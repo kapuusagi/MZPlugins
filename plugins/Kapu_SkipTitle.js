@@ -26,6 +26,6 @@
         this.checkPlayerLocation();
         DataManager.setupNewGame();
         SceneManager.goto(Scene_Map);
-        Window_TitleCommand.initCommandPosition();
+        //Window_TitleCommand.initCommandPosition();
     };
  })();
