@@ -675,8 +675,61 @@ id#のコモンイベントを呼び出す。正確には呼び出し予約す�
     みたいに書く。
 
 #### ・アニメーションさせる場合
-        
+
 MVから大きく変わってるので結構面倒。
+
+##### SpriteとSprite_Animationを使う方法
+
+1. シーンではアニメーションターゲットのスプライトを作成する。
+
+    これは空でもよいようだ。
+    中央に表示させるためのターゲット例。
+
+~~~javascript
+    Scene_RunAnimation2.prototype.createTargetSprite = function() {
+        const width = 0;
+        const height = 0;
+        this._targetSprite = new Sprite();
+        this._targetSprite.x = Graphics.boxWidth / 2;
+        this._targetSprite.y = Graphics.boxHeight / 2;
+        this._targetSprite.setFrame(0, 0, width, height);
+        this.addChild(this._targetSprite);
+    };
+~~~
+
+2. アニメーション開始時はSprite_Animationを構築して初期化する。
+
+~~~javascript
+        const sprite = new Sprite_Animation();
+        const targetSprites = [ this._targetSprite ];
+        sprite.targetObjects = targetSprites;
+        const animation = $dataAnimations[this._animationId];
+        sprite.setup(targetSprites, animation, this._mirror, 0, null);
+        this._animationSprite = sprite;
+        this.addChild(sprite); // 以降Scene.updateでアニメーションスプライトが更新される。
+~~~
+
+3. アニメーション完了待ち
+
+    アニメーション完了を検出したら、場合によってはremoveChildやdestroyを使って解放すること。
+~~~javascript
+    if (!this._animationSprite.isPlaying()) {
+        this.removeChild(this._animationSprite);
+        this._animationSprite.destroy();
+        this._animationSprite = null;
+        // アニメーション再生終了。
+        SceneManager.pop();
+    }
+~~~
+
+
+##### Spritesetを使う方法
+
+Game_TempとSpriteset_Baseの実装クラス、Sceneが複雑に絡んでいるので面倒。
+準備が面倒だが、一度汎用的な Spriteset_Base の実装クラスを作ってしまえば、使いまわすことで開発効率は上がる。
+あとSpriteset_Baseがリソース開放をしてくれるのが強み。
+
+
 __$gameTemp.requestAnimation__ を呼ぶことになるが、これだけでは足りないのだ。
 まず、 __$gameTemp.requestAnimation__ に渡すデータは
 
@@ -691,11 +744,38 @@ __$gameTemp.requestAnimation__ を呼ぶことになるが、これだけでは�
     * mirror : {Boolean} 左右反転させるかどうか。(省略可。省略時はfalse)
 
 となっている。
-独自のSceneでアニメーションさせるならばどうするか？
 
 1. まずSpriteset_Baseの派生を定義する。
     
-    オーバーロードするのはfindTargetSpriteだけで良い。ここで、アニメーションを表示するスプライトを返す。
+    実装するのは大きく2つ。createLowerLayerとfindTargetSprite。
+    createLowerLayerはアニメーション対象のスプライトの作成と、コンテナ、背景などを設定する。
+    findTargetSpriteはアニメーション対象のスプライトを返す。
+
+~~~javascript
+    Spriteset_RunAnimation.prototype.createLowerLayer = function() {
+        Spriteset_Base.prototype.createLowerLayer.call(this);
+        this._blackScreen.visible = false; // ブラックスクリーンは使用しないので無効化。
+
+        // アニメーション対象スプライトの作成。
+        const width = Graphics.boxWidth;
+        const height = Graphics.boxHeight;
+        this._centerSprite = new Sprite();
+        this._centerSprite.x = Graphics.boxWidth / 2;
+        this._centerSprite.y = Graphics.boxHeight / 2 + height / 2;
+        this._centerSprite.bitmap = new Bitmap(width, height);
+        this._centerSprite.setFrame(0, 0, width, height);
+        this._baseSprite.addChild(this._centerSprite);
+
+        // エフェクトコンテナの作成。
+        this._effectsContainer = new Sprite();
+        this._baseSprite.addChild(this._effectsContainer);
+    };
+
+    Spriteset_RunAnimation.prototype.findTargetSprite = function( /* target */ ) {
+        // アニメーション対象スプライトを返す。
+        return this._centerSprite;
+    };
+~~~
 
 2. Sceneに作成した独自Spriteset_Baseを追加する。
             
@@ -704,33 +784,15 @@ __$gameTemp.requestAnimation__ を呼ぶことになるが、これだけでは�
 
 3. $gameTemp.requestAnimation()をコールする。
 
-4. アニメーション完了待ちするならば、
-       
-    Spriteset_Base.isAnimationPlaying()で判定を取得する。但し、Sceneのメソッドでforやらwhileで待たないこと。
-        
-    画面中央に表示させるようなアニメーションでいいならば、次のようにすればできそう（試してない）。
-~~~javascript    
-        function Spriteset_Hoge() {
-            this.initialize(...arguments);
-        }
-
-        Spriteset_Hoge.prototype = Object.create(Spriteset_Base);
-        Spriteset_Hoge.prototype.constructor = Spriteset_Hoge;
-
-        Spriteset_Hoge.prototype.initialize = function() {
-            SpritesetBase.prototype.initialize.call(this);
-        };
-
-        SpritesetBase.prototype.createLowerLayer = function() {
-            this._centerSprite = new new Sprite();
-            this._centerSprite.x = Graphics.boxWidth / 2;
-            this._centerSprite.y = Graphics.boxHeight / 2;
-            this._baseSprite.addChild(this._centerSprite);
-        };
-        SpritesetBase.prototype.findTargetSprite = function(target) {
-            return this._centerSprite;
-        };
+~~~javascript
+    $gameTemp.requestAnimation([this._spritesetRunAnimation], this._animationId, this._mirror);
 ~~~
+
+
+4. アニメーション完了待ちするならば、Spriteset_Base.isAnimationPlaying()で判定を取得する。
+
+    但し、Sceneのメソッドでforやらwhileで待たないこと。
+
 
 Spriteset_Baseのインスタンスは、1つのシーンに1つだけ用意すること。
 さもないとどちらかはアニメーション再生要求を取り出せない。
