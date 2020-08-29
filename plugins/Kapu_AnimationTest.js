@@ -64,23 +64,18 @@
     };
 
     Spriteset_RunAnimation.prototype.createTargetSprite = function() {
+        const width = Graphics.boxWidth;
+        const height = Graphics.boxHeight;
         this._centerSprite = new Sprite();
         this._centerSprite.x = Graphics.boxWidth / 2;
-        this._centerSprite.y = Graphics.boxHeight;
-        this._centerSprite.bitmap = new Bitmap(Graphics.boxWidth, Graphics.boxHeight);
-        this._centerSprite.setFrame(0, 0, Graphics.boxWidth, Graphics.boxHeight);
+        this._centerSprite.y = Graphics.boxHeight / 2 + height / 2;
+        this._centerSprite.bitmap = new Bitmap(width, height);
+        this._centerSprite.setFrame(0, 0, width, height);
         this._baseSprite.addChild(this._centerSprite);
     };
 
     Spriteset_RunAnimation.prototype.createEffectsContainer = function() {
-        const width = Graphics.boxWidth;
-        const height = Graphics.boxHeight;
-        const x = (Graphics.boxWidth - width) / 2; // = 0
-        const y = (Graphics.boxHeight - height) / 2; // = 0
         this._effectsContainer = new Sprite();
-        this._effectsContainer.setFrame(0, 0, width, height);
-        this._effectsContainer.x = x;
-        this._effectsContainer.y = y;
         this._baseSprite.addChild(this._effectsContainer);
     };
 
