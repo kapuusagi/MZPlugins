@@ -45,6 +45,11 @@
         SceneManager.prepareNextScene(animationId, mirror);
     });
 
+    /**
+     * Spriteset_RunAnimation。
+     * 
+     * Spriteset_Baseのロジックを使ってアニメーションを表示させるためのもの。
+     */
     function Spriteset_RunAnimation() {
         this.initialize(...arguments);
     };
@@ -56,6 +61,9 @@
         Spriteset_Base.prototype.initialize.call(this);
     };
 
+    /**
+     * 下位レイヤーを構築する。
+     */
     Spriteset_RunAnimation.prototype.createLowerLayer = function() {
         Spriteset_Base.prototype.createLowerLayer.call(this);
         this._blackScreen.visible = false; // ブラックスクリーンは使用しないので無効化。
@@ -63,7 +71,12 @@
         this.createEffectsContainer();
     };
 
+    /**
+     * ターゲットスプライトを作成する。
+     */
     Spriteset_RunAnimation.prototype.createTargetSprite = function() {
+        // なんだかよくわからないけど、画面サイズと同じサイズのターゲットSpriteを用意して
+        // よくわからんオフセットを設定すると位置的に上手くいくみたい。なんでだ？
         const width = Graphics.boxWidth;
         const height = Graphics.boxHeight;
         this._centerSprite = new Sprite();
@@ -74,6 +87,9 @@
         this._baseSprite.addChild(this._centerSprite);
     };
 
+    /**
+     * エフェクトコンテナを構築する。
+     */
     Spriteset_RunAnimation.prototype.createEffectsContainer = function() {
         this._effectsContainer = new Sprite();
         this._baseSprite.addChild(this._effectsContainer);
