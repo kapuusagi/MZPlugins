@@ -948,3 +948,27 @@ Game_Battler.prototype.onBattleEnd = function() {
     this.appear();
 };
 ~~~
+
+### 新しいシーンにしたとき、前のシーンの画像がぼやけた表示になるのをやめるには？
+
+Scene_MenuBase.createBackgroundでやってる、filtersを空の配列にし、
+setBackgroundOpacityを255にする。
+
+~~~javascript
+Scene_MenuBase.prototype.createBackground = function() {
+    this._backgroundFilter = new PIXI.filters.BlurFilter();
+    this._backgroundSprite = new Sprite();
+    this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
+    this._backgroundSprite.filters = [this._backgroundFilter]; // ここを空配列([])にする。
+    this.addChild(this._backgroundSprite);
+    this.setBackgroundOpacity(192); // これを255に設定する。
+};
+~~~
+
+特定のシーンだけぼやけないようにするには、Scene_XXX.createの処理で、_backgroundSprite.filtersを空配列にし、setBackgroundOpacity(255)を呼び出すようにすればいい。
+
+~~~javascript
+    Scene_MenuBase.prototype.create.call(this);
+    this._backgroundSprite.filters = [];
+    this.setBackgroundOpacity(255);
+~~~
