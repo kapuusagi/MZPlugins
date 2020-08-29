@@ -1,7 +1,8 @@
-/*:
+/*:ja
  * @target MZ
  * @plugindesc クリティカルエフェクトを変更してみるサンプル。
  * @author kapuusagi
+ * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  *
  * プラグインコマンドはなし。
  * 
@@ -70,7 +71,6 @@
         }
     };
     */
-
 
 
 
