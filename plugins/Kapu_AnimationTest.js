@@ -1,7 +1,8 @@
-/*:
+/*:ja
  * @target MZ
  * @plugindesc 独自シーンを使った場合のアニメーションテスト。
  * @author kapuusagi
+ * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  *
  * =================================================================
  * プラグインコマンド

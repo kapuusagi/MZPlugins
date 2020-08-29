@@ -1,7 +1,8 @@
-/*:
+/*:ja
  * @target MZ
  * @plugindesc シーンを使うサンプル。ついでにメッセージ表示するよ。
  * @author kapuusagi
+ * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  *
  * =================================================================
  * プラグインコマンド

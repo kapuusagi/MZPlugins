@@ -1,7 +1,8 @@
-/*:
+/*:ja
  * @target MZ
  * @plugindesc タイトル画面をスキップするよ。デバッグの時面倒じゃん。
  * @author kapuusagi
+ * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  *
  * @help
  * このプラグインは Scene_Boot.startNormalGameを上書きする。
@@ -26,6 +27,5 @@
         this.checkPlayerLocation();
         DataManager.setupNewGame();
         SceneManager.goto(Scene_Map);
-        //Window_TitleCommand.initCommandPosition();
     };
  })();
