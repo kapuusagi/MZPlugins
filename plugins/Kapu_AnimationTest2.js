@@ -87,12 +87,11 @@
      * アニメーションターゲットスプライトを作成する。
      */
     Scene_RunAnimation2.prototype.createTargetSprite = function() {
-        const width = Graphics.boxWidth;
-        const height = Graphics.boxHeight;
+        const width = 0;
+        const height = 0;
         this._targetSprite = new Sprite();
-        this._targetSprite.bitmap = new Bitmap(width, height);
         this._targetSprite.x = Graphics.boxWidth / 2;
-        this._targetSprite.y = Graphics.boxHeight;
+        this._targetSprite.y = Graphics.boxHeight / 2;
         this._targetSprite.setFrame(0, 0, width, height);
         this.addChild(this._targetSprite);
     };
@@ -105,6 +104,9 @@
         this.startAnimation();
     };
 
+    /**
+     * アニメーションを開始する。
+     */
     Scene_RunAnimation2.prototype.startAnimation = function() {
         const sprite = new Sprite_Animation();
         const targetSprites = [ this._targetSprite ];
@@ -121,6 +123,9 @@
     Scene_RunAnimation2.prototype.update = function() {
         Scene_MenuBase.prototype.update.call(this);
         if (!this._animationSprite.isPlaying()) {
+            this.removeChild(this._animationSprite);
+            this._animationSprite.destroy();
+            this._animationSprite = null;
             // アニメーション再生終了。
             SceneManager.pop();
         }
