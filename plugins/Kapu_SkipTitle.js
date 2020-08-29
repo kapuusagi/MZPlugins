@@ -2,6 +2,7 @@
  * @target MZ
  * @plugindesc タイトル画面をスキップするよ。デバッグの時面倒じゃん。
  * @author kapuusagi
+ * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  *
  * @help
  * このプラグインは Scene_Boot.startNormalGameを上書きする。
@@ -13,7 +14,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.1.0.0 作ってみた。
+ * Version.1.0.0 初版
  */
 
  (() => {

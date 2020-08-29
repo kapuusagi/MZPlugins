@@ -2,6 +2,7 @@
  * @target MZ
  * @plugindesc Hello Worldプラグイン
  * @author kapuusagi
+ * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
  * =================================================================
  * プラグインコマンド
