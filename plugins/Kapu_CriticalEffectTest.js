@@ -68,7 +68,7 @@
         // updateメソッドに実装を追加して処理する。
     };
 
-    const WIndow_BattleLog_displayActionResults = Window_BattleLog.prototype.displayActionResults;
+    const _WIndow_BattleLog_displayActionResults = Window_BattleLog.prototype.displayActionResults;
 
     /**
      * アクション結果を表示する。
@@ -89,7 +89,7 @@
                 $gameTemp.requestAnimation([ target ], criticalAnimationId, false);
             }
         }
-        WIndow_BattleLog_displayActionResults.call(this, ...arguments);
+        _WIndow_BattleLog_displayActionResults.call(this, ...arguments);
     };
 
 
