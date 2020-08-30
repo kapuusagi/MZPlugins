@@ -17,15 +17,15 @@
  * Version.1.0.0 作ってみた。
  */
 
- (() => {
-     /**
-      * 通常ゲームを開始する。
-      * Note: startメソッドをオーバーライドするんじゃなくて、
-      *       こっちをオーバーライドした。
-      */
-    Scene_Boot.prototype.startNormalGame = function() {
+(() => {
+    /**
+     * 通常ゲームを開始する。
+     * Note: startメソッドをオーバーライドするんじゃなくて、
+     *       こっちをオーバーライドした。
+     */
+    Scene_Boot.prototype.startNormalGame = function () {
         this.checkPlayerLocation();
         DataManager.setupNewGame();
         SceneManager.goto(Scene_Map);
     };
- })();
+})();

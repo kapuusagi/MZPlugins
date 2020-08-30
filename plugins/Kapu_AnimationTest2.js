@@ -60,7 +60,7 @@
     /**
      * Scene_RunAnimationを初期化する。
      */
-    Scene_RunAnimation2.prototype.initialize = function() {
+    Scene_RunAnimation2.prototype.initialize = function () {
         Scene_MenuBase.prototype.initialize.call(this);
         this._animationId = 0;
         this._mirror = false;
@@ -71,7 +71,7 @@
      * @param {Number} アニメーションID
      * @param {Boolean} 反転させるかどうか。
      */
-    Scene_RunAnimation2.prototype.prepare = function(animationId, mirror) {
+    Scene_RunAnimation2.prototype.prepare = function (animationId, mirror) {
         this._animationId = animationId;
         this._mirror = mirror;
     };
@@ -79,7 +79,7 @@
     /**
      * シーンを作成する。
      */
-    Scene_RunAnimation2.prototype.create = function() {
+    Scene_RunAnimation2.prototype.create = function () {
         Scene_MenuBase.prototype.create.call(this);
         this.createTargetSprite();
     };
@@ -87,7 +87,7 @@
     /**
      * アニメーションターゲットスプライトを作成する。
      */
-    Scene_RunAnimation2.prototype.createTargetSprite = function() {
+    Scene_RunAnimation2.prototype.createTargetSprite = function () {
         const width = 0;
         const height = 0;
         this._targetSprite = new Sprite();
@@ -100,7 +100,7 @@
     /**
      * シーンを開始する。
      */
-    Scene_RunAnimation2.prototype.start = function() {
+    Scene_RunAnimation2.prototype.start = function () {
         Scene_MenuBase.prototype.start.call(this);
         this.startAnimation();
     };
@@ -108,9 +108,9 @@
     /**
      * アニメーションを開始する。
      */
-    Scene_RunAnimation2.prototype.startAnimation = function() {
+    Scene_RunAnimation2.prototype.startAnimation = function () {
         const sprite = new Sprite_Animation();
-        const targetSprites = [ this._targetSprite ];
+        const targetSprites = [this._targetSprite];
         sprite.targetObjects = targetSprites;
         const animation = $dataAnimations[this._animationId];
         sprite.setup(targetSprites, animation, this._mirror, 0, null);
@@ -121,7 +121,7 @@
     /**
      * シーンを更新する。
      */
-    Scene_RunAnimation2.prototype.update = function() {
+    Scene_RunAnimation2.prototype.update = function () {
         Scene_MenuBase.prototype.update.call(this);
         if (!this._animationSprite.isPlaying()) {
             this.removeChild(this._animationSprite);
@@ -136,7 +136,7 @@
      * ビジーかどうかを判定する。
      * @return {Boolean} ビジーの場合にはtrue, それ以外はfalse.
      */
-    Scene_RunAnimation2.prototype.isBusy = function() {
+    Scene_RunAnimation2.prototype.isBusy = function () {
         if (this._animationSprite) {
             return this._animationSprite.isPlaying();
         } else {
@@ -144,4 +144,4 @@
         }
     };
 
- })();
+})();

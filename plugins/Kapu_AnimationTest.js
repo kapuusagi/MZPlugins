@@ -35,7 +35,7 @@
  * Version.1.0.0 初版
  */
 
- (() => {
+(() => {
     'use strict'
 
     const pluginName = 'Kapu_AnimationTest';
@@ -59,14 +59,14 @@
     Spriteset_RunAnimation.prototype = Object.create(Spriteset_Base.prototype);
     Spriteset_RunAnimation.prototype.constructor = Spriteset_RunAnimation;
 
-    Spriteset_RunAnimation.prototype.initialize = function() {
+    Spriteset_RunAnimation.prototype.initialize = function () {
         Spriteset_Base.prototype.initialize.call(this);
     };
 
     /**
      * 下位レイヤーを構築する。
      */
-    Spriteset_RunAnimation.prototype.createLowerLayer = function() {
+    Spriteset_RunAnimation.prototype.createLowerLayer = function () {
         Spriteset_Base.prototype.createLowerLayer.call(this);
         this._blackScreen.visible = false; // ブラックスクリーンは使用しないので無効化。
         this.createTargetSprite();
@@ -76,7 +76,7 @@
     /**
      * ターゲットスプライトを作成する。
      */
-    Spriteset_RunAnimation.prototype.createTargetSprite = function() {
+    Spriteset_RunAnimation.prototype.createTargetSprite = function () {
         // なんだかよくわからないけど、画面サイズと同じサイズのターゲットSpriteを用意して
         // よくわからんオフセットを設定すると位置的に上手くいくみたい。なんでだ？
         const width = Graphics.boxWidth;
@@ -92,7 +92,7 @@
     /**
      * エフェクトコンテナを構築する。
      */
-    Spriteset_RunAnimation.prototype.createEffectsContainer = function() {
+    Spriteset_RunAnimation.prototype.createEffectsContainer = function () {
         this._effectsContainer = new Sprite();
         this._baseSprite.addChild(this._effectsContainer);
     };
@@ -101,7 +101,7 @@
      * アニメーションさせる対象のスプライトを得る。
      * @return {Sprite} アニメーション対象のスプライト
      */
-    Spriteset_RunAnimation.prototype.findTargetSprite = function( /* target */ ) {
+    Spriteset_RunAnimation.prototype.findTargetSprite = function ( /* target */) {
         return this._centerSprite;
     };
 
@@ -118,7 +118,7 @@
     /**
      * Scene_RunAnimationを初期化する。
      */
-    Scene_RunAnimation.prototype.initialize = function() {
+    Scene_RunAnimation.prototype.initialize = function () {
         Scene_MenuBase.prototype.initialize.call(this);
         this._animationId = 0;
         this._mirror = false;
@@ -129,7 +129,7 @@
      * @param {Number} アニメーションID
      * @param {Boolean} 反転させるかどうか。
      */
-    Scene_RunAnimation.prototype.prepare = function(animationId, mirror) {
+    Scene_RunAnimation.prototype.prepare = function (animationId, mirror) {
         this._animationId = animationId;
         this._mirror = mirror;
     };
@@ -137,7 +137,7 @@
     /**
      * シーンを作成する。
      */
-    Scene_RunAnimation.prototype.create = function() {
+    Scene_RunAnimation.prototype.create = function () {
         Scene_MenuBase.prototype.create.call(this);
         this._spritesetRunAnimation = new Spriteset_RunAnimation();
         this.addChild(this._spritesetRunAnimation);
@@ -146,7 +146,7 @@
     /**
      * シーンを開始する。
      */
-    Scene_RunAnimation.prototype.start = function() {
+    Scene_RunAnimation.prototype.start = function () {
         Scene_MenuBase.prototype.start.call(this);
         $gameTemp.requestAnimation([this._spritesetRunAnimation], this._animationId, this._mirror);
     };
@@ -154,7 +154,7 @@
     /**
      * シーンを更新する。
      */
-    Scene_RunAnimation.prototype.update = function() {
+    Scene_RunAnimation.prototype.update = function () {
         Scene_MenuBase.prototype.update.call(this);
         if (!this._spritesetRunAnimation.isAnimationPlaying()) {
             SceneManager.pop();
@@ -164,8 +164,8 @@
     /**
      * ビジーかどうかを判定する。
      */
-    Scene_RunAnimation.prototype.isBusy = function() {
+    Scene_RunAnimation.prototype.isBusy = function () {
         return this._spritesetRunAnimation.isAnimationPlaying();
     };
 
- })();
+})();

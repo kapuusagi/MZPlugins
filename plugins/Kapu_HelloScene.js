@@ -38,7 +38,7 @@
         SceneManager.push(Scene_HelloWorld);
         SceneManager.prepareNextScene(args.msg);
     });
-    
+
 
     // ------------------------------------------------------------
     // define scene
@@ -53,7 +53,7 @@
     /**
      * Scene_HelloWorldを初期化する。
      */
-    Scene_HelloWorld.prototype.initialize = function() {
+    Scene_HelloWorld.prototype.initialize = function () {
         Scene_MenuBase.prototype.initialize.call(this);
         this._msg = '';
     };
@@ -62,14 +62,14 @@
      * シーンの準備をする。
      * @param {String} msg メッセージ
      */
-    Scene_HelloWorld.prototype.prepare = function(msg) {
+    Scene_HelloWorld.prototype.prepare = function (msg) {
         this._msg = msg || '';
     };
 
     /**
      * シーンを作成する。
      */
-    Scene_HelloWorld.prototype.create = function() {
+    Scene_HelloWorld.prototype.create = function () {
         Scene_MenuBase.prototype.create.call(this);
         this.createMessageWindow();
     };
@@ -77,7 +77,7 @@
     /**
      * メッセージウィンドウを作成する。
      */
-    Scene_HelloWorld.prototype.createMessageWindow = function() {
+    Scene_HelloWorld.prototype.createMessageWindow = function () {
         // この実装は乱暴できたない。
         // Window_Messageは高機能過ぎるので、
         // もうちょっと楽に使えるタイプのやつを用意した方がいいかも。
@@ -120,7 +120,7 @@
     /**
      * メッセージ表示が完了したときの処理を行う。
      */
-    Scene_HelloWorld.prototype.onTerminateMessage = function() {
+    Scene_HelloWorld.prototype.onTerminateMessage = function () {
         Window_Message.prototype.terminateMessage.call(this._messageWindow);
         SceneManager.pop()
     };
@@ -128,7 +128,7 @@
     /**
      * シーンを開始する。
      */
-    Scene_HelloWorld.prototype.start = function() {
+    Scene_HelloWorld.prototype.start = function () {
         Scene_MenuBase.prototype.start.call(this);
         $gameMessage.add(this._msg);
     };
@@ -136,14 +136,14 @@
     /**
      * シーンを更新する。
      */
-    Scene_HelloWorld.prototype.update = function() {
+    Scene_HelloWorld.prototype.update = function () {
         Scene_MenuBase.prototype.update.call(this);
     };
 
     /**
      * ビジーかどうかを判定する。
      */
-    Scene_HelloWorld.prototype.isBusy = function() {
+    Scene_HelloWorld.prototype.isBusy = function () {
         return this.isMessageWindowClosing();
     };
 
@@ -151,9 +151,9 @@
      * メッセージウィンドウがクローズ処理中かどうかを取得する。
      * @return {Boolean} クローズ処理中の場合にはtrue, それ以外はfalse
      */
-    Scene_HelloWorld.prototype.isMessageWindowClosing = function() {
+    Scene_HelloWorld.prototype.isMessageWindowClosing = function () {
         return this._messageWindow.isClosing();
     };
-        
+
 
 })();

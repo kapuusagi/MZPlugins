@@ -19,7 +19,7 @@
     const pluginName = "Kapu_NotetagTest";
 
     const _Scene_Boot_start = Scene_Boot.prototype.start;
-    Scene_Boot.prototype.start = function() {
+    Scene_Boot.prototype.start = function () {
         _Scene_Boot_start.call(this);
         DataManager.processSampleNoteTag();
     };
@@ -27,7 +27,7 @@
     /**
      * サンプルノートタグを処理する。
      */
-    DataManager.processSampleNoteTag = function() {
+    DataManager.processSampleNoteTag = function () {
         for (let item of $dataItems) {
             if (!item) {
                 continue;

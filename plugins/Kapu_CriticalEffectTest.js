@@ -29,7 +29,7 @@
      * ダメージポップアップ用スプライトをセットアップする。
      * @param {Game_Battler} target ダメージポップアップ対象
      */
-    Sprite_Damage.prototype.setup = function(target) {
+    Sprite_Damage.prototype.setup = function (target) {
         const result = target.result();
         this._critical = result.critical;
         if (result.missed || result.evaded) {
@@ -51,7 +51,7 @@
      * 表示文字サイズを取得する。
      * @return {Number} 文字サイズ
      */
-    Sprite_Damage.prototype.fontSize = function() {
+    Sprite_Damage.prototype.fontSize = function () {
         // クリティカル時はフォントサイズを大きくする。
         return $gameSystem.mainFontSize() + ((this._critical) ? 18 : 4);
     };
@@ -60,7 +60,7 @@
      * クリティカルによるスプライトの効果を設定する。
      * 既定の実装ではダメージ表示の色をフラッシュ効果で変えるだけ。
      */
-    Sprite_Damage.prototype.setupCriticalEffect = function() {
+    Sprite_Damage.prototype.setupCriticalEffect = function () {
         this._flashColor = [180, 0, 0, 250]; // R,G,B,Aらしい。
         this._flashDuration = 60;
 
@@ -80,18 +80,14 @@
      * @param {Game_Battler} subject 使用者
      * @param {Game_Battler} target 対象
      */
-    Window_BattleLog.prototype.displayActionResults = function(subject, target) {
+    Window_BattleLog.prototype.displayActionResults = function (subject, target) {
         const result = target.result();
-        if (result.used && result.critical)
-        {
+        if (result.used && result.critical) {
             const criticalAnimation = $dataAnimations[criticalAnimationId];
             if (criticalAnimation) {
-                $gameTemp.requestAnimation([ target ], criticalAnimationId, false);
+                $gameTemp.requestAnimation([target], criticalAnimationId, false);
             }
         }
         _WIndow_BattleLog_displayActionResults.call(this, ...arguments);
     };
-
-
-
 })();

@@ -39,7 +39,7 @@
             $gameMessage.add('Hello world.');
         }
     });
-    
-    
+
+
 
 })();
