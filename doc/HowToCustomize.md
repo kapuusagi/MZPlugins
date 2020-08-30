@@ -37,7 +37,11 @@ __/*: ～ */__ で書く。わかりにくいけど。
 |__@url__ _URL_|配布元URL|
 
 ---
-### ■ パラメータコメント
+### ■ パラメータ
+
+プラグイン全体に対する動作をカスタマイズする機能を提供するためのもの。
+このゲームでは～の動作させて、こっちのゲームでは～の動作させたい、みたいなのを実現するための方法だよ！
+プラグインコメントでアノテーションを書けば良い。
 
 ~~~
  * @param paramName
@@ -63,6 +67,18 @@ __/*: ～ */__ で書く。わかりにくいけど。
 |__@off__ _文字列_|OFFを選択したときにダイアログに表示する値(@type=boolean)|
 |__@option__ _文字列_|プルダウンの表示項目。(@type=select,combo)|
 |__@value__ _文字列_|プルダウンを選択したときに設定される値。optionとペアで使う。(@type=select,combo)|
+
+プラグイン側で参照するときは __PluginManager.parameters()__ で取得できる。
+Hoge.jsプラグインで定義された'hoge'というパラメータにアクセスするには
+
+~~~javascript
+    const pluginName = "Hoge";
+    const parameters = PluginManager.parameters(pluginName);
+    const setting = parameters['hoge'];
+~~~
+
+のようにすればいい。
+
 
 @type で指定可能な型
 
