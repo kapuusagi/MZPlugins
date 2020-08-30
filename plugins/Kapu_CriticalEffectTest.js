@@ -4,6 +4,12 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  *
+ * @param Critical Animation ID
+ * @text クリティカルアニメーションID
+ * @desc クリティカル時に追加で再生するアニメーションID(追加できるの？)
+ * @type animation
+ * @default 0
+ * 
  * プラグインコマンドはなし。
  * 
  * @help 
@@ -15,6 +21,10 @@
  * Version.1.0.0 初版
  */
 (() => {
+    const pluginName = "Kapu_CriticalEffectTest";
+    const parameters = PluginManager.parameters(pluginName);
+    const criticalAnimationId = Number(parameters['Critical Animation ID']) || 0;
+
     /**
      * ダメージポップアップ用スプライトをセットアップする。
      * @param {Game_Battler} target ダメージポップアップ対象
@@ -58,19 +68,29 @@
         // updateメソッドに実装を追加して処理する。
     };
 
-    /*
-    Window_BattleLog.prototype.showNormalAnimation = function(
-        targets, animationId, mirror
-    ) {
-        const criticalTargets = 
+    const WIndow_BattleLog_displayActionResults = Window_BattleLog.prototype.displayActionResults;
 
-
-        const animation = $dataAnimations[animationId];
-        if (animation) {
-            $gameTemp.requestAnimation(targets, animationId, mirror);
+    /**
+     * アクション結果を表示する。
+     * 
+     * BattleManagerの既定の実装では、攻撃アニメーション->判定->結果と処理している。
+     * これは反射とかその辺を考慮していると考えられる。
+     * クリティカル時に攻撃アニメーション自体を変更しようとしたら、
+     * BattleManagerの処理から変更しないといけない。
+     * @param {Game_Battler} subject 使用者
+     * @param {Game_Battler} target 対象
+     */
+    Window_BattleLog.prototype.displayActionResults = function(subject, target) {
+        const result = target.result();
+        if (result.used && result.critical)
+        {
+            const criticalAnimation = $dataAnimations[criticalAnimationId];
+            if (criticalAnimation) {
+                $gameTemp.requestAnimation([ target ], criticalAnimationId, false);
+            }
         }
+        WIndow_BattleLog_displayActionResults.call(this, ...arguments);
     };
-    */
 
 
 
