@@ -282,14 +282,17 @@ const value = data.ParamName;
 ### 独自のノートタグを実装する場合
 
 __Scene_Boot.start__ をフックして処理を追加する。
-
+ノートタグ処理はオリジナルのstartより先に処理する方がよさそう。
+試した限りでは、オリジナルのstart中でアクターの装備初期化などが呼び出されるため、
+後ろに実装するとノートタグを処理しないまま実行されることになってしまう。
 
 ~~~javascript
   const _Scene_Boot_start = Scene_Boot.prototype.start;
   Scene_Boot.prototype.start = function() {
-    _Scene_Boot_start.call(this);
 
         /* TODO : ノートタグの処理 */
+
+      _Scene_Boot_start.call(this);
   };
 ~~~
 

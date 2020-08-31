@@ -10,7 +10,7 @@
  * @param independentItemCount
  * @text 個別アイテム登録可能数。
  * @desc 登録可能な個別アイテム数。0で個別アイテム所持不可。
- * @default 0
+ * @default 200
  * @type number
  * @parent independentItemSetting
  * 
@@ -24,8 +24,15 @@
  * @param independentItemStockCount
  * @text 個別アイテム所持可能数
  * @desc 所持可能な個別アイテム数。
- * @default 0
+ * @default 100
  * @type number
+ * @parent independentItemSetting
+ * 
+ * @param independentItemDefault
+ * @text 個別アイテムデフォルト
+ * @desc アイテムコレクションの個別アイテム指定デフォルト値。
+ * @default false
+ * @type boolean
  * @parent independentItemSetting
  * 
  * 
@@ -35,7 +42,7 @@
  * @param independentWeaponCount
  * @text 個別武器登録可能数。
  * @desc 登録可能な個別武器数。0で個別武器所持不可。装備品も含む。
- * @default 0
+ * @default 200
  * @type number
  * @parent independentWeaponSetting
  * 
@@ -49,8 +56,15 @@
  * @param independentWeaponStockCount
  * @text 個別武器所持可能数
  * @desc 所持可能な個別武器数。
- * @default 0
+ * @default 100
  * @type number
+ * @parent independentWeaponSetting
+ * 
+ * @param independentWeaponDefault
+ * @text 個別武器デフォルト
+ * @desc 武器コレクションの個別アイテム指定デフォルト値。
+ * @default false
+ * @type boolean
  * @parent independentWeaponSetting
  * 
  * 
@@ -60,7 +74,7 @@
  * @param independentArmorCount
  * @text 個別防具登録可能数。
  * @desc 登録可能な個別防具数。0で個別防具所持不可。装備品も含む。
- * @default 0
+ * @default 200
  * @type number
  * @parent independentArmorSetting
  * 
@@ -74,8 +88,15 @@
  * @param independentArmorStockCount
  * @text 個別防具所持可能数
  * @desc 所持可能な個別防具数。
- * @default 0
+ * @default 100
  * @type number
+ * @parent independentArmorSetting
+ *
+ * @param independentArmorDefault
+ * @text 個別防具デフォルト
+ * @desc 防具コレクションの個別アイテム指定デフォルト値。
+ * @default false
+ * @type boolean
  * @parent independentArmorSetting
  * 
  * 
@@ -129,44 +150,56 @@
 (() => {
     const pluginName = "Kapu_IndependentItem";
     const parameters = PluginManager.parameters(pluginName);
-    const independentItemCount = parameters['independentItemCount'] || 0;
-    const independentItemStartIndex = parameters['independentItemStartIndex'] || 1000;
-    const independentItemStockCount = parameters['independentItemStockCount'] || 200;
-    const independentWeaponCount = parameters['independentWeaponCount'] || 0;
-    const independentWeaponStartIndex = parameters['independentWeaponStartIndex'] || 1000;
-    const independentWeaponStockCount = parameters['independentWeaponStockCount'] || 200;
-    const independentArmorCount = parameters['independentArmorCount'] || 0;
-    const independentArmorStartIndex = parameters['independentArmorStartIndex'] || 1000;
-    const independentArmorStockCount = parameters['independentArmorStockCount'] || 200;
+    const independentItemCount = Number(parameters['independentItemCount']) || 0;
+    const independentItemStartIndex = Number(parameters['independentItemStartIndex']) || 1000;
+    const independentItemStockCount = Number(parameters['independentItemStockCount']) || 200;
+    const independentItemDefault = parameters['independentItemDefault'] || false;
+    const independentWeaponCount = Number(parameters['independentWeaponCount']) || 0;
+    const independentWeaponStartIndex = Number(parameters['independentWeaponStartIndex']) || 1000;
+    const independentWeaponStockCount = Number(parameters['independentWeaponStockCount']) || 200;
+    const independentWeaponDefault = parameters['independentWeaponDefault'] || false;
+    const independentArmorCount = Number(parameters['independentArmorCount']) || 0;
+    const independentArmorStartIndex = Number(parameters['independentArmorStartIndex']) || 1000;
+    const independentArmorStockCount = Number(parameters['independentArmorStockCount']) || 200;
+    const independentArmorDefault = parameters['independentArmorDefault'] || false;
 
     //-------------------------------------------------------------------------
     // Scene_Boot
     const _Scene_Boot_start = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function () {
+        if ($dataItems.length >= independentItemStartIndex) {
+            throw new Error('independentItemStartIndex is illegal. (< $dataItem.length)');
+        }
+        DataManager.processIndependentNotetag($dataItems, independentItemDefault);
+        if ($dataWeapons.length >= independentWeaponStartIndex) {
+            throw new Error('independentWeaponStartIndex is illegal. (< $dataWeapons.length');
+        }
+        DataManager.processIndependentNotetag($dataWeapons, independentWeaponDefault);
+        if ($dataArmors.length >= independentArmorStartIndex) {
+            throw new Error('independentArmorStartIndex is illegal. (< $dataArmors.length');
+        }
+        DataManager.processIndependentNotetag($dataArmors, independentArmorDefault);
+
         _Scene_Boot_start.call(this);
     };
     //-------------------------------------------------------------------------
     // DataManager
-    const _DataManager_loadDatabase = DataManager.loadDatabase;
-    /**
-     * データベースをロードする。
-     */
-    DataManager.loadDatabase = function () {
-        _DataManager_loadDatabase.call(this, ...arguments);
-        if ($dataItems.length >= independentItemStartIndex) {
-            throw new Error('independentItemStartIndex is illegal. (< $dataItem.length)');
-        }
-        if ($dataWeapons.length >= independentWeaponStartIndex) {
-            throw new Error('independentWeaponStartIndex is illegal. (< $dataWeapons.length');
-        }
-        if ($dataArmors.length >= independentArmorStartIndex) {
-            throw new Error('independentArmorStartIndex is illegal. (< $dataArmors.length');
-        }
-    };
 
-    const _DataManager_createGameObjects = DataManager.createGameObjects;
-    DataManager.createGameObjects = function () {
-        _DataManager_createGameObjects.call(this);
+    /**
+     * 個別アイテムノートタグを処理する。
+     * 
+     * @param {Array<Object>} dataArray データ配列
+     * @param {Boolean} independent 個別アイテムかどうかのデフォルト値。
+     */
+    DataManager.processIndependentNotetag = function(dataArray, independent) {
+        for (let item of dataArray) {
+            if (item) {
+                if (!item.meta.independent) {
+                    item.meta.independent = independent;
+                }
+            }
+        }
+
     };
 
     const _DataManager_makeSaveContents = DataManager.makeSaveContents;
@@ -314,6 +347,17 @@
     };
 
     /**
+     * 新しい個別アイテム/個別武器/個別防具を初期化する。
+     * 全ての項目で共通の処理を行う。
+     * 他のプラグインでフックし、個別アイテムを使って使用したい機能を実現することを想定する。
+     * 
+     * @param {DataItem} newItem 新しい個別アイテム
+     */
+    DataManager.initializeIndependentCommon = function( /* newItem */ ) {
+
+    };
+
+    /**
      * newItemIdを割り当てた新しい個別アイテムを作成する。データベースへは登録しない。
      * 
      * @param {Number} newItemId 新しい個別アイテムに割り当てるID。
@@ -325,7 +369,8 @@
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
         newItem.note = '';
-        DataManager.initializeIndependentItem(newItemId);
+        DataManager.initializeIndependentCommon(newItem);
+        DataManager.initializeIndependentItem(newItem);
         return newItem;
     };
  
@@ -371,7 +416,8 @@
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
         newItem.note = '';
-        DataManager.initializeIndependentWeapon(newItemId);
+        DataManager.initializeIndependentCommon(newItem);
+        DataManager.initializeIndependentWeapon(newItem);
         return newItem;
     };
 
@@ -381,7 +427,7 @@
      * 
      * @param {DataArmor} newWeapon 新しい個別武器
      */
-    DataManager.initializeIndependentWeapon = function( /* newWeapon */ ) {
+    DataManager.initializeIndependentWeapon = function( /* newWeapon */) {
 
     };
 
@@ -416,7 +462,8 @@
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
         newItem.note = '';
-        DataManager.initializeIndependentArmor(newItemId);
+        DataManager.initializeIndependentCommon(newItem);
+        DataManager.initializeIndependentArmor(newItem);
         return newItem;
     };
 
@@ -441,11 +488,10 @@
         if (startIndex > 0) {
             for (let i = 0; i < maxCount; i++) {
                 const id = startIndex + i;
-                let item = $dataArray[id];
+                let item = dataArray[id];
                 if (!item || !DataManager.isIndependentItemUsed(item)) {
                     // 割り当てが無いか、このアイテムは空きである。
                     return id;
-
                 }
             }
         }
@@ -460,11 +506,11 @@
      * 該当するコレクションが無い場合にはnull
      */
     DataManager.getDataCollection = function(item) {
-        if (DataManager.isItem(baseItem)) {
+        if (DataManager.isItem(item)) {
             return $dataItems;
-        } else if (DataManager.isWeapon(baseItem)) {
+        } else if (DataManager.isWeapon(item)) {
             return $dataWeapons;
-        } else if (DataManager.isArmor(baseItem)) {
+        } else if (DataManager.isArmor(item)) {
             return $dataArmors;
         } else {
             return null;
@@ -481,7 +527,7 @@
     DataManager.getBaseItem = function(item) {
         if (item && item.baseItemId) {
             const dataArray = DataManager.getDataCollection(item);
-            return $dataArray[item.baseItemId];
+            return dataArray[item.baseItemId];
         } else {
             return item;
         }
@@ -507,10 +553,10 @@
 
         // 装備しているかどうかをチェックする。
         for (let id = 1; id < $dataActors.length; id++) {
-            if (!$dataActors.isActorDataExists(id)) {
+            if (!$gameActors.isActorDataExists(id)) {
                 continue;
             }
-            let actor = $dataActors.actor(id);
+            let actor = $gameActors.actor(id);
             if (actor.isEquipped(independentItem)) {
                 return true;
             }
@@ -533,14 +579,15 @@
         } else if (includeEquip) {
             // アクターが装備しているかどうかをチェックする。
             for (let id = 1; id < $dataActors.length; id++) {
-                if (!$dataActors.isActorDataExists(id)) {
+                if (!$gameActors.isActorDataExists(id)) {
                     continue;
                 }
-                let actor = $dataActors.actor(id);
+                let actor = $gameActors.actor(id);
                 const equippedItem = actor.equips().find(item => {
-                    if (item) return false;
-                    if (item.baseItemId && item.baseItemId === baseItem.id) return true;
-                    return false;
+                    if (item) {
+                        return false;
+                    }
+                    return (item.baseItemId && (item.baseItemId === baseItem.id));
                 });
                 if (equippedItem) {
                     return equippedItem;
@@ -648,6 +695,10 @@
      * @param {Number} itemId アイテムID(装備なしは0) 
      */
     Game_Item.prototype.setEquip = function(isWeapon, itemId) {
+        if (itemId === 0) {
+            _GameItem_setEquip.call(this, ...arguments);
+            return;
+        }
         if (isWeapon && (itemId < independentWeaponStartIndex)
                 && DataManager.isIndependent($dataWeapons[itemId])) {
             const independentWeapon = DataManager.registerNewIndependentWeapon($dataWeapons[itemId]);
@@ -761,7 +812,7 @@
         if (!baseItem) {
             return null;
         }
-        const container = this.itemCollections(item);
+        const container = this.itemCollections(baseItem);
         const baseItemId = baseItem.id;
         for (let item of container) {
             if (!DataManager.isIndependentItem(item)) {
@@ -772,7 +823,7 @@
             }
             if (includeEquip) {
                 return item;
-            } else if (!this.isItemEquipped(item)) {
+            } else if (!this.isAnyMemberEquipped(item)) {
                 return item;
             }
         }
@@ -955,7 +1006,7 @@
     Game_Party.prototype.hasItem = function (item, includeEquip) {
         if (DataManager.isIndependent(item)) {
             const baseItem = DataManager.getBaseItem(item);
-            var independentItem = this.getMatchingBaseItem(baseItem, includeEquip);
+            var independentItem = this.getMatchingIndependentItem(baseItem, includeEquip);
             return (independentItem !== null);
         } else {
             return _Game_Party_hasItem.call(this, ...arguments);
