@@ -216,6 +216,7 @@
      * @param {Object} contents 保存コンテンツ
      */
     DataManager.extractSaveContents = function(contents) {
+        _DataManager_extractSaveContents.call(this, ...arguments);
         DataManager.extractSaveDataArray(contents.independentItems, $dataItems, 
             independentItemStartIndex, independentItemCount);
         DataManager.extractSaveDataArray(contents.independentWeapons, $dataWeapons,
