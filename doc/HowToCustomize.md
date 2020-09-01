@@ -630,6 +630,17 @@ Scene_Battle.prototype.onSelectAction = function() {
     リソースを破棄（たぶん）
 
 
+### ■ BattleManager と Window_BattleLog
+
+基本的にはBattleManagerが戦闘システムの全体の流れを制御して、
+Window_BattleLogにその表示についての処理が実装されている形。
+アニメーション再生をWndow_BattleLogに入れてるのは、
+フロントエンド側はWindowクラス、という設計思想なのか？
+
+BattleManagerは_logWindow（Window_BattleLogのインスタンス)を使用してメソッドを呼び出す。
+ちょっと調べた限り、クリティカル時に表示するアニメーションを切り替えるには、
+BattleManager側も変えないとむりぽだった。
+(updateTurn()にて使用アニメーション、updateActionにて結果表示。applyはupdateActionにて使用されるため、使用アニメーションの段階ではクリティカルになるかどうかわからん。戦闘システムカスタマイズすればいいんだけど。)
 
 
 ### ■ 小ネタ
@@ -905,6 +916,7 @@ MVと違い、名前表示欄が追加されている。そのため、Window_Me
 
     メッセージ表示完了は $gameMessage.isBusy()を参照する。
 ~~~
+
 
 ### ・スクリーンサイズの変更
 
