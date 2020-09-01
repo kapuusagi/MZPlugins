@@ -144,6 +144,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 アイテム数を取得するメソッドがエラーになる問題を修正した。
  * Version.0.1.0 作成開始
  */
 
@@ -969,7 +970,7 @@
             if (!item) {
                 continue;
             }
-            if ((item.id === baseItemId) || (item.baseItemId && (item.baseItemId === baseItemid))) {
+            if ((item.id === baseItemId) || (item.baseItemId && (item.baseItemId === baseItemId))) {
                 numItems++;
             }
         }
