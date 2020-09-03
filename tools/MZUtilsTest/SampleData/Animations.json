@@ -1,0 +1,5 @@
+[
+null,
+{"id":1,"displayType":0,"effectName":"HitPhysical","flashTimings":[{"frame":0,"duration":30,"color":[255,255,255,255]}],"name":"打撃/物理","offsetX":0,"offsetY":0,"rotation":{"x":0,"y":0,"z":0},"scale":50,"soundTimings":[{"frame":0,"se":{"name":"Blow1","pan":0,"pitch":100,"volume":90}}],"speed":100},
+{"id":2,"displayType":0,"effectName":"HitEffect","flashTimings":[{"frame":1,"duration":30,"color":[255,255,255,255]}],"name":"打撃/エフェクト","offsetX":0,"offsetY":0,"rotation":{"x":0,"y":0,"z":0},"scale":60,"soundTimings":[{"frame":0,"se":{"name":"Evasion2","pan":0,"pitch":150,"volume":80}},{"frame":1,"se":{"name":"Damage4","pan":0,"pitch":120,"volume":90}},{"frame":2,"se":{"name":"Powerup","pan":0,"pitch":150,"volume":90}}],"speed":100},
+]
