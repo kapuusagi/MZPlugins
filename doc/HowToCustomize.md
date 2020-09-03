@@ -642,6 +642,43 @@ BattleManagerは_logWindow（Window_BattleLogのインスタンス)を使用し�
 BattleManager側も変えないとむりぽだった。
 (updateTurn()にて使用アニメーション、updateActionにて結果表示。applyはupdateActionにて使用されるため、使用アニメーションの段階ではクリティカルになるかどうかわからん。戦闘システムカスタマイズすればいいんだけど。)
 
+### メニュー系
+
+プラグインで独自のシーンを作る場合、まず、Scene_Baseを使うか、Scene_MenuBaseを使うかで分かれる。
+Scene_Baseはタイトル画面など、背景に表示するスプライトから全部用意する場合に使用する。
+Scene_MenuBaseは、シーンの背景として前のシーンのキャプチャ画像を使用し、かつ入力キャンセルボタンなど、
+メニュー操作が絡んでくる場合に使用するときに使うと良い。
+
+尚既定の実装では背景として、前のシーンにジャギーをかけたような画像を使用している。
+これを止めるには、Scene_MenuBaseのcreateBackgroundの一部を変更すればいい。
+
+~~~javascript
+Scene_MenuBase.prototype.createBackground = function() {
+    this._backgroundFilter = new PIXI.filters.BlurFilter();
+    this._backgroundSprite = new Sprite();
+    this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
+    //this._backgroundSprite.filters = [this._backgroundFilter];
+    this._backgroundSprite.filters = []; // フィルタなし。
+    this.addChild(this._backgroundSprite);
+    //this.setBackgroundOpacity(192);
+    this.setBackgroundOpacity(255);
+};
+~~~
+フックしてfiltersとsetBackgroundOpacity(255)として可。
+見て分かるとおり、_backgroundSprite.bitmapに任意の画像を設定すれば、背景を変更することができる。
+メニューの背景を可愛いうさぎさんにする事も出来るというわけだ。
+
+尚、既定の実装ではScene_MenuBaseを使うとキャンセルボタンも作ってくれる。
+派生した先で不要だと感じたら、 __needsCancelButton__ を実装してfalseを返せば良い。
+~~~javascript
+/**
+ * キャンセルボタンが必要かどうかを取得する。
+ * @return {Boolean} 必要な場合にはtrue, それ以外はfalse
+ */
+Scene_Hogehoge.prototype.needsCancelButton = function() {
+    return false; // キャンセルボタンは要らない
+};
+~~~
 
 ### ■ 小ネタ
    
@@ -1065,3 +1102,9 @@ Scene_MenuBase.prototype.createBackground = function() {
     this._backgroundSprite.filters = [];
     this.setBackgroundOpacity(255);
 ~~~
+
+### 新しいパラメータを追加して挙動を制御したいんだけど？
+
+例えばゴールド取得倍率を2倍固定じゃなくて、0.20％増しとか0.40％増しとかやりたい場合。
+新しいTraitとコードを定義するしよう。
+このとき、他のプラグインを使ってるならば、競合に注意すること。
