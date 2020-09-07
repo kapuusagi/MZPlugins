@@ -89,57 +89,66 @@
         +- Sprite_Battleback
     *** MZ/src/rmmz_windows.js ***
         Window
-        +- Window_Base
-            +- Window_Scrollable
-            |   +- Window_Selectable
-            |       +- Window_Command
-            |       |   +- Window_HorzCommand
-            |       |   |   +- Window_ItemCategory
-            |       |   |   +- Window_EquipCommand
-            |       |   |   +- Window_ShopCommand
-            |       |   +- Window_MenuCommand
-            |       |   +- Window_SkillType
-            |       |   +- Window_Options
-            |       |   +- Window_ChoiceList
-            |       |   +- Window_PartyCommand
-            |       |   +- Window_ActorCommand
-            |       |   +- Window_TitleCommand
-            |       |   +- Window_GameEnd
-            |       +- Window_Gold
-            |       +- Window_StatusBase
-            |       |   +- Window_MenuStatus
-            |       |   |   +- Window_MenuActor
-            |       |   +- Window_SkillStatus
-            |       |   +- Window_EquipStatus
-            |       |   +- Window_EquipSlot
-            |       |   +- Window_Status
-            |       |   +- Window_StatusParams
-            |       |   +- Window_StatusEquip
-            |       |   +- Window_ShopStatus
-            |       |   +- Window_NameEdit
-            |       |   +- Window_BattleStatus
-            |       |       +- Window_BattleActor
-            |       +- Window_ItemList
-            |       |   +- Window_EquipItem
-            |       |   +- Window_ShopSell
-            |       |   +- Window_EventItem
+        +- Window_Base - 各ウィンドウの親クラス。
+            +- Window_Scrollable - ウィンドウにスクロール機能を追加したもの。
+            |   |                  マウスホイールやタッチによるスクロールをサポートしている。
+            |   +- Window_Selectable - ウィンドウにカーソルや選択状態を追加したもの。
+            |       +- Window_Command - コマンド選択の親クラス。垂直方向にコマンドを並べる。
+            |       |   |               派生クラスではmakeCommandList()をインプリメントする。
+            |       |   +- Window_HorzCommand - 水平方向に最大4つのコマンドを並べるウィンドウ。
+            |       |   |   +- Window_ItemCategory - アイテムカテゴリウィンドウ。
+            |       |   |   +- Window_EquipCommand - 装備選択ウィンドウ（個別装備変更だとか、全て外すだとか)。
+            |       |   |   +- Window_ShopCommand - お店のコマンドウィンドウ。
+            |       |   +- Window_MenuCommand - メニューでのコマンド選択ウィンドウ。
+            |       |   |                       各プラグインにて、addOriginalCommandsを
+            |       |   |                       フックして使用することを想定している。
+            |       |   +- Window_SkillType - スキルタイプ選択ウィンドウ。（魔法だとか特技だとかのカテゴリ）
+            |       |   +- Window_Options - オプション選択ウィンドウ
+            |       |   +- Window_ChoiceList - 選択肢を表示するウィンドウ。
+            |       |   +- Window_PartyCommand - 戦闘中、パーティーコマンドを表示するウィンドウ。
+            |       |   |                        つまり、「戦う」だとか「逃げる」だとかね。
+            |       |   +- Window_ActorCommand - 戦闘中、アクターのコマンドを表示するウィンドウ。
+            |       |   +- Window_TitleCommand - タイトル画面のコマンドウィンドウ
+            |       |   +- Window_GameEnd - タイトルに戻る操作時の確認ウィンドウ。
+            |       +- Window_Gold - 所持金を表示するウィンドウ。
+            |       |                refresh()呼び出し毎に更新される。
+            |       +- Window_StatusBase - アクターのステータスを表示するウィンドウのベースクラス。
+            |       |   +- Window_MenuStatus - メニュー画面のアクター一覧表示のウィンドウ。
+            |       |   |   |                  隊列変更のためのUIも提供する。
+            |       |   |   +- Window_MenuActor - スキル表示でのアクター選択を表示するウィンドウ
+            |       |   +- Window_SkillStatus - スキル表示でのアクターステータスを表示するウィンドウ
+            |       |   +- Window_EquipStatus - 装備画面でのアクターのステータス上昇を表示するウィンドウ
+            |       |   +- Window_EquipSlot - 装備画面での装備スロットを表示するウィンドウ
+            |       |   +- Window_Status - ステータス画面でのアクターステータスを表示するウィンドウ
+            |       |   |                  名前だとか、LevelだとかEXPだとか、その辺を表示する。
+            |       |   +- Window_StatusParams - ステータス画面でのアクターのパラメータを表示するウィンドウ。
+            |       |   +- Window_StatusEquip - ステータス画面でのアクターの装備を表示するウィンドウ。
+            |       |   +- Window_ShopStatus - ショップ画面でのステータスを表示するウィンドウ。
+            |       |   +- Window_NameEdit - アクターの名前入力画面で、現在の編集値を表示するウィンドウ。
+            |       |   +- Window_BattleStatus - 戦闘画面でのアクターステータスを表示するウィンドウ。
+            |       |       +- Window_BattleActor - 戦闘画面でのアクター選択ウィンドウ。
+            |       |                               スキルやアイテムの使用対象を選択する時に使う。
+            |       +- Window_ItemList - アイテムを選択するウィンドウ。
+            |       |   +- Window_EquipItem - 装備品選択ウィンドウ
+            |       |   +- Window_ShopSell - ショップへの売却品選択ウィンドウ
+            |       |   +- Window_EventItem - イベントコマンドでのアイテム選択ウィンドウ？
             |       |   +- Window_BattleItem
-            |       +- Window_SkillList
-            |       |   +- Window_BattleSkill
-            |       +- Window_SavefileList
-            |       +- Window_ShopBuy
-            |       +- Window_ShopNumber
-            |       +- Window_NameInput
-            |       +- Window_NumberInput
-            |       +- Window_BattleEnemy
-            |       +- Window_DebugRange
-            |       +- Window_DebugEdit
-            +- Window_Help
-            +- Window_NameBox
-            +- Window_Message
-            +- Window_ScrollText
-            +- Window_MapName
-            +- Window_BattleLog
+            |       +- Window_SkillList - スキル選択ウィンドウ（マップ）
+            |       |   +- Window_BattleSkill - スキル選択ウィンドウ（戦闘中）
+            |       +- Window_SavefileList - セーブ画面での選択ウィンドウ
+            |       +- Window_ShopBuy - ショップ購入品選択ウィンドウ
+            |       +- Window_ShopNumber - ショップでの数量入力ウィンドウ
+            |       +- Window_NameInput - 名前入力の文字選択ウィンドウ
+            |       +- Window_NumberInput - 数値入力ウィンドウ
+            |       +- Window_BattleEnemy - 戦闘画面のエネミー選択ウィンドウ
+            |       +- Window_DebugRange - デバッグ画面での変数/スイッチ選択ウィンドウ
+            |       +- Window_DebugEdit - デバッグ画面での変数/スイッチ編集ウィンドウ
+            +- Window_Help - ヘルプメッセージ表示ウィンドウ
+            +- Window_NameBox - メッセージのところに表示する名前ウィンドウ。
+            +- Window_Message - メッセージウィンドウ
+            +- Window_ScrollText - スクロールテキストウィンドウ。
+            +- Window_MapName - マップ名表示ウィンドウ
+            +- Window_BattleLog - 戦闘画面でのメッセージ表示ウィンドウ。
 
 ■ デーベース内モジュール
   (名前は未定義である。)
