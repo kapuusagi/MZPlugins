@@ -198,7 +198,7 @@
      */
     Window_SkillList.prototype.drawItem = function(index) {
         if ((this._orderEditEnable) && (index == this._pendingIndex)) {
-            // 並び替え用の項目は背景色を設定
+            // 並び替え用の項目は背景色をペンディングカラーに設定
             var rect = this.itemRect(index);
             var color = ColorManager.pendingColor();
             this.changePaintOpacity(false);
