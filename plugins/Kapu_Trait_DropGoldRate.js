@@ -75,10 +75,10 @@
      */
     DataManager.processDropGoldRateTraitNotetag = function(dataArray) {
         for (let obj of dataArray) {
-            if (!obj || !obj.dropGoldRate) {
+            if (!obj || !obj.meta.dropGoldRate) {
                 continue;
             }
-            DataManager.addDropGoldRateTrait(obj);
+            DataManager.addDropGoldRateTrait(obj, obj.meta.dropGoldRate);
         }
     };
     /**

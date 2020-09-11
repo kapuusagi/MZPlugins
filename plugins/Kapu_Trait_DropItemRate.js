@@ -75,10 +75,10 @@
      */
     DataManager.processDropItemRateTraitNotetag = function(dataArray) {
         for (let obj of dataArray) {
-            if (!obj || !obj.dropItemRate) {
+            if (!obj || !obj.meta.dropItemRate) {
                 continue;
             }
-            DataManager.addDropItemRateTrait(obj);
+            DataManager.addDropItemRateTrait(obj, obj.meta.dropItemRate);
         }
     };
     /**
