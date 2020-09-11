@@ -86,10 +86,10 @@
      */
     DataManager.processCriticalDamageRateTraitNotetag = function(dataArray) {
         for (let obj of dataArray) {
-            if (!obj || !obj.criticalDamageRate) {
+            if (!obj || !obj.meta.criticalDamageRate) {
                 continue;
             }
-            DataManager.addCriticalDamageRateTrait(obj, criticalDamageRate);
+            DataManager.addCriticalDamageRateTrait(obj, obj.meta.criticalDamageRate);
         }
     };
     /**
