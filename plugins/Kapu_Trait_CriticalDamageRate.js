@@ -16,6 +16,8 @@
  * @param BasicRate
  * @text クリティカル時のダメージ倍率基本値。
  * @desc クリティカルダメージ計算時に使用される倍率です。
+ * @type number
+ * @decimals 2
  * 
  * @help 
  * クリティカルダメージ倍率増減の特性を追加します。
@@ -55,8 +57,8 @@
     const pluginName = "Kapu_Trait_CriticalDamageRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.TRAIT_XPARAM_DID_CDR = parameters['TraitId'];
-    const basicCriticalRate = parameters['BasicRate'];
+    Game_BattlerBase.TRAIT_XPARAM_DID_CDR = Number(parameters['TraitId']) || 0;
+    const basicCriticalRate = Number(parameters['BasicRate']) || 0;
 
     //------------------------------------------------------------------------------
     // Scene_Boot

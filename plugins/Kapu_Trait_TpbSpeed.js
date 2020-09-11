@@ -1,14 +1,30 @@
 /*:ja
  * @target MZ 
- * @plugindesc TPB速度の特性を追加するプラグイン。
+ * @plugindesc TPB速度/キャストタイム/チャージタイムの特性を追加するプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * 
- * @param TraitId
- * @text 特性ID
- * @desc 特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
+ * @param TpbSpeedTraitId
+ * @text TPB速度倍率-特性ID
+ * @desc TPB速度倍率の特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 11
+ * @type number
+ * @max 999
+ * @min 10
+ * 
+ * @param TpbCastSpeedTraitId
+ * @text TPBキャスト速度倍率-特性ID
+ * @desc TPBキャスト速度倍率の特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
+ * @default 12
+ * @type number
+ * @max 999
+ * @min 10
+ * 
+ * @param TpbChargeSpeedTraitId
+ * @text TPBチャージ速度倍率-特性ID
+ * @desc TPBチャージ速度倍率の特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
+ * @default 13
  * @type number
  * @max 999
  * @min 10
@@ -37,6 +53,16 @@
  *     <tpbSpeed:rateStr%>
  *        rateStr: 倍率の値。100で100%増加。
  * 
+ *     <tpbCastSpeed:rate>
+ *        rate: 倍率の値。1.0で100％増加。0.3で30%増加。
+ *     <tpbCastSpeed:rateStr%>
+ *        rateStr: 倍率の値。100で100%増加。
+ * 
+ *     <tpbChargeSpeed:rate>
+ *        rate: 倍率の値。1.0で100％増加。0.3で30%増加。
+ *     <tpbChargeSpeed:rateStr%>
+ *        rateStr: 倍率の値。100で100%増加。
+ * 
  * ============================================
  * 変更履歴
  * ============================================
@@ -46,7 +72,9 @@
     const pluginName = "Kapu_Trait_TpbSpeed";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.TRAIT_XPARAM_DID_TPB_SPEED = parameters['TraitId'];
+    Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED = Number(parameters['TpbSpeedTraitId']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_TPB_CASTSPEED = Number(parameters['TpbCastSpeedTraitId'] || 0);
+    Game_BattlerBase.TRAIT_XPARAM_DID_TPB_CHARGESPEED = Number(parameters['TpbChargeSpeedTraitId']) || 0;
 
     //------------------------------------------------------------------------------
     // Scene_Boot
@@ -76,10 +104,18 @@
      */
     DataManager.processTpbSpeedTraitNotetag = function(dataArray) {
         for (let obj of dataArray) {
-            if (!obj || !obj.meta.tpbSpeed) {
+            if (!obj) {
                 continue;
             }
-            DataManager.addTpbSpeedTrait(obj, obj.meta.tpbSpeed);
+            if (obj.meta.tpbSpeed) {
+                DataManager.addTpbSpeedTrait(obj, obj.meta.tpbSpeed);
+            }
+            if (obj.meta.tpbCastSpeed) {
+                DataManager.addTpbCastSpeedTrait(obj, obj.meta.tpbCastSpeed);
+            }
+            if (obj.meta.tpbChargeSpeed) {
+                DataManager.addTpbCastSpeedTrait(obj, obj.meta.tpbChargeSpeed);
+            }
         }
     };
     /**
@@ -101,6 +137,47 @@
             value:speed
         });
     };
+
+    /**
+     * itemの特性にvalueStrのTPB速度倍率を加減する特性を追加する。
+     * 
+     * @apram {TraitObject} obj Actor/Class/Weapon/Armor/State/Enemyのいずれか。traitsを持ってるデータ
+     * @param {String} valueStr 効果値
+     */
+    DataManager.addTpbCastSpeedTrait = function(obj, valueStr) {
+        let speed;
+        if (valueStr.slice(-1) === "%") {
+            speed = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
+        } else {
+            speed = Number(valueStr);
+        }
+        obj.traits.push({ 
+            code:Game_BattlerBase.TRAIT_XPARAM, 
+            dataId:Game_BattlerBase.TRAIT_XPARAM_DID_TPB_CASTSPEED, 
+            value:speed
+        });
+    };
+
+    /**
+     * itemの特性にvalueStrのTPB速度倍率を加減する特性を追加する。
+     * 
+     * @apram {TraitObject} obj Actor/Class/Weapon/Armor/State/Enemyのいずれか。traitsを持ってるデータ
+     * @param {String} valueStr 効果値
+     */
+    DataManager.addTpbChargeSpeedTrait = function(obj, valueStr) {
+        let speed;
+        if (valueStr.slice(-1) === "%") {
+            speed = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
+        } else {
+            speed = Number(valueStr);
+        }
+        obj.traits.push({ 
+            code:Game_BattlerBase.TRAIT_XPARAM, 
+            dataId:Game_BattlerBase.TRAIT_XPARAM_DID_TPB_CHARGESPEED, 
+            value:speed
+        });
+    };
+
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     const _Game_Battler_tpbSpeed = Game_Battler.prototype.tpbSpeed;
@@ -116,6 +193,39 @@
         const rate = 1.0 + this.traitsSum(Game_Battler.TRAIT_XPARAM, Game_Battler.TRAIT_XPARAM_DID_TPB_SPEED);
         return speed * Math.max(rate, 0);
     };
+    /**
+     * TPBチャージ状態を更新する。
+     * 
+     * !!!overwrite!!!
+     */
+    Game_Battler.prototype.updateTpbChargeTime = function() {
+        if (this._tpbState === "charging") {
+            const rate = 1.0
+                + this.traitsSum(Game_BattlerBase.TRAIT_XPARAM,
+                     Game_BattlerBase.TRAIT_XPARAM_DID_TPB_CHARGESPEED);
+            this._tpbChargeTime += (this.tpbAcceleration() * Math.max(rate, 0));
+            if (this._tpbChargeTime >= 1) {
+                this._tpbChargeTime = 1;
+                this.onTpbCharged();
+            }
+        }
+    };
 
-
+    /**
+     * TPBキャストタイムを更新する。
+     * 
+     * !!!overwrite!!!
+     */
+    Game_Battler.prototype.updateTpbCastTime = function() {
+        if (this._tpbState === "casting") {
+            const rate = 1.0
+                + this.traitsSum(Game_BattlerBase.TRAIT_XPARAM,
+                     Game_BattlerBase.TRAIT_XPARAM_DID_TPB_CASTSPEED);
+            this._tpbCastTime += (this.tpbAcceleration() * rate);
+            if (this._tpbCastTime >= this.tpbRequiredCastTime()) {
+                this._tpbCastTime = this.tpbRequiredCastTime();
+                this._tpbState = "ready";
+            }
+        }
+    };
 })();

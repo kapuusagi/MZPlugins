@@ -46,7 +46,7 @@
     const pluginName = "Kapu_Trait_DropGoldRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.ABILITY_DROP_GOLD_RATE = parameters['TraitId'];
+    Game_Party.ABILITY_DROP_GOLD_RATE = Number(parameters['TraitId']) || 0;
 
     //------------------------------------------------------------------------------
     // Scene_Boot
