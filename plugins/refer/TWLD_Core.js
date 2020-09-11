@@ -524,24 +524,6 @@ if (typeof Game_Temp === 'undefined') {
     
 
 
-    /**
-     * itemの特性にvalueStrのクリティカルダメージ倍率を加算する特性を追加する。
-     * @apram {Trait_Object} item Weapon/Armor/Stateのいずれか。traitsを持ってるデータ
-     * @param {String} valueStr 効果値
-     */
-    DataManager.addCriticalDamageRateTrait = function(item, valueStr) {
-        var criRate;
-        if (valueStr.slice(-1) === "%") {
-            criRate = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
-        } else {
-            criRate = Number(valueStr);
-        }
-        item.traits.push({
-            code:Game_BattlerBase.TRAIT_XPARAM,
-            dataId:Game_BattlerBase.TRAIT_XPARAM_DID_CRR,
-            value:criRate
-        });
-    };
 
     /**
      * 吸収属性を表す特性を追加する。
@@ -731,8 +713,6 @@ if (typeof Game_Temp === 'undefined') {
         luk : { get: function() { return this.getLuk(); }, configurable:true }, // 再定義
         pdr : { get: function() { return this.getPhysicalDamageRate(); }, configurable:true}, // 再定義
         mdr : { get: function() { return this.getMagicalDamegeRate(); }, configurable:true }, // 再定義
-        pcr : { get: function() { return this.getPhysicalCriticalRate(); }, configurable:true },
-        mcrr : { get: function() { return this.getMagicalCriticalrate(); }, configurable:true },
         ppr: { get: function() { return this.getPhysicalPenetrationRate(); }, configurable:true },
         mpr: { get: function() { return this.getMagicalPenetrationRate(); }, configurable:true },
         /** 攻撃計算式補正値 */  
@@ -2550,21 +2530,7 @@ if (typeof Game_Temp === 'undefined') {
         return rate;
     };
 
-    /**
-     * クリティカル発生時のダメージ倍率を適用する。 
-     * 防御無視ステートの付与とかはSigureya氏のプラグインで実現することにした。
-     * (コード効率的に考えるとTWLDコアでやった方がいいかもだが。)
-     */
-    Game_Action.prototype.applyCritical = function(damage) {
-        var subject = this.subject(); // 使用者
-        if (this.isPhysical()) {
-            return damage * subject.pcr;
-        } else if (this.isMagical()) {
-            return damage * subject.mcrr;
-        } else {
-            return damage * TWLD.Core.BasicCriticalRate;
-        }
-    };
+
 
 
     /**
