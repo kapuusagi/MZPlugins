@@ -167,6 +167,9 @@
     //-------------------------------------------------------------------------
     // Scene_Boot
     const _Scene_Boot_start = Scene_Boot.prototype.start;
+    /**
+     * Scene_Bootを開始する。
+     */
     Scene_Boot.prototype.start = function () {
         if ($dataItems.length >= independentItemStartIndex) {
             throw new Error('independentItemStartIndex is illegal. (< $dataItem.length)');
