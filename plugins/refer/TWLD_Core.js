@@ -458,8 +458,6 @@ if (typeof Game_Temp === 'undefined') {
                     }
                 } else if ((re = line.match(patternRequired)) !== null) {
                     item.equipCondition = re[1].trim();
-                } else if ((re = line.match(patternDropRate)) !== null) {
-                    DataManager.addDropRateTrait(item, re[1]);
                 } else if ((re = line.match(patternCriticalRate)) !== null) {
                     DataManager.addCriticalDamageRateTrait(item, re[1]);
                 } else if ((re = line.match(patternTrait) !== null)) {
@@ -509,8 +507,6 @@ if (typeof Game_Temp === 'undefined') {
                     for (i = 0; i < 6; i++) {
                         state.basicParams[i].rate = Number(re[i + 1]);
                     }
-                } else if ((re = line.match(patternDropRate)) !== null) {
-                    DataManager.addDropRateTrait(state, re[1]);
                 } else if ((re = line.match(patternCriticalRate)) !== null) {
                     DataManager.addCriticalDamageRateTrait(state, re[1]);
                 } else if ((re = line.match(patternTrait) !== null)) {
@@ -527,24 +523,6 @@ if (typeof Game_Temp === 'undefined') {
 
     
 
-    /**
-     * itemの特性にvalueStrのドロップレート加算する特性を追加する。
-     * @apram {Trait_Object} item Weapon/Armor/Stateのいずれか。traitsを持ってるデータ
-     * @param {String} valueStr 効果値
-     */
-    DataManager.addDropRateTrait = function(item, valueStr) {
-        var dropRate;
-        if (valueStr.slice(-1) === "%") {
-            dropRate = Number(valueStr.slice(0, valueStr.length - 1)).clamp(-500, 500) / 100.0;
-        } else {
-            dropRate = Number(valueStr);
-        }
-        item.traits.push({ 
-            code:Game_BattlerBase.TRAIT_PARTY_ABILITY, 
-            dataId:Game_Party.ABILITY_DROP_ITEM_RATE, 
-            value:dropRate
-        });
-    };
 
     /**
      * itemの特性にvalueStrのクリティカルダメージ倍率を加算する特性を追加する。
@@ -2606,9 +2584,9 @@ if (typeof Game_Temp === 'undefined') {
     //------------------------------------------------------------------------------
     // Game_Party
     //
-
     /**
      * 戦闘参加メンバーでabilityIdで指定される特性を持っているメンバーがいるかどうかを判定する。
+     * 
      * @note 既定の実装ではメンバーの生存状態に関係なかったが、生存オンリーとした。
      * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
      * @return 持っている場合にはtrue ,それ以外はfalse
@@ -2618,48 +2596,10 @@ if (typeof Game_Temp === 'undefined') {
             return !actor.isDead() && actor.partyAbility(abilityId);
         });
     };
-    /**
-     * abilityIdで指定される特性値のパーティーメンバー合計を得る。
-     * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
-     */
-    Game_Party.prototype.partyTraitsSum = function(abilityId) {
-        return this.battleMembers().reduce(function(prev, actor) {
-            if (!actor.isDead()) {
-                return prev + actor.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, abilityId);
-            } else {
-                return prev;
-            }
-        }, 0);
-    };
 
-    /**
-     * abilityIdで指定される特性値のパーティーでの最大値を得る。
-     * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
-     * @return {Number} 最大値
-     */
-    Game_Party.prototype.partyTraitsSumMax = function(abilityId) {
-        return this.battleMembers().max(function(actor) {
-            return actor.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, abilityId);
-        });
-    };
 
-    /**
-     * 取得金額倍率を得る。     * 
-     * @return {Number} 取得金額倍率
-     */
-    Game_Party.prototype.goldRate = function() {
-        var rate = this.hasGoldDouble() ? 2 : 1;
-        return rate + this.partyTraitsSum(Game_Party.ABILITY_DROP_GOLD_RATE);
-    };
 
-    /**
-     * ドロップレート補正倍率を得る。
-     * @return {Number} ドロップレート補正倍率
-     */
-    Game_Party.prototype.getDropRate = function() {
-        var rate = this.hasDropItemDouble() ? 2 : 1;
-        return rate + this.partyTraitsSum(Game_Party.ABILITY_DROP_ITEM_RATE);
-    };
+
 
     //------------------------------------------------------------------------------
     // BattleManager

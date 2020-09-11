@@ -112,15 +112,6 @@ if (typeof Game_Temp === 'undefined') {
             return $gameParty.getDropRate();
         };
     } else {
-        TWLD.Core.Game_Enemy_dropItemRate = Game_Enemy.prototype.dropItemRate;
-
-        /**
-         * アイテムドロップ率補正倍率を得る。
-         * @return {Number} 補正倍率
-         */
-        Game_Enemy.prototype.dropItemRate = function() {
-            return $gameParty.getDropRate();
-        };
     }
 
     //---------------------------------------------------------------------
