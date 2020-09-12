@@ -18,5 +18,14 @@
         //this.frameVisible = false; // frame_Visibleで枠が無くなる。
         //this._contentsBackSprite.visible = false;
     };
-    
+
+    const Sprite_Enemy_updateBitmap = Sprite_Enemy.prototype.updateBitmap;
+
+    Sprite_Enemy.prototype.updateBitmap = function() {
+        Sprite_Enemy_updateBitmap.call(this, ...arguments);
+
+        this.scale.x = 2;
+        this.scale.y = 2;
+    };    
+
 })();

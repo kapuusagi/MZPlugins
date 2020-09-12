@@ -19,7 +19,7 @@ __/*: ～ */__ で書く。わかりにくいけど。
 ### ■ プラグイン全体
 
 ~~~javascript
-/*:
+/*:ja
  * @target MZ 
  * @plugindesc 概要
  * @author hogehoge
@@ -180,22 +180,31 @@ MVの時に比べて、若干エレガントな書き方してる。
 
 既存の実装に機能を追加する場合にはフックを使用する。
 既存の処理が残るので影響が小さい。
-const 参照用変数 = オーバーロードするメソッド
 
-    オーバーロードするメソッド = function() {
+    const 参照用変数 = オーバーロードするメソッド
+
+    フックするメソッド = function() {
         // 必要な処理
         参照用変数.apply(this, arguments);
         // 必要な処理
     };
       
-とする。
+とする。注意としては、フックでプラグイン処理と内部分岐させる場合、
+インポート順によっては他のプラグインが正常に動作しなくなる。
 
-### メソッドのオーバーロード
+
+### メソッドのオーバーライト
 完全に置きかえる場合。
 他のプラグインとの競合に気をつけないといけないパターン。
+コメントに「!!!overwrite!!!」とか書いておくのが良いみたい。
 
 ~~~javascript
-オーバーロードするメソッド = function() {
+/**
+ * 説明ごにょごにょ
+ * 
+ * !!!overwrite!!!
+ */
+オーバーライトするメソッド = function() {
     // 必要な処理
 };
 ~~~
@@ -650,6 +659,43 @@ BattleManagerは_logWindow（Window_BattleLogのインスタンス)を使用し�
 BattleManager側も変えないとむりぽだった。
 (updateTurn()にて使用アニメーション、updateActionにて結果表示。applyはupdateActionにて使用されるため、使用アニメーションの段階ではクリティカルになるかどうかわからん。戦闘システムカスタマイズすればいいんだけど。)
 
+### メニュー系
+
+プラグインで独自のシーンを作る場合、まず、Scene_Baseを使うか、Scene_MenuBaseを使うかで分かれる。
+Scene_Baseはタイトル画面など、背景に表示するスプライトから全部用意する場合に使用する。
+Scene_MenuBaseは、シーンの背景として前のシーンのキャプチャ画像を使用し、かつ入力キャンセルボタンなど、
+メニュー操作が絡んでくる場合に使用するときに使うと良い。
+
+尚既定の実装では背景として、前のシーンにジャギーをかけたような画像を使用している。
+これを止めるには、Scene_MenuBaseのcreateBackgroundの一部を変更すればいい。
+
+~~~javascript
+Scene_MenuBase.prototype.createBackground = function() {
+    this._backgroundFilter = new PIXI.filters.BlurFilter();
+    this._backgroundSprite = new Sprite();
+    this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
+    //this._backgroundSprite.filters = [this._backgroundFilter];
+    this._backgroundSprite.filters = []; // フィルタなし。
+    this.addChild(this._backgroundSprite);
+    //this.setBackgroundOpacity(192);
+    this.setBackgroundOpacity(255);
+};
+~~~
+フックしてfiltersとsetBackgroundOpacity(255)として可。
+見て分かるとおり、_backgroundSprite.bitmapに任意の画像を設定すれば、背景を変更することができる。
+メニューの背景を可愛いうさぎさんにする事も出来るというわけだ。
+
+尚、既定の実装ではScene_MenuBaseを使うとキャンセルボタンも作ってくれる。
+派生した先で不要だと感じたら、 __needsCancelButton__ を実装してfalseを返せば良い。
+~~~javascript
+/**
+ * キャンセルボタンが必要かどうかを取得する。
+ * @return {Boolean} 必要な場合にはtrue, それ以外はfalse
+ */
+Scene_Hogehoge.prototype.needsCancelButton = function() {
+    return false; // キャンセルボタンは要らない
+};
+~~~
 
 ### ■ 小ネタ
    
@@ -1089,3 +1135,8 @@ __Sprite.scale.x__ と __Sprite.scle.y__ を変更すればいいみたい。
 ~~~
 
 とはいえ、ベーシックシステムでscaleを使ってるかもしれないから、安易にscaleパラメータを変えるのはまずい。
+### 新しいパラメータを追加して挙動を制御したいんだけど？
+
+例えばゴールド取得倍率を2倍固定じゃなくて、0.20％増しとか0.40％増しとかやりたい場合。
+新しいTraitとコードを定義するしよう。
+このとき、他のプラグインを使ってるならば、競合に注意すること。
