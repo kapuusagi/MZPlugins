@@ -59,6 +59,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 ノートタグの処理をKapu_Utilityのコールバックでやるように変更した。
  * Version.0.1.0 TWLDで実装したのを移植。
  */
 (() => {
@@ -69,46 +70,18 @@
     const basicCriticalRate = Number(parameters['BasicRate']) || 0;
 
     //------------------------------------------------------------------------------
-    // Scene_Boot
-    const _Scene_Boot_start = Scene_Boot.prototype.start;
-    /**
-     * Scene_Bootを開始する。
-     */
-    Scene_Boot.prototype.start = function () {
-        DataManager.processCriticalDamageRateTrait();
-        _Scene_Boot_start.call(this);
-    };
-
-    //------------------------------------------------------------------------------
     // DataManager
-    DataManager.processCriticalDamageRateTrait = function() {
-        DataManager.processCriticalDamageRateTraitNotetag($dataActors);
-        DataManager.processCriticalDamageRateTraitNotetag($dataClasses);
-        DataManager.processCriticalDamageRateTraitNotetag($dataWeapons);
-        DataManager.processCriticalDamageRateTraitNotetag($dataArmors);
-        DataManager.processCriticalDamageRateTraitNotetag($dataStates);
-        DataManager.processCriticalDamageRateTraitNotetag($dataEnemies);
-    };
 
     /**
-     * クリティカルレートのノートタグを処理する。
-     * @param {Array<Object>} dataArray データコレクション
-     */
-    DataManager.processCriticalDamageRateTraitNotetag = function(dataArray) {
-        for (let obj of dataArray) {
-            if (!obj || !obj.meta.criticalDamageRate) {
-                continue;
-            }
-            DataManager.addCriticalDamageRateTrait(obj, obj.meta.criticalDamageRate);
-        }
-    };
-    /**
-     * itemの特性にvalueStrのクリティカルダメージ加算する特性を追加する。
+     * criticalDamageRate ノートタグを処理する。
      * 
-     * @apram {TraitObject} obj Actor/Class/Weapon/Armor/State/Enemyのいずれか。traitsを持ってるデータ
-     * @param {String} valueStr 効果値
+     * @param {Object} obj データオブジェクト
      */
-    DataManager.addCriticalDamageRateTrait = function(obj, valueStr) {
+    const _processCriticalDamageRateNoteTag = function(obj) {
+        if (!obj.meta.criticalDamageRate) {
+            return;
+        }
+        const valueStr = obj.meta.criticalDamageRate;
         let cdr;
         if (valueStr.slice(-1) === "%") {
             cdr = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
@@ -121,6 +94,14 @@
             value:cdr
         });
     };
+
+    DataManager.addNotetagParserActors(_processCriticalDamageRateNoteTag);
+    DataManager.addNotetagParserClasses(_processCriticalDamageRateNoteTag);
+    DataManager.addNotetagParserWeapons(_processCriticalDamageRateNoteTag);
+    DataManager.addNotetagParserArmors(_processCriticalDamageRateNoteTag);
+    DataManager.addNotetagParserStates(_processCriticalDamageRateNoteTag);
+    DataManager.addNotetagParserEnemies(_processCriticalDamageRateNoteTag);
+
     //------------------------------------------------------------------------------
     // Game_BattlerBase
 
