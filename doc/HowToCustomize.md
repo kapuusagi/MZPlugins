@@ -1096,6 +1096,51 @@ Game_Battler.prototype.onBattleEnd = function() {
 };
 ~~~
 
+### TPB処理について
+
+Game_Battler.updateTpb()で処理される。TPB関連のパラメータとしては以下3つが使用される。
+* _tpbChageTime - TPBステートがchargingの時に更新される。
+_tpbChageTimeが1.0以上になるとTPBステートがchangedになる。
+加算量はTPB相対速度(tpbRelativeSpeed)。
+* _tpbCastTime - TPBステートがcastingの時に更新される。
+_tpbCastTimeがスキルなどの要求キャストタイム以上になると、TPBステートがreadyになる。
+加算量はTPB相対速度(tpbRelativeSpeed)。
+* _tpbIdleTime - TPBステートがcharging以外の時に更新される。
+onTpbTimeout()がコールされて0になる。
+加算量はTPB相対速度(tpbRelativeSpeed)。用途がよくわからん。
+
+ベーシックシステムでのTPB計算
+
+TPB速度(tpbSpeed) : Sqrt(AGI) + 1
+TPBベース速度(tpbBaseSpeed) : 
+パーティーのTPBベース速度 : パーティー中、TPBベース速度。
+TPB相対速度(tpbRelativeSpeed) : TPB速度(tpbSpeed) / リファレンスタイム
+
+リファレンスタイムはGame_Unit.tpbReferenceTimeで定義されている。
+大きくすると、時間経過がゆっくりになる。
+データベースで設定できないのはいかがなものか。
+~~~javascript
+Game_Unit.prototype.tpbReferenceTime = function() {
+    return BattleManager.isActiveTpb() ? 240 : 60;
+};
+~~~
+
+キャストタイム
+アイテム/スキルで指定したSPEED(データベース上は負数)に対して以下の計算。
+キャストタイム = Sqrt(Speed) / TPB速度
+
+~~~javascript
+Game_Battler.prototype.tpbRequiredCastTime = function() {
+    const actions = this._actions.filter(action => action.isValid());
+    const items = actions.map(action => action.item());
+    const delay = items.reduce((r, item) => r + Math.max(0, -item.speed), 0);
+    return Math.sqrt(delay) / this.tpbSpeed();
+};
+~~~
+TPB速度の計算式にあるとおり、ベーシックシステムではAGIが高いほどキャスト時間が早くなる。
+
+
+
 ### 新しいシーンにしたとき、前のシーンの画像がぼやけた表示になるのをやめるには？
 
 Scene_MenuBase.createBackgroundでやってる、filtersを空の配列にし、
