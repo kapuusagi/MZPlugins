@@ -6,8 +6,8 @@
  * @base Kapu_Utility
  * 
  * @param TraitId
- * @text 特性ID
- * @desc 特性として割り当てるID番号。(65以上で他のプラグインとぶつからないやつ)
+ * @text 特性DID
+ * @desc 特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 10
  * @type number
  * @max 999
