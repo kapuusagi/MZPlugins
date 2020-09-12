@@ -7,7 +7,7 @@
  * 
  * @param TraitId
  * @text 特性ID
- * @desc 特性として割り当てるID番号。(65以上で他のプラグインとぶつからないやつ)
+ * @desc 特性として割り当てるID番号。(6以上で他のプラグインとぶつからないやつ)
  * @default 6
  * @type number
  * @max 999
@@ -40,7 +40,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 TWLDで実装したのを移植。未確認。
+ * Version.0.1.0 TWLDで実装したのを移植。
  */
 (() => {
     const pluginName = "Kapu_Trait_DropItemRate";
@@ -49,45 +49,17 @@
     Game_Party.ABILITY_DROP_ITEM_RATE = Number(parameters['TraitId']) || 0;
 
     //------------------------------------------------------------------------------
-    // Scene_Boot
-    const _Scene_Boot_start = Scene_Boot.prototype.start;
-    /**
-     * Scene_Bootを開始する。
-     */
-    Scene_Boot.prototype.start = function () {
-        DataManager.processDropItemRateTrait();
-        _Scene_Boot_start.call(this);
-    };
-
-    //------------------------------------------------------------------------------
     // DataManager
-    DataManager.processDropItemRateTrait = function() {
-        DataManager.processDropItemRateTraitNotetag($dataActors);
-        DataManager.processDropItemRateTraitNotetag($dataClasses);
-        DataManager.processDropItemRateTraitNotetag($dataWeapons);
-        DataManager.processDropItemRateTraitNotetag($dataArmors);
-        DataManager.processDropItemRateTraitNotetag($dataStates);
-    };
-
-    /**
-     * ドロップレートのノートタグを処理する。
-     * @param {Array<Object>} dataArray データコレクション
-     */
-    DataManager.processDropItemRateTraitNotetag = function(dataArray) {
-        for (let obj of dataArray) {
-            if (!obj || !obj.meta.dropItemRate) {
-                continue;
-            }
-            DataManager.addDropItemRateTrait(obj, obj.meta.dropItemRate);
-        }
-    };
     /**
      * itemの特性にvalueStrのドロップレート加算する特性を追加する。
      * 
      * @apram {TraitObject} obj Actor/Class/Weapon/Armor/Stateのいずれか。traitsを持ってるデータ
-     * @param {String} valueStr 効果値
      */
-    DataManager.addDropItemRateTrait = function(obj, valueStr) {
+    const _processDropItemRateTrait = function(obj) {
+        if (!obj.meta.dropItemRate) {
+            return;
+        }
+        const valueStr = obj.meta.dropItemRate;
         let dropRate;
         if (valueStr.slice(-1) === "%") {
             dropRate = Number(valueStr.slice(0, valueStr.length - 1)).clamp(-500, 500) / 100.0;
@@ -100,6 +72,13 @@
             value:dropRate
         });
     };
+
+    DataManager.addNotetagParserActors(_processDropItemRateTrait);
+    DataManager.addNotetagParserClasses(_processDropItemRateTrait);
+    DataManager.addNotetagParserWeapons(_processDropItemRateTrait);
+    DataManager.addNotetagParserArmors(_processDropItemRateTrait);
+    DataManager.addNotetagParserStates(_processDropItemRateTrait);
+
     //------------------------------------------------------------------------------
     // Game_Enemy
     /**
