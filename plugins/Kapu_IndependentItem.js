@@ -144,6 +144,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.2 装備したときにイベントリから削除されない問題を修正した。
  * Version.0.1.1 アイテム数を取得するメソッドがエラーになる問題を修正した。
  * Version.0.1.0 作成開始
  */
@@ -771,7 +772,7 @@
         } else if (amount < 0) {
             const loseCount = Math.abs(amount);
             for (let i = 0; i < loseCount; i++) {
-                if (DataManager.isIndependentItem(item.baseItemId)) {
+                if (DataManager.isIndependentItem(item)) {
                     // 個別アイテム明示
                     this.removeIndependentItemFromInventory(item);
                 } else if (DataManager.isIndependent(item)) {
