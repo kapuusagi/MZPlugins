@@ -7,7 +7,8 @@
  * ユーザーによるスキル並び替えを行えるようにUIを改変する。
  * 
  * 仕様
- * ・以下のUIに表示されるスキルリストが、ユーザーによってカスタマイズ可能になります。
+ * ・以下のUIに表示されるスキルリストが、ユーザーによって
+ *   カスタマイズ可能になります。
  *       マップでのスキルウィンドウ。
  *       戦闘中でのスキルウィンドウ。
  * 
@@ -17,15 +18,17 @@
  *             選択中のスキルを再選択した場合は使用/対象選択へ。
  *             選択中のスキル以外を選択した場合には順序入れ替え。
  * ・スキル並び順はアクター毎に保存されます。
- * ・スキルリストでスキルを選択・実行する際は、同じスキルを2度選択する必要が出てきます。
+ * ・スキルリストでスキルを選択・実行する際は、同じスキルを
+ *   2度選択する必要が出てきます。
  *   スマートフォンなどの環境では、スキル使用時に2回選択することになるため、
  *   操作のわずらわしさが発生するかもしれません。
  *   スキルの量が多くない場合に導入するのは操作性の悪化を招くでしょう。
  * ・スキル並び順は保存されます。スキルを忘れても順番は残ります。
  * 
- * 導入時の注意。
+ * 注意。
  * 本プラグインは以下の動作を変更する。
- * 他のプラグイン等で挙動を変更していたり、独自のスキルリスト画面を使っている場合には対応できない。
+ * 他のプラグイン等で挙動を変更していたり、
+ * 独自のスキルリスト画面を使っている場合には対応できない。
  * 
  * ============================================
  * プラグインコマンド
@@ -40,7 +43,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 TWLDで実装したのを移植。未確認。
+ * Version.0.1.0 TWLDで実装したのを移植。
  */
 (() => {
     //------------------------------------------------------------------------------
@@ -285,7 +288,7 @@
         const pendingIndex = this._skillWindow.getPendingIndex();
         if (pendingIndex === -1) {
             // 未選択。
-            this._skillWindow.setPendingIndex(this._itemWindow.index());
+            this._skillWindow.setPendingIndex(this._skillWindow.index());
             this._skillWindow.activate();
         } else {
             const index = this._skillWindow.index();
@@ -298,7 +301,7 @@
                 const srcItem = this._skillWindow.itemAt(pendingIndex);
                 const dstItem = this._skillWindow.itemAt(index);
                 if (srcItem && dstItem) {
-                    this.actor().swapSkillOrder(srcItem.id, dstItem.id);
+                    BattleManager.actor().swapSkillOrder(srcItem.id, dstItem.id);
                 }
                 this._skillWindow.setPendingIndex(-1);
                 this._skillWindow.refresh();
