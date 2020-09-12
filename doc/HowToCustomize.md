@@ -388,6 +388,14 @@ Scene_Base.popScene()を使う。
 全部戻す場合の遷移
 SceneManager.goto(遷移するシーン);
 
+あと、UIはプラグイン側で用意するべきじゃないと思ってる。
+面倒でもプラグインを組み合わせて使う側でやる方がよい。
+理由は以下の通り
+* 複数のプラグインを組み合わせて使うとき、UIはどうしても競合してしまう。
+* プラグイン毎のUIだと、統一感のあるUIが提供できない。
+
+例外的に特定のプラグイン開発者のものだけ使うとか、競合しないものを組み合わせて使えばなんとかなる。
+
 ### ■ 選択する必要はないけど、OK/キャンセル操作を受け付けたい場合は？
 
 Window_Seleactableを派生させたウィンドウを作成し、
@@ -1065,3 +1073,19 @@ Scene_MenuBase.prototype.createBackground = function() {
     this._backgroundSprite.filters = [];
     this.setBackgroundOpacity(255);
 ~~~
+
+### Spriteの大きさを変えるには？
+
+__Sprite.scale.x__ と __Sprite.scle.y__ を変更すればいいみたい。
+例えばエネミーをでっかくするなら．．．．。
+
+~~~javascript
+    Sprite_Enemy.prototype.updateBitmap = function() {
+        Sprite_Enemy_updateBitmap.call(this, ...arguments);
+
+        this.scale.x = 2;
+        this.scale.y = 2;
+    };    
+~~~
+
+とはいえ、ベーシックシステムでscaleを使ってるかもしれないから、安易にscaleパラメータを変えるのはまずい。
