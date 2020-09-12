@@ -24,8 +24,9 @@
     Sprite_Enemy.prototype.updateBitmap = function() {
         Sprite_Enemy_updateBitmap.call(this, ...arguments);
 
-        this.scale.x = 2;
-        this.scale.y = 2;
+        // scaleを変更するとでっかくなる。
+        //this.scale.x = 2;
+        //this.scale.y = 2;
     };    
 
 })();
