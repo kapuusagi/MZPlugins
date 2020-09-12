@@ -14,9 +14,11 @@
  * @min 10
  * 
  * @param BasicRate
- * @text クリティカル時のダメージ倍率基本値。
+ * @text ダメージ倍率基本値。
  * @desc クリティカルダメージ計算時に使用される倍率です。
  * @type number
+ * @default 3
+ * @min 1.00
  * @decimals 2
  * 
  * @help 
@@ -25,6 +27,12 @@
  *   (クリティカルダメージ) = (ダメージ) × {(BasicRate) + (特性による加減量)}
  * 但し、基本ダメージを下回ることはありません。
  * 
+ * ■ 注意
+ * applyCriticalをオーバーライドするため、
+ * 他のプラグインでのクリティカル計算式を変更している場合には、
+ * 競合に注意する必要があります。
+ * 
+ * ■ プラグイン開発者向け
  * Trait XPARAMを使用し、
  * Game_BattlerBase.TRAIT_XPARAM_DID_CDR を追加します。
  * 値はプラグインパラメータで指定したものになります。
@@ -51,7 +59,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 TWLDで実装したのを移植。未確認。
+ * Version.0.1.0 TWLDで実装したのを移植。
  */
 (() => {
     const pluginName = "Kapu_Trait_CriticalDamageRate";
@@ -177,7 +185,7 @@
         } else {
             rate = basicCriticalRate;
         }
-        return (rate > 1) ? Math.round(damage.rate) : damage;
+        return (rate > 1) ? Math.round(damage * rate) : damage;
     };
 
 

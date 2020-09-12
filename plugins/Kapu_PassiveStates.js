@@ -30,9 +30,9 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 MVのYanfly氏のYEP_AutoPassiveStates.jsを参考に作成。動作未確認。
+ * Version.0.1.0 MVのYanfly氏のYEP_AutoPassiveStates.jsを参考に作成。
  *               MVプロジェクトをインポートして使いたいなら、
- *               素直にYanfly氏がMZ向けにリリースしているプラグインを使った方が良いです。
+ *               素直にYanfly氏がMZ向けにリリースしているVisustellaプラグインを使った方が良いです。
  */
 (() => {
     const pluginName = 'Kapu_PassiveStates';
@@ -78,19 +78,21 @@
 
             data.passiveStates = [];
 
-            const psEntries = data.meta.passiveStates.split(',');
-            for (const psEntry of psEntries) {
-                let re;
-                if ((re = psEntry.match(patternSingle)) !== null) {
-                    const stateId = Number(re[1]);
-                    if (stateId) {
-                        data.passiveStates.push(stateId);
-                    }
-                } else if ((re = psEntry.match(patternRange)) !== null) {
-                    const begin = Number(re[1]);
-                    const end = Number(re[2]);
-                    for (let id = begin; id <= end; id++) {
-                        data.passiveStates.push(id);
+            if (data.meta.passiveStates) {
+                const psEntries = data.meta.passiveStates.split(',');
+                for (const psEntry of psEntries) {
+                    let re;
+                    if ((re = psEntry.match(patternSingle)) !== null) {
+                        const stateId = Number(re[1]);
+                        if (stateId) {
+                            data.passiveStates.push(stateId);
+                        }
+                    } else if ((re = psEntry.match(patternRange)) !== null) {
+                        const begin = Number(re[1]);
+                        const end = Number(re[2]);
+                        for (let id = begin; id <= end; id++) {
+                            data.passiveStates.push(id);
+                        }
                     }
                 }
             }
@@ -236,8 +238,9 @@
                 }
             }
         }
-        const skills = this.skills();
-        for (let skill of skills) {
+        const skillIds = this._skills;
+        for (let skillId of skillIds) {
+            const skill = $dataSkills[skillId];
             const skillPS = DataManager.getPassiveStateData(skill);
             for (let id of skillPS) {
                 if (!stateIds.contains(id)) {
@@ -280,6 +283,11 @@
     Game_Enemy.prototype.getPassiveStateIds = function() {
         const stateIds = [];
         const enemyPS = DataManager.getPassiveStateData(this.enemy());
+        for (let id of enemyPS) {
+            if (!stateIds.contains(id)) {
+                stateIds.push(id);
+            }
+        }
         const skills = this.skills();
         for (let skill of skills) {
             const skillPS = DataManager.getPassiveStateData(skill);
