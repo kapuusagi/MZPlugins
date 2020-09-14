@@ -3,6 +3,7 @@
  * @plugindesc 属性吸収の特性を追加するプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Utility
  * 
  * @param TraitCode
  * @text 特性コード
@@ -42,11 +43,11 @@
  * アクター/クラス/ステート/武器/防具/エネミー
  *     <elementAbsorb:id#:data,...>
  *        吸収特性設定。dataの記述書式は次の通り。
- *        id#-rate# もしくは id#-rate%
+ *        id#:rate# もしくは id#:rate%
  *        id#:属性ID
- *        rate#
+ *        rate#:吸収レート(0～, 1.0で100％吸収)
+ *        rate%:吸収レート(0～, 100%で100%吸収)
  *        複数吸収設定はカンマ区切りにします。
- *        note中に複数指定した場合、最後の行だけ適用されます。
  * 
  *     例：
  *        <elementAbsorb:1:20%,3:100%>
@@ -90,14 +91,14 @@
         const valueStr = obj.meta.elementAbsorb;
         const entries = valueStr.split(',');
         for (entry of entries) {
-            const tokens = entry.split(',');
+            const tokens = entry.split(':');
             if (tokens.length >= 2) {
                 const elementId = Number(tokens[0]);
                 const rate = _parseRate(tokens[1].trim());
                 if (elementId && rate) {
                     obj.traits.push({ 
-                        code:Game_BattlerBase.TRAIT_XPARAM, 
-                        dataId:Game_BattlerBase.TRAIT_XPARAM_DID_ELEMENT_ABSORB, 
+                        code:Game_BattlerBase.TRAIT_ELEMENT_ABSORB, 
+                        dataId:elementId, 
                         value:rate
                     });
                 }
@@ -124,7 +125,7 @@
      * @return {Number} 吸収レート
      */
     Game_BattlerBase.prototype.elementAbsorbRate = function(elementId) {
-        return this.traitsWithId(code, id).reduce((r, trait) => {
+        return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_ABSORB, elementId).reduce((r, trait) => {
             if ((trait.value > 0) && (trait.value > r)) {
                 return trait.value;
             } else {
@@ -140,7 +141,8 @@
      * @return {Boolean} 属性を吸収可能な場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isAbsorbElement = function(elementId) {
-        return this.traitsWithId(code, id).some(trait => trait.value > 0);
+        return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_ABSORB,
+             elementId).some(trait => trait.value > 0);
     }
 
     const _Game_BattlerBase_elementRate = Game_BattlerBase.prototype.elementRate;
