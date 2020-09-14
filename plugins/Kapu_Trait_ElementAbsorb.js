@@ -141,14 +141,6 @@
      * @return {Boolean} 属性を吸収可能な場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isAbsorbElement = function(elementId) {
-        const traits = this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_ABSORB, elementId);
-        if (traits.length > 0) {
-            const isAbsorb = traits.some(trait => trait.value > 0);
-            return isAbsorb;
-        } else {
-            return false;
-        }
-
         return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_ABSORB,
              elementId).some(trait => trait.value > 0);
     }
