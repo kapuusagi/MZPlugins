@@ -387,8 +387,6 @@ if (typeof Game_Temp === 'undefined') {
                         code:Number(re[1]), dataId:Number(re[2]), value:Number(re[3])
                     };
                     enemy.traits.push(trait);
-                } else if ((re = line.match(patternElementAbsorb)) !== null) {
-                    DataManager.addElementAbsorbTrait(enemy, re[1], re[2])
                 }
             });
 
@@ -458,15 +456,11 @@ if (typeof Game_Temp === 'undefined') {
                     }
                 } else if ((re = line.match(patternRequired)) !== null) {
                     item.equipCondition = re[1].trim();
-                } else if ((re = line.match(patternCriticalRate)) !== null) {
-                    DataManager.addCriticalDamageRateTrait(item, re[1]);
                 } else if ((re = line.match(patternTrait) !== null)) {
                     var trait = {
                         code:Number(re[1]), dataId:Number(re[2]), value:Number(re[3])
                     };
                     item.traits.push(trait);
-                } else if ((re = line.match(patternElementAbsorb)) !== null) {
-                    DataManager.addElementAbsorbTrait(item, re[1], re[2])
                 }
             });
         }
@@ -507,15 +501,11 @@ if (typeof Game_Temp === 'undefined') {
                     for (i = 0; i < 6; i++) {
                         state.basicParams[i].rate = Number(re[i + 1]);
                     }
-                } else if ((re = line.match(patternCriticalRate)) !== null) {
-                    DataManager.addCriticalDamageRateTrait(state, re[1]);
                 } else if ((re = line.match(patternTrait) !== null)) {
                     var trait = {
                         code:Number(re[1]), dataId:Number(re[2]), value:Number(re[3])
                     };
                     state.traits.push(trait);
-                } else if ((re = line.match(patternElementAbsorb)) !== null) {
-                    DataManager.addElementAbsorbTrait(state, re[1], re[2])
                 }
             });
         }
@@ -525,28 +515,7 @@ if (typeof Game_Temp === 'undefined') {
 
 
 
-    /**
-     * 吸収属性を表す特性を追加する。
-     * @param {TraitObject} item traitsを持つオブジェクト。(Actor, Enemy, Weapon, Armor, State)
-     * @param {string} idStr 属性ID文字列
-     * @param {string} valueStr レート文字列
-     */
-    DataManager.addElementAbsorbTrait = function(obj, idStr, valueStr) {
-        var elementId = Number(idStr);
-        if (elementId > 0) {
-            var absorbRate;
-            if (valueStr.slice(-1) === "%") {
-                absorbRate = -Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
-            } else {
-                absorbRate = -Number(valueStr);
-            }
-            obj.traits.push({
-                code:Game_BattlerBase.TRAIT_ELEMENT_RATE,
-                dataId:elementId,
-                value:absorbRate
-            });
-        }
-    };
+
 
     /**
      * アイテムのノートタグを解析する。
@@ -760,6 +729,7 @@ if (typeof Game_Temp === 'undefined') {
 
     /**
      * 属性倍率を得る。
+     * 
      * @param {Number} elementId 属性ID
      * @return {Number} 属性倍率
      */
