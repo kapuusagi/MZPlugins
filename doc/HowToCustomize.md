@@ -1165,6 +1165,29 @@ Scene_MenuBase.prototype.createBackground = function() {
     this.setBackgroundOpacity(255);
 ~~~
 
+### Sprite作って文字を描画したいなら？
+
+まずSpriteを作る。このとき寸法に注意。
+
+~~~javascript
+const fontFace = フォント名;
+const fontSize = フォントサイズ;
+const width = 幅;
+const height = 高さ;
+const textColor = 色;
+const sprite = new Sprite();
+sprite.bitmap = new Bitmap(width, height);
+sprite.bitmap.fontFace = fontFace;
+sprite.bitmap.fontSize = fontSize;
+sprite.bitmap.textColor = textColor;
+sprite.x = 位置x;
+sprite.y = 位置y;
+~~~
+
+作成したSpriteはシーンに追加しておくこと。
+さもないとdestroyしてくれないはず。
+あとは、 __bitmap.drawText()__ で描画して終わり。
+
 ### Spriteの大きさを変えるには？
 
 __Sprite.scale.x__ と __Sprite.scle.y__ を変更すればいいみたい。
