@@ -19,7 +19,7 @@ __/*: ～ */__ で書く。わかりにくいけど。
 ### ■ プラグイン全体
 
 ~~~javascript
-/*:
+/*:ja
  * @target MZ 
  * @plugindesc 概要
  * @author hogehoge
@@ -180,22 +180,31 @@ MVの時に比べて、若干エレガントな書き方してる。
 
 既存の実装に機能を追加する場合にはフックを使用する。
 既存の処理が残るので影響が小さい。
-const 参照用変数 = オーバーロードするメソッド
 
-    オーバーロードするメソッド = function() {
+    const 参照用変数 = オーバーロードするメソッド
+
+    フックするメソッド = function() {
         // 必要な処理
         参照用変数.apply(this, arguments);
         // 必要な処理
     };
       
-とする。
+とする。注意としては、フックでプラグイン処理と内部分岐させる場合、
+インポート順によっては他のプラグインが正常に動作しなくなる。
 
-### メソッドのオーバーロード
+
+### メソッドのオーバーライト
 完全に置きかえる場合。
 他のプラグインとの競合に気をつけないといけないパターン。
+コメントに「!!!overwrite!!!」とか書いておくのが良いみたい。
 
 ~~~javascript
-オーバーロードするメソッド = function() {
+/**
+ * 説明ごにょごにょ
+ * 
+ * !!!overwrite!!!
+ */
+オーバーライトするメソッド = function() {
     // 必要な処理
 };
 ~~~
@@ -282,14 +291,17 @@ const value = data.ParamName;
 ### 独自のノートタグを実装する場合
 
 __Scene_Boot.start__ をフックして処理を追加する。
-
+ノートタグ処理はオリジナルのstartより先に処理する方がよさそう。
+試した限りでは、オリジナルのstart中でアクターの装備初期化などが呼び出されるため、
+後ろに実装するとノートタグを処理しないまま実行されることになってしまう。
 
 ~~~javascript
   const _Scene_Boot_start = Scene_Boot.prototype.start;
   Scene_Boot.prototype.start = function() {
-    _Scene_Boot_start.call(this);
 
         /* TODO : ノートタグの処理 */
+
+      _Scene_Boot_start.call(this);
   };
 ~~~
 
@@ -384,6 +396,14 @@ Scene_Base.popScene()を使う。
 ~~~
 全部戻す場合の遷移
 SceneManager.goto(遷移するシーン);
+
+あと、UIはプラグイン側で用意するべきじゃないと思ってる。
+面倒でもプラグインを組み合わせて使う側でやる方がよい。
+理由は以下の通り
+* 複数のプラグインを組み合わせて使うとき、UIはどうしても競合してしまう。
+* プラグイン毎のUIだと、統一感のあるUIが提供できない。
+
+例外的に特定のプラグイン開発者のものだけ使うとか、競合しないものを組み合わせて使えばなんとかなる。
 
 ### ■ 選択する必要はないけど、OK/キャンセル操作を受け付けたい場合は？
 
@@ -627,7 +647,55 @@ Scene_Battle.prototype.onSelectAction = function() {
     リソースを破棄（たぶん）
 
 
+### ■ BattleManager と Window_BattleLog
 
+基本的にはBattleManagerが戦闘システムの全体の流れを制御して、
+Window_BattleLogにその表示についての処理が実装されている形。
+アニメーション再生をWndow_BattleLogに入れてるのは、
+フロントエンド側はWindowクラス、という設計思想なのか？
+
+BattleManagerは_logWindow（Window_BattleLogのインスタンス)を使用してメソッドを呼び出す。
+ちょっと調べた限り、クリティカル時に表示するアニメーションを切り替えるには、
+BattleManager側も変えないとむりぽだった。
+(updateTurn()にて使用アニメーション、updateActionにて結果表示。applyはupdateActionにて使用されるため、使用アニメーションの段階ではクリティカルになるかどうかわからん。戦闘システムカスタマイズすればいいんだけど。)
+
+### メニュー系
+
+プラグインで独自のシーンを作る場合、まず、Scene_Baseを使うか、Scene_MenuBaseを使うかで分かれる。
+Scene_Baseはタイトル画面など、背景に表示するスプライトから全部用意する場合に使用する。
+Scene_MenuBaseは、シーンの背景として前のシーンのキャプチャ画像を使用し、かつ入力キャンセルボタンなど、
+メニュー操作が絡んでくる場合に使用するときに使うと良い。
+
+尚既定の実装では背景として、前のシーンにジャギーをかけたような画像を使用している。
+これを止めるには、Scene_MenuBaseのcreateBackgroundの一部を変更すればいい。
+
+~~~javascript
+Scene_MenuBase.prototype.createBackground = function() {
+    this._backgroundFilter = new PIXI.filters.BlurFilter();
+    this._backgroundSprite = new Sprite();
+    this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
+    //this._backgroundSprite.filters = [this._backgroundFilter];
+    this._backgroundSprite.filters = []; // フィルタなし。
+    this.addChild(this._backgroundSprite);
+    //this.setBackgroundOpacity(192);
+    this.setBackgroundOpacity(255);
+};
+~~~
+フックしてfiltersとsetBackgroundOpacity(255)として可。
+見て分かるとおり、_backgroundSprite.bitmapに任意の画像を設定すれば、背景を変更することができる。
+メニューの背景を可愛いうさぎさんにする事も出来るというわけだ。
+
+尚、既定の実装ではScene_MenuBaseを使うとキャンセルボタンも作ってくれる。
+派生した先で不要だと感じたら、 __needsCancelButton__ を実装してfalseを返せば良い。
+~~~javascript
+/**
+ * キャンセルボタンが必要かどうかを取得する。
+ * @return {Boolean} 必要な場合にはtrue, それ以外はfalse
+ */
+Scene_Hogehoge.prototype.needsCancelButton = function() {
+    return false; // キャンセルボタンは要らない
+};
+~~~
 
 ### ■ 小ネタ
    
@@ -903,6 +971,7 @@ MVと違い、名前表示欄が追加されている。そのため、Window_Me
     メッセージ表示完了は $gameMessage.isBusy()を参照する。
 ~~~
 
+
 ### ・スクリーンサイズの変更
 
 MVだとプラグインでやる必要があったが、MZではデータベースで指定するとそのまま適用できる(らしい)。
@@ -1027,6 +1096,51 @@ Game_Battler.prototype.onBattleEnd = function() {
 };
 ~~~
 
+### TPB処理について
+
+Game_Battler.updateTpb()で処理される。TPB関連のパラメータとしては以下3つが使用される。
+* _tpbChageTime - TPBステートがchargingの時に更新される。
+_tpbChageTimeが1.0以上になるとTPBステートがchangedになる。
+加算量はTPB相対速度(tpbRelativeSpeed)。
+* _tpbCastTime - TPBステートがcastingの時に更新される。
+_tpbCastTimeがスキルなどの要求キャストタイム以上になると、TPBステートがreadyになる。
+加算量はTPB相対速度(tpbRelativeSpeed)。
+* _tpbIdleTime - TPBステートがcharging以外の時に更新される。
+onTpbTimeout()がコールされて0になる。
+加算量はTPB相対速度(tpbRelativeSpeed)。用途がよくわからん。
+
+ベーシックシステムでのTPB計算
+
+TPB速度(tpbSpeed) : Sqrt(AGI) + 1
+TPBベース速度(tpbBaseSpeed) : 
+パーティーのTPBベース速度 : パーティー中、TPBベース速度。
+TPB相対速度(tpbRelativeSpeed) : TPB速度(tpbSpeed) / リファレンスタイム
+
+リファレンスタイムはGame_Unit.tpbReferenceTimeで定義されている。
+大きくすると、時間経過がゆっくりになる。
+データベースで設定できないのはいかがなものか。
+~~~javascript
+Game_Unit.prototype.tpbReferenceTime = function() {
+    return BattleManager.isActiveTpb() ? 240 : 60;
+};
+~~~
+
+キャストタイム
+アイテム/スキルで指定したSPEED(データベース上は負数)に対して以下の計算。
+キャストタイム = Sqrt(Speed) / TPB速度
+
+~~~javascript
+Game_Battler.prototype.tpbRequiredCastTime = function() {
+    const actions = this._actions.filter(action => action.isValid());
+    const items = actions.map(action => action.item());
+    const delay = items.reduce((r, item) => r + Math.max(0, -item.speed), 0);
+    return Math.sqrt(delay) / this.tpbSpeed();
+};
+~~~
+TPB速度の計算式にあるとおり、ベーシックシステムではAGIが高いほどキャスト時間が早くなる。
+
+
+
 ### 新しいシーンにしたとき、前のシーンの画像がぼやけた表示になるのをやめるには？
 
 Scene_MenuBase.createBackgroundでやってる、filtersを空の配列にし、
@@ -1051,7 +1165,6 @@ Scene_MenuBase.prototype.createBackground = function() {
     this.setBackgroundOpacity(255);
 ~~~
 
-
 ### Sprite作って文字を描画したいなら？
 
 まずSpriteを作る。このとき寸法に注意。
@@ -1075,3 +1188,23 @@ sprite.y = 位置y;
 さもないとdestroyしてくれないはず。
 あとは、 __bitmap.drawText()__ で描画して終わり。
 
+### Spriteの大きさを変えるには？
+
+__Sprite.scale.x__ と __Sprite.scle.y__ を変更すればいいみたい。
+例えばエネミーをでっかくするなら．．．．。
+
+~~~javascript
+    Sprite_Enemy.prototype.updateBitmap = function() {
+        Sprite_Enemy_updateBitmap.call(this, ...arguments);
+
+        this.scale.x = 2;
+        this.scale.y = 2;
+    };    
+~~~
+
+とはいえ、ベーシックシステムでscaleを使ってるかもしれないから、安易にscaleパラメータを変えるのはまずい。
+### 新しいパラメータを追加して挙動を制御したいんだけど？
+
+例えばゴールド取得倍率を2倍固定じゃなくて、0.20％増しとか0.40％増しとかやりたい場合。
+新しいTraitとコードを定義するしよう。
+このとき、他のプラグインを使ってるならば、競合に注意すること。
