@@ -13,5 +13,10 @@ namespace MZUtils
         /// 説明
         /// </summary>
         string Description { get; }
+
+        /// <summary>
+        /// アイテムの種類を得る。
+        /// </summary>
+        ItemType Kind { get; }
     }
 }

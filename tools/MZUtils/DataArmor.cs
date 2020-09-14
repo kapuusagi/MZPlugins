@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace MZUtils
@@ -49,6 +50,11 @@ namespace MZUtils
         /// 価格
         /// </summary>
         public int Price { get; set; } = 0;
+
+        /// <summary>
+        /// アイテムの種類を得る。
+        /// </summary>
+        public ItemType Kind { get => ItemType.Armor; }
 
         /// <summary>
         /// 値をセットする。

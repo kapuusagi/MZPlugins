@@ -80,6 +80,11 @@ namespace MZUtils
         public int TpGain { get; set; } = 0;
 
         /// <summary>
+        /// アイテムの種類を得る。
+        /// </summary>
+        public ItemType Kind { get => ItemType.Item; }
+
+        /// <summary>
         /// 値をセットする
         /// </summary>
         /// <param name="paramName">フィールド名</param>

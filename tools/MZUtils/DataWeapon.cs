@@ -56,6 +56,11 @@ namespace MZUtils
         public int WeaponTypeId { get; set; } = 0;
 
         /// <summary>
+        /// アイテム種類を得る。
+        /// </summary>
+        public ItemType Kind { get => ItemType.Weapon; }
+
+        /// <summary>
         /// 値をセットする。
         /// </summary>
         /// <param name="paramName">パラメータ名</param>

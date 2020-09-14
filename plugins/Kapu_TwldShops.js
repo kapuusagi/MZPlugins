@@ -1,95 +1,124 @@
-/*:
- * @plugindesc TWLDのショップシステム
- * TWLDでのショップを実現する。
+/*:ja
+ * @target MZ 
+ * @plugindesc TWLDシステム向けに作成したショッププラグイン。
  * @author kapuusagi
- * @help
- * プラグインコマンド
- *      TWLD.Shop.OpenShop id# [clerkFileName$]
- *               id# オープンするショップID/または店名
- *               clerkFileName$ 店員ファイル名
- *      TWLD.Shop.UpdateShop [ id# ] 
- *               id# 更新するショップID/または店名
- *               未指定時は一度以上オープンしたショップ全てを更新する。
- *      TWLD.Shop.SetShopLevel id# level#
- *               id# レベルを設定するショップ番号/または店名
- *               level# 設定するレベル。 
- *               没落させるなら低いレベルに設定して、繁栄したら高いレベルにするとか。
- *               レベルを上げても商品は更新されないので、別途UpdateShopを呼ぶこと。
+ * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * ■ openShop
+ * @command openShop
+ * @text ショップを開く
+ * @desc 指定したIDのお店の売買シーンを開始します。
+ *
+ * @arg id
+ * @text ショップID
+ * @desc ショップのID番号
+ * @type number
+ * @default 1
  * 
- * 条件分岐で使用するスクリプト用
- *       TWLD.Shop.isTransacted()
- *               直前のショップ処理にて取引が行われたかどうかを取得する。
- *       TWLD.Shop.isBoughtAny()
- *               直前のショップ処理にて、購入が行われたかどうかを取得する。
- *       TWLD.Shop.isSoldAny()
- *               直前のショップ処理にて、売却が行われたかどうかを取得する。
- * 機能
- *     ・売却処理の変更。
- *       個別アイテムを数量指定で2個以上売ると、勝手に売られてしまう問題があった。
- *     ・店の規模を表すlevelを持たせた。
- *       在庫アイテム追加条件に指定できる。
- *     ・店の在庫（最大購入数）
- *     ・購入可能な品と数量は初回オープン時にShops.jsonのデータを元に構築する。
- *     ・購入可能な品は任意のタイミングで更新する。
- *     ・店員表示（プラグインコマンドでファイル指定時）
- *     ・取引金額
- *       プレイヤーとの取引金額を持ってる。
- *       アイテム入荷条件に指定できる。
- *       取引少ないやつには売らないよ、みたいな。
- *     
+ * @arg ckerkFileName
+ * @text 店員画像
+ * @desc 店員として表示する画像ファイル名。
+ * @type file
+ * @dir pictures
+ * 
+ * ■ updateShop
+ * @command updateShop
+ * @text 品揃えを更新
+ * @desc 指定したIDのお店の品揃えを更新します。
+ *
+ * @arg id
+ * @text ショップID
+ * @desc ショップのID番号
+ * @type number
+ * @default 1
+ * 
+ * ■ setShopLevel
+ * @command setShopLevel
+ * @text お店のレベルを設定
+ * @desc お店のレベルを設定します。
+ *
+ * @arg id
+ * @text ショップID
+ * @desc ショップのID番号
+ * @type number
+ * @default 1
+ * 
+ * @arg level
+ * @text ショップレベル
+ * @desc 設定するショップレベル。
+ * @type number
+ * @default 1
+ * 
+ * @help 
+ * TWLDシステム向けに作成したショップです。
+ * 
+ * 
+ * 
+ * openShopコール後、以下のメソッドで条件分岐できる。
+ * TWLD.Shop.isTransacted()
+ *      直前のショップ処理にて取引が行われたかどうかを取得する。
+ * TWLD.Shop.isBoughtAny()
+ *      直前のショップ処理にて、購入が行われたかどうかを取得する。
+ * TWLD.Shop.isSoldAny()
+ *      直前のショップ処理にて、売却が行われたかどうかを取得する。
+ * 
+ * ■プラグイン開発者向け
+ * 
+ * 
+ * ============================================
+ * プラグインコマンド
+ * ============================================
+ * openShop
+ *     ショップのシーンを開始する。
+ * updateShop
+ *     ショップの品揃えを更新する。
+ * setShopLevel
+ *     ショップレベルを設定する。
+ *     ショップの繁栄度として使用するもので、
+ *     ショップレベルは品物の入荷条件に使用される。
+ * 
+ * ============================================
+ * ノートタグ
+ * ============================================
+ * ノートタグはありません。
+ * 
+ * ============================================
+ * 変更履歴
+ * ============================================
+ * Version.0.1.0 TWLD向けに作成したものを移植。レイアウト未調整。
  */
-var Imported = Imported || {};
-Imported.TWLD_Shop = true;
-
-var TWLD = TWLD || {};
-TWLD.Sh = TWLD.Sh || {};
+TWLD = TWLD || {};
 TWLD.Shop = TWLD.Shop || {};
 
-if (!Imported.TWLD_UI) {
-    throw 'This plugin must be import after TWLD_UI.js';
-}
-
-// for ESLint
-if (typeof Window_ItemCategory === 'undefined') {
-    var Window_Selectable = {};
-    var Window_Gold = {};
-    var Window_ShopNumber = {};
-    var Window_ShopSell = {};
-    var SoundManager = {};
-    var ImageManager = {};
-    var Window_Help = {};
-    var Game_Interpreter = {};
-    var Scene_MenuBase = {};
-
-    var SceneManager = {};
-    var DataManager = {};
-    var TextManager = {};
-
-    var $gameParty = {};
-    var $dataItems = {};
-    var $dataWeapons = {};
-    var $dataArmors = {};
-
-    var Graphics = {};
-    var Sprite = {};
-
-    var Window_CommandGeneric = {};
-    var GenericCommand = {};
-}
-
-var $dataShops = null;
-var $gameShops = null;
-
-// for ESLint
-(function() {
+(() => {
     'use strict';
 
-    TWLD.Sh.SHOP_MODE_SELL_AND_PURCHASE = 0;
-    TWLD.Sh.SHOP_MODE_SELL_ONLY = 1;
-    TWLD.Sh.SHOP_MODE_PURCHASE_ONLY = 2;
+    const pluginName = 'Kapu_TwldShops';
 
-    TWLD.Sh.isBoughtAny = false;
-    TWLD.Sh.isSoldAny = false;
+    PluginManager.registerCommand(pluginName, 'openShop', args => {
+        id = Number(args.id) || 0;
+        if (id && id < $dataShops.length) {
+            TWLD.Shop.isBoughtAny = false;
+            TWLD.Shop.isSoldAny = false;
+            SceneManager.push(Scene_TwldShop);
+            SceneManager.prepareNextScene(args.id, args.clerkFileName);
+        }
+    });
+    
+    PluginManager.registerCommand(pluginName, 'updateShop', args => {
+        $gameShops.updateShopItems(args.id);
+    });
+
+    PluginManager.registerCommand(pluginName, 'setShopLevel', args => {
+
+    });
+
+    TWLD.Shop.SHOP_MODE_SELL_AND_PURCHASE = 0;
+    TWLD.Shop.SHOP_MODE_SELL_ONLY = 1;
+    TWLD.Shop.SHOP_MODE_PURCHASE_ONLY = 2;
+
+
+    TWLD.Shop._isBoughtAny = false;
+    TWLD.Shop._isSoldAny = false;
 
     /**
      * 取引があったかどうかを判定して取得する。
@@ -104,7 +133,7 @@ var $gameShops = null;
      * @return {Boolean} 購入があった場合にはtrue, 購入が無かった場合にはfalse.
      */
     TWLD.Shop.isBoughtAny = function() {
-        return TWLD.Sh.isBoughtAny;
+        return TWLD.Shop._isBoughtAny;
     };
 
     /**
@@ -112,62 +141,49 @@ var $gameShops = null;
      * @return {Boolean} 売却があった場合にはtrue, 売却がなかった場合にはfalse
      */
     TWLD.Shop.isSoldAny = function() {
-        return TWLD.Sh.isSoldAny;
+        return TWLD.Shop._isSoldAny;
     };
 
     //------------------------------------------------------------------------------
-    // DataManagerの変更
-    // Shops.jsonを読み出してデータを構築する。
-    //
-    TWLD.Sh.DataManager_loadDatabase = DataManager.loadDatabase;
+    // DataManager
+    DataManager._databaseFiles.push({ name:"$dataShops", src:"Shops.json" });
 
-    /**
-     * データベースをロードする。
-     */
-    DataManager.loadDatabase = function() {
-        TWLD.Sh.DataManager_loadDatabase.call(this);
-        try {
-            this.loadDataFile("$dataShops", "Shops.json");
-        }
-        catch (e) {
-            console.error(e);
-        }
-    };
-
-    TWLD.Sh.DataManager_makeSaveContents = DataManager.makeSaveContents;
+    const _DataManager_makeSaveContents = DataManager.makeSaveContents;
 
     /**
      * セーブデータに入れるデータを構築する。
+     * 
      * @return {Dictionary} 保存するコンテンツ
      */
     DataManager.makeSaveContents = function() {
-        const contents = TWLD.Sh.DataManager_makeSaveContents.call(this);
+        const contents = _DataManager_makeSaveContents.call(this);
         contents.shops = $gameShops;
         return contents;
     };
 
-    TWLD.Sh.DataManager_extractSaveContents = DataManager.extractSaveContents;
+    const _DataManager_extractSaveContents = DataManager.extractSaveContents;
 
     /**
      * セーブデータから必要なコンテンツを展開する。
+     * 
      * @param {Dictionary} contents コンテンツ
      */
     DataManager.extractSaveContents = function(contents) {
-        TWLD.Sh.DataManager_extractSaveContents.call(this, contents);
+        _DataManager_extractSaveContents.call(this, ...arguments);
         var shops = contents.shops;
         if (shops) {
             $gameShops = shops;
         }
     };
-
-    TWLD.Sh.DataManager_createGameObjects = DataManager.createGameObjects;
+    const _DataManager_createGameObjects = DataManager.createGameObjects;
     /**
      * 必要なオブジェクトを構築する。
      */
     DataManager.createGameObjects = function() {
-        TWLD.Sh.DataManager_createGameObjects.call(this);
+        _DataManager_createGameObjects.call(this);
         $gameShops = new Game_Shops();
     };
+
     //------------------------------------------------------------------------------
     // Game_Shop
     //
@@ -1156,64 +1172,6 @@ var $gameShops = null;
             case 'sell':
                 this._sellWindow.activate();
                 break;
-        }
-    };
-
-
-    //------------------------------------------------------------------------------
-    // プラグインコマンドの実装
-    // プラグインON/OFF
-    //
-
-    /**
-     * 店IDを得る。
-     * @param {String}} arg 引数
-     */
-    TWLD.Sh.getShopId = function(arg) {
-        if (arg === null) {
-            return 0;
-        }
-        for (var i = 1; i < $dataShops.length; i++) {
-            if ($dataShops[i] && ($dataShops.name === arg)) {
-                return i;
-            }
-        }
-
-        var id = Number(arg);
-        if (id) {
-            return id;
-        }
-        return 0;
-    };
-
-
-    TWLD.Sh.Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-
-    Game_Interpreter.prototype.pluginCommand = function(command, args) {
-        var re = command.match(/^TWLD\.Shop\.(.*)/);
-        if (re !== null) {
-            var id;
-            switch (re[1]) {
-                case 'UpdateShop':
-                    id = TWLD.Sh.getShopId(args[0]);
-                    $gameShops.updateShopItems(id);
-                    break;
-                case 'OpenShop':
-                    id = TWLD.Sh.getShopId(args[0]);
-                    var mode = Number(args[1]) || TWLD.Sh.SHOP_MODE_SELL_AND_PURCHASE;
-                    var clerkFileName = args[2] || '';
-                    TWLD.Sh.isBoughtAny = false;
-                    TWLD.Sh.isSoldAny = false;
-                    SceneManager.push(Scene_TwldShop);
-                    SceneManager.prepareNextScene(id, mode, clerkFileName);
-                    break;
-                case 'SetShopLevel':
-                    id = TWLD.Sh.getShopId(args[0]);
-                    var level = Number(args[1]) || 1;
-                    $gameShops.setShopLevel(id, level);
-            }
-        } else {
-            TWLD.Sh.Game_Interpreter_pluginCommand.call(this, command, args);
         }
     };
 })();
