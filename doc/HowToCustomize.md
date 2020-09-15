@@ -405,6 +405,11 @@ SceneManager.goto(遷移するシーン);
 
 例外的に特定のプラグイン開発者のものだけ使うとか、競合しないものを組み合わせて使えばなんとかなる。
 
+__MVからMZに移植する際の変更点__
+
+* ウィンドウを作成する際、 __x,y,width,height__ じゃなくて __Rectangle__ を渡すようになった。
+
+
 ### ■ 選択する必要はないけど、OK/キャンセル操作を受け付けたい場合は？
 
 Window_Seleactableを派生させたウィンドウを作成し、
@@ -645,6 +650,13 @@ Scene_Battle.prototype.onSelectAction = function() {
 8. detachReservation()
 
     リソースを破棄（たぶん）
+
+### ■ 色
+
+MZではColorManagerが色の管理をしている。文字の描画色などで使うのもこれ。
+扱っている色はCSSの色文字列('#RRGGBB')でやりとりされる。
+
+例えば白(255,255,255)は '#ffffff'、赤(255,0,0)は'#ff0000',緑(0,255,0)は '#00ff00', 青(0,0,255)は '#0000ff' になる。
 
 
 ### ■ BattleManager と Window_BattleLog
