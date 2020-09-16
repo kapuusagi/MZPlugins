@@ -5,10 +5,10 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * 
- * @param TraitId
+ * @param TraitPartyAbilityId
  * @text パーティー特性DID
  * @desc 特性として割り当てるID番号。(6以上で他のプラグインとぶつからないやつ)
- * @default 7
+ * @default 101
  * @type number
  * @max 999
  * @min 6
@@ -40,13 +40,14 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 IDデフォルト値を101に変更した。
  * Version.0.1.0 TWLDで実装したのを移植。
  */
 (() => {
     const pluginName = "Kapu_Trait_DropGoldRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.ABILITY_DROP_GOLD_RATE = Number(parameters['TraitId']) || 0;
+    Game_Party.ABILITY_DROP_GOLD_RATE = Number(parameters['TraitPartyAbilityId']) || 0;
 
     //------------------------------------------------------------------------------
     // DataManager
