@@ -4,6 +4,7 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @param TraitXParamDid
  * @text 特性DID
@@ -60,6 +61,7 @@
  * 変更履歴
  * ============================================
  * Version.0.2.1 デフォルト値を変更した。
+ *               プラグインコメントにorderAfterを追加した。
  * Version.0.2.0 ノートタグの処理をKapu_Utilityのコールバックでやるように変更した。
  * Version.0.1.0 TWLDで実装したのを移植。
  */

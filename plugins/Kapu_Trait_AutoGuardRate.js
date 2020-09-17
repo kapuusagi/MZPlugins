@@ -4,6 +4,7 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @param TraitXParamDid
  * @text 特性DID

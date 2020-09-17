@@ -4,6 +4,7 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @param TraitPartyAbilityId
  * @text 特性ID
@@ -41,6 +42,7 @@
  * 変更履歴
  * ============================================
  * Version.0.1.1 IDデフォルト値を100に変更した。
+ *               プラグインコメントにorderAfterを追加した。
  * Version.0.1.0 TWLDで実装したのを移植。
  */
 (() => {

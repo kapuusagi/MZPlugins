@@ -4,6 +4,7 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @param TraitXParamDid
  * @text キャストタイム倍率-特性ID
@@ -50,6 +51,7 @@
  * 変更履歴
  * ============================================
  * Version.0.1.1 IDのデフォルト値を変更した。
+ *               プラグインコメントにorderAfterを追加した。
  * Version.0.1.0 新規作成。
  */
 (() => {

@@ -4,6 +4,7 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_ElementCore
+ * @orderAfter Kapu_ElementCore
  * 
  * @param TraitCode
  * @text 特性コード
@@ -45,7 +46,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 思いついたので追加した。
+ * Version.0.1.0 思いついたので追加した。動作未確認。
  */
 (() => {
     const pluginName = "Kapu_Trait_AttackElementRate";

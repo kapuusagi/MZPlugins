@@ -4,6 +4,7 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @param TraitId
  * @text TPB速度倍率-特性ID
@@ -40,6 +41,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 プラグインコメントをorderAfterに変更した。
  * Version.0.1.0 新規作成。
  */
 (() => {

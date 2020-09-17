@@ -4,6 +4,7 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_ElementCore
+ * @orderAfter Kapu_ElementCore
  * 
  * @param TraitCode
  * @text 特性コード
@@ -58,6 +59,7 @@
  * Version.0.1.1 特性コードデフォルト値を100に変更した。
  *               Game_Action.elementsMaxRate()をオーバーライドしない実装にした。
  *               Kapu_ElementCoreを使う実装に変更した。
+ *               プラグインコメントにorderAfterを追加した。
  * Version.0.1.0 新規作成。
  */
 (() => {

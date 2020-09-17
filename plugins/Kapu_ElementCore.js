@@ -4,6 +4,7 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @help 
  * 属性処理について、以下の拡張を行います。
@@ -44,7 +45,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 新規作成。
+ * Version.0.1.0 新規作成。動作未確認。
  */
 (() => {
     const pluginName = 'Kapu_ElementCore';
