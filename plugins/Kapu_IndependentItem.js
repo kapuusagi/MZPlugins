@@ -140,6 +140,8 @@
  *    新しい個別アイテム生成時の初期化処理を行う。(weapon)
  * DataManager.initializeIndependentArmor(newItem:DataArmor, baseItem:DataArmor) : void
  *    新しい個別アイテム生成時の初期化処理を行う。(armor)
+ * DataManager.reinitializeIndependentItem(item:object) : void
+ *    itemで指定される個別アイテムを再初期化する。
  * 
  * よく使うメソッドは次の通り。
  * DataManager.isIndependent(item:object) : boolean
@@ -165,6 +167,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 プラグイン拡張用に個別アイテムの再初期化メソッドを追加した。
  * Version.0.2.0 装備したときにイベントリから削除されない問題を修正した。
  *               コメント誤りを修正した。
  *               initializeIndependentXXX の引数にbaseItemを渡すように変更した。
@@ -628,6 +631,48 @@
         }
         return null;
     };
+    /***
+     * newItemのデータをbaseItemのデータで上書きする。
+     * 上書きされるのはid以外のbaseItemで持っているメンバー全て。traitも含めて再設定される。
+     * 
+     * @param {Object} 新しいアイテム
+     * @param {Object} ベースアイテム
+     */
+    const _resetIndependentItemData = function(item, baseItem) {
+        for (const key of Object.keys(baseItem)) {
+            if (key !== 'id') {
+                delete item[key];
+            }
+        }
+        for (const key of Object.keys(baseItem)) {
+            if (key !== 'id') {
+                item[key] = JsonEx.makeDeepCopy(baseItem[key]);
+            }
+        }
+    };
+
+    /**
+     * 個別アイテムの性能を再初期化する。
+     * id以外のベースアイテムが持つパラメータは全て再初期化される。
+     * 
+     * @param {Object} item アイテム (DataItem/DataWeapon/DataArmor)
+     */
+    DataManager.reinitializeIndependentItem = function(item) {
+        if (!DataManager.isIndependentItem(item)) {
+            return;
+        }
+        const baseItem = DataManager.getBaseItem(item);
+        _resetIndependentItemData(item, baseItem);
+        DataManager.initializeIndependentCommon(item, baseItem);
+        if (DataManager.isItem(item)) {
+            DataManager.initializeIndependentItem(item, baseItem);
+        } else if (DataManager.isWeapon(item)) {
+            DataManager.initializeIndependentWeapon(item, baseItem);
+        } else if (DataManager.isArmor(item)) {
+            DataManager.initializeIndependentArmor(item, baseItem);
+        }
+    };
+
 
     //-------------------------------------------------------------------------
     // Game_Actor
@@ -714,6 +759,8 @@
             _Game_Actor_changeEquipById.call(this, ...arguments);
         }
     };
+
+
 
     //-------------------------------------------------------------------------
     // Game_Item
