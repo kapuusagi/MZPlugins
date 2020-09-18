@@ -118,16 +118,37 @@
  * 
  * 
  * 個別アイテムデータの削除タイミングについて
- * Game_Party.gainItemでやろうとしたが、装備変更の場合など減らしてから装備とか発生すると、
+ * Game_Party.gainItemでやろうとしたが、装備変更の場合など、
+ * 減らしてから装備とか発生する場合に、
  * 装備する前にデータが削除されてしまうため止めた。
  * 代わりに以下のタイミングで削除される。
  *     ・セーブデータ読み出し時
- *       (保存時に未使用なら保存されない)
+ *       (保存時に未使用なら保存しない。
+ *        メモリ上は、読み出し時に未使用品は復元されないことで対応する)
  *     ・新しい個別アイテム登録時、未使用IDがあれば使用する。
  *       ショップでの複数個購入時に影響が出るはず。
  * 処理が重そうなら実装を見直す。
  * 数が増えると多分影響が大きくなるんじゃ無いかな。
  * 
+ * ■ プラグイン開発者向け
+ * 機能拡張するなら、以下のメソッドをフックする。
+ * DataManager.initializeIndependentCommon(newItem:object, baseItem:object) : void
+ *    新しい個別アイテム生成時の初期化処理を行う。(Item/Weapon/Armor)
+ * DataManager.initializeIndependentItem(newItem:DataItem, baseItem:DataItem) : void 
+ *    新しい個別アイテム生成時の初期化処理を行う。(item)
+ * DataManager.initializeIndependentWeapon(newItem:DataWeapon, baseItem:DataWeapon) : void
+ *    新しい個別アイテム生成時の初期化処理を行う。(weapon)
+ * DataManager.initializeIndependentArmor(newItem:DataArmor, baseItem:DataArmor) : void
+ *    新しい個別アイテム生成時の初期化処理を行う。(armor)
+ * 
+ * よく使うメソッドは次の通り。
+ * DataManager.isIndependent(item:object) : boolean
+ *    itemが個別アイテムをサポートする種類かどうかを判定する。
+ * DataManager.isIndependentItem(item:object) : boolean
+ *    item自体が個別アイテムかどうかを判定する。
+ * DataManager.getBaseItem(item:object) : object
+ *    itemのベースアイテムを得る。
+ *    itemが個別アイテムをサポートしていない場合、itemが返る。
  * ============================================
  * ノートタグ
  * ============================================
@@ -144,7 +165,9 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.2 装備したときにイベントリから削除されない問題を修正した。
+ * Version.0.2.0 装備したときにイベントリから削除されない問題を修正した。
+ *               コメント誤りを修正した。
+ *               initializeIndependentXXX の引数にbaseItemを渡すように変更した。
  * Version.0.1.1 アイテム数を取得するメソッドがエラーになる問題を修正した。
  * Version.0.1.0 作成開始
  */
@@ -285,7 +308,7 @@
     };
 
     /**
-     * アイテムが個別アイテムかどうかを取得する。
+     * アイテムが個別アイテムとして扱うものかどうかを取得する。
      * 
      * @param {Object} item ベースまたは個別アイテム。(DataItem/DataWeapon/DataArmor)
      * @return {Boolean} 個別アイテムの場合にはtrue, それ以外はfalse.
@@ -357,8 +380,9 @@
      * 他のプラグインでフックし、個別アイテムを使って使用したい機能を実現することを想定する。
      * 
      * @param {DataItem} newItem 新しい個別アイテム
+     * @param {DataItem} baseItem ベースアイテム
      */
-    DataManager.initializeIndependentCommon = function( /* newItem */ ) {
+    DataManager.initializeIndependentCommon = function(newItem, baseItem) {
 
     };
 
@@ -374,8 +398,8 @@
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
         newItem.note = '';
-        DataManager.initializeIndependentCommon(newItem);
-        DataManager.initializeIndependentItem(newItem);
+        DataManager.initializeIndependentCommon(newItem, baseItem);
+        DataManager.initializeIndependentItem(newItem, baseItem);
         return newItem;
     };
  
@@ -384,8 +408,9 @@
      * 他のプラグインでフックし、個別アイテムを使って使用したい機能を実現することを想定する。
      * 
      * @param {DataItem} newItem 新しい個別アイテム
+     * @param {DataItem} baseItem 元となるアイテムデータ
      */
-    DataManager.initializeIndependentItem = function( /* newItem */ ) {
+    DataManager.initializeIndependentItem = function(newItem, baseItem) {
 
     };
 
@@ -421,8 +446,8 @@
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
         newItem.note = '';
-        DataManager.initializeIndependentCommon(newItem);
-        DataManager.initializeIndependentWeapon(newItem);
+        DataManager.initializeIndependentCommon(newItem, baseItem);
+        DataManager.initializeIndependentWeapon(newItem, baseItem);
         return newItem;
     };
 
@@ -430,9 +455,10 @@
      * 新しい個別武器を初期化する。
      * 他のプラグインでフックし、個別武器を使って使用したい機能を実現することを想定する。
      * 
-     * @param {DataArmor} newWeapon 新しい個別武器
+     * @param {DataWeapon} newWeapon 新しい個別武器
+     * @param {DataWeapon} baseWeapon ベース武器データ
      */
-    DataManager.initializeIndependentWeapon = function( /* newWeapon */) {
+    DataManager.initializeIndependentWeapon = function(newWeapon, baseWeapon) {
 
     };
 
@@ -467,8 +493,8 @@
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
         newItem.note = '';
-        DataManager.initializeIndependentCommon(newItem);
-        DataManager.initializeIndependentArmor(newItem);
+        DataManager.initializeIndependentCommon(newItem, baseItem);
+        DataManager.initializeIndependentArmor(newItem, baseItem);
         return newItem;
     };
 
@@ -476,8 +502,9 @@
      * 新しい個別防具を初期化する。
      * 他のプラグインでフックし、個別防具を使って使用したい機能を実現することを想定する。
      * @param {DataArmor} newArmor 新しい個別防具
+     * @param {DataArmor} baseArmor ベース防具データ
      */
-    DataManager.initializeIndependentArmor = function(newArmor) {
+    DataManager.initializeIndependentArmor = function(newArmor, baseArmor) {
 
     };
 
