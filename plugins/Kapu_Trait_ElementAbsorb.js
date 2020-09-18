@@ -200,7 +200,7 @@
      * @param {Array<Number>} elementRates IDに対応した倍率。elementRates[elementId]で値がとれる。
      */
     Game_Action.prototype.getApplyElementRate = function(elements, elementRates) {
-        const rate = Math.min(rates);
+        const rate = Math.min(...elementRates);
         if (rate < 0) {
             return rate;
         } else {
