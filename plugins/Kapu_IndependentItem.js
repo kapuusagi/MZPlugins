@@ -167,6 +167,9 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.1 個別アイテムとして扱われない場合がある不具合を修正。
+ *               個別道具が使用できない不具合を修正。
+ *               装備品の一致判定が誤っていたのを修正。
  * Version.0.3.0 プラグイン拡張用に個別アイテムの再初期化メソッドを追加した。
  * Version.0.2.0 装備したときにイベントリから削除されない問題を修正した。
  *               コメント誤りを修正した。
@@ -323,7 +326,7 @@
         if (DataManager.isBattleTest()) {
             return false; // 戦闘テストでは個別アイテム無効。
         }
-        if (!item.meta.independent && !item.baseItemId) {
+        if (!item.meta.independent) {
             return false; // 個別アイテムでない。
         }
 
@@ -673,6 +676,24 @@
         }
     };
 
+    /**
+     * ベースアイテムが一致してるかどうかを取得する。
+     * 
+     * @param {Object} item1 アイテム
+     * @param {Object} item2 アイテム
+     * 
+     * @return {Boolean} 一致している場合にはtrue, それ以外はfalse
+     */
+    DataManager.isBaseItemMatch = function(item1, item2) {
+        if ((DataManager.isItem(item1) !== DataManager.isItem(item2))
+                || (DataManager.isWeapon(item1) !== DataManager.isWeapon(item2))
+                || (DataManager.isArmor(item1) !== DataManager.isArmor(item2))) {
+            return false;
+        }
+        const baseItemId1 = item1.baseItemId || item1.id;
+        const baseItemId2 = item2.baseItemId || item2.id;
+        return baseItemId1 === baseItemId2;
+    };
 
     //-------------------------------------------------------------------------
     // Game_Actor
@@ -723,13 +744,12 @@
      */
     Game_Actor.prototype.findEquippedSlot = function(baseItem) {
         const equips = this.equips();
-        const id = baseItem.id;
-        const isWeapon = DataManager.isWeapon(baseItem);
         for (let slotId = 0; slotId < equips.length; slotId++) {
             const equippedItem = equips[slotId];
-            if (equippedItem
-                    && (DataManager.isWeapon(equippedItem) === isWeapon)
-                    && ((equippedItem.id == id) || (equippedItem.baseItemId == id))) {
+            if (!equippedItem) {
+                continue;
+            }
+            if (DataManager.isBaseItemMatch(equippedItem, baseItem)) {
                 return slotId;
             }
         }
@@ -1102,7 +1122,8 @@
      */
     Game_Party.prototype.isAnyMemberEquipped = function(item) {
         if (DataManager.isIndependent(item)) {
-            // Note: ベーススクリプトでincludesを直接書いてるやつはバグじゃないかな。
+            // Note: ベーススクリプトの処理がID一致をべた書きしてるので、
+            //       Game_Actor.isEquipped()をコールして調べるように変更する。
             return this.members().some(actor => actor.isEquipped(item));
         } else {
             return _Game_Party_isAnyMemberEquipped.call(this, ...arguments);
