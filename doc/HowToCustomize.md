@@ -37,7 +37,7 @@ __/*: ～ */__ で書く。わかりにくいけど。
 |__@url__ _URL_|配布元URL|
 
 ---
-### ■ パラメータ
+### ■ プラグインパラメータ
 
 プラグイン全体に対する動作をカスタマイズする機能を提供するためのもの。
 このゲームでは～の動作させて、こっちのゲームでは～の動作させたい、みたいなのを実現するための方法だよ！
@@ -405,6 +405,11 @@ SceneManager.goto(遷移するシーン);
 
 例外的に特定のプラグイン開発者のものだけ使うとか、競合しないものを組み合わせて使えばなんとかなる。
 
+__MVからMZに移植する際の変更点__
+
+* ウィンドウを作成する際、 __x,y,width,height__ じゃなくて __Rectangle__ を渡すようになった。
+
+
 ### ■ 選択する必要はないけど、OK/キャンセル操作を受け付けたい場合は？
 
 Window_Seleactableを派生させたウィンドウを作成し、
@@ -470,10 +475,10 @@ Traitの持ってるメンバ
 |||8|FDR(床ダメージ倍率)|
 |||9|EXR(経験値増加倍率)|
 |TRAIT_ATTACK_ELEMENT|31|属性ID|dataIdで指定される属性を攻撃属性として追加する。|
-|TRAIT_ATTACK_STATE|32|||
-|TRAIT_ATTACK_SPEED|33|||
-|TRAIT_ATTACK_TIMES|34|||
-|TRAIT_ATTACK_SKILL|35|||
+|TRAIT_ATTACK_STATE|32|ステートID|dataIdで指定されるステートを、攻撃時に付与する。|
+|TRAIT_ATTACK_SPEED|33|-|value値の加算合計を、攻撃速度補正値として得る。|
+|TRAIT_ATTACK_TIMES|34|-|value値の加算合計を、攻撃回数として加算する。単純にリピートされる値となる。|
+|TRAIT_ATTACK_SKILL|35|スキルID|攻撃時のスキルIDをdataIdに変更する。複数持っていた場合には、最も高い値が採用される。(MZで新規追加。WeponMasteryプラグインに相当）|
 |TRAIT_STYPE_ADD|41|スキルタイプID|dataIdで指定したスキルタイプを追加する。valueは無視されるようだ。dataId=x: スキルタイプ x を追加する。|
 |TRAIT_STYPE_SEAL|42|スキルタイプID|dataIdで指定したスキルタイプを封印する。|
 |TRAIT_SKILL_ADD|43|スキルID|dataIdで指定したスキルを追加する。|
@@ -482,15 +487,19 @@ Traitの持ってるメンバ
 |TRAIT_EQUIP_ATYPE|52|防具タイプID|dataIdで指定した防具タイプを装備可能にする。|
 |TRAIT_EQUIP_LOCK|53|装備スロットタイプ|dataIdで指定した装備をロックする。ロックは装備タイプの装備を変更できない状態。|
 |TRAIT_EQUIP_SEAL|54|装備スロットタイプ|dataIdで指定した装備を封印する。封印は装備スロットに装備できない状態。|
-|TRAIT_SLOT_TYPE|55|||
-|TRAIT_ACTION_PLUS|61|||
-|TRAIT_SPECIAL_FLAG|62|||
+|TRAIT_SLOT_TYPE|55|装備タイプ|装備タイプ変更特性。(0:通常, 1:二刀流)|
+|TRAIT_ACTION_PLUS|61|-|行動回数追加特性。valueは追加される確率を表す。加算合計じゃなくて、特性を持っている数だけ乱数判定されて、1つずつ加算される仕組み。|
+|TRAIT_SPECIAL_FLAG|62|フラグID|特別な機能を提供するためのフラグ。|
+|||0|自動戦闘。(Game_BattlerBase.FLAG_ID_AUTO_BATTLE)|
+|||1|防御。(Game_BattlerBase.FLAG_GUARD)|
+|||2|身代わり。敵対者のアクションに対して、身代わりになる。(Game_BattlerBase.FLAG_ID_SUBSTITUTE,isSubstitute()メソッド)|
+|||3|TPが保存されるかどうか。(Game_BattlerBase.FLAG_ID_PRESERVE_TP。isPreserveTp()メソッド。)|
 |TRAIT_COLLAPSE_TYPE|63|||
 |TRAIT_PARTY_ABILITY|64||パーティーアビリティ。既定の実装はdataIdで指定された値の効果を持っているかどうか、だけの判定に使われる。dataIdはGame_Party.ABILITY_～で定義されてる。|
 |||0|ABILITY_ENCOUNTER_HALF。ランダムエンカウント率半減。|
 |||1|ABILITY_ENCOUNTER_NONE。ランダムエンカウントでエンカウントしない。|
-|||2|ABILITY_CANCEL_SURPRISE|
-|||3|ABILITY_RAISE_PREEMPTIVE|
+|||2|ABILITY_CANCEL_SURPRISE|急襲でのエンカウントを防ぐ。|
+|||3|ABILITY_RAISE_PREEMPTIVE|先制攻撃率向上。特性を持っていると、基本先制攻撃率に対して4倍になる。|
 |||4|ABILITY_GOLD_DOUBLE。戦闘でのゴールド倍率2倍|
 |||5|ABILITY_DROP_ITEM_DOUBLE。戦闘でのアイテムドロップレート2倍|
 
@@ -645,6 +654,13 @@ Scene_Battle.prototype.onSelectAction = function() {
 8. detachReservation()
 
     リソースを破棄（たぶん）
+
+### ■ 色
+
+MZではColorManagerが色の管理をしている。文字の描画色などで使うのもこれ。
+扱っている色はCSSの色文字列('#RRGGBB')でやりとりされる。
+
+例えば白(255,255,255)は '#ffffff'、赤(255,0,0)は'#ff0000',緑(0,255,0)は '#00ff00', 青(0,0,255)は '#0000ff' になる。
 
 
 ### ■ BattleManager と Window_BattleLog
@@ -1203,8 +1219,14 @@ __Sprite.scale.x__ と __Sprite.scle.y__ を変更すればいいみたい。
 ~~~
 
 とはいえ、ベーシックシステムでscaleを使ってるかもしれないから、安易にscaleパラメータを変えるのはまずい。
+
 ### 新しいパラメータを追加して挙動を制御したいんだけど？
 
 例えばゴールド取得倍率を2倍固定じゃなくて、0.20％増しとか0.40％増しとかやりたい場合。
 新しいTraitとコードを定義するしよう。
 このとき、他のプラグインを使ってるならば、競合に注意すること。
+
+### 属性の扱いについて
+
+属性は基本的にID値だけで扱われます。
+そこにはNotetagみたいな素敵要素はなく、例えば物理属性だとか魔法属性だとか識別するすべは用意されてない。プラグイン側でやりたかったら、プラグインパラメータとして指定して渡してもらう。

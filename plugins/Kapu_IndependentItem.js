@@ -118,16 +118,39 @@
  * 
  * 
  * 個別アイテムデータの削除タイミングについて
- * Game_Party.gainItemでやろうとしたが、装備変更の場合など減らしてから装備とか発生すると、
+ * Game_Party.gainItemでやろうとしたが、装備変更の場合など、
+ * 減らしてから装備とか発生する場合に、
  * 装備する前にデータが削除されてしまうため止めた。
  * 代わりに以下のタイミングで削除される。
  *     ・セーブデータ読み出し時
- *       (保存時に未使用なら保存されない)
+ *       (保存時に未使用なら保存しない。
+ *        メモリ上は、読み出し時に未使用品は復元されないことで対応する)
  *     ・新しい個別アイテム登録時、未使用IDがあれば使用する。
  *       ショップでの複数個購入時に影響が出るはず。
  * 処理が重そうなら実装を見直す。
  * 数が増えると多分影響が大きくなるんじゃ無いかな。
  * 
+ * ■ プラグイン開発者向け
+ * 機能拡張するなら、以下のメソッドをフックする。
+ * DataManager.initializeIndependentCommon(newItem:object, baseItem:object) : void
+ *    新しい個別アイテム生成時の初期化処理を行う。(Item/Weapon/Armor)
+ * DataManager.initializeIndependentItem(newItem:DataItem, baseItem:DataItem) : void 
+ *    新しい個別アイテム生成時の初期化処理を行う。(item)
+ * DataManager.initializeIndependentWeapon(newItem:DataWeapon, baseItem:DataWeapon) : void
+ *    新しい個別アイテム生成時の初期化処理を行う。(weapon)
+ * DataManager.initializeIndependentArmor(newItem:DataArmor, baseItem:DataArmor) : void
+ *    新しい個別アイテム生成時の初期化処理を行う。(armor)
+ * DataManager.reinitializeIndependentItem(item:object) : void
+ *    itemで指定される個別アイテムを再初期化する。
+ * 
+ * よく使うメソッドは次の通り。
+ * DataManager.isIndependent(item:object) : boolean
+ *    itemが個別アイテムをサポートする種類かどうかを判定する。
+ * DataManager.isIndependentItem(item:object) : boolean
+ *    item自体が個別アイテムかどうかを判定する。
+ * DataManager.getBaseItem(item:object) : object
+ *    itemのベースアイテムを得る。
+ *    itemが個別アイテムをサポートしていない場合、itemが返る。
  * ============================================
  * ノートタグ
  * ============================================
@@ -144,7 +167,13 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.2 装備したときにイベントリから削除されない問題を修正した。
+ * Version.0.3.1 個別アイテムとして扱われない場合がある不具合を修正。
+ *               個別道具が使用できない不具合を修正。
+ *               装備品の一致判定が誤っていたのを修正。
+ * Version.0.3.0 プラグイン拡張用に個別アイテムの再初期化メソッドを追加した。
+ * Version.0.2.0 装備したときにイベントリから削除されない問題を修正した。
+ *               コメント誤りを修正した。
+ *               initializeIndependentXXX の引数にbaseItemを渡すように変更した。
  * Version.0.1.1 アイテム数を取得するメソッドがエラーになる問題を修正した。
  * Version.0.1.0 作成開始
  */
@@ -285,7 +314,7 @@
     };
 
     /**
-     * アイテムが個別アイテムかどうかを取得する。
+     * アイテムが個別アイテムとして扱うものかどうかを取得する。
      * 
      * @param {Object} item ベースまたは個別アイテム。(DataItem/DataWeapon/DataArmor)
      * @return {Boolean} 個別アイテムの場合にはtrue, それ以外はfalse.
@@ -297,7 +326,7 @@
         if (DataManager.isBattleTest()) {
             return false; // 戦闘テストでは個別アイテム無効。
         }
-        if (!item.meta.independent && !item.baseItemId) {
+        if (!item.meta.independent) {
             return false; // 個別アイテムでない。
         }
 
@@ -357,8 +386,9 @@
      * 他のプラグインでフックし、個別アイテムを使って使用したい機能を実現することを想定する。
      * 
      * @param {DataItem} newItem 新しい個別アイテム
+     * @param {DataItem} baseItem ベースアイテム
      */
-    DataManager.initializeIndependentCommon = function( /* newItem */ ) {
+    DataManager.initializeIndependentCommon = function(newItem, baseItem) {
 
     };
 
@@ -374,8 +404,8 @@
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
         newItem.note = '';
-        DataManager.initializeIndependentCommon(newItem);
-        DataManager.initializeIndependentItem(newItem);
+        DataManager.initializeIndependentCommon(newItem, baseItem);
+        DataManager.initializeIndependentItem(newItem, baseItem);
         return newItem;
     };
  
@@ -384,8 +414,9 @@
      * 他のプラグインでフックし、個別アイテムを使って使用したい機能を実現することを想定する。
      * 
      * @param {DataItem} newItem 新しい個別アイテム
+     * @param {DataItem} baseItem 元となるアイテムデータ
      */
-    DataManager.initializeIndependentItem = function( /* newItem */ ) {
+    DataManager.initializeIndependentItem = function(newItem, baseItem) {
 
     };
 
@@ -421,8 +452,8 @@
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
         newItem.note = '';
-        DataManager.initializeIndependentCommon(newItem);
-        DataManager.initializeIndependentWeapon(newItem);
+        DataManager.initializeIndependentCommon(newItem, baseItem);
+        DataManager.initializeIndependentWeapon(newItem, baseItem);
         return newItem;
     };
 
@@ -430,9 +461,10 @@
      * 新しい個別武器を初期化する。
      * 他のプラグインでフックし、個別武器を使って使用したい機能を実現することを想定する。
      * 
-     * @param {DataArmor} newWeapon 新しい個別武器
+     * @param {DataWeapon} newWeapon 新しい個別武器
+     * @param {DataWeapon} baseWeapon ベース武器データ
      */
-    DataManager.initializeIndependentWeapon = function( /* newWeapon */) {
+    DataManager.initializeIndependentWeapon = function(newWeapon, baseWeapon) {
 
     };
 
@@ -467,8 +499,8 @@
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
         newItem.note = '';
-        DataManager.initializeIndependentCommon(newItem);
-        DataManager.initializeIndependentArmor(newItem);
+        DataManager.initializeIndependentCommon(newItem, baseItem);
+        DataManager.initializeIndependentArmor(newItem, baseItem);
         return newItem;
     };
 
@@ -476,8 +508,9 @@
      * 新しい個別防具を初期化する。
      * 他のプラグインでフックし、個別防具を使って使用したい機能を実現することを想定する。
      * @param {DataArmor} newArmor 新しい個別防具
+     * @param {DataArmor} baseArmor ベース防具データ
      */
-    DataManager.initializeIndependentArmor = function(newArmor) {
+    DataManager.initializeIndependentArmor = function(newArmor, baseArmor) {
 
     };
 
@@ -601,6 +634,66 @@
         }
         return null;
     };
+    /***
+     * newItemのデータをbaseItemのデータで上書きする。
+     * 上書きされるのはid以外のbaseItemで持っているメンバー全て。traitも含めて再設定される。
+     * 
+     * @param {Object} 新しいアイテム
+     * @param {Object} ベースアイテム
+     */
+    const _resetIndependentItemData = function(item, baseItem) {
+        for (const key of Object.keys(baseItem)) {
+            if (key !== 'id') {
+                delete item[key];
+            }
+        }
+        for (const key of Object.keys(baseItem)) {
+            if (key !== 'id') {
+                item[key] = JsonEx.makeDeepCopy(baseItem[key]);
+            }
+        }
+    };
+
+    /**
+     * 個別アイテムの性能を再初期化する。
+     * id以外のベースアイテムが持つパラメータは全て再初期化される。
+     * 
+     * @param {Object} item アイテム (DataItem/DataWeapon/DataArmor)
+     */
+    DataManager.reinitializeIndependentItem = function(item) {
+        if (!DataManager.isIndependentItem(item)) {
+            return;
+        }
+        const baseItem = DataManager.getBaseItem(item);
+        _resetIndependentItemData(item, baseItem);
+        DataManager.initializeIndependentCommon(item, baseItem);
+        if (DataManager.isItem(item)) {
+            DataManager.initializeIndependentItem(item, baseItem);
+        } else if (DataManager.isWeapon(item)) {
+            DataManager.initializeIndependentWeapon(item, baseItem);
+        } else if (DataManager.isArmor(item)) {
+            DataManager.initializeIndependentArmor(item, baseItem);
+        }
+    };
+
+    /**
+     * ベースアイテムが一致してるかどうかを取得する。
+     * 
+     * @param {Object} item1 アイテム
+     * @param {Object} item2 アイテム
+     * 
+     * @return {Boolean} 一致している場合にはtrue, それ以外はfalse
+     */
+    DataManager.isBaseItemMatch = function(item1, item2) {
+        if ((DataManager.isItem(item1) !== DataManager.isItem(item2))
+                || (DataManager.isWeapon(item1) !== DataManager.isWeapon(item2))
+                || (DataManager.isArmor(item1) !== DataManager.isArmor(item2))) {
+            return false;
+        }
+        const baseItemId1 = item1.baseItemId || item1.id;
+        const baseItemId2 = item2.baseItemId || item2.id;
+        return baseItemId1 === baseItemId2;
+    };
 
     //-------------------------------------------------------------------------
     // Game_Actor
@@ -651,13 +744,12 @@
      */
     Game_Actor.prototype.findEquippedSlot = function(baseItem) {
         const equips = this.equips();
-        const id = baseItem.id;
-        const isWeapon = DataManager.isWeapon(baseItem);
         for (let slotId = 0; slotId < equips.length; slotId++) {
             const equippedItem = equips[slotId];
-            if (equippedItem
-                    && (DataManager.isWeapon(equippedItem) === isWeapon)
-                    && ((equippedItem.id == id) || (equippedItem.baseItemId == id))) {
+            if (!equippedItem) {
+                continue;
+            }
+            if (DataManager.isBaseItemMatch(equippedItem, baseItem)) {
                 return slotId;
             }
         }
@@ -687,6 +779,8 @@
             _Game_Actor_changeEquipById.call(this, ...arguments);
         }
     };
+
+
 
     //-------------------------------------------------------------------------
     // Game_Item
@@ -1028,7 +1122,8 @@
      */
     Game_Party.prototype.isAnyMemberEquipped = function(item) {
         if (DataManager.isIndependent(item)) {
-            // Note: ベーススクリプトでincludesを直接書いてるやつはバグじゃないかな。
+            // Note: ベーススクリプトの処理がID一致をべた書きしてるので、
+            //       Game_Actor.isEquipped()をコールして調べるように変更する。
             return this.members().some(actor => actor.isEquipped(item));
         } else {
             return _Game_Party_isAnyMemberEquipped.call(this, ...arguments);

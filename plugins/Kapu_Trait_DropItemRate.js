@@ -4,11 +4,12 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
- * @param TraitId
+ * @param TraitPartyAbilityId
  * @text 特性ID
  * @desc 特性として割り当てるID番号。(6以上で他のプラグインとぶつからないやつ)
- * @default 6
+ * @default 100
  * @type number
  * @max 999
  * @min 6
@@ -40,13 +41,15 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 IDデフォルト値を100に変更した。
+ *               プラグインコメントにorderAfterを追加した。
  * Version.0.1.0 TWLDで実装したのを移植。
  */
 (() => {
     const pluginName = "Kapu_Trait_DropItemRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.ABILITY_DROP_ITEM_RATE = Number(parameters['TraitId']) || 0;
+    Game_Party.ABILITY_DROP_ITEM_RATE = Number(parameters['TraitPartyAbilityId']) || 0;
 
     //------------------------------------------------------------------------------
     // DataManager

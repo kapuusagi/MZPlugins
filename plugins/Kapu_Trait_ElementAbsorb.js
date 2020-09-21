@@ -3,12 +3,13 @@
  * @plugindesc 属性吸収の特性を追加するプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_Utility
+ * @base Kapu_ElementCore
+ * @orderAfter Kapu_ElementCore
  * 
  * @param TraitCode
  * @text 特性コード
  * @desc 特性として割り当てるID番号。(65以上で他のプラグインとぶつからないやつ)
- * @default 65
+ * @default 100
  * @type number
  * @max 999
  * @min 65
@@ -55,6 +56,10 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 特性コードデフォルト値を100に変更した。
+ *               Game_Action.elementsMaxRate()をオーバーライドしない実装にした。
+ *               Kapu_ElementCoreを使う実装に変更した。
+ *               プラグインコメントにorderAfterを追加した。
  * Version.0.1.0 新規作成。
  */
 (() => {
@@ -162,6 +167,8 @@
         }
     };
 
+    const _Game_Action_elementMaxRate = Game_Action.prototype.elementsMaxRate;
+
     /**
      * elementsで指定される属性の内、最も効果が大きな値を得る。
      * 吸収属性の効果が1つ以上あるならば、最も吸収効果が高いものが返る。
@@ -169,23 +176,36 @@
      * @param {Game_BattlerBase} target 対象
      * @param {Array<Number>} elements 属性ID配列
      * @return {Number} 値
-     * 
-     * !!!overwrite!!!
      */
     Game_Action.prototype.elementsMaxRate = function(target, elements) {
+        
         if (elements.length > 0) {
             const rates = elements.map(elementId => target.elementRate(elementId));
             const minRate = Math.min(...rates);
             if (minRate < 0) {
+                // 1つ以上吸収する属性がある。
                 return minRate;
-            } else {
-                return Math.max(...rates);
             }
-        } else {
-            return 1;
         }
+
+        return _Game_Action_elementMaxRate.call(this, ...arguments);
     };
 
+    const _Game_Action_getApplyElementRate = Game_Action.prototype.getApplyElementRate;
 
+    /**
+     * 適用する属性レートを取得する。
+     * 
+     * @param {Array<Number>} elements 属性ID配列。
+     * @param {Array<Number>} elementRates IDに対応した倍率。elementRates[elementId]で値がとれる。
+     */
+    Game_Action.prototype.getApplyElementRate = function(elements, elementRates) {
+        const rate = Math.min(...elementRates);
+        if (rate < 0) {
+            return rate;
+        } else {
+            return _Game_Action_getApplyElementRate.call(this, ...arguments);
+        }
+    };
 
 })();

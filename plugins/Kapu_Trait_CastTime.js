@@ -4,11 +4,12 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
- * @param TraitId
+ * @param TraitXParamDid
  * @text キャストタイム倍率-特性ID
  * @desc キャストタイムの特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
- * @default 12
+ * @default 202
  * @type number
  * @max 999
  * @min 10
@@ -49,13 +50,15 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 IDのデフォルト値を変更した。
+ *               プラグインコメントにorderAfterを追加した。
  * Version.0.1.0 新規作成。
  */
 (() => {
     const pluginName = "Kapu_Trait_CastTime";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE = Number(parameters['TraitId']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE = Number(parameters['TraitXParamDid']) || 0;
 
     //------------------------------------------------------------------------------
     // DataManager

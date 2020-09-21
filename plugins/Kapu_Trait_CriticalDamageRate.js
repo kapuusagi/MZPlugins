@@ -4,11 +4,12 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
- * @param TraitId
+ * @param TraitXParamDid
  * @text 特性DID
  * @desc 特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
- * @default 10
+ * @default 200
  * @type number
  * @max 999
  * @min 10
@@ -59,6 +60,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.1 デフォルト値を変更した。
+ *               プラグインコメントにorderAfterを追加した。
  * Version.0.2.0 ノートタグの処理をKapu_Utilityのコールバックでやるように変更した。
  * Version.0.1.0 TWLDで実装したのを移植。
  */
@@ -66,7 +69,7 @@
     const pluginName = "Kapu_Trait_CriticalDamageRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_XPARAM_DID_CDR = Number(parameters['TraitId']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_CDR = Number(parameters['TraitXParamDid']) || 0;
     const basicCriticalRate = Number(parameters['BasicRate']) || 0;
 
     //------------------------------------------------------------------------------
