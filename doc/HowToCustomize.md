@@ -1230,3 +1230,45 @@ __Sprite.scale.x__ と __Sprite.scle.y__ を変更すればいいみたい。
 
 属性は基本的にID値だけで扱われます。
 そこにはNotetagみたいな素敵要素はなく、例えば物理属性だとか魔法属性だとか識別するすべは用意されてない。プラグイン側でやりたかったら、プラグインパラメータとして指定して渡してもらう。
+
+### 入力操作各種
+
+#### ゲームパッド/キーボード入力操作
+
+Input を使う。
+Input.isRepatedで入力操作を受け取る。
+
+|文字列|Keyboard|GamePad|補足|
+|---|---|---|---|
+|"tab"|TAB|||
+|"ok"|Enter/Space/Z|Button A||
+|"shift"|Shift|Button X||
+|"control"|Control/Alt|||
+|"escape"|ESC/INS/X/0|||
+|"cancel"||Button B|||
+|"pageup"|PageUp/Q|Button LB||
+|"pagedown"|PageDown/W|Button RB||
+|"left"|左矢印/4|Button Left||
+|"up"|上矢印/8|Button Up||
+|"right"|右矢印/6|Button Right||
+|"down"|下矢印/2|Button Down||
+|"menu"||Button Y|||
+|"debug"|F9|||
+
+#### タッチ操作
+
+TouchInput を使う。
+但しタッチ対象がどれか、とかはSprite_Clickable経由で取得する仕組みになっている。
+TouchInput.isCanceled でキャンセル操作入力検出。
+タッチ対象は Sprite_Clickable 経由で選択検出処理に渡るようになっている。
+
+1. Sprite_Clickable でタッチ検出
+2. $gameTemp.setTouchState でタッチ状態保存
+3. 選択処理(Window_xxxxなど)のupdate()にて、タッチ対象を選択対象として取得
+
+タッチ用のキャッシュデータは TouchInput.clearTouchState を使用する。
+
+Sprite_Clickableを派生してボタンとか作るならば、setFrameでSpriteのタッチ領域を設定すること。
+
+#### マウス操作
+基本的にタッチ操作と同じ。
