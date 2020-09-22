@@ -355,10 +355,33 @@
         return 1;
     };
 
+    const _Window_BattleEnemy_processCursorMove = Window_BattleEnemy.prototype.processCursorMove;
+
+    /**
+     * カーソルの移動を処理する。
+     */
+    Window_BattleEnemy.prototype.processCursorMove = function() {
+        if (this.isCursorMovable()) {
+            if (Input.isRepeated("right")) {
+                this.cursorDown(Input.isTriggered("right"));
+                return;
+            } else if (Input.isRepeated("left")) {
+                this.cursorUp(Input.isTriggered("left"));
+                return;
+            }
+        } 
+        return _Window_BattleEnemy_processCursorMove.call(this);
+    };
     //------------------------------------------------------------------------------
     // Sprite_Gauge
 
     const _SpriteGauge_currentValue = Sprite_Gauge.prototype.currentValue;
+
+    /**
+     * ゲージのラベルを得る。
+     * 
+     * @return {String} ラベル
+     */
     Sprite_Gauge.prototype.label = function() {
         switch (this._statusType) {
             case "hp":
@@ -376,7 +399,6 @@
 
     /**
      * 現在値を更新する。
-     * 
      */
     Sprite_Gauge.prototype.currentValue = function() {
         if (this._battler && this._statusType === 'time' && this._battler.isTpbCasting()) {
@@ -762,6 +784,7 @@
 
     /**
      * Sprite_ActorName。
+     * Sprite_Nameから表示を変更するために派生して使う。
      */
     function Sprite_ActorName() {
         this.initialize(...arguments);
@@ -770,6 +793,9 @@
     Sprite_ActorName.prototype = Object.create(Sprite_Name.prototype);
     Sprite_ActorName.prototype.constructor = Sprite_ActorName;
 
+    /**
+     * Sprite_ActorNameを初期化する。
+     */
     Sprite_ActorName.prototype.initialize = function() {
         Sprite_Name.prototype.initialize.call(this);
     };
@@ -793,19 +819,30 @@
 
     //------------------------------------------------------------------------------
     // Sprite_HudStateIcons
+    /**
+     * Sprite_HudStateIcons。
+     * ステートアイコンを表示するためのスプライト。
+     * 一度に4つずつ表示するために用意したが、
+     * Sprite_StateIconを複数並べる方式の方がリソース節約になるかもしれない。
+     */
     function Sprite_HudStateIcons() {
         this.initialize(...arguments);
     };
 
     Sprite_HudStateIcons.prototype = Object.create(Sprite.prototype);
     Sprite_HudStateIcons.prototype.constructor = Sprite_HudStateIcons;
-
+    /**
+     * Sprite_HudStateIconsを初期化する。
+     */
     Sprite_HudStateIcons.prototype.initialize = function() {
         Sprite.prototype.initialize.call(this);
         this.initMembers();
         this.loadBitmap();
     };
 
+    /**
+     * Sprite_HudStateIconsのメンバを初期化する。
+     */
     Sprite_HudStateIcons.prototype.initMembers = function() {
         this._battler = null;
         this._animationCount = 0;
@@ -814,6 +851,9 @@
         this.anchor.y = 0.5;
     };
 
+    /**
+     * Sprite_HudStateIconsを破棄する。
+     */
     Sprite_HudStateIcons.prototype.destroy = function() {
         Sprite.prototype.destroy.call(this);
         if (this._iconBitmap) {
@@ -821,11 +861,19 @@
         }
     };
 
+    /**
+     * IconSetのBitmapをロードする。
+     */
     Sprite_HudStateIcons.prototype.loadBitmap = function() {
         this.bitmap = new Bitmap(ImageManager.iconWidth * 4 + 6, ImageManager.iconHeight);
         this._iconBitmap = ImageManager.loadSystem("IconSet");
     };
 
+    /**
+     * このスプライトに関連付けるGame_Battlerオブジェクトを設定する。
+     * 
+     * @param {Game_Battler} battler ステートを表示するGame_Battlerオブジェクト
+     */
     Sprite_HudStateIcons.prototype.setup = function(battler) {
         if (this._battler !== battler) {
             this._battler = battler;
@@ -833,6 +881,9 @@
         }
     };
 
+    /**
+     * Sprite_HudStateIcons を更新する。
+     */
     Sprite_HudStateIcons.prototype.update = function() {
         Sprite.prototype.update.call(this);
         this._animationCount++;
@@ -842,10 +893,16 @@
         }
     };
 
+    /**
+     * アニメーションを表示するフレーム数。
+     */
     Sprite_HudStateIcons.prototype.animationWait = function() {
         return 40;
     };
 
+    /**
+     * 表示するアイコンを切り替えて更新する。
+     */
     Sprite_HudStateIcons.prototype.updateIcon = function() {
         const icons = [];
         if (this.shouldDisplay()) {
@@ -869,6 +926,12 @@
         }
     };
 
+    /**
+     * アイコンを描画する。
+     * 
+     * @param {Number} iconIndex 描画するアイコンのインデックス
+     * @param {Number} drawIndex 書き込み先位置(0~3)
+     */
     Sprite_HudStateIcons.prototype.drawIcon = function(iconIndex, drawIndex) {
         // 所定のアイコンをbltでコピーしていく。
         const pw = ImageManager.iconWidth;
@@ -880,6 +943,11 @@
         this.bitmap.blt(this._iconBitmap, sx, sy, pw, ph, dx, dy);
     };
 
+    /**
+     * このスプライトを表示するべきかどうかを取得する。
+     * 
+     * @return {Boolean} 表示するべき場合にはtrue, それ以外はfalse.
+     */
     Sprite_HudStateIcons.prototype.shouldDisplay = function() {
         const battler = this._battler;
         return battler && (battler.isActor() || battler.isAlive());
@@ -1280,6 +1348,19 @@
         const wh = this.helpAreaHeight();
         const wx = (Graphics.boxWidth - ww) / 2;
         const wy = this.helpAreaTop();
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * メッセージウィンドウの位置を取得する。
+     * 
+     * @return {Rectangle} ウィンドウ矩形領域。
+     */
+    Scene_Message.prototype.messageWindowRect = function() {
+        const ww = Math.min(816, Graphics.boxWidth);
+        const wh = this.calcWindowHeight(4, false) + 8;
+        const wx = (Graphics.boxWidth - ww) / 2;
+        const wy = 0;
         return new Rectangle(wx, wy, ww, wh);
     };
 
