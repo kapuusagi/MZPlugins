@@ -756,10 +756,10 @@
     Sprite_ActorHud.prototype.initialize = function(battler) {
         Sprite_Battler.prototype.initialize.call(this, battler);
         this._actor = null;
-        this._fvBattlerName = null;
         this._faceName = null;
         this._faceIndex = -1;
         this._activeSelAdd = 2;
+        this.setFrame(0, 0, statusAreaWidth, statusAreaHeight);
     };
 
     /**
@@ -983,48 +983,27 @@
     Sprite_ActorHud.prototype.updateBitmap = function() {
         Sprite_Battler.prototype.updateBitmap.call(this);
 
-        // if (this.bitmap == null) {
-        //     this.bitmap = new Bitmap(statusAreaWidth, statusAreaHeight);
-        //     this.bitmap.fillAll('blue');
-        // }
-
-        const name = this._actor.fvBattlerName();
-        if (name) {
-            if (name !== this._fvBattlerName) {
-                this.loadMainSpriteBitmapPicture(name);
-            }
-        } else {
-            const faceName = this._actor.faceName();
-            const faceIndex = this._actor.faceIndex();
-            if ((faceName !== this._faceName) || (faceIndex !== this._faceIndex)) {
-                this.loadMainSpriteBitmapFace(faceName, faceIndex);
-            }
+        const faceName = this._actor.faceName();
+        const faceIndex = this._actor.faceIndex();
+        if ((faceName !== this._faceName) || (faceIndex !== this._faceIndex)) {
+            this.loadMainSpriteBitmapFace(faceName, faceIndex);
         }
     };
 
-    /**
-     * Pictureをメインスプライト画像として読み出す。
-     * 
-     * @param {String} name Pictureファイル名
-     */
-    Sprite_ActorHud.prototype.loadMainSpriteBitmapPicture = function(name) {
-        const bitmap = ImageManager.loadPicture(name);
-        this._mainSprite.bitmap = bitmap;
-        const cw = Math.min(bitmap.width, statusAreaWidth);
-        const ch = Math.min(bitmap.height, statusAreaHeight);
-        const cx = Math.min(0, (bitmap.width - cw) / 2);
-        const cy = Math.min(0, (bitmap.height - ch) / 2);
-        const offsetY = Math.min(statusPictureLeftY, cy);
-
-        this._mainSprite.setFrame(cx, cy - offsetY, cw, ch + offsetY);
-
-        this._mainSprite.x = 0;
-        this._mainSprite.y = -(statusAreaHeight - ph);
-
-        this._fvBattlerName = name;
-        this._faceName = null;
-        this._faceIndex = -1;
-    };
+    // Sprite_ActorHud.prototype.hitTest = function(x, y) {
+    //     const rect = new Rectangle(
+    //         -this.anchor.x * this.width,
+    //         -this.anchor.y * this.height,
+    //         this.width,
+    //         this.height
+    //     );
+    //     const isHit = rect.contains(x, y);
+    //     if (!isHit) {
+    //         const actorName = this._actor ? this._actor.name() : "";
+    //         console.log(actorName + " point=(" + x + "," + y + ") rect=(" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + ")");
+    //     }
+    //     return isHit;
+    // };
 
     /**
      * Faceをメインスプライト画像として読み出す。
@@ -1034,7 +1013,6 @@
      */
     Sprite_ActorHud.prototype.loadMainSpriteBitmapFace = function(faceName, faceIndex) {
         this._mainSprite.bitmap = ImageManager.loadFace(faceName, faceIndex);
-        this._fvBattlerName = null;
         const pw = ImageManager.faceWidth;
         const ph = ImageManager.faceHeight;
         const cw = Math.min(pw, statusAreaWidth);
@@ -1134,9 +1112,7 @@
 
     //------------------------------------------------------------------------------
     // Scene_Battle
-    // statusWindowは使用しない。
-    //
-
+    //     _statusWindow, _actorWindow は使用しない。
         
     /**
      * Scene_Battleを開始する。
@@ -1185,11 +1161,13 @@
             if (this._selectingActorIndex > 0) {
                 SoundManager.playCursor();
                 this._selectingActorIndex--;
+                $gameParty.select(this.selectingActor());
             }
         } else if (Input.isRepeated("right")) {
             if (this._selectingActorIndex < ($gameParty.battleMembers().length - 1)) {
                 SoundManager.playCursor();
                 this._selectingActorIndex++;
+                $gameParty.select(this.selectingActor());
             }
         } else if (Input.isRepeated("ok")) {
             SoundManager.playOk();
@@ -1199,8 +1177,10 @@
             this.onActorCancel();
         } else if ($gameTemp.touchTarget() != null) {
             this.processTouchActorSelection();
+        } else if (TouchInput.isCancelled()) {
+            SoundManager.playCancel();
+            this.onActorCancel();
         }
-        $gameParty.select(this.selectingActor());
     };
 
     /**
@@ -1209,10 +1189,13 @@
      * ウィンドウを表示しないなら仕方ないね！
      */
     Scene_Battle.prototype.processTouchActorSelection = function() {
-        const target = $gamteTemp.touchTarget();
-        if ($gameParty.battleMembers().contains(target)) {
+        const target = $gameTemp.touchTarget();
+        const battleMembers = $gameParty.battleMembers();
+        console.log("touched : " + target.name());
+        if (battleMembers.contains(target)) {
+            this._selectingActorIndex = battleMembers.indexOf(target);
             $gameParty.select(target);
-            if ($gamtTemp.touchState() === "click") {
+            if ($gameTemp.touchState() === "click") {
                 this.onActorOk();
             }
         }
@@ -1414,6 +1397,7 @@
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.onActorOk = function() {
+        $gameParty.select(null);
         this._actorSelecting = false;
         const action = BattleManager.inputtingAction();
         action.setTarget(this._selectingActorIndex);
@@ -1427,6 +1411,7 @@
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.onActorCancel = function() {
+        $gameParty.select(null);
         this._actorSelecting = false;
         switch (this._actorCommandWindow.currentSymbol()) {
             case "skill":
