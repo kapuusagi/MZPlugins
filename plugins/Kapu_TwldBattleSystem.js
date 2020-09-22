@@ -201,6 +201,60 @@
         return maxBattleMembers;
     };
 
+    //------------------------------------------------------------------------------
+    // Window_HudItemName
+    /**
+     * Window_HudItemName。
+     * スキル/アイテム名表示用ウィンドウ。
+     * 用意しないと何の対象を選択しているのかわからん。
+     */
+    function Window_HudItemName() {
+        this.initialize(...arguments);
+    }
+
+    Window_HudItemName.prototype = Object.create(Window_Base.prototype);
+    Window_HudItemName.prototype.constructor = Window_HudItemName;
+
+    /**
+     * Window_HudItemName を初期化する。
+     * 
+     * @param {Rectangle} rect Rectangleオブジェクト
+     */
+    Window_HudItemName.prototype.initialize = function(rect) {
+        Window_Base.prototype.initialize.call(this, rect);
+        this._item = null;
+    };
+
+    /**
+     * アイテムを設定する。
+     * 
+     * @param {Object} item アイテム。(DataItem/DataWeapon/DataArmor/DataSkill)
+     */
+    Window_HudItemName.prototype.setItem = function(item) {
+        if (this._item !== item) {
+            this._item = item;
+            this.refresh();
+        }
+    };
+
+    /**
+     * 表示をクリアする。
+     */
+    Window_HudItemName.prototype.clear = function() {
+        this._item = null;
+        this.refresh();
+    };
+
+    /**
+     * コンテンツを再描画する。
+     */
+    Window_HudItemName.prototype.refresh = function() {
+        const rect = this.baseTextRect();
+        this.contents.clear();
+        if (this._item) {
+            this.drawItemName(this._item, rect.x, rect.y, rect.width);
+        }
+    };
 
     //------------------------------------------------------------------------------
     // Sprite_Gauge
@@ -1113,6 +1167,47 @@
     //------------------------------------------------------------------------------
     // Scene_Battle
     //     _statusWindow, _actorWindow は使用しない。
+
+    const _Scene_Battle_create = Scene_Battle.prototype.create;
+
+    /**
+     * Scene_Battleを作成する。
+     * 
+     * 表示するオブジェクトの生成などを行う。
+     */
+    Scene_Battle.prototype.create = function() {
+        _Scene_Battle_create.call(this);
+        this.createHudItemNameWindow();
+    };
+
+    /**
+     * アイテム名表示ウィンドウを作成する。
+     */
+    Scene_Battle.prototype.createHudItemNameWindow = function() {
+        const x = this._skillWindow.x;
+        const y = this._skillWindow.y - 64;
+        const rect = new Rectangle(x, y, 320, 64);
+        this._itemNameWindow = new Window_HudItemName(rect);
+        this._itemNameWindow.hide();
+        this.addChild(this._itemNameWindow);
+    };
+
+
+    /**
+     * ステータスウィンドウを作成する。
+     * 
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.createStatusWindow = function() {
+    };
+
+    /**
+     * スキル使用対象選択用のアクター選択ウィンドウを作成する。
+     * 
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.createActorWindow = function() {
+    };
         
     /**
      * Scene_Battleを開始する。
@@ -1144,6 +1239,9 @@
 
     const _Scene_Battle_update = Scene_Battle.prototype.update;
 
+    /**
+     * Scene_Battle の更新処理を行う。
+     */
     Scene_Battle.prototype.update = function() {
         _Scene_Battle_update.call(this);
         this.updateActorSelecting();
@@ -1224,21 +1322,6 @@
     Scene_Battle.prototype.updateStatusWindowVisibility = function() {
     };
 
-    /**
-     * ステータスウィンドウを作成する。
-     * 
-     * !!!overwrite!!!
-     */
-    Scene_Battle.prototype.createStatusWindow = function() {
-    };
-
-    /**
-     * スキル使用対象選択用のアクター選択ウィンドウを作成する。
-     * 
-     * !!!overwrite!!!
-     */
-    Scene_Battle.prototype.createActorWindow = function() {
-    };
 
     /**
      * エネミーウィンドウの矩形領域を得る。
@@ -1274,6 +1357,7 @@
         this._actorCommandWindow.show();
         this._actorCommandWindow.setup(BattleManager.actor());
     };
+
     /**
      * スキルが選択されたときの処理を行う。
      * 
@@ -1377,12 +1461,53 @@
         this._skillWindow.hide();
         this._itemWindow.hide();
     };
+
+    const _Scene_Battle_startEnemySelection = Scene_Battle.prototype.startEnemySelection;
+
+    /**
+     * エネミー選択を開始する。
+     */
+    Scene_Battle.prototype.startEnemySelection = function() {
+        _Scene_Battle_startEnemySelection.call(this);
+        const action = BattleManager.inputtingAction();
+        const item = action.item();
+        if (item !== null) {
+            this._itemNameWindow.setItem(item);
+            this._itemNameWindow.show();
+        }
+    };
+
+    const _Scene_Battle_onEnemyOk = Scene_Battle.prototype.onEnemyOk;
+
+    /**
+     * エネミー選択でOKされたときの処理を行う。
+     */
+    Scene_Battle.prototype.onEnemyOk = function() {
+        _Scene_Battle_onEnemyOk.call(this);
+        this._itemNameWindow.hide();
+    };
+
+    const _Scene_Battle_onEnemyCancel = Scene_Battle.prototype.onEnemyCancel;
+    /**
+     * エネミー選択でキャンセル操作されたときの処理を行う。
+     */
+    Scene_Battle.prototype.onEnemyCancel = function() {
+        _Scene_Battle_onEnemyCancel.call(this);
+        this._itemNameWindow.hide();
+    };
+
     /**
      * アクター選択を開始する。
      */
     Scene_Battle.prototype.startActorSelection = function() {
         this._skillWindow.hide();
         this._itemWindow.hide();
+        const action = BattleManager.inputtingAction();
+        const item = action.item();
+        if (item !== null) {
+            this._itemNameWindow.setItem(item);
+            this._itemNameWindow.show();
+        }
         this._actorSelecting = true;
         this._selectingActorIndex = $gameTemp.lastActionData(4); // 4:Last target actor Id. 
         if (this._selectingActorIndex >= $gameParty.battleMembers().length) {
@@ -1399,6 +1524,7 @@
     Scene_Battle.prototype.onActorOk = function() {
         $gameParty.select(null);
         this._actorSelecting = false;
+        this._itemNameWindow.hide();
         const action = BattleManager.inputtingAction();
         action.setTarget(this._selectingActorIndex);
         this.hideSubInputWindows();
@@ -1413,6 +1539,7 @@
     Scene_Battle.prototype.onActorCancel = function() {
         $gameParty.select(null);
         this._actorSelecting = false;
+        this._itemNameWindow.hide();
         switch (this._actorCommandWindow.currentSymbol()) {
             case "skill":
                 this._skillWindow.show();
