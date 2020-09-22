@@ -97,6 +97,15 @@
     const gaugeLabelFontSize = parameters['labelFontSize'] || 12;
     const gaugeValueFontSize = parameters['valueFontSize'] || 12;
 
+
+    const listWindowWidth = 816;
+    const commandWindowX = 1068;
+    const commandWindowWidth = 192;
+    const statusAreaWidth = 160;
+    const statusAreaPadding = 16;
+    const statusAreaHeight = 220;
+    const statusPictureLeftY = 40;
+
     PluginManager.registerCommand(pluginName, 'setFvBattler', args => {
         const actorId = args.actorId;
         const fileName = args.fileName;
@@ -254,6 +263,96 @@
         if (this._item) {
             this.drawItemName(this._item, rect.x, rect.y, rect.width);
         }
+    };
+    //------------------------------------------------------------------------------
+    // Window_BattleActor
+
+    const _Window_BattleActor_initialize = Window_BattleStatus.prototype.initialize;
+
+    /**
+     * Window_BattleActorを初期化する。
+     * 
+     * @param {Rectangle} rect ウィンドウ矩形領域
+     */
+    Window_BattleActor.prototype.initialize = function(rect) {
+        _Window_BattleActor_initialize.call(this, rect);
+        this.frameVisible = true;
+        this.openness = 255;
+        this._bitmapsReady = 255;
+    };
+    /**
+     * 項目を描画する。
+     * 
+     * @param {Number} index インデックス番号
+     */
+    Window_BattleActor.prototype.drawItem = function(index) {
+        const actor = this.actor(index);
+        const rect = this.itemRect(index);
+        this.drawActorName(actor, rect.x, rect.y, rect.width);
+    };
+
+    /**
+     * 最大カラム数を得る。
+     * 
+     * @return {Number} 最大カラム数
+     */
+    Window_BattleActor.prototype.maxCols = function() {
+        return 1;
+    };
+
+    /**
+     * 1項目の高さを得る。
+     * 
+     * @return {Number} 1項目の高さ。
+     */
+    Window_BattleStatus.prototype.itemHeight = function() {
+        return this.lineHeight();
+    };
+
+    /**
+     * 最大行数を得る。
+     * 
+     * @return {Number} 最大行数。
+     */
+    Window_BattleActor.prototype.maxRows = function() {
+        return this.innerHeight / this.itemHeight();
+    };
+
+    /**
+     * 行スペースを得る。
+     * 
+     * @return {Number} 行スペース
+     */
+    Window_BattleActor.prototype.rowSpacing = function() {
+        return 4;
+    };
+
+    const _Window_BattleActor_processCursorMove = Window_BattleActor.prototype.processCursorMove;
+    /**
+     * カーソルの移動を処理する。
+     */
+    Window_BattleActor.prototype.processCursorMove = function() {
+        if (this.isCursorMovable()) {
+            if (Input.isRepeated("right")) {
+                this.cursorDown(Input.isTriggered("right"));
+                return;
+            } else if (Input.isRepeated("left")) {
+                this.cursorUp(Input.isTriggered("left"));
+                return;
+            }
+        } 
+        return _Window_BattleActor_processCursorMove.call(this);
+    };
+
+    //------------------------------------------------------------------------------
+    // Window_BattleEnemy
+    /**
+     * 最大カラム数を得る。
+     * 
+     * @return {Number} 最大カラム数
+     */
+    Window_BattleEnemy.prototype.maxCols = function() {
+        return 1;
     };
 
     //------------------------------------------------------------------------------
@@ -786,7 +885,21 @@
         return battler && (battler.isActor() || battler.isAlive());
     };
 
+    //------------------------------------------------------------------------------
+    // Sprite_Enemy
 
+    const _Sprite_Enemy_setHome = Sprite_Enemy.prototype.setHome;
+    /**
+     * ホーム位置を設定する。
+     * 
+     * @param {Number} x X位置
+     * @param {Number} y Y位置
+     */
+    Sprite_Enemy.prototype.setHome = function(x, y) {
+        const offsetX = (Graphics.boxWidth - 816) / 2;
+        const offsetY = (Graphics.boxHeight - 624) / 2;
+        _Sprite_Enemy_setHome.call(this, x + offsetX, y + offsetY);
+    };
     //------------------------------------------------------------------------------
     // Sprite_ActorHud
 
@@ -971,11 +1084,6 @@
         return this._actor;
     };
 
-    const statusAreaWidth = 160;
-    const statusAreaPadding = 16;
-    const statusAreaHeight = 220;
-    const statusPictureLeftY = 40;
-
     /**
      * HUDの位置を得る。
      * 
@@ -1036,28 +1144,12 @@
      */
     Sprite_ActorHud.prototype.updateBitmap = function() {
         Sprite_Battler.prototype.updateBitmap.call(this);
-
         const faceName = this._actor.faceName();
         const faceIndex = this._actor.faceIndex();
         if ((faceName !== this._faceName) || (faceIndex !== this._faceIndex)) {
             this.loadMainSpriteBitmapFace(faceName, faceIndex);
         }
     };
-
-    // Sprite_ActorHud.prototype.hitTest = function(x, y) {
-    //     const rect = new Rectangle(
-    //         -this.anchor.x * this.width,
-    //         -this.anchor.y * this.height,
-    //         this.width,
-    //         this.height
-    //     );
-    //     const isHit = rect.contains(x, y);
-    //     if (!isHit) {
-    //         const actorName = this._actor ? this._actor.name() : "";
-    //         console.log(actorName + " point=(" + x + "," + y + ") rect=(" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + ")");
-    //     }
-    //     return isHit;
-    // };
 
     /**
      * Faceをメインスプライト画像として読み出す。
@@ -1151,19 +1243,6 @@
         }
     };
 
-    const _Spriteset_Battle_isEffecting = Spriteset_Battle.prototype.isEffecting;
-
-    /**
-     * エフェクト処理中かどうかを判定する。
-     * 
-     * @return {Boolean} エフェクト処理中の場合にはtrue, それ以外はfalse
-     */
-    Spriteset_Battle.prototype.isEffecting = function() {
-        // return _Spriteset_Battle_isEffecting.call(this) 
-        //     || this._actorHudSprites.some(sprite => sprite.isEffecting());
-        return _Spriteset_Battle_isEffecting.call(this);
-    };
-
     //------------------------------------------------------------------------------
     // Scene_Battle
     //     _statusWindow, _actorWindow は使用しない。
@@ -1184,35 +1263,170 @@
      * アイテム名表示ウィンドウを作成する。
      */
     Scene_Battle.prototype.createHudItemNameWindow = function() {
-        const x = this._skillWindow.x;
-        const y = this._skillWindow.y - 64;
-        const rect = new Rectangle(x, y, 320, 64);
+        const rect = this.itemNameWindowRect();
         this._itemNameWindow = new Window_HudItemName(rect);
         this._itemNameWindow.hide();
         this.addChild(this._itemNameWindow);
     };
 
+    /**
+     * ヘルプウィンドウの表示領域を取得する。
+     * 
+     * @return {Rectangle} ヘルプウィンドウの表示領域を表すRectangle.
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.helpWindowRect = function() {
+        const ww = Math.min(816, Graphics.boxWidth);
+        const wh = this.helpAreaHeight();
+        const wx = (Graphics.boxWidth - ww) / 2;
+        const wy = this.helpAreaTop();
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * ステータスウィンドウ矩形領域を得る。
+     * 
+     * @return {Rectangle} ウィンドウ矩形領域。
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.statusWindowRect = function() {
+        const extra = 10;
+        const ww = listWindowWidth;
+        const wh = this.windowAreaHeight() + extra;
+        const wx = (Graphics.boxWidth - ww) / 2;
+        const wy = Graphics.boxHeight - wh + extra - 4;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * パーティーコマンドの矩形領域を得る。
+     * 
+     * @return {Rectangle} ウィンドウ矩形領域。
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.partyCommandWindowRect = function() {
+        const itemNameRect = this.itemNameWindowRect();
+        const ww = commandWindowWidth;;
+        const wh = this.windowAreaHeight();
+        const wx = commandWindowX;
+        const wy = itemNameRect.y + itemNameRect.height;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * アクターコマンドの矩形領域を得る。
+     * 
+     * @return {Rectangle} ウィンドウ矩形領域。
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.actorCommandWindowRect = function() {
+        const itemWindowRect = this.itemNameWindowRect();
+        const ww = commandWindowWidth;
+        const wh = this.windowAreaHeight();
+        const wx = commandWindowX;
+        const wy = itemWindowRect.y + itemWindowRect.height;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    const _Scene_Base_createActorCommandWindow = Scene_Battle.prototype.createActorCommandWindow;
+    /**
+     * アクターコマンドウィンドウ(_actorCommandWindow)を作成する。
+     * 
+     * Note: ベーシックシステムでは、ウィンドウ作成時にyが上書きされているため、
+     *       レイアウトを変えるためにフックする必要がある。
+     */
+    Scene_Battle.prototype.createActorCommandWindow = function() {
+        _Scene_Base_createActorCommandWindow.call(this);
+        this._actorCommandWindow.y = this.actorCommandWindowRect().y;
+    };
+
+
+    /**
+     * スキルウィンドウの矩形領域を得る。
+     * 
+     * @return {Rectangle} ウィンドウ矩形領域。
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.skillWindowRect = function() {
+        const itemNameRect = this.itemNameWindowRect();
+        const ww = Math.min(Graphics.boxWidth, 816);
+        const wh = this.windowAreaHeight();
+        const wx = (Graphics.boxWidth - ww) / 2;
+        const wy = itemNameRect.y + itemNameRect.height;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * ログウィンドウの矩形領域を得る。
+     * 
+     * @return {Rectangle} ウィンドウ矩形領域。
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.logWindowRect = function() {
+        const ww = Math.min(816, Graphics.boxWidth);
+        const wh = this.calcWindowHeight(10, false);
+        const wx = (Graphics.boxWidth - ww) / 2;
+        const wy = 0;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * アイテム名表示の矩形領域を得る。
+     * 
+     * @return {Rectangle} ウィンドウ矩形領域。
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.itemNameWindowRect = function() {
+        const width = 240;
+        const height = 64;
+        const x = Graphics.boxWidth - width;
+        const y = 180;
+        return new Rectangle(x, y, width, height);
+    };
 
     /**
      * ステータスウィンドウを作成する。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.createStatusWindow = function() {
     };
 
     /**
-     * スキル使用対象選択用のアクター選択ウィンドウを作成する。
+     * アクター選択ウィンドウのウィンドウ位置を得る。
      * 
+     * @return {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!!
      */
-    Scene_Battle.prototype.createActorWindow = function() {
+    Scene_Battle.prototype.actorWindowRect = function() {
+        const itemNameWindowRect = this.itemNameWindowRect();
+        const ww = commandWindowWidth;
+        const wh = this.windowAreaHeight();
+        const wx = commandWindowX;
+        const wy = itemNameWindowRect.y + itemNameWindowRect.height;
+        return new Rectangle(wx, wy, ww, wh);
     };
-        
+
+    /**
+     * エネミーウィンドウの矩形領域を得る。
+     * 
+     * @return {Rectangle} エネミーウィンドウの矩形領域。
+     * !!!overwrite!!!
+     */
+    Scene_Battle.prototype.enemyWindowRect = function() {
+        const itemNameWindowRect = this.itemNameWindowRect();
+        const ww = commandWindowWidth;
+        const wh = this.windowAreaHeight();
+        const wx = commandWindowX;
+        const wy = itemNameWindowRect.y + itemNameWindowRect.height;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
     /**
      * Scene_Battleを開始する。
      * 
-     * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.start = function() {
@@ -1224,6 +1438,7 @@
     /**
      * Scene_Battleを一時停止する
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.stop = function() {
@@ -1244,101 +1459,23 @@
      */
     Scene_Battle.prototype.update = function() {
         _Scene_Battle_update.call(this);
-        this.updateActorSelecting();
-    };
-
-    /**
-     * アクター選択の処理を更新する。
-     */
-    Scene_Battle.prototype.updateActorSelecting = function() {
-        if (!this._actorSelecting) {
-            return;
-        }
-
-        if (Input.isRepeated("left")) {
-            if (this._selectingActorIndex > 0) {
-                SoundManager.playCursor();
-                this._selectingActorIndex--;
-                $gameParty.select(this.selectingActor());
-            }
-        } else if (Input.isRepeated("right")) {
-            if (this._selectingActorIndex < ($gameParty.battleMembers().length - 1)) {
-                SoundManager.playCursor();
-                this._selectingActorIndex++;
-                $gameParty.select(this.selectingActor());
-            }
-        } else if (Input.isRepeated("ok")) {
-            SoundManager.playOk();
-            this.onActorOk();
-        } else if (Input.isRepeated("cancel")) {
-            SoundManager.playCancel();
-            this.onActorCancel();
-        } else if ($gameTemp.touchTarget() != null) {
-            this.processTouchActorSelection();
-        } else if (TouchInput.isCancelled()) {
-            SoundManager.playCancel();
-            this.onActorCancel();
-        }
-    };
-
-    /**
-     * アクター選択中のタッチ操作を処理する。
-     * 
-     * ウィンドウを表示しないなら仕方ないね！
-     */
-    Scene_Battle.prototype.processTouchActorSelection = function() {
-        const target = $gameTemp.touchTarget();
-        const battleMembers = $gameParty.battleMembers();
-        console.log("touched : " + target.name());
-        if (battleMembers.contains(target)) {
-            this._selectingActorIndex = battleMembers.indexOf(target);
-            $gameParty.select(target);
-            if ($gameTemp.touchState() === "click") {
-                this.onActorOk();
-            }
-        }
-
-        $gameTemp.clearTouchState();
-    };
-
-    /**
-     * 選択中のアクターを取得する。
-     * 
-     * @return {Game_Actor} 選択中のアクター。未選択時はnull
-     */
-    Scene_Battle.prototype.selectingActor = function() {
-        if (this._selectingActorIndex >= 0) {
-            return $gameParty.battleMembers()[this._selectingActorIndex];
-        }
-
-        return null;
     };
 
     /**
      * ステータスウィンドウの表示状態を更新する。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.updateStatusWindowVisibility = function() {
     };
 
 
-    /**
-     * エネミーウィンドウの矩形領域を得る。
-     * 
-     * @return {Rectangle} エネミーウィンドウの矩形領域。
-     */
-    Scene_Battle.prototype.enemyWindowRect = function() {
-        const ww = Graphics.boxWidth - 192;
-        const wh = this.windowAreaHeight();
-        const wx = this.isRightInputMode() ? 0 : Graphics.boxWidth - ww;
-        const wy = Graphics.boxHeight - wh;
-        return new Rectangle(wx, wy, ww, wh);
-    };
 
     /**
      * パーティーコマンド選択を開始する。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.startPartyCommandSelection = function() {
@@ -1350,6 +1487,7 @@
     /**
      * アクターコマンド選択を開始する。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.startActorCommandSelection = function() {
@@ -1361,6 +1499,7 @@
     /**
      * スキルが選択されたときの処理を行う。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.commandSkill = function() {
@@ -1374,6 +1513,7 @@
     /**
      * アイテムが選択されたときの処理を行う。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.commandItem = function() {
@@ -1386,9 +1526,14 @@
     /**
      * エネミー選択を開始する。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
+     *      他、対象を視認しやすいよう、アイテムウィンドウ/スキルウィンドウを非表示にする。
+     *        
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.startEnemySelection = function() {
+        this._itemWindow.hide();
+        this._skillWindow.hide();
         this._enemyWindow.refresh();
         this._enemyWindow.show();
         this._enemyWindow.select(0);
@@ -1397,6 +1542,7 @@
     /**
      * エネミー選択/スキル選択/アイテム選択でキャンセル操作されたときの処理を行う。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.onEnemyCancel = function() {
@@ -1420,6 +1566,7 @@
     /**
      * スキル選択でキャンセル操作された時の処理を行う。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.onSkillCancel = function() {
@@ -1431,6 +1578,7 @@
     /**
      * アイテム選択ウィンドウでキャンセル操作されたときの処理を行う。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.onItemCancel = function() {
@@ -1441,6 +1589,7 @@
     /**
      * コマンド選択が完了したときの処理を行う。
      * 
+     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!!
      */
     Scene_Battle.prototype.endCommandSelection = function() {
@@ -1448,18 +1597,14 @@
         this.hideSubInputWindows();
     };
 
+    const _Scene_Battle_hideSubInputWindows = Scene_Battle.prototype.hideSubInputWindows;
+
     /**
      * サブ入力ウィンドウを非表示にする。
-     * 
-     * !!!overwrite!!!
      */
     Scene_Battle.prototype.hideSubInputWindows = function() {
-        this._enemyWindow.deactivate();
-        this._skillWindow.deactivate();
-        this._itemWindow.deactivate();
-        this._enemyWindow.hide();
-        this._skillWindow.hide();
-        this._itemWindow.hide();
+        _Scene_Battle_hideSubInputWindows.call(this);
+        this._itemNameWindow.hide();
     };
 
     const _Scene_Battle_startEnemySelection = Scene_Battle.prototype.startEnemySelection;
@@ -1496,10 +1641,13 @@
         this._itemNameWindow.hide();
     };
 
+    const _Scene_Battle_startActorSelection = Scene_Battle.prototype.startActorSelection;
+
     /**
      * アクター選択を開始する。
      */
     Scene_Battle.prototype.startActorSelection = function() {
+        _Scene_Battle_startActorSelection.call(this);
         this._skillWindow.hide();
         this._itemWindow.hide();
         const action = BattleManager.inputtingAction();
@@ -1508,49 +1656,31 @@
             this._itemNameWindow.setItem(item);
             this._itemNameWindow.show();
         }
-        this._actorSelecting = true;
-        this._selectingActorIndex = $gameTemp.lastActionData(4); // 4:Last target actor Id. 
-        if (this._selectingActorIndex >= $gameParty.battleMembers().length) {
-            this._selectingActorIndex = 0;
-        }
-        $gameTemp.clearTouchState();
     };
+
+    const _Scene_Battle_onActorOk = Scene_Battle.prototype.onActorOk;
 
     /**
      * アクター選択でOKが選択されたときの処理を行う。
-     * 
-     * !!!overwrite!!!
      */
     Scene_Battle.prototype.onActorOk = function() {
+        _Scene_Battle_onActorOk.call(this);
         $gameParty.select(null);
         this._actorSelecting = false;
         this._itemNameWindow.hide();
-        const action = BattleManager.inputtingAction();
-        action.setTarget(this._selectingActorIndex);
-        this.hideSubInputWindows();
-        this.selectNextCommand();
     };
+
+    const _Scene_Battle_onActorCancel = Scene_Battle.prototype.onActorCancel;
     
     /**
      * アクター選択でキャンセルされたときの処理を行う。
-     * 
-     * !!!overwrite!!!
      */
     Scene_Battle.prototype.onActorCancel = function() {
-        $gameParty.select(null);
-        this._actorSelecting = false;
         this._itemNameWindow.hide();
-        switch (this._actorCommandWindow.currentSymbol()) {
-            case "skill":
-                this._skillWindow.show();
-                this._skillWindow.activate();
-                break;
-            case "item":
-                this._itemWindow.show();
-                this._itemWindow.activate();
-                break;
-        }
+        _Scene_Battle_onActorCancel.call(this);
     };
+
+    const _Scene_Battle_isAnyInputWindowActive = Scene_Battle.prototype.isAnyInputWindowActive;
 
     /**
      * いずれかの入力ウィンドウがアクティブ（選択中）かどうかを判定する。
@@ -1558,12 +1688,6 @@
      * @return {Boolean} いずれかの入力ウィンドウがアクティブな場合にはtrue, それ以外はfalse
      */
     Scene_Battle.prototype.isAnyInputWindowActive = function() {
-        return (this._partyCommandWindow.active 
-            || this._actorCommandWindow.active
-            || this._skillWindow.active
-            || this._itemWindow.active
-            || this._enemyWindow.active
-            || this._actorSelecting
-        );
+        return _Scene_Battle_isAnyInputWindowActive.call(this);
     };
 })();
