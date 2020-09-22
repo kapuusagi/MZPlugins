@@ -1257,6 +1257,129 @@
     Sprite_ActorHud.prototype.damageOffsetY = function() {
         return ImageManager.faceHeight - statusAreaHeight;
     };
+    //------------------------------------------------------------------------------
+    // Spriteset_FvBattler
+    /**
+     * Sprite_FvBattler。
+     * 
+     */
+    function Sprite_FvBattler() {
+        this.initialize(...arguments);
+    }
+
+    Sprite_FvBattler.prototype = Object.create(Sprite.prototype);
+    Sprite_FvBattler.prototype.constructor = Sprite_FvBattler;
+
+    /**
+     * Sprite_FvBattlerを初期化する。
+     */
+    Sprite_FvBattler.prototype.initialize = function() {
+        Sprite.prototype.initialize.call(this, ...arguments);
+        this.anchor.x = 0.5;
+        this.anchor.y = 0;
+        this._battler = null;
+        this._fvBattlerName = '';
+    };
+
+    /**
+     * このスプライトが表示するGame_Battlerを設定する。
+     * 
+     * @param {Game_Battler} battler Game_Battlerオブジェクト
+     */
+    Sprite_FvBattler.prototype.setBattler = function(battler) {
+        if (battler !== this._battler) {
+            this._battler = battler;
+        }
+    };
+
+    /**
+     * Sprite_FvBattlerを更新する。
+     */
+    Sprite_FvBattler.prototype.update = function() {
+        Sprite.prototype.update.call(this);
+        this.updateBitmap();
+        this.updateVisibility();
+        this.updateMovement();
+    };
+
+    /**
+     * Bitmapを更新する。
+     */
+    Sprite_FvBattler.prototype.updateBitmap = function() {
+        if (this._battler) {
+            const fvBattlerName = this._battler.fvBattlerName();
+            if (this._fvBattlerName !== fvBattlerName) {
+                if (fvBattlerName) {
+                    try {
+                        this._fvBattlerName = fvBattlerName;
+                        this.bitmap = ImageManager.loadPicture(this._fvBattlerName);
+                    }
+                    catch (e) {
+                        this.bitmap = null;
+                    }
+                } else {
+                    this.bitmap = null;
+                }
+            }
+        } else {
+            this.bitmap = null;
+        }
+    };
+
+    /**
+     * 表示状態を更新する。
+     */
+    Sprite_FvBattler.prototype.updateVisibility = function() {
+        if (this._battler) {
+            if (this._battler.isInputting()) {
+                this.visible = true;
+            } else {
+                if ((this.opacity < 32) || (this.x >= Graphics.boxWidth)) {
+                    this.visible = false;
+                }
+            }
+        } else {
+            this.visible = false;
+        }
+    };
+
+    /**
+     * 表示の移動を処理する。
+     */
+    Sprite_FvBattler.prototype.updateMovement = function() {
+        if (this._battler) {
+            const distance = 280;
+            const movePos = Graphics.boxWidth - distance;
+            const addCount = Math.max(1, Math.floor(distance / 30));
+            if (this._battler.isInputting()) {
+                if (this.x > movePos) {
+                    this.x -= addCount;
+                }
+                if (this.opacity < 255) {
+                    this.opacity += 5;
+                    if (this.opacity >= 255) {
+                        this.opacity = 255;
+                    }
+                }
+            } else {
+                if (this.x < Graphics.boxWidth) {
+                    this.x += addCount;
+                }
+                if (this.opacity > 0) {
+                    this.opacity -= 25;
+                    if (this.opacity < 0) {
+                        this.opacity = 0;
+                    }
+                }
+            }
+        } else {
+            this.x = Graphics.boxWidth;
+            this.opacity = 0;
+        }
+
+    };
+
+
 
     //------------------------------------------------------------------------------
     // Spriteset_Battle
@@ -1274,6 +1397,20 @@
             this._actorHudSprites.push(sprite);
             this._battleField.addChild(sprite);
         }
+
+        const insertIndex = this._baseSprite.getChildIndex(this._battleField);
+        this._fvBattlerSprites = [];
+        for (let i = 0; i < maxBattleMembers; i++) {
+            const sprite = new Sprite_FvBattler();
+            sprite.x = 0;
+            sprite.y = 180;
+            this._fvBattlerSprites.push(sprite);
+            if (insertIndex >= 0) {
+                this._baseSprite.addChildAt(sprite, insertIndex);
+            } else {
+                this._baseSprite.addChild(sprite);
+            }
+        }
     };
 
     const _Spriteset_Battle_updateActors = Spriteset_Battle.prototype.updateActors;
@@ -1286,6 +1423,9 @@
         const members = $gameParty.battleMembers();
         for (let i = 0; i < this._actorHudSprites.length; i++) {
             this._actorHudSprites[i].setBattler(members[i]);
+        }
+        for (let i = 0; i < this._fvBattlerSprites.length; i++) {
+            this._fvBattlerSprites[i].setBattler(members[i]);
         }
     };
 
