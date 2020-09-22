@@ -1258,6 +1258,74 @@
         return ImageManager.faceHeight - statusAreaHeight;
     };
     //------------------------------------------------------------------------------
+    // HorizontalAlphaFilter
+    /**
+     * HorizontalAlphaFilter。
+     * なんか汎用的な名前がついてるが、
+     * 画面上の指定したX位置を境界として、右側を表示、左側を非表示にするカラーフィルター。
+     */
+    function HorizontalAlphaFilter() {
+        this.initialize(...arguments);
+    };
+
+    HorizontalAlphaFilter.prototype = Object.create(PIXI.Filter.prototype);
+    HorizontalAlphaFilter.prototype.constructor = HorizontalAlphaFilter;
+
+    /**
+     * HorizontalAlphaFilterを初期化する。
+     */
+    HorizontalAlphaFilter.prototype.initialize = function() {
+        PIXI.Filter.call(this, null, this._fragmentSrc());
+        this.uniforms.validX = 1000.0;
+        this.uniforms.zeroX = 900.0;
+        this.uniforms.validWidth = 100.0;
+    };
+
+    /**
+     * 表示を行う水平方向位置を得る。
+     * 
+     * @param {Number} x 画面上のX位置
+     */
+    HorizontalAlphaFilter.prototype.setValidX = function(x) {
+        this.uniforms.validX = Number(x) || 0;
+        this.uniforms.zeroX = this.uniforms.validX - this.uniforms.validWidth;
+    }
+
+    /**
+     * フラグメントシェーダーソースを得る。
+     */
+    HorizontalAlphaFilter.prototype._fragmentSrc = function() {
+        // GLSLよくわからん。
+        // gl_FragCoordはピクセル毎に更新されるっぽい。
+        const src =
+            "varying vec2 vTextureCoord;" +
+            "uniform sampler2D uSampler;" +
+            "uniform float validX;" +
+            "uniform float zeroX;" +
+            "uniform float validWidth;" +
+            "float getRate(float x) {" +
+            "  if (x > validX) {" +
+            "    return 1.0;" +
+            "  } else if (x > zeroX) {" +
+            "    return ((x - zeroX) / validWidth);" +
+            "  } else {" +
+            "    return 0.0;" +
+            "  }" +
+            "}" +
+            "void main() {" +
+            "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
+            "  float rate = getRate(gl_FragCoord.x);" +
+            "  float r = sample.r * rate;" +
+            "  float g = sample.g * rate;" +
+            "  float b = sample.b * rate;" +
+            "  float a = sample.a * rate;" +
+            "  gl_FragColor = vec4(r, g, b, a);" +
+            "}";
+        return src;
+    };
+
+
+    //------------------------------------------------------------------------------
     // Spriteset_FvBattler
     /**
      * Sprite_FvBattler。
@@ -1279,6 +1347,9 @@
         this.anchor.y = 0;
         this._battler = null;
         this._fvBattlerName = '';
+        this._horizontalAlphaFilter = new HorizontalAlphaFilter();
+        this.filters = [];
+        this.filters.push(this._horizontalAlphaFilter)
     };
 
     /**
@@ -1347,6 +1418,7 @@
      * 表示の移動を処理する。
      */
     Sprite_FvBattler.prototype.updateMovement = function() {
+
         if (this._battler) {
             const distance = 280;
             const movePos = Graphics.boxWidth - distance;
@@ -1376,7 +1448,6 @@
             this.x = Graphics.boxWidth;
             this.opacity = 0;
         }
-
     };
 
 
