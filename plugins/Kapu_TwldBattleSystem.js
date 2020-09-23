@@ -3,10 +3,10 @@
  * @plugindesc Twld向けに作成した戦闘システムの変更
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * ■ setFvBattler
- * @command setFvBattler
- * @text アクター戦闘グラフィック設定
- * @desc 戦闘中に表示するグラフィックを設定する。
+ * ■ setBattlePicture
+ * @command setBattlePicture
+ * @text アクター戦闘画像設定
+ * @desc 戦闘中にコマンド入力欄脇に表示するグラフィックを設定する。
  * 
  * @arg actorId
  * @text アクターID
@@ -64,11 +64,15 @@
  * @requiredAssets img/hud/ActiveHud
  * 
  * @help 
+ * Twld向けに作成した戦闘シーンのUI処理プラグイン。
  * 
  * img/hud/ActiveHud
  *     Active状態の時に表示するイメージ
  * img/hud/StatusBackground
  *     Status背景の表示
+ *
+ * ■ 注意事項 
+ * フロントビュー固定になります。
  * 
  * ============================================
  * プラグインコマンド
@@ -79,8 +83,9 @@
  * ノートタグ
  * ============================================
  * アクター
- *   <fvBattlerName:pictureName$>
- *        フロントビューで表示するアクターの画像。picturesフォルダの下から引っ張ってくる。
+ *   <battlePicture:pictureName$>
+ *        フロントビューで表示するアクターの画像。
+ *        picturesフォルダの下から引っ張ってくる。
  * 
  * ============================================
  * 変更履歴
@@ -104,13 +109,12 @@
     const statusAreaWidth = 160;
     const statusAreaPadding = 16;
     const statusAreaHeight = 220;
-    const statusPictureLeftY = 40;
 
-    PluginManager.registerCommand(pluginName, 'setFvBattler', args => {
+    PluginManager.registerCommand(pluginName, 'setBattlePicture', args => {
         const actorId = args.actorId;
         const fileName = args.fileName;
         if (actorId) {
-            $gameActors.actor(actorId).setFvBattlerName(fileName);
+            $gameActors.actor(actorId).setBattlePicture(fileName);
         }
     });
     //------------------------------------------------------------------------------
@@ -155,7 +159,7 @@
      */
     Game_Actor.prototype.initMembers = function() {
         _Game_Actor_initMembers.call(this, ...arguments);
-        this._fvBattlerName = '';
+        this._battlePicture = '';
     };
     const _Game_Actor_setup = Game_Actor.prototype.setup;
     /**
@@ -166,27 +170,27 @@
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, ...arguments);
         const actor = $dataActors[actorId];
-        if (actor.meta.fvBattlerName) {
-            this.setFvBattlerName(actor.meta.fvBattlerName);
+        if (actor.meta.battlePicture) {
+            this.setBattlePicture(actor.meta.battlePicture);
         }
     };
 
     /**
-     * フロントビュー戦闘グラフィックファイル名を取得する。
+     * フロントビュー画像ファイル名を取得する。
      * 
      * @return {String} フロントビュー戦闘グラフィックファイル名。
      */
-    Game_Actor.prototype.fvBattlerName = function() {
-        return this._fvBattlerName;
+    Game_Actor.prototype.battlePicture = function() {
+        return this._battlePicture;
     };
 
     /**
-     * フロントビュー戦闘グラフィックファイル名を設定する。
+     * フロントビュー戦画像ファイル名を設定する。
      * 
      * @param {String} pictureName フロントビュー戦闘グラフィックファイル名。
      */
-    Game_Actor.prototype.setFvBattlerName = function(pictureName) {
-        this._fvBattlerName = pictureName;
+    Game_Actor.prototype.setBattlePicture = function(pictureName) {
+        this._battlePicture = pictureName;
         $gameTemp.requestBattleRefresh();
     };
 
@@ -1003,7 +1007,7 @@
     Sprite_ActorHud.prototype.initMembers = function() {
         Sprite_Battler.prototype.initMembers.call(this);
         this.createActiveSelSprite();
-        this.createFvBattlerSprite();
+        this.createMainSprite();
         this.createStatusBackSprite();
         this.createNameSprite();
         this.createGaugeSprites();
@@ -1031,9 +1035,11 @@
     };
 
     /**
-     * FVアクタースプライトを作成する。
+     * メインスプライトを作成する。
+     * メインスプライトはHUDを構成する各スプライトを乗せる（addChild)する
+     * ベースになるスプライト。
      */
-    Sprite_ActorHud.prototype.createFvBattlerSprite = function() {
+    Sprite_ActorHud.prototype.createMainSprite = function() {
         this._mainSprite = new Sprite();
         this._mainSprite.anchor.x = 0.5; // 原点XはSprite中央
         this._mainSprite.anchor.y = 1; // 原点YはSprite下端
@@ -1326,27 +1332,29 @@
 
 
     //------------------------------------------------------------------------------
-    // Spriteset_FvBattler
+    // Sprite_ActorPicture
     /**
-     * Sprite_FvBattler。
-     * 
+     * Sprite_ActorPicture。
+     * コマンド入力ウィンドウの脇に、でっかく表示するアクター画像のスプライト。
      */
-    function Sprite_FvBattler() {
+    function Sprite_ActorPicture() {
         this.initialize(...arguments);
     }
 
-    Sprite_FvBattler.prototype = Object.create(Sprite.prototype);
-    Sprite_FvBattler.prototype.constructor = Sprite_FvBattler;
+    Sprite_ActorPicture.prototype = Object.create(Sprite.prototype);
+    Sprite_ActorPicture.prototype.constructor = Sprite_ActorPicture;
 
     /**
-     * Sprite_FvBattlerを初期化する。
+     * Sprite_ActorPictureを初期化する。
      */
-    Sprite_FvBattler.prototype.initialize = function() {
+    Sprite_ActorPicture.prototype.initialize = function() {
         Sprite.prototype.initialize.call(this, ...arguments);
         this.anchor.x = 0.5;
-        this.anchor.y = 0;
+        this.anchor.y = 1.0; // 下基準
+        this.x = Graphics.boxWidth; // 右端
+        this.y = Graphics.boxHeight; // 下端を揃える。
         this._battler = null;
-        this._fvBattlerName = '';
+        this._pictureName = '';
         this._horizontalAlphaFilter = new HorizontalAlphaFilter();
         this.filters = [];
         this.filters.push(this._horizontalAlphaFilter)
@@ -1357,16 +1365,16 @@
      * 
      * @param {Game_Battler} battler Game_Battlerオブジェクト
      */
-    Sprite_FvBattler.prototype.setBattler = function(battler) {
+    Sprite_ActorPicture.prototype.setBattler = function(battler) {
         if (battler !== this._battler) {
             this._battler = battler;
         }
     };
 
     /**
-     * Sprite_FvBattlerを更新する。
+     * Sprite_ActorPictureを更新する。
      */
-    Sprite_FvBattler.prototype.update = function() {
+    Sprite_ActorPicture.prototype.update = function() {
         Sprite.prototype.update.call(this);
         this.updateBitmap();
         this.updateVisibility();
@@ -1376,14 +1384,14 @@
     /**
      * Bitmapを更新する。
      */
-    Sprite_FvBattler.prototype.updateBitmap = function() {
+    Sprite_ActorPicture.prototype.updateBitmap = function() {
         if (this._battler) {
-            const fvBattlerName = this._battler.fvBattlerName();
-            if (this._fvBattlerName !== fvBattlerName) {
-                if (fvBattlerName) {
+            const pictureName = this._battler.battlePicture();
+            if (this._pictureName !== pictureName) {
+                this._pictureName = pictureName;
+                if (this._pictureName) {
                     try {
-                        this._fvBattlerName = fvBattlerName;
-                        this.bitmap = ImageManager.loadPicture(this._fvBattlerName);
+                        this.bitmap = ImageManager.loadPicture(this._pictureName);
                     }
                     catch (e) {
                         this.bitmap = null;
@@ -1392,6 +1400,8 @@
                     this.bitmap = null;
                 }
             }
+            // 画像が変更されたら透過状態にする。コマンド選択中に変更されてもふわっと出てくる（はず）
+            this.opacity = 0;
         } else {
             this.bitmap = null;
         }
@@ -1400,11 +1410,14 @@
     /**
      * 表示状態を更新する。
      */
-    Sprite_FvBattler.prototype.updateVisibility = function() {
+    Sprite_ActorPicture.prototype.updateVisibility = function() {
         if (this._battler) {
             if (this._battler.isInputting()) {
+                // コマンド入力中は表示。
                 this.visible = true;
             } else {
+                // コマンド入力キャンセルor入力完了しても、
+                // ふわっと消えるようにする。
                 if ((this.opacity < 32) || (this.x >= Graphics.boxWidth)) {
                     this.visible = false;
                 }
@@ -1417,8 +1430,7 @@
     /**
      * 表示の移動を処理する。
      */
-    Sprite_FvBattler.prototype.updateMovement = function() {
-
+    Sprite_ActorPicture.prototype.updateMovement = function() {
         if (this._battler) {
             const distance = 280;
             const movePos = Graphics.boxWidth - distance;
@@ -1444,8 +1456,18 @@
                     }
                 }
             }
+            if (this.bitmap != null) {
+                if (this.bitmap.height < (Graphics.boxHeight - 180)) {
+                    this.y = 180 + this.bitmap.height;
+                } else {
+                    this.y = Graphics.boxHeight;
+                }
+            } else {
+                this.y = Graphics.boxHeight;
+            }
         } else {
             this.x = Graphics.boxWidth;
+            this.y = Graphics.boxHeight;
             this.opacity = 0;
         }
     };
@@ -1470,12 +1492,10 @@
         }
 
         const insertIndex = this._baseSprite.getChildIndex(this._battleField);
-        this._fvBattlerSprites = [];
+        this._actorPictureSprites = [];
         for (let i = 0; i < maxBattleMembers; i++) {
-            const sprite = new Sprite_FvBattler();
-            sprite.x = 0;
-            sprite.y = 180;
-            this._fvBattlerSprites.push(sprite);
+            const sprite = new Sprite_ActorPicture();
+            this._actorPictureSprites.push(sprite);
             if (insertIndex >= 0) {
                 this._baseSprite.addChildAt(sprite, insertIndex);
             } else {
@@ -1495,8 +1515,8 @@
         for (let i = 0; i < this._actorHudSprites.length; i++) {
             this._actorHudSprites[i].setBattler(members[i]);
         }
-        for (let i = 0; i < this._fvBattlerSprites.length; i++) {
-            this._fvBattlerSprites[i].setBattler(members[i]);
+        for (let i = 0; i < this._actorPictureSprites.length; i++) {
+            this._actorPictureSprites[i].setBattler(members[i]);
         }
     };
 
