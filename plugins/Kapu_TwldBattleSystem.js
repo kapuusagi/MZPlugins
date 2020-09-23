@@ -1264,27 +1264,31 @@
         return ImageManager.faceHeight - statusAreaHeight;
     };
     //------------------------------------------------------------------------------
-    // HorizontalAlphaFilter
+    // DisplayBattlePictureFilter
     /**
-     * HorizontalAlphaFilter。
-     * なんか汎用的な名前がついてるが、
-     * 画面上の指定したX位置を境界として、右側を表示、左側を非表示にするカラーフィルター。
+     * DisplayBattlePictureFilter。
+     * カラーフィルター。
+     * 画面上の指定したX位置を境界として、左側を非表示、右側を表示させる。
+     * 画面上の指定したY位置を境界として、上側を表示、下側を非表示にする。
      */
-    function HorizontalAlphaFilter() {
+    function DisplayBattlePictureFilter() {
         this.initialize(...arguments);
     };
 
-    HorizontalAlphaFilter.prototype = Object.create(PIXI.Filter.prototype);
-    HorizontalAlphaFilter.prototype.constructor = HorizontalAlphaFilter;
+    DisplayBattlePictureFilter.prototype = Object.create(PIXI.Filter.prototype);
+    DisplayBattlePictureFilter.prototype.constructor = DisplayBattlePictureFilter;
 
     /**
-     * HorizontalAlphaFilterを初期化する。
+     * DisplayBattlePictureFilterを初期化する。
      */
-    HorizontalAlphaFilter.prototype.initialize = function() {
+    DisplayBattlePictureFilter.prototype.initialize = function() {
         PIXI.Filter.call(this, null, this._fragmentSrc());
         this.uniforms.validX = 1000.0;
         this.uniforms.zeroX = 900.0;
         this.uniforms.validWidth = 100.0;
+        this.uniforms.validY = 680.0;
+        this.uniforms.zeroY = 720.0;
+        this.uniforms.validHeight = 40.0;
     };
 
     /**
@@ -1292,7 +1296,7 @@
      * 
      * @param {Number} x 画面上のX位置
      */
-    HorizontalAlphaFilter.prototype.setValidX = function(x) {
+    DisplayBattlePictureFilter.prototype.setValidX = function(x) {
         this.uniforms.validX = Number(x) || 0;
         this.uniforms.zeroX = this.uniforms.validX - this.uniforms.validWidth;
     }
@@ -1300,7 +1304,7 @@
     /**
      * フラグメントシェーダーソースを得る。
      */
-    HorizontalAlphaFilter.prototype._fragmentSrc = function() {
+    DisplayBattlePictureFilter.prototype._fragmentSrc = function() {
         // GLSLよくわからん。
         // gl_FragCoordはピクセル毎に更新されるっぽい。
         const src =
@@ -1309,7 +1313,10 @@
             "uniform float validX;" +
             "uniform float zeroX;" +
             "uniform float validWidth;" +
-            "float getRate(float x) {" +
+            "uniform float validY;" +
+            "uniform float zeroY;" +
+            "uniform float validHeight;" +
+            "float getRateX(float x) {" +
             "  if (x > validX) {" +
             "    return 1.0;" +
             "  } else if (x > zeroX) {" +
@@ -1318,9 +1325,22 @@
             "    return 0.0;" +
             "  }" +
             "}" +
+            "float getRateY(float y) {" +
+            "  if (y < validY) {" +
+            "    return 1.0;" +
+            "  } else if (y < zeroY) {" +
+            "    return ((zeroY - y) / validHeight);" +
+            "  } else {" +
+            "    return 0.0;" +
+            "  }" +
+            "}" +
+            "float getRate(float x, float y) {" +
+            //"  return 1.0;" +
+            "  return min(getRateX(x), getRateY(y));" +
+            "}" +
             "void main() {" +
             "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
-            "  float rate = getRate(gl_FragCoord.x);" +
+            "  float rate = getRate(gl_FragCoord.x, gl_FragCoord.y);" +
             "  float r = sample.r * rate;" +
             "  float g = sample.g * rate;" +
             "  float b = sample.b * rate;" +
@@ -1355,7 +1375,7 @@
         this.y = Graphics.boxHeight; // 下端を揃える。
         this._battler = null;
         this._pictureName = '';
-        this._horizontalAlphaFilter = new HorizontalAlphaFilter();
+        this._horizontalAlphaFilter = new DisplayBattlePictureFilter();
         this.filters = [];
         this.filters.push(this._horizontalAlphaFilter)
     };
@@ -1389,21 +1409,34 @@
             const pictureName = this._battler.battlePicture();
             if (this._pictureName !== pictureName) {
                 this._pictureName = pictureName;
-                if (this._pictureName) {
-                    try {
-                        this.bitmap = ImageManager.loadPicture(this._pictureName);
-                    }
-                    catch (e) {
-                        this.bitmap = null;
-                    }
-                } else {
-                    this.bitmap = null;
-                }
+                this.bitmap = this.loadBattlePicture();
+                // 画像が変更されたら透過状態にする。コマンド選択中に変更されてもふわっと出てくる（はず）
+                this.opacity = 0;
             }
-            // 画像が変更されたら透過状態にする。コマンド選択中に変更されてもふわっと出てくる（はず）
-            this.opacity = 0;
         } else {
             this.bitmap = null;
+        }
+    };
+
+    /**
+     * コマンド選択中に表示するがぞうをロードする。
+     * 
+     * @return {Bitmap} Bitmapオブジェクト。表示する画像がない場合にはnull
+     */
+    Sprite_ActorPicture.prototype.loadBattlePicture = function() {
+        if (this._pictureName) {
+            try {
+                return ImageManager.loadPicture(this._pictureName);
+                // const bitmap = new Bitmap(640, 800);
+                // bitmap.fillAll('black');
+                // return bitmap;
+            }
+            catch (e) {
+                console.error(e);
+                return null;
+            }
+        } else {
+            return null;
         }
     };
 
@@ -1432,7 +1465,7 @@
      */
     Sprite_ActorPicture.prototype.updateMovement = function() {
         if (this._battler) {
-            const distance = 280;
+            const distance = 240;
             const movePos = Graphics.boxWidth - distance;
             const addCount = Math.max(1, Math.floor(distance / 30));
             if (this._battler.isInputting()) {
