@@ -12,10 +12,32 @@
 |||203|TRAIT_XPARAM_DID_AUTOGUARD_RATE。自動防御率。|
 |TRAIT_SPARAM|23||効果値乗算が全ての乗算結果で生成されるパラメータに対する効果。初期値は1.0で効果エントリのrateが乗算される。|
 |||0～9|ベーシックシステムで使用|
+|TRAIT_SPECIAL_FLAG|62|フラグID|特別な機能を提供するためのフラグ。|
 |TRAIT_PARTY_ABILITY|64||パーティーアビリティ。既定の実装はdataIdで指定された値の効果を持っているかどうか、だけの判定に使われる。dataIdはGame_Party.ABILITY_～で定義されてる。|
 |||0～5|ベーシックシステムで使用|
 |||100|ABILITY_DROP_GOLD_RATE。アイテムドロップ倍率。|
 |||101|ABILITY_DROP_GOLD_RATE。取得ゴールド倍率。|
 |TRAIT_ELEMENT_ABSORB|100|属性ID|指定した属性の攻撃を受けたとき、ダメージを急襲する特性|
+
+
+### スペシャルフラグ
+
+__TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
+
+|定義名|flag ID|説明|
+|---|---|---|
+||0～4|ベーシックシステムで使用|
+|EFFECT_IGNORE_MOVE_BATTLEPOSITION|ノックバックなどの効果を防止する。|
+
+## エフェクトコード
+
+エフェクトコードリスト
+
+|定義名|code|dataId|value1|value2|説明|
+|---|---|---|---|---|---|
+||0～44||||ベーシックシステムで使用|
+|EFFECT_MOVE_BATTLE_POSITION|100|0|-|-|前に出る効果。|
+|||1|-|-|後ろに下がる効果。|
+
 
 

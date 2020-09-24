@@ -36,47 +36,7 @@
  *     Game_Action.EFFECT_TWLD_UPDATE_LUK         993  LUK更新(value1～value2の間の値が加算される)
  * 
  */
-var Imported = Imported || {};
-Imported.TWLD_Core = true;
 
-var TWLD = TWLD || {};
-TWLD.Core = TWLD.Core || {};
-
-// for ESLint.
-if (typeof Game_Temp === 'undefined') {
-    var Game_Action = {};
-    var Game_Item = {};
-    var Game_BattlerBase = {};
-    var Game_Actor = {};
-    var Game_Enemy = {};
-    var Game_Interpreter = {};
-    var Game_Party = {};
-    var DataManager = {};
-    var SceneManager = {};
-    var TextManager = {};
-    var BattleManager = {};
-    var $dataActors       = null;
-    var $dataClasses      = null;
-    var $dataSkills       = null;
-    var $dataItems        = null;
-    var $dataWeapons      = null;
-    var $dataArmors       = null;
-    var $dataEnemies      = null;
-    var $dataStates       = null;
-    var $dataSystem       = null;
-    var $gameVariables    = null;
-    var $gameActors       = null;
-    var $gameParty        = null;
-    var Graphics = {};
-    var Window_Base = {};
-    var Window_Selectable = {};
-    var Window_Help = {};
-    var Window_MenuCommand = {};
-    var Scene_Battle = {};
-    var Scene_MenuBase = {};
-    var Scene_Menu = {};
-    var Sprite_Damage = {};
-}
 
 
 (function() {
