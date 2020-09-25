@@ -959,7 +959,15 @@
 
     //------------------------------------------------------------------------------
     // Sprite_Enemy
-
+    /**
+     * ステートアイコンスプライトを作成する。
+     */
+    Sprite_Enemy.prototype.createStateIconSprite = function() {
+        this._stateIconSprite = new Sprite_HudStateIcons();
+        this._stateIconSprite.anchor.x = 0.5;
+        this._stateIconSprite.anchor.y = 0.5;
+        this.addChild(this._stateIconSprite);
+    };
     const _Sprite_Enemy_setHome = Sprite_Enemy.prototype.setHome;
     /**
      * ホーム位置を設定する。
@@ -972,6 +980,16 @@
         const offsetY = (Graphics.boxHeight - 624) / 2;
         _Sprite_Enemy_setHome.call(this, x + offsetX, y + offsetY);
     };
+
+    const _Sprite_Enemy_update = Sprite_Enemy.prototype.update;
+
+    /**
+     * Sprite_Enemyを更新する。
+     */
+    Sprite_Enemy.prototype.update = function() {
+        _Sprite_Enemy_update.call(this);
+    };
+
     //------------------------------------------------------------------------------
     // Sprite_ActorHud
 
