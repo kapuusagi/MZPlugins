@@ -355,7 +355,7 @@
         }
         if (moveToRearSkillId) {
             // エフェクト追加
-            const skill = $dataSkills[moveToFrontSkillId];
+            const skill = $dataSkills[moveToRearSkillId];
             if (skill.scope !== 11) {
                 console.error("skill: + " + skill.name + " scope is not for self.");
                 skill.scope = 11;
@@ -414,8 +414,10 @@
             const unit = target.friendsUnit();
             if (effect.dataId === 0) {
                 unit.moveToFront(target.index());
+                this.makeSuccess(target);
             } else if (effect.dataId === 1) {
                 unit.moveToRear(target.index());
+                this.makeSuccess(target);
             }
         } else {
             _Game_Action_applyItemEffect.call(this, ...arguments);
@@ -440,7 +442,7 @@
     Game_Action.prototype.rangeDistance = function() {
         const item = this.item();
         if (item) {
-            return this.subject().itemRangeDistance(item) - this.subject().battlePosition();
+            return this.subject().itemRangeDistance(item);
         } else {
             return -1;
         }
@@ -677,7 +679,7 @@
             return 2; // 全射程
         }
         if (item.range >= 0) {
-            return item.ragnge;
+            return item.range;
         } else {
             return this.defaultRangeDistance(item);
         }
@@ -753,7 +755,7 @@
      * @param {Number} newPosition 新しい位置。未指定時は現在の設定と切り替え。
      */
     Game_Unit.prototype.changeBattlePosition = function(index, newPosition) {
-        const battler = this.members(index);
+        const battler = this.members()[index];
         if (battler) {
             if (typeof newPosition === "undefined") {
                 const currentPosition = battler.battlePosition();
@@ -794,11 +796,11 @@
      */
     Game_Unit.prototype.moveToFront = function(index) {
         // Backと違ってこっちはちょっと面倒。
-        if (this.canMoveToFront()) {
+        if (this.canMoveToFront(index)) {
             const members = this.members();
             const member = members[index];
             if (member.battlePosition() !== 0) {
-                // 誰かが既に前衛 -> 指定Battlerだけ前衛にする。
+                // 指定されたアクターは後衛 -> 指定Battlerだけ移動。
                 member.setBattlePosition(1);
             } else if (members.every(member => member.battlePosition() === 0)) {
                 // 全員前衛時に前に出る -> 指定Battlerは前衛のままで、他は後衛に変更。
@@ -1063,7 +1065,7 @@
             const index = $gameParty.members().indexOf(this._actor);
             if (moveToFrontSkillId) {
                 this.addCommand($dataSkills[moveToFrontSkillId].name, 
-                    "moveToFront", $gameParty.canMoveToRear(index));
+                    "moveToFront", $gameParty.canMoveToFront(index));
             }
             if (moveToRearSkillId) {
                 this.addCommand($dataSkills[moveToRearSkillId].name,
@@ -1093,9 +1095,11 @@
      * !!!overwrite!!!
      */
     Window_BattleEnemy.prototype.isCurrentItemEnabled = function() {
-        return isEnabled(this.enemy());
+        return this.isEnabled(this.enemy());
     };
 
+    // Note: isEnabledが定義されているかはわからないが、
+    //       定義されていたら呼び出すようにする。
     const _Window_BattleEnemy_isEnabled = Window_BattleEnemy.prototype.isEnabled;
 
     /**
@@ -1104,8 +1108,12 @@
      * @param {Game_Enemy} enemy 選択可否判定するエネミー
      */
     Window_BattleEnemy.prototype.isEnabled = function(enemy) {
-        return _Window_BattleEnemy_isEnabled.call(this, ...arguments)
-                && this.inSubectRangeDistance(enemy);
+        let enabled = this.inSubectRangeDistance(enemy);
+        if (enabled && _Window_BattleEnemy_isEnabled) {
+            return _Window_BattleEnemy_isEnabled.call(this, enemy);
+        } else {
+            return enabled;
+        }
     };
 
     /**
@@ -1114,7 +1122,7 @@
      * @param {Game_Enemy} enemy 選択可否判定するエネミー
      */
     Window_BattleEnemy.prototype.inSubectRangeDistance = function(enemy) {
-        return enemy && (enemy.battlePosition() < this._actionRangeDistance);
+        return enemy && (enemy.battlePosition() <= this._actionRangeDistance);
     };
 
     const _Window_BattleEnemy_drawItem = Window_BattleEnemy.prototype.drawItem;
@@ -1136,7 +1144,8 @@
     Window_BattleEnemy.prototype.refresh = function() {
         _Window_BattleEnemy_refresh.call(this);
         const action = BattleManager.inputtingAction();
-        this._actionRangeDistance = action.rangeDistanceForUnit($gameTroop);
+        this._actionRangeDistance
+                = (action) ? action.rangeDistanceForUnit($gameTroop) : -1;
     };
 
     const _Window_BattleEnemy_select = Window_BattleEnemy.prototype.select;
@@ -1151,10 +1160,14 @@
         Window_Selectable.prototype.select.call(this, index);
 
         const action = BattleManager.inputtingAction();
-        if (action.isForRow()) {
-            $gameTroop.selectRow(this.enemy().battlePosition());
+        if (action) {
+            if (action.isForRow()) {
+                $gameTroop.selectRow(this.enemy().battlePosition());
+            } else {
+                $gameTroop.select(this.enemy());
+            }
         } else {
-            $gameTroop.select(this.enemy());
+            $gameTroop.select(null);
         }
     };
 
@@ -1169,10 +1182,14 @@
     Window_BattleActor.prototype.select = function(index) {
         Window_BattleStatus.prototype.select.call(this, index);
         const action = BattleManager.inputtingAction();
-        if (action.isForRow()) {
-            $gameParty.selectRow(this.actor().battlePosition());
+        if (action) {
+            if (action.isForRow()) {
+                $gameParty.selectRow(this.actor().battlePosition());
+            } else {
+                $gameParty.select(this.actor(index));
+            }
         } else {
-            $gameParty.select(this.actor(index));
+            $gameParty.select(null);
         }
     };
     //------------------------------------------------------------------------------
