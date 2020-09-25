@@ -40,7 +40,14 @@
  * @desc 戦闘位置変更効果を防止するスペシャルフラグID
  * @type number
  * @default 100
- * @min 
+ * @min 6
+ * 
+ * @param longRangeFlagId
+ * @text 射程無効効果フラグID
+ * @desc 射程が常にLONGRNAGEになるスペシャルフラグID
+ * @type number
+ * @default 101
+ * @min 6
  * 
  * @param effectCode
  * @text 戦闘位置エフェクトコード
@@ -74,20 +81,25 @@
  *   M:前衛to前衛/後衛 または 後衛to前衛
  *   L:前衛/後衛to前衛/後衛
  * ・効果範囲・列の追加
+ *   ノートタグにrangeRowを付与すると、元からのスコープに併せて以下のように振る舞いが変わります。
+ *   対象が使用者 -> 使用者＋同列
+ *   対象が単体選択 -> 味方1列 or エネミー1列
  * 
- * 残りのTODO:
- *     選択対象にレンジを考慮
- *     武器・スキルレンジ
- *     列の効果範囲の追加。(前列/後列/任意の1列)
- *     特性によるスキルレンジ無視
  * 
  * ■ 使用時の注意
  * エネミーグループにはノートタグが設定できません（無念）。
  * エネミーグループの隊列を設定するには、
- * 戦闘開始時のイベントで設定することを想定しています。
+ * 戦闘開始時のイベントで列を設定することを想定しています。
+ * 
+ * ターゲット選択周りはほぼオーバーライドしているので、
+ * 他の対象変更系プラグインと組み合わせると破綻する可能性が高いです（無念）
+ * 
+ * システムに関わってくるので、UI上の表示は含まれません。
+ * 別途用意します。
  * 
  * ■ プラグイン開発者向け
  * Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION が定義されます。
+ * Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE が定義されます。
  * Game_Action.EFFECT_MOVE_BATTLE_POSITION が定義されます。
  * 
  * 
@@ -110,11 +122,12 @@
  *   <range:range#>
  *      アイテム/スキルの射程を指定する。
  *      未指定時は0
- *     -1:装備品依存
+ *     -1:Depends 装備品依存
  *      0:Short (前列to前列) 
  *      1:Middle (前列to後列まで / 後列to前列まで)
  *      2:Long (全部)
- * 
+ *   <rangeRow>
+ *      効果範囲が列であることを指定します。
  * 武器
  *   <range:range#>
  *      アイテム/スキルの射程を指定する。
@@ -122,10 +135,20 @@
  *      0:Short (前列to前列) 
  *      1:Middle (前列to後列まで / 後列to前列まで)
  *      2:Long (全部)
- * アクター/クラス/ステート/武器/防具/エネミー
+ *   <blockMovePosition>
+ *      敵対者からの前衛/後衛 移動操作をブロックする。
+ *   <ignoreRangeDistance>
+ *      射程距離無視特性を追加する。
+ * 
+ * アクター/クラス/ステート/防具
  *   <blockMovePosition>
  *      敵対者からの前衛/後衛 移動操作をブロックする。
  * 
+ * エネミー
+ *   <blockMovePosition>
+ *      敵対者からの前衛/後衛 移動操作をブロックする。
+ *   <defaultRange:range#>
+ *      デフォルトの射程距離をrange#とする。未指定時は0
  * ============================================
  * 変更履歴
  * ============================================
@@ -137,6 +160,7 @@
     const moveToFrontSkillId = Number(parameters['moveFrontSkillId']) || 0;
     const moveToRearSkillId = Number(parameters['moveRearSkillId']) || 0;
     Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION = Number(parameters['blockMoveFlagId']) || 0;
+    Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE = Number(parameters['longRangeFlagId']) || 0;
     Game_Action.EFFECT_MOVE_BATTLE_POSITION = Number(parameters['effectCode']) || 0;
 
     PluginManager.registerCommand(pluginName, 'setEnemyBattlePosition', args => {
@@ -182,19 +206,6 @@
             dataId: dataId,
             value1: 0,
             value2: 0
-        });
-    };
-
-    /**
-     * 敵対者からの前衛/後衛移動操作をブロックする特性を追加する。
-     * 
-     * @param {Object} obj 追加するオブジェクト 
-     */
-    const _addBlockMovePositionTrait = function(obj) {
-        obj.traits.push({ 
-            code:Game_BattlerBase.TRAIT_SPECIAL_FLAG, 
-            dataId:Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION, 
-            value:0
         });
     };
 
@@ -246,6 +257,28 @@
             }
         }
     };
+    /**
+     * 特性ノートタグを処理する。
+     * 
+     * @param {TraitObject} obj 特性(traits)を持ったオブジェクト。
+     */
+    const _processTraitsNoteTag = function(obj) {
+        if (obj.meta.blockMovePosition) {
+            obj.traits.push({ 
+                code:Game_BattlerBase.TRAIT_SPECIAL_FLAG, 
+                dataId:Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION, 
+                value:0
+            });              
+        }
+        if (obj.meta.ignoreRangeDistance) {
+            obj.traits.push({
+                code:Game_BattlerBase.TRAIT_SPECIAL_FLAG,
+                dataId:Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE,
+                value:0
+            });
+
+        }
+    };
 
     /**
      * $dataWeaponsのノートタグを処理する。
@@ -259,11 +292,9 @@
             }
             obj.range = 0;
 
+            _processTraitsNoteTag(obj);
             if (obj.meta.range) {
-                obj.range = Number(obj.meta.range).clamp(0, 2);
-            }
-            if (obj.meta.blockMovePosition) {
-                _addBlockMovePositionTrait(obj);                
+                obj.range = Number(obj.meta.range).clamp(-1, 2);
             }
         }
     };
@@ -278,12 +309,28 @@
             if (!obj) {
                 continue;
             }
-            if (obj.meta.blockMovePosition) {
-                _addBlockMovePositionTrait(obj);                
-            }
+            _processTraitsNoteTag(obj);
         }
     };
+    /**
+     * $dataEnemyのノートタグを処理する。
+     * 
+     * @param {Array<Object>} dataArray データ配列 
+     */
+    const _processRangeDistanceEnemyNotetag = function(dataArray) {
+        for (const obj of dataArray) {
+            if (!obj) {
+                continue;
+            }
+            obj.defaultRange = 0;
+            _processTraitsNoteTag(obj);
+            if (obj.meta.defaultRange) {
+                const range = Number(obj.meta.defaultRange) || 0;
+                obj.defaultRange = range.clamp(0, 1);
+            }
 
+        }
+    };
     /**
      * 射程データ及び移動スキルを処理する。
      */
@@ -295,7 +342,7 @@
         _processRangeDistanceTraitNotetag($dataClasses);
         _processRangeDistanceTraitNotetag($dataStates);
         _processRangeDistanceTraitNotetag($dataArmors);
-        _processRangeDistanceTraitNotetag($dataEnemies);
+        _processRangeDistanceEnemyNotetag($dataEnemies);
 
         if (moveToFrontSkillId) {
             // エフェクト追加
@@ -336,24 +383,13 @@
                 // 敵対者からの移動効果は無効
                 return false;
             }
-            if (target.isActor()) {
-                const index = $gameParty.members().indexOf(target);
-                if (effect.dataId === 0) {
-                    return $gameParty.canMoveToFront(index);
-                } else if (effect.dataId === 1) {
-                    return $gaeParty.canMoveToRear(index);
-                } else {
-                    return false;
-                }
+            const unit = target.friendsUnit();
+            if (effect.dataId === 0) {
+                return unit.canMoveToFront(target.index());
+            } else if (effect.dataId === 1) {
+                return unit.canMoveToRear(target.index());
             } else {
-                const index = $gameTroop.members().indexOf(target);
-                if (effect.dataId === 0) {
-                    return $gameTroop.canMoveToFront(index);
-                } else if (effect.dataId === 1) {
-                    return $gameTroop.canMoveToRear(index);
-                } else {
-                    return false;
-                }
+                return false;
             }
         } else {
             return _Game_Action_testItemEffect.call(this, ...arguments);
@@ -375,23 +411,218 @@
                 // 敵対者からの移動効果は無効
                 return;
             }
-            if (target.isActor()) {
-                const index = $gameParty.members().indexOf(target);
-                if (effect.dataId === 0) {
-                    $gameParty.moveToFront(index);
-                } else if (effect.dataId === 1) {
-                    $gaeParty.moveToRear(index);
-                }
-            } else {
-                const index = $gameTroop.members().indexOf(target);
-                if (effect.dataId === 0) {
-                    $gameTroop.moveToFront(index);
-                } else if (effect.dataId === 1) {
-                    $gameTroop.moveToRear(index);
-                }
+            const unit = target.friendsUnit();
+            if (effect.dataId === 0) {
+                unit.moveToFront(target.index());
+            } else if (effect.dataId === 1) {
+                unit.moveToRear(target.index());
             }
         } else {
             _Game_Action_applyItemEffect.call(this, ...arguments);
+        }
+    };
+
+    /**
+     * 列を対象にしたアクションかどうかを取得する。
+     * 
+     * @return {Boolean} 列を対象にしたアクションの場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.isForRow = function() {
+        const item = this.item();
+        return item && item.meta.rangeRow;
+    };
+
+    /**
+     * このアクションの射程距離を得る。
+     * 
+     * @return {Number} 射程距離
+     */
+    Game_Action.prototype.rangeDistance = function() {
+        const item = this.item();
+        if (item) {
+            return this.subject().itemRangeDistance(item) - this.subject().battlePosition();
+        } else {
+            return -1;
+        }
+    };
+
+    /**
+     * 指定したユニットに適用する射程距離を得る。
+     * 
+     * @param {Game_Unit} unit ユニット
+     * @return {Number} 射程距離
+     */
+    Game_Action.prototype.rangeDistanceForUnit = function(unit) {
+        const subject = this.subject();
+        if (unit.members().contains(subject)) {
+            return 1; // To firendの場合には1（全員対象）
+        } else {
+            return this.rangeDistance() - subject.battlePosition();
+        }
+    };
+
+    /**
+     * 混乱時のアクション対象を得る。
+     * 
+     * Note: Game_Unit.randomTarget()をコールする代わりに、
+     *       Game_Action.randomTargets(unit)等をコールするように変更するため、
+     *       オーバーライドする。
+     * @return {Array<Game_Battler} アクション対象オブジェクトの配列
+     * !!!overwrite!!!
+     */
+    Game_Action.prototype.confusionTarget = function() {
+        switch (this.subject().confusionLevel()) {
+            case 1:
+                return this.randomTargets(this.opponentsUnit());
+            case 2:
+                if (Math.randomInt(2) === 0) {
+                    return this.randomTargets(this.opponentsUnit());
+                } else {
+                    return this.randomTargets(this.friendsUnit());
+                }
+            default:
+                return this.randomTargets(this.friendsUnit());
+        }
+    };
+    const _Game_Action_targetsForFriends = Game_Action.prototype.targetsForFriends;
+
+    /**
+     * 味方に対するアクション対象を得る。
+     * 
+     * @return {Array<Game_Battler} アクション対象オブジェクトの配列
+     */
+    Game_Action.prototype.targetsForFriends = function() {
+        if (this.isForUser() && this.isForRow()) {
+            const unit = this.friendsUnit();
+            let row = this.subject().battlePosition();
+            return (row === 0) ? unit.frontAliveMembers() : unit.rearAliveMembers();
+        } else {
+            return _Game_Action_targetsForFriends.call(this);
+        }
+    };
+    /**
+     * ランダムに対象を決める。
+     * イベントコマンドによりランダムに対象選択する場合に呼ばれる。
+     * !!!overwrite!!!
+     */
+    Game_Action.prototype.decideRandomTarget = function() {
+        let target;
+        if (this.isForDeadFriend()) {
+            const unit = this.friendsUnit();
+            const range = this.rangeDistanceForUnit(unit);
+            target = unit.randomDeadTargetWithRange(this.subject(), range);
+        } else if (this.isForFriend()) {
+            const unit = this.friendsUnit();
+            const range = this.rangeDistanceForUnit(unit);
+            target = unit.randomTargetWithRange(this.subject(), range);
+        } else {
+            const unit = this.opponentsUnit()
+            const range = this.rangeDistanceForUnit(unit);
+            target = unit.randomTargetWithRange(this.subject(), range);
+        }
+        if (target) {
+            this._targetIndex = target.index();
+        } else {
+            this.clear();
+        }
+    };
+
+    /**
+     * グループからランダムな対象を得る。
+     * 
+     * @param {Game_Unit} unit 対象のグループ
+     * @return {Array<Game_Battler>} 対象
+     * !!!overwrite!!!
+     */
+    Game_Action.prototype.randomTargets = function(unit) {
+        const targets = [];
+        const rangeDistance = this.rangeDistanceForUnit(unit);
+        for (let i = 0; i < this.numTargets(); i++) {
+            targets.push(unit.randomTargetWithRange(this.subject(), rangeDistance));
+        }
+        return targets;
+    };
+
+    /**
+     * グループから死亡対象を得る。
+     * 
+     * @param {Game_Unit} unit 対象のグループ
+     * @return {Array<Game_Battler>} 対象
+     * !!!overwrite!!!
+     */
+    Game_Action.prototype.targetsForDead = function(unit) {
+        if (this.isForOne()) {
+            const rangeDistance = this.rangeDistanceForUnit(unit);
+            if (this.isForRow()) {
+                let row = unit.members()[this._targetIndex].battlePosition();
+                if ((row > 0) && (unit.rearDeadMembers().length === 0)) {
+                    row = 0;
+                } else if ((row === 0) && (unit.frontDeadMembers().length === 0)) {
+                    row = 1;
+                }
+                return (row === 0) ? unit.frontAliveMembers() : unit.rearAliveMembers();
+            } else {
+                return [unit.smoothDeadTargetWithRange(this._targetIndex, this.subject(), rangeDistance)];
+            }
+        } else {
+            return unit.deadMembers();
+        }
+    };
+
+    /**
+     * グループから生存している対象を得る。
+     * 
+     * @param {Game_Unit} unit 対象のグループ
+     * @return {Array<Game_Battler>} 対象
+     * !!!overwrite!!!
+     */
+    Game_Action.prototype.targetsForAlive = function(unit) {
+        if (this.isForOne()) {
+            const rangeDistance = this.rangeDistanceForUnit(unit);
+            if (this.isForRow()) {
+                let row;
+                if (this._targetIndex < 0) {
+                    row = Math.RandomInt(2);
+                } else {
+                    row = unit.members()[this._targetIndex].battlePosition();
+                }
+                if ((row > 0) && unit.rearAliveMembers().length === 0) {
+                    row = 0; // 後衛に誰も生存者がいない。-> 対象を前列にする。
+                }
+                return (row === 0) ? unit.frontAliveMembers() : unit.rearAliveMembers();
+            } else {
+                if (this._targetIndex < 0) {
+                    return [unit.randomTargetWithRange(rangeDistance)];
+                } else {
+                    return [unit.smoothTargetWithRange(this._targetIndex, this.subject(), rangeDistance)];
+                }
+            }
+        } else {
+            return unit.aliveMembers();
+        }
+    };
+
+    /**
+     * グループから生存または死亡している対象を得る。
+     * 
+     * @param {Game_Unit} unit 対象のグループ
+     * @return {Array<Game_Battler>} 対象
+     * !!!overwrite!!!
+     */
+    Game_Action.prototype.targetsForDeadAndAlive = function(unit) {
+        if (this.isForOne()) {
+            if (this.isForRow()) {
+                let row = unit.members()[this._targetIndex].battlePosition();
+                if ((row > 0) && unit.rearMembers().length === 0) {
+                    row = 0; // 後衛に誰も生存者がいない。-> 対象を前列にする。
+                }
+                return (row === 0) ? unit.frontMembers() : unit.rearMembers();
+            } else {
+                const rangeDistance = this.rangeDistanceForUnit(unit);
+                return unit.smoothDeadAndAliveTarget(this._targetIndex, this.subject(), rangeDistance);
+            }
+        } else {
+            return unit.members();
         }
     };
 
@@ -436,9 +667,85 @@
         return this._battlePosition;
     };
 
+    /**
+     * アイテムまたはスキルの射程距離を得る。
+     * 
+     * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
+     */
+    Game_BattlerBase.prototype.itemRangeDistance = function(item) {
+        if (this.specialFlag(Game_BattlerBase.FLAG_ID_SKILLLONGRANGE)) {
+            return 2; // 全射程
+        }
+        if (item.range >= 0) {
+            return item.ragnge;
+        } else {
+            return this.defaultRangeDistance(item);
+        }
+    };
+
+    /**
+     * デフォルトレンジを得る。
+     * 
+     * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
+     */
+    Game_BattlerBase.prototype.defaultRangeDistance = function(item) {
+        return 0;
+    };
+
+    //------------------------------------------------------------------------------
+    // Game_Enemy
+    /**
+     * デフォルトレンジを得る。
+     * 
+     * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
+     */
+    Game_Enemy.prototype.defaultRangeDistance = function(item) {
+        const enemy = this.enemy();
+        if (enemy) {
+            return enemy.defaultRange;
+        } else {
+            return 0;
+        }
+    };
+    //------------------------------------------------------------------------------
+    // Game_Actor
+    /**
+     * デフォルトレンジを得る。
+     * 
+     * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
+     */
+    Game_Actor.prototype.defaultRangeDistance = function(item) {
+        // 装備武器レンジを返す。
+        const ranges = this.weapons().map(item => item.range);
+        if (ranges.length > 0) {
+            return this.weapons().min(...ranges);
+        } else {
+            const bareHandSkillId = this.attackSkillId();
+            const bareHandSkill = $dataSkills[bareHandSkillId];
+            if (bareHandSkill.range >= 0) {
+                return bareHandSkill.range;
+            } else {
+                return 0;
+            }
+        }
+    };
+
     //------------------------------------------------------------------------------
     // Game_Unit
-
+    /**
+     * メンバーを選択する
+     * 
+     * @param {Number} battlePosition 戦闘位置 
+     */
+    Game_Unit.prototype.selectRow = function(battlePosition) {
+        for (const member of this.members()) {
+            if (member.battlePosition() === battlePosition) {
+                member.select();
+            } else {
+                member.deselect();
+            }
+        }
+    };
     /**
      * 指定されたインデックスのBattlerの戦闘ポジションを変更する。
      * 
@@ -564,6 +871,15 @@
     };
 
     /**
+     * 前衛の死亡メンバーを得る。
+     * 
+     * @return {Array<Game_Battler>} 前衛メンバー
+     */
+    Game_Unit.prototype.frontDeadMembers = function() {
+        return this.deadMembers().filter(member => member.battlePosition() === 0);
+    };
+
+    /**
      * 後衛のメンバーを得る。
      * 
      * @return {Array<Game_Battler>} 後衛メンバー。
@@ -578,7 +894,127 @@
      * @return {Array<Game_Battler>} 後衛メンバー。
      */
     Game_Unit.prototype.rearAliveMembers = function() {
-        return this.members().filter(member => member.battlePosition() !== 0);
+        return this.aliveMembers().filter(member => member.battlePosition() !== 0);
+    };
+    /**
+     * 後衛の死亡メンバーを得る。
+     * 
+     * @return {Array<Game_Battler>} 後衛メンバー。
+     */
+    Game_Unit.prototype.rearDeadMembers = function() {
+        return this.deadMembers().filter(member => member.battlePosition() !== 0);
+    };
+
+    /**
+     * 射程距離内のメンバーを得る。
+     * 
+     * @param {Number} range 射程距離
+     * @return {Array<Game_Battler>} メンバーの配列
+     */
+    Game_Unit.prototype.membersWithRange = function(range) {
+        return this.members().filter(member => member.battlePosition() <= range);
+    };
+
+    /**
+     * 射程距離内の生存メンバーを得る。
+     * 
+     * @param {Number} range 射程距離。
+     * @return {Array<Game_Battler>} メンバーの配列
+     */
+    Game_Unit.prototype.aliveMembersWithRange = function(range) {
+        return this.aliveMembers().filter(member => member.battlePosition() <= range);
+    };
+
+    /**
+     * 射程距離内の死亡メンバーを得る。
+     * 
+     * @param {Number} range 射程距離。
+     * @return {Array<Game_Battler>} メンバーの配列
+     */
+    Game_Unit.prototype.deadMembersWithRange = function(range) {
+        return this.deadMembers().filter(member => member.battlePosition() <= range);
+    };
+    /**
+     * 射程距離内メンバーの、ターゲット率の合計を得る。
+     * 
+     * @return {Number} ターゲット率合計
+     */
+    Game_Unit.prototype.tgrSumWithRange = function(range) {
+        return this.aliveMembersWithRange(range).reduce((r, member) => r + member.tgr, 0);
+    };
+
+    /**
+     * 射程距離を加味した、ランダムなターゲットを得る。
+     * 
+     * @param {Number} range 射程距離
+     * @return {Game_Battler} ランダムなターゲット
+     */
+    Game_Unit.prototype.randomTargetWithRange = function(range) {
+        let tgrRand = Math.random() * this.tgrSumWithRange(range);
+        let target = null;
+        for (const member of this.aliveMembersWithRange(range)) {
+            tgrRand -= member.tgr;
+            if (tgrRand <= 0 && !target) {
+                target = member;
+            }
+        }
+        return target;
+    };
+
+    /**
+     * 射程距離を加味したランダムな死亡ターゲットを得る。
+     * 
+     * @param {Number} range 射程距離
+     * @return {Game_Battler} ランダムな死亡ターゲット
+     */
+    Game_Unit.prototype.randomDeadTargetWithRange = function(range) {
+        const members = this.deadMembersWithRange(range);
+        return members.length ? members[Math.randomInt(members.length)] : null;
+    };
+
+    /**
+     * 射程距離を加味したターゲットを得る。
+     * 実際にアクションを起こそうとした際、
+     * 対象が死亡していたら切り替えて使用するための対象を得るためのインタフェース。
+     * 
+     * @param {Number} index インデックス番号
+     * @param {Number} range 射程距離
+     * @return {Game_Battler} indexで指定したメンバーが生存していれば、そのメンバーが返る。
+     *                        生存していなければ、生存メンバーの先頭が返る。
+     */
+    Game_Unit.prototype.smoothTargetWithRange = function(index, range) {
+        const member = this.membersWithRange(range)[Math.max(0, index)];
+        return member && member.isAlive() ? member : this.aliveMembersWithRange(range)[0];
+    };
+
+    /**
+     * 指定された死亡対象を取得する。
+     * 
+     * @param {Number} インデックス番号
+     * @param {Number} 射程距離
+     * @return {Game_Battler} Game_Battlerオブジェクト。
+     *         indexで指定した対象が死亡していない場合、deadMembers()の先頭が返る。
+     */
+    Game_Unit.prototype.smoothDeadTargetWithRange = function(index, range) {
+        const member = this.membersWithRange(range)[Math.max(0, index)];
+        return member && member.isDead() ? member : this.deadMembersWithRange(range)[0];
+    };
+
+    /**
+     * 射程距離を加味した、生存または死亡対象を得る。
+     * 
+     * @param {Number} インデックス番号
+     * @param {Number} 射程距離
+     * @return {Game_Battler} Game_Battlerオブジェクト。
+     *         indexで指定した対象が射程距離外の場合、射程距離内の先頭メンバーを得る。
+     */
+    Game_Unit.prototype.smoothDeadAndAliveTarget = function(index, range) {
+        const member = this.membersWithRange(range)[Math.max(0, index)];
+        if (member && (member.battlePosition() <= range)) {
+            return member;
+        } else {
+            this.membersWithRange(range)[0];
+        }
     };
     //------------------------------------------------------------------------------
     // BattleMamager
@@ -633,6 +1069,110 @@
                 this.addCommand($dataSkills[moveToRearSkillId].name,
                     "moveToRear", $gameParty.canMoveToRear(index));
             }
+        }
+    };
+    //------------------------------------------------------------------------------
+    // Window_BattleEnemy
+
+    const _Window_BattleEnemy_initialize = Window_BattleEnemy.prototype.initialize;
+
+    /**
+     * Window_BattleEnemyを構築する。
+     * 
+     * @param {Rectangle} rect ウィンドウ矩形領域
+     */
+    Window_BattleEnemy.prototype.initialize = function(rect) {
+        _Window_BattleEnemy_initialize.call(this, ...arguments);
+        this._actionRangeDistance = 0;
+    };
+
+    /**
+     * 現在の選択が選択可能かどうかを取得する。
+     * 
+     * @return {Boolean} 選択可能な場合にtrue, それ以外はfalse
+     * !!!overwrite!!!
+     */
+    Window_BattleEnemy.prototype.isCurrentItemEnabled = function() {
+        return isEnabled(this.enemy());
+    };
+
+    const _Window_BattleEnemy_isEnabled = Window_BattleEnemy.prototype.isEnabled;
+
+    /**
+     * 項目が選択可能かどうかを取得する。
+     * 
+     * @param {Game_Enemy} enemy 選択可否判定するエネミー
+     */
+    Window_BattleEnemy.prototype.isEnabled = function(enemy) {
+        return _Window_BattleEnemy_isEnabled.call(this, ...arguments)
+                && this.inSubectRangeDistance(enemy);
+    };
+
+    /**
+     * 項目がスキルの射程内かどうかを判定する。
+     * 
+     * @param {Game_Enemy} enemy 選択可否判定するエネミー
+     */
+    Window_BattleEnemy.prototype.inSubectRangeDistance = function(enemy) {
+        return enemy && (enemy.battlePosition() < this._actionRangeDistance);
+    };
+
+    const _Window_BattleEnemy_drawItem = Window_BattleEnemy.prototype.drawItem;
+    /**
+     * 項目を描画する。
+     * 
+     * @param {Number} index インデックス番号
+     */
+    Window_BattleEnemy.prototype.drawItem = function(index) {
+        const enemy = this._enemies[index];
+        this.changePaintOpacity(this.isEnabled(enemy));
+        _Window_BattleEnemy_drawItem.call(this, index);
+    };
+
+    const _Window_BattleEnemy_refresh = Window_BattleEnemy.prototype.refresh;
+    /**
+     * ウィンドウを更新する。
+     */
+    Window_BattleEnemy.prototype.refresh = function() {
+        _Window_BattleEnemy_refresh.call(this);
+        const action = BattleManager.inputtingAction();
+        this._actionRangeDistance = action.rangeDistanceForUnit($gameTroop);
+    };
+
+    const _Window_BattleEnemy_select = Window_BattleEnemy.prototype.select;
+
+    /**
+     * 対象のエネミーを選択する。
+     * 
+     * @param {Number} index インデックス番号
+     * !!!overwrite!!!
+     */
+    Window_BattleEnemy.prototype.select = function(index) {
+        Window_Selectable.prototype.select.call(this, index);
+
+        const action = BattleManager.inputtingAction();
+        if (action.isForRow()) {
+            $gameTroop.selectRow(this.enemy().battlePosition());
+        } else {
+            $gameTroop.select(this.enemy());
+        }
+    };
+
+    //------------------------------------------------------------------------------
+    // Scene_BattleActor
+    /**
+     * 選択インデックスを設定する。
+     * 
+     * @param {Number} index インデックス番号
+     * !!!overwrite!!!
+     */
+    Window_BattleActor.prototype.select = function(index) {
+        Window_BattleStatus.prototype.select.call(this, index);
+        const action = BattleManager.inputtingAction();
+        if (action.isForRow()) {
+            $gameParty.selectRow(this.actor().battlePosition());
+        } else {
+            $gameParty.select(this.actor(index));
         }
     };
     //------------------------------------------------------------------------------

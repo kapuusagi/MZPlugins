@@ -27,7 +27,8 @@ __TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
 |定義名|flag ID|説明|
 |---|---|---|
 ||0～4|ベーシックシステムで使用|
-|EFFECT_IGNORE_MOVE_BATTLEPOSITION|ノックバックなどの効果を防止する。|
+|EFFECT_IGNORE_MOVE_BATTLEPOSITION|100|ノックバックなどの効果を防止する。|
+|FLAG_ID_SKILLLONGRANGE|101|常にロングレンジになる|
 
 ## エフェクトコード
 
