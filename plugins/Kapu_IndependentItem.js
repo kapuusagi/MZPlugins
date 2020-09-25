@@ -181,18 +181,18 @@
 (() => {
     const pluginName = "Kapu_IndependentItem";
     const parameters = PluginManager.parameters(pluginName);
-    const independentItemCount = Number(parameters['independentItemCount']) || 0;
-    const independentItemStartIndex = Number(parameters['independentItemStartIndex']) || 1000;
-    const independentItemStockCount = Number(parameters['independentItemStockCount']) || 200;
-    const independentItemDefault = parameters['independentItemDefault'] || false;
-    const independentWeaponCount = Number(parameters['independentWeaponCount']) || 0;
-    const independentWeaponStartIndex = Number(parameters['independentWeaponStartIndex']) || 1000;
-    const independentWeaponStockCount = Number(parameters['independentWeaponStockCount']) || 200;
-    const independentWeaponDefault = parameters['independentWeaponDefault'] || false;
-    const independentArmorCount = Number(parameters['independentArmorCount']) || 0;
-    const independentArmorStartIndex = Number(parameters['independentArmorStartIndex']) || 1000;
-    const independentArmorStockCount = Number(parameters['independentArmorStockCount']) || 200;
-    const independentArmorDefault = parameters['independentArmorDefault'] || false;
+    const independentItemCount = Number(parameters["independentItemCount"]) || 0;
+    const independentItemStartIndex = Number(parameters["independentItemStartIndex"]) || 1000;
+    const independentItemStockCount = Number(parameters["independentItemStockCount"]) || 200;
+    const independentItemDefault = parameters["independentItemDefault"] || false;
+    const independentWeaponCount = Number(parameters["independentWeaponCount"]) || 0;
+    const independentWeaponStartIndex = Number(parameters["independentWeaponStartIndex"]) || 1000;
+    const independentWeaponStockCount = Number(parameters["independentWeaponStockCount"]) || 200;
+    const independentWeaponDefault = parameters["independentWeaponDefault"] || false;
+    const independentArmorCount = Number(parameters["independentArmorCount"]) || 0;
+    const independentArmorStartIndex = Number(parameters["independentArmorStartIndex"]) || 1000;
+    const independentArmorStockCount = Number(parameters["independentArmorStockCount"]) || 200;
+    const independentArmorDefault = parameters["independentArmorDefault"] || false;
 
     //-------------------------------------------------------------------------
     // Scene_Boot
@@ -202,15 +202,15 @@
      */
     Scene_Boot.prototype.start = function () {
         if ($dataItems.length >= independentItemStartIndex) {
-            throw new Error('independentItemStartIndex is illegal. (< $dataItem.length)');
+            throw new Error("independentItemStartIndex is illegal. (< $dataItem.length)");
         }
         DataManager.processIndependentNotetag($dataItems, independentItemDefault);
         if ($dataWeapons.length >= independentWeaponStartIndex) {
-            throw new Error('independentWeaponStartIndex is illegal. (< $dataWeapons.length');
+            throw new Error("independentWeaponStartIndex is illegal. (< $dataWeapons.length");
         }
         DataManager.processIndependentNotetag($dataWeapons, independentWeaponDefault);
         if ($dataArmors.length >= independentArmorStartIndex) {
-            throw new Error('independentArmorStartIndex is illegal. (< $dataArmors.length');
+            throw new Error("independentArmorStartIndex is illegal. (< $dataArmors.length");
         }
         DataManager.processIndependentNotetag($dataArmors, independentArmorDefault);
 
@@ -403,7 +403,7 @@
         let newItem = JsonEx.makeDeepCopy(baseItem);
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
-        newItem.note = '';
+        newItem.note = "";
         DataManager.initializeIndependentCommon(newItem, baseItem);
         DataManager.initializeIndependentItem(newItem, baseItem);
         return newItem;
@@ -451,7 +451,7 @@
         let newItem = JsonEx.makeDeepCopy(baseItem);
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
-        newItem.note = '';
+        newItem.note = "";
         DataManager.initializeIndependentCommon(newItem, baseItem);
         DataManager.initializeIndependentWeapon(newItem, baseItem);
         return newItem;
@@ -498,7 +498,7 @@
         let newItem = JsonEx.makeDeepCopy(baseItem);
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
-        newItem.note = '';
+        newItem.note = "";
         DataManager.initializeIndependentCommon(newItem, baseItem);
         DataManager.initializeIndependentArmor(newItem, baseItem);
         return newItem;
@@ -643,12 +643,12 @@
      */
     const _resetIndependentItemData = function(item, baseItem) {
         for (const key of Object.keys(baseItem)) {
-            if (key !== 'id') {
+            if (key !== "id") {
                 delete item[key];
             }
         }
         for (const key of Object.keys(baseItem)) {
-            if (key !== 'id') {
+            if (key !== "id") {
                 item[key] = JsonEx.makeDeepCopy(baseItem[key]);
             }
         }

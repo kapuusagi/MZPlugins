@@ -74,7 +74,7 @@
  * ・前衛/後衛の設定を追加。
  * ・戦闘中の前衛・後衛の切り替え
  * ・プラグインコマンドによる前衛・後衛の切り替え
- *   '前に移動コマンドスキルID' '後ろに移動コマンドスキルID'を指定すること。
+ *   "前に移動コマンドスキルID" "後ろに移動コマンドスキルID"を指定すること。
  *   スキル対象は自分自身にする。
  * ・武器・スキルの射程の概念追加。
  *   S:前衛to前衛
@@ -155,15 +155,15 @@
  * Version.0.1.0 動作未確認。まだまだ作りかけ。
  */
 (() => {
-    const pluginName = 'Kapu_RangeDistance';
+    const pluginName = "Kapu_RangeDistance";
     const parameters = PluginManager.parameters(pluginName);
-    const moveToFrontSkillId = Number(parameters['moveFrontSkillId']) || 0;
-    const moveToRearSkillId = Number(parameters['moveRearSkillId']) || 0;
-    Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION = Number(parameters['blockMoveFlagId']) || 0;
-    Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE = Number(parameters['longRangeFlagId']) || 0;
-    Game_Action.EFFECT_MOVE_BATTLE_POSITION = Number(parameters['effectCode']) || 0;
+    const moveToFrontSkillId = Number(parameters["moveFrontSkillId"]) || 0;
+    const moveToRearSkillId = Number(parameters["moveRearSkillId"]) || 0;
+    Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION = Number(parameters["blockMoveFlagId"]) || 0;
+    Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE = Number(parameters["longRangeFlagId"]) || 0;
+    Game_Action.EFFECT_MOVE_BATTLE_POSITION = Number(parameters["effectCode"]) || 0;
 
-    PluginManager.registerCommand(pluginName, 'setEnemyBattlePosition', args => {
+    PluginManager.registerCommand(pluginName, "setEnemyBattlePosition", args => {
         const no = Number(args.no) || 0;
         const position = Number(args.position) || 0;
         if ((no >= 0) && (position >= 0) && (position <= 1)) {
@@ -173,7 +173,7 @@
         }
     });
 
-    PluginManager.registerCommand(pluginName, 'setActorBattlePosition', args => {
+    PluginManager.registerCommand(pluginName, "setActorBattlePosition", args => {
         const no = Number(args.no) || 0;
         const position = Number(args.position) || 0;
         if ((no >= 0) && (position >= 0) && (position <= 1)) {
@@ -755,7 +755,7 @@
     Game_Unit.prototype.changeBattlePosition = function(index, newPosition) {
         const battler = this.members(index);
         if (battler) {
-            if (typeof newPosition === 'undefined') {
+            if (typeof newPosition === "undefined") {
                 const currentPosition = battler.battlePosition();
                 newPosition = (currentPosition > 0) ? 0 : 1;
             } 
@@ -1186,10 +1186,10 @@
     Scene_Battle.prototype.createActorCommandWindow = function() {
         _Scene_Battle_createActorCommandWindow.call(this);
         if (moveToFrontSkillId) {
-            this._actorCommandWindow.setHandler('moveToFront', this.commandMoveToFront.bind(this));
+            this._actorCommandWindow.setHandler("moveToFront", this.commandMoveToFront.bind(this));
         }
         if (moveToRearSkillId) {
-            this._actorCommandWindow.setHandler('moveToRear', this.commandMoveToRear.bind(this));
+            this._actorCommandWindow.setHandler("moveToRear", this.commandMoveToRear.bind(this));
         }
     };
 

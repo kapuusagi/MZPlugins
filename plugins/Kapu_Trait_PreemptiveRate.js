@@ -51,7 +51,7 @@
     const pluginName = "Kapu_Trait_PreemptiveRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.ABILITY_PREEMPTIVE_RATE = Number(parameters['TraitId']) || 0;
+    Game_Party.ABILITY_PREEMPTIVE_RATE = Number(parameters["TraitId"]) || 0;
 
     //------------------------------------------------------------------------------
     // DataManager

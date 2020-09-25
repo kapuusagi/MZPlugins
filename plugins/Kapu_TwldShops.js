@@ -90,11 +90,11 @@ TWLD = TWLD || {};
 TWLD.Shop = TWLD.Shop || {};
 
 (() => {
-    'use strict';
+    "use strict";
 
-    const pluginName = 'Kapu_TwldShops';
+    const pluginName = "Kapu_TwldShops";
 
-    PluginManager.registerCommand(pluginName, 'openShop', args => {
+    PluginManager.registerCommand(pluginName, "openShop", args => {
         id = Number(args.id) || 0;
         if (id && id < $dataShops.length) {
             TWLD.Shop.isBoughtAny = false;
@@ -104,11 +104,11 @@ TWLD.Shop = TWLD.Shop || {};
         }
     });
     
-    PluginManager.registerCommand(pluginName, 'updateShop', args => {
+    PluginManager.registerCommand(pluginName, "updateShop", args => {
         $gameShops.updateShopItems(args.id);
     });
 
-    PluginManager.registerCommand(pluginName, 'setShopLevel', args => {
+    PluginManager.registerCommand(pluginName, "setShopLevel", args => {
 
     });
 
@@ -670,9 +670,9 @@ TWLD.Shop = TWLD.Shop || {};
             rect.width -= this.textPadding();
             this.changePaintOpacity(this.isEnabled(item));
             this.drawItemName(item, rect.x, rect.y, nameWidth);
-            this.drawText('在庫:' + this.stok(item), rect.x + nameWidth, rect.y, numWidth, 'right');
+            this.drawText("在庫:" + this.stok(item), rect.x + nameWidth, rect.y, numWidth, "right");
             this.drawText(this.price(item), rect.x + nameWidth + numWidth,
-                          rect.y, priceWidth, 'right');
+                          rect.y, priceWidth, "right");
             this.changePaintOpacity(true);
         }
     };
@@ -702,7 +702,7 @@ TWLD.Shop = TWLD.Shop || {};
     Scene_TwldShop.prototype.prepare = function(id, mode, clerkFileName) {
         this._shop = $gameShops.getShop(id); // Game_Shopオブジェクト
         this._mode = mode;
-        this._clerkFileName = clerkFileName || '';
+        this._clerkFileName = clerkFileName || "";
     };
 
     /**
@@ -743,16 +743,16 @@ TWLD.Shop = TWLD.Shop || {};
      */
     Scene_TwldShop.prototype.createCommandWindow = function() {
         var commandList = [];
-        commandList.push(new GenericCommand(TextManager.buy, 'buy', this.isEnableBuy()));
-        commandList.push(new GenericCommand(TextManager.sell, 'sell', this.isEnableSell()));
-        commandList.push(new GenericCommand(TextManager.cancel, 'cancel', true));
+        commandList.push(new GenericCommand(TextManager.buy, "buy", this.isEnableBuy()));
+        commandList.push(new GenericCommand(TextManager.sell, "sell", this.isEnableSell()));
+        commandList.push(new GenericCommand(TextManager.cancel, "cancel", true));
 
         var x = this._goldWindow.x;
         var y = this._goldWindow.y + this._goldWindow.height;
         var width = this._goldWindow.width;
         this._commandWindow = new Window_CommandGeneric(x, y, commandList, width);
-        this._commandWindow.setHandler('ok',     this.onCommandOk.bind(this));
-        this._commandWindow.setHandler('cancel', this.onCommandCancel.bind(this));
+        this._commandWindow.setHandler("ok",     this.onCommandOk.bind(this));
+        this._commandWindow.setHandler("cancel", this.onCommandCancel.bind(this));
         this.addWindow(this._commandWindow);
     };
 
@@ -766,9 +766,9 @@ TWLD.Shop = TWLD.Shop || {};
         var height = Graphics.boxHeight - y;
         this._buyWindow = new Window_TwldShopBuy(x, y, width, height, this._shop);
         this._buyWindow.hide();
-        this._buyWindow.setHandler('ok', this.onBuyOk.bind(this));
-        this._buyWindow.setHandler('cancel', this.onBuyCancel.bind(this));
-        this._buyWindow.setHandler('itemchange', this.onBuyItemChange.bind(this));
+        this._buyWindow.setHandler("ok", this.onBuyOk.bind(this));
+        this._buyWindow.setHandler("cancel", this.onBuyCancel.bind(this));
+        this._buyWindow.setHandler("itemchange", this.onBuyItemChange.bind(this));
         this.addWindow(this._buyWindow);
     };
 
@@ -782,9 +782,9 @@ TWLD.Shop = TWLD.Shop || {};
         var height = Graphics.boxHeight - y;
         this._sellWindow = new Window_ShopSell(x, y, width, height);
         this._sellWindow.hide();
-        this._sellWindow.setHandler('ok', this.onSellOk.bind(this));
-        this._sellWindow.setHandler('cancel', this.onSellCancel.bind(this));
-        this._sellWindow.setHandler('itemchange', this.onSellItemChange.bind(this));
+        this._sellWindow.setHandler("ok", this.onSellOk.bind(this));
+        this._sellWindow.setHandler("cancel", this.onSellCancel.bind(this));
+        this._sellWindow.setHandler("itemchange", this.onSellItemChange.bind(this));
         this.addWindow(this._sellWindow);
     };
 
@@ -793,10 +793,10 @@ TWLD.Shop = TWLD.Shop || {};
      */
     Scene_TwldShop.prototype.createCategoryWindow = function() {
         var commandList = [];
-        commandList.push(new GenericCommand(TextManager.item, 'item', true));
-        commandList.push(new GenericCommand(TextManager.weapon, 'weapon', true));
-        commandList.push(new GenericCommand(TextManager.armor, 'armor', true));
-        commandList.push(new GenericCommand(TextManager.keyItem, 'keyItem', true));
+        commandList.push(new GenericCommand(TextManager.item, "item", true));
+        commandList.push(new GenericCommand(TextManager.weapon, "weapon", true));
+        commandList.push(new GenericCommand(TextManager.armor, "armor", true));
+        commandList.push(new GenericCommand(TextManager.keyItem, "keyItem", true));
 
         var x = this._commandWindow.x;
         var y = this._commandWindow.y + this._commandWindow.height;
@@ -804,9 +804,9 @@ TWLD.Shop = TWLD.Shop || {};
         this._categoryWindow = new Window_CommandGeneric(x, y, commandList, width);
         this._categoryWindow.deactivate();
         this._categoryWindow.hide();
-        this._categoryWindow.setHandler('ok', this.onCategoryOk.bind(this));
-        this._categoryWindow.setHandler('cancel', this.onCategoryCancel.bind(this));
-        this._categoryWindow.setHandler('itemchange', this.onCategoryItemChange.bind(this));
+        this._categoryWindow.setHandler("ok", this.onCategoryOk.bind(this));
+        this._categoryWindow.setHandler("cancel", this.onCategoryCancel.bind(this));
+        this._categoryWindow.setHandler("itemchange", this.onCategoryItemChange.bind(this));
         this.addWindow(this._categoryWindow);
     };
 
@@ -821,8 +821,8 @@ TWLD.Shop = TWLD.Shop || {};
         this._numberWindow.x = (Graphics.boxWidth - this._numberWindow.width) / 2;
         this._numberWindow.y = (Graphics.boxHeight - this._numberWindow.height) / 2;
         this._numberWindow.hide();
-        this._numberWindow.setHandler('ok', this.onNumberOk.bind(this));
-        this._numberWindow.setHandler('cancel', this.onNumberCancel.bind(this));
+        this._numberWindow.setHandler("ok", this.onNumberOk.bind(this));
+        this._numberWindow.setHandler("cancel", this.onNumberCancel.bind(this));
         this.addWindow(this._numberWindow);
     };
 
@@ -847,7 +847,7 @@ TWLD.Shop = TWLD.Shop || {};
      * 店員画像を追加する。
      */
     Scene_TwldShop.prototype.addClerkSprite = function() {
-        console.log('clerk bitmap loaded.');
+        console.log("clerk bitmap loaded.");
         this._clerkSprite = new Sprite();
         this._clerkSprite.bitmap = this._clerkBitmap;
         this._clerkSprite.x = Graphics.boxWidth - this._clerkBitmap.width;
@@ -972,7 +972,7 @@ TWLD.Shop = TWLD.Shop || {};
      */
     Scene_TwldShop.prototype.onCommandOk = function() {
         switch (this._commandWindow.currentSymbol()) {
-            case 'buy':
+            case "buy":
                 this._commandWindow.deactivate();
                 this._helpWindow.setItem(this._buyWindow.item());
                 this._buyWindow.setMoney(this.money());
@@ -980,7 +980,7 @@ TWLD.Shop = TWLD.Shop || {};
                 this._buyWindow.show();
                 this._buyWindow.activate();
                 break;
-            case 'sell':
+            case "sell":
                 this._commandWindow.deactivate();
                 this._sellWindow.setCategory(this._categoryWindow.currentSymbol());
                 this._sellWindow.show();
@@ -1097,10 +1097,10 @@ TWLD.Shop = TWLD.Shop || {};
         // シャリーン
         SoundManager.playShop();
         switch (this._commandWindow.currentSymbol()) {
-            case 'buy':
+            case "buy":
                 this.doBuy(this._numberWindow.number());
                 break;
-            case 'sell':
+            case "sell":
                 this.doSell(this._numberWindow.number());
                 break;
         }
@@ -1147,12 +1147,12 @@ TWLD.Shop = TWLD.Shop || {};
     Scene_TwldShop.prototype.onTransactionEnd = function() {
         this._numberWindow.hide();
         switch (this._commandWindow.currentSymbol()) {
-            case 'buy':
+            case "buy":
                 this._buyWindow.refresh();
                 this._helpWindow.setItme(this._buyWindow.item());
                 this._buyWindow.activate();
                 break;
-            case 'sell':
+            case "sell":
                 this._sellWindow.refresh();
                 this._helpWindow.setItem(this._sellWindow.item());
                 this._sellWindow.activate();
@@ -1166,10 +1166,10 @@ TWLD.Shop = TWLD.Shop || {};
     Scene_TwldShop.prototype.onTransactionCancel = function() {
         this._numberWindow.hide();
         switch (this._commandWindow.currentSymbol()) {
-            case 'buy':
+            case "buy":
                 this._buyWindow.activate();
                 break;
-            case 'sell':
+            case "sell":
                 this._sellWindow.activate();
                 break;
         }

@@ -16,7 +16,7 @@
  * @text メッセージ
  * @desc 表示するメッセージ
  * @type string
- * @default 'Hello world'
+ * @default "Hello world"
  * 
  * @help 
  * プラグインコマンドでメッセージを表示するだけのプラグイン。
@@ -28,15 +28,15 @@
  * Version.1.0.0 初版
  */
 (() => {
-    'use strict'
+    "use strict"
 
-    const pluginName = 'Kapu_HelloWorld';
+    const pluginName = "Kapu_HelloWorld";
 
-    PluginManager.registerCommand(pluginName, 'Message', args => {
+    PluginManager.registerCommand(pluginName, "Message", args => {
         if (args.msg) {
             $gameMessage.add(args.msg);
         } else {
-            $gameMessage.add('Hello world.');
+            $gameMessage.add("Hello world.");
         }
     });
 

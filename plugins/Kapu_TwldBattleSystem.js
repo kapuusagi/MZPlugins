@@ -93,14 +93,14 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = 'Kapu_TwldBattleSystem';
+    const pluginName = "Kapu_TwldBattleSystem";
     const parameters = PluginManager.parameters(pluginName);
-    const maxBattleMembers = Number(parameters['maxBattleMembers']) || 4;
-    const tpbCastLabel = parameters['tpbCastLabel'] || 'Casting';
-    const gaugeLabelHpFontSize = parameters['labelHpFontSize'] || 16;
-    const gaugeValueHpFontSize = parameters['valueHpFontSize'] || 24;
-    const gaugeLabelFontSize = parameters['labelFontSize'] || 12;
-    const gaugeValueFontSize = parameters['valueFontSize'] || 12;
+    const maxBattleMembers = Number(parameters["maxBattleMembers"]) || 4;
+    const tpbCastLabel = parameters["tpbCastLabel"] || "Casting";
+    const gaugeLabelHpFontSize = parameters["labelHpFontSize"] || 16;
+    const gaugeValueHpFontSize = parameters["valueHpFontSize"] || 24;
+    const gaugeLabelFontSize = parameters["labelFontSize"] || 12;
+    const gaugeValueFontSize = parameters["valueFontSize"] || 12;
 
 
     const listWindowWidth = 816;
@@ -110,7 +110,7 @@
     const statusAreaPadding = 16;
     const statusAreaHeight = 220;
 
-    PluginManager.registerCommand(pluginName, 'setBattlePicture', args => {
+    PluginManager.registerCommand(pluginName, "setBattlePicture", args => {
         const actorId = args.actorId;
         const fileName = args.fileName;
         if (actorId) {
@@ -137,7 +137,7 @@
      * @return {Boolean} TPBキャスト中の場合にはtrue, それ以外はfalse
      */
     Game_Battler.prototype.isTpbCasting = function() {
-        return (this._tpbState === 'casting');
+        return (this._tpbState === "casting");
     };
 
     /**
@@ -159,7 +159,7 @@
      */
     Game_Actor.prototype.initMembers = function() {
         _Game_Actor_initMembers.call(this, ...arguments);
-        this._battlePicture = '';
+        this._battlePicture = "";
     };
     const _Game_Actor_setup = Game_Actor.prototype.setup;
     /**
@@ -405,7 +405,7 @@
      * 現在値を更新する。
      */
     Sprite_Gauge.prototype.currentValue = function() {
-        if (this._battler && this._statusType === 'time' && this._battler.isTpbCasting()) {
+        if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
             return this._battler.tpbCastTime();
         } else {
             return _Sprite_Gauge_currentValue.call(this);
@@ -420,7 +420,7 @@
      * @return {string} カラー
      */
     Sprite_Gauge.prototype.gaugeColor1 = function() {
-        if (this._battler && this._statusType === 'time' && this._battler.isTpbCasting()) {
+        if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
             return ColorManager.tpGaugeColor2();
         } else {
             return _Sprite_Gauge_gaugeColor1.call(this);
@@ -435,7 +435,7 @@
      * @return {String} カラー
      */
     Sprite_Gauge.prototype.gaugeColor2 = function() {
-        if (this._battler && this._statusType === 'time' && this._battler.isTpbCasting()) {
+        if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
             return ColorManager.mpGaugeColor2();
         } else {
             return _Sprite_Gauge_gaugeColor2.call(this);
@@ -474,7 +474,7 @@
         const width = this.bitmapWidth();
         const height = this.bitmapHeight();
         this.setupValueFont();
-        this.bitmap.drawText(label, 0, 0, width, height, 'center');
+        this.bitmap.drawText(label, 0, 0, width, height, "center");
     };
 
     /**
@@ -544,7 +544,7 @@
         const width = this.bitmapWidth();
         const height = this.bitmapHeight();
         this.setupValueFont();
-        const txt = String(currentValue).padStart(4) + '/' + String(maxValue).padStart(4);
+        const txt = String(currentValue).padStart(4) + "/" + String(maxValue).padStart(4);
         this.bitmap.drawText(txt, 0, 0, width, height, "right");
     };
 
@@ -624,7 +624,7 @@
         const maxWidth = 48;
         this.bitmap.drawText(String(currentValue).padStart(4), 0, 0, width - maxWidth, height, "right");
         this.setupMaxValueFont();
-        this.bitmap.drawText('/' + String(currentValue).padStart(4), width - maxWidth, 0, maxWidth, height, 'right');
+        this.bitmap.drawText("/" + String(currentValue).padStart(4), width - maxWidth, 0, maxWidth, height, "right");
     };
 
     /**
@@ -1038,7 +1038,7 @@
     Sprite_ActorHud.prototype.createActiveSelSprite = function() {
         this._activeSelSprite = new Sprite();
         try {
-            this._activeSelSprite.bitmap = ImageManager.loadBitmap('img/hud/', 'ActiveHud');
+            this._activeSelSprite.bitmap = ImageManager.loadBitmap("img/hud/", "ActiveHud");
             this._activeSelSprite.x = 0;
             this._activeSelSprite.y = 6;
         }
@@ -1069,7 +1069,7 @@
      */
     Sprite_ActorHud.prototype.createStatusBackSprite = function() {
         this._statusBackSprite = new Sprite();
-        this._statusBackSprite.bitmap = ImageManager.loadBitmap('img/hud/', 'StatusBackground')
+        this._statusBackSprite.bitmap = ImageManager.loadBitmap("img/hud/", "StatusBackground")
         this._statusBackSprite.anchor.x = 0.5;
         this._statusBackSprite.anchor.y = 1;
         this._statusBackSprite.x = 0;
@@ -1156,10 +1156,10 @@
             if (battler) {
                 this.setHudPosition(battler.index());
                 this._nameSprite.setup(battler);
-                this._hpGaugeSprite.setup(battler, 'hp');
-                this._mpGaugeSprite.setup(battler, 'mp');
-                this._tpGaugeSprite.setup(battler, 'tp');
-                this._tpbGaugeSprite.setup(battler, 'time');
+                this._hpGaugeSprite.setup(battler, "hp");
+                this._mpGaugeSprite.setup(battler, "mp");
+                this._tpGaugeSprite.setup(battler, "tp");
+                this._tpbGaugeSprite.setup(battler, "time");
                 this._stateIconSprite.setup(battler);
             } else {
                 this._mainSprite.bitmap = null;
@@ -1392,7 +1392,7 @@
         this.x = Graphics.boxWidth; // 右端
         this.y = Graphics.boxHeight; // 下端を揃える。
         this._battler = null;
-        this._pictureName = '';
+        this._pictureName = "";
         this._horizontalAlphaFilter = new DisplayBattlePictureFilter();
         this.filters = [];
         this.filters.push(this._horizontalAlphaFilter)
@@ -1446,7 +1446,7 @@
             try {
                 return ImageManager.loadPicture(this._pictureName);
                 // const bitmap = new Bitmap(640, 800);
-                // bitmap.fillAll('black');
+                // bitmap.fillAll("black");
                 // return bitmap;
             }
             catch (e) {
