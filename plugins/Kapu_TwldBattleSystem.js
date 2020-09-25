@@ -1485,13 +1485,13 @@
         if (this._battler) {
             const distance = 240;
             const movePos = Graphics.boxWidth - distance;
-            const addCount = Math.max(1, Math.floor(distance / 30));
+            const addCount = Math.max(1, Math.floor(distance / 20));
             if (this._battler.isInputting()) {
                 if (this.x > movePos) {
                     this.x -= addCount;
                 }
                 if (this.opacity < 255) {
-                    this.opacity += 5;
+                    this.opacity += 10;
                     if (this.opacity >= 255) {
                         this.opacity = 255;
                     }
