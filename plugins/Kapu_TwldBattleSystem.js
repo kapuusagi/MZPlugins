@@ -1218,6 +1218,8 @@ function Sprite_BattleHudPicture() {
             this._tpGaugeSprite.setup(battler, "tp");
             this._tpbGaugeSprite.setup(battler, "time");
             this._stateIconSprite.setup(battler);
+            this._mainColorFilter.setBrightness(this.mainSpriteBrightness());
+            this._mainSprite.opacity = this.mainSpriteOpacity();
         } else {
             this._mainSprite.bitmap = null;
         }
@@ -1356,14 +1358,27 @@ function Sprite_BattleHudPicture() {
         const cw = Math.min(pw, this.statusAreaWidth());
         const ch = Math.min(ph, this.statusAreaHeight());
         const cx = (faceIndex % 4) * pw + Math.min(0, (this.statusAreaWidth() - cw) / 2) + 1;
-        const cy = Math.floor(faceIndex / 4) * ph + Math.min(0, (statusAreaHeight - ch) / 2);
+        const cy = Math.floor(faceIndex / 4) * ph + Math.min(0, (this.statusAreaHeight() - ch) / 2);
 
-        this._mainSprite.x = 0;
-        this._mainSprite.y = -(statusAreaHeight - ph);
+        const pos = this.mainSpritePosition();
+        this._mainSprite.x = pos.x;
+        this._mainSprite.y = pos.y;
 
         this._mainSprite.setFrame(cx, cy, cw, ch);
         this._faceName = faceName;
         this._faceIndex = faceIndex;
+    };
+
+
+    /**
+     * メインスプライトの位置を得る。
+     * 
+     * @return {Point} スプライトの位置
+     */
+    Sprite_BattleHudActor.prototype.mainSpritePosition = function() {
+        const x = 0;
+        const y = -(this.statusAreaHeight() - ImageManager.faceHeight);
+        return new Point(x, y);
     };
 
     /**
@@ -1379,7 +1394,7 @@ function Sprite_BattleHudPicture() {
      * @return {Number} ポップアップ位置y
      */
     Sprite_BattleHudActor.prototype.damageOffsetY = function() {
-        return ImageManager.faceHeight - statusAreaHeight;
+        return ImageManager.faceHeight - this.statusAreaHeight();
     };
     //------------------------------------------------------------------------------
     // DisplayBattlePictureFilter
