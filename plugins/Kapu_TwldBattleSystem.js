@@ -74,10 +74,24 @@
  * ■ 注意事項 
  * フロントビュー固定になります。
  * 
+ * ■ 開発者向け？
+ * 以下のモジュールは、他のプラグインとの兼ね合いで変更できるよう、
+ * 匿名メソッドから外に出している。
+ * Sprite_BattleHudHpGauge
+ *   UI上で、1アクターのHPゲージを表示するスプライト
+ * Sprite_BattleHudMpTpGauge
+ *   UI上で、1アクターのMP/TPゲージを表示するスプライト
+ * Sprite_BattleHudActorName
+ *   UI上で、1アクターの名前を表示するスプライト。
+ * Sprite_HudStateIcons
+ *   UI上で、1アクターのステートを表示するスプライト。
+ * Sprite_BattleHudActor
+ *   UI上で、1アクターあたりの表示をするスプライト。
+ * 
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * プラグインコマンドはありません。
  * 
  * ============================================
  * ノートタグ
@@ -92,6 +106,89 @@
  * ============================================
  * Version.0.1.0 動作未確認。
  */
+/**
+ * Sprite_BattleHudHpGauge
+ * HPゲージ。
+ */
+function Sprite_BattleHudHpGauge() {
+    this.initialize(...arguments);
+};
+
+Sprite_BattleHudHpGauge.prototype = Object.create(Sprite_Gauge.prototype);
+Sprite_BattleHudHpGauge.prototype.constructor = Sprite_BattleHudHpGauge;
+
+/**
+ * Sprite_BattleHudMpTpGauge。
+ * MP/TPゲージ
+ */
+function Sprite_BattleHudMpTpGauge() {
+    this.initialize(...arguments);
+};
+
+Sprite_BattleHudMpTpGauge.prototype = Object.create(Sprite_Gauge.prototype);
+Sprite_BattleHudMpTpGauge.prototype.constructor = Sprite_BattleHudMpTpGauge;
+
+/**
+ * Sprite_BattleHudTpgGauge。
+ * TPBゲージ
+ */
+function Sprite_BattleHudTpgGauge() {
+    this.initialize(...arguments);
+};
+
+Sprite_BattleHudTpgGauge.prototype = Object.create(Sprite_Gauge.prototype);
+Sprite_BattleHudTpgGauge.prototype.constructor = Sprite_BattleHudTpgGauge;
+
+
+/**
+ * Sprite_BattleHudActorName。
+ * Sprite_Nameから表示を変更するために派生して使う。
+ */
+function Sprite_BattleHudActorName() {
+    this.initialize(...arguments);
+};
+
+Sprite_BattleHudActorName.prototype = Object.create(Sprite_Name.prototype);
+Sprite_BattleHudActorName.prototype.constructor = Sprite_BattleHudActorName;
+
+/**
+ * Sprite_HudStateIcons。
+ * ステートアイコンを表示するためのスプライト。
+ * 一度に4つずつ表示するために用意したが、
+ * Sprite_StateIconを複数並べる方式の方がリソース節約になるかもしれない。
+ */
+function Sprite_HudStateIcons() {
+    this.initialize(...arguments);
+};
+
+Sprite_HudStateIcons.prototype = Object.create(Sprite.prototype);
+Sprite_HudStateIcons.prototype.constructor = Sprite_HudStateIcons;
+
+/**
+ * Sprite_BattleHudActor
+ * 
+ * アクター情報を表示するHUD。
+ */
+function Sprite_BattleHudActor() {
+    this.initialize(...arguments);
+};
+
+Sprite_BattleHudActor.prototype = Object.create(Sprite_Battler.prototype);
+Sprite_BattleHudActor.prototype.constructor = Sprite_BattleHudActor;
+
+/**
+ * Sprite_BattleHudPicture。
+ * コマンド入力ウィンドウの脇に、でっかく表示するアクター画像のスプライト。
+ */
+function Sprite_BattleHudPicture() {
+    this.initialize(...arguments);
+}
+
+Sprite_BattleHudPicture.prototype = Object.create(Sprite.prototype);
+Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
+
+
+
 (() => {
     const pluginName = "Kapu_TwldBattleSystem";
     const parameters = PluginManager.parameters(pluginName);
@@ -117,6 +214,23 @@
             $gameActors.actor(actorId).setBattlePicture(fileName);
         }
     });
+
+    /**
+     * TPBキャスト中ゲージ色1を得る。
+     * 
+     * @return {String} CSSスタイルの色データ
+     */
+    ColorManager.tpbCastGaugeColor1 = function() {
+        return ColorManager.mpGaugeColor2();
+    };
+    /**
+     * TPBキャスト中ゲージ色2を得る。
+     * 
+     * @return {String} CSSスタイルの色データ
+     */
+    ColorManager.tbpCastGaugeColor2 = function() {
+        return ColorManager.mpGaugeColor2();
+    };
     //------------------------------------------------------------------------------
     // Game_System
     /**
@@ -269,19 +383,19 @@
         }
     };
     //------------------------------------------------------------------------------
-    // Window_BattleActor
-
-    const _Window_BattleActor_initialize = Window_BattleStatus.prototype.initialize;
+    // Window_BattleActor の変更
+    const _Window_BattleActor_initialize = Window_BattleActor.prototype.initialize;
 
     /**
      * Window_BattleActorを初期化する。
+     * 
+     * Note: フレームとウィンドウ背景を表示するためにフックする。
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_BattleActor.prototype.initialize = function(rect) {
         _Window_BattleActor_initialize.call(this, rect);
         this.frameVisible = true;
-        this.openness = 255;
         this._bitmapsReady = 255;
     };
     /**
@@ -349,7 +463,7 @@
     };
 
     //------------------------------------------------------------------------------
-    // Window_BattleEnemy
+    // Window_BattleEnemy の変更
     /**
      * 最大カラム数を得る。
      * 
@@ -379,30 +493,12 @@
     //------------------------------------------------------------------------------
     // Sprite_Gauge
 
-    const _SpriteGauge_currentValue = Sprite_Gauge.prototype.currentValue;
-
-    /**
-     * ゲージのラベルを得る。
-     * 
-     * @return {String} ラベル
-     */
-    Sprite_Gauge.prototype.label = function() {
-        switch (this._statusType) {
-            case "hp":
-                return TextManager.hpA;
-            case "mp":
-                return TextManager.mpA;
-            case "tp":
-                return TextManager.tpA;
-            default:
-                return "";
-        }
-    };
-
     const _Sprite_Gauge_currentValue = Sprite_Gauge.prototype.currentValue;
 
     /**
      * 現在値を更新する。
+     * 
+     * キャスト中はキャストゲージを表示するため、オーバーライドする。
      */
     Sprite_Gauge.prototype.currentValue = function() {
         if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
@@ -421,7 +517,7 @@
      */
     Sprite_Gauge.prototype.gaugeColor1 = function() {
         if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
-            return ColorManager.tpGaugeColor2();
+            return ColorManager.tpbCastGaugeColor1();
         } else {
             return _Sprite_Gauge_gaugeColor1.call(this);
         }
@@ -436,7 +532,7 @@
      */
     Sprite_Gauge.prototype.gaugeColor2 = function() {
         if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
-            return ColorManager.mpGaugeColor2();
+            return ColorManager.tbpCastGaugeColor2();
         } else {
             return _Sprite_Gauge_gaugeColor2.call(this);
         }
@@ -549,22 +645,13 @@
     };
 
     //------------------------------------------------------------------------------
-    // Sprite_HpGauge
-    /**
-     * Sprite_HpGauge
-     * HPゲージ。
-     */
-    function Sprite_HpGauge() {
-        this.initialize(...arguments);
-    };
+    // Sprite_BattleHudHpGauge
 
-    Sprite_HpGauge.prototype = Object.create(Sprite_Gauge.prototype);
-    Sprite_HpGauge.prototype.constructor = Sprite_HpGauge;
 
     /**
-     * Sprite_HpGaugeを初期化する。
+     * Sprite_BattleHudHpGaugeを初期化する。
      */
-    Sprite_HpGauge.prototype.initialize = function() {
+    Sprite_BattleHudHpGauge.prototype.initialize = function() {
         Sprite_Gauge.prototype.initialize.call(this);
     };
     /**
@@ -572,7 +659,7 @@
      * 
      * @return {Number} フォントサイズ
      */
-    Sprite_HpGauge.prototype.labelFontSize = function() {
+    Sprite_BattleHudHpGauge.prototype.labelFontSize = function() {
         return gaugeValueHpFontSize;
     };
 
@@ -581,7 +668,7 @@
      * 
      * @return {Number} X位置
      */
-    Sprite_HpGauge.prototype.gaugeX = function() {
+    Sprite_BattleHudHpGauge.prototype.gaugeX = function() {
         return 16;
     };
 
@@ -590,7 +677,7 @@
      * 
      * @return {Number} フォントサイズ
      */
-    Sprite_HpGauge.prototype.labelFontSize = function() {
+    Sprite_BattleHudHpGauge.prototype.labelFontSize = function() {
         return gaugeLabelHpFontSize;
     };
 
@@ -599,14 +686,14 @@
      * 
      * @return {Number} 値のフォントサイズ。
      */
-    Sprite_HpGauge.prototype.valueFontSize = function() {
+    Sprite_BattleHudHpGauge.prototype.valueFontSize = function() {
         return 24;
     };
 
     /**
      * 
      */
-    Sprite_HpGauge.prototype.maxValueFontSize = function() {
+    Sprite_BattleHudHpGauge.prototype.maxValueFontSize = function() {
         return valueFontSize;
     };
 
@@ -615,7 +702,7 @@
      * 
      * !!!overwrite!!!
      */
-    Sprite_HpGauge.prototype.drawValue = function() {
+    Sprite_BattleHudHpGauge.prototype.drawValue = function() {
         const currentValue = this.currentValue();
         const maxValue = this.currentMaxValue();
         const width = this.bitmapWidth();
@@ -630,7 +717,7 @@
     /**
      * 最大値表示用フォントをセットアップする。
      */
-    Sprite_HpGauge.prototype.setupMaxValueFont = function() {
+    Sprite_BattleHudHpGauge.prototype.setupMaxValueFont = function() {
         this.bitmap.fontFace = this.valueFontFace();
         this.bitmap.fontSize = this.valueFontSize() - 8;
         this.bitmap.textColor = this.valueColor();
@@ -638,22 +725,13 @@
         this.bitmap.outlineWidth = this.valueOutlineWidth();
     };
     //------------------------------------------------------------------------------
-    // Sprite_MpTpGauge
-    /**
-     * Sprite_MpTpGauge。
-     * MP/TPゲージ
-     */
-    function Sprite_MpTpGauge() {
-        this.initialize(...arguments);
-    };
+    // Sprite_BattleHudMpTpGauge
 
-    Sprite_MpTpGauge.prototype = Object.create(Sprite_Gauge.prototype);
-    Sprite_MpTpGauge.prototype.constructor = Sprite_MpTpGauge;
 
     /**
      * Sprite_MpGaugeを初期化する。
      */
-    Sprite_MpTpGauge.prototype.initialize = function() {
+    Sprite_BattleHudMpTpGauge.prototype.initialize = function() {
         Sprite_Gauge.prototype.initialize.call(this);
     };
 
@@ -662,7 +740,7 @@
      * 
      * @return {Number} Bitmapの幅。
      */
-    Sprite_MpTpGauge.prototype.bitmapWidth = function() {
+    Sprite_BattleHudMpTpGauge.prototype.bitmapWidth = function() {
         return 96;
     };
 
@@ -671,7 +749,7 @@
      * 
      * @return {Number} Bitmapの高さ。
      */
-    Sprite_MpTpGauge.prototype.bitmapHeight = function() {
+    Sprite_BattleHudMpTpGauge.prototype.bitmapHeight = function() {
         return 12;
     };
 
@@ -680,7 +758,7 @@
      * 
      * @return {Number} ゲージの高さ。
      */
-    Sprite_MpTpGauge.prototype.gaugeHeight = function() {
+    Sprite_BattleHudMpTpGauge.prototype.gaugeHeight = function() {
         return 8;
     };
 
@@ -689,7 +767,7 @@
      * 
      * @return {Number} フォントサイズ
      */
-    Sprite_MpTpGauge.prototype.labelFontSize = function() {
+    Sprite_BattleHudMpTpGauge.prototype.labelFontSize = function() {
         return gaugeLabelFontSize;
     };
 
@@ -698,7 +776,7 @@
      * 
      * @return {Number} 値のフォントサイズ。
      */
-    Sprite_MpTpGauge.prototype.valueFontSize = function() {
+    Sprite_BattleHudMpTpGauge.prototype.valueFontSize = function() {
         return gaugeValueFontSize;
     };
 
@@ -711,22 +789,11 @@
         return 16;
     };    
     //------------------------------------------------------------------------------
-    // Sprite_TpbGauge
+    // Sprite_BattleHudTpgGauge
     /**
-     * Sprite_TpbGauge。
-     * TPBゲージ
+     * Sprite_BattleHudTpgGaugeを初期化する。
      */
-    function Sprite_TpbGauge() {
-        this.initialize(...arguments);
-    };
-
-    Sprite_TpbGauge.prototype = Object.create(Sprite_Gauge.prototype);
-    Sprite_TpbGauge.prototype.constructor = Sprite_TpbGauge;
-
-    /**
-     * Sprite_TpbGaugeを初期化する。
-     */
-    Sprite_TpbGauge.prototype.initialize = function() {
+    Sprite_BattleHudTpgGauge.prototype.initialize = function() {
         Sprite_Gauge.prototype.initialize.call(this);
     };
 
@@ -735,7 +802,7 @@
      * 
      * @return {Number} Bitmapの幅。
      */
-    Sprite_TpbGauge.prototype.bitmapWidth = function() {
+    Sprite_BattleHudTpgGauge.prototype.bitmapWidth = function() {
         return 96;
     };
 
@@ -744,7 +811,7 @@
      * 
      * @return {Number} Bitmapの高さ。
      */
-    Sprite_TpbGauge.prototype.bitmapHeight = function() {
+    Sprite_BattleHudTpgGauge.prototype.bitmapHeight = function() {
         return 12;
     };
 
@@ -753,7 +820,7 @@
      * 
      * @return {Number} X位置
      */
-    Sprite_TpbGauge.prototype.gaugeX = function() {
+    Sprite_BattleHudTpgGauge.prototype.gaugeX = function() {
         return 0;
     };
 
@@ -762,7 +829,7 @@
      * 
      * @return {Number} ゲージの高さ。
      */
-    Sprite_TpbGauge.prototype.gaugeHeight = function() {
+    Sprite_BattleHudTpgGauge.prototype.gaugeHeight = function() {
         return 8;
     };
 
@@ -771,7 +838,7 @@
      * 
      * @return {Number} フォントサイズ
      */
-    Sprite_TpbGauge.prototype.labelFontSize = function() {
+    Sprite_BattleHudTpgGauge.prototype.labelFontSize = function() {
         return gaugeLabelFontSize;
     };
 
@@ -780,27 +847,17 @@
      * 
      * @return {Number} 値のフォントサイズ。
      */
-    Sprite_TpbGauge.prototype.valueFontSize = function() {
+    Sprite_BattleHudTpgGauge.prototype.valueFontSize = function() {
         return gaugeValueFontSize;
     };
     //------------------------------------------------------------------------------
-    // Sprite_ActorName
+    // Sprite_BattleHudActorName
+
 
     /**
-     * Sprite_ActorName。
-     * Sprite_Nameから表示を変更するために派生して使う。
+     * Sprite_BattleHudActorNameを初期化する。
      */
-    function Sprite_ActorName() {
-        this.initialize(...arguments);
-    };
-
-    Sprite_ActorName.prototype = Object.create(Sprite_Name.prototype);
-    Sprite_ActorName.prototype.constructor = Sprite_ActorName;
-
-    /**
-     * Sprite_ActorNameを初期化する。
-     */
-    Sprite_ActorName.prototype.initialize = function() {
+    Sprite_BattleHudActorName.prototype.initialize = function() {
         Sprite_Name.prototype.initialize.call(this);
     };
 
@@ -809,7 +866,7 @@
      * 
      * @return {Number} Bitmapの高さ
      */
-    Sprite_ActorName.prototype.bitmapHeight = function() {
+    Sprite_BattleHudActorName.prototype.bitmapHeight = function() {
         return 18;
     };    
     /**
@@ -817,24 +874,13 @@
      * 
      * @return {Number} 名前表示用フォントサイズ。
      */
-    Sprite_ActorName.prototype.fontSize = function() {
+    Sprite_BattleHudActorName.prototype.fontSize = function() {
         return 16;
     };
 
     //------------------------------------------------------------------------------
     // Sprite_HudStateIcons
-    /**
-     * Sprite_HudStateIcons。
-     * ステートアイコンを表示するためのスプライト。
-     * 一度に4つずつ表示するために用意したが、
-     * Sprite_StateIconを複数並べる方式の方がリソース節約になるかもしれない。
-     */
-    function Sprite_HudStateIcons() {
-        this.initialize(...arguments);
-    };
 
-    Sprite_HudStateIcons.prototype = Object.create(Sprite.prototype);
-    Sprite_HudStateIcons.prototype.constructor = Sprite_HudStateIcons;
     /**
      * Sprite_HudStateIconsを初期化する。
      */
@@ -991,26 +1037,14 @@
     };
 
     //------------------------------------------------------------------------------
-    // Sprite_ActorHud
+    // Sprite_BattleHudActor
 
     /**
-     * Sprite_ActorHud
-     * 
-     * アクター情報を表示するHUD。
-     */
-    function Sprite_ActorHud() {
-        this.initialize(...arguments);
-    };
-
-    Sprite_ActorHud.prototype = Object.create(Sprite_Battler.prototype);
-    Sprite_ActorHud.prototype.constructor = Sprite_ActorHud;
-
-    /**
-     * Sprite_ActorHudを初期化する。
+     * Sprite_BattleHudActorを初期化する。
      * 
      * @param {Game_Battler} battler Game_Battlerオブジェクト。
      */
-    Sprite_ActorHud.prototype.initialize = function(battler) {
+    Sprite_BattleHudActor.prototype.initialize = function(battler) {
         Sprite_Battler.prototype.initialize.call(this, battler);
         this._actor = null;
         this._faceName = null;
@@ -1022,7 +1056,7 @@
     /**
      * メンバーを初期化する。
      */
-    Sprite_ActorHud.prototype.initMembers = function() {
+    Sprite_BattleHudActor.prototype.initMembers = function() {
         Sprite_Battler.prototype.initMembers.call(this);
         this.createActiveSelSprite();
         this.createMainSprite();
@@ -1035,7 +1069,7 @@
     /**
      * 入力アクティブになったときに表示するスプライトをロードする。
      */
-    Sprite_ActorHud.prototype.createActiveSelSprite = function() {
+    Sprite_BattleHudActor.prototype.createActiveSelSprite = function() {
         this._activeSelSprite = new Sprite();
         try {
             this._activeSelSprite.bitmap = ImageManager.loadBitmap("img/hud/", "ActiveHud");
@@ -1057,7 +1091,7 @@
      * メインスプライトはHUDを構成する各スプライトを乗せる（addChild)する
      * ベースになるスプライト。
      */
-    Sprite_ActorHud.prototype.createMainSprite = function() {
+    Sprite_BattleHudActor.prototype.createMainSprite = function() {
         this._mainSprite = new Sprite();
         this._mainSprite.anchor.x = 0.5; // 原点XはSprite中央
         this._mainSprite.anchor.y = 1; // 原点YはSprite下端
@@ -1067,7 +1101,7 @@
     /**
      * ステータスの背景に表示するスプライトを作成する。
      */
-    Sprite_ActorHud.prototype.createStatusBackSprite = function() {
+    Sprite_BattleHudActor.prototype.createStatusBackSprite = function() {
         this._statusBackSprite = new Sprite();
         this._statusBackSprite.bitmap = ImageManager.loadBitmap("img/hud/", "StatusBackground")
         this._statusBackSprite.anchor.x = 0.5;
@@ -1081,8 +1115,8 @@
     /**
      * アクター名スプライトを作成する。
      */
-    Sprite_ActorHud.prototype.createNameSprite = function() {
-        const sprite = new Sprite_ActorName();
+    Sprite_BattleHudActor.prototype.createNameSprite = function() {
+        const sprite = new Sprite_BattleHudActorName();
         sprite.x = -statusAreaWidth / 2;
         sprite.y = -88;
         this._nameSprite = sprite;
@@ -1092,27 +1126,27 @@
     /**
      * ゲージスプライトを作成する。
      */
-    Sprite_ActorHud.prototype.createGaugeSprites = function() {
+    Sprite_BattleHudActor.prototype.createGaugeSprites = function() {
         // HPゲージ
-        this._hpGaugeSprite = new Sprite_HpGauge();
+        this._hpGaugeSprite = new Sprite_BattleHudHpGauge();
         this._hpGaugeSprite.x = -64;
         this._hpGaugeSprite.y = -72;
         this.addChild(this._hpGaugeSprite);
 
         // MPゲージ
-        this._mpGaugeSprite = new Sprite_MpTpGauge();
+        this._mpGaugeSprite = new Sprite_BattleHudMpTpGauge();
         this._mpGaugeSprite.x = -32;
         this._mpGaugeSprite.y = -48;
         this.addChild(this._mpGaugeSprite);
 
         // TPゲージ
-        this._tpGaugeSprite = new Sprite_MpTpGauge();
+        this._tpGaugeSprite = new Sprite_BattleHudMpTpGauge();
         this._tpGaugeSprite.x = -32;
         this._tpGaugeSprite.y = -32;
         this.addChild(this._tpGaugeSprite);
 
         // TPBゲージ
-        this._tpbGaugeSprite = new Sprite_TpbGauge();
+        this._tpbGaugeSprite = new Sprite_BattleHudTpgGauge();
         this._tpbGaugeSprite.x = -32;
         this._tpbGaugeSprite.y = -16;
         this.addChild(this._tpbGaugeSprite);
@@ -1125,7 +1159,7 @@
     /**
      * ステータスアイコンスプライトを作成する。
      */
-    Sprite_ActorHud.prototype.createStateIconSprite = function() {
+    Sprite_BattleHudActor.prototype.createStateIconSprite = function() {
         const sprite = new Sprite_HudStateIcons();
         sprite.x = -(statusAreaWidth / 2);
         sprite.y = -statusAreaHeight;
@@ -1140,7 +1174,7 @@
      * 
      * @return {Sprite} メインのスプライト
      */
-    Sprite_ActorHud.prototype.mainSprite = function() {
+    Sprite_BattleHudActor.prototype.mainSprite = function() {
         return this._mainSprite;
     };
 
@@ -1149,7 +1183,7 @@
      * 
      * @param {Game_Battler} battler Game_Battlerオブジェクト。
      */
-    Sprite_ActorHud.prototype.setBattler = function(battler) {
+    Sprite_BattleHudActor.prototype.setBattler = function(battler) {
         Sprite_Battler.prototype.setBattler.call(this, battler);
         if (battler !== this._actor) {
             this._actor = battler;
@@ -1172,7 +1206,7 @@
      * 
      * @return {Game_Actor} Game_Actorオブジェクト。関連付けられていない場合にはnull.
      */
-    Sprite_ActorHud.prototype.actor = function() {
+    Sprite_BattleHudActor.prototype.actor = function() {
         return this._actor;
     };
 
@@ -1181,7 +1215,7 @@
      * 
      * @param {Number} index 位置
      */
-    Sprite_ActorHud.prototype.setHudPosition = function(index) {
+    Sprite_BattleHudActor.prototype.setHudPosition = function(index) {
         const battleMemberCount = $gameParty.battleMembers().length;
         const totalStatusAreaWidth = statusAreaWidth * battleMemberCount + statusAreaPadding + (battleMemberCount - 1);
         const baseX = (Graphics.boxWidth - totalStatusAreaWidth) / 2
@@ -1194,7 +1228,7 @@
     /**
      * HUDを更新する。
      */
-    Sprite_ActorHud.prototype.update = function() {
+    Sprite_BattleHudActor.prototype.update = function() {
         Sprite_Battler.prototype.update.call(this);
         this.updateSelecting();
     };
@@ -1202,7 +1236,7 @@
     /**
      * 選択状態表示を更新する。
      */
-    Sprite_ActorHud.prototype.updateSelecting = function() {
+    Sprite_BattleHudActor.prototype.updateSelecting = function() {
         if (this._battler && this._battler.isInputting()) {
             this._activeSelSprite.opacity += this._activeSelAdd;
             if (this._activeSelSprite.opacity >= 128) {
@@ -1221,7 +1255,7 @@
     /**
      * このSpriteの可視状態を更新する。
      */
-    Sprite_ActorHud.prototype.updateVisibility = function() {
+    Sprite_BattleHudActor.prototype.updateVisibility = function() {
         Sprite_Battler.prototype.updateVisibility.call(this);
         if (this._battler && this._battler.isInputting()) {
             this._activeSelSprite.visible = true;
@@ -1234,7 +1268,7 @@
      * Bitmapを更新する。
      * Sprite_Battler.update()からコールされる。
      */
-    Sprite_ActorHud.prototype.updateBitmap = function() {
+    Sprite_BattleHudActor.prototype.updateBitmap = function() {
         Sprite_Battler.prototype.updateBitmap.call(this);
         const faceName = this._actor.faceName();
         const faceIndex = this._actor.faceIndex();
@@ -1249,7 +1283,7 @@
      * @param {String} faceName 顔グラフィックファイル名
      * @param {Number} faceIndex 顔グラフィックファイル中のインデックス番号
      */
-    Sprite_ActorHud.prototype.loadMainSpriteBitmapFace = function(faceName, faceIndex) {
+    Sprite_BattleHudActor.prototype.loadMainSpriteBitmapFace = function(faceName, faceIndex) {
         this._mainSprite.bitmap = ImageManager.loadFace(faceName, faceIndex);
         const pw = ImageManager.faceWidth;
         const ph = ImageManager.faceHeight;
@@ -1269,7 +1303,7 @@
     /**
      * フレーム（表示領域）を更新する。
      */
-    Sprite_ActorHud.prototype.updateFrame = function() {
+    Sprite_BattleHudActor.prototype.updateFrame = function() {
         Sprite_Battler.prototype.updateFrame.call(this);
     };
 
@@ -1278,7 +1312,7 @@
      * 
      * @return {Number} ポップアップ位置y
      */
-    Sprite_ActorHud.prototype.damageOffsetY = function() {
+    Sprite_BattleHudActor.prototype.damageOffsetY = function() {
         return ImageManager.faceHeight - statusAreaHeight;
     };
     //------------------------------------------------------------------------------
@@ -1370,22 +1404,11 @@
 
 
     //------------------------------------------------------------------------------
-    // Sprite_ActorPicture
+    // Sprite_BattleHudPicture
     /**
-     * Sprite_ActorPicture。
-     * コマンド入力ウィンドウの脇に、でっかく表示するアクター画像のスプライト。
+     * Sprite_BattleHudPictureを初期化する。
      */
-    function Sprite_ActorPicture() {
-        this.initialize(...arguments);
-    }
-
-    Sprite_ActorPicture.prototype = Object.create(Sprite.prototype);
-    Sprite_ActorPicture.prototype.constructor = Sprite_ActorPicture;
-
-    /**
-     * Sprite_ActorPictureを初期化する。
-     */
-    Sprite_ActorPicture.prototype.initialize = function() {
+    Sprite_BattleHudPicture.prototype.initialize = function() {
         Sprite.prototype.initialize.call(this, ...arguments);
         this.anchor.x = 0.5;
         this.anchor.y = 1.0; // 下基準
@@ -1403,16 +1426,16 @@
      * 
      * @param {Game_Battler} battler Game_Battlerオブジェクト
      */
-    Sprite_ActorPicture.prototype.setBattler = function(battler) {
+    Sprite_BattleHudPicture.prototype.setBattler = function(battler) {
         if (battler !== this._battler) {
             this._battler = battler;
         }
     };
 
     /**
-     * Sprite_ActorPictureを更新する。
+     * Sprite_BattleHudPictureを更新する。
      */
-    Sprite_ActorPicture.prototype.update = function() {
+    Sprite_BattleHudPicture.prototype.update = function() {
         Sprite.prototype.update.call(this);
         this.updateBitmap();
         this.updateVisibility();
@@ -1422,7 +1445,7 @@
     /**
      * Bitmapを更新する。
      */
-    Sprite_ActorPicture.prototype.updateBitmap = function() {
+    Sprite_BattleHudPicture.prototype.updateBitmap = function() {
         if (this._battler) {
             const pictureName = this._battler.battlePicture();
             if (this._pictureName !== pictureName) {
@@ -1441,7 +1464,7 @@
      * 
      * @return {Bitmap} Bitmapオブジェクト。表示する画像がない場合にはnull
      */
-    Sprite_ActorPicture.prototype.loadBattlePicture = function() {
+    Sprite_BattleHudPicture.prototype.loadBattlePicture = function() {
         if (this._pictureName) {
             try {
                 return ImageManager.loadPicture(this._pictureName);
@@ -1461,7 +1484,7 @@
     /**
      * 表示状態を更新する。
      */
-    Sprite_ActorPicture.prototype.updateVisibility = function() {
+    Sprite_BattleHudPicture.prototype.updateVisibility = function() {
         if (this._battler) {
             if (this._battler.isInputting()) {
                 // コマンド入力中は表示。
@@ -1481,7 +1504,7 @@
     /**
      * 表示の移動を処理する。
      */
-    Sprite_ActorPicture.prototype.updateMovement = function() {
+    Sprite_BattleHudPicture.prototype.updateMovement = function() {
         if (this._battler) {
             const distance = 240;
             const movePos = Graphics.boxWidth - distance;
@@ -1537,7 +1560,7 @@
         _Spriteset_Battle_createActors.call(this, ...arguments);
         this._actorHudSprites = [];
         for (let i = 0; i < $gameParty.maxBattleMembers(); i++) {
-            const sprite = new Sprite_ActorHud();
+            const sprite = new Sprite_BattleHudActor();
             this._actorHudSprites.push(sprite);
             this._battleField.addChild(sprite);
         }
@@ -1545,7 +1568,7 @@
         const insertIndex = this._baseSprite.getChildIndex(this._battleField);
         this._actorPictureSprites = [];
         for (let i = 0; i < maxBattleMembers; i++) {
-            const sprite = new Sprite_ActorPicture();
+            const sprite = new Sprite_BattleHudPicture();
             this._actorPictureSprites.push(sprite);
             if (insertIndex >= 0) {
                 this._baseSprite.addChildAt(sprite, insertIndex);
