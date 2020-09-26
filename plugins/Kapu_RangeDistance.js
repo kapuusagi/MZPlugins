@@ -60,13 +60,13 @@
  * @text 前に移動コマンドスキルID
  * @desc 前に移動する先頭コマンドに割り当てるスキルID。0で未割当。
  * @default 0
- * @type number
+ * @type skill
  * 
  * @param moveRearSkillId
  * @text 後ろに移動コマンドスキルID
  * @desc 後ろに移動する先頭コマンドに割り当てるスキルID。0で未割当。
  * @default 0
- * @type number
+ * @type skill
  * 
  * @help
  * 戦闘時の射程距離(S/M/L)を追加します。
