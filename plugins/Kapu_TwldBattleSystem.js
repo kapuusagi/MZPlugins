@@ -1005,6 +1005,7 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
 
     //------------------------------------------------------------------------------
     // Sprite_Enemy
+
     /**
      * ステートアイコンスプライトを作成する。
      */
@@ -1014,6 +1015,7 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
         this._stateIconSprite.anchor.y = 0.5;
         this.addChild(this._stateIconSprite);
     };
+
     const _Sprite_Enemy_setHome = Sprite_Enemy.prototype.setHome;
     /**
      * ホーム位置を設定する。
@@ -1025,15 +1027,6 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
         const offsetX = (Graphics.boxWidth - 816) / 2;
         const offsetY = (Graphics.boxHeight - 624) / 2;
         _Sprite_Enemy_setHome.call(this, x + offsetX, y + offsetY);
-    };
-
-    const _Sprite_Enemy_update = Sprite_Enemy.prototype.update;
-
-    /**
-     * Sprite_Enemyを更新する。
-     */
-    Sprite_Enemy.prototype.update = function() {
-        _Sprite_Enemy_update.call(this);
     };
 
     //------------------------------------------------------------------------------
@@ -1051,7 +1044,25 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
         this._faceIndex = -1;
         this._activeSelAdd = 2;
         this._brightness = 255;
-        this.setFrame(0, 0, statusAreaWidth, statusAreaHeight);
+        this.setFrame(0, 0, this.statusAreaWidth(), this.statusAreaHeight());
+    };
+
+    /**
+     * ステータス領域の幅を得る。
+     * 
+     * @return {Number} ステータス領域の幅
+     */
+    Sprite_BattleHudActor.prototype.statusAreaWidth = function() {
+        return statusAreaWidth;
+    };
+
+    /**
+     * ステータス領域の高さを得る。
+     * 
+     * @return {Number} ステータスエリアの高さ
+     */
+    Sprite_BattleHudActor.prototype.statusAreaHeight = function() {
+        return statusAreaHeight;
     };
 
     /**
@@ -1184,6 +1195,9 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
 
     /**
      * このスプライトに関連付けるGame_Battlerオブジェクトを構築する。
+     * このメソッドは Spriteset_Battle.update()から、
+     * 毎フレームコールされる実装になっている。
+     * パフォーマンス低下を防ぐため、拡張する場合には onBattlerChangedをフックする。
      * 
      * @param {Game_Battler} battler Game_Battlerオブジェクト。
      */
@@ -1191,17 +1205,26 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
         Sprite_Battler.prototype.setBattler.call(this, battler);
         if (battler !== this._actor) {
             this._actor = battler;
-            if (battler) {
-                this.setHudPosition(battler.index());
-                this._nameSprite.setup(battler);
-                this._hpGaugeSprite.setup(battler, "hp");
-                this._mpGaugeSprite.setup(battler, "mp");
-                this._tpGaugeSprite.setup(battler, "tp");
-                this._tpbGaugeSprite.setup(battler, "time");
-                this._stateIconSprite.setup(battler);
-            } else {
-                this._mainSprite.bitmap = null;
-            }
+            this.onBattlerChanged(battler);
+        }
+    };
+
+    /**
+     * このスプライトに関連付けるGame_Battlerが変更されたときの処理を行う。
+     * 
+     * @param {Game_Battler} battler Game_Battlerオブジェクト
+     */
+    Sprite_BattleHudActor.prototype.onBattlerChanged = function(battler) {
+        if (battler) {
+            this.setHudPosition(battler.index());
+            this._nameSprite.setup(battler);
+            this._hpGaugeSprite.setup(battler, "hp");
+            this._mpGaugeSprite.setup(battler, "mp");
+            this._tpGaugeSprite.setup(battler, "tp");
+            this._tpbGaugeSprite.setup(battler, "time");
+            this._stateIconSprite.setup(battler);
+        } else {
+            this._mainSprite.bitmap = null;
         }
     };
 
@@ -1335,9 +1358,9 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
         this._mainSprite.bitmap = ImageManager.loadFace(faceName, faceIndex);
         const pw = ImageManager.faceWidth;
         const ph = ImageManager.faceHeight;
-        const cw = Math.min(pw, statusAreaWidth);
-        const ch = Math.min(ph, statusAreaHeight);
-        const cx = (faceIndex % 4) * pw + Math.min(0, (statusAreaWidth - cw) / 2) + 1;
+        const cw = Math.min(pw, this.statusAreaWidth());
+        const ch = Math.min(ph, this.statusAreaHeight());
+        const cx = (faceIndex % 4) * pw + Math.min(0, (this.statusAreaWidth() - cw) / 2) + 1;
         const cy = Math.floor(faceIndex / 4) * ph + Math.min(0, (statusAreaHeight - ch) / 2);
 
         this._mainSprite.x = 0;
