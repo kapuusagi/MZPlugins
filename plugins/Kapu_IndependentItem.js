@@ -99,7 +99,12 @@
  * @type boolean
  * @parent independentArmorSetting
  * 
- * 
+ * @param gainFailureEventId
+ * @text アイテム加算失敗時イベントID
+ * @desc 空きイベントリが無くて加算に失敗した場合に呼び出すコモンイベントID。
+ * @default 0
+ * @type common_event
+ *  
  * @help 
  * 道具/武器/防具を個別化するためのプラグイン。
  * Yanfly氏がMVでItemCoreとしてリリースしていたプラグインの、
@@ -129,6 +134,11 @@
  *       ショップでの複数個購入時に影響が出るはず。
  * 処理が重そうなら実装を見直す。
  * 数が増えると多分影響が大きくなるんじゃ無いかな。
+ * 
+ * インタプリタからのgainItemで増やしたとき、
+ * 所持最大数を超える場合には加算されなくなる。
+ * この場合、 gainFailureEventId で指定したコモンイベントで通知をうけるか、
+ * $gameTemp.isGailFailure()で結果を得られる。
  * 
  * ■ プラグイン開発者向け
  * 機能拡張するなら、以下のメソッドをフックする。
@@ -167,6 +177,9 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 アイテム所持数を超えて入手できなかった場合に、
+ *               コモンイベント及び条件分岐で通知する仕組みを追加した。
+ *               アイテム所持可能数の処理が誤っていたので修正した。
  * Version.0.3.1 個別アイテムとして扱われない場合がある不具合を修正。
  *               個別道具が使用できない不具合を修正。
  *               装備品の一致判定が誤っていたのを修正。
@@ -184,15 +197,16 @@
     const independentItemCount = Number(parameters["independentItemCount"]) || 0;
     const independentItemStartIndex = Number(parameters["independentItemStartIndex"]) || 1000;
     const independentItemStockCount = Number(parameters["independentItemStockCount"]) || 200;
-    const independentItemDefault = parameters["independentItemDefault"] || false;
+    const independentItemDefault = Boolean(parameters["independentItemDefault"]) || false;
     const independentWeaponCount = Number(parameters["independentWeaponCount"]) || 0;
     const independentWeaponStartIndex = Number(parameters["independentWeaponStartIndex"]) || 1000;
     const independentWeaponStockCount = Number(parameters["independentWeaponStockCount"]) || 200;
-    const independentWeaponDefault = parameters["independentWeaponDefault"] || false;
+    const independentWeaponDefault = Boolean(parameters["independentWeaponDefault"]) || false;
     const independentArmorCount = Number(parameters["independentArmorCount"]) || 0;
     const independentArmorStartIndex = Number(parameters["independentArmorStartIndex"]) || 1000;
     const independentArmorStockCount = Number(parameters["independentArmorStockCount"]) || 200;
-    const independentArmorDefault = parameters["independentArmorDefault"] || false;
+    const independentArmorDefault = Boolean(parameters["independentArmorDefault"]) || false;
+    const gainFailureEventId = Number(parameters["gainFailureEventId"]) || 0;
 
     //-------------------------------------------------------------------------
     // Scene_Boot
@@ -696,6 +710,38 @@
     };
 
     //-------------------------------------------------------------------------
+    // Game_Temp
+    _Game_Temp_initialize = Game_Temp.prototype.initialize;
+    /**
+     * 初期化する。
+     */
+    Game_Temp.prototype.initialize = function() {
+        _Game_Temp_initialize.call(this);
+        this._gainItemFailure = false;
+    };
+    /**
+     * インタプリタからの要求でアイテムの加算に成功したかどうかを設定する。
+     * 
+     * @param {Boolean} isFailure 加算に失敗した場合にはtrue, それ以外はfalse
+     */
+    Game_Temp.prototype.setItemGainFailure = function(isFailure) {
+        this._gailItemFailure = isFailure;
+        if (isFailure && gainFailureEventId) {
+            if (!this._commonEventQueue.contains(gainFailureEventId)) {
+                this.reserveCommonEvent(gainFailureEventId);
+            }
+        }
+    };
+    /**
+     * インタプリタからの要求でアイテムの加算に成功したかどうかを取得する。
+     * 
+     * @return {Boolean} 加算に失敗した場合にはtrue, それ以外はfalse
+     */
+    Game_Temp.prototype.isItemGainFailure = function() {
+        return this._gailItemFailure;
+    };
+
+    //-------------------------------------------------------------------------
     // Game_Actor
 
     const _Game_Actor_isEquipped = Game_Actor.prototype.isEquipped;
@@ -1089,10 +1135,10 @@
             return Math.min(specifiedMaxCount, itemInventoryCount);
         } else if (DataManager.isWeapon(baseItem)) {
             const itemInventoryCount = this.useableWeaponInventoryCount() + this.numItems(baseItem);
-            return Math.min(specifiedMaxcount, itemInventoryCount);
+            return Math.min(specifiedMaxCount, itemInventoryCount);
         } else if (DataManager.isArmor(baseItem)) {
             const itemInventoryCount = this.useableArmorInventoryCount() + this.numItems(baseItem);
-            return Math.min(specifiedMaxcount, itemInventoryCount);
+            return Math.min(specifiedMaxCount, itemInventoryCount);
         } else {
             return 0;
         }
@@ -1139,7 +1185,7 @@
      * 
      * @return {Array<DataItem>} 個別アイテムのリスト
      */
-    Game_party.prototype.independentItems = function() {
+    Game_Party.prototype.independentItems = function() {
         return this.items().filter(item => DataManager.isIndependentItem(item));
     };
 
@@ -1148,7 +1194,7 @@
      * 
      * @return {Array<DataWeapon>} 個別武器のリスト
      */
-    Game_Party.prototype.independenetWeapons = function() {
+    Game_Party.prototype.independentWeapons = function() {
         return this.weapons().filter(weapon => DataManager.isIndependentItem(weapon));
     };
 
@@ -1157,7 +1203,7 @@
      * 
      * @return {Array<DataArmor>} 個別防具のリスト
      */
-    Game_Party.prototype.independenetArmors = function() {
+    Game_Party.prototype.independentArmors = function() {
         return this.armors().filter(armor => DataManager.isIndependentItem(armor));
     };
 
@@ -1187,7 +1233,64 @@
      * @return {Number} イベントリ数
      */
     Game_Party.prototype.useableArmorInventoryCount = function() {
-        return independentArmorStockCount - this.independenetArmors().length;
+        return independentArmorStockCount - this.independentArmors().length;
+    };
+
+    //-------------------------------------------------------------------------
+    /**
+     * アイテムの増減コマンドを処理する。
+     * 
+     * @param {Object} params パラメータ
+     * !!!overwrite!!!
+     */
+    Game_Interpreter.prototype.command126 = function(params) {
+        let value = this.operateValue(params[1], params[2], params[3]);
+        this.commandGainItem($dataItems[params[0]], value, false);
+        return true;
+    };
+
+    /**
+     * 武器の増減コマンドを処理する。
+     * 
+     * @param {Object} params パラメータ
+     * !!!overwrite!!!
+     */
+    Game_Interpreter.prototype.command127 = function(params) {
+        let value = this.operateValue(params[1], params[2], params[3]);
+        this.commandGainItem($dataWeapons[params[0]], value, params[4]);
+        return true;
+    };
+
+    /**
+     * 防具の増減コマンドを処理する。
+     * 
+     * @param {Object} params パラメータ
+     * !!!overwrite!!!
+     */
+    Game_Interpreter.prototype.command128 = function(params) {
+        let value = this.operateValue(params[1], params[2], params[3]);
+        this.commandGainItem($dataArmors[params[0]], value, params[4]);
+        return true;
+    };
+
+
+    /**
+     * アイテム増減コマンドを処理する。
+     * 
+     * @param {Object} item アイテムデータ(DataItem/DataWeapon/DataArmor)
+     * @param {Number} value 増減する値
+     * @param {Boolean} includesEquip 装備を品を含めるかどうか。
+     */
+    Game_Interpreter.prototype.commandGainItem = function(item, value, includesEquip) {
+        const maxAppendCount = $gameParty.maxItems(item) - $gameParty.numItems(item);
+        const isGainFailure = (value > 0) && (value > maxAppendCount);
+        if (isGainFailure) {
+            value = maxAppendCount;
+        }
+        $gameTemp.setItemGainFailure(isGainFailure);
+        if (value !== 0) {
+            $gameParty.gainItem(item, value, includesEquip);
+        }
     };
 
     //-------------------------------------------------------------------------
