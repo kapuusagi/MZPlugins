@@ -1050,6 +1050,7 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
         this._faceName = null;
         this._faceIndex = -1;
         this._activeSelAdd = 2;
+        this._brightness = 255;
         this.setFrame(0, 0, statusAreaWidth, statusAreaHeight);
     };
 
@@ -1095,6 +1096,9 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
         this._mainSprite = new Sprite();
         this._mainSprite.anchor.x = 0.5; // 原点XはSprite中央
         this._mainSprite.anchor.y = 1; // 原点YはSprite下端
+        this._mainSprite.filters = [];
+        this._mainColorFilter = new ColorFilter();
+        this._mainSprite.filters.push(this._mainColorFilter);
         this.addChild(this._mainSprite);
     };
 
@@ -1231,6 +1235,7 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
     Sprite_BattleHudActor.prototype.update = function() {
         Sprite_Battler.prototype.update.call(this);
         this.updateSelecting();
+        this.updateColor();
     };
 
     /**
@@ -1250,6 +1255,49 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
             this._activeSelCount = 0;
             this._activeSelSprite.opacity = 0;
         }
+    };
+
+    /**
+     * ステートに合わせて色を変更する。
+     */
+    Sprite_BattleHudActor.prototype.updateColor = function() {
+        if (this._battler) {
+            // もしかしたらHSLフィルタつけて、グレーにした方がいいかも。
+            // 輝度
+            const targetBrightness = this.mainSpriteBrightness();
+            if (this._brightness > targetBrightness) {
+                this._brightness = Math.max(this._brightness - 10, targetBrightness);
+            } else if (this._brightness < targetBrightness) {
+                this._brightness = Math.min(this._brightness + 50, targetBrightness);
+            }
+            this._mainColorFilter.setBrightness(this._brightness);
+
+            // 不透明度
+            const opacity = this._mainSprite.opacity;
+            const targetOpacity = this.mainSpriteOpacity();
+            if (opacity > targetOpacity) {
+                this._mainSprite.opacity = Math.max(opacity - 10, targetOpacity);
+            } else if (opacity < targetOpacity) {
+                this._mainSprite.opacity = Math.min(opacity + 50, targetOpacity);
+            }
+        }
+    };
+
+    /**
+     * メインスプライトの輝度を取得する。
+     * 
+     * @return {Number} 輝度(0～255)
+     */
+    Sprite_BattleHudActor.prototype.mainSpriteBrightness = function() {
+        return this._battler.isDead() ? 64 : 255;
+    };
+    /**
+     * メインスプライトの不透明度を得る。
+     * 
+     * @return {Number} 不透明度(0～255)
+     */
+    Sprite_BattleHudActor.prototype.mainSpriteOpacity = function() {
+        return this._battler.isDead() ? 64 : 255;
     };
 
     /**
