@@ -114,8 +114,6 @@ function Sprite_BattleHudHpGauge() {
     this.initialize(...arguments);
 };
 
-Sprite_BattleHudHpGauge.prototype = Object.create(Sprite_Gauge.prototype);
-Sprite_BattleHudHpGauge.prototype.constructor = Sprite_BattleHudHpGauge;
 
 /**
  * Sprite_BattleHudMpTpGauge。
@@ -125,8 +123,6 @@ function Sprite_BattleHudMpTpGauge() {
     this.initialize(...arguments);
 };
 
-Sprite_BattleHudMpTpGauge.prototype = Object.create(Sprite_Gauge.prototype);
-Sprite_BattleHudMpTpGauge.prototype.constructor = Sprite_BattleHudMpTpGauge;
 
 /**
  * Sprite_BattleHudTpgGauge。
@@ -136,8 +132,6 @@ function Sprite_BattleHudTpgGauge() {
     this.initialize(...arguments);
 };
 
-Sprite_BattleHudTpgGauge.prototype = Object.create(Sprite_Gauge.prototype);
-Sprite_BattleHudTpgGauge.prototype.constructor = Sprite_BattleHudTpgGauge;
 
 
 /**
@@ -148,8 +142,6 @@ function Sprite_BattleHudActorName() {
     this.initialize(...arguments);
 };
 
-Sprite_BattleHudActorName.prototype = Object.create(Sprite_Name.prototype);
-Sprite_BattleHudActorName.prototype.constructor = Sprite_BattleHudActorName;
 
 /**
  * Sprite_HudStateIcons。
@@ -161,8 +153,6 @@ function Sprite_HudStateIcons() {
     this.initialize(...arguments);
 };
 
-Sprite_HudStateIcons.prototype = Object.create(Sprite.prototype);
-Sprite_HudStateIcons.prototype.constructor = Sprite_HudStateIcons;
 
 /**
  * Sprite_BattleHudActor
@@ -173,9 +163,6 @@ function Sprite_BattleHudActor() {
     this.initialize(...arguments);
 };
 
-Sprite_BattleHudActor.prototype = Object.create(Sprite_Battler.prototype);
-Sprite_BattleHudActor.prototype.constructor = Sprite_BattleHudActor;
-
 /**
  * Sprite_BattleHudPicture。
  * コマンド入力ウィンドウの脇に、でっかく表示するアクター画像のスプライト。
@@ -183,11 +170,6 @@ Sprite_BattleHudActor.prototype.constructor = Sprite_BattleHudActor;
 function Sprite_BattleHudPicture() {
     this.initialize(...arguments);
 }
-
-Sprite_BattleHudPicture.prototype = Object.create(Sprite.prototype);
-Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
-
-
 
 (() => {
     const pluginName = "Kapu_TwldBattleSystem";
@@ -646,7 +628,9 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
 
     //------------------------------------------------------------------------------
     // Sprite_BattleHudHpGauge
-
+    Sprite_BattleHudHpGauge.prototype = Object.create(Sprite_Gauge.prototype);
+    Sprite_BattleHudHpGauge.prototype.constructor = Sprite_BattleHudHpGauge;
+    
 
     /**
      * Sprite_BattleHudHpGaugeを初期化する。
@@ -726,7 +710,8 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
     };
     //------------------------------------------------------------------------------
     // Sprite_BattleHudMpTpGauge
-
+    Sprite_BattleHudMpTpGauge.prototype = Object.create(Sprite_Gauge.prototype);
+    Sprite_BattleHudMpTpGauge.prototype.constructor = Sprite_BattleHudMpTpGauge;    
 
     /**
      * Sprite_MpGaugeを初期化する。
@@ -790,6 +775,9 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
     };    
     //------------------------------------------------------------------------------
     // Sprite_BattleHudTpgGauge
+    Sprite_BattleHudTpgGauge.prototype = Object.create(Sprite_Gauge.prototype);
+    Sprite_BattleHudTpgGauge.prototype.constructor = Sprite_BattleHudTpgGauge;
+
     /**
      * Sprite_BattleHudTpgGaugeを初期化する。
      */
@@ -852,7 +840,8 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
     };
     //------------------------------------------------------------------------------
     // Sprite_BattleHudActorName
-
+    Sprite_BattleHudActorName.prototype = Object.create(Sprite_Name.prototype);
+    Sprite_BattleHudActorName.prototype.constructor = Sprite_BattleHudActorName;    
 
     /**
      * Sprite_BattleHudActorNameを初期化する。
@@ -880,7 +869,10 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
 
     //------------------------------------------------------------------------------
     // Sprite_HudStateIcons
-
+    
+    Sprite_HudStateIcons.prototype = Object.create(Sprite.prototype);
+    Sprite_HudStateIcons.prototype.constructor = Sprite_HudStateIcons;
+    
     /**
      * Sprite_HudStateIconsを初期化する。
      */
@@ -1031,7 +1023,10 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
 
     //------------------------------------------------------------------------------
     // Sprite_BattleHudActor
-
+    Sprite_BattleHudActor.prototype = Object.create(Sprite_Battler.prototype);
+    Sprite_BattleHudActor.prototype.constructor = Sprite_BattleHudActor;
+    
+    
     /**
      * Sprite_BattleHudActorを初期化する。
      * 
@@ -1476,6 +1471,9 @@ Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
 
     //------------------------------------------------------------------------------
     // Sprite_BattleHudPicture
+    Sprite_BattleHudPicture.prototype = Object.create(Sprite.prototype);
+    Sprite_BattleHudPicture.prototype.constructor = Sprite_BattleHudPicture;
+
     /**
      * Sprite_BattleHudPictureを初期化する。
      */
