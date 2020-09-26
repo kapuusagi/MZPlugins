@@ -87,11 +87,12 @@
     Scene_TwldShop.prototype.canHaveMax = function(item) {
         if (DataManager.isIndependent(item)) {
             if (DataManager.isItem(item)) {
-                return $gameParty.getMaxIndependentItemCount(item)
-                        - $gameParty.numItems(item);
+                return $gameParty.maxItems(item) - $gameParty.numItems(item);
             } else if (DataManager.isWeapon(item)) {
+                // 個別武器は1個ずつ
                 return 1;
             } else if (DataManager.isArmor(item)) {
+                // 個別防具は1個ずつ
                 return 1;
             }
         } else {

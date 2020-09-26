@@ -1082,18 +1082,22 @@
      * @return {Number} 最大アイテム数
      */
     Game_Party.prototype.getMaxIndependentItemCount = function(item) {
+        const specifiedMaxCount = _Game_Party_maxItems.call(item); // データベース上で指定されている最大数
         const baseItem = DataManager.getBaseItem(item);
         if (DataManager.isItem(baseItem)) {
-            return independentItemStockCount - this.numItems(baseItem);
+            const itemInventoryCount = this.useableItemInventoryCount() + this.numItems(baseItem);
+            return Math.min(specifiedMaxCount, itemInventoryCount);
         } else if (DataManager.isWeapon(baseItem)) {
-            return independentWeaponStockCount - this.numItems(baseItem);
+            const itemInventoryCount = this.useableWeaponInventoryCount() + this.numItems(baseItem);
+            return Math.min(specifiedMaxcount, itemInventoryCount);
         } else if (DataManager.isArmor(baseItem)) {
-            return independentArmorStockCount - this.numItems(baseItem);
+            const itemInventoryCount = this.useableArmorInventoryCount() + this.numItems(baseItem);
+            return Math.min(specifiedMaxcount, itemInventoryCount);
         } else {
             return 0;
         }
     };
-    
+
     const _Game_Party_hasItem = Game_Party.prototype.hasItem;
     /**
      * itemで指定されるアイテムを持っているかどうか判定する。
@@ -1128,6 +1132,62 @@
         } else {
             return _Game_Party_isAnyMemberEquipped.call(this, ...arguments);
         }
+    };
+
+    /**
+     * イベントリにある個別アイテムのリストを得る。
+     * 
+     * @return {Array<DataItem>} 個別アイテムのリスト
+     */
+    Game_party.prototype.independentItems = function() {
+        return this.items().filter(item => DataManager.isIndependentItem(item));
+    };
+
+    /**
+     * イベントリにある個別武器のリストを得る。
+     * 
+     * @return {Array<DataWeapon>} 個別武器のリスト
+     */
+    Game_Party.prototype.independenetWeapons = function() {
+        return this.weapons().filter(weapon => DataManager.isIndependentItem(weapon));
+    };
+
+    /**
+     * イベントリにある個別防具のリストを得る。
+     * 
+     * @return {Array<DataArmor>} 個別防具のリスト
+     */
+    Game_Party.prototype.independenetArmors = function() {
+        return this.armors().filter(armor => DataManager.isIndependentItem(armor));
+    };
+
+    /**
+     * 使用可能な個別アイテムのイベントリ数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+
+    Game_Party.prototype.useableItemInventoryCount = function() {
+        return independentItemStockCount - this.independentItems().length;
+    };
+
+    /**
+     * 使用可能な個別武器のイベントリ数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+
+    Game_Party.prototype.useableWeaponInventoryCount = function() {
+        return independentWeaponStockCount - this.independentWeapons().length;
+    };
+
+    /**
+     * 使用可能な個別防具のイベントリ数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+    Game_Party.prototype.useableArmorInventoryCount = function() {
+        return independentArmorStockCount - this.independenetArmors().length;
     };
 
     //-------------------------------------------------------------------------
