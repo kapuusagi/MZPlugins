@@ -158,7 +158,7 @@
     Sprite_Enemy.prototype.updateBattlePosition = function() {
         const battlePosition = this._enemy.battlePosition();
 
-        const currentScale = this._enemy.scale.x;
+        const currentScale = this.scale.x;
         const targetScale = 1.0 - battlePosition * 0.1;
         if (currentScale < targetScale) {
             const scale = Math.min(currentScale + 0.1, targetScale);
@@ -201,11 +201,11 @@
      * 戦闘位置表示スプライトを作成する。
      */
     Sprite_BattleHudActor.prototype.createPositionSprite = function() {
-        this._positionSprite = new Sprite_BattleHudActor();
+        this._positionSprite = new Sprite_PositionIcon();
         // 左下を合わせる。
         this._positionSprite.anchor.x = 0;
         this._positionSprite.anchor.y = 1.0;
-        this._positionSprite.x = this.statusAreaWidth() / 2;
+        this._positionSprite.x = -(this.statusAreaWidth() / 2 - 10);
         this.addChild(this._positionSprite);
     };
 
@@ -219,6 +219,43 @@
     Sprite_BattleHudActor.prototype.onBattlerChanged = function(battler) {
         _Sprite_BattleHudActor_onBattlerChanged.call(this, battler);
         this._positionSprite.setup(battler);
+        this._mainSprite.y = this.mainSpritePosition().y;
+    };
+
+    const _Sprite_BattleHudActor_mainSpritePosition = Sprite_BattleHudActor.prototype.mainSpritePosition;
+    /**
+     * メインスプライトの位置を得る。
+     * 
+     * @return {Point} スプライトの位置
+     */
+    Sprite_BattleHudActor.prototype.mainSpritePosition = function() {
+        let pos = _Sprite_BattleHudActor_mainSpritePosition.call(this);
+        if (this._actor && this._actor.battlePosition() !== 0) {
+            pos.y += 20;
+        } else {
+            pos.y -= 10;
+        }
+        return pos;
+    };
+
+    const _Sprite_BattleHudActor_updatePosition = Sprite_BattleHudActor.prototype.updatePosition;
+
+    /**
+     * 表示位置を更新する。
+     * 
+     * 毎フレーム ホーム位置＋オフセット位置に設定される。
+     */
+    Sprite_BattleHudActor.prototype.updatePosition = function() {
+        _Sprite_BattleHudActor_updatePosition.call(this);
+        if (this._actor) {
+            const targetY = this.mainSpritePosition().y;
+            const currentY = this._mainSprite.y;
+            if (currentY < targetY) {
+                this._mainSprite.y = Math.min(currentY + 3, targetY);
+            } else if (currentY > targetY) {
+                this._mainSprite.y = Math.max(currentY - 3, targetY);
+            }
+        }
     };
 
     //------------------------------------------------------------------------------
@@ -248,8 +285,8 @@
             // 次に戦闘位置により、位置の変更が必要なら変更する。
             for (let i = 1; i < this._enemySprites.length; i++) {
                 const sprite = this._enemySprites[i];
-                const index = this._battleField.indexOf(sprite);
-                const originIndex = this._battleField.indexOf(originSprite);
+                const index = this._battleField.children.indexOf(sprite);
+                const originIndex = this._battleField.children.indexOf(originSprite);
                 if ((sprite.zIndex < originSprite.zIndex) && (index > originIndex)) {
                     this._battleField.swapChildren(sprite, originSprite);
                 } else if ((sprite.zIndex >= originSprite.zIndex) && (index < originIndex)) {
