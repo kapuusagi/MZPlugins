@@ -512,15 +512,15 @@
         if (this.isForDeadFriend()) {
             const unit = this.friendsUnit();
             const range = this.rangeDistanceForUnit(unit);
-            target = unit.randomDeadTargetWithRange(this.subject(), range);
+            target = unit.randomDeadTargetWithRange(range);
         } else if (this.isForFriend()) {
             const unit = this.friendsUnit();
             const range = this.rangeDistanceForUnit(unit);
-            target = unit.randomTargetWithRange(this.subject(), range);
+            target = unit.randomTargetWithRange(range);
         } else {
             const unit = this.opponentsUnit()
             const range = this.rangeDistanceForUnit(unit);
-            target = unit.randomTargetWithRange(this.subject(), range);
+            target = unit.randomTargetWithRange(range);
         }
         if (target) {
             this._targetIndex = target.index();
@@ -540,7 +540,7 @@
         const targets = [];
         const rangeDistance = this.rangeDistanceForUnit(unit);
         for (let i = 0; i < this.numTargets(); i++) {
-            targets.push(unit.randomTargetWithRange(this.subject(), rangeDistance));
+            targets.push(unit.randomTargetWithRange(rangeDistance));
         }
         return targets;
     };
@@ -564,7 +564,7 @@
                 }
                 return (row === 0) ? unit.frontAliveMembers() : unit.rearAliveMembers();
             } else {
-                return [unit.smoothDeadTargetWithRange(this._targetIndex, this.subject(), rangeDistance)];
+                return [unit.smoothDeadTargetWithRange(this._targetIndex, rangeDistance)];
             }
         } else {
             return unit.deadMembers();
@@ -596,7 +596,7 @@
                 if (this._targetIndex < 0) {
                     return [unit.randomTargetWithRange(rangeDistance)];
                 } else {
-                    return [unit.smoothTargetWithRange(this._targetIndex, this.subject(), rangeDistance)];
+                    return [unit.smoothTargetWithRange(this._targetIndex, rangeDistance)];
                 }
             }
         } else {
@@ -800,8 +800,8 @@
             const members = this.members();
             const member = members[index];
             if (member.battlePosition() !== 0) {
-                // 指定されたアクターは後衛 -> 指定Battlerだけ移動。
-                member.setBattlePosition(1);
+                // 指定されたアクターは後衛 -> 指定Battlerだけ前衛に移動。
+                member.setBattlePosition(0);
             } else if (members.every(member => member.battlePosition() === 0)) {
                 // 全員前衛時に前に出る -> 指定Battlerは前衛のままで、他は後衛に変更。
                 for (let i = 0; i < members.length; i++) {
