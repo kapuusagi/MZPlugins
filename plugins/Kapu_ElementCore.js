@@ -48,7 +48,7 @@
  * Version.0.1.0 新規作成。
  */
 (() => {
-    const pluginName = 'Kapu_ElementCore';
+    const pluginName = "Kapu_ElementCore";
     const parameters = PluginManager.parameters(pluginName);
 
 
@@ -72,7 +72,7 @@
             return;
         }
         const valueStr = obj.meta.elementIds;
-        const tokens = valueStr.split(',');
+        const tokens = valueStr.split(",");
         for (token of tokens) {
             const elementId = Number(token);
             if (elementId) {

@@ -52,7 +52,7 @@
     const pluginName = "Kapu_Trait_AttackElementRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE = Number(parameters['TraitCode']) || 0;
+    Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE = Number(parameters["TraitCode"]) || 0;
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -80,9 +80,9 @@
             return;
         }
         const valueStr = obj.meta.elementAttackRate;
-        const entries = valueStr.split(',');
+        const entries = valueStr.split(",");
         for (entry of entries) {
-            const tokens = entry.split(':');
+            const tokens = entry.split(":");
             if (tokens.length >= 2) {
                 const elementId = Number(tokens[0]);
                 const rate = _parseRate(tokens[1].trim());

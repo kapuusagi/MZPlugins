@@ -49,7 +49,7 @@
     const pluginName = "Kapu_Trait_DropItemRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.ABILITY_DROP_ITEM_RATE = Number(parameters['TraitPartyAbilityId']) || 0;
+    Game_Party.ABILITY_DROP_ITEM_RATE = Number(parameters["TraitPartyAbilityId"]) || 0;
 
     //------------------------------------------------------------------------------
     // DataManager
