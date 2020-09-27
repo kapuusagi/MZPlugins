@@ -130,6 +130,66 @@
         const sy = Math.floor(iconIndex / 16) * ph;
         this.setFrame(sx, sy, pw, ph);
     };
+
+    //------------------------------------------------------------------------------
+    // EnemyBattlePositionColorFilter
+    /**
+     * EnemyBattlePositionColorFilter.
+     * エネミーの位置を表示に反映させるためのカラーフィルター。
+     * 後列のとき、画像の上側を黒くして見えにくくする。
+     */
+    function EnemyBattlePositionColorFilter() {
+        this.initialize(...arguments);
+    }
+
+    EnemyBattlePositionColorFilter.prototype = Object.create(PIXI.Filter.prototype);
+    EnemyBattlePositionColorFilter.prototype.constructor = EnemyBattlePositionColorFilter;
+
+    /**
+     * EnemyBattlePositionColorFilterを初期化する。
+     */
+    EnemyBattlePositionColorFilter.prototype.initialize = function() {
+        PIXI.Filter.call(this, null, this._fragmentSrc());
+        this.uniforms.shadowRate = 0;
+    };
+    /**
+     * 影の割合を設定する。
+     * 
+     * @param {Number} shadowRate 影の割合(0～255。255で影最大)
+     */
+    EnemyBattlePositionColorFilter.prototype.setShadowRate = function(shadowRate) {
+        this.uniforms.shadowRate = shadowRate.clamp(0.0, 255.0);
+    };
+    /**
+     * 影の割合を取得する。
+     * 
+     * @return {Number} 影の割合(0～255。255で影最大)
+     */
+    EnemyBattlePositionColorFilter.prototype.shadowRate = function() {
+        return this.uniforms.shadowRate;
+    };
+    /**
+     * GLSLソースを得る。
+     * 
+     * @return {String} GLSLソース。
+     */
+    EnemyBattlePositionColorFilter.prototype._fragmentSrc = function() {
+        const src =
+            "varying vec2 vTextureCoord;" +
+            "uniform sampler2D uSampler;" +
+            "uniform float shadowRate;" +
+            "void main() {" +
+            "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
+            "  float vertRate = clamp(1.0 - vTextureCoord.y * 2.0 + 0.5, 0.0, 1.0);" +
+            "  float pictureRate = 1.0 - shadowRate / 255.0 * vertRate;" +
+            "  float r = sample.r * pictureRate;" +
+            "  float g = sample.g * pictureRate;" +
+            "  float b = sample.b * pictureRate;" +
+            "  float a = sample.a;" +
+            "  gl_FragColor = vec4(r, g, b, a);" +
+            "}";
+        return src;
+    };
     //------------------------------------------------------------------------------
     // Sprite_Enemy
 
@@ -140,6 +200,11 @@
     Sprite_Enemy.prototype.initMembers = function() {
         _Sprite_Enemy_initMembers.call(this);
         this._brightness = 255;
+        this._positionColorFilter = new EnemyBattlePositionColorFilter();
+        if (!this.filters) {
+            this.filters = [];
+        }
+        this.filters.push(this._positionColorFilter);
     };
     const _Sprite_Enemy_update = Sprite_Enemy.prototype.update;
     /**
@@ -170,18 +235,14 @@
             this.scale.y = scale;
         }
 
-        const currentBrightness = this._brightness;
-        const targetBrightness = (battlePosition === 0) ? 255 : 180;
-        let brightness = currentBrightness;
-        if (currentBrightness < targetBrightness) {
-            brightness = Math.min(currentBrightness + 10, targetBrightness);
+        let shadowRate = this._positionColorFilter.shadowRate();
+        const targetShadowRate = (battlePosition === 0) ? 0 : 255;
+        if (shadowRate < targetShadowRate) {
+            shadowRate = Math.min(shadowRate + 10, targetShadowRate);
         } else {
-            brightness = Math.max(currentBrightness - 10, targetBrightness);
+            shadowRate = Math.max(shadowRate - 10, targetShadowRate);
         }
-        if (this._colorFilter) {
-            this._colorFilter.setBrightness(brightness);
-        }
-
+        this._positionColorFilter.setShadowRate(shadowRate);
         this.zIndex = -battlePosition;
     };
 
@@ -239,7 +300,6 @@
     };
 
     const _Sprite_BattleHudActor_updatePosition = Sprite_BattleHudActor.prototype.updatePosition;
-
     /**
      * 表示位置を更新する。
      * 
