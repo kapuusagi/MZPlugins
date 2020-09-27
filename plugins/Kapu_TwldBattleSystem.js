@@ -38,27 +38,31 @@
  * @parent ui
  * 
  * @param labelHpFontSize
- * @text ラベルフォントサイズ
+ * @text HPラベルフォントサイズ
  * @desc HPゲージのラベルフォントサイズ
- * @default 24
+ * @default 16
+ * @type number
  * @parent ui
  * 
  * @param valueHpFontSize
- * @text 値フォントサイズ
+ * @text HP値フォントサイズ
  * @desc HPゲージの値フォントサイズ
- * @default 16
+ * @default 24
+ * @type number
  * @parent ui
  * 
  * @param labelFontSize
- * @text ラベルフォントサイズ
- * @desc ゲージのラベルフォントサイズ
+ * @text MP/TPラベルフォントサイズ
+ * @desc MP/TPゲージのラベルフォントサイズ
  * @default 12
+ * @type number
  * @parent ui
  * 
  * @param valueFontSize
- * @text 値フォントサイズ
- * @desc ゲージの値フォントサイズ
+ * @text MP/TP値フォントサイズ
+ * @desc MP/TPゲージの値フォントサイズ
  * @default 12
+ * @type number
  * @parent ui
  * 
  * @param layout
@@ -109,7 +113,7 @@
  * @param statusAreaOffsetX
  * @text ステータスエリア位置X
  * @desc ステータスエリアの水平位置
- * @default 192
+ * @default 60
  * @type number
  * @parent layout
  * 
@@ -551,7 +555,7 @@ function Sprite_BattleHudPicture() {
      * @return {Number} フォントサイズ
      */
     Sprite_BattleHudHpGauge.prototype.labelFontSize = function() {
-        return gaugeValueHpFontSize;
+        return gaugeLabelHpFontSize;
     };
 
     /**
@@ -564,28 +568,12 @@ function Sprite_BattleHudPicture() {
     };
 
     /**
-     * ラベルのフォントサイズを得る。
-     * 
-     * @return {Number} フォントサイズ
-     */
-    Sprite_BattleHudHpGauge.prototype.labelFontSize = function() {
-        return gaugeLabelHpFontSize;
-    };
-
-    /**
      * 値のフォントサイズを得る。
      * 
      * @return {Number} 値のフォントサイズ。
      */
     Sprite_BattleHudHpGauge.prototype.valueFontSize = function() {
-        return 24;
-    };
-
-    /**
-     * 
-     */
-    Sprite_BattleHudHpGauge.prototype.maxValueFontSize = function() {
-        return valueFontSize;
+        return gaugeValueHpFontSize;
     };
 
     /**
@@ -597,10 +585,13 @@ function Sprite_BattleHudPicture() {
         const width = this.bitmapWidth();
         const height = this.bitmapHeight();
         this.setupValueFont();
-        const maxWidth = 48;
-        this.bitmap.drawText(String(currentValue).padStart(4), 0, 0, width - maxWidth, height, "right");
+        const maxValueWidth = 48;
+        this.bitmap.drawText(String(currentValue).padStart(4),
+                0, 0, width - maxValueWidth, height, "right");
         this.setupMaxValueFont();
-        this.bitmap.drawText("/" + String(maxValue).padStart(4), width - maxWidth, 0, maxWidth, height, "right");
+        const maxValueY = this.labelY();
+        this.bitmap.drawText("/" + String(maxValue).padStart(4), 
+                width - maxValueWidth, maxValueY, maxValueWidth, height, "right");
     };
 
     /**
@@ -608,7 +599,7 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudHpGauge.prototype.setupMaxValueFont = function() {
         this.bitmap.fontFace = this.valueFontFace();
-        this.bitmap.fontSize = this.valueFontSize() - 8;
+        this.bitmap.fontSize = this.labelFontSize();
         this.bitmap.textColor = this.valueColor();
         this.bitmap.outlineColor = this.valueOutlineColor();
         this.bitmap.outlineWidth = this.valueOutlineWidth();
@@ -1309,10 +1300,13 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudActor.prototype.setHudPosition = function(index) {
         const battleMemberCount = $gameParty.battleMembers().length;
-        const totalStatusAreaWidth = statusAreaWidth * battleMemberCount + statusAreaPadding + (battleMemberCount - 1);
+        const width = statusAreaWidth;
+        const padding = statusAreaPadding;
+        const maxStatusAreaWidth = (width + padding) * maxBattleMembers - statusAreaPadding;
+        const totalStatusAreaWidth = (width + padding) * battleMemberCount - statusAreaPadding;
         const baseX = statusAreaOffsetX;
-        const offsetX = (statusAreaWidth + statusAreaPadding) * index;
-        const x = baseX + offsetX;
+        const memberCountOffsetX = (maxStatusAreaWidth - totalStatusAreaWidth) / 2;
+        const x = baseX + memberCountOffsetX + (width + padding) * index + width / 2;
         const y = Graphics.boxHeight;
         this.setHome(x, y);
     };
