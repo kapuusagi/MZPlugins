@@ -1,4 +1,4 @@
-/*:
+/*:ja
  * @target MZ
  * @plugindesc タイトル画面をスキップするよ。デバッグの時面倒じゃん。
  * @author kapuusagi
@@ -6,6 +6,8 @@
  *
  * @help
  * このプラグインは Scene_Boot.startNormalGameを上書きする。
+ * しかしながら、標準で付いてるDevToolsManageプラグインの方が高機能なので
+ * そっちを使った方がいい。
  * 
  * 使い方はプラグインをMZで有効化してONにするだけ。
  * デプロイメントする時はプラグインを削除してからやるか、
@@ -17,16 +19,15 @@
  * Version.1.0.0 初版
  */
 
- (() => {
-     /**
-      * 通常ゲームを開始する。
-      * Note: startメソッドをオーバーライドするんじゃなくて、
-      *       こっちをオーバーライドした。
-      */
-    Scene_Boot.prototype.startNormalGame = function() {
+(() => {
+    /**
+     * 通常ゲームを開始する。
+     * Note: startメソッドをオーバーライドするんじゃなくて、
+     *       こっちをオーバーライドした。
+     */
+    Scene_Boot.prototype.startNormalGame = function () {
         this.checkPlayerLocation();
         DataManager.setupNewGame();
         SceneManager.goto(Scene_Map);
-        Window_TitleCommand.initCommandPosition();
     };
- })();
+})();

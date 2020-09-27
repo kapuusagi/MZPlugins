@@ -19,7 +19,7 @@ __/*: ～ */__ で書く。わかりにくいけど。
 ### ■ プラグイン全体
 
 ~~~javascript
-/*:
+/*:ja
  * @target MZ 
  * @plugindesc 概要
  * @author hogehoge
@@ -37,7 +37,11 @@ __/*: ～ */__ で書く。わかりにくいけど。
 |__@url__ _URL_|配布元URL|
 
 ---
-### ■ パラメータコメント
+### ■ プラグインパラメータ
+
+プラグイン全体に対する動作をカスタマイズする機能を提供するためのもの。
+このゲームでは～の動作させて、こっちのゲームでは～の動作させたい、みたいなのを実現するための方法だよ！
+プラグインコメントでアノテーションを書けば良い。
 
 ~~~
  * @param paramName
@@ -63,6 +67,18 @@ __/*: ～ */__ で書く。わかりにくいけど。
 |__@off__ _文字列_|OFFを選択したときにダイアログに表示する値(@type=boolean)|
 |__@option__ _文字列_|プルダウンの表示項目。(@type=select,combo)|
 |__@value__ _文字列_|プルダウンを選択したときに設定される値。optionとペアで使う。(@type=select,combo)|
+
+プラグイン側で参照するときは __PluginManager.parameters()__ で取得できる。
+Hoge.jsプラグインで定義された'hoge'というパラメータにアクセスするには
+
+~~~javascript
+    const pluginName = "Hoge";
+    const parameters = PluginManager.parameters(pluginName);
+    const setting = parameters['hoge'];
+~~~
+
+のようにすればいい。
+
 
 @type で指定可能な型
 
@@ -164,22 +180,31 @@ MVの時に比べて、若干エレガントな書き方してる。
 
 既存の実装に機能を追加する場合にはフックを使用する。
 既存の処理が残るので影響が小さい。
-const 参照用変数 = オーバーロードするメソッド
 
-    オーバーロードするメソッド = function() {
+    const 参照用変数 = オーバーロードするメソッド
+
+    フックするメソッド = function() {
         // 必要な処理
         参照用変数.apply(this, arguments);
         // 必要な処理
     };
       
-とする。
+とする。注意としては、フックでプラグイン処理と内部分岐させる場合、
+インポート順によっては他のプラグインが正常に動作しなくなる。
 
-### メソッドのオーバーロード
+
+### メソッドのオーバーライト
 完全に置きかえる場合。
 他のプラグインとの競合に気をつけないといけないパターン。
+コメントに「!!!overwrite!!!」とか書いておくのが良いみたい。
 
 ~~~javascript
-オーバーロードするメソッド = function() {
+/**
+ * 説明ごにょごにょ
+ * 
+ * !!!overwrite!!!
+ */
+オーバーライトするメソッド = function() {
     // 必要な処理
 };
 ~~~
@@ -266,14 +291,17 @@ const value = data.ParamName;
 ### 独自のノートタグを実装する場合
 
 __Scene_Boot.start__ をフックして処理を追加する。
-
+ノートタグ処理はオリジナルのstartより先に処理する方がよさそう。
+試した限りでは、オリジナルのstart中でアクターの装備初期化などが呼び出されるため、
+後ろに実装するとノートタグを処理しないまま実行されることになってしまう。
 
 ~~~javascript
   const _Scene_Boot_start = Scene_Boot.prototype.start;
   Scene_Boot.prototype.start = function() {
-    _Scene_Boot_start.call(this);
 
         /* TODO : ノートタグの処理 */
+
+      _Scene_Boot_start.call(this);
   };
 ~~~
 
@@ -369,6 +397,19 @@ Scene_Base.popScene()を使う。
 全部戻す場合の遷移
 SceneManager.goto(遷移するシーン);
 
+あと、UIはプラグイン側で用意するべきじゃないと思ってる。
+面倒でもプラグインを組み合わせて使う側でやる方がよい。
+理由は以下の通り
+* 複数のプラグインを組み合わせて使うとき、UIはどうしても競合してしまう。
+* プラグイン毎のUIだと、統一感のあるUIが提供できない。
+
+例外的に特定のプラグイン開発者のものだけ使うとか、競合しないものを組み合わせて使えばなんとかなる。
+
+__MVからMZに移植する際の変更点__
+
+* ウィンドウを作成する際、 __x,y,width,height__ じゃなくて __Rectangle__ を渡すようになった。
+
+
 ### ■ 選択する必要はないけど、OK/キャンセル操作を受け付けたい場合は？
 
 Window_Seleactableを派生させたウィンドウを作成し、
@@ -434,10 +475,10 @@ Traitの持ってるメンバ
 |||8|FDR(床ダメージ倍率)|
 |||9|EXR(経験値増加倍率)|
 |TRAIT_ATTACK_ELEMENT|31|属性ID|dataIdで指定される属性を攻撃属性として追加する。|
-|TRAIT_ATTACK_STATE|32|||
-|TRAIT_ATTACK_SPEED|33|||
-|TRAIT_ATTACK_TIMES|34|||
-|TRAIT_ATTACK_SKILL|35|||
+|TRAIT_ATTACK_STATE|32|ステートID|dataIdで指定されるステートを、攻撃時に付与する。|
+|TRAIT_ATTACK_SPEED|33|-|value値の加算合計を、攻撃速度補正値として得る。|
+|TRAIT_ATTACK_TIMES|34|-|value値の加算合計を、攻撃回数として加算する。単純にリピートされる値となる。|
+|TRAIT_ATTACK_SKILL|35|スキルID|攻撃時のスキルIDをdataIdに変更する。複数持っていた場合には、最も高い値が採用される。(MZで新規追加。WeponMasteryプラグインに相当）|
 |TRAIT_STYPE_ADD|41|スキルタイプID|dataIdで指定したスキルタイプを追加する。valueは無視されるようだ。dataId=x: スキルタイプ x を追加する。|
 |TRAIT_STYPE_SEAL|42|スキルタイプID|dataIdで指定したスキルタイプを封印する。|
 |TRAIT_SKILL_ADD|43|スキルID|dataIdで指定したスキルを追加する。|
@@ -446,15 +487,19 @@ Traitの持ってるメンバ
 |TRAIT_EQUIP_ATYPE|52|防具タイプID|dataIdで指定した防具タイプを装備可能にする。|
 |TRAIT_EQUIP_LOCK|53|装備スロットタイプ|dataIdで指定した装備をロックする。ロックは装備タイプの装備を変更できない状態。|
 |TRAIT_EQUIP_SEAL|54|装備スロットタイプ|dataIdで指定した装備を封印する。封印は装備スロットに装備できない状態。|
-|TRAIT_SLOT_TYPE|55|||
-|TRAIT_ACTION_PLUS|61|||
-|TRAIT_SPECIAL_FLAG|62|||
+|TRAIT_SLOT_TYPE|55|装備タイプ|装備タイプ変更特性。(0:通常, 1:二刀流)|
+|TRAIT_ACTION_PLUS|61|-|行動回数追加特性。valueは追加される確率を表す。加算合計じゃなくて、特性を持っている数だけ乱数判定されて、1つずつ加算される仕組み。|
+|TRAIT_SPECIAL_FLAG|62|フラグID|特別な機能を提供するためのフラグ。|
+|||0|自動戦闘。(Game_BattlerBase.FLAG_ID_AUTO_BATTLE)|
+|||1|防御。(Game_BattlerBase.FLAG_GUARD)|
+|||2|身代わり。敵対者のアクションに対して、身代わりになる。(Game_BattlerBase.FLAG_ID_SUBSTITUTE,isSubstitute()メソッド)|
+|||3|TPが保存されるかどうか。(Game_BattlerBase.FLAG_ID_PRESERVE_TP。isPreserveTp()メソッド。)|
 |TRAIT_COLLAPSE_TYPE|63|||
 |TRAIT_PARTY_ABILITY|64||パーティーアビリティ。既定の実装はdataIdで指定された値の効果を持っているかどうか、だけの判定に使われる。dataIdはGame_Party.ABILITY_～で定義されてる。|
 |||0|ABILITY_ENCOUNTER_HALF。ランダムエンカウント率半減。|
 |||1|ABILITY_ENCOUNTER_NONE。ランダムエンカウントでエンカウントしない。|
-|||2|ABILITY_CANCEL_SURPRISE|
-|||3|ABILITY_RAISE_PREEMPTIVE|
+|||2|ABILITY_CANCEL_SURPRISE|急襲でのエンカウントを防ぐ。|
+|||3|ABILITY_RAISE_PREEMPTIVE|先制攻撃率向上。特性を持っていると、基本先制攻撃率に対して4倍になる。|
 |||4|ABILITY_GOLD_DOUBLE。戦闘でのゴールド倍率2倍|
 |||5|ABILITY_DROP_ITEM_DOUBLE。戦闘でのアイテムドロップレート2倍|
 
@@ -610,8 +655,63 @@ Scene_Battle.prototype.onSelectAction = function() {
 
     リソースを破棄（たぶん）
 
+### ■ 色
+
+MZではColorManagerが色の管理をしている。文字の描画色などで使うのもこれ。
+扱っている色はCSSの色文字列('#RRGGBB')でやりとりされる。
+
+例えば白(255,255,255)は '#ffffff'、赤(255,0,0)は'#ff0000',緑(0,255,0)は '#00ff00', 青(0,0,255)は '#0000ff' になる。
 
 
+### ■ BattleManager と Window_BattleLog
+
+基本的にはBattleManagerが戦闘システムの全体の流れを制御して、
+Window_BattleLogにその表示についての処理が実装されている形。
+アニメーション再生をWndow_BattleLogに入れてるのは、
+フロントエンド側はWindowクラス、という設計思想なのか？
+
+BattleManagerは_logWindow（Window_BattleLogのインスタンス)を使用してメソッドを呼び出す。
+ちょっと調べた限り、クリティカル時に表示するアニメーションを切り替えるには、
+BattleManager側も変えないとむりぽだった。
+(updateTurn()にて使用アニメーション、updateActionにて結果表示。applyはupdateActionにて使用されるため、使用アニメーションの段階ではクリティカルになるかどうかわからん。戦闘システムカスタマイズすればいいんだけど。)
+
+### メニュー系
+
+プラグインで独自のシーンを作る場合、まず、Scene_Baseを使うか、Scene_MenuBaseを使うかで分かれる。
+Scene_Baseはタイトル画面など、背景に表示するスプライトから全部用意する場合に使用する。
+Scene_MenuBaseは、シーンの背景として前のシーンのキャプチャ画像を使用し、かつ入力キャンセルボタンなど、
+メニュー操作が絡んでくる場合に使用するときに使うと良い。
+
+尚既定の実装では背景として、前のシーンにジャギーをかけたような画像を使用している。
+これを止めるには、Scene_MenuBaseのcreateBackgroundの一部を変更すればいい。
+
+~~~javascript
+Scene_MenuBase.prototype.createBackground = function() {
+    this._backgroundFilter = new PIXI.filters.BlurFilter();
+    this._backgroundSprite = new Sprite();
+    this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
+    //this._backgroundSprite.filters = [this._backgroundFilter];
+    this._backgroundSprite.filters = []; // フィルタなし。
+    this.addChild(this._backgroundSprite);
+    //this.setBackgroundOpacity(192);
+    this.setBackgroundOpacity(255);
+};
+~~~
+フックしてfiltersとsetBackgroundOpacity(255)として可。
+見て分かるとおり、_backgroundSprite.bitmapに任意の画像を設定すれば、背景を変更することができる。
+メニューの背景を可愛いうさぎさんにする事も出来るというわけだ。
+
+尚、既定の実装ではScene_MenuBaseを使うとキャンセルボタンも作ってくれる。
+派生した先で不要だと感じたら、 __needsCancelButton__ を実装してfalseを返せば良い。
+~~~javascript
+/**
+ * キャンセルボタンが必要かどうかを取得する。
+ * @return {Boolean} 必要な場合にはtrue, それ以外はfalse
+ */
+Scene_Hogehoge.prototype.needsCancelButton = function() {
+    return false; // キャンセルボタンは要らない
+};
+~~~
 
 ### ■ 小ネタ
    
@@ -675,8 +775,61 @@ id#のコモンイベントを呼び出す。正確には呼び出し予約す�
     みたいに書く。
 
 #### ・アニメーションさせる場合
-        
+
 MVから大きく変わってるので結構面倒。
+
+##### SpriteとSprite_Animationを使う方法
+
+1. シーンではアニメーションターゲットのスプライトを作成する。
+
+    これは空でもよいようだ。
+    中央に表示させるためのターゲット例。
+
+~~~javascript
+    Scene_RunAnimation2.prototype.createTargetSprite = function() {
+        const width = 0;
+        const height = 0;
+        this._targetSprite = new Sprite();
+        this._targetSprite.x = Graphics.boxWidth / 2;
+        this._targetSprite.y = Graphics.boxHeight / 2;
+        this._targetSprite.setFrame(0, 0, width, height);
+        this.addChild(this._targetSprite);
+    };
+~~~
+
+2. アニメーション開始時はSprite_Animationを構築して初期化する。
+
+~~~javascript
+        const sprite = new Sprite_Animation();
+        const targetSprites = [ this._targetSprite ];
+        sprite.targetObjects = targetSprites;
+        const animation = $dataAnimations[this._animationId];
+        sprite.setup(targetSprites, animation, this._mirror, 0, null);
+        this._animationSprite = sprite;
+        this.addChild(sprite); // 以降Scene.updateでアニメーションスプライトが更新される。
+~~~
+
+3. アニメーション完了待ち
+
+    アニメーション完了を検出したら、場合によってはremoveChildやdestroyを使って解放すること。
+~~~javascript
+    if (!this._animationSprite.isPlaying()) {
+        this.removeChild(this._animationSprite);
+        this._animationSprite.destroy();
+        this._animationSprite = null;
+        // アニメーション再生終了。
+        SceneManager.pop();
+    }
+~~~
+
+
+##### Spritesetを使う方法
+
+Game_TempとSpriteset_Baseの実装クラス、Sceneが複雑に絡んでいるので面倒。
+準備が面倒だが、一度汎用的な Spriteset_Base の実装クラスを作ってしまえば、使いまわすことで開発効率は上がる。
+あとSpriteset_Baseがリソース開放をしてくれるのが強み。
+
+
 __$gameTemp.requestAnimation__ を呼ぶことになるが、これだけでは足りないのだ。
 まず、 __$gameTemp.requestAnimation__ に渡すデータは
 
@@ -691,11 +844,38 @@ __$gameTemp.requestAnimation__ を呼ぶことになるが、これだけでは�
     * mirror : {Boolean} 左右反転させるかどうか。(省略可。省略時はfalse)
 
 となっている。
-独自のSceneでアニメーションさせるならばどうするか？
 
 1. まずSpriteset_Baseの派生を定義する。
     
-    オーバーロードするのはfindTargetSpriteだけで良い。ここで、アニメーションを表示するスプライトを返す。
+    実装するのは大きく2つ。createLowerLayerとfindTargetSprite。
+    createLowerLayerはアニメーション対象のスプライトの作成と、コンテナ、背景などを設定する。
+    findTargetSpriteはアニメーション対象のスプライトを返す。
+
+~~~javascript
+    Spriteset_RunAnimation.prototype.createLowerLayer = function() {
+        Spriteset_Base.prototype.createLowerLayer.call(this);
+        this._blackScreen.visible = false; // ブラックスクリーンは使用しないので無効化。
+
+        // アニメーション対象スプライトの作成。
+        const width = Graphics.boxWidth;
+        const height = Graphics.boxHeight;
+        this._centerSprite = new Sprite();
+        this._centerSprite.x = Graphics.boxWidth / 2;
+        this._centerSprite.y = Graphics.boxHeight / 2 + height / 2;
+        this._centerSprite.bitmap = new Bitmap(width, height);
+        this._centerSprite.setFrame(0, 0, width, height);
+        this._baseSprite.addChild(this._centerSprite);
+
+        // エフェクトコンテナの作成。
+        this._effectsContainer = new Sprite();
+        this._baseSprite.addChild(this._effectsContainer);
+    };
+
+    Spriteset_RunAnimation.prototype.findTargetSprite = function( /* target */ ) {
+        // アニメーション対象スプライトを返す。
+        return this._centerSprite;
+    };
+~~~
 
 2. Sceneに作成した独自Spriteset_Baseを追加する。
             
@@ -704,33 +884,15 @@ __$gameTemp.requestAnimation__ を呼ぶことになるが、これだけでは�
 
 3. $gameTemp.requestAnimation()をコールする。
 
-4. アニメーション完了待ちするならば、
-       
-    Spriteset_Base.isAnimationPlaying()で判定を取得する。但し、Sceneのメソッドでforやらwhileで待たないこと。
-        
-    画面中央に表示させるようなアニメーションでいいならば、次のようにすればできそう（試してない）。
-~~~javascript    
-        function Spriteset_Hoge() {
-            this.initialize(...arguments);
-        }
-
-        Spriteset_Hoge.prototype = Object.create(Spriteset_Base);
-        Spriteset_Hoge.prototype.constructor = Spriteset_Hoge;
-
-        Spriteset_Hoge.prototype.initialize = function() {
-            SpritesetBase.prototype.initialize.call(this);
-        };
-
-        SpritesetBase.prototype.createLowerLayer = function() {
-            this._centerSprite = new new Sprite();
-            this._centerSprite.x = Graphics.boxWidth / 2;
-            this._centerSprite.y = Graphics.boxHeight / 2;
-            this._baseSprite.addChild(this._centerSprite);
-        };
-        SpritesetBase.prototype.findTargetSprite = function(target) {
-            return this._centerSprite;
-        };
+~~~javascript
+    $gameTemp.requestAnimation([this._spritesetRunAnimation], this._animationId, this._mirror);
 ~~~
+
+
+4. アニメーション完了待ちするならば、Spriteset_Base.isAnimationPlaying()で判定を取得する。
+
+    但し、Sceneのメソッドでforやらwhileで待たないこと。
+
 
 Spriteset_Baseのインスタンスは、1つのシーンに1つだけ用意すること。
 さもないとどちらかはアニメーション再生要求を取り出せない。
@@ -824,6 +986,7 @@ MVと違い、名前表示欄が追加されている。そのため、Window_Me
 
     メッセージ表示完了は $gameMessage.isBusy()を参照する。
 ~~~
+
 
 ### ・スクリーンサイズの変更
 
@@ -948,3 +1111,122 @@ Game_Battler.prototype.onBattleEnd = function() {
     this.appear();
 };
 ~~~
+
+### TPB処理について
+
+Game_Battler.updateTpb()で処理される。TPB関連のパラメータとしては以下3つが使用される。
+* _tpbChageTime - TPBステートがchargingの時に更新される。
+_tpbChageTimeが1.0以上になるとTPBステートがchangedになる。
+加算量はTPB相対速度(tpbRelativeSpeed)。
+* _tpbCastTime - TPBステートがcastingの時に更新される。
+_tpbCastTimeがスキルなどの要求キャストタイム以上になると、TPBステートがreadyになる。
+加算量はTPB相対速度(tpbRelativeSpeed)。
+* _tpbIdleTime - TPBステートがcharging以外の時に更新される。
+onTpbTimeout()がコールされて0になる。
+加算量はTPB相対速度(tpbRelativeSpeed)。用途がよくわからん。
+
+ベーシックシステムでのTPB計算
+
+TPB速度(tpbSpeed) : Sqrt(AGI) + 1
+TPBベース速度(tpbBaseSpeed) : 
+パーティーのTPBベース速度 : パーティー中、TPBベース速度。
+TPB相対速度(tpbRelativeSpeed) : TPB速度(tpbSpeed) / リファレンスタイム
+
+リファレンスタイムはGame_Unit.tpbReferenceTimeで定義されている。
+大きくすると、時間経過がゆっくりになる。
+データベースで設定できないのはいかがなものか。
+~~~javascript
+Game_Unit.prototype.tpbReferenceTime = function() {
+    return BattleManager.isActiveTpb() ? 240 : 60;
+};
+~~~
+
+キャストタイム
+アイテム/スキルで指定したSPEED(データベース上は負数)に対して以下の計算。
+キャストタイム = Sqrt(Speed) / TPB速度
+
+~~~javascript
+Game_Battler.prototype.tpbRequiredCastTime = function() {
+    const actions = this._actions.filter(action => action.isValid());
+    const items = actions.map(action => action.item());
+    const delay = items.reduce((r, item) => r + Math.max(0, -item.speed), 0);
+    return Math.sqrt(delay) / this.tpbSpeed();
+};
+~~~
+TPB速度の計算式にあるとおり、ベーシックシステムではAGIが高いほどキャスト時間が早くなる。
+
+
+
+### 新しいシーンにしたとき、前のシーンの画像がぼやけた表示になるのをやめるには？
+
+Scene_MenuBase.createBackgroundでやってる、filtersを空の配列にし、
+setBackgroundOpacityを255にする。
+
+~~~javascript
+Scene_MenuBase.prototype.createBackground = function() {
+    this._backgroundFilter = new PIXI.filters.BlurFilter();
+    this._backgroundSprite = new Sprite();
+    this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
+    this._backgroundSprite.filters = [this._backgroundFilter]; // ここを空配列([])にする。
+    this.addChild(this._backgroundSprite);
+    this.setBackgroundOpacity(192); // これを255に設定する。
+};
+~~~
+
+特定のシーンだけぼやけないようにするには、Scene_XXX.createの処理で、_backgroundSprite.filtersを空配列にし、setBackgroundOpacity(255)を呼び出すようにすればいい。
+
+~~~javascript
+    Scene_MenuBase.prototype.create.call(this);
+    this._backgroundSprite.filters = [];
+    this.setBackgroundOpacity(255);
+~~~
+
+### Sprite作って文字を描画したいなら？
+
+まずSpriteを作る。このとき寸法に注意。
+
+~~~javascript
+const fontFace = フォント名;
+const fontSize = フォントサイズ;
+const width = 幅;
+const height = 高さ;
+const textColor = 色;
+const sprite = new Sprite();
+sprite.bitmap = new Bitmap(width, height);
+sprite.bitmap.fontFace = fontFace;
+sprite.bitmap.fontSize = fontSize;
+sprite.bitmap.textColor = textColor;
+sprite.x = 位置x;
+sprite.y = 位置y;
+~~~
+
+作成したSpriteはシーンに追加しておくこと。
+さもないとdestroyしてくれないはず。
+あとは、 __bitmap.drawText()__ で描画して終わり。
+
+### Spriteの大きさを変えるには？
+
+__Sprite.scale.x__ と __Sprite.scle.y__ を変更すればいいみたい。
+例えばエネミーをでっかくするなら．．．．。
+
+~~~javascript
+    Sprite_Enemy.prototype.updateBitmap = function() {
+        Sprite_Enemy_updateBitmap.call(this, ...arguments);
+
+        this.scale.x = 2;
+        this.scale.y = 2;
+    };    
+~~~
+
+とはいえ、ベーシックシステムでscaleを使ってるかもしれないから、安易にscaleパラメータを変えるのはまずい。
+
+### 新しいパラメータを追加して挙動を制御したいんだけど？
+
+例えばゴールド取得倍率を2倍固定じゃなくて、0.20％増しとか0.40％増しとかやりたい場合。
+新しいTraitとコードを定義するしよう。
+このとき、他のプラグインを使ってるならば、競合に注意すること。
+
+### 属性の扱いについて
+
+属性は基本的にID値だけで扱われます。
+そこにはNotetagみたいな素敵要素はなく、例えば物理属性だとか魔法属性だとか識別するすべは用意されてない。プラグイン側でやりたかったら、プラグインパラメータとして指定して渡してもらう。

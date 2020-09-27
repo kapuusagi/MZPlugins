@@ -1,0 +1,5 @@
+[
+null,
+{"id":1,"atypeId":1,"description":"","etypeId":4,"traits":[{"code":22,"dataId":1,"value":0}],"iconIndex":135,"name":"-----鎧系","note":"","params":[0,0,0,1,0,0,0,0],"price":100},
+{"id":2,"atypeId":1,"description":"【一般装備】通気性の高い布の服。","etypeId":4,"traits":[{"code":22,"dataId":1,"value":0}],"iconIndex":135,"name":"布の服","note":"","params":[0,0,0,1,0,0,0,0],"price":100},
+]
