@@ -16,7 +16,7 @@
  * @text メッセージ
  * @desc 表示するメッセージ
  * @type string
- * @default 'Hello world'
+ * @default "Hello world"
  * 
  * 
  * @help 
@@ -29,12 +29,12 @@
  * Version.1.0.0 初版
  */
 (() => {
-    'use strict'
+    "use strict"
 
-    const pluginName = 'Kapu_HelloScene';
+    const pluginName = "Kapu_HelloScene";
 
-    PluginManager.registerCommand(pluginName, 'Message', args => {
-        const msg = args.msg || 'Hello world';
+    PluginManager.registerCommand(pluginName, "Message", args => {
+        const msg = args.msg || "Hello world";
         SceneManager.push(Scene_HelloWorld);
         SceneManager.prepareNextScene(args.msg);
     });
@@ -55,7 +55,7 @@
      */
     Scene_HelloWorld.prototype.initialize = function () {
         Scene_MenuBase.prototype.initialize.call(this);
-        this._msg = '';
+        this._msg = "";
     };
 
     /**
@@ -63,7 +63,7 @@
      * @param {String} msg メッセージ
      */
     Scene_HelloWorld.prototype.prepare = function (msg) {
-        this._msg = msg || '';
+        this._msg = msg || "";
     };
 
     /**

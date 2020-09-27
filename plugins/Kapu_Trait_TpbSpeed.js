@@ -48,7 +48,7 @@
     const pluginName = "Kapu_Trait_TpbSpeed";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED = Number(parameters['TraitId']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED = Number(parameters["TraitId"]) || 0;
 
     //------------------------------------------------------------------------------
     // DataManager

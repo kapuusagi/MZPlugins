@@ -36,11 +36,11 @@
  */
 
 (() => {
-    'use strict'
+    "use strict"
 
-    const pluginName = 'Kapu_AnimationTest';
+    const pluginName = "Kapu_AnimationTest";
 
-    PluginManager.registerCommand(pluginName, 'runAnimation', args => {
+    PluginManager.registerCommand(pluginName, "runAnimation", args => {
         const animationId = args.animationId || 0;
         const mirror = args.mirror || false;
         SceneManager.push(Scene_RunAnimation);

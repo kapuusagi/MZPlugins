@@ -57,7 +57,7 @@
  *     <varianceParam:N=value#,...>
  *        0～valueの範囲で指定パラメータを加算する。Nはパラメータ名。
  *        Nに指定可能なものは次の通り。
- *        'MaxHP','MaxMP','ATK','DEF','MATK','MDEF','AGI','LUK'
+ *        "MaxHP","MaxMP","ATK","DEF","MATK","MDEF","AGI","LUK"
  *        
  * ============================================
  * 変更履歴
@@ -65,14 +65,14 @@
  * Version.0.1.0 
  */
 (() => {
-    'use strict'
+    "use strict"
 
-    const pluginName = 'Kapu_IndependentItem_Randomize'
+    const pluginName = "Kapu_IndependentItem_Randomize"
 
     const parameters = PluginManager.parameters(pluginName);
-    const isShopRandomize = Boolean(parameters['isShopRandomize']) || false;
+    const isShopRandomize = Boolean(parameters["isShopRandomize"]) || false;
 
-    PluginManager.registerCommand(pluginName, 'setRandomize', args => {
+    PluginManager.registerCommand(pluginName, "setRandomize", args => {
         const enabled = Boolean(args.enabled) || false;
         $gameTemp.setIndependentItemRandomize(enabled);
     });
@@ -199,7 +199,7 @@
      * @return {object} 効果変動量オブジェクト
      */
     const _parseVarianceEffect = function(varianceStr) {
-        const tokens = varianceStr.split(',');
+        const tokens = varianceStr.split(",");
         let v1 = 0;
         let v2 = 0;
         if (tokens.length == 1) {
@@ -265,9 +265,9 @@
                 varianceParam[i] = singleNumber;
             }
         } else {
-            const paramArray = [ 'MaxHP', 'MaxMP', 'ATK', 'DEF', 'MATK', 'MDEF', 'AGI', 'LUK'];
-            for (const token of varianceStr.split(',')) {
-                const arg = token.split('=');
+            const paramArray = [ "MaxHP", "MaxMP", "ATK", "DEF", "MATK", "MDEF", "AGI", "LUK"];
+            for (const token of varianceStr.split(",")) {
+                const arg = token.split("=");
                 if (arg.length > 1) {
                     const index = paramArray.indexOf(arg[0]);
                     const variance = Number(arg[1]);

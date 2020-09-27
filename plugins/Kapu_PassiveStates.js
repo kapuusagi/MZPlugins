@@ -35,7 +35,7 @@
  *               素直にYanfly氏がMZ向けにリリースしているVisustellaプラグインを使った方が良いです。
  */
 (() => {
-    const pluginName = 'Kapu_PassiveStates';
+    const pluginName = "Kapu_PassiveStates";
 
     const _Scene_Boot_start = Scene_Boot.prototype.start;
 
@@ -79,7 +79,7 @@
             data.passiveStates = [];
 
             if (data.meta.passiveStates) {
-                const psEntries = data.meta.passiveStates.split(',');
+                const psEntries = data.meta.passiveStates.split(",");
                 for (const psEntry of psEntries) {
                     let re;
                     if ((re = psEntry.match(patternSingle)) !== null) {

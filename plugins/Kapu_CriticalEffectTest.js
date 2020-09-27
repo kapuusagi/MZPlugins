@@ -23,7 +23,7 @@
 (() => {
     const pluginName = "Kapu_CriticalEffectTest";
     const parameters = PluginManager.parameters(pluginName);
-    const criticalAnimationId = Number(parameters['Critical Animation ID']) || 0;
+    const criticalAnimationId = Number(parameters["Critical Animation ID"]) || 0;
 
     /**
      * ダメージポップアップ用スプライトをセットアップする。
