@@ -11,13 +11,18 @@
  * 
  * @arg no
  * @text 番号
- * @desc グループ上のインデックス番号
+ * @desc グループ上のエネミー番号(1～x)
  * @type number
  * 
  * @arg position
  * @text 位置
  * @desc 戦闘位置。
- * @type number
+ * @type select
+ * @option 前衛
+ * @value 0
+ * @option 後衛
+ * @value 1
+ * @default 1
  * 
  * @command setActorBattlePosition
  * @text アクター戦闘位置設定
@@ -31,9 +36,12 @@
  * @arg position
  * @text 位置
  * @desc 戦闘位置。
- * @type number
- * @min 0
- * @max 1
+ * @type select
+ * @option 前衛
+ * @value 0
+ * @option 後衛
+ * @value 1
+ * @default 1
  * 
  * @param blockMoveFlagId
  * @text 戦闘位置変更効果フラグID
@@ -109,7 +117,8 @@
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * setEnemyBattlePosition
+ *    エネミーの戦闘位置を変更する。
  * 
  * ============================================
  * ノートタグ
@@ -122,19 +131,21 @@
  *   <range:range#>
  *      アイテム/スキルの射程を指定する。
  *      未指定時は0
- *     -1:Depends 装備品依存
- *      0:Short (前列to前列) 
- *      1:Middle (前列to後列まで / 後列to前列まで)
- *      2:Long (全部)
+ *     -1:depends 装備品依存
+ *      0:short (前列to前列) 
+ *      1:middle (前列to後列まで / 後列to前列まで)
+ *      2:long (全部)
+ * 
  *   <rangeRow>
  *      効果範囲が列であることを指定します。
  * 武器
  *   <range:range#>
  *      アイテム/スキルの射程を指定する。
  *      未指定時は0
- *      0:Short (前列to前列) 
- *      1:Middle (前列to後列まで / 後列to前列まで)
- *      2:Long (全部)
+ *      0:short (前列to前列) 
+ *      1:middle (前列to後列まで / 後列to前列まで)
+ *      2:long (全部)
+ *      
  *   <blockMovePosition>
  *      敵対者からの前衛/後衛 移動操作をブロックする。
  *   <ignoreRangeDistance>
@@ -163,12 +174,18 @@
     Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE = Number(parameters["longRangeFlagId"]) || 0;
     Game_Action.EFFECT_MOVE_BATTLE_POSITION = Number(parameters["effectCode"]) || 0;
 
+    Game_Action.RANGE_SHORT = 0;
+    Game_Action.RANGE_MIDDLE = 1;
+    Game_Action.RANGE_LONG = 2;
+    Game_Action.RANGE_DEPENDS = -1;
+
     PluginManager.registerCommand(pluginName, "setEnemyBattlePosition", args => {
-        const no = Number(args.no) || 0;
+        const no = Number(args.no) || 1;
         const position = Number(args.position) || 0;
-        if ((no >= 0) && (position >= 0) && (position <= 1)) {
-            if (!$gameParty.inBattle()) {
-                $gameTroop.changeBattlePosition(no, position);
+        if ((no > 0) && (position >= 0) && (position <= 1)) {
+            if ($gameParty.inBattle()) {
+                const index = no - 1;
+                $gameTroop.changeBattlePosition(index, position);
             }
         }
     });
@@ -210,6 +227,32 @@
     };
 
     /**
+     * レンジ文字列からレンジ値を得る。
+     * 
+     * @param {String} rangeStr レンジ文字列
+     * @return {Number} レンジ 
+     */
+    const _getRange = function(rangeStr) {
+        const num = Number(rangeStr);
+        if (!isNaN(num)) {
+            return Math.round(num);
+        } else {
+            switch (rangeStr) {
+                case 'short':
+                    return Game_Action.RANGE_SHORT;
+                case 'middle':
+                    return Game_Action.RANGE_MIDDLE;
+                case 'long':
+                    return Game_Action.RANGE_LONG;
+                case 'depends':
+                    return Game_Action.RANGE_DEPENDS;
+                default:
+                    return Game_Action.RANGE_SHORT;
+            }
+        }
+    };
+
+    /**
      * DataSkillのノートタグを処理する。
      * 
      * @param {Array<DataSkill>} dataArray DataSkill配列
@@ -220,7 +263,7 @@
             if (!obj) {
                 continue;
             }
-            obj.range = 0;
+            obj.range = Game_Action.RANGE_DEPENDS;
 
             if ((i != moveToFrontSkillId) && (i != moveToRearSkillId)) {
                 if (obj.meta.moveToFront) {
@@ -230,7 +273,7 @@
                 }
             }
             if (obj.meta.range) {
-                obj.range = Number(obj.meta.range).clamp(-1, 2);
+                obj.range = _getRange(obj.meta.range).clamp(-1, 2);
             }
         }
     };
@@ -246,14 +289,14 @@
                 continue;
             }
             obj.range = 0;
+            if (obj.meta.range) {
+                obj.range = _getRange(obj.meta.range).clamp(-1, 2);
+            }
 
             if (obj.meta.moveToFront) {
                 _addEffectMoveBattlePosition(obj, 0);
             } else if (obj.meta.moveToRear) {
                 _addEffectMoveBattlePosition(obj, 1);
-            }
-            if (obj.meta.range) {
-                obj.range = Number(obj.meta.range).clamp(-1, 2);
             }
         }
     };
@@ -291,11 +334,11 @@
                 continue;
             }
             obj.range = 0;
-
-            _processTraitsNoteTag(obj);
             if (obj.meta.range) {
-                obj.range = Number(obj.meta.range).clamp(-1, 2);
+                obj.range = _getRange(obj.meta.range).clamp(-1, 2);
             }
+            
+            _processTraitsNoteTag(obj);
         }
     };
 
@@ -326,7 +369,7 @@
             _processTraitsNoteTag(obj);
             if (obj.meta.defaultRange) {
                 const range = Number(obj.meta.defaultRange) || 0;
-                obj.defaultRange = range.clamp(0, 1);
+                obj.defaultRange = _getRange(obj.meta.defaultRange).clamp(0, 1);
             }
 
         }
@@ -720,7 +763,7 @@
         // 装備武器レンジを返す。
         const ranges = this.weapons().map(item => item.range);
         if (ranges.length > 0) {
-            return this.weapons().min(...ranges);
+            return Math.min(...ranges);
         } else {
             const bareHandSkillId = this.attackSkillId();
             const bareHandSkill = $dataSkills[bareHandSkillId];
@@ -848,7 +891,7 @@
     Game_Unit.prototype.updateMembersBattlePosition = function() {
         if (this.frontAliveMembers().length === 0) {
             // 前衛がいなくなったら後衛を前衛に持ってくる。
-            for (const member of this.rearAliveMembers()) {
+            for (const member of this.rearMembers()) {
                 member.setBattlePosition(0);
             }
         }
@@ -1182,9 +1225,10 @@
     Window_BattleActor.prototype.select = function(index) {
         Window_BattleStatus.prototype.select.call(this, index);
         const action = BattleManager.inputtingAction();
-        if (action) {
+        const actor = this.actor(index);
+        if (action && actor) {
             if (action.isForRow()) {
-                $gameParty.selectRow(this.actor().battlePosition());
+                $gameParty.selectRow(actor.battlePosition());
             } else {
                 $gameParty.select(this.actor(index));
             }
