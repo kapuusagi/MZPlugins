@@ -1102,9 +1102,11 @@ function Sprite_BattleHudPicture() {
         this._mainSprite = new Sprite();
         this._mainSprite.anchor.x = 0.5; // 原点XはSprite中央
         this._mainSprite.anchor.y = 1; // 原点YはSprite下端
-        this._mainSprite.filters = [];
-        this._mainColorFilter = new ColorFilter();
-        this._mainSprite.filters.push(this._mainColorFilter);
+        if (!this._mainSprite.filters) {
+            this._mainSprite.filters = [];
+        }
+        this._mainSpriteFilter = new BattleHudActorFilter();
+        this._mainSprite.filters.push(this._mainSpriteFilter);
         this.addChild(this._mainSprite);
     };
 
@@ -1218,8 +1220,10 @@ function Sprite_BattleHudPicture() {
             this._tpGaugeSprite.setup(battler, "tp");
             this._tpbGaugeSprite.setup(battler, "time");
             this._stateIconSprite.setup(battler);
-            this._mainColorFilter.setBrightness(this.mainSpriteBrightness());
-            this._mainSprite.opacity = this.mainSpriteOpacity();
+            const condition = this.mainSpriteColorCondition();
+            this._mainSpriteFilter.setSaturation(condition.saturation);
+            this._mainSpriteFilter.setBrightness(condition.brightness);
+            this._mainSprite.opacity = condition.opacity;
         } else {
             this._mainSprite.bitmap = null;
         }
@@ -1244,7 +1248,7 @@ function Sprite_BattleHudPicture() {
         const totalStatusAreaWidth = statusAreaWidth * battleMemberCount + statusAreaPadding + (battleMemberCount - 1);
         const baseX = (Graphics.boxWidth - totalStatusAreaWidth) / 2
         const offsetX = (statusAreaWidth + statusAreaPadding) * index;
-        const x = baseX + offsetX + statusAreaWidth / 2;
+        const x = baseX + offsetX; // + statusAreaWidth / 2;
         const y = Graphics.boxHeight;
         this.setHome(x, y);
     };
@@ -1282,34 +1286,64 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudActor.prototype.updateColor = function() {
         if (this._battler) {
-            // もしかしたらHSLフィルタつけて、グレーにした方がいいかも。
-            // 輝度
-            const targetBrightness = this.mainSpriteBrightness();
-            if (this._brightness > targetBrightness) {
-                this._brightness = Math.max(this._brightness - 10, targetBrightness);
-            } else if (this._brightness < targetBrightness) {
-                this._brightness = Math.min(this._brightness + 50, targetBrightness);
+            // 彩度
+            const targetCondition = this.mainSpriteColorCondition();
+            let saturation = this._mainSpriteFilter.saturation();
+            if (saturation > targetCondition.saturation) {
+                saturation = Math.max(saturation - 10, targetCondition.saturation);
+            } else if (saturation < targetCondition.saturation) {
+                saturation = Math.min(saturation + 50, targetCondition.saturation);
             }
-            this._mainColorFilter.setBrightness(this._brightness);
+            this._mainSpriteFilter.setSaturation(saturation);
+
+            // 輝度
+            let brightness = this._mainSpriteFilter.brightness();
+            if (brightness > targetCondition.brightness) {
+                brightness = Math.max(brightness - 10, targetCondition.brightness);
+            } else if (brightness < targetCondition.brightness) {
+                brightness = Math.min(brightness + 50, targetCondition.brightness);
+            }
+            this._mainSpriteFilter.setBrightness(brightness);
 
             // 不透明度
             const opacity = this._mainSprite.opacity;
-            const targetOpacity = this.mainSpriteOpacity();
-            if (opacity > targetOpacity) {
-                this._mainSprite.opacity = Math.max(opacity - 10, targetOpacity);
-            } else if (opacity < targetOpacity) {
-                this._mainSprite.opacity = Math.min(opacity + 50, targetOpacity);
+            if (opacity > targetCondition.opacity) {
+                this._mainSprite.opacity = Math.max(opacity - 10, targetCondition.opacity);
+            } else if (opacity < targetCondition.opacity) {
+                this._mainSprite.opacity = Math.min(opacity + 50, targetCondition.opacity);
             }
         }
     };
 
     /**
-     * メインスプライトの輝度を取得する。
+     * メインスプライトの色補正を得る。
+     * 
+     * @return {Object} 色補正
+     */
+    Sprite_BattleHudActor.prototype.mainSpriteColorCondition = function() {
+        return {
+            saturation : this.mainSpriteSaturation(),
+            brightness : this.mainSpriteBrightness(),
+            opacity : this.mainSpriteOpacity(),
+        };
+    };
+
+    /**
+     * メインスプライトの彩度補正値を得る。
+     * 
+     * @return {Number} 彩度補正値(0～255)
+     */
+    Sprite_BattleHudActor.prototype.mainSpriteSaturation = function() {
+        return (this._actor.isDead()) ? 0 : 255;
+    };
+
+    /**
+     * メインスプライトの輝度補正値を取得する。
      * 
      * @return {Number} 輝度(0～255)
      */
     Sprite_BattleHudActor.prototype.mainSpriteBrightness = function() {
-        return this._battler.isDead() ? 64 : 255;
+        return (this._actor.isDead()) ? 128 : 255;
     };
     /**
      * メインスプライトの不透明度を得る。
@@ -1317,7 +1351,7 @@ function Sprite_BattleHudPicture() {
      * @return {Number} 不透明度(0～255)
      */
     Sprite_BattleHudActor.prototype.mainSpriteOpacity = function() {
-        return this._battler.isDead() ? 64 : 255;
+        return 255;
     };
 
     /**
@@ -1468,7 +1502,6 @@ function Sprite_BattleHudPicture() {
             "  }" +
             "}" +
             "float getRate(float x, float y) {" +
-            //"  return 1.0;" +
             "  return min(getRateX(x), getRateY(y));" +
             "}" +
             "void main() {" +
@@ -1483,6 +1516,136 @@ function Sprite_BattleHudPicture() {
         return src;
     };
 
+    //------------------------------------------------------------------------------
+    // BattleHudActorFilter
+    /**
+     * BattleHudActorFilter
+     * カラーフィルター。
+     */
+    function BattleHudActorFilter() {
+        this.initialize(...arguments);
+    };
+
+    BattleHudActorFilter.prototype = Object.create(PIXI.Filter.prototype);
+    BattleHudActorFilter.prototype.constructor = BattleHudActorFilter;
+
+    /**
+     * BattleHudActorFilterを初期化する。
+     */
+    BattleHudActorFilter.prototype.initialize = function() {
+        PIXI.Filter.call(this, null, this._fragmentSrc());
+        this.uniforms.saturation = 255;
+        this.uniforms.brightness = 255;
+    };
+
+    /**
+     * 色差を設定する。
+     * 
+     * @param {Number} saturation 色差変更値
+     */
+    BattleHudActorFilter.prototype.setSaturation = function(saturation) {
+        this.uniforms.saturation = saturation.clamp(0, +255.0);
+    };
+
+    /**
+     * 色差を取得する。
+     * 
+     * @return {Number} 色差変更値
+     */
+    BattleHudActorFilter.prototype.saturation = function() {
+        return this.uniforms.saturation;
+    };
+
+    /**
+     * 輝度補正値を設定する。
+     * 
+     * @param {Number} brightness 輝度
+     */
+    BattleHudActorFilter.prototype.setBrightness = function(brightness) {
+        this.uniforms.brightness = brightness.clamp(0, 255.0);
+    };
+
+    /**
+     * 輝度補正値を得る。
+     * 
+     * @return {Number} 輝度補正値
+     */
+    BattleHudActorFilter.prototype.brightness = function() {
+        return this.uniforms.brightness;
+    };
+
+    /**
+     * フラグメントシェーダーソースを得る。
+     */
+    BattleHudActorFilter.prototype._fragmentSrc = function() {
+        // GLSLよくわからん。
+        // gl_FragCoordはピクセル毎に更新されるっぽい。
+        const src =
+            "varying vec2 vTextureCoord;" +
+            "uniform sampler2D uSampler;" +
+            "uniform float saturation;" +
+            "uniform float brightness;" +
+            "vec3 rgbToHsl(vec3 rgb) {" +
+            "  float r = rgb.r;" +
+            "  float g = rgb.g;" +
+            "  float b = rgb.b;" +
+            "  float cmin = min(r, min(g, b));" +
+            "  float cmax = max(r, max(g, b));" +
+            "  float h = 0.0;" +
+            "  float s = 0.0;" +
+            "  float l = (cmin + cmax) / 2.0;" +
+            "  float delta = cmax - cmin;" +
+            "  if (delta > 0.0) {" +
+            "    if (r == cmax) {" +
+            "      h = mod((g - b) / delta + 6.0, 6.0) / 6.0;" +
+            "    } else if (g == cmax) {" +
+            "      h = ((b - r) / delta + 2.0) / 6.0;" +
+            "    } else {" +
+            "      h = ((r - g) / delta + 4.0) / 6.0;" +
+            "    }" +
+            "    if (l < 1.0) {" +
+            "      s = delta / (1.0 - abs(2.0 * l - 1.0));" +
+            "    }" +
+            "  }" +
+            "  return vec3(h, s, l);" +
+            "}" +
+            "vec3 hslToRgb(vec3 hsl) {" +
+            "  float h = hsl.x;" +
+            "  float s = hsl.y;" +
+            "  float l = hsl.z;" +
+            "  float c = (1.0 - abs(2.0 * l - 1.0)) * s;" +
+            "  float x = c * (1.0 - abs((mod(h * 6.0, 2.0)) - 1.0));" +
+            "  float m = l - c / 2.0;" +
+            "  float cm = c + m;" +
+            "  float xm = x + m;" +
+            "  if (h < 1.0 / 6.0) {" +
+            "    return vec3(cm, xm, m);" +
+            "  } else if (h < 2.0 / 6.0) {" +
+            "    return vec3(xm, cm, m);" +
+            "  } else if (h < 3.0 / 6.0) {" +
+            "    return vec3(m, cm, xm);" +
+            "  } else if (h < 4.0 / 6.0) {" +
+            "    return vec3(m, xm, cm);" +
+            "  } else if (h < 5.0 / 6.0) {" +
+            "    return vec3(xm, m, cm);" +
+            "  } else {" +
+            "    return vec3(cm, m, xm);" +
+            "  }" +
+            "}" +
+            "void main() {" +
+            "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
+            "  vec3 hsl = rgbToHsl(sample.rgb);" +
+            "  hsl.y = clamp(hsl.y * saturation / 255.0, 0.0, 1.0);" +
+            "  hsl.z = clamp(hsl.z * brightness / 255.0, 0.0, 1.0);" +
+            "  vec3 rgb = hslToRgb(hsl);" +
+            "  float r = rgb.r;" +
+            "  float g = rgb.g;" +
+            "  float b = rgb.b;" +
+            "  float a = sample.a;" +
+            "  gl_FragColor = vec4(r, g, b, a);" +
+            "}";
+        return src;
+    };
 
     //------------------------------------------------------------------------------
     // Sprite_BattleHudPicture
