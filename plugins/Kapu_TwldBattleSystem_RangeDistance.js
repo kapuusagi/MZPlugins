@@ -44,7 +44,7 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "Kapu_BattleSystem_RangeDistance";
+    const pluginName = "Kapu_TwldBattleSystem_RangeDistance";
     const parameters = PluginManager.parameters(pluginName);
     const frontIconId = Number(parameters['frontIconId']) || 0;
     const backIconId = Number(parameters['rearIconId']) || 0;
@@ -276,6 +276,7 @@
      */
     Spriteset_Battle.prototype.updateEnemeySpriteOrder = function() {
         // Zインデックスによる更新をする。
+        this._battleField.sortableChildren = true;
         if (this._battleField.sortableChildren) {
             this._battleField.updateTransform();
         } else {
