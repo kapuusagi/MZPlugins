@@ -7,7 +7,8 @@
  * @orderAfter Kapu_Utility
  * 
  * @help 
- * 装備スロット変更用プラグイン。UIは変えない。
+ * クラス毎に装備スロットを変更するためのプラグイン。UIは変更しない。
+ * UIに影響を与えないで装備スロットを変更するプラグインがなさそうだったので作成した。
  * 
  * ■ 使用時の注意
  * ありません。
@@ -31,16 +32,11 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 作成。
  */
 (() => {
     const pluginName = "Kapu_EquipSlots";
     const parameters = PluginManager.parameters(pluginName);
-
-    PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-        // TODO : コマンドの処理。
-        // パラメータメンバは @argで指定した名前でアクセスできる。
-    });
 
     /**
      * 装備スロットのノートタグを処理する。
@@ -60,8 +56,8 @@
         }
         if (obj.equipSlots.length == 0) {
             // 装備スロットが無い場合にはデフォルトを設定する。
-            for (const equipType of $dataSystem.equipTypes) {
-                obj.equipSlots.push(equipType);
+            for (let i = 1; i < $dataSystem.equipTypes.length; i++) {
+                obj.equipSlots.push(i);
             }
         }
     };
@@ -102,7 +98,7 @@
         for (let i = 0; i < equipSlots.length; i++) {
             this._equips[i] = new Game_Item();
         }
-        for (const equipItem of equipItms) {
+        for (const equipItem of equipItems) {
             if (!equipItem) {
                 continue;
             }
