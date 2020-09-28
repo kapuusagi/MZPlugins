@@ -40,23 +40,16 @@
 
 
 (function() {
-    'use strict';
 
     /**
      * TRAITTの追加(あれば)
      */
-    Game_BattlerBase.TRAIT_XPARAM_DID_CRR = 10; // クリティカル時ダメージ倍率加算
     Game_BattlerBase.TRAIT_XPARAM_DID_PPR = 11; // 物理貫通率加算
     Game_BattlerBase.TRAIT_XPARAM_DID_MPR = 12; // 魔法貫通率加算
 
     Game_BattlerBase.TRAIT_SPARAM_DID_ATB = 10; // ATB速度
     Game_BattlerBase.TRAIT_SPARAM_DID_CASTTIME = 11; // キャストタイム
 
-    /**
-     * TRAIT_PARTY_ABIRITYのdataId追加
-     */
-    Game_Party.ABILITY_DROP_GOLD_RATE = 6;
-    Game_Party.ABILITY_DROP_ITEM_RATE = 7;
 
     //var params = PluginManager.parameters('TWLD_Core');
 
@@ -145,41 +138,6 @@
      */
     TWLD.Core.isPhysicalElement = function(elementId) {
         return TWLD.Core.PhysicalElements.contains(elementId);
-    };
-
-
-
-    /**
-     * traitsListのうち、codeとparamIdを持つものの合計を得る。
-     * @param {Array<Trait} traitsList 効果値リスト
-     * @param {Number} code Game_BattlerBase.TRAIT_～を指定する。
-     * @param {Number} パラメータID
-     * @return valueの合計値が返る。
-     */
-    TWLD.Core.traitsSum = function(traitsList, code, paramId) {
-        var ret = 0;
-        traitsList.forEach(function(t) {
-            if ((t.code === code) && (t.dataId === paramId)) {
-                ret += t.value;
-            }
-        });
-        return ret;
-    };
-    /**
-     * traitsListのうち、codeとparamIdを持つものの乗算値合計を得る。
-     * @param {Array<Trait} traitsList 効果値リスト
-     * @param {Number} code Game_BattlerBase.TRAIT_～を指定する。
-     * @param {Number} パラメータID
-     * @return valueの乗算合計値が返る。
-     */
-    TWLD.Core.traitsPi = function(traitsList, code, paramId) {
-        var ret = 1;
-        traitsList.forEach(function(t) {
-            if ((t.code === code) && (t.dataId === paramId)) {
-                ret *= t.value;
-            }
-        });
-        return ret;
     };
 
     // DataManager
@@ -688,41 +646,8 @@
     };
 
     /**
-     * 属性倍率を得る。
-     * 
-     * @param {Number} elementId 属性ID
-     * @return {Number} 属性倍率
-     */
-    Game_BattlerBase.prototype.elementRate = function(elementId) {
-        return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId).reduce(function(prev, trait) {
-            var rate = Math.abs(prev) * Math.abs(trait.value);
-            return ((prev >= 0) && (trait.value >= 0)) ? rate : -rate;
-        }, 1);
-    };
-
-
-    /**
-     * 物理攻撃のクリティカル倍率を取得する。
-     * @return {Number} クリティカル倍率。
-     */
-    Game_BattlerBase.prototype.getPhysicalCriticalRate = function () {
-        var rate = (TWLD.Core.BasicCriticalRate + Math.max(0, (this.dex - 20)) * 0.01);
-        rate += this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CRR);
-        return rate;
-    };
-
-    /**
-     * 魔法攻撃のクリティカル倍率を取得する。
-     * @return {Number} クリティカル倍率。
-     */
-    Game_BattlerBase.prototype.getMagicalCriticalrate = function() {
-        var rate = (TWLD.Core.BasicCriticalRate + Math.max(0, (this.int - 20)) * 0.01);
-        rate += this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CRR);
-        return rate;
-    };
-
-    /**
      * 物理防御貫通率を取得する。
+     * 
      * @return {Number} 物理防御貫通率。
      */
     Game_BattlerBase.prototype.getPhysicalPenetrationRate = function() {
@@ -733,6 +658,7 @@
 
     /**
      * 魔法防御貫通率を取得する。
+     * 
      * @return {Number} 魔法防御貫通率。
      */
     Game_BattlerBase.prototype.getMagicalPenetrationRate = function() {
@@ -2069,91 +1995,7 @@
         }
     };
 
-    /**
-     * スキルやアイテムを適用する。
-     * @param {Game_Battler} target 対象
-     */
-    Game_Action.prototype.apply = function(target) {
-        var result = target.result(); // Game_ActionResultオブジェクト
-        this.subject().clearResult(); // 使用者側の結果をクリア？？
-        result.clear(); // 対象の結果をクリア
-        result.used = this.testApply(target); // 対象に適用可能かを調べる。(戦闘不能の相手にダメージ与えるとかないよね。)
 
-        // クリティカル判定。クリティカルしたら、問答無用で当てる。
-        if (this.item().damage.critical) {
-            result.critical = (Math.random() < this.itemCri(target));
-        } else {
-            result.critical = false;
-        }
-        if (!result.critical) {
-            result.missed = !this.testHit(target);
-            result.evaded = false;
-        } else {
-            result.missed = false;
-            result.evaded = false;
-        }
-
-        // 物理属性判定
-        result.physical = this.isPhysical();
-        // 吸収判定
-        result.drain = this.isDrain();
-
-        // ヒットしたかどうか
-        // (適用対象でミスや回避が発生していないかどうか、ということ)
-        if (result.isHit()) {
-            if (this.item().damage.type > 0) {
-                var value = this.makeDamageValue(target, result.critical);
-                this.executeDamage(target, value);
-                this._damageValue = value;
-            }
-            this.item().effects.forEach(function(effect) {
-                this.applyItemEffect(target, effect);
-            }, this);
-            this.applyItemUserEffect(target);
-        }
-    };
-
-    /**
-     * ダメージを計算する。
-     * 
-     * @param {Game_BattlerBase} target 効果対象
-     * @param {Boolean} ciritical クリティカルかどうか
-     * @return {Number} ダメージ量。回復の場合には負数になる。
-     */
-    Game_Action.prototype.makeDamageValue = function(target, critical) {
-        var item = this.item();
-        var baseValue = this.evalDamageFormula(target);
-        var value = baseValue * this.calcElementRate(target);
-        if (this.isPhysical()) {
-            // 物理被ダメージレート
-            var pdr = target.pdr;
-            if (pdr < 1) {
-                // 物理貫通率だけ加算して、最大で1.0倍まで戻せる。
-                pdr = Math.min(1, pdr + this.subject().ppr);
-            }
-            value *= pdr; // 物理被ダメージレートを乗算。
-        } else if (this.isMagical()) {
-            // 魔法被ダメージレート
-            var mdr = target.mdr;
-            if (mdr < 1) {
-                // 魔法貫通率だけ加算して、最大で1.0倍まで戻せる。
-                mdr = Math.min(1, mdr + this.subject().mpr);
-            }
-            value *= mdr; // 魔法被ダメージレートを乗算
-        }
-        if (baseValue < 0) {
-            // 回復量UPは使用者とターゲットのを足して平均する。（ベースシステムは対象のみ）
-            // アイテム適用時（itemEffectRecoverHPなど）は使用者の能力は関係ないのでrec値は適用しない。
-            value *= (this.subject().rec + target.rec) * 0.5; // 除算より乗算がよい。
-        }
-        if (critical) {
-            value = this.applyCritical(value); // クリティカル倍率を適用。
-        }
-        value = this.applyVariance(value, item.damage.variance);
-        value = this.applyGuard(value, target);
-        value = Math.round(value);
-        return value;
-    };
 
     /**
      * 属性による与ダメージ倍率を計算する。
