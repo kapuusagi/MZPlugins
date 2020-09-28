@@ -100,9 +100,9 @@
 
     /**
      * ゴールドレートを得る。
-     * @return {Number} ゴールドレート。
      * 
-     * !!!overwrite!!!
+     * @return {Number} ゴールドレート。
+     * !!!overwrite!!! Game_Troop.goldRate
      */
     Game_Troop.prototype.goldRate = function() {
         return $gameParty.getGoldRate();

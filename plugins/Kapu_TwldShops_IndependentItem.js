@@ -41,7 +41,7 @@
      * 
      * @param {Object} item アイテム
      * @return {ItemEntry} アイテムエントリ
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Shop.getItemEntryByItem
      */
     Game_Shop.prototype.getItemEntryByItem = function(item) {
         const dataShop = this.shopData();
@@ -82,7 +82,7 @@
      * 所持できる最大数を得る。
      * 
      * @param {Data_Item} item アイテム
-     * !!!overwrite!!!
+     * !!!overwrite!!! Scene_TwldShop_canHaveMax
      */
     Scene_TwldShop.prototype.canHaveMax = function(item) {
         if (DataManager.isIndependent(item)) {
@@ -103,7 +103,7 @@
      * 最大売却数を取得する。
      * 
      * @return {Number} 最大売却数
-     * !!!overwrite!!!
+     * !!!overwrite!!! Scene_TwldShop.maxSell
      */
     Scene_TwldShop.prototype.maxSell = function() {
         if (DataManager.isIndependent(this._item)) {

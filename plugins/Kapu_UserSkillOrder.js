@@ -163,7 +163,7 @@
     /**
      * スキル一覧に表示するスキルリストを構築する。
      * 
-     * !!!overwrite!!!
+     * !!!overwrite!!! Window_SkillList.makeItemList
      */
     Window_SkillList.prototype.makeItemList = function() {
         if (this._actor) {

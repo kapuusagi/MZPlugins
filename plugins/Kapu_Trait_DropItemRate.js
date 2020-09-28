@@ -99,7 +99,7 @@
      * アイテムドロップ率補正倍率を得る。
      * 
      * @return {Number} 補正倍率
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Enmy.dropItemRate
      */
     Game_Enemy.prototype.dropItemRate = function() {
         return $gameParty.getDropRate();

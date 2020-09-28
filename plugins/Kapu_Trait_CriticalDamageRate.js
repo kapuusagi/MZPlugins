@@ -154,10 +154,11 @@
     /**
      * クリティカルを適用する。
      * 
-     * !!!overwrite!!!
+     * Note: クリティカル時のダメージ倍率計算式を変更するため、オーバーライドする。
      * 
      * @param {Number} damage ダメージ
      * @return {Number} クリティカル適用後のダメージ
+     * !!!overwrite!!! Game_Action.applyCritical
      */
     Game_Action.prototype.applyCritical = function(damage) {
         const subject = this.subject();

@@ -93,7 +93,7 @@
      * 
      * @param {Game_BattlerBase} target ターゲット
      * @return {Number} 効果倍率
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.calcElementRate
      */
     Game_Action.prototype.calcElementRate = function(target) {
         const item = this.item();
@@ -108,7 +108,7 @@
      * 
      * @param {Game_BattlerBase} target ターゲット
      * @return {Number} 効果倍率
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.elementsMaxRate
      */
     Game_Action.prototype.elementsMaxRate = function(target, elements) {
         const elementRates = new Array($dataSystem.elements.length).fill(0);

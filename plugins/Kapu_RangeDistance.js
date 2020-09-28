@@ -526,7 +526,7 @@
      *       Game_Action.randomTargets(unit)等をコールするように変更するため、
      *       オーバーライドする。
      * @return {Array<Game_Battler} アクション対象オブジェクトの配列
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.confusionTarget
      */
     Game_Action.prototype.confusionTarget = function() {
         switch (this.subject().confusionLevel()) {
@@ -561,7 +561,7 @@
     /**
      * ランダムに対象を決める。
      * イベントコマンドによりランダムに対象選択する場合に呼ばれる。
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.decideRandomTarget
      */
     Game_Action.prototype.decideRandomTarget = function() {
         let target;
@@ -590,7 +590,7 @@
      * 
      * @param {Game_Unit} unit 対象のグループ
      * @return {Array<Game_Battler>} 対象
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.randomTargets
      */
     Game_Action.prototype.randomTargets = function(unit) {
         const targets = [];
@@ -606,7 +606,7 @@
      * 
      * @param {Game_Unit} unit 対象のグループ
      * @return {Array<Game_Battler>} 対象
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.targetsForDead
      */
     Game_Action.prototype.targetsForDead = function(unit) {
         if (this.isForOne()) {
@@ -632,7 +632,7 @@
      * 
      * @param {Game_Unit} unit 対象のグループ
      * @return {Array<Game_Battler>} 対象
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.targetsForAlive
      */
     Game_Action.prototype.targetsForAlive = function(unit) {
         if (this.isForOne()) {
@@ -665,7 +665,7 @@
      * 
      * @param {Game_Unit} unit 対象のグループ
      * @return {Array<Game_Battler>} 対象
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.targetsForDeadAndAlive
      */
     Game_Action.prototype.targetsForDeadAndAlive = function(unit) {
         if (this.isForOne()) {
@@ -1179,7 +1179,7 @@
      * 現在の選択が選択可能かどうかを取得する。
      * 
      * @return {Boolean} 選択可能な場合にtrue, それ以外はfalse
-     * !!!overwrite!!!
+     * !!!overwrite!!! Window_BattleEnemy_isCurrentItemEnabled
      */
     Window_BattleEnemy.prototype.isCurrentItemEnabled = function() {
         return this.isEnabled(this.enemy());
@@ -1241,7 +1241,7 @@
      * 対象のエネミーを選択する。
      * 
      * @param {Number} index インデックス番号
-     * !!!overwrite!!!
+     * !!!overwrite!!! Window_BattleEnemy_select
      */
     Window_BattleEnemy.prototype.select = function(index) {
         Window_Selectable.prototype.select.call(this, index);
@@ -1264,7 +1264,7 @@
      * 選択インデックスを設定する。
      * 
      * @param {Number} index インデックス番号
-     * !!!overwrite!!!
+     * !!!overwrite!!! Window_BattleActor_select
      */
     Window_BattleActor.prototype.select = function(index) {
         Window_BattleStatus.prototype.select.call(this, index);

@@ -36,7 +36,6 @@
  */
 (() => {
     const pluginName = "Kapu_EquipSlots";
-    const parameters = PluginManager.parameters(pluginName);
 
     /**
      * 装備スロットのノートタグを処理する。
@@ -72,7 +71,7 @@
      * 装備を初期化する。
      * 
      * @param {Array<Number>} equips 装備品ID配列
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Actor.initEquips
      */
     Game_Actor.prototype.initEquips = function(equips) {
         // 装備品オブジェクト配列を作成する。

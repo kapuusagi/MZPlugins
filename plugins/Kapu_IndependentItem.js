@@ -1241,7 +1241,7 @@
      * アイテムの増減コマンドを処理する。
      * 
      * @param {Object} params パラメータ
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Interpreter.command126 // アイテムの増減
      */
     Game_Interpreter.prototype.command126 = function(params) {
         let value = this.operateValue(params[1], params[2], params[3]);
@@ -1253,7 +1253,7 @@
      * 武器の増減コマンドを処理する。
      * 
      * @param {Object} params パラメータ
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Interpreter.command127 // 武器の増減
      */
     Game_Interpreter.prototype.command127 = function(params) {
         let value = this.operateValue(params[1], params[2], params[3]);
@@ -1265,7 +1265,7 @@
      * 防具の増減コマンドを処理する。
      * 
      * @param {Object} params パラメータ
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Interpreter.command128 // 防具の増減
      */
     Game_Interpreter.prototype.command128 = function(params) {
         let value = this.operateValue(params[1], params[2], params[3]);
