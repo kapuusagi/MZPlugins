@@ -365,7 +365,7 @@
             if (!obj) {
                 continue;
             }
-            obj.defaultRange = 0;
+            obj.defaultRange = Game_Action.RANGE_SHORT;
             _processTraitsNoteTag(obj);
             if (obj.meta.defaultRange) {
                 const range = Number(obj.meta.defaultRange) || 0;
@@ -500,7 +500,7 @@
     Game_Action.prototype.rangeDistanceForUnit = function(unit) {
         const subject = this.subject();
         if (unit.members().contains(subject)) {
-            return 1; // To firendの場合には1（全員対象）
+            return Game_Action.RANGE_MIDDLE; // To firendの場合には1（全員対象）
         } else {
             return this.rangeDistance() - subject.battlePosition();
         }
@@ -734,11 +734,40 @@
      * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
      */
     Game_BattlerBase.prototype.defaultRangeDistance = function(item) {
-        return 0;
+        return Game_Action.RANGE_SHORT;
     };
 
     //------------------------------------------------------------------------------
     // Game_Enemy
+    const _Game_Enemy_isActionValid = Game_Enemy.prototype.isActionValid;
+    /**
+     * actionが実行対象かどうかを判定する。
+     * 
+     * @param {DataEnemyAction} action エネミーアクションデータ
+     */
+    Game_Enemy.prototype.isActionValid = function(action) {
+        return _Game_Enemy_isActionValid.call(this, action)
+                && this.isActionValidRange(action);
+    };
+
+    /**
+     * 指定されたアクションが実行可能な射程かどうかを取得する。
+     * 後列なのに射程1スキルが選択されないようにする。
+     * 
+     * @param {DataEnemyAction} action エネミーアクションデータ 
+     */
+    Game_Enemy.prototype.isActionValidRange = function(action) {
+        if (this.battlePosition() === 0) {
+            // 前衛にいるなら、対象が存在しないスキルはないので不要。
+            return true;
+        } else {
+            // 後衛にいるなら、射程0のスキルは対象がいないので使用しない。
+            const skill = $dataSkills[action.skillId];
+            const rangeDistance = this.itemRangeDistance(skill);
+            return (rangeDistance > 0); // 射程1以上のスキルはtrue
+        }
+    };
+
     /**
      * デフォルトレンジを得る。
      * 
@@ -749,7 +778,7 @@
         if (enemy) {
             return enemy.defaultRange;
         } else {
-            return 0;
+            return Game_Action.RANGE_SHORT;
         }
     };
     //------------------------------------------------------------------------------
@@ -763,6 +792,8 @@
         // 装備武器レンジを返す。
         const ranges = this.weapons().map(item => item.range);
         if (ranges.length > 0) {
+            // 複数武器持っていたら、短いのに合わせる。
+            // じゃないと届かないよね。
             return Math.min(...ranges);
         } else {
             const bareHandSkillId = this.attackSkillId();
@@ -770,7 +801,7 @@
             if (bareHandSkill.range >= 0) {
                 return bareHandSkill.range;
             } else {
-                return 0;
+                return Game_Action.RANGE_SHORT;
             }
         }
     };
