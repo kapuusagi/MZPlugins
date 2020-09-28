@@ -124,10 +124,12 @@
  * ノートタグ
  * ============================================
  * アイテム/スキル
- *   <moveToFront>
+ *   <moveToFront:rate#>
  *      前衛に移動する効果。例えばエネミーなら引き寄せとか。
- *   <moveToRear>
+ *      rate#の割合で発生する。rate#を指定しない場合には100%発生する。
+ *   <moveToRear:rate#>
  *      後衛に移動する効果。例えばエネミー対象にすると、ノックバック効果になる。
+ *      rate#の割合で発生する。rate#を指定しない場合には100%発生する。
  *   <range:range#>
  *      アイテム/スキルの射程を指定する。
  *      未指定時は0
@@ -216,12 +218,13 @@
      * 
      * @param {Object} obj エフェクトを追加するオブジェクト
      * @param {Number} dataId データID
+     * @param {Number} rate 発生確率
      */
-    const _addEffectMoveBattlePosition = function(obj, dataId) {
+    const _addEffectMoveBattlePosition = function(obj, dataId, rate) {
         obj.effects.push({
             code: Game_Action.EFFECT_MOVE_BATTLE_POSITION,
             dataId: dataId,
-            value1: 0,
+            value1: rate,
             value2: 0
         });
     };
@@ -267,9 +270,11 @@
 
             if ((i != moveToFrontSkillId) && (i != moveToRearSkillId)) {
                 if (obj.meta.moveToFront) {
-                    _addEffectMoveBattlePosition(obj, 0);
+                    const rate = Number(obj.meta.moveToFront) || 1.0;
+                    _addEffectMoveBattlePosition(obj, 0, rate);
                 } else if (obj.meta.moveToRear) {
-                    _addEffectMoveBattlePosition(obj, 1);
+                    const rate = Number(obj.meta.moveToRear) || 1.0;
+                    _addEffectMoveBattlePosition(obj, 1, rate);
                 }
             }
             if (obj.meta.range) {
@@ -294,9 +299,11 @@
             }
 
             if (obj.meta.moveToFront) {
-                _addEffectMoveBattlePosition(obj, 0);
+                const rate = Number(obj.meta.moveToFront) || 1.0;
+                _addEffectMoveBattlePosition(obj, 0, rate);
             } else if (obj.meta.moveToRear) {
-                _addEffectMoveBattlePosition(obj, 1);
+                const rate = Number(obj.meta.moveToRear) || 1.0;
+                _addEffectMoveBattlePosition(obj, 1, rate);
             }
         }
     };
@@ -454,13 +461,15 @@
                 // 敵対者からの移動効果は無効
                 return;
             }
-            const unit = target.friendsUnit();
-            if (effect.dataId === 0) {
-                unit.moveToFront(target.index());
-                this.makeSuccess(target);
-            } else if (effect.dataId === 1) {
-                unit.moveToRear(target.index());
-                this.makeSuccess(target);
+            if (Math.random() < effect.value1) {
+                const unit = target.friendsUnit();
+                if (effect.dataId === 0) {
+                    unit.moveToFront(target.index());
+                    this.makeSuccess(target);
+                } else if (effect.dataId === 1) {
+                    unit.moveToRear(target.index());
+                    this.makeSuccess(target);
+                }
             }
         } else {
             _Game_Action_applyItemEffect.call(this, ...arguments);
