@@ -156,16 +156,20 @@
  * アクター/クラス/ステート/防具
  *   <blockMovePosition>
  *      敵対者からの前衛/後衛 移動操作をブロックする。
+ *   <ignoreRangeDistance>
+ *      射程距離無視特性を追加する。
  * 
  * エネミー
  *   <blockMovePosition>
  *      敵対者からの前衛/後衛 移動操作をブロックする。
+ *   <ignoreRangeDistance>
+ *      射程距離無視特性を追加する。
  *   <defaultRange:range#>
  *      デフォルトの射程距離をrange#とする。未指定時は0
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。まだまだ作りかけ。
+ * Version.0.1.0 作成した。
  */
 (() => {
     const pluginName = "Kapu_RangeDistance";
@@ -727,8 +731,8 @@
      * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
      */
     Game_BattlerBase.prototype.itemRangeDistance = function(item) {
-        if (this.specialFlag(Game_BattlerBase.FLAG_ID_SKILLLONGRANGE)) {
-            return 2; // 全射程
+        if (this.specialFlag(Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE)) {
+            return Game_Action.RANGE_LONG; // 全射程
         }
         if (item.range >= 0) {
             return item.range;
