@@ -401,7 +401,7 @@
                 console.error("skill: + " + skill.name + " scope is not for self.");
                 skill.scope = 11; // 対象を自分自身に変更
             }
-            _addEffectMoveBattlePosition(skill, 0);
+            _addEffectMoveBattlePosition(skill, 0, 1.0);
         }
         if (moveToRearSkillId) {
             // エフェクト追加
@@ -410,7 +410,7 @@
                 console.error("skill: + " + skill.name + " scope is not for self.");
                 skill.scope = 11;
             }
-            _addEffectMoveBattlePosition(skill, 1);
+            _addEffectMoveBattlePosition(skill, 1, 1.0);
         }
     };
 
