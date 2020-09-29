@@ -618,32 +618,6 @@
     };
 
     /**
-     * 固有特性を追加する。
-     * 固有特性はステートクリアで消去されない特性。
-     */
-    Game_BattlerBase.prototype.addUniqueTrait = function(trait) {
-        this._uniqueTraits.push(trait);
-    };
-
-    /**
-     * 固有特性配列を得る。
-     * @note このメソッドの返値を変更しても、Game_BattlerBaseのもつ固有特性は変化しない。
-     * @return {Array<Trait>} 特性配列。
-     */
-    Game_BattlerBase.prototype.uniqueTraits = function() {
-        return this._uniqueTraits.slice(0);
-    };
-
-    /**
-     * 指定した位置の特性を削除する。
-     */
-    Game_BattlerBase.prototype.removeUniqueTraits = function(index) {
-        if ((index >= 0) && (index < this._uniqueTraits.length)) {
-            this._uniqueTraits.splice(index, 0);
-        }
-    };
-
-    /**
      * 物理防御貫通率を取得する。
      * 
      * @return {Number} 物理防御貫通率。
