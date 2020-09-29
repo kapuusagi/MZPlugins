@@ -444,7 +444,7 @@ Traitの持ってるメンバ
 |TRAIT_STATE_RATE|13|ステートID|dataIdで指定されるパラメータのステート受付率。|
 |TRAIT_STATE_RESIST|14|ステートID|指定したステートを受け付けない。|
 |TRAIT_PARAM|21||基本パラメータ|
-|||1|MaxHP|
+|||0|MaxHP|
 |||1|MaxMP|
 |||2|ATK|
 |||3|DEF|
