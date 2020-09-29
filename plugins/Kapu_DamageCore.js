@@ -140,8 +140,10 @@
      * !!!overwrite!!! Game_Action.makeDamageValue
      */
     Game_Action.prototype.makeDamageValue = function(target, critical) {
-        this.subject().setTempTraits(this.additionalSubjectTraits(target));
-        target.setTempTraits(this.additionalTargetTraits(), critical);
+        const subjectAddtionalTraits = this.additionalSubjectTraits(target);
+        const targetAdditionalTraits = this.additionalTargetTraits(), critical);
+        this.subject().setTempTraits(subjectAddtionalTraits);
+        target.setTempTraits(targetAdditionalTraits);
 
         const item = this.item();
         const baseValue = this.evalDamageFormula(target);
