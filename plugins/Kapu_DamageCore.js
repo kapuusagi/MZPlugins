@@ -88,7 +88,7 @@
      */
     Game_Battler.prototype.allTraits = function() {
         const traits = _Game_Battler_allTraits.call(this);
-        if (this._tmpTraits && this._tempTraits.length > 0) {
+        if (this._tmpTraits && this._tmpTraits.length > 0) {
             return traits.concat(this._tmpTraits);
         } else {
             return traits;
@@ -100,14 +100,14 @@
      * 
      * @param {Trait} trait 特性オブジェクト
      */
-    Game_Batter.prototype.setTempTraits = function(traits) {
+    Game_Battler.prototype.setTempTraits = function(traits) {
         this._tmpTraits = traits;
     };
 
     /**
      * 一時付与特性をクリアする。
      */
-    Game_Batter.prototype.clearTempTraits = function() {
+    Game_Battler.prototype.clearTempTraits = function() {
         delete this._tmpTraits;
     };
 
@@ -141,7 +141,7 @@
      */
     Game_Action.prototype.makeDamageValue = function(target, critical) {
         const subjectAddtionalTraits = this.additionalSubjectTraits(target);
-        const targetAdditionalTraits = this.additionalTargetTraits(), critical);
+        const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
         this.subject().setTempTraits(subjectAddtionalTraits);
         target.setTempTraits(targetAdditionalTraits);
 
