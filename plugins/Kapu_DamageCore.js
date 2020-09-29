@@ -193,10 +193,10 @@
      */
     Game_Action.prototype.applyDamageRate = function(value, target, critical) {
         if (this.isPhysical()) {
-            value *= this.itemPdr(target, critical);
+            value *= Math.max(0, this.itemPdr(target, critical));
         }
         if (this.isMagical()) {
-            value *= this.itemMdr(target, critical);
+            value *= Math.max(0, this.itemMdr(target, critical));
         }
         return value * this.multiplyDamageRate();
     };
