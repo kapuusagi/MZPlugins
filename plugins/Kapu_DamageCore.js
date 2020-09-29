@@ -193,12 +193,36 @@
      */
     Game_Action.prototype.applyDamageRate = function(value, target, critical) {
         if (this.isPhysical()) {
-            value *= Math.max(0, this.itemPdr(target, critical));
+            value = this.applyPhysicalDamageRate(value, target, critical);
         }
         if (this.isMagical()) {
-            value *= Math.max(0, this.itemMdr(target, critical));
+            value = this.applyMagicalDamageRate(value, target, critical);
         }
         return value * this.multiplyDamageRate();
+    };
+
+    /**
+     * 物理ダメージレートを適用する。
+     * 
+     * @param {Number} value 基本ダメージ値
+     * @param {Game_Battler} target ターゲット。
+     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @return {Number} MDR適用後の値
+     */
+    Game_Action.prototype.applyPhysicalDamageRate = function(value, target, critical) {
+        return value * Math.max(0, this.itemPdr(target, critical));
+    };
+
+    /**
+     * 魔法ダメージレートを適用する。
+     * 
+     * @param {Number} value 基本ダメージ値
+     * @param {Game_Battler} target ターゲット。
+     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @return {Number} MDR適用後の値
+     */
+    Game_Action.prototype.applyMagicalDamageRate = function(value, target, critical) {
+        return value * Math.max(0, this.itemMdr(target, critical));
     };
 
     /**
