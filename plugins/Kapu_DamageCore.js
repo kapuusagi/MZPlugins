@@ -32,16 +32,22 @@
  *     ダメージ倍率の処理を行う。
  *     プラグインで定義されたTraitで、
  *     ダメージ倍率に変更を与えたい場合にフックすることを想定します。
+ * Game_Action.prototype.additionalSubjectTraits(target:Game_Battler) : Array<Taraits>
+ *     ダメージ計算時、使用者に一時的に付与する特性を返す。
+ *     使用者に相手の攻撃力を自動で減衰させるような特性を持たせる場合に使用する。
+ * Game_Action.prototype.additionalTargetTraits(target:Game_Battler, critical:Boolean) : Array<Traits>
+ *     ダメージ計算時、対象に一時的に付与する特性を返す。
+ *     使用者に相手の防御力を自動で減衰させるような特性を持たせる場合に使用する。
  * Game_Action.multiplyDamageRate(target) : number
  *     何かしらのダメージ倍率を乗算するためのフック用メソッド。
  *     例えばウェポンマスタリーによるダメージボーナスがあったとき、
  *     calcElementRateをフックするのはメソッドの意味合いが変わるので
  *     あんまりよろしくないのだ。
- * Game_Action.itemPdr(target:Game_Battler) : number
+ * Game_Action.itemPdr(target:Game_Battler, critical:Boolean) : number
  *     物理ダメージレートを返す。
  *     プラグインで定義されたTraitで、
  *     物理ダメージレートを増減させたい場合にフックすることを想定します。
- * Game_Action.itemMdr(target:Game_Batter) : number
+ * Game_Action.itemMdr(target:Game_Batter, critical:Boolean) : number
  *     魔法ダメージレートを返す。
  *     プラグインで定義されたTraitで、
  *     魔法ダメージレートを増減させたい場合にフックすることを想定します。
@@ -49,6 +55,9 @@
  *     リカバリレートを返す。
  *     プラグインで定義されたTraitで、
  *     リカバリーレートを増減させたい場合にフックすることを想定します。
+ * Game_Battler.prototype.additionalTargetTraits() : Array<Trait>
+ *     ダメージ計算時、相手に一時的に付与する特性を得る。
+ *     貫通効果とか、そのあたりを実現するためのインタフェース。
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -62,10 +71,63 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 ダメージ計算時、一時的に付与するTraitを設定出来るようにした。
+ *               ステート付与という作戦もあるけど、
+ *               データベースのリソースを使ったりするのでやめた。動作未確認
  * Version.0.1.0 ダメージ計算式に関する拡張をするため、コアプラグインを用意した。
  *               コアプラグインは競合しやすいので、あんまりやりたくないけど..。
  */
 (() => {
+    //------------------------------------------------------------------------------
+    // Game_Battler
+    const _Game_Battler_allTraits = Game_BattlerBase.prototype.allTraits;
+    /**
+     * このGame_BattlerBaseの全ての特性(Trait)を取得する。
+     * 
+     * @return {Array<Trait>} 特性配列
+     */
+    Game_Battler.prototype.allTraits = function() {
+        const traits = _Game_Battler_allTraits.call(this);
+        if (this._tmpTraits && this._tempTraits.length > 0) {
+            return traits.concat(this._tmpTraits);
+        } else {
+            return traits;
+        }
+    };
+
+    /**
+     * 一時付与特性を設定する。
+     * 
+     * @param {Trait} trait 特性オブジェクト
+     */
+    Game_Batter.prototype.setTempTraits = function(traits) {
+        this._tmpTraits = traits;
+    };
+
+    /**
+     * 一時付与特性をクリアする。
+     */
+    Game_Batter.prototype.clearTempTraits = function() {
+        delete this._tmpTraits;
+    };
+
+    const _Game_Battler_onButtleEnd = Game_Battler.prototype.onBattleEnd
+    /**
+     * 戦闘終了時の処理を行う。
+     */
+    Game_Battler.prototype.onBattleEnd = function() {
+        _Game_Battler_onButtleEnd.call(this);
+        this.clearTempTraits();
+    };
+
+    /**
+     * ダメージ計算時、相手に一時的に付与する特性を得る。
+     * 
+     * @return {Array<Trait>} 一時的に付与する特性の配列
+     */
+    Game_Battler.prototype.additionalTargetTraits = function() {
+        return [];
+    };
 
     //------------------------------------------------------------------------------
     // Game_Action
@@ -75,12 +137,16 @@
      * @param {Game_BattlerBase} target 対象
      * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
      * @return {Number} ダメージ値
+     * !!!overwrite!!! Game_Action.makeDamageValue
      */
     Game_Action.prototype.makeDamageValue = function(target, critical) {
+        this.subject().setTempTraits(this.additionalSubjectTraits(target));
+        target.setTempTraits(this.additionalTargetTraits(), critical);
+
         const item = this.item();
         const baseValue = this.evalDamageFormula(target);
         let value = baseValue * this.calcElementRate(target);
-        value = this.applyDamageRate(value, target);
+        value = this.applyDamageRate(value, target, critical);
         value = this.applyRecoveryRate(value, target);
         if (critical) {
             value = this.applyCritical(value);
@@ -88,21 +154,47 @@
         value = this.applyVariance(value, item.damage.variance);
         value = this.applyGuard(value, target);
         value = Math.round(value);
+
+        target.clearTempTraits();
+        this.subject().clearTempTraits();
+
         return value;
     };
+
+    /**
+     * ダメージ計算時、使用者に追加で付与する特性を取得する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {Array<Trait>} trait 特性オブジェクト配列
+     */
+    Game_Action.prototype.additionalSubjectTraits = function(target) {
+        return target.additionalTargetTraits();
+    };
+    /**
+     * ダメージ計算時、対象に追加で付与する特性を取得する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @param {Array<Trait>} trait 特性オブジェクト配列
+     */
+    Game_Action.prototype.additionalTargetTraits = function(target, critical) {
+        return this.subject().additionalTargetTraits();
+    };
+
     /**
      * 乗算ボーナスを得る。
      * 
      * @param {Number} value 基本ダメージ値
      * @param {Game_Battler} target ターゲット。
+     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
      * @return {Number} 乗算ボーナス適用後の値
      */
-    Game_Action.prototype.applyDamageRate = function(value, target) {
+    Game_Action.prototype.applyDamageRate = function(value, target, critical) {
         if (this.isPhysical()) {
-            value *= this.itemPdr(target);
+            value *= this.itemPdr(target, critical);
         }
         if (this.isMagical()) {
-            value *= this.itemMdr(target);
+            value *= this.itemMdr(target, critical);
         }
         return value * this.multiplyDamageRate();
     };
@@ -136,9 +228,10 @@
      * 物理ダメージレートを得る。
      * 
      * @param {Game_Battler} target ターゲット
+     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
      * @return {Number} 物理ダメージレート
      */
-    Game_Action.prototype.itemPdr = function(target) {
+    Game_Action.prototype.itemPdr = function(target, critical) {
         return target.pdr;
     };
 
@@ -146,9 +239,10 @@
      * 魔法ダメージレートを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @return {Number} 魔法ダメージレート。
+     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @return {Number} 魔法ダメージレート。(0.0～、等倍は1.0)
      */
-    Game_Action.prototype.itemMdr = function(target) {
+    Game_Action.prototype.itemMdr = function(target, critical) {
         return target.mdr;
     };
 
@@ -156,7 +250,7 @@
      * 回復レートを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @return {Number} 回復レート
+     * @return {Number} 回復レート(0.0～、等倍は1.0)
      */
     Game_Action.prototype.itemRec = function(target) {
         return target.rec;
