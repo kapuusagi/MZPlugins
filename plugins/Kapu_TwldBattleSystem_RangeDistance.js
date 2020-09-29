@@ -3,7 +3,7 @@
  * @plugindesc RangeDistanceをTwldBattleSystemに適用するためのプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_BattleSystem
+ * @base Kapu_TwldBattleSystem
  * @base Kapu_RangeDistance
  * @orderAfter Kapu_BattleSystem
  * @orderAfter Kapu_RangeDistance
