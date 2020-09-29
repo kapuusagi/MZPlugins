@@ -41,7 +41,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 ソースを調査していて思いついたので追加した。動作未確認。
+ * Version.0.1.0 ソースを調査していて思いついたので追加した。
  */
 (() => {
     const pluginName = "Kapu_Trait_AutoGuardRate";
@@ -97,7 +97,7 @@
         if (guard) {
             return guard; // 防御指定されている。
         } else {
-            const rate = this.xparam(Game_battlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE);
+            const rate = this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE);
             return (rate > 0) ? Math.random() < rate : false;
         }
     };
