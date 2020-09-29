@@ -86,5 +86,14 @@
             this.applyItemUserEffect(target);
         }
     };
+    /**
+     * パッシブスキルを持っているかどうかを判定する。
+     * @return パッシブスキルを持っている場合にはtrue, それ以外はfalse
+     */
+    Game_Actor.prototype.hasPassiveSkill = function() {
+        return this.skills().some(function(skill) {
+            return skill && (skill.stypeId == 0);
+        });
+    };
 
 })();

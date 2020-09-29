@@ -45,15 +45,11 @@
      * TRAITTの追加(あれば)
      */
 
-    Game_BattlerBase.TRAIT_SPARAM_DID_ATB = 10; // ATB速度
-    Game_BattlerBase.TRAIT_SPARAM_DID_CASTTIME = 11; // キャストタイム
 
 
     //var params = PluginManager.parameters('TWLD_Core');
 
-    Game_Item.RANGE_SHORT = 0;
-    Game_Item.RANGE_MIDDLE = 1;
-    Game_Item.RANGE_LONG = 2;
+
 
     // 定数。他のプラグインと衝突するなら変更する事。
     // grep で EFFECT_を検索して調べれば良い。
@@ -459,12 +455,6 @@
                             paramId: paramId
                         });
                     }
-                } else if ((re = line.match(patternGrowPointAdd)) !== null) {
-                    item.effects.push({
-                        code: Game_Action.EFFECT_TWLD_GROWPONT_ADD,
-                        value1: Number(re[2]).clamp(0, 999),
-                        value2: 0,
-                    });
                 } else if ((re = line.match(patternLearnableSkills)) !== null) {
                     re[1].split(/[ ,]/).forEach(function (val) {
                         if ((val.length > 0) && (val >= 0) && (val <= $dataSkills.length)) {
@@ -1115,15 +1105,7 @@
 
 
 
-    /**
-     * パッシブスキルを持っているかどうかを判定する。
-     * @return パッシブスキルを持っている場合にはtrue, それ以外はfalse
-     */
-    Game_Actor.prototype.hasPassiveSkill = function() {
-        return this.skills().some(function(skill) {
-            return skill && (skill.stypeId == 0);
-        });
-    };
+
 
     /**
      * 武器熟練度レベルを得る。
@@ -1358,9 +1340,9 @@
      */
     Game_Actor.prototype.levelUp = function() {
         TWLD.Core.Game_Actor_levelUp.call(this);
-        // 成長ボーナス加算
-        var gpPlus = 3 + Math.min(6, Math.floor(this._level / 20));
-        this.addGrowPoint(gpPlus);
+        // // 成長ボーナス加算
+        // var gpPlus = 3 + Math.min(6, Math.floor(this._level / 20));
+        // this.addGrowPoint(gpPlus);
         // 習得可能スキルを更新する。
         this.updateGpLearnableSkills();
     };
@@ -1599,11 +1581,6 @@
         return this.isMaxLevel();
     };
 
-    /**
-     * 現在の成長ボーナス値を得る。
-     * つまり、残っているポイントね。
-     * @return {Number} 現在の成長ボーナス値。
-     */
     Game_Actor.prototype.getGrowPoint = function() {
         return this._growPoint.current;
     };
@@ -1618,18 +1595,7 @@
     };
 
 
-    /**
-     * 成長ボーナス値にvalueを加算する。
-     * 最大値は超えない。
-     * @param {Number} value 加算値
-     */
-    Game_Actor.prototype.addGrowPoint = function(value) {
-        var addValue = Math.min(999 - this._growPoint.max, value);
-        if (addValue > 0) {
-            this._growPoint.current += addValue;
-            this._growPoint.max += addValue;
-        }
-    };
+
 
     /**
      * paramIdで指定される基本パラメータにvalue値を加算する。
@@ -1705,7 +1671,7 @@
         });
         this._learnedSkills = [];
 
-        this._growPoint.current = this._growPoint.max;
+        //this._growPoint.current = this._growPoint.max;
         // 装備できないアイテムは外す。
         this.releaseUnequippableItems();
         this.refresh();
@@ -1883,9 +1849,6 @@
      */
     Game_Action.prototype.applyItemEffect = function(target, effect) {
         switch (effect.code) {
-            case Game_Action.EFFECT_TWLD_GROWPONT_ADD:
-                this.applyItemEffectGrowPointAdd(target, effect);
-                break;
             case Game_Action.EFFECT_TWLD_BASICPARAM_ADD:
                 this.applyItemEffectBasicParamAdd(target, effect);
                 break;
@@ -1902,15 +1865,7 @@
     };
 
 
-    /**
-     * 成長ポイントを加算するアイテム適用処理を行う。
-     * @param {Game_BattlerBase} target ターゲット
-     * @param effect エフェクトデータ
-     */
-    Game_Action.prototype.applyItemEffectGrowPointAdd = function(target, effect) {
-        target.addGrowPoint(effect.value1);
-        this.makeSuccess(target);
-    };
+
 
 
     /**
@@ -1952,8 +1907,6 @@
      */
     Game_Action.prototype.testItemEffect = function(target, effect) {
         switch (effect.code) {
-            case Game_Action.EFFECT_TWLD_GROWPONT_ADD:
-                return ((effect.value1 !== 0) && ((target.growPoint) ? (target.growPoint.max < 999) : false));
             case Game_Action.EFFECT_TWLD_BASICPARAM_ADD:
                 var param = target.basicParams[effect.paramId];
                 return ((effect.value1 !== 0) && ((param.add) ? (param.add < 999) : false));
@@ -2669,530 +2622,13 @@
     };
 
    
-    //------------------------------------------------------------------------------
-    // Window_GrowupActorStatus
-    // 育成画面のアクターステータスを表示するウィンドウ。
-    function Window_GrowupActorStatus() {
-        this.initialize.apply(this, arguments);
-    }
-
-    Window_GrowupActorStatus.prototype = Object.create(Window_Base.prototype);
-    Window_GrowupActorStatus.prototype.constructor = Window_GrowupActorStatus;
-
-    Window_GrowupActorStatus.prototype.initialize = function (x, y) {
-        var width = this.windowWidth();
-        var height = this.windowHeight();
-        Window_Base.prototype.initialize.call(this, x, y, width, height);
-        this._actor = null;
-        this.hide();
-    };
-
-    /**
-     * 表示するアクターを設定する。
-     * 
-     * @param {Game_Actor} actor アクター
-     */
-    Window_GrowupActorStatus.prototype.setActor = function(actor) {
-        if (this._actor !== actor) {
-            this._actor = actor;
-            this.refresh();
-        }
-    };
-
-    /**
-     * ウィンドウ幅を返す。
-     * @return {Number} ウィンドウ幅(ピクセル数)
-     */
-    Window_GrowupActorStatus.prototype.windowWidth = function() {
-        return 380;
-    };
-    /**
-     * ウィンドウ高さを返す。
-     * @return {Number} ウィンドウ高さ(ピクセル数)
-     */
-    Window_GrowupActorStatus.prototype.windowHeight = function() {
-        return Graphics.boxHeight;
-    };
-    /**
-     * 表示を更新する。
-     */
-    Window_GrowupActorStatus.prototype.refresh = function() {
-        var x = this.standardPadding();
-        var y = this.standardPadding();
-        var actor = this._actor;
-        this.contents.clear();
-        this.drawActorFace(actor, x, y);
-        var nameX = x + 144 + this.textPadding();
-        var nameY = y;
-        var nameWidth = this.contentsWidth() - nameX - this.textPadding();
-        this.drawActorName(actor, nameX, nameY, nameWidth);
-        var levelX = nameX;
-        var levelY = nameY + this.lineHeight();
-        this.drawActorLevel(actor, levelX, levelY);
-        var gpX = nameX;
-        var gpY = levelY + this.lineHeight();
-        var gpWidth = nameWidth;
-        this.drawActorGrowPoint(actor, gpX, gpY, gpWidth);
-
-        // 基本ステータス描画するぜ。
-        var statusX = x;
-        var statusY = y + 144 + this.standardPadding();
-        var statusWidth = this.width - this.standardPadding() * 2;
-        this.changeTextColor(this.normalColor());
-        this.drawText("基本ステータス", statusX, statusY, statusWidth);
-        statusY += this.lineHeight();
-
-        var statusNames = TWLD.Core.StatusNames;
-        for (var i = 0; i < 6; i++) {
-            var paramValue =  actor.getBasicParam(i);
-            var correct = paramValue - actor.getBasicParamBase(i); // 装備による補正値
-            this.drawBasicParam(statusNames[i], paramValue, correct, statusX, statusY, statusWidth);
-            statusY += this.lineHeight();
-        }
-    };
-
-    //-----------------------------------------------------------------
-    // GrowupItem
-    // 
-    function GrowupItem(type) {
-        this.iconIndex = -1; // 項目のアイコンインデックス
-        this.text = ""; // 項目表示用テキスト
-        this.type = type;
-        this.id = -1;
-        this.id = -1; // 基本パラメータIDまたはスキルID
-        this.gpCost = 1; // Gpコスト
-        this.description = ""; // 説明用文書
-    }
-
-    //-----------------------------------------------------------------
-    // Window_GrowupSelect
-    //    育成項目選択ウィンドウ
-    //
-    function Window_GrowupSelect() {
-        this.initialize.apply(this, arguments);
-    }
-
-    Window_GrowupSelect.prototype = Object.create(Window_Selectable.prototype);
-    Window_GrowupSelect.prototype.constructor = Window_GrowupSelect;
-
-    /**
-     * ウィンドウを初期化する。
-     */
-    Window_GrowupSelect.prototype.initialize = function (x, y, width, height) {
-        this._items = [];
-        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-        this._actor = null;
-    };
-
-    /**
-     * 選択されている項目を得る。
-     * @return {GrowupItem} 選択されている項目。 
-     */
-    Window_GrowupSelect.prototype.selectedItem = function() {
-        if ((this.index() >= 0) && (this.index() < this._items.length)) {
-            return this._items[this.index()];
-        } else {
-            return null;
-        }
-    };
-
-    /**
-     * アクターを設定する。
-     * @param {Game_Actor} actor 設定するアクター
-     */
-    Window_GrowupSelect.prototype.setActor = function(actor) {
-        if (this._actor !== actor) {
-            this._actor = actor;
-            this.makeItemList();
-            if (this.index() >= this._items.length) {
-                this.select(this._index.length - 1);
-            }
-            this.refresh();
-        }
-    };
-
-    /**
-     * 選択項目を更新する。
-     */
-    Window_GrowupSelect.prototype.makeItemList = function() {
-        this._items = [];
-        if (!this._actor) {
-            return;
-        }
-        if (this._actor.canReincarnation()) {
-            var rItem = new GrowupItem('reincarnation');
-            rItem.iconIndex = TWLD.Core.ReincarnationIconIndex;
-            rItem.text = "レベルを1に戻して再成長させる。";
-            rItem.id = -1;
-            rItem.gpCost = 0;
-            rItem.description = "再成長ボーナスを得て、レベル1から育てなおします。";
-            this._items.push(rItem);
-        }
-    
-        var statusNames = TWLD.Core.StatusNames;
-        for (var i = 0; i < 6; i++) {
-            var paramItem = new GrowupItem('basicParam');
-            paramItem.iconIndex = TWLD.Core.BasicParamIcons[i];
-            paramItem.text = statusNames[i] + "を1ポイント上昇させる。";
-            paramItem.id = i;
-            paramItem.gpCost = this._actor.getBasicParamGrowCost(i);
-            paramItem.description = TWLD.Core.BasicParamDescriptions[i];
-            this._items.push(paramItem);
-        }
-        
-        this._actor.updateGpLearnableSkills();
-        this._actor.getGpLearnableSkills().forEach(function (skill) {
-            var skillItem = new GrowupItem('skill');
-            skillItem.iconIndex = skill.iconIndex,
-            skillItem.text = skill.name + "を習得する。",
-            skillItem.id = skill.id,
-            skillItem.gpCost = skill.gpCost;
-            skillItem.description = skill.description;
-            this._items.push(skillItem);
-        }, this);
-    };
-
-    /**
-     * 項目数を得る。
-     * @return {Number} 項目数
-     */
-    Window_GrowupSelect.prototype.maxItems = function () {
-        return this._items.length;
-    };
-
-    /**
-     * 現在の選択項目が有効かどうかを判定する。
-     * @return 有効な場合にはtrue, それ以外はfalse
-     */
-    Window_GrowupSelect.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.selectedItem());
-    };
-
-    /**
-     * 指定インデックスの項目を描画する。
-     * @param index インデックス
-     */
-    Window_GrowupSelect.prototype.drawItem = function (index) {
-        var item = this._items[index]; // GrowupItem
-        var rect = this.itemRect(index);
-
-        // アイコン描画
-        if (item.iconIndex >= 0) {
-            this.drawIcon(item.iconIndex, rect.x, rect.y);
-        }
-
-        // 項目名描画
-        this.changePaintOpacity(this.isEnabled(item));
-        var gpWidth = this.textWidth('GP-XXX');
-        var x = rect.x + 40;
-        var width = rect.width - this.standardPadding() - gpWidth;
-        if (width >= 480) {
-            width = 480;
-        }
-        this.changeTextColor(this.normalColor());
-        this.drawText(item.text, x, rect.y, width);
-
-        // GPコスト描画
-        var x2 = x + width;
-        var costStr = "GP-" + item.gpCost;
-        this.changeTextColor(this.systemColor());
-        this.drawText(costStr, x2, rect.y, gpWidth);
-        this.changePaintOpacity(true);
-    };
 
 
-    /**
-     * ヘルプウィンドウに表示する内容を更新する。
-     */
-    Window_GrowupSelect.prototype.updateHelp = function() {
-        Window_Selectable.prototype.updateHelp.call(this);
-        this.setHelpWindowItem(this.selectedItem());
-    };
 
-    /**
-     * 選択項目が有効かどうかを得る。
-     * @param {GrowupItem} item 項目
-     * @return {Boolean} 有効な場合にはtrue, それ以外はfalse
-     */
-    Window_GrowupSelect.prototype.isEnabled = function(item) {
-        if (item) {
-            return item.gpCost <= this._actor.getGrowPoint();
-        } else {
-            return false;
-        }
-    };
-    /**
-     * 表示項目を更新する。
-     */
-    Window_GrowupSelect.prototype.refresh = function() {
-        this.makeItemList();
-        if (this.index() >= this._items.length) {
-            this.select(this._items.length - 1);
-        }
-        Window_Selectable.prototype.refresh.call(this);
-    };
 
-    //-----------------------------------------------------------------
-    // Window_ConfirmApply
-    //     変更適用確認ウィンドウ
-    //
-    /**
-     * Window_ConfirmApply
-     */
-    function Window_ConfirmApply() {
-        this.initialize.apply(this, arguments);
-    }
 
-    Window_ConfirmApply.prototype = Object.create(Window_Selectable.prototype);
-    Window_ConfirmApply.prototype.constructor = Window_ConfirmApply;
 
-    /**
-     * Window_ConfirmApplyを初期化する。
-     */
-    Window_ConfirmApply.prototype.initialize = function (x, y, width, height) {
-        this._items = [ '', 'キャンセル'];
-        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-        this.activate();
-    };
 
-    /**
-     * 選択項目のメッセージを設定する。
-     * @param msg メッセージ
-     */
-    Window_ConfirmApply.prototype.setMessage = function(msg) {
-        this._items[0] = msg;
-        this.refresh();
-    };
-
-    /**
-     * コンテンツにあわせて、最適な位置/サイズに変更する。
-     */
-    Window_ConfirmApply.prototype.setPreferredPosition = function() {
-        var itemWidth = this.maxItemWidth();
-        var prevWidth = this.width;
-        var prevHeight = this.height;
-        var width = this.padding * 2 + itemWidth;
-        var height = this.padding * 2 + this.lineHeight() * this._items.length;
-        var x = (Graphics.boxWidth - width) / 2;
-        var y = (Graphics.boxHeight - height) / 2;
-        this.move(x, y, width, height);
-        if ((width !== prevWidth) && (height !== prevHeight)) {
-            // ウィンドウサイズが変わったので描画バッファを再構築する。
-            this.createContents();
-        }
-        Window_Selectable.prototype.refresh.call(this);
-    };
-    
-    /**
-     * コンテンツの幅を取得する。
-     * @return {Number} コンテンツの幅
-     */
-    Window_ConfirmApply.prototype.maxItemWidth = function() {
-        var maxTextWidth = 0;
-        for (var n = 0; n < this._items.length; n++) {
-            var width = this.textWidth(this._items[n]);
-            if (width > maxTextWidth) {
-                maxTextWidth = width;
-            }
-        }
-        return maxTextWidth;
-    };
-
-    /**
-     * 最大項目数を取得する。
-     * @return {Number} 最大項目数
-     */
-    Window_ConfirmApply.prototype.maxItems = function () {
-        return this._items.length;
-    };
-
-    /**
-     * 項目を描画する。
-     * @param {Number} index 描画する項目のインデックス番号
-     */
-    Window_ConfirmApply.prototype.drawItem = function (index) {
-        var rect = this.itemRect(index);
-        this.resetTextColor();
-        this.drawText(this._items[index], rect.x, rect.y, rect.width, 'left');
-        this.changeTextColor(this.normalColor());
-    };
-
-    //------------------------------------------------------------------------------
-    // Scene_Growup
-    //     面倒なのでカテゴリ選択用のウィンドウは用意しないけど。
-    //     習得可能スキル数が膨大になったら、いろいろ考えた方がいいなあ。
-    //
-    function Scene_Growup() {
-        this.initialize.apply(this, arguments);
-    }
-
-    Scene_Growup.prototype = Object.create(Scene_MenuBase.prototype);
-    Scene_Growup.prototype.constructor = Scene_Growup;
-
-    /**
-     * Scene_Growupを初期化する。
-     */
-    Scene_Growup.prototype.initialize = function() {
-        Scene_MenuBase.prototype.initialize.apply(this, arguments);
-    };
-
-    /**
-     * シーンに関係するオブジェクト(ウィンドウなど）を作成する。
-     */
-    Scene_Growup.prototype.create = function() {
-        Scene_MenuBase.prototype.create.call(this); // ここでアクターがセットされる。
-        this.createActorStatusWindow();
-        this.createHelpWindow();
-        this.createSelectWindow();
-        this.createConfirmApplyWindow();
-    };
-
-    /**
-     * アクターステータスウィンドウを作成する。
-     */
-    Scene_Growup.prototype.createActorStatusWindow = function() {
-        this._actorStatusWindow = new Window_GrowupActorStatus(0, 0, 320, Graphics.boxHeight);
-        this._actorStatusWindow.setActor(this.actor());
-        this.addWindow(this._actorStatusWindow);
-    };
-
-    /**
-     * ヘルプウィンドウを作成する。
-     */
-    Scene_Growup.prototype.createHelpWindow = function() {
-        this._helpWindow = new Window_Help(2);
-        var x = this._actorStatusWindow.x + this._actorStatusWindow.width;
-        var y = 0;
-        var width = Graphics.boxWidth - x;
-        var height = this._helpWindow.fittingHeight(2);
-        this._helpWindow.move(x, y, width, height);
-        this.addWindow(this._helpWindow);
-    };
-
-    /**
-     * 項目選択画面を作成する。
-     * カテゴリ分けしないけどいいのかなあ。項目多いと見づらくなるけど。
-     */
-    Scene_Growup.prototype.createSelectWindow = function() {
-        var x = this._actorStatusWindow.width;
-        var y = this._helpWindow.height;
-        var width = Graphics.boxWidth - x;
-        var height = Graphics.boxHeight - y;
-        this._selectWindow = new Window_GrowupSelect(x, y, width, height);
-        this._selectWindow.setActor(this.actor());
-        this._selectWindow.setHelpWindow(this._helpWindow);
-        this._selectWindow.setHandler('ok', this.onGrowupSelectOk.bind(this));
-        this._selectWindow.setHandler('cancel', this.onGrowupSelectCancel.bind(this));
-        this._selectWindow.setHandler('pageup', this.nextActor.bind(this));
-        this._selectWindow.setHandler('pagedown', this.previousActor.bind(this));
-        this._selectWindow.select(0);
-
-        this.addWindow(this._selectWindow);
-    };
-
-    /**
-     * 成長項目選択画面でOK操作を受けたときに通知を受け取る。
-     * 
-     * @method onGrowupSelectOk
-     * @memberof Scene_Growup
-     */
-    Scene_Growup.prototype.onGrowupSelectOk = function() {
-        this._selectWindow.deactivate();
-        var item = this._selectWindow.selectedItem();
-        if (item.type == 'reincarnation') {
-            this._confirmApplyWindow.setMessage(item.description);
-        } else {
-            // GPを X 消費して XX を1ポイント上昇させる。
-            // GPを X 消費して XX を習得する。
-            this._confirmApplyWindow.setMessage("GPを " + item.gpCost + " 消費して" + item.text);
-        }
-        this._confirmApplyWindow.select(0);
-        this._confirmApplyWindow.show();
-        this._confirmApplyWindow.activate();
-    };
-
-    /**
-     * 成長項目選択画面でキャンセル操作を受けたときに通知を受け取る。
-     */
-    Scene_Growup.prototype.onGrowupSelectCancel = function() {
-        // シーンを終了して前に戻す。
-        this.popScene();
-    };
-
-    /**
-     * 確認ウィンドウを作成する。
-     */
-    Scene_Growup.prototype.createConfirmApplyWindow = function() {
-        var height = 120;
-        var width = 480;
-        var x = (Graphics.boxWidth - width) / 2;
-        var y = (Graphics.boxHeight - height) / 2;
-        this._confirmApplyWindow = new Window_ConfirmApply(x, y, width, height);
-        this._confirmApplyWindow.hide();
-        this._confirmApplyWindow.deactivate();
-        this._confirmApplyWindow.setHandler('ok', this.onConfirmOK.bind(this));
-        this._confirmApplyWindow.setHandler('cancel', this.onConfirmCancel.bind(this));
-        this.addWindow(this._confirmApplyWindow);
-    };
-
-    /**
-     * 確認ウィンドウでOKが選択された時に通知を受け取る。
-     */
-    Scene_Growup.prototype.onConfirmOK = function() {
-        if (this._confirmApplyWindow.index() === 0) {
-            // 変更を適用する。
-            var item = this._selectWindow.selectedItem();
-            var actor = this.actor();
-            switch (item.type) {
-                case 'reincarnation':
-                    actor.reincarnation();
-                    break;
-                case 'basicParam':
-                    var paramId = item.id;
-                    actor.growBasicParamByGp(paramId);
-                    break;
-                case 'skill':
-                    var skillId = item.id;
-                    actor.learnSkillByGp(skillId);
-                    break;
-            }
-
-            this._actorStatusWindow.refresh();
-            this._selectWindow.refresh();
-        }
-        this._confirmApplyWindow.deactivate();
-        this._confirmApplyWindow.hide();
-        this._selectWindow.activate();
-    };
-
-    /**
-     * 確認ウィンドウでキャンセルが選択された時に通知を受け取る。
-     */
-    Scene_Growup.prototype.onConfirmCancel = function() {
-        this._confirmApplyWindow.deactivate();
-        this._confirmApplyWindow.hide();
-        this._selectWindow.activate();
-    };
-
-    /**
-     * シーンを開始する。
-     */
-    Scene_Growup.prototype.start = function() {
-        Scene_MenuBase.prototype.start.call(this);
-        this._actorStatusWindow.show();
-        this._helpWindow.show();
-
-        this._selectWindow.activate();
-    };
-
-    /**
-     * アクターが変更されたときに通知を受け取る。
-     */
-    Scene_Growup.prototype.onActorChange = function() {
-        this._actorStatusWindow.setActor(this.actor());
-        this._selectWindow.setActor(this.actor());
-        this._selectWindow.activate();
-    };
 
     //------------------------------------------------------------------------------
     // Scene_Menu

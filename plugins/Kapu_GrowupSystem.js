@@ -1,0 +1,358 @@
+/*:ja
+ * @target MZ 
+ * @plugindesc 成長システムプラグイン
+ * @author kapuusagi
+ * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
+ * 
+ * ■ gainGrowPoint
+ * @command gainGrowPoint
+ * @text 成長ポイント加算
+ * @desc 指定アクターの成長ポイントを加算する。
+ * 
+ * @arg actorId
+ * @text アクターID
+ * @desc 加算するアクターのID。
+ * @type actor
+ * 
+ * @arg value
+ * @text 増加量
+ * @desc 加算する値
+ * @type number
+ * @min 1
+ * 
+ * ■ resetGrows
+ * @command resetGrows
+ * @text 成長リセット
+ * @desc 指定アクターの育成状態をリセットする。
+ * 
+ * @arg actorId
+ * @text アクターID
+ * @desc 加算するアクターのID。
+ * @type actor
+ * 
+ * 
+ * @param maxGrowPoint
+ * @text 最大成長ポイント
+ * @desc 成長ポイントの最大値
+ * @type number
+ * @default 999
+ * @min 0
+ * 
+ * @param growPointAtLevelUp
+ * @text レベルアップ時加算ポイント
+ * @desc レベルアップ時に加算する成長ポイントの量。
+ * @type number
+ * @default 3
+ * @min 0
+ * 
+ * @param effectCode
+ * @text 成長ポイント加算エフェクトコード
+ * @desc 成長ポイントを加算する効果を割り当てるエフェクトコード。
+ * @type number
+ * @default 101
+ * @min 4
+ * 
+ * @param growPointText
+ * @text 成長ポイント名
+ * @desc 成長ポイントの名前
+ * @type string
+ * @default GP
+ *  
+ * @help 
+ * GP(GrowPoint)成長システムの枠を提供するプラグイン。
+ * 但し本プラグイン単体では動作しない。
+ * GPはレベルアップとアイテム（種）で加算し、
+ * 成長UIにて任意の割り振りをしたりすることを想定する。
+ * 
+ * ■ 使用時の注意
+ * 本プラグインにはUIはない。UIプラグインを併せて使用すること。
+ * 
+ * ■ プラグイン開発者向け
+ * 最大GrowPoint値を保持する Game_Actor.MAX_GROW_POINT を追加します。
+ * GrowPointは Game_Actor に以下のオブジェクトとして格納しています。
+ * _growPoint {
+ *     current: {Number} 現在値。振り分け格納な値。
+ *     max: {Number} 最大値。リセット時はcurrentがこの値になる。
+ * };
+ * 
+ * 育成項目は Game_Actor.growupItems にて配列を返す。
+ * GrowupItem = {
+ *     iconIndex : {Number} アイコンインデックス
+ *     text : {String} 項目名
+ *     type : {String} 育成タイプ。
+ *     id : {Number} 成長処理側で使用する識別ID
+ *     cost : {Number} growPointのコスト
+ *     description : {String} 説明用文字列。
+ *     msg : {String} 確認メッセージ
+ * }
+ * 実際の育成処理は
+ * Game_Actor.prototype.applyGrowup
+ * をフックして実装する。適用できたらtrueを返すこと。
+ * 
+ * ============================================
+ * プラグインコマンド
+ * ============================================
+ * 
+ * 
+ * ============================================
+ * ノートタグ
+ * ============================================
+ * アクター
+ *     <growPoint:max#>
+ *          加入時の成長ポイント現在値と最大値をmaxで指定した値にする。
+ *     <growPoint:current#/max#>
+ *     <growPoint:current#,max#>
+ *          加入時の成長ポイント現在値をcurrent#に、最大値をmax#で指定した値にする。
+ * 
+ * アイテム/スキル
+ *     <growPoint:value#>
+ *          使用すると、対象の成長ポイントをvalue#だけ追加する。
+ * 
+ * ============================================
+ * 変更履歴
+ * ============================================
+ * Version.0.1.0 TWLD向けコードから抜粋して移植。 動作未確認。
+ */
+(() => {
+    const pluginName = "Kapu_GrowupSystem";
+    const parameters = PluginManager.parameters(pluginName);
+
+    Game_Actor.MAX_GROW_POINT = Number(parameters["maxGrowPoint"]) || 999;
+    Game_Action.EFFECT_GAIN_GROWPOINT = Number(parameters["effectCode"]) || 0;
+
+    const growPointAtLevelUp = Number(parameters["growPointAtLevelUp"]) || 0;
+
+    const growPointText = String(parameters["growPointText"]) || "GP";
+    Object.defineProperty(TextManager, "growPoint", { get: () => growPointText, configurable:true});
+
+    PluginManager.registerCommand(pluginName, "gainGrowPoint", args => {
+        const actorId = Number(args.actorId) || 0;
+        const value = Math.floor(Number(args.value) || 0);
+        if ((actorId > 0) && (value > 0)) {
+            const actor = $dataActors.actor(actorId);
+            if (actor) {
+                actor.gainGrowPoint(value);
+            }
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, "resetGrows", args => {
+        const actorId = Number(args.actorId) || 0;
+        if (actorId > 0) {
+            const actor = $dataActors.actor(actorId);
+            if (actor) {
+                actor.resetGrows();
+            }
+        }
+    });
+
+    //------------------------------------------------------------------------------
+    // DataManager
+
+    /**
+     * ノートタグを処理する。
+     * 
+     * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
+     */
+    const _processNotetag = function(obj) {
+        if (obj.meta.growPoint) {
+            const value = Math.floor(Number(obj.meta.growPoint) || 0);
+            if (value > 0) {
+                obj.effects.push({
+                    code: Game_Action.EFFECT_GAIN_GROWPOINT,
+                    value1: value,
+                    value2: 0
+                });
+            }
+        }
+
+    };
+
+    DataManager.addNotetagParserSkills(_processNotetag);
+    DataManager.addNotetagParserItems(_processNotetag);
+
+    //------------------------------------------------------------------------------
+    // Game_Actor
+
+    const _Game_Actor_initMembers = Game_Actor.prototype.initMembers;
+    /**
+     * Game_Actorのパラメータを初期化する。
+     */
+    Game_Actor.prototype.initMembers = function() {
+        _Game_Actor_initMembers.call(this);
+        this._growPoint = { current : 10, max : 10 };
+    };
+
+    const _Game_Actor_setup = Game_Actor.prototype.setup;
+    /**
+     * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
+     * 
+     * @param {Number} actorId アクターID
+     */
+    Game_Actor.prototype.setup = function(actorId) {
+        _Game_Actor_setup.call(this, actorId);
+        const actor = $dataActors[actorId];
+        if (actor.meta.growPoint) {
+            const tokens = actor.meta.growPoint.split(/[,/]/);
+            if (tokens.length >= 2) {
+                this._growPoint.current = Matn.floor(Number(tokens[0]) || 0);
+                this._growPoint.max = Math.floor(Number(tokens[1]) || 0);
+            } else {
+                this._gorwPoint.current = Math.floor(Number(tokens[0]) || 0);
+                this._growPoint.max = this._growPoint.current;
+            }
+        }
+        if (this._growPoint.current > this._growPoint.max) {
+            this._growPoint.current = this._growPoint.max;
+        }
+    };
+
+    const _Game_Actor_levelUp = Game_Actor.prototype.levelUp;
+    /**
+     * レベルアップ処理をする。
+     */
+    Game_Actor.prototype.levelUp = function() {
+        _Game_Actor_levelUp.call(this);
+
+        // 成長ボーナス加算
+        var gpPlus = this.growPointAtLevelUp;
+        this.gainGrowPoint(gpPlus);
+    };
+
+    /**
+     * レベルアップ時に加算するGrowPointを得る。
+     * 
+     * @param {Number} level レベル
+     * @return {Number} 加算するGrowPoint
+     */
+    Game_Actor.prototype.growPointAtLevelUp = function(level) {
+        return growPointAtLevelUp;
+    };
+
+    /**
+     * 現在の成長ボーナス値を得る。
+     * つまり、残っているポイントね。
+     * 
+     * @return {Number} 現在の成長ボーナス値。
+     */
+    Game_Actor.prototype.growPoint = function() {
+        return this._growPoint.current;
+    };
+
+    /**
+     * 最大成長ボーナス値を得る。
+     * つまり、使用済み＋残っているポイント。
+     * 
+     * @return {Number} 成長ボーナス値合計。
+     */
+    Game_Actor.prototype.maxGrowPoint = function() {
+        return this._growPoint.max;
+    };
+
+    /**
+     * 成長ポイントにvalueを加算する。
+     * プラグインパラメータで指定された、最大成長ポイントは超えない。
+     * 
+     * @param {Number} value 加算値
+     */
+    Game_Actor.prototype.gainGrowPoint = function(value) {
+        const gainValue = Math.min(maxGrowPoint - this._growPoint.max, value);
+        if (gainValue) {
+            this._growPoint.current += gainValue;
+            this._growPoint.max += gainValue;
+        }
+    };
+
+    /**
+     * 成長リセットする。
+     * 
+     * 本システムを使った拡張プラグインにて、
+     * 本メソッドをフックしてリセット処理を実装すること。
+     */
+    Game_Actor.prototype.resetGrows = function() {
+        this._growPoint.current = this._growPoint.max;
+    };
+
+    /**
+     * 育成項目を返す。
+     * 
+     * @return {Array<GrowupItem>} 育成項目
+     */
+    Game_Actor.prototype.growupItems = function() {
+        return [];
+    };
+
+    /**
+     * 育成する。
+     * 
+     * @param {GrowupItem} growupItem 育成項目
+     */
+    Game_Actor.prototype.growup = function(growupItem) {
+        if (growupItem.gpCost < this.growPoint()) {
+            if (this.applyGrowup(growupItem)) {
+                this._growPoint.current -= growupItem.gpCost;
+                this.refresh();
+            }
+        }
+    };
+
+    /**
+     * 育成項目を適用する。
+     * 
+     * @param {GrowupItem} growupItem 育成項目
+     * @return {Boolean} 適用できたかどうか。
+     */
+    Game_Actor.prototype.applyGrowup = function(growupItem) {
+        return false;
+    };
+
+    //------------------------------------------------------------------------------
+    // Game_Action
+    const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
+
+    /**
+     * 効果を適用可能かどうかを判定する。
+     * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @param {DataEffect} effect エフェクトデータ
+     * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.testItemEffect = function(target, effect) {
+        if (effect.code == Game_Action.EFFECT_GAIN_GROWPOINT) {
+            return (target.isActor() && (target.growPoint() < target.maxGrowPoint());
+        } else {
+            return _Game_Action_testItemEffect.call(this, target, effect);
+        }
+    };
+
+    const _Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
+    /**
+     * 効果を適用する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {DataEffect} effect エフェクトデータ
+     */
+    Game_Action.prototype.applyItemEffect = function(target, effect) {
+        if (effect.code === Game_Action.EFFECT_GAIN_GROWPOINT) {
+            this.applyItemEffectGainGrowPoint(target, effect);
+        } else {
+            _Game_Action_applyItemEffect.call(this, target, effect);
+        }
+    };
+
+    /**
+     * 効果を適用する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {DataEffect} effect エフェクトデータ
+     */
+    Game_Action.prototype.applyItemEffectGainGrowPoint = function(target, effect) {
+        if (target.isActor()) {
+            target.gainGrowPoint(effect.value1);
+            this.makeSuccess(target);
+        }
+    };
+})();
