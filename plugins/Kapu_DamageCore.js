@@ -38,7 +38,7 @@
  * Game_Action.prototype.additionalTargetTraits(target:Game_Battler, critical:Boolean) : Array<Traits>
  *     ダメージ計算時、対象に一時的に付与する特性を返す。
  *     使用者に相手の防御力を自動で減衰させるような特性を持たせる場合に使用する。
- * Game_Action.multiplyDamageRate(target) : number
+ * Game_Action.multiplyDamageRate(target:Game_Battler, critical:Boolean) : number
  *     何かしらのダメージ倍率を乗算するためのフック用メソッド。
  *     例えばウェポンマスタリーによるダメージボーナスがあったとき、
  *     calcElementRateをフックするのはメソッドの意味合いが変わるので
@@ -198,7 +198,7 @@
         if (this.isMagical()) {
             value = this.applyMagicalDamageRate(value, target, critical);
         }
-        return value * this.multiplyDamageRate();
+        return value * this.multiplyDamageRate(target, critical);
     };
 
     /**
@@ -229,9 +229,11 @@
      * ダメージ量の乗算ボーナスレートを得る。
      * (加算・乗算用)
      * 
+     * @param {Game_Battler} target ターゲット。
+     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
      * @return {Number} 乗算ボーナスレート
      */
-    Game_Action.prototype.multiplyDamageRate = function() {
+    Game_Action.prototype.multiplyDamageRate = function(target, critical) {
         return 1.0;
     };
 
