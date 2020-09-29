@@ -13,6 +13,7 @@
  * @text 番号
  * @desc グループ上のエネミー番号(1～x)
  * @type number
+ * @min 1
  * 
  * @arg position
  * @text 位置
