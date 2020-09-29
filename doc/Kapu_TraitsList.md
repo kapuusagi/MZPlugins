@@ -10,6 +10,10 @@
 |||200|TRAIT_XPARAM_DID_CDR。クリティカルダメージレート。|
 |||202|TRAIT_XPARAM_DID_CASTTIME_RATE。スキル発動時間率。|
 |||203|TRAIT_XPARAM_DID_AUTOGUARD_RATE。自動防御率。|
+|||204|TRAIT_XPARAM_DID_DEFPR 物理貫通レート。指定した割合だけDEFを減衰させる。|
+|||205|TRAIT_XPARAM_DID_PDRPR 物理ダメージレート貫通。指定した割合だけPDRを減衰させる。|
+|||206|TRAIT_XPARAM_DID_MDFPR 魔法貫通レート。指定した割合だけMDEFを減衰させる。|
+|||207|TRAIT_XPARAM_DID_MDRPR 魔法ダメージレート貫通。指定した割合だけMDRを減衰させる。|
 |TRAIT_SPARAM|23||効果値乗算が全ての乗算結果で生成されるパラメータに対する効果。初期値は1.0で効果エントリのrateが乗算される。|
 |||0～9|ベーシックシステムで使用|
 |TRAIT_SPECIAL_FLAG|62|フラグID|特別な機能を提供するためのフラグ。|

@@ -44,8 +44,6 @@
     /**
      * TRAITTの追加(あれば)
      */
-    Game_BattlerBase.TRAIT_XPARAM_DID_PPR = 11; // 物理貫通率加算
-    Game_BattlerBase.TRAIT_XPARAM_DID_MPR = 12; // 魔法貫通率加算
 
     Game_BattlerBase.TRAIT_SPARAM_DID_ATB = 10; // ATB速度
     Game_BattlerBase.TRAIT_SPARAM_DID_CASTTIME = 11; // キャストタイム
