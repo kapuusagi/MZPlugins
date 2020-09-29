@@ -10,7 +10,7 @@
  * @text ファストアタックフラグID
  * @desc 戦闘開始時、初回のTPBがたまった状態にするスペシャルフラグID
  * @type number
- * @default 100
+ * @default 102
  * @min 6
  * 
  * @help 
@@ -37,10 +37,15 @@
  * Version.0.1.0 新規作成。
  */
 (() => {
-    const pluginName = "Kapu_Trait_FastAction";
+    const pluginName = "Kapu_Trait_TpbFastAction";
     const parameters = PluginManager.parameters(pluginName);
 
     Game_BattlerBase.FLAG_ID_FAST_ACTION = Number(parameters["specialFlagId"]) || 0;
+
+    if (Game_BattlerBase.FLAG_ID_FAST_ACTION === 0) {
+        console.error(pluginName + ":FLAG_ID_FAST_ACTION is 0.");
+        return;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -54,7 +59,7 @@
     const _processNotetag = function(obj) {
         if (obj.meta.fastAction) {
             obj.traits.push({
-                code : Game_BattlerBase.Game_BattlerBase.TRAIT_SPECIAL_FLAG,
+                code : Game_BattlerBase.TRAIT_SPECIAL_FLAG,
                 dataId : Game_BattlerBase.FLAG_ID_FAST_ACTION,
                 value : 0
             });
@@ -71,17 +76,16 @@
     //------------------------------------------------------------------------------
     // Game_Battler
 
-    const _Game_Battler_onBattleStart = Game_Battler.prototype.onBattleStart;
+    const _Game_Battler_initTpbChargeTime = Game_Battler.prototype.initTpbChargeTime;
     /**
-     * 戦闘開始時の処理を行う。
+     * TPB値を初期化する。
      * 
      * @param {Boolean} advantageous 有利な状態かどうか
      */
-    Game_Battler.prototype.onBattleStart = function(advantageous) {
-        _Game_Battler_onBattleStart.call(this, advantageous);
+    Game_Battler.prototype.initTpbChargeTime = function(advantageous) {
+        _Game_Battler_initTpbChargeTime.call(this, advantageous);
         if (this.specialFlag(Game_BattlerBase.FLAG_ID_FAST_ACTION)) {
-            this.this._tpbChargeTime = 1;
+            this._tpbChargeTime = 1;
         }
-
     };
 })();
