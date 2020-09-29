@@ -90,7 +90,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 TWLD_Coreから移植。動作未確認。
+ * Version.0.1.0 TWLD_Coreから移植して作成。
  */
 (() => {
     const pluginName = "Kapu_Trait_Penetrate";
@@ -122,9 +122,6 @@
      * @param {Object} obj データオブジェクト
      */
     const _processPenetrateRateNoteTag = function(obj) {
-        if (!obj.meta.criticalDamageRate) {
-            return;
-        }
         if (obj.meta.penDEF) {
             _addRateTrait(Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR, obj.meta.penDEF);
         }
@@ -212,10 +209,11 @@
         if (penmdf) {
             traits.push({
                 code : Game_BattlerBase.TRAIT_PARAM,
-                dataId : 4, // 4 is MDEF.
+                dataId : 5, // 5 is MDEF.
                 value : 1.0 - penmdf, // 0 indicates 0 percent.
             });
         }
+        return traits;
     };
 
     const _Game_Action_itemPdr = Game_Action.prototype.itemPdr;
