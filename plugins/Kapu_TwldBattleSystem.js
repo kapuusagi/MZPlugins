@@ -1098,7 +1098,6 @@ function Sprite_BattleHudPicture() {
         this._brightness = 255;
         this.setFrame(0, 0, this.statusAreaWidth(), this.statusAreaHeight());
     };
-
     /**
      * ステータス領域の幅を得る。
      * 
@@ -1488,7 +1487,7 @@ function Sprite_BattleHudPicture() {
      * @return {Number} ポップアップ位置y
      */
     Sprite_BattleHudActor.prototype.damageOffsetY = function() {
-        return ImageManager.faceHeight - this.statusAreaHeight();
+        return ImageManager.faceHeight - this.statusAreaHeight() - 60;
     };
     //------------------------------------------------------------------------------
     // DisplayBattlePictureFilter
