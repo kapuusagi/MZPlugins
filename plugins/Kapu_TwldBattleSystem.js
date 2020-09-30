@@ -129,6 +129,8 @@
  * @help 
  * Twld向けに作成した戦闘シーンのUI処理プラグイン。
  * 
+ * GLSLソースで使用しているRGB<->HSL変換は
+ * 
  * img/hud/ActiveHud
  *     Active状態の時に表示するイメージ
  * img/hud/StatusBackground
@@ -1508,11 +1510,9 @@ function Sprite_BattleHudPicture() {
      */
     DisplayBattlePictureFilter.prototype.initialize = function() {
         PIXI.Filter.call(this, null, this._fragmentSrc());
-        this.uniforms.validX = 1000.0;
         this.uniforms.zeroX = 900.0;
         this.uniforms.validWidth = 100.0;
-        this.uniforms.validY = 680.0;
-        this.uniforms.zeroY = 720.0;
+        this.uniforms.zeroY = 540.0;
         this.uniforms.validHeight = 40.0;
     };
 
@@ -1522,8 +1522,7 @@ function Sprite_BattleHudPicture() {
      * @param {Number} x 画面上のX位置
      */
     DisplayBattlePictureFilter.prototype.setValidX = function(x) {
-        this.uniforms.validX = Number(x) || 0;
-        this.uniforms.zeroX = this.uniforms.validX - this.uniforms.validWidth;
+        this.uniforms.zeroX = Number(x) || 0;
     }
 
     /**
@@ -1535,41 +1534,18 @@ function Sprite_BattleHudPicture() {
         const src =
             "varying vec2 vTextureCoord;" +
             "uniform sampler2D uSampler;" +
-            "uniform float validX;" +
             "uniform float zeroX;" +
             "uniform float validWidth;" +
-            "uniform float validY;" +
             "uniform float zeroY;" +
             "uniform float validHeight;" +
-            "float getRateX(float x) {" +
-            "  if (x > validX) {" +
-            "    return 1.0;" +
-            "  } else if (x > zeroX) {" +
-            "    return ((x - zeroX) / validWidth);" +
-            "  } else {" +
-            "    return 0.0;" +
-            "  }" +
-            "}" +
-            "float getRateY(float y) {" +
-            "  if (y < validY) {" +
-            "    return 1.0;" +
-            "  } else if (y < zeroY) {" +
-            "    return ((zeroY - y) / validHeight);" +
-            "  } else {" +
-            "    return 0.0;" +
-            "  }" +
-            "}" +
-            "float getRate(float x, float y) {" +
-            "  return min(getRateX(x), getRateY(y));" +
-            "}" +
             "void main() {" +
             "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
-            "  float rate = getRate(gl_FragCoord.x, gl_FragCoord.y);" +
-            "  float r = sample.r * rate;" +
-            "  float g = sample.g * rate;" +
-            "  float b = sample.b * rate;" +
+            "  float rateH = clamp((gl_FragCoord.x - zeroX) / validWidth, 0.0, 1.0);" +
+            "  float rateV = 1.0 - clamp((gl_FragCoord.y - zeroY) / validHeight, 0.0, 1.0);" +
+            "  float rate = min(rateH, rateV);" +
+            "  vec3 rgb = sample.rgb * rate;" +
             "  float a = sample.a * rate;" +
-            "  gl_FragColor = vec4(r, g, b, a);" +
+            "  gl_FragColor = vec4(rgb, a);" +
             "}";
         return src;
     };
@@ -1634,6 +1610,7 @@ function Sprite_BattleHudPicture() {
 
     /**
      * フラグメントシェーダーソースを得る。
+     * 
      */
     BattleHudActorFilter.prototype._fragmentSrc = function() {
         // GLSLよくわからん。
