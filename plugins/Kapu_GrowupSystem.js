@@ -66,6 +66,13 @@
  * GPはレベルアップとアイテム（種）で加算し、
  * 成長UIにて任意の割り振りをしたりすることを想定する。
  * 
+ * なんでこれを用意したかというと、
+ * プレイヤーに「成長ポイントを何に割り振るか」という楽しみを提供するため。
+ * よくある習得システムだと、
+ * 「スキルはスキルポイント、ステータスはステータスポイント」と決まっていて
+ * 「どっちに割り振ろうか」ということにできなかった。
+ * 全体を包括してるスゴイプラグインもあるけど．．．。
+ * 
  * ■ 使用時の注意
  * 本プラグインにはUIはない。UIプラグインを併せて使用すること。
  * 
@@ -77,15 +84,27 @@
  *     max: {Number} 最大値。リセット時はcurrentがこの値になる。
  * };
  * 
+ * 
+ * 独自の育成項目を追加するには、以下を実装します。
+ * 1.Game_Actor.initMembersをフックして育成データを格納する場所を追加。
+ * 2.Game_Actor.setupをフックし、ノートタグを解析して初期値を設定する処理を追加。
+ *   （必要な場合）
+ * 3.Game_Actorの適切なメソッドをフックし、育成データを反映する場所を追加。
+ * 　例えばMaxHPならGame_Actor.paramBaseかGame_Actor.paramPlusをフックする。
+ * 4.Game_Actor.resetGrowsをフックし、育成リセットを追加。
+ * 5.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
+ * 6.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
+ * 
+ * サンプルはKapu_GrowupSystem_Params等を参照。
+ * 
  * 育成項目は Game_Actor.growupItems にて配列を返す。
  * GrowupItem = {
  *     iconIndex : {Number} アイコンインデックス
- *     text : {String} 項目名
- *     type : {String} 育成タイプ。
+ *     name : {String} 項目名
+ *     type : {String} 育成タイプ。(プラグインで識別に使用する文字列)
  *     id : {Number} 成長処理側で使用する識別ID
  *     cost : {Number} growPointのコスト
  *     description : {String} 説明用文字列。
- *     msg : {String} 確認メッセージ
  * }
  * 実際の育成処理は
  * Game_Actor.prototype.applyGrowup

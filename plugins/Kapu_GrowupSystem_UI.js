@@ -28,6 +28,13 @@
  * @default 育成
  * @parent menu
  * 
+ * 
+ * @param confirmMessageText
+ * @text 確認メッセージ
+ * @desc 確認メッセージとして表示する書式。%1は項目名、%2に育成パラメータ名、%3にコストが渡る。
+ * @type string
+ * @default %1(%2を%3消費)
+ * 
  * @help 
  * 
  * ■ 使用時の注意
@@ -86,6 +93,7 @@ function Scene_Growup() {
     const parameters = PluginManager.parameters(pluginName);
     const menuEnable = Boolean(parameters["menuEnable"]) || false;
     const menuCommandText = String(parameters["menuCommandText"]) || "";
+    const confirmMessageText = String(parameters["confirmMessageText"]) || "%1(%2-%3)";
 
     PluginManager.registerCommand(pluginName, "startGrowupScene", args => {
         SceneManager.push(Scene_Growup);
@@ -297,7 +305,7 @@ function Scene_Growup() {
             width = 480;
         }
         this.changeTextColor(this.normalColor());
-        this.drawText(item.text, x, rect.y, width);
+        this.drawText(item.name, x, rect.y, width);
 
         // GPコスト描画
         const x2 = x + width;
@@ -553,7 +561,7 @@ function Scene_Growup() {
     Scene_Growup.prototype.onGrowupSelectOk = function() {
         this._selectWindow.deactivate();
         const item = this._selectWindow.item();
-        this._confirmApplyWindow.setMessage(item.msg);
+        this._confirmApplyWindow.setMessage(this.confirmMessage(item));
         // if (item.type == 'reincarnation') {
         //     this._confirmApplyWindow.setMessage(item.description);
         // } else {
@@ -564,6 +572,15 @@ function Scene_Growup() {
         this._confirmApplyWindow.select(0);
         this._confirmApplyWindow.show();
         this._confirmApplyWindow.activate();
+    };
+
+    /**
+     * 確認メッセージを得る。
+     * 
+     * @param {GrowupItem} item 育成項目
+     */
+    Scene_Growup.prototype.confirmMessage = function(item) {
+        return confirmMessageText.format(item.name, TextManager.growPoint, item.gpCost);
     };
 
     /**
