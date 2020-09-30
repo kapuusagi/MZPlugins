@@ -61,3 +61,38 @@
 |wasdKeyMZ.js|wasd移動に対応させます。|
 |WeatherOnBattle.js|戦闘中も天候アニメを表示します|
 |Yami_8DirEx.js|8方向移動(タッチパネル対応版)
+
+## GLSL Editor
+
+エディタはColorFilterを独自実装して動作確認したい場合に必須。
+直接記述すると、どこがおかしいのかわかりにくいのだ。
+
+https://github.com/patriciogonzalezvivo/glslEditor
+
+がよさげ？cloneしてindex.htmlを開けば色々できそうな予感。
+詳細は見て無いけど、rmmz_coreのColorFilterはフラグメントシェーダーを実装している。
+
+ソースを読むときによく分からなかったら、
+
+https://gist.github.com/gyohk/abf13dbcb5be750b3b021752b280ccd3
+
+とか見ると、意味が分かるかもしれない。xyとか意味分からんよ！
+
+ヒントを書いておく。
+
+* gl_FragColor
+
+    出力する（表示する）ピクセルの画素。
+
+* gl_FragCoord
+
+    出力するピクセルの座標が格納されている。こっちは普通に0,1,2,...とふえていくっぽい。
+
+* varying vec2 vTextureCoord
+
+    Textureの座標が0.0～1.0で格納される。左上が0っぽいけど、座標系によるのかな？
+
+* uniform sampler2D uSampler
+
+    テクスチャ？ texture2D(uSampler, vTextureCoord); とすると、テクスチャの座標に対応するピクセルが得られる。
+
