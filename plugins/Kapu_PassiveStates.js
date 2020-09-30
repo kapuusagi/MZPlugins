@@ -30,7 +30,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.2.0 条件付きパッシブステートを実現するため、構造を変更した。動作未確認。
+ * Version.0.2.0 条件付きパッシブステートを実現するため、構造を変更した。
  *               Kapu_Utilityを使用してパースするように変更した。
  *               ノートタグ書式<passiveStates: begin# to end#>は削除した。
  * Version.0.1.0 MVのYanfly氏のYEP_AutoPassiveStates.jsを参考に作成。
@@ -54,7 +54,7 @@
         obj.passiveStates = [];
 
         if (!obj.meta.passiveStates) {
-            continue;
+            return;
         }
         for (const token of obj.meta.passiveStates.split(",")) {
             const id = Number(token);
