@@ -2150,36 +2150,7 @@
         }
     };
 
-    /**
-     * 当たるかどうかを判定する。 
-     * @param {Game_BattlerBase} target ターゲット
-     * @return 成功した場合にはtrue,それ以外はfalse
-     */
-    Game_Action.prototype.testHit = function(target) {
-        var subject = this.subject(); // 使用者
-        var hitRate = this.itemHit(target); // 基本命中率(スキルの使いやすさ)
-        if (this.isPhysical()) {
-            var pev = target.eva // 回避率は純粋に効いてくる
-                - (hitRate - 1.0) // 命中率分の補正。1.0超えた分は命中しやすくなる。
-                + (target.luk - subject.luk) * 0.01; // LUKによるあたり判定(LUK高いやつは当てやすい)
-            if (this.isLongRange()) {
-                // 長距離の場合には相手の素早さと使用者の器用さを比較する。
-                pev += this.getRelativeDiff(target.agi, subject.dex);
-            } else {
-                // 接近戦の場合にはDEXとAGIの合計値を比較する。
-                pev += this.getRelativeDiff((target.dex + target.agi), (subject.dex + subject.agi));
-            }
-            return Math.random() >= pev;
-        } else if (this.isMagical()) {
-            var mev = target.mev // 魔法回避率は純粋に効いてくる。
-                - (hitRate - 1.0) // 命中率の1.0超えた分は相手の回避率を減らす方向に効く。
-                + this.getRelativeDiff(target.men, subject.men) / 2
-                + (target.luk - subject.luk) * 0.01; // LUKによるあたり判定(LUK高いやつは当てやすい)
-                return Math.random() >= mev;
-        } else {
-            return true; // その他は100%成功
-        }
-    };
+
 
     TWLD.Core.Game_Action_itemHit = Game_Action.prototype.itemHit;
     /**

@@ -3,6 +3,9 @@
  * @plugindesc パッシブステートを追加するプラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
+ * 
  * @help 
  * パッシブステートを追加する。
  * パッシブステート：装備・習得しているだけで付与されるステートの事。
@@ -24,103 +27,59 @@
  *         idで指定したステートが付与されるようになる。
  *     <passiveStates:id#,id#,id#>
  *         カンマで区切られたidで指定したステートが付与されるようになる。
- *     <passiveStates:begin# to end#>
- *         begin# から end# で指定したステートが付与されるようになる。
- * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 条件付きパッシブステートを実現するため、構造を変更した。動作未確認。
+ *               Kapu_Utilityを使用してパースするように変更した。
+ *               ノートタグ書式<passiveStates: begin# to end#>は削除した。
  * Version.0.1.0 MVのYanfly氏のYEP_AutoPassiveStates.jsを参考に作成。
  *               MVプロジェクトをインポートして使いたいなら、
- *               素直にYanfly氏がMZ向けにリリースしているVisustellaプラグインを使った方が良いです。
+ *               素直にYanfly氏がMZ向けにリリースしている
+ *               Visustellaプラグインを使った方が良いです。
  */
 (() => {
     const pluginName = "Kapu_PassiveStates";
 
-    const _Scene_Boot_start = Scene_Boot.prototype.start;
-
-    //------------------------------------------------------------------------------
-    // Scene_Boot
-
-    /**
-     * Scene_Bootを開始する。
-     */
-    Scene_Boot.prototype.start = function() {
-        DataManager.processPassiveState();
-        _Scene_Boot_start.call(this);
-    };
 
     //------------------------------------------------------------------------------
     // DataManager
-    /**
-     * パッシブステートノートタグを処理する。
-     */
-    DataManager.processPassiveState = function() {
-        this.processPassiveStateNotetags($dataActors);
-        this.processPassiveStateNotetags($dataClasses);
-        this.processPassiveStateNotetags($dataEnemies);
-        this.processPassiveStateNotetags($dataSkills);
-        this.processPassiveStateNotetags($dataWeapons);
-        this.processPassiveStateNotetags($dataArmors);
-    };
 
     /**
-     * パッシブステートノートタグを処理する。
+     * ノートタグを処理する。
      * 
-     * @param {Array<Object>} dataArray データコレクション
+     * @apram {TraitObject} obj Actor/Class/Weapon/Armor/State/Enemyのいずれか。traitsを持ってるデータ
      */
-    DataManager.processPassiveStateNotetags = function(dataArray) {
-        const patternSingle = /^ *(\d+) *$/;
-        const patternRange = /^ *(\d+) ?to ?(\d+) */;
+    const _processNotetag = function(obj) {
+        obj.passiveStates = [];
 
-        for (let i = 1; i < dataArray.length; i++) {
-            const data = dataArray[i];
-
-            data.passiveStates = [];
-
-            if (data.meta.passiveStates) {
-                const psEntries = data.meta.passiveStates.split(",");
-                for (const psEntry of psEntries) {
-                    let re;
-                    if ((re = psEntry.match(patternSingle)) !== null) {
-                        const stateId = Number(re[1]);
-                        if (stateId) {
-                            data.passiveStates.push(stateId);
-                        }
-                    } else if ((re = psEntry.match(patternRange)) !== null) {
-                        const begin = Number(re[1]);
-                        const end = Number(re[2]);
-                        for (let id = begin; id <= end; id++) {
-                            data.passiveStates.push(id);
-                        }
-                    }
+        if (!obj.meta.passiveStates) {
+            continue;
+        }
+        for (const token of obj.meta.passiveStates.split(",")) {
+            const id = Number(token);
+            if (id > 0) {
+                if (!obj.passiveStates.contains(id)) {
+                    obj.passiveStates.push(id);
                 }
             }
         }
     };
-
-    /**
-     * objからパッシブステートID配列を得る。
-     * 
-     * @param {Object} obj オブジェクト
-     * @return {Array<Number>} パッシブステートID配列
-     */
-    DataManager.getPassiveStateData = function(obj) {
-        if (obj && obj.passiveStates) {
-            return obj.passiveStates;
-        } else {
-            return [];
-        }
-    };
-
+    DataManager.addNotetagParserActors(_processNotetag);
+    DataManager.addNotetagParserClasses(_processNotetag);
+    DataManager.addNotetagParserEnemies(_processNotetag);
+    DataManager.addNotetagParserSkills(_processNotetag);
+    DataManager.addNotetagParserWeapons(_processNotetag);
+    DataManager.addNotetagParserArmors(_processNotetag);
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     const _Game_BattlerBase_states = Game_BattlerBase.prototype.states;
+    
     /**
      * このGame_Battlerのステートを返す。
      * 
-     * @return {Array<DataStates>} ステート
+     * @return {Array<DataState>} ステート
      */
     Game_BattlerBase.prototype.states = function() {
         let states = _Game_BattlerBase_states.call(this);
@@ -171,11 +130,44 @@
 
     /**
      * このGame_BattlerBaseが持ってるパッシブステートID列を得る。
-     * Game_Enemy, Game_Actorでそれぞれ実装する。
      * 
      * @return {Array<Number>} ステートID配列。
      */
     Game_BattlerBase.prototype.getPassiveStateIds = function() {
+        const passiveStateObjects = this.passiveStateObjects();
+        const stateIds = [];
+        for (const psObj of passiveStateObjects) {
+            const ids = this.getObjectPassiveStateIds(psObj);
+            for (const id of ids) {
+                if (!stateIds.contains(id)) {
+                    stateIds.push(id);
+                }
+            }
+        }
+        return stateIds;
+    };
+
+    /**
+     * objが持つパッシブステートを得る。
+     * 
+     * @param {Object} obj 
+     * @return {Array<Number>} ステートID配列
+     */
+    Game_BattlerBase.prototype.getObjectPassiveStateIds = function(obj) {
+        if (obj && obj.passiveStates) {
+            return obj.passiveStates;
+        } else {
+            return [];
+        }
+    };
+
+    /**
+     * パッシブステートデータを持ったオブジェクトを返す。
+     * Game_Actor/Game_Enemyにて、本メソッドを実装してオブジェクトを返すようにする。
+     * 
+     * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
+     */
+    Game_BattlerBase.prototype.passiveStateObjects = function() {
         return [];
     };
 
@@ -213,91 +205,57 @@
 
     //------------------------------------------------------------------------------
     // Game_Actor
+
     /**
-     * このGame_BattlerBaseが持ってるパッシブステートID列を得る。
-     * Game_Enemy, Game_Actorでそれぞれ実装する。
+     * パッシブステートデータを持ったオブジェクトを返す。
      * 
-     * @return {Array<Number>} ステートID配列。
+     * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
      */
-    Game_Actor.prototype.getPassiveStateIds = function() {
-        const stateIds = DataManager.getPassiveStateData(this.actor());
-        const classPS = DataManager.getPassiveStateData(this.currentClass());
-        for (let id of classPS) {
-            if (!stateIds.contains(id)) {
-                stateIds.push(id);
-            }
-        }
-        const equips = this.equips();
-        for (let equip of equips) {
+    Game_Actor.prototype.passiveStateObjects = function() {
+        const psObjs = [];
+        const actor = this.actor();
+        psObjs.push(this.actor());
+        const currentClass = this.currentClass(); 
+        psObjs.push(currentClass);
+        for (const equip of this.equips()) {
             if (equip) {
-                const equipPS = DataManager.getPassiveStateData(equip);
-                for (let id of equipPS) {
-                    if (!stateIds.contains(id)) {
-                        stateIds.push(id);
-                    }
-                }
+                psObjs.push(equip);
             }
         }
+        // Note: this.skills()を呼ぶと、特性によるスキル追加を取得するため、
+        //       traits() -> states() -> passiveStates() -> ... passiveStateObjects()
+        //       と呼ばれて循環し、スタックオーバーフローする。
+        //       そのため、_skillsを参照し、対象を追加する。
         const skillIds = this._skills;
         for (let skillId of skillIds) {
             const skill = $dataSkills[skillId];
-            const skillPS = DataManager.getPassiveStateData(skill);
-            for (let id of skillPS) {
-                if (!stateIds.contains(id)) {
-                    stateIds.push(id);
-                }
+            if (skill) {
+                psObjs.push(skill);
             }
         }
-
-        return stateIds;
+        return psObjs;
     };
 
     //------------------------------------------------------------------------------
     // Game_Enemy
-    if (!Game_Enemy.prototype.skills) {
-        /**
-         * エネミーの使用するスキルを得る。
-         * 
-         * @return {Array<DataSkill>} スキルデータ配列
-         */
-        Game_Enemy.prototype.skills = function() {
-            const skillIds = [];
-            const actions = this.enemy().actions;
-            for (action of actions) {
-                const skillId = action.skillId;
-                if (!skillIds.contains(skillId)) {
-                    skillIds.push(skillId);
-                }
-            }
-            return skillIds.map(id => $dataSkills[id]);
-        }
-    
-    }
 
     /**
-     * このGame_BattlerBaseが持ってるパッシブステートID列を得る。
-     * Game_Enemy, Game_Actorでそれぞれ実装する。
+     * パッシブステートデータを持ったオブジェクトを返す。
      * 
-     * @return {Array<Number>} ステートID配列。
+     * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
      */
-    Game_Enemy.prototype.getPassiveStateIds = function() {
-        const stateIds = [];
-        const enemyPS = DataManager.getPassiveStateData(this.enemy());
-        for (let id of enemyPS) {
-            if (!stateIds.contains(id)) {
-                stateIds.push(id);
-            }
-        }
-        const skills = this.skills();
-        for (let skill of skills) {
-            const skillPS = DataManager.getPassiveStateData(skill);
-            for (let id of skillPS) {
-                if (!stateIds.contains(id)) {
-                    stateIds.push(id);
-                }
+    Game_Enemy.prototype.passiveStateObjects = function() {
+        const psObjs = [];
+        const enemy = this.enemy();
+        psObjs.push(enemy);
+        for (const enemyAction of enemy.actions) {
+            const skillId = enemyAction.skillId;
+            if (skillId) {
+                const skill = $dataSkills[skillId];
+                psObjs.push(skill);
             }
         }
 
-        return stateIds;
+        return psObjs;
     };
 })();
