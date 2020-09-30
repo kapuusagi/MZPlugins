@@ -545,26 +545,7 @@
     //------------------------------------------------------------------------------
     // Sprite_Damageの変更
     //
-    /**
-     * ダメージスプライトをセットアップする。
-     * @param {Game_BattlerBase} target ターゲット
-     */
-    Sprite_Damage.prototype.setup = function(target) {
-        var result = target.result();
-        if (result.missed || result.evaded) {
-            this.createMiss();
-        } else if (result.hpAffected) {
-            this.createDigits(0, result.hpDamage);
-        } else if (target.isAlive() && result.mpDamage !== 0) {
-            this.createDigits(2, result.mpDamage);
-        }
-        if (result.critical) {
-            if (TWLD.Core.CriticalAnimationId > 0) {
-                this.startAnimation(TWLD.Core.CriticalAnimationId , false, 0);
-            }
-            this.setupCriticalEffect();
-        }
-    };    
+   
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     //
