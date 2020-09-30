@@ -30,9 +30,11 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 作成した。
  */
 (() => {
+
+    const baseY = 40;
 
     //------------------------------------------------------------------------------
     // Sprite_Damage
@@ -61,8 +63,30 @@
             this._colorType = 0; // ColorManager.damageColor()に渡る
             this.createCritical();
         }
+        this._damageXMove = this.damageXMove(target);
         _Sprite_Damage_setup.call(this, target);
     };
+
+    /**
+     * X方向移動量を得る。
+     * 
+     * @param {Game_Battler} target ポップアップ対象
+     * @return {Number} X方向移動量。
+     */
+    Sprite_Damage.prototype.damageXMove = function(target) {
+        const result = target.result();
+        // Note: 動かそうかと思ったけれど、
+        //       なんか判定が上手くいかない。
+        //       たぶん target.isAlive() && result.mpDamage に引っかかってる。
+        if ((result.hpAffected && (result.hpDamage >= 0))
+                /* || (target.isAlive() && result.mpDamage >= 0) */) {
+            return 0.5;
+        } else {
+            return 0;
+        }
+
+    };
+
     /**
      * Missスプライトを作成する。
      * 
@@ -77,7 +101,7 @@
         sprite.dy = 0;
         sprite.opacity = 0;
         sprite.x = -60;
-        sprite.y = 0;
+        sprite.y = -40;
         sprite.updatePosition = this.updatePositionMiss.bind(this);
     };
 
@@ -91,7 +115,7 @@
         sprite.bitmap.drawText("Critical", 0, 0, w, h, "center");
         sprite.anchor.y = 0;
         sprite.x = 0;
-        sprite.y = 0;
+        sprite.y = -40;
         sprite.opacity = 0;
         sprite.dy = 0;
         sprite.updatePosition = this.updatePositionCritical.bind(this);
@@ -110,7 +134,12 @@
             const sprite = this.createChildSprite(w, h);
             sprite.bitmap.drawText(string[i], 0, 0, w, h, "center");
             sprite.x = (i - (string.length - 1) / 2) * w;
-            sprite.dy = 5;
+            sprite.ry = baseY;
+            sprite.dy = 10;
+            sprite.ay = 0.5;
+            sprite.rx = sprite.x;
+            sprite.wait = i * 8;
+            sprite.visible = sprite.wait === 0;
             sprite.updatePosition = this.updatePositionDigits.bind(this);
         }
     };
@@ -123,7 +152,7 @@
      */
     Sprite_Damage.prototype.fontSize = function () {
         // クリティカル時はフォントサイズを大きくする。
-        return $gameSystem.mainFontSize() + ((this._critical) ? 18 : 4);
+        return $gameSystem.mainFontSize() + ((this._critical) ? 20 : 10);
     };
 
     /**
@@ -162,7 +191,7 @@
      * @param {Sprite} sprite Spriteオブジェクト。Missと書かれたスプライトが1つだけ。
      */
     Sprite_Damage.prototype.updatePositionMiss = function(sprite) {
-        if (frameCount < 30) {
+        if (this._frameCount < 30) {
             if (sprite.x < 0) {
                 sprite.x += 3;
             }
@@ -171,7 +200,7 @@
                 sprite.opacity = Math.min(255, opacity + 10);
             }
         }
-        if (frameCount > 90) {
+        if (this._frameCount > 90) {
             let opacity = sprite.opacity;
             if (opacity > 0) {
                 sprite.opacity = Math.max(0, opacity -= 10);
@@ -187,7 +216,7 @@
      * @param {Sprite} sprite Spriteオブジェクト。Criticalと書かれたスプライトが1つだけ。
      */
     Sprite_Damage.prototype.updatePositionCritical = function(sprite) {
-        if (frameCount < 30) {
+        if (this._frameCount < 30) {
             if (sprite.x < 0) {
                 sprite.x += 3;
             }
@@ -196,7 +225,7 @@
                 sprite.opacity = Math.min(255, opacity + 10);
             }
         }
-        if (frameCount > 90) {
+        if (this._frameCount > 90) {
             let opacity = sprite.opacity;
             if (opacity > 0) {
                 sprite.opacity = Math.max(0, opacity -= 10);
@@ -212,19 +241,23 @@
      * @param {Sprite} sprite Spriteオブジェクト。1つのSpriteが1桁の数値を表示している。
      */
     Sprite_Damage.prototype.updatePositionDigits = function(sprite) {
-        sprite.ry += sprite.dy;
-        if ((sprite.ry < 0) && (sprite.dy > 0)) {
-            sprite.dy -= 0.1;
-            sprite.x += 1;
-        } else {
-            if ((sprite.ry >= 0) && (sprite.dy != 0)) {
-                sprite.dy -= 0.5;
-                sprite.x += 1;
-            } else {
-                sprite.dy = 0;
-                sprite.ry = 0;
-            }
+        if (sprite.wait > 0) {
+            sprite.wait--;
+            return;
         }
+        sprite.visible = true;
+
+        sprite.ry -= sprite.dy;
+        sprite.dy -= sprite.ay; // 減速するよ
+
+
+        if ((sprite.ry > baseY) && (sprite.dy < 0)) {
+            sprite.ry = baseY;
+        } else {
+            sprite.rx += this._damageXMove;
+        }
+
+        sprite.x = Math.round(sprite.rx);
         sprite.y = Math.round(sprite.ry);
         sprite.setBlendColor(this._flashColor);
     };
