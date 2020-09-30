@@ -18,6 +18,7 @@
  * 敵対者のアクションが行われたとき、指定した確率で自動ガード処理される特性を追加します。
  * 
  * ■ 注意
+ * 特にありません。
  * 
  * ■ プラグイン開発者向け
  * Trait XPARAMを使用し、
@@ -41,6 +42,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 TRAIT_XPARAM_DID_AUTOGUARD_RATE未指定時は
+ *               ログに出力して動作しないように変更した。
  * Version.0.1.0 ソースを調査していて思いついたので追加した。
  */
 (() => {
@@ -48,6 +51,10 @@
     const parameters = PluginManager.parameters(pluginName);
 
     Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE = Number(parameters["TraitXParamDid"]) || 0;
+    if (!Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE) {
+        console.error(pluginName + ":TRAIT_XPARAM_DID_AUTOGUARD_RATE is not valid.");
+        return;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager

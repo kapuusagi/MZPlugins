@@ -50,6 +50,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.2 TRAIT_XPARAM_DID_CASTTIME_RATE未指定時は
+ *               ログに出力して動作しないように変更した。
  * Version.0.1.1 IDのデフォルト値を変更した。
  *               プラグインコメントにorderAfterを追加した。
  * Version.0.1.0 新規作成。
@@ -59,6 +61,10 @@
     const parameters = PluginManager.parameters(pluginName);
 
     Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE = Number(parameters["TraitXParamDid"]) || 0;
+    if (!Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE) {
+        console.log(pluginName + ":TRAIT_XPARAM_DID_CASTTIME_RATE is not valid.");
+        return;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager

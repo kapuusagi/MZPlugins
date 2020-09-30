@@ -56,6 +56,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.2 TRAIT_ELEMENT_ABSORB未指定時は動作しないように変更した。
  * Version.0.1.1 特性コードデフォルト値を100に変更した。
  *               Game_Action.elementsMaxRate()をオーバーライドしない実装にした。
  *               Kapu_ElementCoreを使う実装に変更した。
@@ -67,6 +68,10 @@
     const parameters = PluginManager.parameters(pluginName);
 
     Game_BattlerBase.TRAIT_ELEMENT_ABSORB = Number(parameters["TraitCode"]) || 0;
+    if (!Game_BattlerBase.TRAIT_ELEMENT_ABSORB) {
+        console.error(pluginName + ":TRAIT_ELEMENT_ABSORB is not valid.");
+        return ;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager

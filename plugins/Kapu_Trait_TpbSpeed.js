@@ -41,6 +41,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.2 ID未指定時に機能を無効化するように変更した。
  * Version.0.1.1 プラグインコメントをorderAfterに変更した。
  * Version.0.1.0 新規作成。
  */
@@ -49,6 +50,10 @@
     const parameters = PluginManager.parameters(pluginName);
 
     Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED = Number(parameters["TraitId"]) || 0;
+    if (!Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED) {
+        console.error(pluginName + ":TRAIT_XPARAM_DID_TPB_SPEED is not valid.");
+        return;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager

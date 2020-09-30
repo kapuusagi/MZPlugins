@@ -52,6 +52,10 @@
     const parameters = PluginManager.parameters(pluginName);
 
     Game_Party.ABILITY_PREEMPTIVE_RATE = Number(parameters["TraitId"]) || 0;
+    if (Game_Party.ABILITY_PREEMPTIVE_RATE === 0) {
+        console.error(pluginName + ":ABILITY_PREEMPTIVE_RATE is 0.");
+        return;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager

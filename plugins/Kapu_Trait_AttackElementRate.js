@@ -46,6 +46,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 TRAIT_ELEMENT_ATTACK_RATE未指定時は
+ *               ログに出力して動作しないように変更した。
  * Version.0.1.0 思いついたので追加した。
  */
 (() => {
@@ -53,6 +55,10 @@
     const parameters = PluginManager.parameters(pluginName);
 
     Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE = Number(parameters["TraitCode"]) || 0;
+    if (!Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE) {
+        console.error(pluginName + ":TRAIT_ELEMENT_ATTACK_RATE is not valid.");
+        return;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager

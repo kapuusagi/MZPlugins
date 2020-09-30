@@ -49,6 +49,10 @@
 
 
     Game_BattlerBase.TRAIT_SPARAM_DID_MAXTP_RATE = Number(parameters["TraitSParamDid"]) || 0;
+    if (!Game_BattlerBase.TRAIT_SPARAM_DID_MAXTP_RATE) {
+        console.error(pluginName + ":TRAIT_SPARAM_DID_MAXTP_RATE is not valid.");
+        return;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager

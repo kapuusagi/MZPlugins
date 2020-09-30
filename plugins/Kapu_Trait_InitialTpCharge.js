@@ -45,10 +45,13 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "TODO:拡張子なしのプラグインファイル名。ファイル名変更すると動かなくなるのはどうなの？";
+    const pluginName = "Kapu_Trait_InitialTpCharge";
     const parameters = PluginManager.parameters(pluginName);
     Game_BattlerBase.TRAIT_XPARAM_DID_INITTP_RATE = Number(parameters["TraitXParamDid"]) || 0;
-
+    if (!Game_BattlerBase.TRAIT_XPARAM_DID_INITTP_RATE) {
+        console.error(pluginName + ":TRAIT_XPARAM_DID_INITTP_RATE is not valid.");
+        return;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager

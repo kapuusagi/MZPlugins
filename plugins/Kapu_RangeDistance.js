@@ -170,6 +170,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 各特性について、ID未指定時は動作しないように変更した。動作未確認。
  * Version.0.1.0 作成した。
  */
 (() => {
@@ -180,6 +181,16 @@
     Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION = Number(parameters["blockMoveFlagId"]) || 0;
     Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE = Number(parameters["longRangeFlagId"]) || 0;
     Game_Action.EFFECT_MOVE_BATTLE_POSITION = Number(parameters["effectCode"]) || 0;
+
+    if (!Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION) {
+        console.error(pluginName + ":FLAG_ID_BLOCK_MOVE_BATTLEPOSITION is not valid.");
+    }
+    if (!Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE) {
+        console.error(pluginName + ":FLAG_ID_IGNORE_RANGEDISTANCE is not valid.");
+    }
+    if (!Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
+        console.error(pluginName + ":EFFECT_MOVE_BATTLE_POSITION is not valid.");
+    }
 
     Game_Action.RANGE_SHORT = 0;
     Game_Action.RANGE_MIDDLE = 1;
@@ -226,12 +237,14 @@
      * @param {Number} rate 発生確率
      */
     const _addEffectMoveBattlePosition = function(obj, dataId, rate) {
-        obj.effects.push({
-            code: Game_Action.EFFECT_MOVE_BATTLE_POSITION,
-            dataId: dataId,
-            value1: rate,
-            value2: 0
-        });
+        if (Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
+            obj.effects.push({
+                code: Game_Action.EFFECT_MOVE_BATTLE_POSITION,
+                dataId: dataId,
+                value1: rate,
+                value2: 0
+            });
+        }
     };
 
     /**
@@ -318,14 +331,14 @@
      * @param {TraitObject} obj 特性(traits)を持ったオブジェクト。
      */
     const _processTraitsNoteTag = function(obj) {
-        if (obj.meta.blockMovePosition) {
+        if (obj.meta.blockMovePosition && Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION) {
             obj.traits.push({ 
                 code:Game_BattlerBase.TRAIT_SPECIAL_FLAG, 
                 dataId:Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION, 
                 value:0
             });              
         }
-        if (obj.meta.ignoreRangeDistance) {
+        if (obj.meta.ignoreRangeDistance && Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE) {
             obj.traits.push({
                 code:Game_BattlerBase.TRAIT_SPECIAL_FLAG,
                 dataId:Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE,
@@ -421,65 +434,62 @@
 
     //------------------------------------------------------------------------------
     // Game_Action
-    const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
 
-    /**
-     * 効果を適用可能かどうかを判定する。
-     * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
-     * 
-     * @param {Game_BattlerBase} target 対象
-     * @param {DataEffect} effect エフェクトデータ
-     * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
-     */
-    Game_Action.prototype.testItemEffect = function(target, effect) {
-        if (effect.code === Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
-            if ((this.subject().isActor() !== target.isActor())
-                    && target.specialFlag(Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION)) {
-                // 敵対者からの移動効果は無効
-                return false;
-            }
-            const unit = target.friendsUnit();
-            if (effect.dataId === 0) {
-                return unit.canMoveToFront(target.index());
-            } else if (effect.dataId === 1) {
-                return unit.canMoveToRear(target.index());
-            } else {
-                return false;
-            }
-        } else {
-            return _Game_Action_testItemEffect.call(this, ...arguments);
-        }
-    };
-
-    const _Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
-
-    /**
-     * 効果を適用する。
-     * 
-     * @param {Game_Battler} target ターゲット
-     * @param {DataEffect} effect エフェクトデータ
-     */
-    Game_Action.prototype.applyItemEffect = function(target, effect) {
-        if (effect.code === Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
-            if ((this.subject().isActor() !== target.isActor())
-                    && target.specialFlag(Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION)) {
-                // 敵対者からの移動効果は無効
-                return;
-            }
-            if (Math.random() < effect.value1) {
+    if (Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
+        const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
+        /**
+         * 効果を適用可能かどうかを判定する。
+         * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
+         * 
+         * @param {Game_BattlerBase} target 対象
+         * @param {DataEffect} effect エフェクトデータ
+         * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testItemEffect = function(target, effect) {
+            if (effect.code === Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
                 const unit = target.friendsUnit();
                 if (effect.dataId === 0) {
-                    unit.moveToFront(target.index());
-                    this.makeSuccess(target);
+                    return unit.canMoveToFront(target.index());
                 } else if (effect.dataId === 1) {
-                    unit.moveToRear(target.index());
-                    this.makeSuccess(target);
+                    return unit.canMoveToRear(target.index());
+                } else {
+                    return false;
                 }
+            } else {
+                return _Game_Action_testItemEffect.call(this, ...arguments);
             }
-        } else {
-            _Game_Action_applyItemEffect.call(this, ...arguments);
-        }
-    };
+        };
+
+        const _Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
+
+        /**
+         * 効果を適用する。
+         * 
+         * @param {Game_Battler} target ターゲット
+         * @param {DataEffect} effect エフェクトデータ
+         */
+        Game_Action.prototype.applyItemEffect = function(target, effect) {
+            if (effect.code === Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
+                if ((this.subject().isActor() !== target.isActor())
+                        && target.canBlockMoveBattlePosition()) {
+                    // 敵対者からの移動効果は無効
+                    return;
+                }
+                if (Math.random() < effect.value1) {
+                    const unit = target.friendsUnit();
+                    if (effect.dataId === 0) {
+                        unit.moveToFront(target.index());
+                        this.makeSuccess(target);
+                    } else if (effect.dataId === 1) {
+                        unit.moveToRear(target.index());
+                        this.makeSuccess(target);
+                    }
+                }
+            } else {
+                _Game_Action_applyItemEffect.call(this, ...arguments);
+            }
+        };
+    }
 
     /**
      * 列を対象にしたアクションかどうかを取得する。
@@ -732,7 +742,7 @@
      * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
      */
     Game_BattlerBase.prototype.itemRangeDistance = function(item) {
-        if (this.specialFlag(Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE)) {
+        if (this.isIgnoreRangeDistance()) {
             return Game_Action.RANGE_LONG; // 全射程
         }
         if (item.range >= 0) {
@@ -743,12 +753,38 @@
     };
 
     /**
+     * このGame_Battlerが射程距離を無視するかどうかを取得する。
+     * 
+     * @return {Boolean} 射程距離を無視する場合にはtrue, それ以外はfalse.
+     */
+    Game_BattlerBase.prototype.isIgnoreRangeDistance = function() {
+        if (Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE) {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE);
+        } else {
+            return false;
+        }
+    };
+
+    /**
      * デフォルトレンジを得る。
      * 
      * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
      */
     Game_BattlerBase.prototype.defaultRangeDistance = function(item) {
         return Game_Action.RANGE_SHORT;
+    };
+
+    /**
+     * 戦闘位置移動がブロックできるかどうかを取得する。
+     * 
+     * @return {Boolean} 戦闘位置移動がブロックできる場合にはtrue, それ以外はfalse
+     */
+    Game_BattlerBase.prototype.canBlockMoveBattlePosition = function() {
+        if (Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION) {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION);
+        } else {
+            return false;
+        }
     };
 
     //------------------------------------------------------------------------------

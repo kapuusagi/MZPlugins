@@ -34,6 +34,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 FLAG_ID_FAST_ACTION無効時、動作しないように変更した。
  * Version.0.1.0 新規作成。
  */
 (() => {
@@ -42,8 +43,8 @@
 
     Game_BattlerBase.FLAG_ID_FAST_ACTION = Number(parameters["specialFlagId"]) || 0;
 
-    if (Game_BattlerBase.FLAG_ID_FAST_ACTION === 0) {
-        console.error(pluginName + ":FLAG_ID_FAST_ACTION is 0.");
+    if (!Game_BattlerBase.FLAG_ID_FAST_ACTION) {
+        console.error(pluginName + ":FLAG_ID_FAST_ACTION is not valid.");
         return;
     }
 

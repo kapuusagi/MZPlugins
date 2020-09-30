@@ -41,6 +41,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.2 ABILITY_DROP_GOLD_RATE未指定時は動作しないように変更した。
  * Version.0.1.1 IDデフォルト値を101に変更した。
  *               プラグインコメントにorderAfterを追加した。
  * Version.0.1.0 TWLDで実装したのを移植。
@@ -50,6 +51,10 @@
     const parameters = PluginManager.parameters(pluginName);
 
     Game_Party.ABILITY_DROP_GOLD_RATE = Number(parameters["TraitPartyAbilityId"]) || 0;
+    if (!Game_Party.ABILITY_DROP_GOLD_RATE) {
+        console.error(pluginName + ":ABILITY_DROP_GOLD_RATE is not valid.");
+        return;
+    }
 
     //------------------------------------------------------------------------------
     // DataManager
