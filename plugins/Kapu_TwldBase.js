@@ -5,11 +5,22 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
  * @help 
- * TWLD向けに、ベーシックシステムの計算式等を変更するプラグイン。
+ * TWLD向けに、ベーシックシステムの計算式や挙動を変更するプラグイン。
+ * 基本的にオーバーライドメソッドで構成される。
  * 
  * 1.アクション適用判定の変更
  *    クリティカル発生時は確実に命中とする。
  *    miss判定はせず、evadのみ結果を格納する。但し命中したかどうかはHITとEVAを考慮する。
+ * 
+ * 2.パラメータの計算変更
+ *   MaxHP/MaxMP/ATK/DEF/MAT/MDF/AGI/LUKの計算式
+ *   ベーシックシステムでは
+ *       {(クラス値)+(種増減分)+(装備品)} x (特性レート) x (バフ増減レート)
+ *   となっていた。これを
+ *       [{(クラス値)+(種増減分)} x (特性レート) + (装備品)] x (バフ増減レート)
+ *   に変更する。
+ * 
+ * 
  * 
  * ■ 使用時の注意
  * 
@@ -127,6 +138,38 @@
         return this.skills().some(function(skill) {
             return skill && (skill.stypeId == 0);
         });
+    };
+
+    /**
+     * パラメータを得る。
+     * 
+     * @param {Number} paramId パラメータID
+     */
+    Game_Actor.prototype.param = function(paramId) {
+        const value =
+            this.paramBasePlus(paramId) *
+            this.paramRate(paramId) *
+            this.paramBuffRate(paramId);
+        const maxValue = this.paramMax(paramId);
+        const minValue = this.paramMin(paramId);
+        return Math.round(value.clamp(minValue, maxValue));
+    };
+
+    /**
+     * 基本パラメータ加算値を得る。
+     * 
+     * @param {Number} paramId パラメータID
+     * @return {Number} 加算値
+     * !!!overwrite!!!
+     */
+    Game_Actor.prototype.paramPlus = function(paramId) {
+        let value = Game_Battler.prototype.paramPlus.call(this, paramId);
+        for (const item of this.equips()) {
+            if (item) {
+                value += item.params[paramId];
+            }
+        }
+        return value;
     };
 
 })();
