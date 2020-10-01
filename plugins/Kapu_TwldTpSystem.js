@@ -18,6 +18,7 @@
  * ・ダメージ計算時、TPが対象のTPに対して1高い毎に1%のボーナスが与えられます。
  * ・アクション実行時、TPが対象のTPに対して1高い毎に 0.05%のボーナスが与えられます。
  * ・アクション実行時、TPが対象のTPに対して1低い毎に 0.05%の減算ボーナスがかかります。
+ * ・アクション実行時、TPが対象のTPに対して1高い毎に、0.01%クリティカル発生率が上がります。
  * 
  * ■ 使用時の注意
  * Game_Battler.initTpをオーバーライドします。
@@ -38,7 +39,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 TWLD向けに作成した。
  */
 (() => {
     //------------------------------------------------------------------------------
@@ -82,12 +83,13 @@
     };
 
     /**
-     * TPダメージレートを計算する。
+     * TPダメージレートを取得する。
      * 
-     * @param {Game_Battler} subject 
+     * @param {Game_Battler} ターゲット
+     * @return {Number} TPダメージレート
      */
-    Game_Action.prototype.tpDamageRate = function(subject) {
-        return 1.0 + subject.tp * 0.001; // TP=1で1%上昇。
+    Game_Action.prototype.tpDamageRate = function(target) {
+        return 1 + Math.max(0, ((this._subjectTp - target.tp) * 0.01));
     };
 
     const _Game_Action_multiplyDamageRate = Game_Action.prototype.multiplyDamageRate;
@@ -99,8 +101,8 @@
      * @return {Number} 乗算ボーナスレート
      */
     Game_Action.prototype.multiplyDamageRate = function(target, critical) {
-        const tpDamageRate = Math.max(0, (1 + (this._subjectTp - target.tp) * 0.01));
-        return _Game_Action_multiplyDamageRate.call(this) * tpDamageRate;
+        const tpDamageRate = this.tpDamageRate(target);
+        return _Game_Action_multiplyDamageRate.call(this, target, critical) * tpDamageRate;
     };
 
     const _Game_Action_itemHit = Game_Action.prototype.itemHit;
@@ -111,8 +113,8 @@
      * @return {Number 命中率。
      */
     Game_Action.prototype.itemHit = function(target) {
-        const tpHitRate = Math.max(0, (this._subjectTp - target.tp) * 0.005);
-        return _Game_Action_itemHit.call(target) + tpHitRate;
+        const tpHitRate = ((this._subjectTp - target.tp) * 0.005).clamp(0, 0.5);
+        return _Game_Action_itemHit.call(this, target) + tpHitRate;
     };
 
     const _Game_Action_itemEva = Game_Action.prototype.itemEva;
@@ -123,7 +125,20 @@
      * @return {Number} 回避率。
      */
     Game_Action.prototype.itemEva = function(target) {
-        const tpEvaRate = Math.max(0, (target.tp - this._subjectTp) * 0.05);
-        return _Game_Action_itemEva.call(target) + tpEvaRate;
+        const tpEvaRate = ((target.tp - this._subjectTp) * 0.005).clamp(0, 0.5);
+        return _Game_Action_itemEva.call(this, target) + tpEvaRate;
+    };
+
+
+    const _Game_Action_itemCri = Game_Action.prototype.itemCri;
+    /**
+     * このアクションのクリティカル率を得る。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @return {Number} クリティカル率(0.0～1.0）
+     */
+    Game_Action.prototype.itemCri = function(target) {
+        const tpCriRate = ((this._subjectTp - target.tp) * 0.0025).clamp(0, 0.25);
+        return _Game_Action_itemCri.call(this, target) + tpCriRate;
     };
 })();
