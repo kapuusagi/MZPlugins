@@ -1158,7 +1158,84 @@ Game_Battler.prototype.tpbRequiredCastTime = function() {
 ~~~
 TPB速度の計算式にあるとおり、ベーシックシステムではAGIが高いほどキャスト時間が早くなる。
 
+### BattleManagerのステート
 
+戦闘処理はBattleManagerで流れを制御している。
+まず __BattleManager.setup()__ がコールされ、処理の準備が開始される。
+その後は Scene_Battle から __BattleManager.update()__ がコールされ、
+戦闘のフローが動く仕組みになっている。
+
+BattleManagerのインタフェース呼び出し順
+
+1. BattleManager.setup() - 戦闘開始準備。Scene_Battleの外から呼ばれる。
+2. BattleManager.onEncounter() - 必要時、エンカウント時の処理。Scene_Battleの外から呼ばれる。この後SceneManager.push(Scene_Battle)でScene_Battleが開始される。   
+3. BattleManager.playBattleBgm() - Scene_Battle.start()から呼ばれる。
+4. BattleManager.startBattle() - Scene_Battle.start()から呼ばれる。
+5. 1. BattleManager.update() - Scene_Battle.updateBattleProcess()から呼ばれる。
+
+5. 2. BattleManager.processEscape() - 逃走操作が行われたとき、Scene_Battleから呼ばれる。
+5. 3. BattleManager.selectNextCommand() - コマンドが確定したとき、次のコマンド選択をするためにScene_Battleから呼ばれる。
+5. 4. BattleManager.selectPreviousCommand() - コマンドをキャンセル操作したとき、前のコマンドを再選択するために、Scene_Battleから呼ばれる。
+
+update()は複雑。処理を追うにはコールグラフを作らないとわからない。
+
+    update()
+      +- updateEvent()
+      |   +- processForcedAction()
+      |   +- updateEventMain() - イベント処理の更新と、実行可能イベントがあれば準備をする。
+      |   +- checkAbort() - 中断終了確認
+      |       +- processAbort() - 中断終了処理
+      |            +- replayBgmAndBgs()
+      |            +- endBattle(1)
+      +- updatePhase() - フェーズ更新処理
+      |   +- updaetStart() - "start"時の更新処理。TPB時は"turn"に遷移させる。
+      |   |   +- startInput() - "input"フェーズをセットする。
+      |   |       +- startTurn() - "turn"に遷移させる。
+      |   |           +- makeActionOrders()
+      |   +- updateTurn()
+      |   +- updateAction()
+      |   +- updateTurnEnd()
+      |   +- updateBattleEnd()
+      +- updateTpbInput()
+
+
+
+
+
+
+#### TPB時のフェーズ遷移
+
+BattleManager.startBattle() にて __start__ から開始
+
+* __start__ - BattleManager.updateStart()
+
+    __turn__ に遷移する。
+
+* __turn__ - BattleManager.updateTurn()
+
+* __action__ - BattleManager.updateAction()
+
+* __turnEnd__ - BattleManager.updateTurnEnd()
+
+* __battleEnd__ - BattleManager.updateBattleEnd()
+
+
+
+#### 非TPB時のフェーズ遷移
+
+BattleManager.startBattle() にて __start__ から開始
+
+* __start__ - BattleManager.updateStart()
+
+    __input__ に遷移させるが、コマンド入力可能なアクターがいない場合、すぐにstartTurn()をコールして __turn__ フェーズに遷移する。
+
+* __turn__ - BattleManager.updateTurn()
+
+* __action__ - BattleManager.updateAction()
+
+* __turnEnd__ - BattleManager.updateTurnEnd()
+
+* __battleEnd__ - BattleManager.updateBattleEnd()
 
 ### 新しいシーンにしたとき、前のシーンの画像がぼやけた表示になるのをやめるには？
 

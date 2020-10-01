@@ -542,22 +542,12 @@
         }
     };
 
-    //------------------------------------------------------------------------------
-    // Sprite_Damageの変更
-    //
-   
+
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     //
     TWLD.Core.Game_BattlerBase_initMembers = Game_BattlerBase.prototype.initMembers;
 
-    /**
-     * Game_BattlerBaseを初期化する。
-     */
-    Game_BattlerBase.prototype.initMembers = function() {
-        TWLD.Core.Game_BattlerBase_initMembers.call(this);
-        this.initUniqueTraits();
-    };
 
     Object.defineProperties(Game_BattlerBase.prototype, {
         str : { get: function() { return this.getBasicParam(0); }, configurable:true },
