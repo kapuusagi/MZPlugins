@@ -54,17 +54,34 @@
      * Sprite_Damageを表示させるための準備をする。
      * 
      * @param {Game_Battler} target ポップアップ対象
+     * !!!overwrite!!!
      */
     Sprite_Damage.prototype.setup = function(target) {
         const result = target.result();
         this._critical = result.critical;
         if (this._critical) {
-            this._duration *= 2;
             this._colorType = 0; // ColorManager.damageColor()に渡る
             this.createCritical();
         }
         this._damageXMove = this.damageXMove(target);
-        _Sprite_Damage_setup.call(this, target);
+        if (result.missed || result.evaded) {
+            this._colorType = 0;
+            this.createMiss();
+        } else {
+            if (result.hpAffected) {
+                this._colorType = result.hpDamage >= 0 ? 0 : 1;
+                this.createDigits(result.hpDamage);
+            } else if (target.isAlive() && result.mpDamage !== 0) {
+                this._colorType = result.mpDamage >= 0 ? 2 : 3;
+                this.createDigits(result.mpDamage);
+                this.setupNormalEffect();
+            }
+            if (result.critical) {
+                this.setupCriticalEffect();
+            } else {
+                this.setupNormalEffect();
+            }
+        }
     };
 
     /**
@@ -102,7 +119,7 @@
         sprite.opacity = 0;
         sprite.x = -60;
         sprite.y = -40;
-        sprite.updatePosition = this.updatePositionMiss.bind(this);
+        sprite.updatePosition = this.updateMiss.bind(this);
     };
 
     /**
@@ -115,10 +132,10 @@
         sprite.bitmap.drawText("Critical", 0, 0, w, h, "center");
         sprite.anchor.y = 0;
         sprite.x = 0;
-        sprite.y = -40;
+        sprite.y = -60;
         sprite.opacity = 0;
         sprite.dy = 0;
-        sprite.updatePosition = this.updatePositionCritical.bind(this);
+        sprite.updatePosition = this.updateCritical.bind(this);
     };
     /**
      * 数値スプライトを作成する。
@@ -140,7 +157,9 @@
             sprite.rx = sprite.x;
             sprite.wait = i * 8;
             sprite.visible = sprite.wait === 0;
-            sprite.updatePosition = this.updatePositionDigits.bind(this);
+            sprite.updatePosition = this.updateDigits.bind(this);
+            sprite.scale.x = 0.8;
+            sprite.scale.y = 0.8;
         }
     };
 
@@ -156,14 +175,21 @@
     };
 
     /**
+     * 通常ダメージのエフェクトを準備する。
+     */
+    Sprite_Damage.prototype.setupNormalEffect = function() {
+        this._flashColor = [160, 160, 160, 200];
+        this._flashDuration = 40;
+    };
+
+    /**
      * クリティカルによるスプライトの効果を設定する。
-     * 既定の実装ではダメージ表示の色をフラッシュ効果で変えるだけ。
      * 
      * !!!overwrite!!! Sprite_Damage.setupCriticalEffect()
      */
     Sprite_Damage.prototype.setupCriticalEffect = function () {
-        this._flashColor = [180, 0, 0, 250]; // R,G,B,Aらしい。
-        this._flashDuration = this._duration;
+        this._flashColor = [180, 0, 0, 200];
+        this._flashDuration = 40;
     };
 
     const _Sprite_Damage_update = Sprite_Damage.prototype.update;
@@ -190,7 +216,7 @@
      * 
      * @param {Sprite} sprite Spriteオブジェクト。Missと書かれたスプライトが1つだけ。
      */
-    Sprite_Damage.prototype.updatePositionMiss = function(sprite) {
+    Sprite_Damage.prototype.updateMiss = function(sprite) {
         if (this._frameCount < 30) {
             if (sprite.x < 0) {
                 sprite.x += 3;
@@ -215,7 +241,7 @@
      * 
      * @param {Sprite} sprite Spriteオブジェクト。Criticalと書かれたスプライトが1つだけ。
      */
-    Sprite_Damage.prototype.updatePositionCritical = function(sprite) {
+    Sprite_Damage.prototype.updateCritical = function(sprite) {
         if (this._frameCount < 30) {
             if (sprite.x < 0) {
                 sprite.x += 3;
@@ -240,7 +266,7 @@
      * 
      * @param {Sprite} sprite Spriteオブジェクト。1つのSpriteが1桁の数値を表示している。
      */
-    Sprite_Damage.prototype.updatePositionDigits = function(sprite) {
+    Sprite_Damage.prototype.updateDigits = function(sprite) {
         if (sprite.wait > 0) {
             sprite.wait--;
             return;
@@ -255,11 +281,29 @@
             sprite.ry = baseY;
         } else {
             sprite.rx += this._damageXMove;
+            sprite.scale.x += 0.01;
+            sprite.scale.y += 0.01;
         }
 
         sprite.x = Math.round(sprite.rx);
         sprite.y = Math.round(sprite.ry);
         sprite.setBlendColor(this._flashColor);
+    };
+
+    /**
+     * 点滅カラーを更新する
+     * 点滅カラー配列のアルファ値を変更することで点滅を実現する。
+     */
+    Sprite_Damage.prototype.updateFlash = function() {
+        if (this._flashDuration > 20) {
+            this._flashColor[3] -= 10;
+            this._flashDuration--;
+        } else if (this._flashDuration > 0) {
+            this._flashColor[3] += 10;
+            this._flashDuration--;
+        } else if (this._flashDuration == 0) {
+            this._flashDuration = 40;
+        }
     };
 
 })();
