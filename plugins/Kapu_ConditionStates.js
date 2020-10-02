@@ -1,18 +1,18 @@
 /*:ja
  * @target MZ 
- * @plugindesc パッシブステートを追加するプラグイン
+ * @plugindesc 条件ステートプラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_Utility
- * @orderAfter Kapu_Utility
  * 
  * @help 
- * パッシブステートを追加する。
- * パッシブステート：装備・習得しているだけで付与されるステートの事。
+ * 条件によりステートを付与するプラグイン。
+ * 当初パッシブステートに条件を付けれる方向で実装したが、
+ * パフォーマンスが悪すぎたのでやめた。
  * 
- * 仕様
- * ・アクター、クラス、エネミー、スキル、ウェポン、アーマーに
- *   パッシブステートが付与されます。
+ * ■ 使用時の注意
+ * 特にありません。
+ * 
+ * ■ プラグイン開発者向け
  * 
  * ============================================
  * プラグインコマンド
@@ -22,30 +22,45 @@
  * ============================================
  * ノートタグ
  * ============================================
- * 対象：アクター、クラス、エネミー、スキル、ウェポン、アーマー
- *     <passiveStates:id>
- *         idで指定したステートが付与されるようになる。
- *     <passiveStates:id#,id#,id#>
- *         カンマで区切られたidで指定したステートが付与されるようになる。
+ * アクター、クラス、エネミー、スキル、ウェポン、アーマー
+ *     <conditionState:conditoinEval$,stateId#, stateId#,...>
+ *         eval(conditionEval$)がtrueの時、stateIdのステートが付与される。
+ *         1つのオブジェクトあたり、任意数指定可能。
+ * 
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.3.0 負荷低減のため、パッシブステートをキャッシュする構造に変更した。
- *               条件付きパッシブステートはやめたのでシンプルな構造に戻した。
- * Version.0.2.0 条件付きパッシブステートを実現するため、構造を変更した。
- *               Kapu_Utilityを使用してパースするように変更した。
- *               ノートタグ書式<passiveStates: begin# to end#>は削除した。
- * Version.0.1.0 MVのYanfly氏のYEP_AutoPassiveStates.jsを参考に作成。
- *               MVプロジェクトをインポートして使いたいなら、
- *               素直にYanfly氏がMZ向けにリリースしている
- *               Visustellaプラグインを使った方が良いです。
+ * Version.0.1.0 新規作成。
  */
 (() => {
-    const pluginName = "Kapu_PassiveStates";
+    //const pluginName = "Kapu_StatesWithCondition";
 
+    /**
+     * 条件付きパッシブステートを解析し、オブジェクトを生成する。
+     * 
+     * @param {String} str 解析対象の文字列
+     * @return {ConditionState} 条件付きパッシブステートオブジェクト。解析エラーの場合にはnull.
+     */
+    const _parseCondition = function(str) {
+        const tokens = str.split(",");
+        if (tokens.length > 1) {
+            const states = [];
+            for (let i = 1; i < tokens.length; i++) {
+                const stateId = Number(tokens[i]);
+                if ((stateId > 0) && !states.contains(stateId)) {
+                    states.push(stateId)
+                }
+            }
+            if (states.length > 0) {
+                return {
+                    condition : tokens[0],
+                    states : states
+                };
+            }
+    }
 
-    //------------------------------------------------------------------------------
-    // DataManager
+        return null;
+    };
 
     /**
      * ノートタグを処理する。
@@ -53,16 +68,16 @@
      * @apram {TraitObject} obj Actor/Class/Weapon/Armor/State/Enemyのいずれか。traitsを持ってるデータ
      */
     const _processNotetag = function(obj) {
-        obj.passiveStates = [];
+        obj.conditionStates = []; // No entry.
+        const pattern = /<conditionState:(.*)+>/;
 
-        if (!obj.meta.passiveStates) {
-            return;
-        }
-        for (const token of obj.meta.passiveStates.split(",")) {
-            const id = Number(token);
-            if (id > 0) {
-                if (!obj.passiveStates.contains(id)) {
-                    obj.passiveStates.push(id);
+        const lines = obj.note.split(/[\r\n]+/);
+        for (line of lines) {
+            const re = line.match(pattern);
+            if (re) {
+                const conditionState = _parseCondition(re[1]);
+                if (conditionState) {
+                    obj.conditionStates.push(conditionState);
                 }
             }
         }
@@ -76,13 +91,14 @@
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
+
     const _Game_BattlerBase_initMembers = Game_BattlerBase.prototype.initMembers;
     /**
      * Game_BattlerBaseのパラメータを初期化する。
      */
     Game_BattlerBase.prototype.initMembers = function() {
         _Game_BattlerBase_initMembers.call(this);
-        this._passiveStateIds = [];
+        this._conditionStateIds = [];
     };
 
     const _Game_BattlerBase_states = Game_BattlerBase.prototype.states;
@@ -93,12 +109,21 @@
      */
     Game_BattlerBase.prototype.states = function() {
         let states = _Game_BattlerBase_states.call(this);
-        for (const state of this.passiveStates()) {
+        for (const state of this.conditionStates()) {
             if (!states.contains(state)) {
                 states.push(state);
             }
         }
         return states;
+    };
+
+    /**
+     * 条件付きステートを得る。
+     * 
+     * @return {Array<DataState>} 条件付きステート
+     */
+    Game_BattlerBase.prototype.conditionStates = function() {
+        return this._conditionStateIds.map(id => $dataStates[id]);
     };
 
     const _Game_BattlerBase_isStateAffected = Game_BattlerBase.prototype.isStateAffected;
@@ -109,55 +134,55 @@
      * @return {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isStateAffected = function(stateId) {
-        if (this.isPassiveStateAffected(stateId)) {
+        if (this.isConditionStateAffected(stateId)) {
             return true;
         } else {
             return _Game_BattlerBase_isStateAffected.call(this, ...arguments);
         }
     };
-    
-    /**
-     * パッシブステートを得る。
-     * 
-     * @return {Array<DataState>} パッシブステート配列。
-     */
-    Game_BattlerBase.prototype.passiveStates = function() {
-        return this._passiveStateIds.map(id => $dataStates[id])
-    };
 
     /**
-     * stateIdで指定されるステートが、
-     * パッシブステートとして持っているかどうかを取得する。
+     * stateIdで指定されるステートを持っているかどうかを取得する。
      * 
      * @param {Number} stateId ステートID
-     * @return {Boolean} 保持しているパッシブステートに含まれる場合にはtrue,それ以外はfalse
+     * @return {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
      */
-    Game_BattlerBase.prototype.isPassiveStateAffected = function(stateId) {
-        return this._passiveStateIds.contains(stateId);
+    Game_BattlerBase.prototype.isConditionStateAffected = function(stateId) {
+        return this._conditionStateIds.contains(stateId);
     };
 
     /**
-     * パッシブステートを更新する。
+     * 条件付きステートを更新する。
      */
-    Game_BattlerBase.prototype.updatePassiveStates = function() {
+    Game_BattlerBase.prototype.updateConditionStates = function() {
         const stateIds = [];
-        const passiveStateObjects = this.passiveStateObjects();
-        for (const obj of passiveStateObjects) {
-            for (const id of obj.passiveStates) {
-                if (!stateIds.contains(id)) {
-                    stateIds.push(id);
+        for (const obj of this.conditionStateObjects()) {
+            for (const conditionState of obj.conditionStates) {
+                try {
+                    const a = this;
+                    if (eval(conditionState.condition)) {
+                        for (const stateId of conditionState.states) {
+                            if (!stateIds.contains(stateId)) {
+                                stateIds.push(stateId);
+                            }
+                        }
+                    }
+                }
+                catch (e) {
+                    console.error(e);
                 }
             }
         }
-        this._passiveStateIds = stateIds;
-    }
+        this._conditionStateIds = stateIds;
+    };
+
     /**
-     * パッシブステートデータを持ったオブジェクトを返す。
+     * 条件付きステートを持ったオブジェクトを返す。
      * Game_Actor/Game_Enemyにて、本メソッドを実装してオブジェクトを返すようにする。
      * 
-     * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
+     * @return {Array<Object>} 条件付きステートデータを持ったオブジェクト
      */
-    Game_BattlerBase.prototype.passiveStateObjects = function() {
+    Game_BattlerBase.prototype.conditionStateObjects = function() {
         return [];
     };
 
@@ -166,40 +191,8 @@
      * 更新する
      */
     Game_BattlerBase.prototype.refresh = function() {
-        this.updatePassiveStates();
+        this.updateConditionStates();
         _Game_BattlerBase_refresh.call(this);
-    };
-
-    //------------------------------------------------------------------------------
-    // Game_Battler
-    const _Game_Battler_isStateAddable = Game_Battler.prototype.isStateAddable;
-
-    /**
-     * ステートを付与可能かどうか判定する。
-     * 
-     * @param {Number} stateId ステートID
-     * @return {Boolean} ステートを付与可能な場合にはtrue,それ以外はfalse
-     */
-    Game_Battler.prototype.isStateAddable = function(stateId) {
-        if (this.isPassiveStateAffected(stateId)) {
-            return false;
-        } else {
-            return _Game_Battler_isStateAddable.call(this, ...arguments);
-        }
-    };
-
-
-    const _Game_Battler_removeState = Game_Battler.prototype.removeState;
-    /**
-     * ステートを取り除く。
-     * 
-     * @param {Number} stateId ステートID
-     */
-    Game_Battler.prototype.removeState = function(stateId) {
-        if (!this.isPassiveStateAffected(stateId)) {
-            // パッシブステートでなければ取り除く。
-            _Game_Battler_removeState.call(this, ...arguments);
-        }
     };
 
     //------------------------------------------------------------------------------
@@ -212,29 +205,29 @@
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
-        this.updatePassiveStates();
-        if (this._passiveStateIds.length > 0) {
-            this.recoverAll(); // ステート付与されてたら更新
+        this.updateConditionStates();
+        if (this._conditionStateIds.length > 0) {
+            this.recoverAll();
         }
     };
 
     /**
-     * パッシブステートデータを持ったオブジェクトを返す。
+     * 条件付きステートデータを持ったオブジェクトを返す。
      * 
-     * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
+     * @return {Array<Object>} 条件付きステートデータを持ったオブジェクト
      */
-    Game_Actor.prototype.passiveStateObjects = function() {
+    Game_Actor.prototype.conditionStateObjects = function() {
         const psObjs = [];
         const actor = this.actor();
-        if (actor.passiveStates.length > 0) {
+        if (actor.conditionStates.length > 0) {
             psObjs.push(actor);
         }
         const currentClass = this.currentClass(); 
-        if (currentClass.passiveStates.length > 0) {
+        if (currentClass.conditionStates.length > 0) {
             psObjs.push(currentClass);
         }
         for (const equip of this.equips()) {
-            if (equip && (equip.passiveStates.length > 0)) {
+            if (equip && (equip.conditionStates.length > 0)) {
                 psObjs.push(equip);
             }
         }
@@ -245,15 +238,15 @@
         const skillIds = this._skills;
         for (let skillId of skillIds) {
             const skill = $dataSkills[skillId];
-            if (skill && (skill.passiveStates.length > 0)) {
+            if (skill && (skill.conditionStates.length > 0)) {
                 psObjs.push(skill);
             }
         }
         return psObjs;
     };
-
     //------------------------------------------------------------------------------
     // Game_Enemy
+
     const _Game_Enemy_setup = Game_Enemy.prototype.setup;
     /**
      * エネミーをセットアップする。
@@ -264,8 +257,8 @@
      */
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
         _Game_Enemy_setup.call(this, enemyId, x, y);
-        this.updatePassiveStates();
-        if (this._passiveStateIds.length > 0) {
+        this.updateConditionStates();
+        if (this._conditionStateIds.length > 0) {
             this.recoverAll();
         }
     };
@@ -274,17 +267,17 @@
      * 
      * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
      */
-    Game_Enemy.prototype.passiveStateObjects = function() {
+    Game_Enemy.prototype.conditionStateObjects = function() {
         const psObjs = [];
         const enemy = this.enemy();
-        if (enemy.passiveStates.length > 0) {
+        if (enemy.conditionStates.length > 0) {
             psObjs.push(enemy);
         }
         for (const enemyAction of enemy.actions) {
             const skillId = enemyAction.skillId;
             if (skillId) {
                 const skill = $dataSkills[skillId];
-                if (skill.passiveStates.length > 0) {
+                if (skill.conditionStates.length > 0) {
                     psObjs.push(skill);
                 }
             }
@@ -292,4 +285,8 @@
 
         return psObjs;
     };
+
+
+    
+
 })();
