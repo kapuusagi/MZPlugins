@@ -31,7 +31,7 @@
 (() => {
     "use strict"
 
-    const pluginName = "Kapu_HelloScene";
+    const pluginName = "Kapu_SandBox_HelloScene";
 
     PluginManager.registerCommand(pluginName, "Message", args => {
         const msg = args.msg || "Hello world";
