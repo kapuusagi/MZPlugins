@@ -24,6 +24,8 @@
 |||100|__ABILITY_DROP_GOLD_RATE__ アイテムドロップ倍率。|
 |||101|__ABILITY_DROP_GOLD_RATE__ 取得ゴールド倍率。|
 |__TRAIT_ELEMENT_ABSORB__|100|属性ID|指定した属性の攻撃を受けたとき、ダメージを急襲する特性|
+|__TRAIT_WEAPON_PERFORMANCE__|101|武器タイプ|指定した武器タイプの性能を向上させる特性|
+|__TRAIT_ARMOR_PERFORMANCE__|102|防具タイプ|指定した防具タイプの性能を向上させる特性
 
 
 ### スペシャルフラグ
