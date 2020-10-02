@@ -13,8 +13,10 @@
 (() => {
     const _Window_Base_drawFace = Window_Base.prototype.drawFace;
     Window_Base.prototype.drawFace = function(faceName, faceIndex, x, y, width, height) {
-        this.contents.filter = "grayscale(100%)";
-        _Window_Base_drawFace.call(faceName, faceIndex, x, y, width, height);
+        // MDNのドキュメントによると、context.filterに適用できるのはChromeくらいらしい。
+        // Safariとかは×
+        this.contents.context.filter = "grayscale(100%)";
+        _Window_Base_drawFace.call(this, faceName, faceIndex, x, y, width, height);
         this.contents.filter = "none";
     };
     
