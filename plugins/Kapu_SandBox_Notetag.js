@@ -16,7 +16,7 @@
  */
 
 (() => {
-    const pluginName = "Kapu_NotetagTest";
+    const pluginName = "Kapu_SandBox_Notetag";
 
     const _Scene_Boot_start = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function () {
