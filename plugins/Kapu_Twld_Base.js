@@ -3,6 +3,14 @@
  * @plugindesc TWLDベースシステムプラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Base_Params
+ * @orderAfter Kapu_Base_Params
+ * 
+ * @param passiveSkillType
+ * @text パッシブスキルタイプ
+ * @desc パッシブスキルとして扱うスキルタイプ
+ * @type number
+ * @default 0
  * 
  * @help 
  * TWLD向けに、ベーシックシステムの計算式や挙動を変更するプラグイン。
@@ -26,6 +34,8 @@
  * 
  * 
  * ■ プラグイン開発者向け
+ * パッシブスキルタイプとして
+ * Game_BattlerBase.PASSIVE_SKILL_TYPE を定義します。
  * 
  * ============================================
  * プラグインコマンド
@@ -42,8 +52,12 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "Kapu_TwldBase";
+    const pluginName = "Kapu_Twld_Base";
     const parameters = PluginManager.parameters(pluginName);
+    
+    Game_BattlerBase.PASSIVE_SKILL_TYPE = Number(parameters['passiveSkillType']) || 0;
+
+
 
     // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
     //     // TODO : コマンドの処理。
@@ -136,7 +150,7 @@
      */
     Game_Actor.prototype.hasPassiveSkill = function() {
         return this.skills().some(function(skill) {
-            return skill && (skill.stypeId == 0);
+            return skill && (skill.stypeId == Game_BattlerBase.PASSIVE_SKILL_TYPE);
         });
     };
 
@@ -146,30 +160,15 @@
      * @param {Number} paramId パラメータID
      */
     Game_Actor.prototype.param = function(paramId) {
-        const value =
+        let baseValue = this.paramBasePlus(paramId);
             this.paramBasePlus(paramId) *
-            this.paramRate(paramId) *
-            this.paramBuffRate(paramId);
+            this.paramRate(paramId);
+        baseValue += this.paramEquip(paramId);
+
+        baseValue *= this.paramBuffRate(paramId);
         const maxValue = this.paramMax(paramId);
         const minValue = this.paramMin(paramId);
         return Math.round(value.clamp(minValue, maxValue));
-    };
-
-    /**
-     * 基本パラメータ加算値を得る。
-     * 
-     * @param {Number} paramId パラメータID
-     * @return {Number} 加算値
-     * !!!overwrite!!!
-     */
-    Game_Actor.prototype.paramPlus = function(paramId) {
-        let value = Game_Battler.prototype.paramPlus.call(this, paramId);
-        for (const item of this.equips()) {
-            if (item) {
-                value += item.params[paramId];
-            }
-        }
-        return value;
     };
 
 })();

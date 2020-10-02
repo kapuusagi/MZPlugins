@@ -158,7 +158,7 @@ function Scene_TwldShop() {
 (() => {
     "use strict";
 
-    const pluginName = "Kapu_TwldShops";
+    const pluginName = "Kapu_Twld_Shops";
 
     PluginManager.registerCommand(pluginName, "openShop", args => {
         const id = Number(args.id) || 0;

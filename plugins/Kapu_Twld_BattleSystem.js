@@ -237,7 +237,7 @@ function Sprite_BattleHudPicture() {
 }
 
 (() => {
-    const pluginName = "Kapu_TwldBattleSystem";
+    const pluginName = "Kapu_Twld_BattleSystem";
     const parameters = PluginManager.parameters(pluginName);
     const maxBattleMembers = Number(parameters["maxBattleMembers"]) || 4;
     const tpbCastLabel = parameters["tpbCastLabel"] || "Casting";

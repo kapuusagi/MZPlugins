@@ -4,9 +4,9 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_IndependentItem
- * @base Kapu_TwldShops
+ * @base Kapu_Twld_Shops
  * @orderAfter Kapu_IndependentItem
- * @orderAfter Kapu_TwldShops
+ * @orderAfter Kapu_Twld_Shops
  * 
  * @help 
  * TwldShopsをIndependentItemに対応させるためのプラグインです。

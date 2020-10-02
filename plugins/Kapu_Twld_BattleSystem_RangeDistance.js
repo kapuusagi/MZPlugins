@@ -3,9 +3,9 @@
  * @plugindesc RangeDistanceをTwldBattleSystemに適用するためのプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_TwldBattleSystem
+ * @base Kapu_Twld_BattleSystem
  * @base Kapu_RangeDistance
- * @orderAfter Kapu_BattleSystem
+ * @orderAfter Kapu_Twld_BattleSystem
  * @orderAfter Kapu_RangeDistance
  * 
  * @param frontIconId
@@ -44,7 +44,7 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "Kapu_TwldBattleSystem_RangeDistance";
+    const pluginName = "Kapu_Twld_BattleSystem_RangeDistance";
     const parameters = PluginManager.parameters(pluginName);
     const frontIconId = Number(parameters['frontIconId']) || 0;
     const backIconId = Number(parameters['rearIconId']) || 0;
