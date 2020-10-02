@@ -21,7 +21,7 @@
  * Version.1.0.0 初版
  */
 (() => {
-    const pluginName = "Kapu_CriticalEffectTest";
+    const pluginName = "Kapu_SandBox_CriticalEffect";
     const parameters = PluginManager.parameters(pluginName);
     const criticalAnimationId = Number(parameters["Critical Animation ID"]) || 0;
 

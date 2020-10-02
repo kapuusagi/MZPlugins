@@ -38,7 +38,7 @@
 (() => {
     "use strict"
 
-    const pluginName = "Kapu_AnimationTest";
+    const pluginName = "Kapu_SandBox_Animation";
 
     PluginManager.registerCommand(pluginName, "runAnimation", args => {
         const animationId = args.animationId || 0;
