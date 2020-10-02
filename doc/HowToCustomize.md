@@ -503,7 +503,7 @@ Traitの持ってるメンバ
 |||4|ABILITY_GOLD_DOUBLE。戦闘でのゴールド倍率2倍|
 |||5|ABILITY_DROP_ITEM_DOUBLE。戦闘でのアイテムドロップレート2倍|
 
-### ■ damage.typeって何？
+### ■ ダメージタイプ (damage.type) って何？
 
 効果量の適用種類っぽい。
  __Game_Action.checkDamageType()__ メソッドで一致判定してる。
@@ -517,6 +517,8 @@ Traitの持ってるメンバ
 |4|MP 回復|Game_Action.isMpEffect(), Game_Action.isRecover(), Game_Action.isMpRecover()|
 |5|HP 吸収|Game_Action.isHpEffect(), Game_Action.isDrain()|
 |6|MP 吸収|Game_Action.isMpEffect(), Game_Action.isDrain()|
+
+尚、動作を調べるときは値を直接見るのでは無く、Game_Action.isDamage()などのメソッドを使用すること。
  
 ### ■ Effectって何？
 

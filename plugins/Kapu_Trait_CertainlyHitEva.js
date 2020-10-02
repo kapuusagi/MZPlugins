@@ -223,7 +223,7 @@
         if (this.isDamage()) {
             if (this.isPhysical() && target.isCertainlyPhyEvad()) {
                 return true;
-            } else if (this.isMagical() && target.isCertainlyEvad()) {
+            } else if (this.isMagical() && target.isCertainlyMagEvad()) {
                 return true;
             }
 

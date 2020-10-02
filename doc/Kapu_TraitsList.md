@@ -38,6 +38,10 @@ __TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
 |__FLAG_ID_BLOCK_MOVE_BATTLEPOSITION__|100|ノックバックなどの効果を防止する。|
 |__FLAG_ID_SKILLLONGRANGE__|101|常にロングレンジになる。|
 |__FLAG_ID_FAST_ACTION__|102|戦闘開始時TPGがたまった状態にする。|
+|__FLAG_ID_CERTAINLY_HIT_PHY__|103|CERTAINLY_EVAがある相手以外には確実にヒットする。|
+|__FLAG_ID_CERTAINLY_HIT_MAG__|104|CERTAINLY_EVAがある相手以外には確実にヒットする。|
+|__FLAG_ID_CERTAINLY_EVA_PHY__|105|必中スキル以外は確実に回避する。|
+|__FLAG_ID_CERTAINLY_EVA_MAG__|106|必中スキル以外は確実に回避する。|
 
 ## エフェクトコード
 
