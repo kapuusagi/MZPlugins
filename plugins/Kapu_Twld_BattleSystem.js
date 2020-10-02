@@ -234,7 +234,7 @@ function Sprite_BattleHudActor() {
  */
 function Sprite_BattleHudPicture() {
     this.initialize(...arguments);
-}
+};
 
 (() => {
     const pluginName = "Kapu_Twld_BattleSystem";
