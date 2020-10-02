@@ -5,6 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
+ * @base Kapu_Base_Hit
+ * @orderAfter Kapu_Base_Hit
  * 
  * @param passiveSkillType
  * @text パッシブスキルタイプ
@@ -66,81 +68,133 @@
 
     //------------------------------------------------------------------------------
     // Game_Action
+
     /**
-     * スキルやアイテムを適用する。
+     * このアクションをtargetに適用する。
+     * 命中判定とダメージ算出、効果適用を行う。
      * 
-     * @param {Game_Battler} target 対象
-     * !!!overwrite!!! Game_Action.apply
+     * @param {Game_BattlerBase} target 対象
+     * !!!overwrite!!!
      */
     Game_Action.prototype.apply = function(target) {
         const result = target.result();
         this.subject().clearResult();
-        result.clear(); // 対象の結果をクリア
-        result.used = this.testApply(target); // 対象に適用可能かを調べる。
-        // クリティカル判定。クリティカルしたら、問答無用で当てる。
-        if (this.item().damage.critical) {
-            result.critical = (Math.random() < this.itemCri(target));
-        } else {
-            result.critical = false;
-        }
-        if (result.critical) {
-            result.missed = false;
-            result.evaded = false;
+        result.clear();
+        result.used = this.testApply(target);
+        if (result.used) {
+            this.testHit(target);
         } else {
             result.missed = false;
-            result.evaded = !this.testHit(target);
+            result.evaded = true;
         }
-
-        // 物理属性判定
         result.physical = this.isPhysical();
-        // 吸収判定
         result.drain = this.isDrain();
-
-        // ヒットしたかどうか
-        // (適用対象でミスや回避が発生していないかどうか、ということ)
         if (result.isHit()) {
             if (this.item().damage.type > 0) {
-                var value = this.makeDamageValue(target, result.critical);
+                result.critical = Math.random() < this.itemCri(target);
+                const value = this.makeDamageValue(target, result.critical);
                 this.executeDamage(target, value);
-                // this._damageValue = value;
             }
-            this.item().effects.forEach(function(effect) {
+            for (const effect of this.item().effects) {
                 this.applyItemEffect(target, effect);
-            }, this);
+            }
             this.applyItemUserEffect(target);
         }
+        this.updateLastTarget(target);
     };
 
     /**
-     * 当たるかどうかを判定する。
+     * 命中できたかどうかを評価する。
      * 
      * @param {Game_Battler} target 対象
+     * @return {Boolean} 命中できた場合にはtrue, それ以外はfalse
+     * !!!overwrite!!! Game_Action.testHit
      */
     Game_Action.prototype.testHit = function(target) {
-        var subject = this.subject(); // 使用者
-        var hitRate = this.itemHit(target); 
-        if (this.isPhysical()) {
-            var pev = target.eva // 回避率は純粋に効いてくる
-                - (hitRate - 1.0) // 命中率分の補正。1.0超えた分は命中しやすくなる。
-                + (target.luk - subject.luk) * 0.01; // LUKによるあたり判定(LUK高いやつは当てやすい)
-            if (this.isLongRange()) {
-                // 長距離の場合には相手の素早さと使用者の器用さを比較する。
-                pev += this.getRelativeDiff(target.agi, subject.dex);
-            } else {
-                // 接近戦の場合にはDEXとAGIの合計値を比較する。
-                pev += this.getRelativeDiff((target.dex + target.agi), (subject.dex + subject.agi));
-            }
-            return Math.random() >= pev;
-        } else if (this.isMagical()) {
-            var mev = target.mev // 魔法回避率は純粋に効いてくる。
-                - (hitRate - 1.0) // 命中率の1.0超えた分は相手の回避率を減らす方向に効く。
-                + this.getRelativeDiff(target.men, subject.men) / 2
-                + (target.luk - subject.luk) * 0.01; // LUKによるあたり判定(LUK高いやつは当てやすい)
-                return Math.random() >= mev;
+        const result = target.result();
+        if (this.isCertainlyEvad(target)) {
+            result.missed = false;
+            result.evaded = true;
+            result.critical = false;
+        } else if (this.isCertainlyHit(target)) {
+            result.missed = false;
+            result.evaded = false;
+            result.critical = false;
+        } else if (this.testCritical(target)) {
+            result.missed = false;
+            result.evaded = false;
+            result.critical = true;
+        } else if (this.testMissed(target)) {
+            result.missed = true;
+            result.evaded = false;
+            result.critical = false;
+        } else if (this.testEvaded(target)) {
+            result.missed = false;
+            result.evaded = true;
+            result.critical = false;
         } else {
-            return true; // その他は100%成功
+            result.missed = false;
+            result.evaded = false;
+            result.critical = false;
         }
     };
+
+    // /**
+    //  * 当たるかどうかを判定する。
+    //  * 
+    //  * @param {Game_Battler} target 対象
+    //  */
+    // Game_Action.prototype.testHit = function(target) {
+    //     if (this.isPhysical()) {
+    //         return this.testHitPhysical(target);
+    //         // var pev = target.eva // 回避率は純粋に効いてくる
+    //         //     - (hitRate - 1.0) // 命中率分の補正。1.0超えた分は命中しやすくなる。
+    //         //     + (target.luk - subject.luk) * 0.01; // LUKによるあたり判定(LUK高いやつは当てやすい)
+    //         // if (this.isLongRange()) {
+    //         //     // 長距離の場合には相手の素早さと使用者の器用さを比較する。
+    //         //     pev += this.getRelativeDiff(target.agi, subject.dex);
+    //         // } else {
+    //         //     // 接近戦の場合にはDEXとAGIの合計値を比較する。
+    //         //     pev += this.getRelativeDiff((target.dex + target.agi), (subject.dex + subject.agi));
+    //         // }
+    //         // return Math.random() >= pev;
+    //     } else if (this.isMagical()) {
+    //         return this.testHitMagical(target);
+    //         // var mev = target.mev // 魔法回避率は純粋に効いてくる。
+    //         //     - (hitRate - 1.0) // 命中率の1.0超えた分は相手の回避率を減らす方向に効く。
+    //         //     + this.getRelativeDiff(target.men, subject.men) / 2
+    //         //     + (target.luk - subject.luk) * 0.01; // LUKによるあたり判定(LUK高いやつは当てやすい)
+    //         //     return Math.random() >= mev;
+    //     } else {
+    //         return true; // その他は100%成功
+    //     }
+    // };
+
+    // /**
+    //  * 物理攻撃時の命中判定を行う。
+    //  * 
+    //  * @param {Game_Battler} target 対象
+    //  * @return {Boolean} 命中した場合にはtrue, それ以外はfalse
+    //  */
+    // Game_Action.prototype.testHitPhysical = function(target) {
+    //     const hitRate = this.itemHit(target); 
+    //     const evaRate = this.itemEva(target);
+    //     const hitRate = hitRate - evaRate;
+    //     return Math.random() < hitRate;
+    // };
+
+    // /**
+    //  * 魔法攻撃時の命中判定を行う。
+    //  * 
+    //  * @param {Game_Battler} target 対象
+    //  * @return {Boolean} 命中した場合にはtrue, それ以外はfalse
+    //  */
+    // Game_Action.prototype.testHitMagical = function(target) {
+    //     const hitRate = this.itemHit(target); 
+    //     const evaRate = this.itemEva(target);
+    //     const hitRate = hitRate - evaRate;
+    //     return Math.random() < hitRate;
+    // };
 
     //------------------------------------------------------------------------------
     // Game_Actor
@@ -157,20 +211,34 @@
     /**
      * パラメータを得る。
      * 
+     * Note: 装備品増加分には特性によるレートボーナスを適用外とするため、
+     *       オーバーライドする。
+     * 
      * @param {Number} paramId パラメータID
+     * !!!overwrite!!! Game_Actor.param
      */
     Game_Actor.prototype.param = function(paramId) {
-        let baseValue = this.paramBasePlus(paramId);
-            this.paramBasePlus(paramId) *
-            this.paramRate(paramId);
-        baseValue += this.paramEquip(paramId);
-
-        baseValue *= this.paramBuffRate(paramId);
+        let baseValue = this.paramBasePlus(paramId)
+                *  this.paramRate(paramId) + this.paramEquip(paramId);
+        const value = baseValue * this.paramBuffRate(paramId);
         const maxValue = this.paramMax(paramId);
         const minValue = this.paramMin(paramId);
         return Math.round(value.clamp(minValue, maxValue));
     };
 
+    /**
+     * 基本パラメータ加算値を得る。
+     * 
+     * Note: 装備品増加分には特性によるレートボーナスを適用外とするため、
+     *       オーバーライドする。
+     * 
+     * @param {Number} paramId パラメータID
+     * @return {Number} 加算値
+     * !!!overwrite!!!
+     */
+    Game_Actor.prototype.paramPlus = function(paramId) {
+        return Game_Battler.prototype.paramPlus.call(this, paramId);
+    };
     
 
 })();

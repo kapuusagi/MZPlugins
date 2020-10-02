@@ -1,0 +1,233 @@
+/*:ja
+ * @target MZ 
+ * @plugindesc 必ず命中特性プラグイン。
+ * @author kapuusagi
+ * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
+ * @base Kapu_Base_Hit
+ * @orderAfter Kapu_Base_Hit
+ * 
+ * @param specialFlagIdPhyHit
+ * @text 物理必中ヒットフラグID
+ * @desc 物理必中特性を割り当てるフラグID
+ * @type number
+ * @default 103
+ * @min 6
+ * 
+ * @param specialFlagIdMagHit
+ * @text 魔法必中ヒットフラグID
+ * @desc 魔法必中特性を割り当てるフラグID
+ * @type number
+ * @default 104
+ * @min 6
+ * 
+ * @param specialFlagIdPhyEva
+ * @text 物理回避ヒットフラグID
+ * @desc 物理回避特性を割り当てるフラグID
+ * @type number
+ * @default 105
+ * @min 6
+ * 
+ * @param specialFlagIdMagEva
+ * @text 魔法回避ヒットフラグID
+ * @desc 魔法回避特性を割り当てるフラグID
+ * @type number
+ * @default 106
+ * @min 6
+ * 
+ * @help 
+ * 攻撃・スキル使用時に必ず命中/回避する特性を追加します。
+ * HPダメージを与えるもの、MPダメージを与えるアイテム/スキル/武器攻撃が対象になります。
+ * 使用者が必中、受け側が確実回避を持っている場合、回避が優先されます。
+ * 完全回避は非ダメージスキルに適用されない。（適用すると回復スキルも回避するため)
+ * 
+ * ■ 使用時の注意
+ * Game_ActionのitemHit/itemEvaを変更します。
+ * 
+ * ■ プラグイン開発者向け
+ * TRAIT_SPECIAL_FLAG を使用し、以下の定義を追加します。
+ * Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY
+ * Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG
+ * Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY
+ * Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG
+ * 
+ * ============================================
+ * プラグインコマンド
+ * ============================================
+ * プラグインコマンドはありません。
+ * 
+ * ============================================
+ * ノートタグ
+ * ============================================
+ * アクター/クラス/ステート/武器/防具/エネミー
+ *     <certainlyPhyHit>
+ *         物理必中特性を追加する。
+ *     <certainlyMagHit>
+ *         魔法必中特性を追加する。
+ *     <certainlyPhyEva>
+ *         物理回避特性を追加する。
+ *     <certainlyMagEva>
+ *         魔法回避特性を追加する。
+ * 
+ * 
+ * ============================================
+ * 変更履歴
+ * ============================================
+ * Version.0.1.0 新規追加。
+ */
+(() => {
+    const pluginName = "Kapu_Trait_CertainlyHitEva";
+    const parameters = PluginManager.parameters(pluginName);
+
+    Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY = Number(parameters["specialFlagIdPhyHit"]) || 0;
+    Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG = Number(parameters["specialFlagIdMagHit"]) || 0;
+    Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY = Number(parameters["specialFlagIdPhyEva"]) || 0;
+    Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG = Number(parameters["specialFlagIdMagEva"]) || 0;
+
+    if (!Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY) {
+        console.error(pluginName + ":FLAG_ID_CERTAINLY_HIT_PHY is not valid.");
+    }
+    if (!Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG) {
+        console.error(pluginName + ":FLAG_ID_CERTAINLY_HIT_MAG is not valid.");
+    }
+    if (!Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY) {
+        console.error(pluginName + ":FLAG_ID_CERTAINLY_EVA_PHY is not valid.");
+    }
+    if (!Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG) {
+        console.error(pluginName + ":FLAG_ID_CERTAINLY_EVA_MAG is not valid.");
+    }
+    //------------------------------------------------------------------------------
+    // DataManager
+
+    /**
+     * ノートタグを処理する。
+     * 
+     * @apram {TraitObject} obj Actor/Class/Weapon/Armor/State/Enemyのいずれか。traitsを持ってるデータ
+     */
+    const _processNotetag = function(obj) {
+        if (obj.meta.certainlyPhyHit && Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY) {
+            obj.traits.push({
+                code:Game_BattlerBase.TRAIT_SPECIAL_FLAG,
+                dataId:Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY,
+                value:0
+            });
+        } 
+        if (obj.meta.certainlyMagHit && Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG) {
+            obj.traits.push({
+                code:Game_BattlerBase.TRAIT_SPECIAL_FLAG,
+                dataId:Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG,
+                value:0
+            });
+        }
+        if (obj.meta.certainlyPhyEva && Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY) {
+            obj.traits.push({
+                code:Game_BattlerBase.TRAIT_SPECIAL_FLAG,
+                dataId:Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY,
+                value:0
+            });
+        }
+        if (obj.meta.certainlyMagEva && Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG) {
+            obj.traits.push({
+                code:Game_BattlerBase.TRAIT_SPECIAL_FLAG,
+                dataId:Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG,
+                value:0
+            });
+        }
+    };
+
+    DataManager.addNotetagParserActors(_processNotetag);
+    DataManager.addNotetagParserClasses(_processNotetag);
+    DataManager.addNotetagParserWeapons(_processNotetag);
+    DataManager.addNotetagParserArmors(_processNotetag);
+    DataManager.addNotetagParserStates(_processNotetag);
+    DataManager.addNotetagParserEnemies(_processNotetag);
+
+    //------------------------------------------------------------------------------
+    // Game_BattlerBase
+
+    /**
+     * 物理攻撃/スキルが確実にヒットするかどうかを取得する。
+     * 
+     * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse
+     */
+    Game_BattlerBase.prototype.isCertainlyPhyHit = function() {
+        if (Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY) {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY);
+        } else {
+            return false;
+        }
+    };
+
+    /**
+     * 魔法攻撃/スキルが確実にヒットするかどうかを取得する。
+     * 
+     * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse.
+     */
+    Game_BattlerBase.prototype.isCertainlyMagHit = function() {
+        if (Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG) {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG);
+        } else {
+            return false;
+        }
+    };
+
+    /**
+     * 物理攻撃を確実に回避するかどうかを取得する。
+     * 
+     * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse.
+     */
+    Game_BattlerBase.prototype.isCertainlyPhyEvad = function() {
+        if (Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY) {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY);
+        } else {
+            return false;
+        }
+    };
+    /**
+     * 魔法攻撃を確実に回避するかどうかを取得する。
+     * 
+     * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse.
+     */
+    Game_BattlerBase.prototype.isCertainlyMagEvad = function() {
+        if (Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG) {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG);
+        } else {
+            return false;
+        }
+    };
+
+    //------------------------------------------------------------------------------
+    // Game_Action
+    const _Game_Action_isCertainlyHit = Game_Action.prototype.isCertainlyHit;
+    /**
+     * 確実にヒットできるかどうかを取得する。
+     * 
+     * @param {Game_Battler} target 対象
+     * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.isCertainlyHit = function(target) {
+        return (this.isPhysical() && this.subject().isCertainlyPhyHit())
+                || (this.isMagical() && this.subject().isCertainlyMagHit())
+                || _Game_Action_isCertainlyHit.call(this, target);
+    };
+
+    const _Game_Action_isCertainlyEvad = Game_Action.prototype.isCertainlyEvad;
+    /**
+     * 確実に回避できるかどうかを取得する。
+     * 
+     * @param {Game_Battler} target 対象
+     * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.isCertainlyEvad = function(target) {
+        if (this.isDamage()) {
+            if (this.isPhysical() && target.isCertainlyPhyEvad()) {
+                return true;
+            } else if (this.isMagical() && target.isCertainlyEvad()) {
+                return true;
+            }
+
+            return _Game_Action_isCertainlyHit.call(this, target);
+        }
+    };
+})();
