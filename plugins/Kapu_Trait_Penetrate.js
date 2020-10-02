@@ -5,8 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
- * @base Kapu_DamageCore
- * @orderAfter kapu_DamageCore
+ * @base Kapu_Base_DamageCalculation
+ * @orderAfter Kapu_Base_DamageCalculation
  *
  * @param TraitXParamDidDEFPR
  * @text DEFPR特性DID

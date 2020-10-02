@@ -3,8 +3,8 @@
  * @plugindesc クリティカル時、DEF/MDEFを貫通させるためのプラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_DamageCore
- * @orderAfter Kapu_DamageCore
+ * @base Kapu_Base_DamageCalculation
+ * @orderAfter Kapu_Base_DamageCalculation
  * 
  * @help 
  * クリティカル発生時、対象のDEF/MDEFをゼロとした状態でダメージ計算されるようにするプラグイン。
