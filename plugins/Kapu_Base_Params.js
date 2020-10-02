@@ -4,13 +4,12 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
- * 
  * @help 
  * 基本パラメータを拡張可能にするためのプラグイン。
- * 
+ * ベーシックシステムからの動作変更は無い。
  * 
  * ■ 使用時の注意
- * 特にありません。
+ * ありません。
  * 
  * ■ プラグイン開発者向け
  * Game_Actor.param()
@@ -32,7 +31,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 Trait_EquipPerformance実装のため追加。
  */
 (() => {
     //------------------------------------------------------------------------------
@@ -41,24 +40,28 @@
      * パラメータを得る。
      * 
      * @param {Number} paramId パラメータID
+     * !!!overwrite!!! Game_Actor.param
      */
     Game_Actor.prototype.param = function(paramId) {
-        const baseValue = this.paramBasePlus(paramId) + this.paramEquip(paramId);
+        const baseValue = this.paramBasePlus(paramId);
         const value = baseValue * this.paramRate(paramId) * this.paramBuffRate(paramId);
         const maxValue = this.paramMax(paramId);
         const minValue = this.paramMin(paramId);
         return Math.round(value.clamp(minValue, maxValue));
     };
 
+
     /**
      * 基本パラメータ加算値を得る。
+     * クラスのベース値を除いた、種による加算値と装備品による加算値の合計を返す。
      * 
      * @param {Number} paramId パラメータID
      * @return {Number} 加算値
      * !!!overwrite!!!
      */
     Game_Actor.prototype.paramPlus = function(paramId) {
-        return Game_Battler.prototype.paramPlus.call(this, paramId);
+        return Game_Battler.prototype.paramPlus.call(this, paramId)
+                + this.paramEquip(paramId);
     };
 
     /**
@@ -68,12 +71,9 @@
      * @return {Number} 全装備品のパラメータ値合計
      */
     Game_Actor.prototype.paramEquip = function(paramId) {
-        for (const equipItem of this.equips()) {
-            if (equipItem) {
-                value += this.paramEquipValue(equipItem, paramId);
-            }
-        }
-        return value;
+        return this.equips().reduce((r, equipItem) => {
+            return (equipItem) ? (r + this.paramEquipValue(equipItem, paramId)) : r;
+        }, 0, this);
     };
 
     /**
