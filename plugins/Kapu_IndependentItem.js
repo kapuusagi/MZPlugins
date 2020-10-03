@@ -177,6 +177,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.2 個別アイテムが無限に使用できる不具合を修正した。
  * Version.0.4.1 装備解除時、解除した個別アイテムが、
  *               初期化された別のアイテムになってしまう不具合を修正した。
  *               個別アイテム装備変更時、変更対象が同じベースアイテムだと、
@@ -359,7 +360,18 @@
      */
     DataManager.isIndependentItem = function(item) {
         return (item && item.baseItemId);
-    }
+    };
+
+    /**
+     * itemが個別アイテムのベースアイテムかどうかを判定する。
+     * 
+     * @param {Object} item ベースアイテムまたは個別アイテム(DataItem/DataWeapon/DataArmor)
+     * @return {Boolean} 個別アイテムのベースアイテムの場合にはtrue,
+     *                   個別アイテム、もしくは非個別アイテムの場合にはfalse
+     */
+    DataManager.isIndependentBaseItem = function(item) {
+        return DataManager.isIndependent(item) && !DataManager.isIndependentItem(item);
+    };
 
     /**
      * 新しい個別アイテムを登録する。
@@ -756,7 +768,7 @@
      * @return {Boolean} 装備中の場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isEquipped = function(item) {
-        if (DataManager.isIndependent(item) && !DataManager.isIndependentItem(item)) {
+        if (DataManager.isIndependentBaseItem(item)) {
             // 個別アイテムのベースアイテムが指定された場合、
             // IDが一致しているものを持っているかどうかで判定する。
             return (this.findEquippedSlot(item) >= 0);
@@ -1159,7 +1171,9 @@
      * @return {Boolean} アイテムを持っている場合にはtrue, それ以外はfalse.
      */
     Game_Party.prototype.hasItem = function (item, includeEquip) {
-        if (DataManager.isIndependent(item)) {
+        if (DataManager.isIndependentBaseItem(item)) {
+            // 個別アイテムのベースアイテムが指定されたときは、
+            // 一致する個別アイテムがあるかを調べる。
             const baseItem = DataManager.getBaseItem(item);
             var independentItem = this.getMatchingIndependentItem(baseItem, includeEquip);
             return (independentItem !== null);
