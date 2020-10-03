@@ -3,8 +3,7 @@
  * @plugindesc TWLD向けダメージエフェクトプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * TWLD向けに作成したダメージエフェクトプラグイン。
- * 
+ *  
  * @help 
  * TWLD向けに作成した、ダメージエフェクトのプラグイン。
  * 今のところダメージの数値が大きく出るとか、飛び出すとかその辺しか考慮してない。
