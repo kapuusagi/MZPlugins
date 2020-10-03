@@ -53,7 +53,7 @@
  * 
  * @param growPointAtLevelUp
  * @text レベルアップ時加算ポイント
- * @desc レベルアップ時に加算する成長ポイントの量。
+ * @desc レベルアップ時に加算する成長ポイントの量。evalで評価するので、levelを使った計算式も可。
  * @type number
  * @default 3
  * @min 0
@@ -146,14 +146,14 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 TWLD向けコードから抜粋して移植。 動作未確認。
+ * Version.0.1.0 TWLD向けコードから抜粋して移植。 
  */
 (() => {
     const pluginName = "Kapu_GrowupSystem";
     const parameters = PluginManager.parameters(pluginName);
     Game_Actor.MAX_GROW_POINT = Number(parameters["maxGrowPoint"]) || 999;
     Game_Action.EFFECT_GAIN_GROWPOINT = Number(parameters["effectCode"]) || 0;
-    const growPointAtLevelUp = Number(parameters["growPointAtLevelUp"]) || 0;
+    const growPointAtLevelUp = parameters["growPointAtLevelUp"] || 0;
     const growPointText = String(parameters["growPointText"]) || "GP";
 
     Object.defineProperty(TextManager, "growPoint", { get: () => growPointText, configurable:true});
@@ -271,7 +271,7 @@
         _Game_Actor_levelUp.call(this);
 
         // 成長ボーナス加算
-        var gpPlus = this.growPointAtLevelUp;
+        var gpPlus = this.growPointAtLevelUp(this._level);
         this.gainGrowPoint(gpPlus);
     };
 
@@ -282,7 +282,7 @@
      * @return {Number} 加算するGrowPoint
      */
     Game_Actor.prototype.growPointAtLevelUp = function(level) {
-        return growPointAtLevelUp;
+        return Math.floor(eval(growPointAtLevelUp) || 0);
     };
 
     /**
