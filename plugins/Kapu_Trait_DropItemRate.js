@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @param TraitPartyAbilityId
+ * @param traitPartyAbilityId
  * @text 特性ID
  * @desc 特性として割り当てるID番号。(6以上で他のプラグインとぶつからないやつ)
  * @default 100
@@ -19,10 +19,16 @@
  * ドロップレートの倍率計算が次のようになります。
  * (ドロップレート)=(パーティーメンバーの特性合計)×(ドロップ2倍特性があるなら2倍)
  * 
- * Game_Party.ABILITY_DROP_ITEM_RATEが定義されます。値はTraitIdで指定されたものになります。
+ * 複数メンバー、複数の特性を持つ場合、それらの加算合計になります。
  *  
- * 制限
- * その他のプラグインにより、独自のアイテムドロップ処理をやっている場合には効果がありません。
+ * ■ 注意
+ * その他のプラグインにより、
+ * 独自のアイテムドロップ処理をやっている場合には効果がありません。
+ * 
+ * ■ プラグイン開発者向け
+ * Game_Party.ABILITY_DROP_ITEM_RATEが定義されます。
+ * 値はTraitIdで指定されたものになります。
+ * 
  * 
  * ============================================
  * プラグインコマンド
@@ -50,7 +56,7 @@
     const pluginName = "Kapu_Trait_DropItemRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.ABILITY_DROP_ITEM_RATE = Number(parameters["TraitPartyAbilityId"]) || 0;
+    Game_Party.ABILITY_DROP_ITEM_RATE = Number(parameters["traitPartyAbilityId"]) || 0;
     if (!Game_Party.ABILITY_DROP_ITEM_RATE) {
         console.error(pluginName + ":ABILITY_DROP_ITEM_RATE is not valid.");
         return;

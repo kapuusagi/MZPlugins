@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @param TraitSParamDid
+ * @param traitSParamDid
  * @text 最大TPレート特性DiD
  * @desc 最大TPレート特性として割り当てるDID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 100
@@ -16,8 +16,10 @@
  *  
  * @help 
  * 最大TPレート特性を追加するプラグイン。
+ * 複数特性を持つ場合、乗算合計になります。
  * 
  * ■ 使用時の注意
+ * 加算合計じゃないので注意。
  * 
  * ■ プラグイン開発者向け
  * Trait SPARAMを使用し、
@@ -48,7 +50,7 @@
     const parameters = PluginManager.parameters(pluginName);
 
 
-    Game_BattlerBase.TRAIT_SPARAM_DID_MAXTP_RATE = Number(parameters["TraitSParamDid"]) || 0;
+    Game_BattlerBase.TRAIT_SPARAM_DID_MAXTP_RATE = Number(parameters["traitSParamDid"]) || 0;
     if (!Game_BattlerBase.TRAIT_SPARAM_DID_MAXTP_RATE) {
         console.error(pluginName + ":TRAIT_SPARAM_DID_MAXTP_RATE is not valid.");
         return;

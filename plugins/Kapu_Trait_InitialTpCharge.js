@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @param TraitXParamDid
+ * @param traitXParamDid
  * @text TPチャージ特性特性ID
  * @desc TPチャージ特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 208
@@ -16,6 +16,8 @@
  * @help 
  * 戦闘開始時に所定の割合だけTPがチャージされた状態にするプラグイン。
  * チャージされる量は、ステートなどに設定した値の合計になります。
+ * 
+ * 複数特性を持っている場合、加算合計になります。
  * 
  * ■ 使用時の注意
  * 他のTP初期化系プラグインがあると正しく動作しない可能性があります。
@@ -47,7 +49,7 @@
 (() => {
     const pluginName = "Kapu_Trait_InitialTpCharge";
     const parameters = PluginManager.parameters(pluginName);
-    Game_BattlerBase.TRAIT_XPARAM_DID_INITTP_RATE = Number(parameters["TraitXParamDid"]) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_INITTP_RATE = Number(parameters["traitXParamDid"]) || 0;
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_INITTP_RATE) {
         console.error(pluginName + ":TRAIT_XPARAM_DID_INITTP_RATE is not valid.");
         return;

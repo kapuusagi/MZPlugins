@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @param TraitXParamDid
+ * @param traitXParamDid
  * @text キャストタイム倍率-特性ID
  * @desc キャストタイムの特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 202
@@ -31,6 +31,7 @@
  * Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE を追加します。
  * 値はプラグインパラメータで指定したものになります。
  * 
+ * 複数の特性を持つ場合、加算合計になります。
  * 
  * ============================================
  * プラグインコマンド
@@ -60,7 +61,7 @@
     const pluginName = "Kapu_Trait_CastTime";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE = Number(parameters["TraitXParamDid"]) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE = Number(parameters["traitXParamDid"]) || 0;
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE) {
         console.log(pluginName + ":TRAIT_XPARAM_DID_CASTTIME_RATE is not valid.");
         return;

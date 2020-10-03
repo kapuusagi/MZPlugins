@@ -6,7 +6,7 @@
  * @base Kapu_ElementCore
  * @orderAfter Kapu_ElementCore
  * 
- * @param TraitCode
+ * @param traitCode
  * @text 特性コード
  * @desc 特性として割り当てるID番号。(65以上で他のプラグインとぶつからないやつ)
  * @default 101
@@ -16,6 +16,13 @@
  * 
  * @help 
  * 属性攻撃時のダメージ量を割合で増加させる特性を追加する。
+ * ベーシックシステムではターゲットの賊例ダメージレートを操作する特性は存在するが、
+ * 使用者の特性として、特定の属性のダメージレートを向上させるものではない。
+ * 本特性では使用者の特性として、
+ * 例えば「火属性だけダメージが2割増加する」というようなものを追加できるようになる。
+ * 
+ * 複数の特性を持つ場合は 乗算合計 になる。
+ * 
  * 
  * ■ プラグイン開発者向け
  * 新規Trait を使用し、
@@ -54,7 +61,7 @@
     const pluginName = "Kapu_Trait_AttackElementRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE = Number(parameters["TraitCode"]) || 0;
+    Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE = Number(parameters["traitCode"]) || 0;
     if (!Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE) {
         console.error(pluginName + ":TRAIT_ELEMENT_ATTACK_RATE is not valid.");
         return;

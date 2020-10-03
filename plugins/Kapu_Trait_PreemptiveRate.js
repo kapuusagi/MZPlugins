@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @param TraitId
+ * @param traitPartyAbilityId
  * @text パーティー特性DID
  * @desc 特性として割り当てるID番号。(6以上で他のプラグインとぶつからないやつ)
  * @default 8
@@ -23,6 +23,8 @@
  * ベーシックシステムでは、イベントで戦闘を行う場合、
  * 「ランダム戦闘と同じ」となっていても先制攻撃判定されない。
  * シンボルエンカウントは見えてるんだから当然か。
+ * 
+ * 複数メンバー、複数特性を持つ場合には加算合計になります。
  * 
  * ベーシックシステムには先制攻撃率向上がありますが、
  * 固定（4倍）となっているため、個性を持たせられません。
@@ -58,7 +60,7 @@
     const pluginName = "Kapu_Trait_PreemptiveRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.ABILITY_PREEMPTIVE_RATE = Number(parameters["TraitId"]) || 0;
+    Game_Party.ABILITY_PREEMPTIVE_RATE = Number(parameters["traitPartyAbilityId"]) || 0;
     if (Game_Party.ABILITY_PREEMPTIVE_RATE === 0) {
         console.error(pluginName + ":ABILITY_PREEMPTIVE_RATE is 0.");
         return;

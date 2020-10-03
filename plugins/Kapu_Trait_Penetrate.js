@@ -8,7 +8,7 @@
  * @base Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Base_DamageCalculation
  *
- * @param TraitXParamDidDEFPR
+ * @param traitXParamDidDEFPR
  * @text DEFPR特性DID
  * @desc DEFPR特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 204
@@ -16,7 +16,7 @@
  * @max 999
  * @min 10
  * 
- * @param TraitXParamDidPDRPR
+ * @param traitXParamDidPDRPR
  * @text PDRPR特性DID
  * @desc PDRPR特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 205
@@ -24,7 +24,7 @@
  * @max 999
  * @min 10
  * 
- * @param TraitXParamDidMDFPR
+ * @param traitXParamDidMDFPR
  * @text MDFPR特性DID
  * @desc MDFPR特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 206
@@ -32,7 +32,7 @@
  * @max 999
  * @min 10
  * 
- * @param TraitXParamDidMDRPR
+ * @param traitXParamDidMDRPR
  * @text MDRPR特性DID
  * @desc MDRPR特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 207
@@ -109,10 +109,10 @@
 (() => {
     const pluginName = "Kapu_Trait_Penetrate";
     const parameters = PluginManager.parameters(pluginName);
-    Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR = Number(parameters['TraitXParamDidDEFPR']) || 0;
-    Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR = Number(parameters['TraitXParamDidPDRPR']) || 0;
-    Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR = Number(parameters['TraitXParamDidMDFPR']) || 0;
-    Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR = Number(parameters['TraitXParamDidMDRPR']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR = Number(parameters['traitXParamDidDEFPR']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR = Number(parameters['traitXParamDidPDRPR']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR = Number(parameters['traitXParamDidMDFPR']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR = Number(parameters['traitXParamDidMDRPR']) || 0;
     enableProperty = Boolean(parameters["enableProperty"]) || false;
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR) {
         console.error(pluginName + ":TRAIT_XPARAM_DID_DEFPR is not valid.");

@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @param TraitXParamDid
+ * @param traitXParamDid
  * @text 特性DID
  * @desc 特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 200
@@ -33,6 +33,8 @@
  * クリティカルダメージ計算が次の式で行われます。
  *   (クリティカルダメージ) = (ダメージ) × {(BasicRate) + (特性による加減量)}
  * 但し、基本ダメージを下回ることはありません。
+ * 
+ * 複数の特性を持つ場合、加算合計になります。
  * 
  * ■ 注意
  * applyCriticalをオーバーライドするため、
@@ -81,7 +83,7 @@
     const parameters = PluginManager.parameters(pluginName);
 
 
-    Game_BattlerBase.TRAIT_XPARAM_DID_CDR = Number(parameters["TraitXParamDid"]) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_CDR = Number(parameters["traitXParamDid"]) || 0;
     const basicCriticalRate = Number(parameters["BasicRate"]) || 0;
     const propertyEnable = Boolean(parameters['propertyEnable']) || false;
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {

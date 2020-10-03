@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @param TraitXParamDid
+ * @param traitXParamDid
  * @text 特性DID
  * @desc 特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 203
@@ -16,6 +16,7 @@
  * 
  * @help 
  * 敵対者のアクションが行われたとき、指定した確率で自動ガード処理される特性を追加します。
+ * 複数の特性を持つ場合、確率は加算合計になります。
  * 
  * ■ 注意
  * 特にありません。
@@ -50,7 +51,7 @@
     const pluginName = "Kapu_Trait_AutoGuardRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE = Number(parameters["TraitXParamDid"]) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE = Number(parameters["traitXParamDid"]) || 0;
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE) {
         console.error(pluginName + ":TRAIT_XPARAM_DID_AUTOGUARD_RATE is not valid.");
         return;

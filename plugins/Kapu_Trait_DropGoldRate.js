@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @param TraitPartyAbilityId
+ * @param traitPartyAbilityId
  * @text パーティー特性DID
  * @desc 特性として割り当てるID番号。(6以上で他のプラグインとぶつからないやつ)
  * @default 101
@@ -23,6 +23,8 @@
  *  
  * 制限
  * その他のプラグインにより、独自のゴールド算出処理をやっている場合には効果がありません。
+ * 
+ * 複数メンバー、複数の特性を持つ場合、それらの加算合計になります。
  * 
  * ============================================
  * プラグインコマンド
@@ -50,7 +52,7 @@
     const pluginName = "Kapu_Trait_DropGoldRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_Party.ABILITY_DROP_GOLD_RATE = Number(parameters["TraitPartyAbilityId"]) || 0;
+    Game_Party.ABILITY_DROP_GOLD_RATE = Number(parameters["traitPartyAbilityId"]) || 0;
     if (!Game_Party.ABILITY_DROP_GOLD_RATE) {
         console.error(pluginName + ":ABILITY_DROP_GOLD_RATE is not valid.");
         return;

@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @param TraitId
+ * @param traitXParamDid
  * @text TPB速度倍率-特性ID
  * @desc TPB速度倍率の特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 11
@@ -15,10 +15,15 @@
  * @min 10
  * 
  * @help 
- * TPB速度増減の特性を追加します。
+ * TPB速度増減の特性を追加します。非TPBでは意味がありません。
  * TPB速度計算が次の式で行われます。
  * (TPB速度)=(基本TPB速度)×(1.0 + 特性値合計)
  * 
+ * 複数特性を持つ場合、加算合計になります。
+ * 
+ * ■ 注意
+ * 
+ * ■ プラグイン開発者向け
  * Trait XPARAMを使用し、
  * Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED を追加します。
  * 値はプラグインパラメータで指定したものになります。
@@ -49,7 +54,7 @@
     const pluginName = "Kapu_Trait_TpbSpeed";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED = Number(parameters["TraitId"]) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED = Number(parameters["traitXParamDid"]) || 0;
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED) {
         console.error(pluginName + ":TRAIT_XPARAM_DID_TPB_SPEED is not valid.");
         return;

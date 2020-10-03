@@ -6,7 +6,7 @@
  * @base Kapu_ElementCore
  * @orderAfter Kapu_ElementCore
  * 
- * @param TraitCode
+ * @param traitCode
  * @text 特性コード
  * @desc 特性として割り当てるID番号。(65以上で他のプラグインとぶつからないやつ)
  * @default 100
@@ -67,7 +67,7 @@
     const pluginName = "Kapu_Trait_ElementAbsorb";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_ELEMENT_ABSORB = Number(parameters["TraitCode"]) || 0;
+    Game_BattlerBase.TRAIT_ELEMENT_ABSORB = Number(parameters["traitCode"]) || 0;
     if (!Game_BattlerBase.TRAIT_ELEMENT_ABSORB) {
         console.error(pluginName + ":TRAIT_ELEMENT_ABSORB is not valid.");
         return ;
