@@ -39,6 +39,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 メニューでのアイテム使用時、
+ *               増減対象がNaNになって正常に動かなくなる不具合を修正した。
  * Version.0.1.0 TWLD向けに作成した。
  */
 (() => {
@@ -70,6 +72,18 @@
 
     //------------------------------------------------------------------------------
     // Game_Action
+    const _Game_Action_initialize = Game_Action.prototype.initialize;
+    /**
+     * Game_Actionを初期化する。
+     * 
+     * @param {Game_Battler} subject 使用者
+     * @param {Boolean} forcing 強制実行
+     */
+    Game_Action.prototype.initialize = function(subject, forcing) {
+        _Game_Action_initialize.call(this, subject, forcing);
+        this._subjectTp = ((subject) ? subject.tp : 0) || 0;
+    };
+
 
     const _Game_Action_prepare = Game_Action.prototype.prepare;
     /**
