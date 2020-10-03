@@ -13,6 +13,11 @@
  * @desc 変更するアクターのID
  * @type actor
  * 
+ * @arg variableId
+ * @text 変数ID
+ * @desc アクターを変数の値で指定する場合に指定する変数ID
+ * @type number
+ * 
  * @arg fileName
  * @text ファイル名
  * @desc 設定する画像ファイル
@@ -256,9 +261,33 @@ function Sprite_BattleHudPicture() {
     const statusAreaOffsetX = Number(parameters["statusAreaOffsetX"]) || 192;
     const enemyAreaOffsetX = Number(parameters["enemyAreaOffsetX"]) || 162;
 
+    /**
+     * アクターIDを得る。
+     * 
+     * @param {Object} args 引数
+     */
+    const _getActorId = function(args) {
+        const actorId = Number(args.actorId) || 0;
+        const variableId = Number(args.variableId) || 0;
+        if (actorId > 0) {
+            return actorId;
+        } else if (variableId > 0) {
+            return $gameVariables.value(variableId);
+        } else {
+            return 0;
+        }
+    };
+
     PluginManager.registerCommand(pluginName, "setBattlePicture", args => {
-        const actorId = args.actorId;
-        const fileName = args.fileName;
+        const actorId = _getActorId(args);
+        let fileName = args.fileName;
+        if (fileName.contains("/")) {
+            if (fileName.startsWith("pictures/")) {
+                fileName = fileName.substr(9);
+            } else {
+                fileName = "";
+            }
+        }
         if (actorId) {
             $gameActors.actor(actorId).setBattlePicture(fileName);
         }
