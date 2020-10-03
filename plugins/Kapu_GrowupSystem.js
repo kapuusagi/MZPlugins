@@ -16,6 +16,12 @@
  * @desc 加算するアクターのID。
  * @type actor
  * 
+ * @arg variableId
+ * @text 変数ID
+ * @desc アクターIDを変数で指定する場合に使用する。
+ * @default 0
+ * @type number
+ * 
  * @arg value
  * @text 増加量
  * @desc 加算する値
@@ -32,6 +38,11 @@
  * @desc 加算するアクターのID。
  * @type actor
  * 
+ * @arg variableId
+ * @text 変数ID
+ * @desc アクターIDを変数で指定する場合に使用する。
+ * @default 0
+ * @type number
  * 
  * @param maxGrowPoint
  * @text 最大成長ポイント
@@ -84,6 +95,8 @@
  *     max: {Number} 最大値。リセット時はcurrentがこの値になる。
  * };
  * 
+ * 成長ポイント表示名は TextManager.growPoint で取得できる。
+ * 
  * 
  * 独自の育成項目を追加するには、以下を実装します。
  * 1.Game_Actor.initMembersをフックして育成データを格納する場所を追加。
@@ -113,7 +126,8 @@
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * gainGrowPoint
+ *     アクターの成長ポイントを加算する。
  * 
  * ============================================
  * ノートタグ
@@ -137,20 +151,41 @@
 (() => {
     const pluginName = "Kapu_GrowupSystem";
     const parameters = PluginManager.parameters(pluginName);
-
     Game_Actor.MAX_GROW_POINT = Number(parameters["maxGrowPoint"]) || 999;
     Game_Action.EFFECT_GAIN_GROWPOINT = Number(parameters["effectCode"]) || 0;
-
     const growPointAtLevelUp = Number(parameters["growPointAtLevelUp"]) || 0;
-
     const growPointText = String(parameters["growPointText"]) || "GP";
+
     Object.defineProperty(TextManager, "growPoint", { get: () => growPointText, configurable:true});
 
-    PluginManager.registerCommand(pluginName, "gainGrowPoint", args => {
+    if (!Game_Action.EFFECT_GAIN_GROWPOINT) {
+        console.error(pluginName + ":EFFECT_GAIN_GROWPOINT is not valid.");
+    }
+
+    /**
+     * アクターIDを得る。
+     * 
+     * @param {Object} args プラグインコマンド引数
+     * @return {Number} アクターID
+     */
+    const _getActorId = function(args) {
         const actorId = Number(args.actorId) || 0;
+        const variableId = Number(args.variableId) || 0;
+        if (actorId > 0) {
+            return actorId;
+        } else if (variableId > 0) {
+            return $gameVariables.value(variableId);
+        } else {
+            return 0;
+        }
+    };
+
+
+    PluginManager.registerCommand(pluginName, "gainGrowPoint", args => {
+        const actorId = _getActorId(args);
         const value = Math.floor(Number(args.value) || 0);
         if ((actorId > 0) && (value > 0)) {
-            const actor = $dataActors.actor(actorId);
+            const actor = $gameActors.actor(actorId);
             if (actor) {
                 actor.gainGrowPoint(value);
             }
@@ -158,9 +193,9 @@
     });
 
     PluginManager.registerCommand(pluginName, "resetGrows", args => {
-        const actorId = Number(args.actorId) || 0;
+        const actorId = _getActorId(args) || 0;
         if (actorId > 0) {
-            const actor = $dataActors.actor(actorId);
+            const actor = $gameActors.actor(actorId);
             if (actor) {
                 actor.resetGrows();
             }
@@ -277,7 +312,7 @@
      * @param {Number} value 加算値
      */
     Game_Actor.prototype.gainGrowPoint = function(value) {
-        const gainValue = Math.min(maxGrowPoint - this._growPoint.max, value);
+        const gainValue = Math.min(Game_Actor.MAX_GROW_POINT - this._growPoint.max, value);
         if (gainValue) {
             this._growPoint.current += gainValue;
             this._growPoint.max += gainValue;
@@ -309,9 +344,9 @@
      * @param {GrowupItem} growupItem 育成項目
      */
     Game_Actor.prototype.growup = function(growupItem) {
-        if (growupItem.gpCost < this.growPoint()) {
+        if (growupItem.cost <= this.growPoint()) {
             if (this.applyGrowup(growupItem)) {
-                this._growPoint.current -= growupItem.gpCost;
+                this._growPoint.current -= growupItem.cost;
                 this.refresh();
             }
         }
@@ -341,7 +376,7 @@
      */
     Game_Action.prototype.testItemEffect = function(target, effect) {
         if (effect.code == Game_Action.EFFECT_GAIN_GROWPOINT) {
-            return (target.isActor() && (target.growPoint() < target.maxGrowPoint());
+            return (target.isActor() && (target.growPoint() < Game_Actor.MAX_GROW_POINT));
         } else {
             return _Game_Action_testItemEffect.call(this, target, effect);
         }
