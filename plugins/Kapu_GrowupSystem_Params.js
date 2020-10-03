@@ -360,7 +360,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 GrowupSystemテスト用に作成。動作未確認。
+ * Version.0.1.0 GrowupSystemテスト用に作成。
  */
 (() => {
     const pluginName = "Kapu_GrowupSystem_Params";
