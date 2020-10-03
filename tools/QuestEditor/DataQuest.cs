@@ -64,6 +64,10 @@ namespace QEditor
         /// 詳細メッセージ
         /// </summary>
         public string Description { get; set; } = string.Empty;
+        /// <summary>
+        /// ノートタグ
+        /// </summary>
+        public string Note { get; set; } = string.Empty;
 
         /// <summary>
         /// 値を設定する。
@@ -124,6 +128,9 @@ namespace QEditor
                 case "description":
                     Description = (string)(value);
                     break;
+                case "note":
+                    Note = (string)(value);
+                    break;
             }
         }
 
@@ -146,6 +153,7 @@ namespace QEditor
             job.Append("achieveMsg", AchieveMessage);
             job.Append("rewardMsg", RewardsMessage);
             job.Append("description", Description);
+            job.Append("note", Note);
             return job.ToString();
         }
 

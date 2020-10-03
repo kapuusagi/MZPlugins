@@ -440,6 +440,7 @@ namespace QEditor
                     dt.Rows.Add(row);
                 }
             }
+            textBoxNote.Text = quest?.Note ?? string.Empty;
 
             panelEdit.Enabled = (quest != null);
         }
@@ -995,6 +996,21 @@ namespace QEditor
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// ノートテキストボックスのテキストが変更されたときに通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnTextBoxNoteTextChanged(object sender, EventArgs e)
+        {
+            DataQuest quest = GetCurrentQuest();
+            if (quest == null)
+            {
+                return;
+            }
+            quest.Note = textBoxNote.Text;
         }
     }
 }

@@ -36,6 +36,10 @@ namespace SEditor
         /// 入荷品リストと条件
         /// </summary>
         public List<ItemEntry> ItemList { get; private set; } = new List<ItemEntry>();
+        /// <summary>
+        /// ノートタグ
+        /// </summary>
+        public string Note { get; set; } = string.Empty;
 
         /// <summary>
         /// フィールドを設定する。
@@ -65,6 +69,9 @@ namespace SEditor
                 case "sellingPriceRate":
                     SellingPriceRate = (double)(value);
                     break;
+                case "note":
+                    Note = (string)(value);
+                    break;
 
             }
         }
@@ -82,6 +89,7 @@ namespace SEditor
             job.Append("itemList", ItemList);
             job.Append("buyingPriceRate", BuyingPriceRate);
             job.Append("sellingPriceRate", SellingPriceRate);
+            job.Append("note", Note);
             return job.ToString();
         }
     }

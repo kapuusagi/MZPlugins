@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemOpen = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,6 +53,9 @@
             this.dataGridViewItems = new System.Windows.Forms.DataGridView();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonAddItem = new System.Windows.Forms.Button();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
+            this.textBoxNote = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewShops)).BeginInit();
@@ -65,6 +68,7 @@
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewItems)).BeginInit();
             this.flowLayoutPanel2.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -133,8 +137,8 @@
             this.dataGridViewShops.AllowUserToDeleteRows = false;
             this.dataGridViewShops.AllowUserToResizeColumns = false;
             this.dataGridViewShops.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.dataGridViewShops.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dataGridViewShops.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewShops.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewShops.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewShops.Location = new System.Drawing.Point(4, 4);
@@ -172,6 +176,7 @@
             // panel2
             // 
             this.panel2.Controls.Add(this.tableLayoutPanel1);
+            this.panel2.Controls.Add(this.panel3);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(200, 24);
             this.panel2.Name = "panel2";
@@ -199,7 +204,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(734, 100);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(534, 100);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // label2
@@ -371,6 +376,36 @@
             this.buttonAddItem.UseVisualStyleBackColor = true;
             this.buttonAddItem.Click += new System.EventHandler(this.OnButtonAddItemClick);
             // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.textBoxNote);
+            this.panel3.Controls.Add(this.label5);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel3.Location = new System.Drawing.Point(534, 0);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(200, 100);
+            this.panel3.TabIndex = 1;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Dock = System.Windows.Forms.DockStyle.Top;
+            this.label5.Location = new System.Drawing.Point(0, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(29, 12);
+            this.label5.TabIndex = 0;
+            this.label5.Text = "Note";
+            // 
+            // textBoxNote
+            // 
+            this.textBoxNote.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxNote.Location = new System.Drawing.Point(0, 12);
+            this.textBoxNote.Multiline = true;
+            this.textBoxNote.Name = "textBoxNote";
+            this.textBoxNote.Size = new System.Drawing.Size(200, 88);
+            this.textBoxNote.TabIndex = 1;
+            this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -401,6 +436,8 @@
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewItems)).EndInit();
             this.flowLayoutPanel2.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -432,6 +469,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown numericUpDownBuyingPriceRate;
         private System.Windows.Forms.NumericUpDown numericUpDownSellingPriceRate;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.TextBox textBoxNote;
+        private System.Windows.Forms.Label label5;
     }
 }
 

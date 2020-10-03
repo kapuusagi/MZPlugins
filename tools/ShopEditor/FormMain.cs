@@ -101,13 +101,13 @@ namespace SEditor
             dataGridViewItems.DataSource = dt;
 
             dataGridViewItems.Columns[0].Width = 240;
-            dataGridViewItems.Columns[1].Width = 48;
+            dataGridViewItems.Columns[1].Width = 64;
             dataGridViewItems.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dataGridViewItems.Columns[2].Width = 48;
+            dataGridViewItems.Columns[2].Width = 64;
             dataGridViewItems.Columns[2].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dataGridViewItems.Columns[3].Width = 48;
+            dataGridViewItems.Columns[3].Width = 64;
             dataGridViewItems.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dataGridViewItems.Columns[4].Width = 48;
+            dataGridViewItems.Columns[4].Width = 64;
             dataGridViewItems.Columns[4].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dataGridViewItems.Columns[5].Width = 360;
         }
@@ -403,6 +403,7 @@ namespace SEditor
                 numericUpDownBuyingPriceRate.Value = 100;
                 numericUpDownSellingPriceRate.Value = 50;
                 ((DataTable)(dataGridViewShops.DataSource)).Rows.Clear();
+                textBoxNote.Text = string.Empty;
             }
             else
             {
@@ -414,6 +415,7 @@ namespace SEditor
                 numericUpDownBuyingPriceRate.Value = Math.Max(1, Math.Min(10000, buyingPriceRate));
                 int sellingPriceRate = (int)(shop.SellingPriceRate * 100);
                 numericUpDownSellingPriceRate.Value = Math.Max(1, Math.Min(10000, sellingPriceRate));
+                textBoxNote.Text = shop.Note;
                 UpdateDataGridViewItems();
             }
             textBoxShopName.Enabled = (shop != null);
@@ -705,6 +707,21 @@ namespace SEditor
                 shop.SellingPriceRate = rate;
             }
 
+        }
+
+        /// <summary>
+        /// ノートテキストボックスのテキストが変更されたときに処理を行う。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnTextBoxNoteTextChanged(object sender, EventArgs e)
+        {
+            DataShop shop = GetSelectedShop();
+            if (shop == null)
+            {
+                return;
+            }
+            shop.Note = textBoxNote.Text;
         }
     }
 }

@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.panel1 = new System.Windows.Forms.Panel();
             this.dataGridViewQuests = new System.Windows.Forms.DataGridView();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -52,8 +52,11 @@
             this.textBoxRewardMsg = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.numericUpDownGuildExp = new System.Windows.Forms.NumericUpDown();
+            this.buttonGenerateRewardMessage = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.textBoxDescription = new System.Windows.Forms.TextBox();
+            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.buttonGenerateDescription = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label6 = new System.Windows.Forms.Label();
             this.radioButtonQtEvent = new System.Windows.Forms.RadioButton();
@@ -71,6 +74,7 @@
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.label10 = new System.Windows.Forms.Label();
             this.textBoxAchieveMsg = new System.Windows.Forms.TextBox();
+            this.buttonGenerateAchieveMessage = new System.Windows.Forms.Button();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.label5 = new System.Windows.Forms.Label();
             this.textBoxEntrustCondition = new System.Windows.Forms.TextBox();
@@ -78,14 +82,12 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxName = new System.Windows.Forms.TextBox();
+            this.buttonGenerateName = new System.Windows.Forms.Button();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
             this.comboBoxGuildRank = new System.Windows.Forms.ComboBox();
-            this.buttonGenerateDescription = new System.Windows.Forms.Button();
-            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-            this.buttonGenerateName = new System.Windows.Forms.Button();
-            this.buttonGenerateAchieveMessage = new System.Windows.Forms.Button();
-            this.buttonGenerateRewardMessage = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.textBoxNote = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewQuests)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -98,6 +100,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardGold)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownGuildExp)).BeginInit();
             this.groupBox2.SuspendLayout();
+            this.flowLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanelQtSubjugation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEnemyCount)).BeginInit();
@@ -110,7 +113,7 @@
             this.panel2.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
-            this.flowLayoutPanel2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -128,8 +131,8 @@
             this.dataGridViewQuests.AllowUserToAddRows = false;
             this.dataGridViewQuests.AllowUserToDeleteRows = false;
             this.dataGridViewQuests.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.dataGridViewQuests.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dataGridViewQuests.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewQuests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewQuests.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewQuests.Location = new System.Drawing.Point(0, 0);
@@ -215,6 +218,7 @@
             // panelEdit
             // 
             this.panelEdit.Controls.Add(this.groupBox1);
+            this.panelEdit.Controls.Add(this.groupBox3);
             this.panelEdit.Controls.Add(this.groupBox2);
             this.panelEdit.Controls.Add(this.tableLayoutPanel1);
             this.panelEdit.Controls.Add(this.tableLayoutPanel3);
@@ -232,7 +236,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 295);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(600, 252);
+            this.groupBox1.Size = new System.Drawing.Size(476, 252);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Rewards";
@@ -251,7 +255,7 @@
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(594, 113);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(470, 113);
             this.tableLayoutPanel6.TabIndex = 1;
             // 
             // label8
@@ -265,7 +269,7 @@
             // 
             // buttonAddItem
             // 
-            this.buttonAddItem.Location = new System.Drawing.Point(516, 3);
+            this.buttonAddItem.Location = new System.Drawing.Point(392, 3);
             this.buttonAddItem.Name = "buttonAddItem";
             this.buttonAddItem.Size = new System.Drawing.Size(75, 23);
             this.buttonAddItem.TabIndex = 2;
@@ -285,7 +289,7 @@
             this.dataGridViewRewardItems.RowHeadersVisible = false;
             this.dataGridViewRewardItems.RowTemplate.Height = 21;
             this.dataGridViewRewardItems.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewRewardItems.Size = new System.Drawing.Size(468, 107);
+            this.dataGridViewRewardItems.Size = new System.Drawing.Size(344, 107);
             this.dataGridViewRewardItems.TabIndex = 1;
             this.dataGridViewRewardItems.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnDataGridViewRewardItemsCellValueChanged);
             this.dataGridViewRewardItems.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.OnDataGridViewRewardItemsRowsRemoved);
@@ -310,7 +314,7 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(594, 121);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(470, 121);
             this.tableLayoutPanel5.TabIndex = 0;
             // 
             // numericUpDownRewardGold
@@ -353,7 +357,7 @@
             this.textBoxRewardMsg.Location = new System.Drawing.Point(63, 3);
             this.textBoxRewardMsg.Multiline = true;
             this.textBoxRewardMsg.Name = "textBoxRewardMsg";
-            this.textBoxRewardMsg.Size = new System.Drawing.Size(447, 66);
+            this.textBoxRewardMsg.Size = new System.Drawing.Size(323, 66);
             this.textBoxRewardMsg.TabIndex = 0;
             this.textBoxRewardMsg.TextChanged += new System.EventHandler(this.OnTextBoxRewardMsgTextChanged);
             // 
@@ -391,6 +395,16 @@
             0});
             this.numericUpDownGuildExp.ValueChanged += new System.EventHandler(this.OnNumericUpDownGuildExpValueChanged);
             // 
+            // buttonGenerateRewardMessage
+            // 
+            this.buttonGenerateRewardMessage.Location = new System.Drawing.Point(392, 3);
+            this.buttonGenerateRewardMessage.Name = "buttonGenerateRewardMessage";
+            this.buttonGenerateRewardMessage.Size = new System.Drawing.Size(75, 23);
+            this.buttonGenerateRewardMessage.TabIndex = 1;
+            this.buttonGenerateRewardMessage.Text = "Generate";
+            this.buttonGenerateRewardMessage.UseVisualStyleBackColor = true;
+            this.buttonGenerateRewardMessage.Click += new System.EventHandler(this.OnButtonGenerateRewardMessage);
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.textBoxDescription);
@@ -412,6 +426,27 @@
             this.textBoxDescription.Size = new System.Drawing.Size(594, 52);
             this.textBoxDescription.TabIndex = 1;
             this.textBoxDescription.TextChanged += new System.EventHandler(this.OnTextBoxDescriptionTextChanged);
+            // 
+            // flowLayoutPanel2
+            // 
+            this.flowLayoutPanel2.AutoSize = true;
+            this.flowLayoutPanel2.Controls.Add(this.buttonGenerateDescription);
+            this.flowLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 15);
+            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(594, 29);
+            this.flowLayoutPanel2.TabIndex = 0;
+            // 
+            // buttonGenerateDescription
+            // 
+            this.buttonGenerateDescription.Location = new System.Drawing.Point(516, 3);
+            this.buttonGenerateDescription.Name = "buttonGenerateDescription";
+            this.buttonGenerateDescription.Size = new System.Drawing.Size(75, 23);
+            this.buttonGenerateDescription.TabIndex = 0;
+            this.buttonGenerateDescription.Text = "Generate";
+            this.buttonGenerateDescription.UseVisualStyleBackColor = true;
+            this.buttonGenerateDescription.Click += new System.EventHandler(this.OnButtonGenerateDescriptionClick);
             // 
             // tableLayoutPanel1
             // 
@@ -649,6 +684,17 @@
             this.textBoxAchieveMsg.TabIndex = 1;
             this.textBoxAchieveMsg.TextChanged += new System.EventHandler(this.OnTextBoxAchieveMsgTextChanged);
             // 
+            // buttonGenerateAchieveMessage
+            // 
+            this.buttonGenerateAchieveMessage.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.buttonGenerateAchieveMessage.Location = new System.Drawing.Point(516, 3);
+            this.buttonGenerateAchieveMessage.Name = "buttonGenerateAchieveMessage";
+            this.buttonGenerateAchieveMessage.Size = new System.Drawing.Size(75, 18);
+            this.buttonGenerateAchieveMessage.TabIndex = 2;
+            this.buttonGenerateAchieveMessage.Text = "Generate";
+            this.buttonGenerateAchieveMessage.UseVisualStyleBackColor = true;
+            this.buttonGenerateAchieveMessage.Click += new System.EventHandler(this.OnButtonGenerateAchieveMessageClick);
+            // 
             // tableLayoutPanel3
             // 
             this.tableLayoutPanel3.ColumnCount = 2;
@@ -729,6 +775,17 @@
             this.textBoxName.TabIndex = 1;
             this.textBoxName.TextChanged += new System.EventHandler(this.OnTextBoxNameTextChanged);
             // 
+            // buttonGenerateName
+            // 
+            this.buttonGenerateName.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.buttonGenerateName.Location = new System.Drawing.Point(287, 7);
+            this.buttonGenerateName.Name = "buttonGenerateName";
+            this.buttonGenerateName.Size = new System.Drawing.Size(75, 23);
+            this.buttonGenerateName.TabIndex = 2;
+            this.buttonGenerateName.Text = "Generate";
+            this.buttonGenerateName.UseVisualStyleBackColor = true;
+            this.buttonGenerateName.Click += new System.EventHandler(this.OnButtonGenerateNameClick);
+            // 
             // tableLayoutPanel4
             // 
             this.tableLayoutPanel4.ColumnCount = 2;
@@ -776,58 +833,27 @@
             this.comboBoxGuildRank.TabIndex = 1;
             this.comboBoxGuildRank.SelectedValueChanged += new System.EventHandler(this.OnComboBoxGuildRankSelectedValueChanged);
             // 
-            // buttonGenerateDescription
+            // groupBox3
             // 
-            this.buttonGenerateDescription.Location = new System.Drawing.Point(516, 3);
-            this.buttonGenerateDescription.Name = "buttonGenerateDescription";
-            this.buttonGenerateDescription.Size = new System.Drawing.Size(75, 23);
-            this.buttonGenerateDescription.TabIndex = 0;
-            this.buttonGenerateDescription.Text = "Generate";
-            this.buttonGenerateDescription.UseVisualStyleBackColor = true;
-            this.buttonGenerateDescription.Click += new System.EventHandler(this.OnButtonGenerateDescriptionClick);
+            this.groupBox3.Controls.Add(this.textBoxNote);
+            this.groupBox3.Dock = System.Windows.Forms.DockStyle.Right;
+            this.groupBox3.Location = new System.Drawing.Point(476, 295);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(124, 252);
+            this.groupBox3.TabIndex = 16;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Note";
+            this.groupBox3.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
             // 
-            // flowLayoutPanel2
+            // textBoxNote
             // 
-            this.flowLayoutPanel2.AutoSize = true;
-            this.flowLayoutPanel2.Controls.Add(this.buttonGenerateDescription);
-            this.flowLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 15);
-            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(594, 29);
-            this.flowLayoutPanel2.TabIndex = 0;
-            // 
-            // buttonGenerateName
-            // 
-            this.buttonGenerateName.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.buttonGenerateName.Location = new System.Drawing.Point(287, 7);
-            this.buttonGenerateName.Name = "buttonGenerateName";
-            this.buttonGenerateName.Size = new System.Drawing.Size(75, 23);
-            this.buttonGenerateName.TabIndex = 2;
-            this.buttonGenerateName.Text = "Generate";
-            this.buttonGenerateName.UseVisualStyleBackColor = true;
-            this.buttonGenerateName.Click += new System.EventHandler(this.OnButtonGenerateNameClick);
-            // 
-            // buttonGenerateAchieveMessage
-            // 
-            this.buttonGenerateAchieveMessage.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.buttonGenerateAchieveMessage.Location = new System.Drawing.Point(516, 3);
-            this.buttonGenerateAchieveMessage.Name = "buttonGenerateAchieveMessage";
-            this.buttonGenerateAchieveMessage.Size = new System.Drawing.Size(75, 18);
-            this.buttonGenerateAchieveMessage.TabIndex = 2;
-            this.buttonGenerateAchieveMessage.Text = "Generate";
-            this.buttonGenerateAchieveMessage.UseVisualStyleBackColor = true;
-            this.buttonGenerateAchieveMessage.Click += new System.EventHandler(this.OnButtonGenerateAchieveMessageClick);
-            // 
-            // buttonGenerateRewardMessage
-            // 
-            this.buttonGenerateRewardMessage.Location = new System.Drawing.Point(516, 3);
-            this.buttonGenerateRewardMessage.Name = "buttonGenerateRewardMessage";
-            this.buttonGenerateRewardMessage.Size = new System.Drawing.Size(75, 23);
-            this.buttonGenerateRewardMessage.TabIndex = 1;
-            this.buttonGenerateRewardMessage.Text = "Generate";
-            this.buttonGenerateRewardMessage.UseVisualStyleBackColor = true;
-            this.buttonGenerateRewardMessage.Click += new System.EventHandler(this.OnButtonGenerateRewardMessage);
+            this.textBoxNote.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxNote.Location = new System.Drawing.Point(3, 15);
+            this.textBoxNote.Multiline = true;
+            this.textBoxNote.Name = "textBoxNote";
+            this.textBoxNote.Size = new System.Drawing.Size(118, 234);
+            this.textBoxNote.TabIndex = 0;
+            this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
             // 
             // FormMain
             // 
@@ -859,6 +885,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownGuildExp)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.flowLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.flowLayoutPanelQtSubjugation.ResumeLayout(false);
@@ -877,7 +904,8 @@
             this.tableLayoutPanel2.PerformLayout();
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
-            this.flowLayoutPanel2.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -942,6 +970,8 @@
         private System.Windows.Forms.Button buttonGenerateName;
         private System.Windows.Forms.Button buttonGenerateAchieveMessage;
         private System.Windows.Forms.Button buttonGenerateRewardMessage;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.TextBox textBoxNote;
     }
 }
 
