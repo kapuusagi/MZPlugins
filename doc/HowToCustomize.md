@@ -746,6 +746,7 @@ id#のコモンイベントを呼び出す。正確には呼び出し予約す�
 1. ImageManager.loadXXXを使ってBitmapを用意する。
 
     Bitmapが読み込み完了していない(isReady()がfalse)場合、 __addLoadListener__ で読み込み完了時のハンドラを追加して、読み込み完了時に表示処理する。
+    addLoadListener()はあまりよろしくないらしい。Spriteの読み出し処理が阻害されるっぽい。
 
 2. 表示処理自体はSpriteオブジェクトを構築し、bitmapメンバに読み込んだビットマップを設定する。
 
