@@ -3,7 +3,7 @@
  * @plugindesc TWLDシステム向けに作成したショッププラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * ■ openShop
+ * 
  * @command openShop
  * @text ショップを開く
  * @desc 指定したIDのお店の売買シーンを開始します。
@@ -14,25 +14,24 @@
  * @type number
  * @default 1
  * 
+ * @arg mode
+ * @text モード
+ * @desc 店のモード
+ * @type select
+ * @option 購入・売却可
+ * @value 0
+ * @option 購入のみ
+ * @value 1
+ * @option 売却のみ
+ * @value 2
+ * 
  * @arg clerkFileName
  * @text 店員画像
  * @desc 店員として表示する画像ファイル名。
- * @type file
  * @dir pictures
+ * @type file
  * 
- * @arg buyable
- * @text 購入可能
- * @desc 店からの購入が可能かどうか
- * @type boolean
- * @default true
  * 
- * @arg sellable
- * @text 売却可能
- * @desc 店への売却が可能かどうか。
- * @type boolean
- * @default true
- * 
- * ■ updateShop
  * @command updateShop
  * @text 品揃えを更新
  * @desc 指定したIDのお店の品揃えを更新します。0だと全ての店。
@@ -43,7 +42,7 @@
  * @type number
  * @default 1
  * 
- * ■ setShopLevel
+ * 
  * @command setShopLevel
  * @text お店のレベルを設定
  * @desc お店のレベルを設定します。
@@ -59,6 +58,11 @@
  * @desc 設定するショップレベル。
  * @type number
  * @default 1
+ * 
+ * @param labelStock
+ * @text 在庫数ラベル名
+ * @desc 購入品リストの在庫数表記に使用する文字列
+ * @type string
  * 
  * @help 
  * TWLDシステム向けに作成したショップです。
@@ -116,14 +120,14 @@ function Game_Shop() {
  * Game_Shopの配列。
  */
 function Game_Shops() {
-    this.initialize.apply(this);
+    this.initialize(...arguments);
 }
 /**
  * Window_TwldShopwCommand
  * TwldShopのコマンドウィンドウ。
  */
 function Window_TwldShopCommand() {
-    this.initialize(this);
+    this.initialize(...arguments);
 }
 
 /**
@@ -132,15 +136,15 @@ function Window_TwldShopCommand() {
  * 店売り品のウィンドウ。
  */
 function Window_TwldShopBuy() {
-    this.initialize.apply(this, arguments);
+    this.initialize(...arguments);
 }
 
 /**
- * Window_TwldShopItemCateogry
+ * Window_TwldShopItemCategory
  * 
  * ウィンドウショップのアイテムカテゴリ選択ウィンドウ
  */
-function Window_TwldShopItemCateogry() {
+function Window_TwldShopItemCategory() {
     this.initialize(...arguments);
 };
 
@@ -150,7 +154,7 @@ function Window_TwldShopItemCateogry() {
  * 店の処理をするシーン。
  */
 function Scene_TwldShop() {
-    this.initialize.apply(this,arguments);
+    this.initialize(...arguments);
 }
 
 
@@ -159,15 +163,26 @@ function Scene_TwldShop() {
     "use strict";
 
     const pluginName = "Kapu_Twld_Shops";
+    const parameters = PluginManager.parameters(pluginName);
+
+    const labelStock = String(parameters["labelStock"]) || "Stock";
 
     PluginManager.registerCommand(pluginName, "openShop", args => {
         const id = Number(args.id) || 0;
-        const buyable = Boolean(args.buyable) || true;
-        const sellable = Boolean(args.sellable) || true;
+        let clerkFileName = String(args.clerkFileName) || "";
+        if (clerkFileName.contains('/')) {
+            if (clerkFileName.startsWith("pictures/")) {
+                clerkFileName = clerkFileName.substr(9);
+            } else {
+                clerkFileName = "";
+            }
+        }
+        const mode = Number(args.mode) || Game_Shop.SHOP_MODE_SELL_AND_PURCHASE;
         if (id && id < $dataShops.length) {
             SceneManager.push(Scene_TwldShop);
-            SceneManager.prepareNextScene(
-                args.id, args.clerkFileName, buyable, sellable);
+            SceneManager.prepareNextScene(id, mode, clerkFileName);
+
+            
         }
     });
     
@@ -186,9 +201,9 @@ function Scene_TwldShop() {
         }
     });
 
-    Scene_TwldShop.SHOP_MODE_SELL_AND_PURCHASE = 0;
-    Scene_TwldShop.SHOP_MODE_SELL_ONLY = 1;
-    Scene_TwldShop.SHOP_MODE_PURCHASE_ONLY = 2;
+    Game_Shop.SHOP_MODE_SELL_AND_PURCHASE = 0;
+    Game_Shop.SHOP_MODE_PURCHASE_ONLY = 1;
+    Game_Shop.SHOP_MODE_SELL_ONLY = 2;
 
 
     //------------------------------------------------------------------------------
@@ -418,7 +433,7 @@ function Scene_TwldShop() {
      * @param {ItemEntry} itemEntry アイテムエントリ
      */
     Game_Shop.prototype.addStockCount = function(itemEntry) {
-        const variance = itementry.maxCount - minCount;
+        const variance = itemEntry.maxCount - itemEntry.minCount;
         return Math.randomInt(variance + 1) + itemEntry.minCount;
     };
 
@@ -740,11 +755,12 @@ function Scene_TwldShop() {
      * Window_TwldShopBuyを構築する。
      * 
      * @param {Rectangle} ウィンドウ矩形領域。
+     * @param {Game_Shop} ショップデータ
      */
-    Window_TwldShopBuy.prototype.initialize = function(rect) {
+    Window_TwldShopBuy.prototype.initialize = function(rect, shop) {
         this._shop = shop;
         this._money = 0;
-        Window_Selectable.prototype.initialize.call(rect);
+        Window_Selectable.prototype.initialize.call(this, rect);
         this.refresh();
         this.select(0);
     };
@@ -753,7 +769,8 @@ function Scene_TwldShop() {
      * ヘルプメッセージを更新する。
      */
     Window_TwldShopBuy.prototype.updateHelp = function() {
-        this.setHelpWIndowItem(this.item());
+        Window_Selectable.prototype.updateHelp.call(this);
+        this._helpWindow.setItem(this.item());
     }
 
     /**
@@ -838,10 +855,10 @@ function Scene_TwldShop() {
             var priceWidth = 96;
             var numWidth = 64;
             var nameWidth = rect.width - numWidth - priceWidth;
-            rect.width -= this.textPadding();
+            rect.width -= this.itemPadding();
             this.changePaintOpacity(this.isEnabled(item));
             this.drawItemName(item, rect.x, rect.y, nameWidth);
-            this.drawText("在庫:" + this.stok(item), rect.x + nameWidth, rect.y, numWidth, "right");
+            this.drawText(labelStock + ":" + this.stok(item), rect.x + nameWidth, rect.y, numWidth, "right");
             this.drawText(this.price(item), rect.x + nameWidth + numWidth,
                           rect.y, priceWidth, "right");
             this.changePaintOpacity(true);
@@ -855,6 +872,11 @@ function Scene_TwldShop() {
     Window_TwldShopCommand.prototype = Object.create(Window_Command.prototype);
     Window_TwldShopCommand.prototype.constructor = Window_TwldShopCommand;
 
+    /**
+     * Window_TwldShopCommandを初期化する。
+     * 
+     * @param {Rectangle} rect ウィンドウ矩形領域
+     */
     Window_TwldShopCommand.prototype.initialize = function(rect) {
         Window_Command.prototype.initialize.call(this, rect);
         this._buyable = true;
@@ -875,7 +897,7 @@ function Scene_TwldShop() {
      * 
      * @param {Boolean} enabled 売却可能かどうか
      */
-    Window_TwldShopCommand.prototype.setEnableSell = function(enabled) {
+    Window_TwldShopCommand.prototype.setSellable = function(enabled) {
         this._sellable = enabled;
         this.refresh();
     };
@@ -899,14 +921,15 @@ function Scene_TwldShop() {
     };
     //------------------------------------------------------------------------------
     // Window_TwldShopItemCategory
-    Window_TwldShopItemCateogry.prototype = Object.create(Window_Command.prototype);
-    Window_TwldShopItemCateogry.prototype.constructor = Window_TwldShopItemCateogry;
+    Window_TwldShopItemCategory.prototype = Object.create(Window_Command.prototype);
+    Window_TwldShopItemCategory.prototype.constructor = Window_TwldShopItemCategory;
 
     /**
+     * Window_TwldShopItemCategoryを初期化する。
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
-    Window_TwldShopItemCateogry.prototype.initialize = function(rect) {
+    Window_TwldShopItemCategory.prototype.initialize = function(rect) {
         Window_Command.prototype.initialize.call(this, rect);
     };
 
@@ -925,7 +948,7 @@ function Scene_TwldShop() {
      * 
      * @param {Window_ItemList} itemWindow アイテムリストウィンドウ
      */
-    Window_TwldShopItemCateogry.prototype.setItemWindow = function(itemWindow) {
+    Window_TwldShopItemCategory.prototype.setItemWindow = function(itemWindow) {
         this._itemWindow = itemWindow;
     }
 
@@ -934,14 +957,14 @@ function Scene_TwldShop() {
      * 
      * @return {Number} カラムス
      */
-    Window_TwldShopItemCateogry.prototype.maxCols = function() {
+    Window_TwldShopItemCategory.prototype.maxCols = function() {
         return 1;
     };
 
     /**
      * コマンドリストを構築する。
      */
-    Window_TwldShopItemCateogry.prototype.makeCommandList = function() {
+    Window_TwldShopItemCategory.prototype.makeCommandList = function() {
         this.addCommand(TextManager.item, "item", true);
         this.addCommand(TextManager.weapon, "weapon", true);
         this.addCommand(TextManager.armor, "armor", true);
@@ -968,15 +991,11 @@ function Scene_TwldShop() {
      * @param {Number} id 店ID番号
      * @param {Number} mode ショップモード
      * @param {String} clerkFileName 店員画像ファイル名。店員画像が無い場合にはnull
-     * @param {Boolean} 購入可能
-     * @param {Boolean} 売却可能
      */
-    Scene_TwldShop.prototype.prepare = function(id, mode, clerkFileName, buyable, sellable) {
+    Scene_TwldShop.prototype.prepare = function(id, mode, clerkFileName) {
         this._shop = $gameShops.getShop(id); // Game_Shopオブジェクト
         this._mode = mode;
         this._clerkFileName = clerkFileName || "";
-        this._buyable = buyable;
-        this._sellable = sellable;
     };
 
     /**
@@ -1028,8 +1047,12 @@ function Scene_TwldShop() {
     Scene_TwldShop.prototype.createCommandWindow = function() {
         const rect = this.commandWindowRect();
         this._commandWindow = new Window_TwldShopCommand(rect);
-        this._commandWindow.setBuyable(this._buyable);
-        this._commandWindow.setSellable(this._sellable);
+        const buyable = (this._mode === Game_Shop.SHOP_MODE_SELL_AND_PURCHASE)
+                || (this._mode === Game_Shop.SHOP_MODE_PURCHASE_ONLY);
+        const sellable = (this._mode === Game_Shop.SHOP_MODE_SELL_AND_PURCHASE)
+                || (this._mode === Game_Shop.SHOP_MODE_SELL_ONLY);
+        this._commandWindow.setBuyable(buyable);
+        this._commandWindow.setSellable(sellable);
         this._commandWindow.setHandler("ok",     this.onCommandOk.bind(this));
         this._commandWindow.setHandler("cancel", this.onCommandCancel.bind(this));
         this.addWindow(this._commandWindow);
@@ -1044,7 +1067,7 @@ function Scene_TwldShop() {
         const ww = this.mainCommandWidth();
         const wh = this.calcWindowHeight(3, true);
         const wx = Graphics.boxWidth - ww;
-        const goldWindowRect = goldWindowRect();
+        const goldWindowRect = this.goldWindowRect();
         const wy = goldWindowRect.y + goldWindowRect.height;
         return new Rectangle(wx, wy, ww, wh);
     };
@@ -1053,11 +1076,7 @@ function Scene_TwldShop() {
      * 購入ウィンドウを作成する。
      */
     Scene_TwldShop.prototype.createBuyWindow = function() {
-        var x = 0;
-        var y = this._helpWindow.height;
-        var width = 456;
-        var height = Graphics.boxHeight - y;
-        this._buyWindow = new Window_TwldShopBuy(x, y, width, height, this._shop);
+        this._buyWindow = new Window_TwldShopBuy(this.twldShopBuyWindowRect(), this._shop);
         this._buyWindow.setHelpWindow(this._helpWindow);
         this._buyWindow.hide();
         this._buyWindow.setHandler("ok", this.onBuyOk.bind(this));
@@ -1071,10 +1090,11 @@ function Scene_TwldShop() {
      * @return {Rectangle} ウィンドウ矩形領域。
      */
     Scene_TwldShop.prototype.twldShopBuyWindowRect = function() {
-        const goldWindowRect = goldWindowRect();
+        const goldWindowRect = this.goldWindowRect();
         const ww = Graphics.boxWidth - this.mainCommandWidth();
         const wh = this.mainAreaHeight() - goldWindowRect.height;
-        const wy = goldWindowRect.y + goldWindowRect.height;
+        const wy = goldWindowRect.y; // + goldWindowRect.height;
+        const wx = 0;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -1096,11 +1116,12 @@ function Scene_TwldShop() {
      * 
      * @return {Rectangle} ウィンドウ矩形領域。
      */
-    Scene_TwldShop.prototype.createSellWindow = function() {
-        const goldWindowRect = goldWindowRect();
+    Scene_TwldShop.prototype.sellWindowRect = function() {
+        const goldWindowRect = this.goldWindowRect();
         const ww = Graphics.boxWidth - this.mainCommandWidth();
         const wh = this.mainAreaHeight() - goldWindowRect.height;
         const wy = goldWindowRect.y + goldWindowRect.height;
+        const wx = 0;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -1115,7 +1136,6 @@ function Scene_TwldShop() {
         this._categoryWindow.hide();
         this._categoryWindow.setHandler("ok", this.onCategoryOk.bind(this));
         this._categoryWindow.setHandler("cancel", this.onCategoryCancel.bind(this));
-        this._categoryWindow.setHandler("itemchange", this.onCategoryItemChange.bind(this));
         this.addWindow(this._categoryWindow);
     };
 
@@ -1150,8 +1170,8 @@ function Scene_TwldShop() {
      */
     Scene_TwldShop.prototype.numberWindowRect = function() {
         const ww = 450;
-        const wh = this.calcWindowHeight(3, true);
-        const wx = (Graphicx.boxWidth - ww) / 2;
+        const wh = this.calcWindowHeight(8, true);
+        const wx = (Graphics.boxWidth - ww) / 2;
         const wy = this.mainAreaTop() + (this.mainAreaHeight() - wh) / 2;
         return new Rectangle(wx, wy, ww, wh);
     };
@@ -1194,8 +1214,8 @@ function Scene_TwldShop() {
      * @return {Boolean} 購入操作ができる場合にはtrue, できない場合にはfalse
      */
     Scene_TwldShop.prototype.isEnableBuy = function() {
-        return ((this._mode === Scene_TwldShop.SHOP_MODE_SELL_AND_PURCHASE)
-                || (this._mode === Scene_TwldShop.SHOP_MODE_PURCHASE_ONLY));
+        return ((this._mode === Game_Shop.SHOP_MODE_SELL_AND_PURCHASE)
+                || (this._mode === Game_Shop.SHOP_MODE_PURCHASE_ONLY));
     };
 
     /**
@@ -1203,8 +1223,8 @@ function Scene_TwldShop() {
      * @return {Boolean} 売却操作ができる場合にはtrue, できない場合にはfalse
      */
     Scene_TwldShop.prototype.isEnableSell = function() {
-        return ((this._mode === Scene_TwldShop.SHOP_MODE_SELL_AND_PURCHASE)
-                || (this._mode === Scene_TwldShop.SHOP_MODE_SELL_ONLY));
+        return ((this._mode === Game_Shop.SHOP_MODE_SELL_AND_PURCHASE)
+                || (this._mode === Game_Shop.SHOP_MODE_SELL_ONLY));
     };
 
     /**
@@ -1463,12 +1483,10 @@ function Scene_TwldShop() {
         switch (this._commandWindow.currentSymbol()) {
             case "buy":
                 this._buyWindow.refresh();
-                this._helpWindow.setItme(this._buyWindow.item());
                 this._buyWindow.activate();
                 break;
             case "sell":
                 this._sellWindow.refresh();
-                this._helpWindow.setItem(this._sellWindow.item());
                 this._sellWindow.activate();
                 break;
         }
