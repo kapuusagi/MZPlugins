@@ -177,6 +177,10 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.1 装備解除時、解除した個別アイテムが、
+ *               初期化された別のアイテムになってしまう不具合を修正した。
+ *               個別アイテム装備変更時、変更対象が同じベースアイテムだと、
+ *               装備変更できない不具合を修正した。
  * Version.0.4.0 アイテム所持数を超えて入手できなかった場合に、
  *               コモンイベント及び条件分岐で通知する仕組みを追加した。
  *               アイテム所持可能数の処理が誤っていたので修正した。
@@ -752,7 +756,7 @@
      * @return {Boolean} 装備中の場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isEquipped = function(item) {
-        if (DataManager.isIndependent(item) && !item.baseItemid) {
+        if (DataManager.isIndependent(item) && !DataManager.isIndependentItem(item)) {
             // 個別アイテムのベースアイテムが指定された場合、
             // IDが一致しているものを持っているかどうかで判定する。
             return (this.findEquippedSlot(item) >= 0);
@@ -783,7 +787,7 @@
     };
 
     /**
-     * 装備中スロット番号を得る。
+     * baseItemを装備しているスロット番号を得る。
      * 
      * @param {Object} baseItem ベースアイテム(DataWeapon/DataArmor)
      * @return {Number} 装備中スロット番号。該当するものが無い場合には-1。
@@ -903,7 +907,9 @@
     Game_Party.prototype.gainIndependentItem = function(item, amount, includeEquip = false) {
         if (amount > 0) {
             for (let i = 0; i < amount; i++) {
-                const newItem = DataManager.registerNewIndependentData(item);
+                // Note: 装備を解除したときにもgainItem()がコールされる。
+                const newItem = DataManager.isIndependentItem(item)
+                        ? item : DataManager.registerNewIndependentData(item);
                 if (newItem) {
                     let container = this.itemContainer(item); // newItemじゃなくてitemを渡して効率化
                     container[newItem.id] = 1;
