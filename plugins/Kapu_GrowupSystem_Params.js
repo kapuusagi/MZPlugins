@@ -179,7 +179,7 @@
  * @text MAT成長レート
  * @desc 1割り振る毎に加算するMATの値。
  * @type number
- * @matault 5
+ * @default 5
  * @min 1
  * @parent mat
  * 
@@ -187,7 +187,7 @@
  * @text matコストレート
  * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
  * @type number
- * @matault 1
+ * @default 1
  * @min 1
  * @parent mat
  * 
@@ -195,7 +195,7 @@
  * @text アイコンインデックス
  * @desc 育成画面に表示するアイコン番号
  * @type number
- * @matault 0
+ * @default 0
  * @min 0
  * @parent mat
  * 
@@ -203,14 +203,14 @@
  * @text 育成項目名
  * @desc 育成画面で表示する名前
  * @type string
- * @matault MATが上昇します。
+ * @default MATが上昇します。
  * @parent mat
  * 
  * @param itemDescription4
  * @text 説明
  * @desc 育成画面に表示する項目名
  * @type string
- * @matault MATが向上します。
+ * @default MATが向上します。
  * @parent mat
  * 
  * @param mdf
@@ -220,7 +220,7 @@
  * @text MDF成長レート
  * @desc 1割り振る毎に加算するMDFの値。
  * @type number
- * @mdfault 3
+ * @default 3
  * @min 1
  * @parent mdf
  * 
@@ -228,7 +228,7 @@
  * @text mdfコストレート
  * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
  * @type number
- * @mdfault 1
+ * @default 1
  * @min 1
  * @parent mdf
  * 
@@ -236,7 +236,7 @@
  * @text アイコンインデックス
  * @desc 育成画面に表示するアイコン番号
  * @type number
- * @mdfault 0
+ * @default 0
  * @min 0
  * @parent mdf
  * 
@@ -244,14 +244,14 @@
  * @text 育成項目名
  * @desc 育成画面で表示する名前
  * @type string
- * @mdfault MDFが上昇します。
+ * @default MDFが上昇します。
  * @parent mdf
  * 
  * @param itemDescription5
  * @text 説明
  * @desc 育成画面に表示する項目名
  * @type string
- * @mdfault MDFが向上します。
+ * @default MDFが向上します。
  * @parent mdf
  * 
  * @param agi
@@ -261,7 +261,7 @@
  * @text AGI成長レート
  * @desc 1割り振る毎に加算するAGIの値。
  * @type number
- * @agiault 1
+ * @default 1
  * @min 1
  * @parent agi
  * 
@@ -269,7 +269,7 @@
  * @text agiコストレート
  * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
  * @type number
- * @agiault 1
+ * @default 1
  * @min 1
  * @parent agi
  * 
@@ -277,7 +277,7 @@
  * @text アイコンインデックス
  * @desc 育成画面に表示するアイコン番号
  * @type number
- * @agiault 0
+ * @default 0
  * @min 0
  * @parent agi
  * 
@@ -285,14 +285,14 @@
  * @text 育成項目名
  * @desc 育成画面で表示する名前
  * @type string
- * @agiault AGIが上昇します。
+ * @default AGIが上昇します。
  * @parent agi
  * 
  * @param itemDescription6
  * @text 説明
  * @desc 育成画面に表示する項目名
  * @type string
- * @agiault AGIが向上します。
+ * @default AGIが向上します。
  * @parent agi
  * 
  * @param luk
@@ -302,7 +302,7 @@
  * @text LUK成長レート
  * @desc 1割り振る毎に加算するLUKの値。
  * @type number
- * @lukault 1
+ * @default 1
  * @min 1
  * @parent luk
  * 
@@ -310,7 +310,7 @@
  * @text lukコストレート
  * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
  * @type number
- * @lukault 1
+ * @default 1
  * @min 1
  * @parent luk
  * 
@@ -318,7 +318,7 @@
  * @text アイコンインデックス
  * @desc 育成画面に表示するアイコン番号
  * @type number
- * @lukault 0
+ * @default 0
  * @min 0
  * @parent luk
  * 
@@ -326,14 +326,14 @@
  * @text 育成項目名
  * @desc 育成画面で表示する名前
  * @type string
- * @lukault LUKが上昇します。
+ * @default LUKが上昇します。
  * @parent luk
  * 
  * @param itemDescription7
  * @text 説明
  * @desc 育成画面に表示する項目名
  * @type string
- * @lukault LUKが向上します。
+ * @default LUKが向上します。
  * @parent luk
  * 
  * @help 
@@ -368,11 +368,12 @@
 
     const growupItemEntries = [];
     for (let i = 0; i < 8; i++) {
-        const rate = Math.max(1, Number(parameters["growRate" + i]) || 1);
-        const costRate = Math.max(0, Number(parameters["costRate" + i]) || 0);
+        const key = "growRate" + i;
+        const rate = Math.max(1, Number(parameters[key]) || 1);
+        const costRate = Math.max(0, Number(parameters["growCostRate" + i]) || 0);
         const iconIndex = String(parameters["iconIndex" + i]) || 0;
-        const name = String(parameters["gorwItemName" + i]) || ("Up " + TextManager.param(i));
-        const description = String(parameters["growItemDescription" + i]) || "";
+        const name = String(parameters["itemName" + i]) || ("Up " + TextManager.param(i));
+        const description = String(parameters["itemDescription" + i]) || "";
         growupItemEntries.push({
             rate : rate,
             costRate : costRate,
@@ -463,7 +464,7 @@
     Game_Actor.prototype.growupItems = function() {
         const items = _Game_Actor_growupItems.call(this);
         for (let i = 0; i < this._gpParams.length; i++) {
-            if (this.goParamGrowable(i)) {
+            if (this.gpParamGrowable(i)) {
                 const entry = growupItemEntries[i];
                 items.push({
                     iconIndex : entry.iconIndex,
@@ -498,16 +499,6 @@
         return 1 + Math.floor(this._gpParams[paramId] * growupItemEntries[paramId].costRate);
     };
 
-    /**
-     * 育成項目を適用する。
-     * 
-     * @param {GrowupItem} growupItem 育成項目
-     * @return {Boolean} 適用できたかどうか。
-     */
-    Game_Actor.prototype.applyGrowup = function(growupItem) {
-        
-    };
-
     // 6.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
     const _Game_Actor_applyGrowup = Game_Actor.prototype.applyGrowup;
     /**
@@ -517,9 +508,10 @@
      * @return {Boolean} 適用できたかどうか。
      */
     Game_Actor.prototype.applyGrowup = function(growupItem) {
-        if (growupItem.name === "param") {
+        if (growupItem.type === "param") {
             const paramId = growupItem.id;
             this._gpParams[paramId] += 1;
+            return true;
         } else {
             return _Game_Actor_applyGrowup.call(this, growupItem);
         }
