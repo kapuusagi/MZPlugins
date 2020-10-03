@@ -26,24 +26,25 @@
  * Version.0.1.0 作成開始
  */
 (() => {
+    DataManager.ITEM_KIND_ITEM = 1; // アイテム種類がアイテム
+    DataManager.ITEM_KIND_WEAPON = 2; // アイテム種類が武器
+    DataManager.ITEM_KIND_ARMOR = 3; // アイテム種類が防具
+    DataManager.ITEM_KIND_SKILL = 101; // アイテム種類がスキル
 
     //-------------------------------------------------------------------------
     // Scene_Boot
     const _Scene_Boot_start = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function () {
-        _Scene_Boot_start.call(this);
         // Add kind field.
+        DataManager.setItemKind($dataSkills, DataManager.ITEM_KIND_SKILL);
         DataManager.setItemKind($dataItems, DataManager.ITEM_KIND_ITEM);
         DataManager.setItemKind($dataWeapons, DataManager.ITEM_KIND_WEAPON);
         DataManager.setItemKind($dataArmors, DataManager.ITEM_KIND_ARMOR);
+        _Scene_Boot_start.call(this);
     };
 
     //-------------------------------------------------------------------------
     // DataManager
-
-    DataManager.ITEM_KIND_ITEM = 1; // アイテム種類がアイテム
-    DataManager.ITEM_KIND_WEAPON = 2; // アイテム種類が武器
-    DataManager.ITEM_KIND_ARMOR = 3; // アイテム種類が防具
 
     /**
      * データコレクションに itemKindフィールドを追加する。
@@ -59,6 +60,22 @@
         }
     };
 
+    const _DataManager_isSkill = DataManager.isSkill;
+    /**
+     * スキルかどうかを判定する。
+     * 
+     * @param {Object} item 判定対象のオブジェクト。
+     * @return {Boolean} スキルの場合にはtrue, それ以外はfalse.
+     */
+    DataManager.isSkill = function(item) {
+        if (item && item.itemKind) {
+            return item.itemKind === DataManager.ITEM_KIND_SKILL;
+        } else {
+            return _DataManager_isSkill.call(this, item);
+        }
+    };
+
+    const _DataManager_isItem = DataManager.isItem;
     /**
      * itemがアイテムかどうかを判定する。
      * 
@@ -66,9 +83,15 @@
      * @return {Boolean} アイテムの場合にはtrue, それ以外はfalse.
      */
     DataManager.isItem = function(item) {
-        return item && item.itemKind &&  item.itemKind === DataManager.ITEM_KIND_ITEM;
+        // itemKind が設定済みの場合、itemKindで識別する。
+        if (item && item.itemKind) {
+            return item.itemKind === DataManager.ITEM_KIND_ITEM;
+        } else {
+            return _DataManager_isItem.call(this, item);
+        }
     };
     
+    const _DataManager_isWeapon = DataManager.isWeapon;
     /**
      * itemが武器かどうかを判定する。
      * 
@@ -76,9 +99,14 @@
      * @return {Boolean} 武器の場合にはtrue, それ以外はfalse
      */
     DataManager.isWeapon = function(item) {
-        return item && item.itemKind && item.itemKind === DataManager.ITEM_KIND_WEAPON;
+        if (item && item.itemKind) {
+            return item.itemKind === DataManager.ITEM_KIND_WEAPON;
+        } else {
+            return _DataManager_isWeapon.call(this, item);
+        }
     };
 
+    const _DataManager_isArmor = DataManager.isArmor;
     /**
      * itemが防具かどうかを判定する。
      * 
@@ -86,7 +114,11 @@
      * @return {Boolean} 防具の場合にはtrue, それ以外はfalse
      */
     DataManager.isArmor = function(item) {
-        return item && item.itemKind && item.itemKind === DataManager.ITEM_KIND_ARMOR;
+        if (item && item.itemKind) {
+            return item.itemKind === DataManager.ITEM_KIND_ARMOR;
+        } else {
+            return _DataManager_isArmor.call(this, item);
+        }
     };
 
     //-------------------------------------------------------------------------
