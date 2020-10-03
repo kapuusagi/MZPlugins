@@ -24,11 +24,21 @@
  * @max 999
  * @min 65
  * 
+ * @param applyRelativeOnly
+ * @text 対象ステータスを絞る
+ * @desc trueにすると武器レートはATK/MATのみ、防具レートはDEF/MDFのみを変動させます。
+ * @default false
+ * @type boolean
+ * 
  * @help 
- * 特定の武器タイプ/防具タイプを装備したとき、その装備品の基本パラメータ性能を増減させるプラグイン。
+ * 特定の武器タイプ/防具タイプを装備したとき、
+ * その装備品の基本パラメータ性能(MaxHP/MaxMP/ATK/DEF/MAT/MDF/LUK/AGI)を
+ * 増減させるプラグイン。
  * ウェポンマスタリなどに使用することを想定します。
+ * 同じ武器(防具)タイプの特性を複数持っていた場合、レートは加算合計になります。
  * 
  * ■ 使用時の注意
+ * 特にありません。
  * 
  * ■ プラグイン開発者向け
  * Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE 及び
@@ -38,7 +48,7 @@
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * プラグインコマンドはありません。
  * 
  * ============================================
  * ノートタグ
@@ -64,7 +74,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 (() => {
     const pluginName = "Kapu_Trait_EquipPerformance";
@@ -72,6 +82,8 @@
 
     Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE = Number(parameters["weaponPerformanceTraitCode"]) || 0;
     Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE = Number(parameters["TRAIT_ARMOR_PERFORMANCE"]) || 0;
+    const applyRelativeOnly = Boolean(parameters["applyRelativeOnly"]) || false;
+
     if (!Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE) {
         console.error(pluginName + ":TRAIT_WEPON_PERFORMANCE is not valid.");
     }
@@ -102,7 +114,7 @@
      */
     const _processNoteTag = function(obj) {
         const patternWeapon = /<weaponPerf[: ]+(\d+),([+-]?\d+\.?\d+%?).*>/;
-        const patternWeapon = /<armorPerf[: ]+(\d+),([+-]?\d+\.?\d+%?).*>/;
+        const patternArmor = /<armorPerf[: ]+(\d+),([+-]?\d+\.?\d+%?).*>/;
         const lines = obj.note.split(/[\r\n]+/);
         for (line of lines) {
             let re = null;
@@ -117,7 +129,15 @@
                     });
                 }
             } else if ((re = line.match(patternArmor)) !== null) {
-
+                const type = Number(re[1]);
+                const rate = _parseRate(re[2]);
+                if (type > 0) {
+                    obj.traits.push({
+                        code:Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE,
+                        dataId:type,
+                        value:rate
+                    });
+                }
             }
         }
     };
@@ -129,6 +149,7 @@
     //------------------------------------------------------------------------------
     // DataManager
     const _Game_Actor_paramEquipValue = Game_Actor.prototype.paramEquipValue;
+
     /**
      * 装備品の基本パラメータ値を得る。
      * 
@@ -138,10 +159,14 @@
      */
     Game_Actor.prototype.paramEquipValue = function(equipItem, paramId) {
         const equipValue = _Game_Actor_paramEquipValue.call(this, equipItem, paramId);
-        if (DataManager.isWeapon(equipItem)) {
-            return Math.floor(equipValue * this.paramEquipValueRateWeapon(equipItem.wtypeId));
-        } else if (DataManager.isArmor(equipItem)) {
-            return Math.floor(equipValue * this.paramEquipValueRateArmor(equipItem.atypeId));
+        if (DataManager.isWeapon(equipItem)
+                && (!applyRelativeOnly || [2,4].contains(paramId))) {
+            const rate = this.paramEquipValueRateWeapon(equipItem.wtypeId);
+            return Math.floor(equipValue * rate);
+        } else if (DataManager.isArmor(equipItem)
+                && (!applyRelativeOnly || [3,5].contains(paramId))) {
+            const rate = this.paramEquipValueRateArmor(equipItem.atypeId);
+            return Math.floor(equipValue * rate);
         } else {
             return equipValue;
         }
