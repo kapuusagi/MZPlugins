@@ -267,9 +267,6 @@
         // ステートアイコン
         this.drawStateIcons(actor, x, y, width);
         y += lineHeight * 2;
-
-        // バトルポジション
-
     };
 
     /**
@@ -395,7 +392,7 @@
         this.drawText("/", x, y + 12, 16, "center");
         x += 16;
         this.contents.fontSize = $gameSystem.mainFontSize() - 4;
-        this.drawText(data.current, x, y + 12, maxValueWidth, "right");
+        this.drawText(data.max, x, y + 12, maxValueWidth, "right");
     };
 
     /**
@@ -442,6 +439,7 @@
         const wy = this.mainAreaTop();
         return new Rectangle(wx, wy, ww, wh);
     };
+    
     /**
      * 所持金ウィンドウを表示する矩形領域を得る。
      * 
