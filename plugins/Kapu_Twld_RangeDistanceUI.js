@@ -1,12 +1,14 @@
 /*:ja
  * @target MZ 
- * @plugindesc RangeDistanceをTwldBattleSystemに適用するためのプラグイン。
+ * @plugindesc RangeDistanceをTwldのシステムに適用するためのプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Twld_BattleSystem
  * @base Kapu_RangeDistance
+ * @base Kapu_Twld_Menu
  * @orderAfter Kapu_Twld_BattleSystem
  * @orderAfter Kapu_RangeDistance
+ * @orderAfter Kapu_Twld_Menu
  * 
  * @param frontIconId
  * @text 前衛アイコンID
@@ -44,10 +46,10 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "Kapu_Twld_BattleSystem_RangeDistance";
+    const pluginName = "Kapu_Twld_RangeDistanceUI";
     const parameters = PluginManager.parameters(pluginName);
     const frontIconId = Number(parameters['frontIconId']) || 0;
-    const backIconId = Number(parameters['rearIconId']) || 0;
+    const rearIconId = Number(parameters['rearIconId']) || 0;
 
     //------------------------------------------------------------------------------
     // Sprite_PositionIcon
@@ -113,7 +115,7 @@
      */
     Sprite_PositionIcon.prototype.iconIndex = function() {
         if (this._battler) {
-            return (this._battler.battlePosition() === 0) ? frontIconId : backIconId;
+            return (this._battler.battlePosition() === 0) ? frontIconId : rearIconId;
         } else {
             return 0;
         }
@@ -356,5 +358,25 @@
             }
         }
     };
+    //------------------------------------------------------------------------------
+    // Window_MenuStatus
+    const _Window_MenuStatus_drawItemStatus = Window_MenuStatus.prototype.drawItemStatus;
+    /**
+     * 項目のステータスを描画する。
+     * 
+     * @param {Number} index インデックス番号
+     * !!!overwrite!!! Window_MenuStatus.drawItemStatus()
+     */
+    Window_MenuStatus.prototype.drawItemStatus = function(index) {
+        const actor = this.actor(index);
+        const rect = this.statusRect(index);
+        const iconX = rect.x + rect.width - ImageManager.iconWidth - 8;
+        const iconY = rect.y + 10;
+        const iconIndex = (actor.battlePosition() === 0) ? frontIconId : rearIconId;
+        if (iconIndex) {
+            this.drawIcon(iconIndex, iconX, iconY);
+        }
 
+        _Window_MenuStatus_drawItemStatus.call(this, index);
+    };
 })();
