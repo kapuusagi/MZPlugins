@@ -10,7 +10,6 @@
  * @text 成長画面を開く
  * @desc 成長画面を開きます。
  * 
- * 
  * @param menu
  * @text メニュー
  * 
@@ -35,20 +34,32 @@
  * @type string
  * @default %1(%2を%3消費)
  * 
+ * @param actorPicture
+ * @text アクターの画像を取得するメソッド名
+ * @desc 他のプラグイン等で、Game_Actorから画像ファイル名を取得できる場合に指定する。未指定時は顔グラフィック。
+ * @type string
+ * 
  * @help 
+ * Kapu_GrowupSystem のUI提供用プラグイン。
+ * ステータス欄に表示する画像はデフォルトで顔グラフィック。
+ * プラグインパラメータ actorPicture で指定したメソッド名で取得できるようにすることもできる。
+ * 例）Kapu_TwldBattleSystemと組み合わせるなら、"battlePicture"とかするとよさげ。
  * 
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
+ * シーンの呼び出し
+ *     SceneManager.push(Scene_Growup);
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * プラグインコマンド
  * 
  * ============================================
  * ノートタグ
  * ============================================
+ * ノータグはありません。
  * 
  * ============================================
  * 変更履歴
@@ -61,7 +72,7 @@
  * 成長画面のアクター表示をする。
  */
 function Window_GrowupActorStatus() {
-    this.initialize(this, ...arguments);
+    this.initialize(...arguments);
 }
 
 /**
@@ -69,7 +80,7 @@ function Window_GrowupActorStatus() {
  * 成長画面の項目選択を提供する。
  */
 function Window_GrowupSelect() {
-    this.initialize.apply(this, arguments);
+    this.initialize(...arguments);
 }
 
 /**
@@ -77,7 +88,7 @@ function Window_GrowupSelect() {
  * 適用確認メッセージウィンドウ。
  */
 function Window_ConfirmApply() {
-    this.initialize.apply(this, arguments);
+    this.initialize(...arguments);
 }
 
 /**
@@ -85,7 +96,7 @@ function Window_ConfirmApply() {
  * 成長ポイントを使用してアクターを強化する。
  */
 function Scene_Growup() {
-    this.initialize.apply(this, arguments);
+    this.initialize(...arguments);
 }
 
 (() => {
@@ -94,6 +105,7 @@ function Scene_Growup() {
     const menuEnable = Boolean(parameters["menuEnable"]) || false;
     const menuCommandText = String(parameters["menuCommandText"]) || "";
     const confirmMessageText = String(parameters["confirmMessageText"]) || "%1(%2-%3)";
+    const actorPicture = String(parameters["actorPicture"]) || "";
 
     PluginManager.registerCommand(pluginName, "startGrowupScene", args => {
         SceneManager.push(Scene_Growup);
@@ -111,7 +123,12 @@ function Scene_Growup() {
     Window_GrowupActorStatus.prototype.initialize = function (rect) {
         Window_Base.prototype.initialize.call(this, rect);
         this._actor = null;
-        this.hide();
+        // 先読みしておく。
+        for (const actor of $gameParty.members()) {
+            if ((actorPicture in actor) && actor[actorPicture]()) {
+                ImageManager.loadPicture(actor[actorPicture]());
+            }
+        }
     };
 
     /**
@@ -130,38 +147,191 @@ function Scene_Growup() {
      * 表示を更新する。
      */
     Window_GrowupActorStatus.prototype.refresh = function() {
-        var x = this.standardPadding();
-        var y = this.standardPadding();
-        var actor = this._actor;
         this.contents.clear();
-        this.drawActorFace(actor, x, y);
-        var nameX = x + 144 + this.textPadding();
-        var nameY = y;
-        var nameWidth = this.contentsWidth() - nameX - this.textPadding();
-        this.drawActorName(actor, nameX, nameY, nameWidth);
-        var levelX = nameX;
-        var levelY = nameY + this.lineHeight();
-        this.drawActorLevel(actor, levelX, levelY);
-        var gpX = nameX;
-        var gpY = levelY + this.lineHeight();
-        var gpWidth = nameWidth;
-        this.drawActorGrowPoint(actor, gpX, gpY, gpWidth);
+        this.drawBackgroundImage();
+        this.drawStatus();
+    };
+
+    /**
+     * 背景画像を描画する。
+     */
+    Window_GrowupActorStatus.prototype.drawBackgroundImage = function() {
+        const actor = this._actor;
+        this.drawActorImage();
+
+        this.changePaintOpacity(false);
+        const statusRect = this.statusAreaRect();
+        this.contents.fillRect(statusRect.x, statusRect.y, 
+            statusRect.width, statusRect.height, "#000000");
+        this.changePaintOpacity(true);
+    };
+
+    /**
+     * ステータス表示領域の矩形領域を得る。
+     * 
+     * @return {Rectangle} 矩形領域。
+     */
+    Window_GrowupActorStatus.prototype.statusAreaRect = function() {
+        const rect = this.baseTextRect();
+        const w = Math.min(rect.width, 180);
+        const h = Math.min(rect.height, 320);
+        const x = rect.x + (rect.width - w) / 2;
+        const y = rect.y + (rect.height - h);
+
+        return new Rectangle(x, y, w, h);
+    };
+
+    /**
+     * アクターの画像を描画する。
+     */
+    Window_GrowupActorStatus.prototype.drawActorImage = function() {
+        const actor = this._actor;
+        if ((actorPicture in actor) && actor[actorPicture]()) {
+            this.drawActorImagePicture();
+        } else {
+            const actor = this._actor;
+            const rect = this.baseTextRect();
+            this.drawFace(actor.faceName(), actor.faceIndex(),
+                    rect.x, rect.y + this.itemPadding(), rect.width, 200);
+        }
+    };
+    /**
+     * アクターの画像を描画する。
+     */
+    Window_GrowupActorStatus.prototype.drawActorImagePicture = function() {
+        const actor = this._actor;
+        const pictureName = actor[actorPicture]();
+        const bitmap = ImageManager.loadPicture(pictureName);
+        if (!bitmap.isReady()) {
+            return;
+        }
+        const rect = this.baseTextRect()
+        this.drawPicture(pictureName, rect.x + 2, rect.y, rect.width - 4, rect.height);
+    };
+
+    /**
+     * 画像を描画する。
+     * 
+     * @param {String} name 画像ファイル名
+     * @param {Number} x 描画領域左上 x位置
+     * @param {Number} y 描画領域左上 y位置
+     * @param {Number} width 描画領域幅
+     * @param {Number} height 描画領域高さ
+     */
+    Window_GrowupActorStatus.prototype.drawPicture = function(name, x, y, width, height) {
+        const bitmap = ImageManager.loadPicture(name);
+        const pw = bitmap.width;
+        const ph = bitmap.height;
+        width = width || pw;
+        height = height || ph;
+        const sw = Math.min(width, pw);
+        const sh = Math.min(height, ph);
+        const dx = Math.floor(x + Math.max(width - pw, 0) / 2);
+        const dy = y;
+        const sx = (pw - sw) / 2;
+        const sy = 0;
+        this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy);
+    };
+
+
+    /**
+     * アクターのステータスを描画する。
+     */
+    Window_GrowupActorStatus.prototype.drawStatus = function() {
+        const rect = this.statusAreaRect();
+
+        let x = rect.x + this.itemPadding();
+        let y = rect.y + this.itemPadding();
+        const width = rect.width - this.itemPadding() * 2;
+        const lineHeight = this.lineHeight();
+        const actor = this._actor;
+
+        // アクター名
+        this.drawActorName(actor, x, y, width);
+        y += lineHeight;
+
+        // アクターレベル
+        // this.drawActorLevel(actor, x, y);
+        // y += lineHeight;
+
+        this.drawActorGrowPoint(actor, x, y, width);
+        y += Math.floor(lineHeight * 1.2);
+
+        this.contents.fontSize = $gameSystem.mainFontSize() - 8;
+        for (let i = 0; i < 8; i++) {
+            const paramWidth = 64;
+            this.changeTextColor(ColorManager.systemColor());
+            this.drawText(TextManager.param(i), x, y, paramWidth);
+            this.resetTextColor();
+            this.drawText(actor.param(i), x + paramWidth, y, width - paramWidth, "right");
+            y += Math.floor(lineHeight * 0.8);
+        }
 
         // 基本ステータス描画するぜ。
-        var statusX = x;
-        var statusY = y + 144 + this.standardPadding();
-        var statusWidth = this.width - this.standardPadding() * 2;
-        this.changeTextColor(this.normalColor());
-        this.drawText("基本ステータス", statusX, statusY, statusWidth);
-        statusY += this.lineHeight();
+        // const statusX = x;
+        // const statusY = y + ImageManager.faceHeight + this.itemPadding();
+        // const statusWidth = this.width - this.itemPadding() * 2;
+        // this.changeTextColor(this.normalColor());
+        // this.drawText("基本ステータス", statusX, statusY, statusWidth);
+        // statusY += this.lineHeight();
 
-        var statusNames = TWLD.Core.StatusNames;
-        for (var i = 0; i < 6; i++) {
-            var paramValue =  actor.getBasicParam(i);
-            var correct = paramValue - actor.getBasicParamBase(i); // 装備による補正値
-            this.drawBasicParam(statusNames[i], paramValue, correct, statusX, statusY, statusWidth);
-            statusY += this.lineHeight();
-        }
+        // const statusNames = TWLD.Core.StatusNames;
+        // for (let i = 0; i < 6; i++) {
+        //     var paramValue =  actor.getBasicParam(i);
+        //     var correct = paramValue - actor.getBasicParamBase(i); // 装備による補正値
+        //     this.drawBasicParam(statusNames[i], paramValue, correct, statusX, statusY, statusWidth);
+        //     statusY += this.lineHeight();
+        // }
+    };
+
+    /**
+     * アクター名を描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画位置左上x
+     * @param {Number} y 描画位置左上y
+     * @param {Number} width 幅
+     */
+    Window_GrowupActorStatus.prototype.drawActorName = function(actor, x, y, width) {
+        this.resetFontSettings();
+        this.drawText(actor.name(), x, y, width);
+    };
+
+
+    /**
+     * レベルを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    Window_GrowupActorStatus.prototype.drawActorLevel = function(actor, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.contents.fontSize = $gameSystem.mainFontSize() - 4;
+        this.drawText(TextManager.levelA, x, y + 4, 20);
+        this.resetFontSettings();
+        this.drawText(actor.level, x + 24, y, 32, "right");
+    };
+    /**
+     * 成長ポイントを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    Window_GrowupActorStatus.prototype.drawActorGrowPoint = function(actor, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.contents.fontSize = $gameSystem.mainFontSize() - 4;
+        this.drawText(TextManager.growPoint, x, y + 4, 20);
+        x += 24;
+        this.resetFontSettings();
+        this.contents.fontSize = $gameSystem.mainFontSize() + 8;
+        const valueWidth = width - 24;
+        this.drawText(actor.growPoint(), x, y, valueWidth, "right");
     };
     //-----------------------------------------------------------------
     // Window_GrowupSelect
@@ -177,9 +347,9 @@ function Scene_Growup() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_GrowupSelect.prototype.initialize = function(rect) {
+        Window_Selectable.prototype.initialize.call(this, rect);
         this._items = [];
         this._actor = null;
-        Window_Selectable.prototype.initialize.call(rect);
     };
 
     /**
@@ -199,7 +369,7 @@ function Scene_Growup() {
      */
     Window_GrowupSelect.prototype.itemAt = function(index) {
         if ((index >= 0) && (index < this._items.length)) {
-            return this._items[this.index()];
+            return this._items[index];
         } else {
             return null;
         }
@@ -234,7 +404,7 @@ function Scene_Growup() {
         //     rItem.iconIndex = TWLD.Core.ReincarnationIconIndex;
         //     rItem.text = "レベルを1に戻して再成長させる。";
         //     rItem.id = -1;
-        //     rItem.gpCost = 0;
+        //     rItem.cost = 0;
         //     rItem.description = "再成長ボーナスを得て、レベル1から育てなおします。";
         //     this._items.push(rItem);
         // }
@@ -245,7 +415,7 @@ function Scene_Growup() {
         //     paramItem.iconIndex = TWLD.Core.BasicParamIcons[i];
         //     paramItem.text = statusNames[i] + "を1ポイント上昇させる。";
         //     paramItem.id = i;
-        //     paramItem.gpCost = this._actor.getBasicParamGrowCost(i);
+        //     paramItem.cost = this._actor.getBasicParamGrowCost(i);
         //     paramItem.description = TWLD.Core.BasicParamDescriptions[i];
         //     this._items.push(paramItem);
         // }
@@ -256,10 +426,18 @@ function Scene_Growup() {
         //     skillItem.iconIndex = skill.iconIndex,
         //     skillItem.text = skill.name + "を習得する。",
         //     skillItem.id = skill.id,
-        //     skillItem.gpCost = skill.gpCost;
+        //     skillItem.cost = skill.gpCost;
         //     skillItem.description = skill.description;
         //     this._items.push(skillItem);
         // }, this);
+        this._items.push({
+            iconIndex:0,
+            name:TextManager.cancel,
+            type:'',
+            id:'',
+            cost:0,
+            description:''
+        });
     };
 
     /**
@@ -300,19 +478,18 @@ function Scene_Growup() {
         this.changePaintOpacity(this.isEnabled(item));
         const gpWidth = this.textWidth(TextManager.growPoint + "-XXXX");
         const x = rect.x + 40;
-        const width = rect.width - this.standardPadding() - gpWidth;
-        if (width >= 480) {
-            width = 480;
-        }
-        this.changeTextColor(this.normalColor());
+        const width = Math.min(480, rect.width - this.itemPadding() - gpWidth);
+        this.resetFontSettings();
         this.drawText(item.name, x, rect.y, width);
 
         // GPコスト描画
-        const x2 = x + width;
-        const costStr = TextManager.growPoint + "-" + item.gpCost;
-        this.changeTextColor(this.systemColor());
-        this.drawText(costStr, x2, rect.y, gpWidth);
-        this.changePaintOpacity(true);
+        if (item.cost > 0) {
+            const x2 = x + width;
+            const costStr = TextManager.growPoint + "-" + item.cost;
+            this.changeTextColor(ColorManager.systemColor());
+            this.drawText(costStr, x2, rect.y, gpWidth);
+            this.changePaintOpacity(true);
+        }
     };
 
 
@@ -331,7 +508,7 @@ function Scene_Growup() {
      */
     Window_GrowupSelect.prototype.isEnabled = function(item) {
         if (item) {
-            return item.gpCost <= this._actor.getGrowPoint();
+            return item.cost <= this._actor.growPoint();
         } else {
             return false;
         }
@@ -362,7 +539,7 @@ function Scene_Growup() {
      */
     Window_ConfirmApply.prototype.initialize = function (rect) {
         this._items = [ '', TextManager.cancel];
-        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
+        Window_Selectable.prototype.initialize.call(this, rect);
         this.activate();
     };
 
@@ -429,7 +606,7 @@ function Scene_Growup() {
         var rect = this.itemRect(index);
         this.resetTextColor();
         this.drawText(this._items[index], rect.x, rect.y, rect.width, 'left');
-        this.changeTextColor(this.normalColor());
+        this.resetTextColor();
     };
 
     //------------------------------------------------------------------------------
@@ -465,6 +642,8 @@ function Scene_Growup() {
     Scene_Growup.prototype.createActorStatusWindow = function() {
         this._actorStatusWindow = new Window_GrowupActorStatus(this.actorStatusWindowRect());
         this._actorStatusWindow.setActor(this.actor());
+        this._actorStatusWindow.show();
+        this._actorStatusWindow.open();
         this.addWindow(this._actorStatusWindow);
     };
 
@@ -477,7 +656,7 @@ function Scene_Growup() {
         const ww = this.statusWidth();
         const wh = this.mainAreaHeight();
         const wx = 0;
-        const wh = this.mainAreaTop();
+        const wy = this.mainAreaTop();
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -510,6 +689,8 @@ function Scene_Growup() {
         this._selectWindow.setHandler('pageup', this.nextActor.bind(this));
         this._selectWindow.setHandler('pagedown', this.previousActor.bind(this));
         this._selectWindow.select(0);
+        this._selectWindow.show();
+        this._selectWindow.open();
 
         this.addWindow(this._selectWindow);
     };
@@ -523,7 +704,7 @@ function Scene_Growup() {
         const statusWindowRect = this.actorStatusWindowRect();
         const ww = Graphics.boxWidth - this.statusWidth();
         const wh = this.mainAreaHeight();
-        const wx = statusWindowRect.x + statusWindowRect.y;
+        const wx = statusWindowRect.x + statusWindowRect.width;
         const wy = this.mainAreaTop();
         return new Rectangle(wx, wy, ww, wh);
     };
@@ -555,23 +736,25 @@ function Scene_Growup() {
     /**
      * 成長項目選択画面でOK操作を受けたときに通知を受け取る。
      * 
-     * @method onGrowupSelectOk
-     * @memberof Scene_Growup
      */
     Scene_Growup.prototype.onGrowupSelectOk = function() {
         this._selectWindow.deactivate();
         const item = this._selectWindow.item();
-        this._confirmApplyWindow.setMessage(this.confirmMessage(item));
-        // if (item.type == 'reincarnation') {
-        //     this._confirmApplyWindow.setMessage(item.description);
-        // } else {
-        //     // GPを X 消費して XX を1ポイント上昇させる。
-        //     // GPを X 消費して XX を習得する。
-        //     this._confirmApplyWindow.setMessage("GPを " + item.gpCost + " 消費して" + item.text);
-        // }
-        this._confirmApplyWindow.select(0);
-        this._confirmApplyWindow.show();
-        this._confirmApplyWindow.activate();
+        if (!item.type) {
+            this.popScene();
+        } else {
+            this._confirmApplyWindow.setMessage(this.confirmMessage(item));
+            // if (item.type == 'reincarnation') {
+            //     this._confirmApplyWindow.setMessage(item.description);
+            // } else {
+            //     // GPを X 消費して XX を1ポイント上昇させる。
+            //     // GPを X 消費して XX を習得する。
+            //     this._confirmApplyWindow.setMessage("GPを " + item.cost + " 消費して" + item.text);
+            // }
+            this._confirmApplyWindow.select(0);
+            this._confirmApplyWindow.show();
+            this._confirmApplyWindow.activate();
+        }
     };
 
     /**
@@ -580,7 +763,7 @@ function Scene_Growup() {
      * @param {GrowupItem} item 育成項目
      */
     Scene_Growup.prototype.confirmMessage = function(item) {
-        return confirmMessageText.format(item.name, TextManager.growPoint, item.gpCost);
+        return confirmMessageText.format(item.name, TextManager.growPoint, item.cost);
     };
 
     /**
@@ -651,7 +834,14 @@ function Scene_Growup() {
         this._selectWindow.setActor(this.actor());
         this._selectWindow.activate();
     };
-
+    /**
+     * ページボタンを作成する必要があるかどうかを取得する。
+     * 
+     * @return {Boolean} ページボタンが必要な場合にはtrue, それ以外はfalse
+     */
+    Scene_Growup.prototype.needsPageButtons = function() {
+        return true;
+    };
     //------------------------------------------------------------------------------
     // Window_MenuCommand
     /**
@@ -685,4 +875,6 @@ function Scene_Growup() {
             _Scene_Menu_onPersonalOk.call(this);
         }
     };
+
+
 })();
