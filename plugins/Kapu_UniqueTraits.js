@@ -4,7 +4,7 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
- * ■ addUniqueTrait
+ * 
  * @command addUniqueTrait
  * @text アクター特性追加
  * @desc アクターの特性を追加する。
@@ -13,6 +13,11 @@
  * @text アクターID
  * @desc 追加するアクターのID
  * @type actor
+ * 
+ * @arg variableId
+ * @text 変数ID
+ * @desc 追加するアクターIDを変数から取得する場合のID
+ * @type variable
  * 
  * @arg name
  * @text 特性識別名
@@ -39,10 +44,19 @@
  * @decimals 3
  * 
  * ■ removeUniqueTrait
+ * @command removeUniqueTrait
+ * @text アクター特性削除
+ * @desc アクターの特性を削除する。
+ * 
  * @arg actorId
  * @text アクターID
  * @desc 追加するアクターのID
  * @type actor
+ * 
+ * @arg variableId
+ * @text 変数ID
+ * @desc 追加するアクターIDを変数から取得する場合のID
+ * @type variable
  * 
  * @arg name
  * @text 特性識別名
@@ -64,8 +78,11 @@
  * ============================================
  * プラグインコマンド
  * ============================================
- * プラグインコマンドはありません。
+ * addUniqueTrait
+ *     ユニーク特性を追加する。
  * 
+ * removeUniqueTrait
+ *     ユニーク特性を削除する。
  * ============================================
  * ノートタグ
  * ============================================
@@ -74,21 +91,39 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 (() => {
     const pluginName = "Kapu_UniqueTraits";
 
+    /**
+     * 引数からアクターIDを得る。
+     * 
+     * @param {Object} arg 引数
+     * @return {Number} アクターID
+     */
+    const _getActorId = function(arg) {
+        const id = Number(arg.actorId) || 0;
+        if (id > 0) {
+            return id;
+        }
+        const variableId = Number(arg.variableId) || 0;
+        if (variableId > 0) {
+            return $gameVariables[variableId];
+        }
+        return 0;
+    };
+
     PluginManager.registerCommand(pluginName, "addUniqueTrait", args => {
-        const actorId = Number(arg.actorId);
-        const name = arg.name;
-        const code = Number(arg.code);
-        const dataId = Number(arg.dataId);
-        const value = Number(arg.value);
+        const actorId = _getActorId(args);
+        const name = args.name;
+        const code = Number(args.code);
+        const dataId = Number(args.dataId);
+        const value = Number(args.value) || 0;
         if (actorId > 0) {
             const actor = $gameActors.actor(actorId);
             if (actor) {
-                if (name && !IsNaN(code) && !IsNaN(dataId) && !isNaN(value)) {
+                if (name && !isNaN(code) && !isNaN(dataId) && !isNaN(value)) {
                     actor.addUniqueTrait(name, {
                         code:code,
                         dataId:dataId,
@@ -99,9 +134,9 @@
         }
     });
 
-    PluginManager.registerCommand(pluginName, "removeUniqueTrait", arg => {
-        const actorId = Number(arg.actorId);
-        const name = arg.name;
+    PluginManager.registerCommand(pluginName, "removeUniqueTrait", args => {
+        const actorId = _getActorId(args);
+        const name = args.name;
         if (actorId > 0) {
             const actor = $gameActors.actor(actorId);
             if (actor) {
@@ -113,12 +148,12 @@
     //------------------------------------------------------------------------------
     // Game_BattlerBase
 
-    const _Game_Actor_initMembers = Game_Actor.prototype.initMembers;
+    const _Game_BattlerBase_initMembers = Game_BattlerBase.prototype.initMembers;
     /**
      * Game_Actorのパラメータを初期化する。
      */
-    Game_Actor.prototype.initMembers = function() {
-        _Game_Actor_initMembers.call();
+    Game_BattlerBase.prototype.initMembers = function() {
+        _Game_BattlerBase_initMembers.call(this);
         this._uniqueTraitObjects = [];
     };
 
@@ -127,24 +162,31 @@
      * 既にnameで指定された特性が追加済みの場合には何もしない。
      * 
      * 固有特性はステートクリアで消去されない特性。
+     * 
+     * @param {String} name 識別名
+     * @param {Trait} trait 特性オブジェクト
      */
     Game_BattlerBase.prototype.addUniqueTrait = function(name, trait) {
         const traitObject = this._uniqueTraitObjects.find(obj => obj.name === name);
-        if (traitObject === null) {
+        if (!traitObject) {
             this._uniqueTraitObjects.push({ 
                 name:name,
                 traits:[ trait ]
             });
+            this.refresh();
         }
     };
     /**
      * 指定した名前の特性を削除する。
+     * 
+     * @param {String} name 特性識別名
      */
     Game_BattlerBase.prototype.removeUniqueTraits = function(name) {
         // 削除するとインデックスが繰り下がるので、後ろから一致判定する。
-        for (let i = this._uniqueTraitObjects.length; i >= 0; i--) {
+        for (let i = this._uniqueTraitObjects.length - 1; i >= 0; i--) {
             if (this._uniqueTraitObjects[i].name === name) {
                 this._uniqueTraitObjects.splice(i, 0);
+                this.refresh();
             }
         }
     };
