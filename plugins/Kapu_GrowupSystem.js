@@ -70,6 +70,12 @@
  * @desc 成長ポイントの名前
  * @type string
  * @default GP
+ * 
+ * @param enableProperty
+ * @text プロパティ定義
+ * @desc trueにすると、actorにプロパティgpを追加する。
+ * @type boolean
+ * @default false
  *  
  * @help 
  * GP(GrowPoint)成長システムの枠を提供するプラグイン。
@@ -155,6 +161,7 @@
     Game_Action.EFFECT_GAIN_GROWPOINT = Number(parameters["effectCode"]) || 0;
     const growPointAtLevelUp = parameters["growPointAtLevelUp"] || 0;
     const growPointText = String(parameters["growPointText"]) || "GP";
+    const enableProperty = Boolean(parameters["enableProperty"]) || false;
 
     Object.defineProperty(TextManager, "growPoint", { get: () => growPointText, configurable:true});
 
@@ -361,6 +368,31 @@
     Game_Actor.prototype.applyGrowup = function(growupItem) {
         return false;
     };
+
+    if (enableProperty) {
+        /**
+         * 残りGPを表すプロパティ名
+         * @constant {Number}
+         */
+        Object.defineProperty(Game_Actor.prototype, "gp", {
+            /** @return {Number} */
+            get: function() {
+                return this._growPoint.current;
+            },
+            configurable: true
+        });
+        /**
+         * 最大GPを表すプロパティ名
+         * @constant {Number}
+         */
+        Object.defineProperty(Game_Actor.prototype, "maxgp", {
+            /** @return {Number} */
+            get: function() {
+                return this._growPoint.max;
+            },
+            configurable: true
+        });
+    }
 
     //------------------------------------------------------------------------------
     // Game_Action
