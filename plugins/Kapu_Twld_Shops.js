@@ -229,6 +229,15 @@ function Window_TwldShopItemCategory() {
 };
 
 /**
+ * Window_TwldShopNumber
+ * 
+ * 数値入力用ウィンドウ
+ */
+function Window_TwldShopNumber() {
+    this.initialize(...arguments);
+};
+
+/**
  * Scene_TwldShop.
  * 
  * 店の処理をするシーン。
@@ -1127,6 +1136,46 @@ function Scene_TwldShop() {
         this.addCommand(TextManager.armor, "armor", true);
         this.addCommand(TextManager.keyItem, "keyItem", true);
     };
+    //------------------------------------------------------------------------------
+    // Window_TwldShopNumber
+    // ボタン位置だけ変更する。
+    Window_TwldShopNumber.prototype = Object.create(Window_ShopNumber.prototype);
+    Window_TwldShopNumber.prototype.constructor = Window_TwldShopNumber;
+
+    /**
+     * Window_TwldShopNumberを初期化する。
+     * 
+     * @param {Rectangle} ウィンドウ矩形領域
+     */
+    Window_TwldShopNumber.prototype.initialize = function(rect) {
+        Window_ShopNumber.prototype.initialize.call(this, rect);
+    };
+    /**
+     * アイテム名表示位置Yを得る。
+     * 
+     * @return {Number} アイテム名表示位置Y
+     */
+    Window_TwldShopNumber.prototype.itemNameY = function() {
+        return this.baseTextRect().y + this.itemPadding();
+    };
+
+    /**
+     * 合計金額表示位置Yを得る。
+     * 
+     * @return {Number} 合計金額表示位置Y
+     */
+    Window_TwldShopNumber.prototype.totalPriceY = function() {
+        return Math.floor(this.itemNameY() + this.lineHeight() * 2);
+    };
+
+    /**
+     * ボタンのY位置を得る。
+     * 
+     * @return {Number} ボタンのY位置
+     */
+    Window_TwldShopNumber.prototype.buttonY = function() {
+        return Math.floor(this.totalPriceY() + this.lineHeight() + 10);
+    };
 
     //------------------------------------------------------------------------------
     // Scene_TwldShop
@@ -1350,7 +1399,7 @@ function Scene_TwldShop() {
      */
     Scene_TwldShop.prototype.createNumberWindow = function() {
         const rect = this.numberWindowRect();
-        this._numberWindow = new Window_ShopNumber(rect);
+        this._numberWindow = new Window_TwldShopNumber(rect);
         this._numberWindow.hide();
         this._numberWindow.setHandler("ok", this.onNumberOk.bind(this));
         this._numberWindow.setHandler("cancel", this.onNumberCancel.bind(this));
@@ -1362,7 +1411,9 @@ function Scene_TwldShop() {
      */
     Scene_TwldShop.prototype.numberWindowRect = function() {
         const ww = 450;
-        const wh = this.calcWindowHeight(8, true);
+        const wh = (ConfigManager.touchUI) 
+                ? this.calcWindowHeight(4, true) 
+                : this.calcWindowHeight(3, true);
         const wx = (Graphics.boxWidth - ww) / 2;
         const wy = this.mainAreaTop() + (this.mainAreaHeight() - wh) / 2;
         return new Rectangle(wx, wy, ww, wh);
