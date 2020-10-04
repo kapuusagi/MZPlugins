@@ -7,36 +7,7 @@
  *      他のプラグインを使うのが難しいというのもあった。
  * 
  */
-var Imported = Imported || {};
-Imported.TWLD_UI_Equip = true;
 
-if (!Imported.TWLD_UI) {
-    throw "This plugin must be import after TWLD_UI.js";
-}
-
-var TWLD = TWLD || {};
-TWLD.Core = TWLD.Core || {};
-
-
-if (typeof Window_Command === 'undefined') {
-    var Window_Base = {};
-    var Window_Help = {};
-    var Window_Command = {};
-    var Window_Selectable = {};
-
-    var Scene_Status = {};
-    var Scene_MenuBase = {};
-    var Scene_Equip = {};
-
-    var $dataSystem = {};
-
-    var TextManager = {};
-    var ImageManager = {};
-    var SceneManager = {};
-
-    var Utils = {};
-    var Graphics = {};
-}
 
 (function() {
     'use strict';
@@ -44,13 +15,7 @@ if (typeof Window_Command === 'undefined') {
     //------------------------------------------------------------------------------
     // Window_StatusActor
     //
-    /**
-     * Window_StatusActor
-     * ステータス画面でアクター情報を表示する。
-     */
-    function Window_StatusActor() {
-        this.initialize.apply(this, arguments);
-    }
+
 
     Window_StatusActor.prototype = Object.create(Window_Base.prototype);
     Window_StatusActor.prototype.constuctor = Window_StatusActor;
