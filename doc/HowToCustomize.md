@@ -376,6 +376,8 @@ MVから変更になってる。 __DataManager._databaseFiles__ に読み出す�
     DataManager._databaseFiles.push({ name:"グローバル変数名", src: "JSONファイル名" });
 ~~~
 
+尚、独自データに "note" メンバが含まれていると、ちゃんと展開してmetaフィールドに格納されるっぽい。覚えておくと便利。
+
 
 ## ■ UIデザインするときは
 

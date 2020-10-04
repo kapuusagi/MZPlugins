@@ -500,7 +500,7 @@ function Scene_TwldShop() {
      * 
      * @param {Number} id ショップID
      */
-    Game_Shop.prototype.setupShop = function(id) {
+    Game_Shop.prototype.setup = function(id) {
         const shop = $dataShops[id];
         this._id = id;
         this._level = shop.level;
@@ -839,8 +839,9 @@ function Scene_TwldShop() {
     Game_Shops.prototype.shop = function(id) {
         if (!this._shopData[id]) {
             // 店が作られてない。
-            this._shopData[id] = new Game_Shop();
-            this._shopData[id].setupShop(id);
+            const shop = new Game_Shop();
+            shop.setup(id);
+            this._shopData[id] = shop;
         }
         return this._shopData[id];
     };
