@@ -57,7 +57,7 @@
                     states : states
                 };
             }
-    }
+        }
 
         return null;
     };
@@ -195,6 +195,16 @@
         _Game_BattlerBase_refresh.call(this);
     };
 
+    const _Game_BattlerBase_recoverAll = Game_BattlerBase.prototype.recoverAll;
+    /**
+     * 全状態を回復させる。
+     */
+    Game_BattlerBase.prototype.recoverAll = function() {
+        _Game_BattlerBase_recoverAll.call(this);
+        // 調べた限り、recoverAllではrefreshはコールされないので、
+        // 別途コンディションステートを更新する必要がある。
+        this.updateConditionStates();
+    };
     //------------------------------------------------------------------------------
     // Game_Actor
     const _Game_Actor_setup = Game_Actor.prototype.setup;
