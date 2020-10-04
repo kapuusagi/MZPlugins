@@ -39,6 +39,12 @@
  * @desc 他のプラグイン等で、Game_Actorから画像ファイル名を取得できる場合に指定する。未指定時は顔グラフィック。
  * @type string
  * 
+ * @param growupOnDead
+ * @text Dead中の育成可否
+ * @desc Dead状態の時、育成を行うかどうか。trueにすると、Dead中でも育成できる。
+ * @type boolean
+ * @default false
+ * 
  * @help 
  * Kapu_GrowupSystem のUI提供用プラグイン。
  * ステータス欄に表示する画像はデフォルトで顔グラフィック。
@@ -106,6 +112,7 @@ function Scene_Growup() {
     const menuCommandText = String(parameters["menuCommandText"]) || "";
     const confirmMessageText = String(parameters["confirmMessageText"]) || "%1(%2-%3)";
     const actorPicture = String(parameters["actorPicture"]) || "";
+    const growupOnDead = Boolean(parameters["growupOnDead"]) || false;
 
     PluginManager.registerCommand(pluginName, "startGrowupScene", args => {
         SceneManager.push(Scene_Growup);
@@ -156,7 +163,6 @@ function Scene_Growup() {
      * 背景画像を描画する。
      */
     Window_GrowupActorStatus.prototype.drawBackgroundImage = function() {
-        const actor = this._actor;
         this.drawActorImage();
 
         this.changePaintOpacity(false);
@@ -187,12 +193,29 @@ function Scene_Growup() {
     Window_GrowupActorStatus.prototype.drawActorImage = function() {
         const actor = this._actor;
         if ((actorPicture in actor) && actor[actorPicture]()) {
+            this.setPaintFilter(this.actorImagePaintFilter());
             this.drawActorImagePicture();
+            this.resetPaintFilter();
         } else {
+            this.setPaintFilter(this.actorImagePaintFilter());
             const actor = this._actor;
             const rect = this.baseTextRect();
             this.drawFace(actor.faceName(), actor.faceIndex(),
                     rect.x, rect.y + this.itemPadding(), rect.width, 200);
+            this.resetPaintFilter();
+        }
+    };
+
+    /**
+     * アクター画像を描画するときのフィルターを得る。
+     * 
+     * @return {String} 描画フィルター文字列
+     */
+    Window_GrowupActorStatus.prototype.actorImagePaintFilter = function() {
+        if (!growupOnDead) {
+            return (this._actor.isDead()) ? "grayscale(100%)" : "none";
+        } else {
+            return "none";
         }
     };
     /**
@@ -333,6 +356,23 @@ function Scene_Growup() {
         const valueWidth = width - 24;
         this.drawText(actor.growPoint(), x, y, valueWidth, "right");
     };
+    /**
+     * 描画フィルターを設定する。
+     * (MDNのドキュメントを見る限り、ChromeとFirefoxじゃないと動かない？)
+     * 
+     * @param {String} filterStr 描画フィルター文字列。
+     */
+    Window_GrowupActorStatus.prototype.setPaintFilter = function(filterStr) {
+        this.contents.context.filter = filterStr;
+    };
+
+    /**
+     * 描画フィルターをリセットする。
+     */
+    Window_GrowupActorStatus.prototype.resetPaintFilter = function() {
+        this.contents.context.filter = "none";
+    };
+
     //-----------------------------------------------------------------
     // Window_GrowupSelect
     //    育成項目選択ウィンドウ
@@ -508,6 +548,13 @@ function Scene_Growup() {
      */
     Window_GrowupSelect.prototype.isEnabled = function(item) {
         if (item) {
+            if (item.type === '') {
+                // キャンセル項目
+                return true;
+            }
+            if (!growupOnDead && this._actor.isDead()) {
+                return false;
+            }
             return item.cost <= this._actor.growPoint();
         } else {
             return false;
