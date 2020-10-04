@@ -233,7 +233,9 @@
         y += lineHeight;
 
         // HPゲージ
-        this.drawGauge("hp", actor.hp, actor.mhp, x, y + 32, width, 12);
+        const gaugeX = x + 32;
+        const gaugeWidth = width - 32;
+        this.drawGauge("hp", actor.hp, actor.mhp, gaugeX, y + 32, gaugeWidth, 12);
 
         // HP
         {
@@ -248,7 +250,7 @@
         y += lineHeight * 2;
 
         // MPゲージ
-        this.drawGauge("mp", actor.mp, actor.mmp, x, y + 32, width, 16);
+        this.drawGauge("mp", actor.mp, actor.mmp, gaugeX, y + 32, gaugeWidth, 16);
 
         // MP
         {
