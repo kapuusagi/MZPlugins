@@ -424,49 +424,5 @@
             }
         }
     };
-    //------------------------------------------------------------------------------
-    // Scene_Menu
-    /**
-     * コマンドウィンドウの矩形領域を得る。
-     * 
-     * @return {Rectangle} ウィンドウ矩形領域
-     * !!!overwrite!!! Scene_Menu.commandWindowRect
-     */
-    Scene_Menu.prototype.commandWindowRect = function() {
-        const ww = this.mainCommandWidth();
-        const wh = this.mainAreaHeight() - this.goldWindowRect().height;
-        const wx = Graphics.boxWidth - ww;
-        const wy = this.mainAreaTop();
-        return new Rectangle(wx, wy, ww, wh);
-    };
-    
-    /**
-     * 所持金ウィンドウを表示する矩形領域を得る。
-     * 
-     * @return {Rectangle} ウィンドウ矩形領域
-     * !!!overwrite!!! Scene_Menu.goldWindowRect
-     */
-    Scene_Menu.prototype.goldWindowRect = function() {
-        const ww = this.mainCommandWidth();
-        const wh = this.calcWindowHeight(1, true);
-        const wx = Graphics.boxWidth - ww;
-        const wy = this.mainAreaBottom() - wh;
-        return new Rectangle(wx, wy, ww, wh);
-    };
-    /**
-     * ステータスウィンドウを表示する矩形領域を得る。
-     * 
-     * @return {Rectangle} ウィンドウ矩形領域。
-     * !!!overwrite!!! Scene_Menu_statusWindowRect
-     */
-    Scene_Menu.prototype.statusWindowRect = function() {
-        const ww = Graphics.boxWidth - this.mainCommandWidth();
-        const wh = this.mainAreaHeight();
-        const wx = 0;
-        const wy = this.mainAreaTop();
-        return new Rectangle(wx, wy, ww, wh);
-    };
-
-
 
 })();
