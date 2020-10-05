@@ -158,7 +158,7 @@
 
     /**
      * Actorのノートタグを解析して初期値をセットする。
-     * @param {Array<Game_Actor>} アクターデータ配列 
+     * @param {Array<Game_Actor>} アクターデータ配列  
      */
     DataManager.twldActorNotetags = function(actors) {
         var patternBasicParam = /<BasicParam[ :]+([+-]?\d+)[ ,]+([+-]?\d+)[ ,]+([+-]?\d+)[ ,]+([+-]?\d+)[ ,]+([+-]?\d+)[ ,]+([+-]?\d+)[ ,]+([+-]?\d+) *>/;
@@ -174,14 +174,7 @@
         for (var n = 1; n < actors.length; n++) {
             var actor = actors[n];
 
-            actor.basicParams = [
-                { base:1, grown:0 }, // STR
-                { base:1, grown:0 }, // DEX
-                { base:1, grown:0 }, // VIT
-                { base:1, grown:0 }, // INT
-                { base:1, grown:0 }, // MEN
-                { base:1, grown:0 }, // AGI
-            ];
+
             actor.initialLuk = 50;
             actor.growPoint = {
                 current : 10,
@@ -197,19 +190,7 @@
             var noteLines = actor.note.split(/[\r\n]+/);
             noteLines.forEach(function(line) {
                 var re, i;
-                if ((re = line.match(patternBasicParam)) !== null) {
-                    for (i = 0; i < 6; i++) {
-                        actor.basicParams[i].base = Number(re[i + 1]).clamp(1, 999);
-                    }
-                    actor.initialLuk = Number(re[6]);
-                } else if ((re = line.match(patternBasicParamGrown)) !== null) {
-                    for (i = 0; i < 6; i++) {
-                        actor.basicParams[i].grown = Number(re[i + 1]).clamp(0, 999);
-                    }
-                } else if ((re = line.match(patternGrowPoint)) !== null) {
-                    actor.growPoint.max = Number(re[2]).clamp(0, 999);
-                    actor.growPoint.current = Number(re[1]).clamp(0, actor.growPoint.max);
-                } else if ((re = line.match(patternLearnedSkills)) !== null) {
+                if ((re = line.match(patternLearnedSkills)) !== null) {
                     re[1].split(/[ ,]/).forEach(function (arg) {
                         if (arg && !actor.gpLearnedSkills.contains(arg)) {
                             actor.gpLearnedSkills.push(Number(arg));
@@ -264,26 +245,14 @@
         for (var n = 1; n < enemies.length; n++) {
             var enemy = enemies[n];
 
-            enemy.basicParams = [
-                { base:10, random:0 }, // STR
-                { base:10, random:0 }, // DEX
-                { base:10, random:0 }, // VIT
-                { base:10, random:0 }, // INT
-                { base:10, random:0 }, // MEN
-                { base:10, random:0 }, // AGI
-                { base:50, random:10 }, // LUK
-            ];
+
             enemy.WM = 1;
             enemy.uniqueTraits = [];
 
             var noteLines = enemy.note.split(/[\r\n]+/);
             noteLines.forEach(function(line) {
                 var re, i;
-                if ((re = line.match(patternBasicParam)) !== null) {
-                    for (i = 0; i < 7; i++) {
-                        enemy.basicParams[i].base = Number(re[i + 1]).clamp(1, 999);
-                    }
-                } else if ((re = line.match(patternBasicParamRandom)) !== null) {
+                if ((re = line.match(patternBasicParamRandom)) !== null) {
                     for (i = 0; i < 7; i++) {
                         enemy.basicParam[i].random = Number(re[i + 1].clamp(1, 999));
                     }
