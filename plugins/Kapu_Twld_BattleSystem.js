@@ -3,7 +3,7 @@
  * @plugindesc Twld向けに作成した戦闘システムの変更
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * ■ setBattlePicture
+ * 
  * @command setBattlePicture
  * @text アクター戦闘画像設定
  * @desc 戦闘中にコマンド入力欄脇に表示するグラフィックを設定する。
