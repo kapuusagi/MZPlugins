@@ -28,6 +28,7 @@
 |__TRAIT_ARMOR_PERFORMANCE__|102|防具タイプ|指定した防具タイプの性能を向上させる特性|
 ||||
 |__TRAIT_BASIC_PARAM__|1001|基本パラメータを加算する特性|
+|__TRAIT_BASIC_PARAM_RATE__|1002|基本パラメータ乗算レート特性|
 
 
 ### スペシャルフラグ
@@ -55,6 +56,8 @@ __TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
 |__EFFECT_MOVE_BATTLE_POSITION__|100|0|-|-|前に出る効果。|
 |__EFFECT_GAIN_GROWPOINT__|101|0|-|-|成長ポイントを加算する効果。|
 |||1|-|-|後ろに下がる効果。|
+|||||||
+|__EFFECT_BASIC_PARAM_ADD__|1001|パラメータID|増減させる値|-|基本パラメータを指定した値だけ増減させる|
 
 
 
