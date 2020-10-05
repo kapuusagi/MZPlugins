@@ -651,7 +651,7 @@
             if (this.isForRow()) {
                 let row;
                 if (this._targetIndex < 0) {
-                    row = Math.RandomInt(2);
+                    row = Math.randomInt(2);
                 } else {
                     row = unit.members()[this._targetIndex].battlePosition();
                 }
