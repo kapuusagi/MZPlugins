@@ -92,6 +92,18 @@
  * @desc 設定する値
  * @type number
  * 
+ * @param overwriteAGI
+ * @text AGIを上書きする
+ * @desc ベーシックシステムのAGIを上書きするかどうかを設定します。
+ * @type boolean
+ * @default true
+ * 
+ * @param overwriteLUK
+ * @text LUKを上書きする
+ * @desc ベーシックシステムのLUKを上書きするかどうかを設定します。
+ * @type boolean
+ * @default true
+ * 
  * @param basicParamMax
  * @text 最大値
  * @desc 基本パラメータ最大値
@@ -167,9 +179,13 @@
  *
  * @help 
  * TWLD向けに作成した、基本パラメータ(STR/DEX/VIT/INT/MEN/AGI/LUK)を追加するプラグイン。
- * 既存のAGI/LUKは挙動変更のために動作が変わります。
+ * デフォルトでは既存のAGI/LUKが上書きされます。
+ * LUK/AGIの上書きを行わない場合、プラグインパラメータの
+ * 「AGIを上書きする」「LUKを上書きする」をfalseに設定します。
  * 
  * ■ 使用時の注意
+ * ベーシックシステムにある、AGI/LUKが上書きされます。
+ * それらに作用する系統のプラグインとは競合します。
  * 
  * ■ プラグイン開発者向け
  * 基本パラメータ加算特性
@@ -249,6 +265,9 @@
     Game_BattlerBase.TRAIT_BASIC_PARAM_RATE = Number(parameters["basciParamRateTraitCode"]) || 0;
     Game_BattlerBase.BASIC_PARAM_MAX = Number(parameters["basicParamMax"]) || 999;
     Game_Action.EFFECT_GAIN_BASIC_PARAM = Number(parameters(basicParamAddEffectCode)) || 0;
+
+    const overwriteAGI = Boolean(parameters["overwriteAGI"]) || true;
+    const overwriteLUK = Boolean(parameters["overwriteLUK"]) || true;
 
     const paramLabels = [
         String(parameters["paramLabel0"]) || "STR",
@@ -451,13 +470,17 @@
         dex : { get: function() { return this.basicParam(1); }, configurable:true },
         vit : { get: function() { return this.basicParam(2); }, configurable:true },
         int : { get: function() { return this.basicParam(3); }, configurable:true },
-        men : { get: function() { return this.basicParam(4); }, configurable:true },
-        agi : { get: function() { return this.basicParam(5); }, configurable:true }, // 再定義
-        luk : { get: function() { return this.basicParam(6); }, configurable:true }, // 再定義
+        men : { get: function() { return this.basicParam(4); }, configurable:true }
     });
 
-
-
+    if (overwriteAGI) {
+        Object.defineProperty(Game_BattlerBase.prototype, "agi", {
+                get: function() { return this.basicParam(5); }, configurable:true });
+    }
+    if (overwriteLUK) {
+        Object.defineProperties(Game_BattlerBase.prototype, "luk", {
+                get: function() { return this.basicParam(6); }, configurable:true });
+    }
 
     const _Game_BattlerBase_initMembers = Game_BattlerBase.prototype.initMembers;
     /**
