@@ -519,13 +519,6 @@
 
 
     Object.defineProperties(Game_BattlerBase.prototype, {
-        str : { get: function() { return this.getBasicParam(0); }, configurable:true },
-        dex : { get: function() { return this.getBasicParam(1); }, configurable:true },
-        vit : { get: function() { return this.getBasicParam(2); }, configurable:true },
-        int : { get: function() { return this.getBasicParam(3); }, configurable:true },
-        men : { get: function() { return this.getBasicParam(4); }, configurable:true },
-        agi : { get: function() { return this.getBasicParam(5); }, configurable:true }, // 再定義
-        luk : { get: function() { return this.getLuk(); }, configurable:true }, // 再定義
         pdr : { get: function() { return this.getPhysicalDamageRate(); }, configurable:true}, // 再定義
         mdr : { get: function() { return this.getMagicalDamegeRate(); }, configurable:true }, // 再定義
         ppr: { get: function() { return this.getPhysicalPenetrationRate(); }, configurable:true },
@@ -539,13 +532,6 @@
         /** 魔法防御力計算式補正式 */
         mdefcoef: { get : function() { return this.getMagicalDefenceRate(); }, configurable:true }
     });
-
-    /**
-     * 固有の特性を初期化する。
-     */
-    Game_BattlerBase.prototype.initUniqueTraits = function() {
-        this._uniqueTraits = [];
-    };
 
     /**
      * 物理防御貫通率を取得する。
@@ -582,19 +568,7 @@
         return Math.round(value.clamp(minValue, maxValue));
     };
 
-    /**
-     * ATK/DEF/MATK/MDEFパラメータの増幅率を得る。
-     * @return {Number} 増幅率
-     */
-    Game_BattlerBase.prototype.paramRate = function(paramId) {
-        // 基本パラメータを乗算レートでやると、めっちゃ大きくなるのでやめる。
-        var rate = 1.0;
-        this.traitsWithId(Game_BattlerBase.TRAIT_PARAM, paramId).forEach(function(trait) {
-            rate += (trait.value - 1.0)
-        });
 
-        return Math.max(0.1, rate);
-    };
 
     /**
      * 物理攻撃力補正値を得る。
@@ -692,27 +666,8 @@
         return Math.max(0, rate - reduce);
     };
 
-    /**
-     * 基本パラメータを得る。
-     * @param {Number} paramId パラメータID
-     * @return {Number} パラメータ値
-     */
-    Game_BattlerBase.prototype.getBasicParam = function(paramId) {
-        var value = this.getBasicParamBase(paramId) * (this.getBasicParamRate(paramId))
-            + this.getBasicParamCorrectByEquips(paramId) + this.getBasicParamCorrectByStates(paramId);
-        return Math.round(Math.floor(value).clamp(1, 999));
-    };
 
-    /**
-     * 基本パラメータベース値を取得する。
-     * 
-     * @param {Number} paramId パラメータID
-     * @return {Number} ベース値が返る。
-     */
-    // eslint-disable-next-line no-unused-vars
-    Game_BattlerBase.prototype.getBasicParamBase = function(paramId) {
-        return 1;
-    };
+
 
     /**
      * LUK値を取得する。

@@ -197,6 +197,24 @@
     // };
 
     //------------------------------------------------------------------------------
+    // Game_BattlerBase
+    /**
+     * MaxHP/MaxMP/ATK/DEF/MATK/MDEFパラメータの増幅率を得る。
+     * 
+     * @return {Number} 増幅率
+     * !!!overwrite!!! Game_BattlerBase.paramRate()
+     */
+    Game_BattlerBase.prototype.paramRate = function(paramId) {
+        // 基本パラメータを乗算レートでやると、めっちゃ大きくなるのでやめる。
+        var rate = 1.0;
+        this.traitsWithId(Game_BattlerBase.TRAIT_PARAM, paramId).forEach(function(trait) {
+            rate += (trait.value - 1.0)
+        });
+
+        return Math.max(0.1, rate);
+    };
+
+    //------------------------------------------------------------------------------
     // Game_Actor
     /**
      * パッシブスキルを持っているかどうかを判定する。
@@ -234,7 +252,7 @@
      * 
      * @param {Number} paramId パラメータID
      * @return {Number} 加算値
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Actor.paramPlus()
      */
     Game_Actor.prototype.paramPlus = function(paramId) {
         return Game_Battler.prototype.paramPlus.call(this, paramId);
