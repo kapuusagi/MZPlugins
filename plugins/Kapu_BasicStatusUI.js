@@ -4,7 +4,6 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
- * 
  * @param statusPictureMethod
  * @text ステータス画像メソッド名
  * @desc アクターのステータス画像を取得するメソッド名。
@@ -48,185 +47,10 @@
  * @desc ステータス画面に表示する項目。
  * @type struct<displayEntry>
  * 
- * @param param0
- * @text ページ2 パラメータ1
+ * @param customParams
+ * @text カスタムパラメータ
  * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param1
- * @text ページ2 パラメータ2
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param2
- * @text ページ2 パラメータ3
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param3
- * @text ページ2 パラメータ4
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param4
- * @text ページ2 パラメータ5
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param5
- * @text ページ2 パラメータ6
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param6
- * @text ページ2 パラメータ7
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param7
- * @text ページ2 パラメータ8
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param8
- * @text ページ2 パラメータ9
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param9
- * @text ページ2 パラメータ10
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param10
- * @text ページ2 パラメータ11
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param11
- * @text ページ2 パラメータ12
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param12
- * @text ページ2 パラメータ13
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param13
- * @text ページ2 パラメータ14
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param14
- * @text ページ2 パラメータ15
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param15
- * @text ページ2 パラメータ16
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param16
- * @text ページ2 パラメータ17
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param17
- * @text ページ2 パラメータ18
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param18
- * @text ページ3 パラメータ19
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param19
- * @text ページ3 パラメータ20
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param20
- * @text ページ3 パラメータ21
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param21
- * @text ページ3 パラメータ22
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param22
- * @text ページ3 パラメータ23
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param23
- * @text ページ3 パラメータ24
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param24
- * @text ページ3 パラメータ25
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param25
- * @text ページ3 パラメータ26
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param26
- * @text ページ3 パラメータ27
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param27
- * @text ページ3 パラメータ28
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param28
- * @text ページ3 パラメータ29
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param29
- * @text ページ3 パラメータ30
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param30
- * @text ページ3 パラメータ31
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param31
- * @text ページ3 パラメータ32
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param32
- * @text ページ3 パラメータ33
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param33
- * @text ページ3 パラメータ34
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param34
- * @text ページ3 パラメータ35
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
- * 
- * @param param35
- * @text ページ3 パラメータ36
- * @desc ステータス画面に表示するパラメータ
- * @type struct<paramEntry>
+ * @type struct<paramEntry>[]
  * 
  * @help 
  * ベーシックシステムのステータス画面は情報量が乏しすぎてしんどいので、
@@ -238,7 +62,7 @@
  * 本プラグインでは、以下の機能を提供する。
  * ・ページ切り替えによるステータス表示項目の変更
  * ・プラグインパラメータによる、任意パラメータの表示
- *   アクターステータス欄4つ＋任意パラメータ最大36個（atkなど指定できるものに限る）
+ *   アクターステータス欄4つ＋任意数のパラメータ
  * ・属性耐性表示
  * ・ステータス画面用画像ファイル取得プロパティ設定
  * 
@@ -348,16 +172,11 @@
         const statusEntry = JSON.parse(parameters["status" + i]);
         statusBlock4Items.push(statusEntry);
     }
-    const customParams = [];
-    for (let i = 0; i < 36; i++) {
-        const paramEntry = JSON.parse(parameters["param" + i]);
-        customParams.push(paramEntry);
-    }
 
-    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-    //     // TODO : コマンドの処理。
-    //     // パラメータメンバは @argで指定した名前でアクセスできる。
-    // });
+    // なんか添付のプラグインと動作が違うんだけど。
+    // JSON.parse しないとオブジェクトにならない。テキストのまんま。どういうこと？
+    const customParams = JSON.parse(parameters["customParams"]).map(str => JSON.parse(str));
+
 
     //------------------------------------------------------------------------------
     // Window_Status
@@ -860,33 +679,14 @@
      */
     Window_StatusParams.prototype.makePages = function() {
         this.addPage(this.drawParamPage.bind(this), null);
-        if (this.customParamExists(0, 18)) {
-            this.addPage(this.drawCustomizeParamPage.bind(this), 0);
-        }
-        if (this.customParamExists(18, 18)) {
-            this.addPage(this.drawCustomizeParamPage.bind(this), 18);
-        }
+        const customPageCount = Math.ceil(customParams.length / 18)
+        for (let i = 0; i < customPageCount; i++) {
+            this.addPage(this.drawCustomizeParamPage.bind(this), 18 * i);
+        } 
         const elementCount = $dataSystem.elements.length - 1;
         const elementPageCount = Math.ceil(elementCount / 18);
         for (let i = 0; i < elementPageCount; i++) {
             this.addPage(this.drawElementRatePage.bind(this), i * 18 + 1);
-        }
-    };
-
-    /**
-     * begin - (begin + length - 1)間に有効な表示パラメータがあるかどうかを取得する。
-     * 
-     * @param {Number} begin 開始インデックス
-     * @param {Number} length チェック範囲の数
-     * @return {Boolean} パラメータが存在する場合にはtrue, それ以外はfalse.
-     */
-    Window_StatusParams.prototype.customParamExists = function(begin, length) {
-        for (let i = begin; i < (begin + length); i++) {
-            const item = customParams[i];
-            if (this.isCustomParamEnabled(item)) {
-                return true;
-            }
-            return false;
         }
     };
 
@@ -1012,6 +812,9 @@
         const height = this.lineHeight();
         let id = arg;
         for (let i = 0; i < 6; i++) {
+            if (id >= customParams.length) {
+                break;
+            }
             const item = customParams[id];
             const y = rect.y + height * i;
             if (this.isCustomParamEnabled(item)) {
@@ -1021,6 +824,9 @@
         }
         const x2 = x1 + width + padding * 4;
         for (let i = 0; i < 6; i++) {
+            if (id >= customParams.length) {
+                break;
+            }
             const item = customParams[id];
             const y = rect.y + height * i;
             if (this.isCustomParamEnabled(item)) {
@@ -1030,6 +836,9 @@
         }
         const x3 = x2 + width + padding * 4;
         for (let i = 0; i < 6; i++) {
+            if (id >= customParams.length) {
+                break;
+            }
             const item = customParams[id];
             const y = rect.y + height * i;
             if (this.isCustomParamEnabled(item)) {
