@@ -86,6 +86,8 @@
  * @text 値
  * @desc 設定する値
  * @type number
+ * @min -10000
+ * @max 10000
  * 
  * @arg valueVariableId
  * @text 値(変数指定)
