@@ -172,89 +172,119 @@
     DataManager.addNotetagParserEnemies(_processPenetrateRateNoteTag);
     //------------------------------------------------------------------------------
     // Game_BattlerBase
-    /**
-     * DEF貫通率を得る。
-     * 
-     * @return {Number} DEF貫通率(0～1.0)
-     */
-    Game_BattlerBase.prototype.penetrateDEF = function() {
-        if (Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR) {
+    if (Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR) {
+        /**
+         * DEF貫通率を得る。
+         * 
+         * @return {Number} DEF貫通率(0～1.0)
+         */
+        Game_BattlerBase.prototype.penetrateDEF = function() {
             return this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR).clamp(0, 1);
-        } else {
-            return 0;
+        };
+        if (enableProperty) {
+            Object.defineProperty(Game_BattlerBase, "pendef", {
+                get:function() {
+                    return this.penetrateDEF();
+                },
+                configurable:true
+            });
         }
-    };
-    if (enableProperty && Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR) {
-        Object.defineProperty(Game_BattlerBase, "pendef", {
-            get:function() {
-                return this.penetrateDEF();
-            },
-            configurable:true
-        });
+    } else {
+        /**
+         * DEF貫通率を得る。
+         * 
+         * @return {Number} DEF貫通率(0～1.0)
+         */
+        Game_BattlerBase.prototype.penetrateDEF = function() {
+            return 0;
+        };
     }
 
-    /**
-     * PDR貫通率を得る。
-     * 
-     * @return {Number} DEF貫通率(0～1.0)
-     */
-    Game_BattlerBase.prototype.penetratePDR = function() {
-        if (Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR) {
+    if (Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR) {
+        /**
+         * PDR貫通率を得る。
+         * 
+         * @return {Number} DEF貫通率(0～1.0)
+         */
+        Game_BattlerBase.prototype.penetratePDR = function() {
             return this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR).clamp(0, 1);
-        } else {
-            return 0;
+        };
+        if (enableProperty) {
+            Object.defineProperty(Game_BattlerBase, "penpdr", {
+                get:function() {
+                    return this.penetratePDR();
+                },
+                configurable:true
+            });
         }
-    };
-    if (enableProperty && Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR) {
-        Object.defineProperty(Game_BattlerBase, "penpdr", {
-            get:function() {
-                return this.penetratePDR();
-            },
-            configurable:true
-        });
+    } else {
+        /**
+         * PDR貫通率を得る。
+         * 
+         * @return {Number} DEF貫通率(0～1.0)
+         */
+        Game_BattlerBase.prototype.penetratePDR = function() {
+            return 0;
+        };
     }
 
 
-    /**
-     * MDF貫通率を得る。
-     * 
-     * @return {Number} MDF貫通率(0～1.0)
-     */
-    Game_BattlerBase.prototype.penetrateMDF = function() {
-        if (Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR) {
+    if (Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR) {
+        /**
+         * MDF貫通率を得る。
+         * 
+         * @return {Number} MDF貫通率(0～1.0)
+         */
+        Game_BattlerBase.prototype.penetrateMDF = function() {
             return this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR).clamp(0, 1);
-        } else {
+        };
+        if (enableProperty) {
+            Object.defineProperty(Game_BattlerBase, "penmdf", {
+                get:function() {
+                    return this.penetrateMDF();
+                },
+                configurable:true
+            });
+        }
+    } else {
+        /**
+         * MDF貫通率を得る。
+         * 
+         * @return {Number} MDF貫通率(0～1.0)
+         */
+        Game_BattlerBase.prototype.penetrateMDF = function() {
+            return 0;
+        };
+    }
+
+    if (Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR) {
+        /**
+         * MDR貫通率を得る。
+         * 
+         * @return {Number} MDR貫通率(0～1.0)
+         */
+        Game_BattlerBase.prototype.penetrateMDR = function() {
+            return this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR).clamp(0, 1);
+        }
+        if (enableProperty) {
+            Object.defineProperty(Game_BattlerBase, "penmdr", {
+                get:function() {
+                    return this.penetrateMDR();
+                },
+                configurable:true
+            });
+        }
+    } else {
+        /**
+         * MDR貫通率を得る。
+         * 
+         * @return {Number} MDR貫通率(0～1.0)
+         */
+        Game_BattlerBase.prototype.penetrateMDR = function() {
             return 0;
         }
-    };
-    if (enableProperty && Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR) {
-        Object.defineProperty(Game_BattlerBase, "penmdf", {
-            get:function() {
-                return this.penetrateMDF();
-            },
-            configurable:true
-        });
     }
-    /**
-     * MDR貫通率を得る。
-     * 
-     * @return {Number} MDR貫通率(0～1.0)
-     */
-    Game_BattlerBase.prototype.penetrateMDR = function() {
-        if (Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR) {
-            return this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR).clamp(0, 1);
-        } else {
-            return 0;
-        }
-    }
-    if (enableProperty && Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR) {
-        Object.defineProperty(Game_BattlerBase, "penmdr", {
-            get:function() {
-                return this.penetrateMDR();
-            },
-            configurable:true
-        });
-    }
+    
 
 
     //------------------------------------------------------------------------------

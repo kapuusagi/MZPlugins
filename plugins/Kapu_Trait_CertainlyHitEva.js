@@ -146,56 +146,87 @@
     //------------------------------------------------------------------------------
     // Game_BattlerBase
 
-    /**
-     * 物理攻撃/スキルが確実にヒットするかどうかを取得する。
-     * 
-     * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse
-     */
-    Game_BattlerBase.prototype.isCertainlyPhyHit = function() {
-        if (Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY) {
+    if (Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY) {
+        /**
+         * 物理攻撃/スキルが確実にヒットするかどうかを取得する。
+         * 
+         * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse
+         */
+        Game_BattlerBase.prototype.isCertainlyPhyHit = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY);
-        } else {
+        };
+    } else {
+        /**
+         * 物理攻撃/スキルが確実にヒットするかどうかを取得する。
+         * 
+         * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse
+         */
+        Game_BattlerBase.prototype.isCertainlyPhyHit = function() {
             return false;
-        }
-    };
+        };
+    }
 
-    /**
-     * 魔法攻撃/スキルが確実にヒットするかどうかを取得する。
-     * 
-     * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse.
-     */
-    Game_BattlerBase.prototype.isCertainlyMagHit = function() {
-        if (Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG) {
+    if (Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG) {
+        /**
+         * 魔法攻撃/スキルが確実にヒットするかどうかを取得する。
+         * 
+         * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse.
+         */
+        Game_BattlerBase.prototype.isCertainlyMagHit = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG);
-        } else {
-            return false;
-        }
-    };
+        };
 
-    /**
-     * 物理攻撃を確実に回避するかどうかを取得する。
-     * 
-     * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse.
-     */
-    Game_BattlerBase.prototype.isCertainlyPhyEvad = function() {
-        if (Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY) {
+    } else {
+        /**
+         * 魔法攻撃/スキルが確実にヒットするかどうかを取得する。
+         * 
+         * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse.
+         */
+        Game_BattlerBase.prototype.isCertainlyMagHit = function() {
+            return false;
+        };
+    }
+
+    if (Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY) {
+        /**
+         * 物理攻撃を確実に回避するかどうかを取得する。
+         * 
+         * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse.
+         */
+        Game_BattlerBase.prototype.isCertainlyPhyEvad = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY);
-        } else {
-            return false;
-        }
-    };
-    /**
-     * 魔法攻撃を確実に回避するかどうかを取得する。
-     * 
-     * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse.
-     */
-    Game_BattlerBase.prototype.isCertainlyMagEvad = function() {
-        if (Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG) {
+        };
+    } else {
+        /**
+         * 物理攻撃を確実に回避するかどうかを取得する。
+         * 
+         * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse.
+         */
+        Game_BattlerBase.prototype.isCertainlyPhyEvad = function() {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY);
+        };
+    }
+
+    if (Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG) {
+        /**
+         * 魔法攻撃を確実に回避するかどうかを取得する。
+         * 
+         * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse.
+         */
+        Game_BattlerBase.prototype.isCertainlyMagEvad = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG);
-        } else {
+        };
+    } else {
+        /**
+         * 魔法攻撃を確実に回避するかどうかを取得する。
+         * 
+         * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse.
+         */
+        Game_BattlerBase.prototype.isCertainlyMagEvad = function() {
             return false;
-        }
-    };
+        };
+    }
+
 
     //------------------------------------------------------------------------------
     // Game_Action

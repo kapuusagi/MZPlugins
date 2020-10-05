@@ -118,7 +118,8 @@
         const lines = obj.note.split(/[\r\n]+/);
         for (line of lines) {
             let re = null;
-            if ((re = line.match(patternWeapon)) !== null) {
+            if (Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE
+                    && ((re = line.match(patternWeapon)) !== null)) {
                 const type = Number(re[1]);
                 const rate = _parseRate(re[2]);
                 if (type > 0) {
@@ -128,7 +129,8 @@
                         value:rate
                     });
                 }
-            } else if ((re = line.match(patternArmor)) !== null) {
+            } else if (Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE
+                    && ((re = line.match(patternArmor)) !== null)) {
                 const type = Number(re[1]);
                 const rate = _parseRate(re[2]);
                 if (type > 0) {
@@ -172,33 +174,50 @@
         }
     };
 
-    /**
-     * 武器の性能可変レートを得る。
-     * 
-     * @param {Number} wtypeId 武器タイプ
-     * @return {Number} 変動レート
-     */
-    Game_Actor.prototype.paramEquipValueRateWeapon = function(wtypeId) {
-        if (Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE) {
+    if (Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE) {
+        /**
+         * 武器の性能可変レートを得る。
+         * 
+         * @param {Number} wtypeId 武器タイプ
+         * @return {Number} 変動レート
+         */
+        Game_Actor.prototype.paramEquipValueRateWeapon = function(wtypeId) {
             return Math.max(0, 1.0 + this.traitsSum(Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE, wtypeId));
-        } else {
+        };
+    } else {
+        /**
+         * 武器の性能可変レートを得る。
+         * 
+         * @param {Number} wtypeId 武器タイプ
+         * @return {Number} 変動レート
+         */
+        Game_Actor.prototype.paramEquipValueRateWeapon = function(wtypeId) {
             return 1;
-        }
-    };
+        };
+    }
 
-    /**
-     * 防具の性能可変レートを得る。
-     * 
-     * @param {Number} wtype 武器タイプ
-     * @return {Number} 変動レート
-     */
-    Game_Actor.prototype.paramEquipValueRateArmor = function(atypeId) {
-        if (Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE) {
+    if (Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE) {
+        /**
+         * 防具の性能可変レートを得る。
+         * 
+         * @param {Number} wtype 武器タイプ
+         * @return {Number} 変動レート
+         */
+        Game_Actor.prototype.paramEquipValueRateArmor = function(atypeId) {
             return Math.max(0, 1.0 + this.traitsSum(Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE, atypeId));
-        } else {
+        };
+    } else {
+        /**
+         * 防具の性能可変レートを得る。
+         * 
+         * @param {Number} wtype 武器タイプ
+         * @return {Number} 変動レート
+         */
+        Game_Actor.prototype.paramEquipValueRateArmor = function(atypeId) {
             return 1;
-        }
-    };
+        };
+    }
+
 
 
 

@@ -93,34 +93,36 @@
     //------------------------------------------------------------------------------
     // DataManager
 
-    /**
-     * criticalDamageRate ノートタグを処理する。
-     * 
-     * @param {Object} obj データオブジェクト
-     */
-    const _processCriticalDamageRateNoteTag = function(obj) {
-        if (obj.meta.criticalDamageRate && Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {
-            const valueStr = obj.meta.criticalDamageRate;
-            let cdr;
-            if (valueStr.slice(-1) === "%") {
-                cdr = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
-            } else {
-                cdr = Number(valueStr);
+    if (Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {
+        /**
+         * criticalDamageRate ノートタグを処理する。
+         * 
+         * @param {Object} obj データオブジェクト
+         */
+        const _processCriticalDamageRateNoteTag = function(obj) {
+            if (obj.meta.criticalDamageRate) {
+                const valueStr = obj.meta.criticalDamageRate;
+                let cdr;
+                if (valueStr.slice(-1) === "%") {
+                    cdr = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
+                } else {
+                    cdr = Number(valueStr);
+                }
+                obj.traits.push({ 
+                    code:Game_BattlerBase.TRAIT_XPARAM, 
+                    dataId:Game_BattlerBase.TRAIT_XPARAM_DID_CDR, 
+                    value:cdr
+                });
             }
-            obj.traits.push({ 
-                code:Game_BattlerBase.TRAIT_XPARAM, 
-                dataId:Game_BattlerBase.TRAIT_XPARAM_DID_CDR, 
-                value:cdr
-            });
-        }
-    };
+        };
 
-    DataManager.addNotetagParserActors(_processCriticalDamageRateNoteTag);
-    DataManager.addNotetagParserClasses(_processCriticalDamageRateNoteTag);
-    DataManager.addNotetagParserWeapons(_processCriticalDamageRateNoteTag);
-    DataManager.addNotetagParserArmors(_processCriticalDamageRateNoteTag);
-    DataManager.addNotetagParserStates(_processCriticalDamageRateNoteTag);
-    DataManager.addNotetagParserEnemies(_processCriticalDamageRateNoteTag);
+        DataManager.addNotetagParserActors(_processCriticalDamageRateNoteTag);
+        DataManager.addNotetagParserClasses(_processCriticalDamageRateNoteTag);
+        DataManager.addNotetagParserWeapons(_processCriticalDamageRateNoteTag);
+        DataManager.addNotetagParserArmors(_processCriticalDamageRateNoteTag);
+        DataManager.addNotetagParserStates(_processCriticalDamageRateNoteTag);
+        DataManager.addNotetagParserEnemies(_processCriticalDamageRateNoteTag);
+    }
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
@@ -152,37 +154,44 @@
             },
         });
     }
-
     /**
      * 物理攻撃のクリティカル倍率を取得する。
+     * 
      * @return {Number} クリティカル倍率。
      */
     Game_BattlerBase.prototype.getPhysicalCriticalRate = function () {
-        return basicCriticalRate + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CDR);
+        return this.criticalDamageRate();
     };
 
     /**
      * 魔法攻撃のクリティカル倍率を取得する。
+     * 
      * @return {Number} クリティカル倍率。
      */
     Game_BattlerBase.prototype.getMagicalCriticalRate = function() {
         return this.criticalDamageRate();
     };
 
-    /**
-     * クリティカルダメージレートを得る。
-     * 
-     * @return {Number} クリティカルダメージレート
-     */
-    Game_BattlerBase.prototype.criticalDamageRate = function() {
-        if (Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {
+    if (Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {
+        /**
+         * クリティカルダメージレートを得る。
+         * 
+         * @return {Number} クリティカルダメージレート
+         */
+        Game_BattlerBase.prototype.criticalDamageRate = function() {
             return basicCriticalRate + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CDR);
-        } else {
-            Game_BattlerBase.prototype.criticalDamageRate = function() {
-                return basicCriticalRate;
-            };
-        }
-    };
+        };
+    } else {
+        /**
+         * クリティカルダメージレートを得る。
+         * 
+         * @return {Number} クリティカルダメージレート
+         */
+        Game_BattlerBase.prototype.criticalDamageRate = function() {
+            return basicCriticalRate;
+        };
+    }
+
 
     Object.defineProperties(Game_BattlerBase.prototype, {
         /**
