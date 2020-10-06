@@ -334,6 +334,8 @@
      */
     Game_Actor.prototype.resetGrows = function() {
         this._growPoint.current = this._growPoint.max;
+        this.releaseUnequippableItems();
+        this.refresh();
     };
 
     /**
