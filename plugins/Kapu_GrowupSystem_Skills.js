@@ -8,6 +8,26 @@
  * @base Kapu_Utility
  * @orderAfter kapu_Utility
  * 
+ * @command addGpLearnableSkill
+ * @text 習得可能スキル追加
+ * @desc 指定アクターに習得可能スキルを追加する。
+ * 
+ * @arg actorId
+ * @text アクターID
+ * @desc アクターID
+ * @type actor
+ * 
+ * @arg variableId
+ * @text アクター指定（変数)
+ * @desc アクターIDを格納した変数ID
+ * @type variable
+ * 
+ * @arg skill
+ * @text スキル
+ * @desc 追加するスキル
+ * @type skill
+ * 
+ * 
  * @param labelName
  * @text 習得アイテムラベル名
  * @desc 育成画面に表示する項目名。(%1にスキル名が入る)
@@ -60,18 +80,38 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "TODO:拡張子なしのプラグインファイル名。ファイル名変更すると動かなくなるのはどうなの？";
+    const pluginName = "Kapu_GrowupSystem_Skills";
     const parameters = PluginManager.parameters(pluginName);
     const labelName = String(parameters["labelName"]) || "lean %1";
     Game_Action.EFFECT_ADD_GPLEARN_SKILL = Number(parameters["effectCode"]) || 0;
+
     if (!Game_Action.EFFECT_ADD_GPLEARN_SKILL) {
         console.error(pluginName + ":EFFECT_ADD_GPLEARN_SKILL is not valid.");
     }
-
-    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-    //     // TODO : コマンドの処理。
-    //     // パラメータメンバは @argで指定した名前でアクセスできる。
-    // });
+    /**
+     * アクターIDを得る。
+     * 
+     * @param {Object} args プラグインコマンド引数
+     * @return {Number} アクターID
+     */
+    const _getActorId = function(args) {
+        const actorId = Number(args.actorId) || 0;
+        const variableId = Number(args.variableId) || 0;
+        if (actorId > 0) {
+            return actorId;
+        } else if (variableId > 0) {
+            return $gameVariables.value(variableId);
+        } else {
+            return 0;
+        }
+    };
+    PluginManager.registerCommand(pluginName, "addGpLearnableSkill", args => {
+        const actorId = _getActorId(args);
+        const skillId = Math.floor(Number(args.skill) || 0);
+        if ((actorId > 0) || (skillId > 0)) {
+            $gameActors.actor(actorId).addGpLearnableSkill(skillId);
+        }
+    });
     //------------------------------------------------------------------------------
     // DataManager
 
