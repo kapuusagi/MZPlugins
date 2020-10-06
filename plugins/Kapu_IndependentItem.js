@@ -743,7 +743,7 @@
     Game_Temp.prototype.setItemGainFailure = function(isFailure) {
         this._gailItemFailure = isFailure;
         if (isFailure && gainFailureEventId) {
-            if (!this._commonEventQueue.contains(gainFailureEventId)) {
+            if (!this._commonEventQueue.includes(gainFailureEventId)) {
                 this.reserveCommonEvent(gainFailureEventId);
             }
         }

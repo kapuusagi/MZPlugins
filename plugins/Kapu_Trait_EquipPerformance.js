@@ -162,11 +162,11 @@
     Game_Actor.prototype.paramEquipValue = function(equipItem, paramId) {
         const equipValue = _Game_Actor_paramEquipValue.call(this, equipItem, paramId);
         if (DataManager.isWeapon(equipItem)
-                && (!applyRelativeOnly || [2,4].contains(paramId))) {
+                && (!applyRelativeOnly || [2,4].includes(paramId))) {
             const rate = this.paramEquipValueRateWeapon(equipItem.wtypeId);
             return Math.floor(equipValue * rate);
         } else if (DataManager.isArmor(equipItem)
-                && (!applyRelativeOnly || [3,5].contains(paramId))) {
+                && (!applyRelativeOnly || [3,5].includes(paramId))) {
             const rate = this.paramEquipValueRateArmor(equipItem.atypeId);
             return Math.floor(equipValue * rate);
         } else {

@@ -277,7 +277,7 @@ function Scene_TwldShop() {
     PluginManager.registerCommand(pluginName, "openShop", args => {
         const id = _getShopId(args);
         let clerkFileName = String(args.clerkFileName) || "";
-        if (clerkFileName.contains('/')) {
+        if (clerkFileName.includes("/")) {
             if (clerkFileName.startsWith("pictures/")) {
                 clerkFileName = clerkFileName.substr(9);
             } else {

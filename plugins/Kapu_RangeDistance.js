@@ -523,7 +523,7 @@
      */
     Game_Action.prototype.rangeDistanceForUnit = function(unit) {
         const subject = this.subject();
-        if (unit.members().contains(subject)) {
+        if (unit.members().includes(subject)) {
             return Game_Action.RANGE_MIDDLE; // To firendの場合には1（全員対象）
         } else {
             return this.rangeDistance() - subject.battlePosition();

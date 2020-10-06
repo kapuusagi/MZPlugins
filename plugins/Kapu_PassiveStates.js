@@ -61,7 +61,7 @@
         for (const token of obj.meta.passiveStates.split(",")) {
             const id = Number(token);
             if (id > 0) {
-                if (!obj.passiveStates.contains(id)) {
+                if (!obj.passiveStates.includes(id)) {
                     obj.passiveStates.push(id);
                 }
             }
@@ -94,7 +94,7 @@
     Game_BattlerBase.prototype.states = function() {
         let states = _Game_BattlerBase_states.call(this);
         for (const state of this.passiveStates()) {
-            if (!states.contains(state)) {
+            if (!states.includes(state)) {
                 states.push(state);
             }
         }
@@ -133,7 +133,7 @@
      * @return {Boolean} 保持しているパッシブステートに含まれる場合にはtrue,それ以外はfalse
      */
     Game_BattlerBase.prototype.isPassiveStateAffected = function(stateId) {
-        return this._passiveStateIds.contains(stateId);
+        return this._passiveStateIds.includes(stateId);
     };
 
     /**
@@ -144,7 +144,7 @@
         const passiveStateObjects = this.passiveStateObjects();
         for (const obj of passiveStateObjects) {
             for (const id of obj.passiveStates) {
-                if (!stateIds.contains(id)) {
+                if (!stateIds.includes(id)) {
                     stateIds.push(id);
                 }
             }

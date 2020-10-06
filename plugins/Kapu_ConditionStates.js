@@ -47,7 +47,7 @@
             const states = [];
             for (let i = 1; i < tokens.length; i++) {
                 const stateId = Number(tokens[i]);
-                if ((stateId > 0) && !states.contains(stateId)) {
+                if ((stateId > 0) && !states.includes(stateId)) {
                     states.push(stateId)
                 }
             }
@@ -110,7 +110,7 @@
     Game_BattlerBase.prototype.states = function() {
         let states = _Game_BattlerBase_states.call(this);
         for (const state of this.conditionStates()) {
-            if (!states.contains(state)) {
+            if (!states.includes(state)) {
                 states.push(state);
             }
         }
@@ -148,7 +148,7 @@
      * @return {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isConditionStateAffected = function(stateId) {
-        return this._conditionStateIds.contains(stateId);
+        return this._conditionStateIds.includes(stateId);
     };
 
     /**
@@ -162,7 +162,7 @@
                     const a = this;
                     if (eval(conditionState.condition)) {
                         for (const stateId of conditionState.states) {
-                            if (!stateIds.contains(stateId)) {
+                            if (!stateIds.includes(stateId)) {
                                 stateIds.push(stateId);
                             }
                         }
