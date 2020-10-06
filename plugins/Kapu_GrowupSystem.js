@@ -219,6 +219,9 @@
          * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
          */
         const _processNotetag = function(obj) {
+            if (!obj.meta.growPoint) {
+                return;
+            }
             const value = Math.floor(Number(obj.meta.growPoint) || 0);
             if (value > 0) {
                 obj.effects.push({
