@@ -791,7 +791,19 @@ function Sprite_BattleHudPicture() {
         } else {
             return Sprite_Gauge.prototype.currentValue.call(this);
         }
-    }; 
+    };
+    /**
+     * 現在のゲージ最大値を得る。
+     * 
+     * @return {Number} ゲージ最大値
+     */ 
+    Sprite_BattleHudTpbGauge.prototype.currentMaxValue = function() {
+        if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
+            return this._battler.tpbRequiredCastTime();
+        } else {
+            return Sprite_Gauge.prototype.currentMaxValue.call(this);
+        }
+    };
 
     /**
      * ゲージカラー1を得る。
