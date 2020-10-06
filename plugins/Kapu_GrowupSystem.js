@@ -65,6 +65,13 @@
  * @default 101
  * @min 4
  * 
+ * @param resetEffectCode
+ * @text 成長リセットするエフェクトコード
+ * @desc 成長リセットをする効果を割り当てるエフェクトコード。
+ * @type number
+ * @default 102
+ * @min 4
+ * 
  * @param growPointText
  * @text 成長ポイント名
  * @desc 成長ポイントの名前
