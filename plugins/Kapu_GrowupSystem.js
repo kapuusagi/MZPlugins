@@ -240,7 +240,7 @@
                 code: Game_Action.EFFECT_RESET_GROWS,
                 dataId: 0,
                 value1: 0,
-                value2; 0
+                value2: 0
             });
         }
     };
