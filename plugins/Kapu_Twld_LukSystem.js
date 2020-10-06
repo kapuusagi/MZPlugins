@@ -84,7 +84,7 @@
  *     <lukVariance:value#>
  *         LUKの加算値として±valueとする。
  * 
- * <アイテム/スキル>
+ * アイテム/スキル
  *     <updateLuk:min#,max#>
  *         LUKを、min～maxだけ変動させる。
  *         min/max未指定時は既定の変動量になる。
