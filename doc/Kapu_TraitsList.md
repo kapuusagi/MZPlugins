@@ -56,8 +56,11 @@ __TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
 |__EFFECT_MOVE_BATTLE_POSITION__|100|0|-|-|前に出る効果。|
 |__EFFECT_GAIN_GROWPOINT__|101|0|-|-|成長ポイントを加算する効果。|
 |||1|-|-|後ろに下がる効果。|
+|__EFFECT_ADD_GPLEARN_SKILL__|103|スキルID|-|-|GP習得可能スキルに追加する。|
 |||||||
 |__EFFECT_BASIC_PARAM_ADD__|1001|パラメータID|増減させる値|-|基本パラメータを指定した値だけ増減させる|
+|__EFFECT_UPDATE_LUK__|1002|0|-|-|LUKを既定値でランダム変動させる。|
+|||1|下限値|上限値|LUKをランダムで変動させる。|
 
 
 

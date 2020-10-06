@@ -168,7 +168,6 @@
             var actor = actors[n];
 
 
-            actor.initialLuk = 50;
             actor.growPoint = {
                 current : 10,
                 max : 10
@@ -183,19 +182,7 @@
             var noteLines = actor.note.split(/[\r\n]+/);
             noteLines.forEach(function(line) {
                 var re, i;
-                if ((re = line.match(patternLearnedSkills)) !== null) {
-                    re[1].split(/[ ,]/).forEach(function (arg) {
-                        if (arg && !actor.gpLearnedSkills.contains(arg)) {
-                            actor.gpLearnedSkills.push(Number(arg));
-                        }
-                    });
-                } else if ((re = line.match(patternLearnableSkills)) !== null) {
-                    re[1].split(/[ ,]/).forEach(function (arg) {
-                        if (arg && !actor.gpLearnableSkills.contains(arg)) {
-                            actor.gpLearnableSkills.push(Number(arg));
-                        }
-                    });
-                } else if ((re = line.match(patternWM)) !== null) {
+                if ((re = line.match(patternWM)) !== null) {
                     var wmTypeId = Number(re[1]);
                     if ((wmTypeId >= 0) && (wmTypeId < $dataSystem.weapontypes.length)) {
                         var wmLevel = Number(re[2]).clamp(1, 99);
@@ -443,8 +430,7 @@
      * @param {Array<Data_Item>} skills スキルデータ
      */
     DataManager.twldSkillNotetags = function(skills) {
-        var patternGpCost = /<GpCost[ :]+([+-]?\d+) ?/;
-        var patternGPLearnCondition = /<GpLearnable[ :]+(.+)?>/;
+        
         var patternElementIds = /<ElementIds[ :]+(.+) ?>/;
 
         for (var n = 1; n < skills.length; n++) {
@@ -454,8 +440,6 @@
             if (skill.damage.elementId > 0) {
                 skill.elementIds.push(skill.damage.elementId);
             }
-            skill.gpCost = 0;
-            skill.gpLearnCondition = [];
             skill.hpCost = Number(skill.meta.hpCost) || 0;
             skill.hpCostRate = Number(skill.meta.hpCostRate) || 0;
             skill.mpCostRate = Number(skill.meta.mpCostRate) || 0;
@@ -465,11 +449,7 @@
             var noteLines = skill.note.split(/[\r\n]+/);
             noteLines.forEach(function (line) {
                 var re;
-                if ((re = line.match(patternGpCost)) !== null) {
-                    skill.gpCost = Number(re[1]).clamp(0, 999);
-                } else if ((re = line.match(patternGPLearnCondition)) !== null) {
-                    skill.gpLearnCondition.push(re[1].trim());
-                } else if ((re = line.match(patternElementIds)) !== null) {
+                if ((re = line.match(patternElementIds)) !== null) {
                     re[1].trim().split(',').forEach(function(s) {
                         var eid = Number(s);
                         if (eid) {
@@ -640,13 +620,7 @@
 
 
 
-    /**
-     * LUK値を取得する。
-     * @return {Number} LUK値
-     */
-    Game_BattlerBase.prototype.getLuk = function() {
-        return 50;
-    }
+
 
 
     /**
@@ -817,33 +791,11 @@
      */
     Game_Actor.prototype.initMembers = function() {
         TWLD.Core.Game_Actor_initMembers.call(this);
-        this.initBasicParams();
         this.initWeaponMastaries();
         this._profilePictureName = "";
     };
 
-    /**
-     * 基本パラメータを初期化する。
-     */
-    Game_Actor.prototype.initBasicParams = function() {
-        this._basicParams = [
-            { base:1, grown:0, add:0, rbonus:0 }, // STR
-            { base:1, grown:0, add:0, rbonus:0 }, // DEX
-            { base:1, grown:0, add:0, rbonus:0 }, // VIT
-            { base:1, grown:0, add:0, rbonus:0 }, // INT
-            { base:1, grown:0, add:0, rbonus:0 }, // MEN
-            { base:1, grown:0, add:0, rbonus:0 }, // AGI
-        ];
-        this._lukBase = 50;
-        this._lukAdd = 0;
-        this._growPoint = {
-            current : 10,
-            max : 10
-        };
-        this._gpLearnedSkills = [];
-        this._gpLearnableSkills = [];
-        this._reincarnationCount = 0;
-    };
+
 
     /**
      * ウェポンマスタリーのパラメータを初期化する。
@@ -875,42 +827,6 @@
      */
     Game_Actor.prototype.setupBasicParams = function(actorId) {
         var actor = $dataActors[actorId];
-        for (var i = 0; i < 6; i++) {
-            this._basicParams[i].base = actor.basicParams[i].base;
-            this._basicParams[i].grown = actor.basicParams[i].grown;
-            this._basicParams[i].add = 0;
-            this._basicParams[i].rbonus = 0;
-        }
-        this._lukBase = actor.initialLuk;
-        this._lukAdd = 0;
-        this._growPoint.current = actor.growPoint.current;
-        this._growPoint.max = actor.growPoint.max;
-        this._reincarnationCount = 0;
-
-        // 習得済みスキル
-        this._gpLearnedSkills = [];
-        actor.gpLearnedSkills.forEach(function(skillId) {
-            if (!this.isLearnedSkill(skillId)) {
-                this._gpLearnedSkills.add(skillId);
-                this.learnSkill(skillId);
-            }
-        });
-        this._gpLearnedSkills.sort(function(a, b) {
-            return a - b;
-        });
-
-        // 習得可能スキル
-        this._gpLearnableSkills = [];
-        actor.gpLearnableSkills.forEach(function(skillId) {
-            if (!this.isLearnedSkill(skillId) && !this.isGpLearnableSkill(skillId)) {
-                this._gpLearnableSkills.add(skillId);
-            }
-        });
-        this._gpLearnableSkills.sort(function(a, b) {
-            return a - b;
-        });
-        // 習得可能スキルを更新する。
-        this.updateGpLearnableSkills();
     };
 
     /**
@@ -938,17 +854,7 @@
         this._profilePictureName = actor.profilePicture;
     };
 
-    /**
-     * 固有特性をセットアップする。
-     * @param {Number} actorId アクターID
-     */
-    Game_Actor.prototype.setupUniqueTraits = function(actorId) {
-        var actor = $dataActors[actorId];
-        this.initUniqueTraits();
-        for (var i = 0; i < actor.uniqueTraits.length; i++) {
-            this.addUniqueTrait(actor.uniqueTraits[i]);
-        }
-    };
+
 
 
     /**
@@ -1005,6 +911,7 @@
 
     /**
      * 武器熟練度の経験値を増やす。
+     * 
      * @param {Number} wmType ウェポンマスタりタイプID
      * @param {Number} exp 加算するEXP
      */
@@ -1200,175 +1107,14 @@
         }, 0);
     };
 
-    TWLD.Core.Game_Actor_levelUp = Game_Actor.prototype.levelUp;
-    /**
-     * レベルアップ処理をする。
-     */
-    Game_Actor.prototype.levelUp = function() {
-        TWLD.Core.Game_Actor_levelUp.call(this);
-        // // 成長ボーナス加算
-        // var gpPlus = 3 + Math.min(6, Math.floor(this._level / 20));
-        // this.addGrowPoint(gpPlus);
-        // 習得可能スキルを更新する。
-        this.updateGpLearnableSkills();
-    };
-
-    /**
-     * LUK値を得る。
-     * @return {Number} LUK値
-     */
-    Game_Actor.prototype.getLuk = function() {
-        return Number(this.getLukBase() + this.getLukAdd()).clamp(1, 100);
-    };
-
-    /**
-     * Lukパラメータの基本値を得る。
-     * @return {Number} Lukパラメータ基本値
-     */
-    Game_Actor.prototype.getLukBase = function() {
-        return this._lukBase;
-    };
-
-    /**
-     * Lukパラメータの補正値を得る。
-     * @return {Number} LUKパラメータ補正値
-     */
-    Game_Actor.prototype.getLukAdd = function() {
-        var equips = this.equips();
-        return equips.reduce(function(prev, equipItem) {
-            return (equipItem) ? (prev + equipItem.params[7]) : prev;
-        }, this._lukAdd);
-    };
-
-    /**
-     * LUK値を更新する。
-     * デフォルトの更新処理は、低いほど上がりやすくなり、高いほど低くなりやすくなる。
-     * @param {Number} min 補正最小値(省略可)
-     * @param {Number} max 補正最大値(省略可)
-     */
-    Game_Actor.prototype.updateLuk = function(min, max) {
-        min = min || (this._lukAdd / 10);
-        max = max || (min + 10);
-        var fluctuationRange = max - min;
-        var correct = Math.floor(fluctuationRange * Math.random() - min);
-        if (correct !== 0) {
-            this._lukAdd += correct;
-            this.refresh();
-        }
-    };
-
-    /**
-     * このアクターが習得可能なスキルを更新する。
-     */
-    Game_Actor.prototype.updateGpLearnableSkills = function() {
-        for (var skillId = 1; skillId < $dataSkills.length; skillId++) {
-            var skill = $dataSkills[skillId];
-            if (skill.name.length == 0) {
-                continue; // 名前なしスキルは無視。
-            }
-            if (this.isLearnedSkill(skillId) || this.isGpLearnableSkill(skillId)) {
-                continue; // 習得済み、習得可能登録済みスキル。
-            }
-            if (this.testGpLearnable(skill)) {
-                // 習得可能
-                this._gpLearnableSkills.push(skillId);
-            }
-        }
-        this._gpLearnableSkills.sort(function (a, b) {
-            return a - b;
-        });
-    };
-
-    /**
-     * skillが習得可能かどうかを判定する。
-     * @param {Game_Skill} スキル
-     * @return 習得可能な場合にはtrue, それ以外はfalse
-     */
-    Game_Actor.prototype.testGpLearnable = function(skill) {
-        if (skill.name.length === 0) {
-            return false;
-        }
-        if (skill.gpLearnCondition.length > 0) {
-            // eslint-disable-next-line no-unused-vars
-            var actor = this; // conditionの判定で使用。
-            // eslint-disable-next-line no-unused-vars
-            var wml = (skill.wmTypeId > 0) ? this.getWMLevel(skill.wmTypeId) : 0;
-
-            return skill.gpLearnCondition.some(function(condition) {
-                return eval(condition);
-            });
-        } else {
-            return (skill.gpCost > 0); // 条件未指定の場合にはgpCostが0以上かどうかだけ見る。
-        }
-    };
-
-    /**
-     * GPで習得可能なスキル一覧を得る。
-     * @return {Array<Game_Skill>} 習得可能スキル一覧が返る。
-     */
-    Game_Actor.prototype.getGpLearnableSkills = function() {
-        var list = [];
-        this._gpLearnableSkills.forEach(function(skillId) {
-            if (!list.contains($dataSkills[skillId])) {
-                list.push($dataSkills[skillId]);
-            }
-        });
-        return list;
-    };
-
-    /**
-     * 習得済みスキルかどうかを判定する。
-     */
-    Game_Actor.prototype.isGpLearnedSkill = function (skillId) {
-        return this._gpLearendSkills.contains(skillId);
-    };
-
-    /**
-     * GP消費で習得可能スキルかどうかを判定する。
-     */
-    Game_Actor.prototype.isGpLearnableSkill = function (skillId) {
-        return this._gpLearnableSkills.contains(skillId);
-    };
-
-    /**
-     * 習得可能スキルを追加する。
-     */
-    Game_Actor.prototype.addGpLearnableSkill = function(skillId) {
-        if (!this.isGpLearnedSkill(skillId) && !this.isGpLearnableSkill(skillId)) {
-            // 未習得のスキル
-            this._gpLearnableSkills.push(skillId);
-        }
-        this._gpLearnableSkills.sort(function (a, b) {
-            return a - b;
-        });
-    };
 
 
-    /**
-     * GrowPointを消費してスキルを習得する。
-     * 
-     * @param skillId スキルID
-     */
-    Game_Actor.prototype.learnSkillByGp = function(skillId) {
-        if (this.isLearnedSkill(skillId)) {
-            return; // 習得済み
-        }
-        if (!this.isGpLearnableSkill(skillId)) {
-            return; // このアクターの習得可能リストにない。
-        }
-        var skill = $dataSkills[skillId];
-        if (skill.gpCost > this._growPoint.current) {
-            return; // 必要なGPが現在値より多い
-        }
 
-        this._growPoint.current -= skill.gpCost;
-        // 該当エントリを習得可能リストから削除
-        var index = this._gpLearnableSkills.indexOf(skillId);
-        this._gpLearnableSkills.splice(index, 1);
-        // 該当エントリをGP習得リストに追加
-        this._gpLearnedSkills.push(skillId);
-        this.learnSkill(skillId);
-    };
+
+
+
+
+
 
     TWLD.Core.Game_Actor_learnSkill = Game_Actor.prototype.learnSkill;
 
@@ -1409,6 +1155,7 @@
 
     /**
      * 装備品パラメータによる加算値合計を取得する。
+     * 
      * @param {Number} paramId パラメータID
      */
     Game_Actor.prototype.getBasicParamCorrectByEquips = function (paramId) {
@@ -1418,39 +1165,8 @@
         }, 0);
     };
 
-    /**
-     * 振り分け値を初期化する。
-     */
-    Game_Actor.prototype.resetGrows = function() {
-        for (var i = 0; i < 6; i++) {
-            this._basicParams[i].grown = 0;
-        }
-        // スキルのリセット。面倒だけどスキル習得で取得したやつだけリセットする。
-        this._learnedSkills.forEach(function (skillId) {
-            this._gpLearnableSkills.push(skillId);
-            this.forgetSkill(skillId);
-        });
-        this._learnedSkills = [];
 
-        //this._growPoint.current = this._growPoint.max;
-        // 装備できないアイテムは外す。
-        this.releaseUnequippableItems();
-        this.refresh();
-    };
 
-    /**
-     * 種アイテムによる加算値を全てクリアする。
-     * 
-     * @param {Number} actorId アクターID
-     */
-    Game_Actor.prototype.clearBasicParamAdd = function(actorId) {
-        var actor = $gameActors.actor(actorId);
-        for (var i = 0; i < 6; i++) {
-            actor.basicParams[i].add = 0;
-        }
-
-        this.refresh();
-    };
 
     //------------------------------------------------------------------------------
     // Game_Enemy
