@@ -148,6 +148,8 @@
  * アイテム/スキル
  *     <growPoint:value#>
  *          使用すると、対象の成長ポイントをvalue#だけ追加する。
+ *     <resetGrows>
+ *          使用すると、育成状態をリセットする効果を追加する。（非戦闘中のみ適用可)
  * 
  * ============================================
  * 変更履歴
@@ -159,6 +161,7 @@
     const parameters = PluginManager.parameters(pluginName);
     Game_Actor.MAX_GROW_POINT = Number(parameters["maxGrowPoint"]) || 999;
     Game_Action.EFFECT_GAIN_GROWPOINT = Number(parameters["effectCode"]) || 0;
+    Game_Action.EFFECT_RESET_GROWS = Number(parameters["resetEffectCode"]) || 0;
     const growPointAtLevelUp = parameters["growPointAtLevelUp"] || 0;
     const growPointText = String(parameters["growPointText"]) || "GP";
     const enableProperty = Boolean(parameters["enableProperty"]) || false;
@@ -167,6 +170,9 @@
 
     if (!Game_Action.EFFECT_GAIN_GROWPOINT) {
         console.error(pluginName + ":EFFECT_GAIN_GROWPOINT is not valid.");
+    }
+    if (!Game_Action.EFFECT_RESET_GROWS) {
+        console.error(pluginName + ":EFFECT_RESET_GROWS is not valid.");
     }
 
     /**
@@ -212,16 +218,13 @@
     //------------------------------------------------------------------------------
     // DataManager
 
-    if (Game_Action.EFFECT_GAIN_GROWPOINT) {
-        /**
-         * ノートタグを処理する。
-         * 
-         * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
-         */
-        const _processNotetag = function(obj) {
-            if (!obj.meta.growPoint) {
-                return;
-            }
+    /**
+     * ノートタグを処理する。
+     * 
+     * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
+     */
+    const _processNotetag = function(obj) {
+        if (Game_Action.EFFECT_GAIN_GROWPOINT && obj.meta.growPoint) {
             const value = Math.floor(Number(obj.meta.growPoint) || 0);
             if (value > 0) {
                 obj.effects.push({
@@ -231,11 +234,19 @@
                     value2: 0
                 });
             }
-        };
+        }
+        if (Game_Action.EFFECT_RESET_GROWS) {
+            obj.effects.push({
+                code: Game_Action.EFFECT_RESET_GROWS,
+                dataId: 0,
+                value1: 0,
+                value2; 0
+            });
+        }
+    };
 
-        DataManager.addNotetagParserSkills(_processNotetag);
-        DataManager.addNotetagParserItems(_processNotetag);
-    }
+    DataManager.addNotetagParserSkills(_processNotetag);
+    DataManager.addNotetagParserItems(_processNotetag);
 
     //------------------------------------------------------------------------------
     // Game_Actor
@@ -402,50 +413,69 @@
     //------------------------------------------------------------------------------
     // Game_Action
 
-    if (Game_Action.EFFECT_GAIN_GROWPOINT) {
-        const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
-        /**
-         * 効果を適用可能かどうかを判定する。
-         * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
-         * 
-         * @param {Game_BattlerBase} target 対象
-         * @param {DataEffect} effect エフェクトデータ
-         * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
-         */
-        Game_Action.prototype.testItemEffect = function(target, effect) {
-            if (effect.code == Game_Action.EFFECT_GAIN_GROWPOINT) {
-                return (target.isActor() && (target.growPoint() < Game_Actor.MAX_GROW_POINT));
-            } else {
-                return _Game_Action_testItemEffect.call(this, target, effect);
-            }
-        };
+    const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
+    /**
+     * 効果を適用可能かどうかを判定する。
+     * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @param {DataEffect} effect エフェクトデータ
+     * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.testItemEffect = function(target, effect) {
+        if (Game_Action.EFFECT_GAIN_GROWPOINT
+                && (effect.code === Game_Action.EFFECT_GAIN_GROWPOINT)) {
+            return (target.isActor() && (target.maxGrowPoint() < Game_Actor.MAX_GROW_POINT));
+        } else if (Game_Action.EFFECT_RESET_GROWS
+                && (effect.code === Game_Action.EFFECT_RESET_GROWS)) {
+            return !$gameParty.inBattle() && target.isActor()
+                    && (target.growPoint() < target.maxGrowPoint());
+        } else {
+            return _Game_Action_testItemEffect.call(this, target, effect);
+        }
+    };
 
-        const _Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
-        /**
-         * 効果を適用する。
-         * 
-         * @param {Game_Battler} target ターゲット
-         * @param {DataEffect} effect エフェクトデータ
-         */
-        Game_Action.prototype.applyItemEffect = function(target, effect) {
-            if (effect.code === Game_Action.EFFECT_GAIN_GROWPOINT) {
-                this.applyItemEffectGainGrowPoint(target, effect);
-            } else {
-                _Game_Action_applyItemEffect.call(this, target, effect);
-            }
-        };
+    const _Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
+    /**
+     * 効果を適用する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {DataEffect} effect エフェクトデータ
+     */
+    Game_Action.prototype.applyItemEffect = function(target, effect) {
+        if (Game_Action.EFFECT_RESET_GROWS
+                && (effect.code === Game_Action.EFFECT_GAIN_GROWPOINT)) {
+            this.applyItemEffectGainGrowPoint(target, effect);
+        } else if (Game_Action.EFFECT_RESET_GROWS
+                && (effect.code === Game_Action.EFFECT_RESET_GROWS)) {
+            this.applyItemEffectResetGrows(target, effect);
+        } else {
+            _Game_Action_applyItemEffect.call(this, target, effect);
+        }
+    };
 
-        /**
-         * 効果を適用する。
-         * 
-         * @param {Game_Battler} target ターゲット
-         * @param {DataEffect} effect エフェクトデータ
-         */
-        Game_Action.prototype.applyItemEffectGainGrowPoint = function(target, effect) {
-            if (target.isActor()) {
-                target.gainGrowPoint(effect.value1);
-                this.makeSuccess(target);
-            }
-        };
-    }
+    /**
+     * 効果を適用する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {DataEffect} effect エフェクトデータ
+     */
+    Game_Action.prototype.applyItemEffectGainGrowPoint = function(target, effect) {
+        if (target.isActor()) {
+            target.gainGrowPoint(effect.value1);
+            this.makeSuccess(target);
+        }
+    };
+    /**
+     * 効果を適用する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {DataEffect} effect エフェクトデータ
+     */
+    Game_Action.prototype.applyItemEffectResetGrows = function(target, effect) {
+        if (target.isActor()) {
+            target.resetGrows();
+            this.makeSuccess(target);
+        }
+    };
 })();
