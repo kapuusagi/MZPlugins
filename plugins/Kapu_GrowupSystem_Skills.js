@@ -77,7 +77,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 TWLD向けに作成したものをベースに作成。
  */
 (() => {
     const pluginName = "Kapu_GrowupSystem_Skills";
@@ -151,8 +151,8 @@
         }
         obj.gpLearnCondition = [];
 
-        const patternGPLearnCondition = /<gpLearnable:(.+) ?>/;        
-        for (const line in obj.note.split(/[\r\n]+/)) {
+        const patternGPLearnCondition = /<gpLearnable:(.+) ?>/;  
+        for (const line of obj.note.split(/[\r\n]+/)) {
             let re;
             if ((re = line.match(patternGPLearnCondition)) !== null) {
                 obj.gpLearnCondition.push(re[1]);
@@ -289,7 +289,7 @@
      * @return {Boolean} GPにて習得済みのスキルである場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isGpLearnedSkill = function (skillId) {
-        return this._gpLearendSkills.includes(skillId);
+        return this._gpLearnedSkills.includes(skillId);
     };
 
     /**
@@ -325,19 +325,15 @@
      * @param skillId スキルID
      */
     Game_Actor.prototype.learnSkillByGp = function(skillId) {
-        if (this.isLearnedSkill(skillId)) {
-            return; // 習得済み
-        }
-        if (!this.isGpLearnableSkill(skillId)) {
-            return; // このアクターの習得可能リストにない。
-        }
         // 該当エントリを習得可能リストから削除
         const index = this._gpLearnableSkills.indexOf(skillId);
-        this._gpLearnableSkills.splice(index, 1);
-        // 該当エントリをGP習得リストに追加
-        this._gpLearnedSkills.push(skillId);
-        // スキル習得
-        this.learnSkill(skillId);
+        if (index >= 0) {
+            this._gpLearnableSkills.splice(index, 1);
+            // 該当エントリをGP習得リストに追加
+            this._gpLearnedSkills.push(skillId);
+            // スキル習得
+            this.learnSkill(skillId);
+        }
     };
 
     // 4.Game_Actor.resetGrowsをフックし、育成リセットを追加。
@@ -389,7 +385,9 @@
     Game_Actor.prototype.applyGrowup = function(growupItem) {
         if (growupItem.type === "skill") {
             const skillId = growupItem.id;
-            return this.learnSkillByGp(skillId);
+            this.learnSkillByGp(skillId);
+            this.updateGpLearnableSkills();
+            return true;
         } else {
             return _Game_Actor_applyGrowup.call(this, growupItem);
         }
@@ -397,7 +395,7 @@
 
     //------------------------------------------------------------------------------
     // Game_Action
-    if (!Game_Action.EFFECT_ADD_GPLEARN_SKILL) {
+    if (Game_Action.EFFECT_ADD_GPLEARN_SKILL) {
         const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
         /**
          * 効果を適用可能かどうかを判定する。
@@ -410,8 +408,12 @@
         Game_Action.prototype.testItemEffect = function(target, effect) {
             if (effect.code == Game_Action.EFFECT_ADD_GPLEARN_SKILL) {
                 const id = effect.dataId;
+                const stype = $dataSkills[id].stypeId;
                 // アクターかつ、習得済み、習得可能スキルにない。
-                return (target.isActor() && !target.isLearnedSkill(id) && !target.isGpLearnableSkill(id));
+                // かつスキルタイプがサポートされている。
+                return (target.isActor() && !target.isLearnedSkill(id) 
+                    && !target.isGpLearnableSkill(id)
+                    && ((stype === 0) || (target.skillTypes().includes(stype))));
             } else {
                 return _Game_Action_testItemEffect.call(this, target, effect);
             }
