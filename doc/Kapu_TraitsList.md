@@ -18,6 +18,7 @@
 |TRAIT_SPARAM|23||効果値乗算が全ての乗算結果で生成されるパラメータに対する効果。初期値は1.0で効果エントリのrateが乗算される。|
 |||0～9|ベーシックシステムで使用|
 |||100|__TRAIT_SPARAM_DID_MAXTP_RATE__ 最大TPレート|
+|||101|__TRAIT_SPARAM_DID_HPCOST_RATE__ HPコストレート|
 |TRAIT_SPECIAL_FLAG|62|フラグID|特別な機能を提供するためのフラグ。|
 |TRAIT_PARTY_ABILITY|64||パーティーアビリティ。既定の実装はdataIdで指定された値の効果を持っているかどうか、だけの判定に使われる。dataIdはGame_Party.ABILITY_～で定義されてる。|
 |||0～5|ベーシックシステムで使用|
