@@ -206,12 +206,11 @@
      */
     Game_BattlerBase.prototype.paramRate = function(paramId) {
         // 基本パラメータを乗算レートでやると、めっちゃ大きくなるのでやめる。
-        var rate = 1.0;
-        this.traitsWithId(Game_BattlerBase.TRAIT_PARAM, paramId).forEach(function(trait) {
-            rate += (trait.value - 1.0)
-        });
-
-        return Math.max(0.1, rate);
+        // 
+        const rate = this.traitsWithId(Game_BattlerBase.TRAIT_PARAM, paramId).reduce((r, trait) => {
+            return r + (trait.value - 1);
+        }, 1.0, this);
+        return Math.max(0, rate);
     };
 
     //------------------------------------------------------------------------------
@@ -258,5 +257,15 @@
         return Game_Battler.prototype.paramPlus.call(this, paramId);
     };
     
-
+    /**
+     * ablitiyIdで指定されるdataIdのパーティーアビリティを持っているかどうかを判定する。
+     * 
+     * @param {Number} abilityId アビリティID
+     * !!!overwrite!!! Game_Party.partyAbility
+     */
+    Game_Party.prototype.partyAbility = function(abilityId) {
+        return this.battleMembers().some(function(actor) {
+            return !actor.isDead() && actor.partyAbility(abilityId);
+        });
+    };
 })();

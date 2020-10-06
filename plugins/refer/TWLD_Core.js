@@ -1172,29 +1172,8 @@
     // Game_Enemy
     //
 
-    TWLD.Core.Game_Enemy_initMembers = Game_Enemy.prototype.initMembers;
-    /**
-     * エネミーのパラメータフィールドを初期化する。
-     */
-    Game_Enemy.prototype.initMembers = function() {
-        TWLD.Core.Game_Enemy_initMembers.call(this);
-        this._basicParams = [ 10, 10, 10, 10, 10, 10 ];
-        this._luk = 50;
-    };
 
-    TWLD.Core.Game_Enemy_setup = Game_Enemy.prototype.setup;
-    /**
-     * エネミーをセットアップする。
-     * @param {Number} enemyId エネミーID
-     * @param {Number} x X表示位置
-     * @param {Number} y y表示位置
-     */
-    Game_Enemy.prototype.setup = function(enemyId, x, y) {
-        TWLD.Core.Game_Enemy_setup.call(this, enemyId, x, y);
 
-        this.setupBasicParams(enemyId);
-        this.setupUniqueTraits(enemyId);
-    };
 
     /**
      * エネミーの基本パラメータをセットアップする。
@@ -1202,22 +1181,6 @@
      */
     Game_Enemy.prototype.setupBasicParams = function(enemyId) {
         var enemyData = $dataEnemies[enemyId];
-        this.basicParams = [ ];
-        for (var i = 0; i < 6; i++) {
-            var param = enemyData.basicParams[i];
-            var paramValue = param.base;
-            if (param.random !== 0) {
-                paramValue += (param.random * Math.random() - (param.random >> 1));
-            }
-            this.basicParams.push(
-                { base:paramValue.clamp(1,999) }
-            );
-        }
-        var luk =  enemyData.basicParams[6].base;
-        if (enemyData.basicParams[6].random) {
-            luk += (enemyData.basicParams[6].random * Math.random() - (enemyData.basicParams[6].random >> 1))
-        }
-        this._luk = luk.clamp(1,100);
     };
 
     /**
@@ -1233,23 +1196,6 @@
 
     };
 
-    /**
-     * LUK値を返す。
-     * @return {Number} LUK値
-     */
-    Game_Enemy.prototype.getLuk = function() {
-        return this._luk;
-    };
-
-    /**
-     * 基本パラメータのベース値を取得する。
-     * @param paramId パラメータID
-     * @return {Number} ベース値
-     */
-    Game_Enemy.prototype.getBasicParamBase = function(paramId) {
-        // データベースにあるエネミーデータを返す。
-        return this.basicParams[paramId].base;
-    };
 
     /**
      * 武器熟練度レベルを得る。
@@ -1282,18 +1228,7 @@
     
     //------------------------------------------------------------------------------
     // Game_Item
-    /**
-     * 長距離タイプかどうかを判定する。
-     * @return 
-     */
-    Game_Item.prototype.isLongRange = function() {
-        var range = this.object().range;
-        if (range && (range === Game_Action.RANGE_LONG)) {
-            return true;
-        } else {
-            return false; // rangeが未定義の場合も含む。
-        }
-    };
+
 
 
     //------------------------------------------------------------------------------
@@ -1316,86 +1251,9 @@
         return this._damageValue;
     };
 
-    TWLD.Core.Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
-
-    /**
-     * このアクションを適用する。
-     * 
-     * @param {Game_BattlerBase} target ターゲット
-     * @oaram effect エフェクトデータオブジェクト
-     */
-    Game_Action.prototype.applyItemEffect = function(target, effect) {
-        switch (effect.code) {
-            case Game_Action.EFFECT_TWLD_BASICPARAM_ADD:
-                this.applyItemEffectBasicParamAdd(target, effect);
-                break;
-            case Game_Action.EFFECT_TWLD_LEARNABLESKILL_ADD:
-                this.applyItemEffectLearnableSkillAdd(target, effect);
-                break;
-            case Game_Action.EFFECT_TWLD_UPDATE_LUK:
-                this.applyItemEffectUpdateLuk(target, effect);
-                break;
-            default:
-                TWLD.Core.Game_Action_applyItemEffect.call(this, target, effect);
-                break;
-        }
-    };
 
 
 
-
-
-    /**
-     * 基本パラメータを加算するアイテム適用処理を行う。
-     * @param {Game_BattlerBase} target ターゲット
-     * @param effect エフェクトデータ
-     */
-    Game_Action.prototype.applyItemEffectBasicParamAdd = function(target, effect) {
-        target.addBasicParam(effect.paramId, effect.value1);
-        this.makeSuccess(target);
-    };
-
-    /**
-     * 習得可能スキルを追加するアイテム適用処理を行う。
-     * @param {Game_BattlerBase} target ターゲット
-     * @param effect エフェクトデータ
-     */
-    Game_Action.prototype.applyItemEffectLearnableSkillAdd = function(target, effect) {
-        target.addGpLearnableSkill(effect.value1);
-        this.makeSuccess(target);
-    };
-
-    /**
-     * LUKを更新する効果を処理する。
-     * @param {Game_BattlerBase} target ターゲット
-     * @param effect エフェクトデータ
-     */
-    Game_Action.prototype.applyItemEffectUpdateLuk = function(target, effect) {
-        target.updateLuk(effect.value1, effect.value2);
-        this.makeSuccess(target);
-    };
-
-    TWLD.Core.Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
-
-    /**
-     * アイテムが適用可能かどうかをテストする。
-     * 
-     * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
-     */
-    Game_Action.prototype.testItemEffect = function(target, effect) {
-        switch (effect.code) {
-            case Game_Action.EFFECT_TWLD_BASICPARAM_ADD:
-                var param = target.basicParams[effect.paramId];
-                return ((effect.value1 !== 0) && ((param.add) ? (param.add < 999) : false));
-            case Game_Action.EFFECT_TWLD_LEARNABLESKILL_ADD:
-                var skillId = effect.value1;
-                return !target.isLearnedSkill(skillId) && !target.isGpLearnableSkill(skillId);
-            case Game_Action.EFFECT_TWLD_UPDATE_LUK:
-                return true;
-            default:
-                return TWLD.Core.Game_Action_testItemEffect.call(this, target, effect);
-        }
-    };
 
 
 
@@ -1556,6 +1414,7 @@
 
     /**
      * 物理でも魔法でもない場合の属性補正値を取得する。
+     * 
      * @param {Game_BattlerBase} target 行動対象
      * @return {Number} 補正値
      */
@@ -1692,25 +1551,6 @@
         return Math.max(1.0 + (this.subject().luk - target.luk) * 0.005, 0.0);
     };
 
-    //------------------------------------------------------------------------------
-    // Game_Party
-    //
-    /**
-     * 戦闘参加メンバーでabilityIdで指定される特性を持っているメンバーがいるかどうかを判定する。
-     * 
-     * @note 既定の実装ではメンバーの生存状態に関係なかったが、生存オンリーとした。
-     * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
-     * @return 持っている場合にはtrue ,それ以外はfalse
-     */
-    Game_Party.prototype.partyAbility = function(abilityId) {
-        return this.battleMembers().some(function(actor) {
-            return !actor.isDead() && actor.partyAbility(abilityId);
-        });
-    };
-
-
-
-
 
     //------------------------------------------------------------------------------
     // BattleManager
@@ -1780,71 +1620,7 @@
 
 
 
-    //------------------------------------------------------------------------------
-    // Game_Interpreter
-    //
-    TWLD.Core.Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 
-    Game_Interpreter.prototype.pluginCommand = function(command, args) {
-        TWLD.Core.Game_Interpreter_pluginCommand.call(this, command, args);
-        if (/^TWLD\./.test(command)) {
-            switch (command) {
-                case 'TWLD.ResetActorGrows':
-                    this.resetActorGrows(args);
-                    break;
-                case 'TWLD.AddLearnableSkill':
-                    this.addActorLearnableSkill(args);
-                    break;
-                case 'TWLD.UpdateLuk':
-                    this.updateLuk(args);
-                    break;
-            }
-        }
-    };
-
-    /**
-     * 指定されたアクターの育成状態をリセットする。
-     * @param {Array} args パラメータ
-     */
-    Game_Interpreter.prototype.resetActorGrows = function(args) {
-        var actor =TWLD.Core.getActor(args[0]);
-        if (!actor) {
-            return;
-        }
-        actor.resetGrows();
-    };
-
-    /**
-     * アクターに習得可能スキルを追加する。
-     * @param {Array} args パラメータ
-     */
-    Game_Interpreter.prototype.addActorLearnableSkill = function(args) {
-        var actor = TWLD.Core.getActor(args[0]);
-        if (!actor) {
-            return;
-        }
-        var skillId = Number(args[1]);
-        if ((skillId < 0) || (skillId >= $dataSkills.length)) {
-            return;
-        }
-        actor.addGpLearnableSkill(skillId);
-    };
-
-    /**
-     * LUKを更新する。
-     * @param {Array} args パラメータ
-     */
-    Game_Interpreter.prototype.updateLuk = function(args) {
-        var actor;
-        var target = args[0] || '';
-        if (target.match(/party/i)) {
-            $gameParty.allMembers().forEach(function(actor) {
-                actor.updateLuk();
-            });
-        } else if ((actor = TWLD.Core.getActor(args[0])) !== null) {
-            actor.updateLuk();
-        }
-    };
 
 
     //------------------------------------------------------------------------------
@@ -2078,64 +1854,6 @@
 
 
 
-    //------------------------------------------------------------------------------
-    // Scene_Menu
-    //     メニューにコマンド追加
-    //
-    TWLD.Core.Scene_Menu_CreateCommandWindow = Scene_Menu.prototype.createCommandWindow;
-    /**
-     * コマンドウィンドウを作成する。
-     */
-    Scene_Menu.prototype.createCommandWindow = function() {
-        TWLD.Core.Scene_Menu_CreateCommandWindow.call(this);
-        this._commandWindow.setHandler('growup', this.commandPersonal.bind(this));
-    };
-
-
-    TWLD.Core.Scene_Menu_commandPersonal = Scene_Menu.prototype.commandPersonal;
-
-    /**
-     * アクター選択が必用なコマンドが選択された時に通知を受け取る。
-     * 通常はフックする必要はないんだけど、パーティー人数で対象が1名ならサクッとやった方がいいよね。
-     */
-    Scene_Menu.prototype.commandPersonal = function() {
-        if ($gameParty.size() == 1) {
-            // 選択が自明なので選択をスキップする。
-            $gameParty.setMenuActor($gameParty.members()[0]);
-            this.onPersonalOk();
-        } else {
-            TWLD.Core.Scene_Menu_commandPersonal.call(this);
-        }
-    };
-
-
-    TWLD.Core.Scene_Menu_onPersonalOk = Scene_Menu.prototype.onPersonalOk;
-    /**
-     * メニューでアクターが選択された時に通知を受け取る。
-     */
-    Scene_Menu.prototype.onPersonalOk = function() {
-        switch (this._commandWindow.currentSymbol()) {
-            case 'growup':
-                SceneManager.push(Scene_Growup);
-                break;
-            default:
-                TWLD.Core.Scene_Menu_onPersonalOk.call(this);
-                break;
-        }
-    };
-
-    //------------------------------------------------------------------------------
-    // Window_MenuCommand
-    //    コマンドを登録する。
-    TWLD.Core.Window_MenuCommand_addOriginalCommands = Window_MenuCommand.prototype.addOriginalCommands;
-
-    /**
-     * 独自コマンドを追加する。
-     */
-    Window_MenuCommand.prototype.addOriginalCommands = function() {
-        TWLD.Core.Window_MenuCommand_addOriginalCommands.call(this);
-        this.addCommand('育成', 'growup', true);
-    };
 
     //------------------------------------------------------------------------------
     // Scene_Battleのヘルプウィンドウ変更
