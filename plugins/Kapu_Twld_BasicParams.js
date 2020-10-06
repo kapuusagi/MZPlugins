@@ -580,6 +580,19 @@
     Game_BattlerBase.prototype.basicParamMax = function(paramId) {
         return Game_BattlerBase.BASIC_PARAM_MAX;
     };
+
+    //------------------------------------------------------------------------------
+    // Game_Battler
+    if (overwriteAGI) {
+        /**
+         * このGame_BattlerのTPB速度。
+         * クラスやTraiatの乗算レートを抜いたAGIに対してtpbSpeedを得た値が返る。
+         */
+        Game_Battler.prototype.tpbBaseSpeed = function() {
+            const baseAgility = this.basicParam(5);
+            return Math.sqrt(baseAgility) + 1;
+        };        
+    }
     //------------------------------------------------------------------------------
     // Game_Actor
     const _Game_Actor_setup = Game_Actor.prototype.setup;
