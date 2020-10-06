@@ -164,10 +164,13 @@
  * ============================================
  * ノートタグ
  * ============================================
- * <independent>
- *    アイテム/武器/防具に適用可能。
- *    入手時、個別アイテムとして加算されるものとして処理される。
- *    未定義または<independent:false>で個別無効。
+ * アイテム/武器/防具
+ *     <independent>
+ *        アイテム/武器/防具に適用可能。
+ *        入手時、個別アイテムとして加算されるものとして処理される。
+ *        未定義の場合にはプラグインパラメータで設定された、
+ *        カテゴリのデフォルト値が採用される。
+ *        <independent:no>または<independent:false>で明示的に無効。
  * 
  * <allowCollectSell>
  *    ショップでの売却時、まとめて売ることを可能にする。
@@ -177,6 +180,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.3 個別アイテム/非個別アイテムの指定が全くできていなかった不具合を修正した。
  * Version.0.4.2 個別アイテムが無限に使用できる不具合を修正した。
  * Version.0.4.1 装備解除時、解除した個別アイテムが、
  *               初期化された別のアイテムになってしまう不具合を修正した。
@@ -247,8 +251,11 @@
     DataManager.processIndependentNotetag = function(dataArray, independent) {
         for (let item of dataArray) {
             if (item) {
-                if (!item.meta.independent) {
-                    item.meta.independent = independent;
+                if (typeof item.meta.independent === "undefined") {
+                    item.independent = independent;
+                } else {
+                    item.independent = (item.meta.independent !== "no")
+                            && (item.meta.independent !== "false");
                 }
             }
         }
@@ -345,7 +352,7 @@
         if (DataManager.isBattleTest()) {
             return false; // 戦闘テストでは個別アイテム無効。
         }
-        if (!item.meta.independent) {
+        if (!item.independent) {
             return false; // 個別アイテムでない。
         }
 
