@@ -64,14 +64,7 @@
     TWLD.Core.PhysicalElements = [ 1,2,3 ]; // 打,斬,突
     TWLD.Core.BasicCriticalRate = 1.5; // クリティカル倍率基本値
 
-    TWLD.Core.BasicParamDescriptions = [
-        "物理ダメージ量に影響します。", // STR
-        "命中率(接近/遠距離)とクリティカル率に影響します。", // DEX
-        "最大HPと物理/魔法被ダメージ量に影響します。", // VIT
-        "最大MPと魔法ダメージ量および魔法被ダメージ量に影響します。", // INT
-        "最大MPと魔法被ダメージ量に影響します。", // MEn
-        "命中率(接近)と回避率および行動順に影響します。", // AGI
-    ];
+
 
     /**
      * クリティカルアニメーションID
@@ -488,28 +481,6 @@
         }
     };
 
-    /**
-     * paramNameからparamIdを得る。
-     * @return {Numbr} パラメータID。paramNameに該当するものが無い場合には-1
-     */
-    DataManager.twldGetParamId = function(paramName) {
-        switch(paramName) {
-            case "str": 
-                return 0;
-            case "dex":
-                return 1;
-            case "vit":
-                return 2;
-            case "int":
-                return 3;
-            case "men":
-                return 4;
-            case "agi":
-                return 5;
-            default:
-                break;
-        }
-    };
 
 
     //------------------------------------------------------------------------------
@@ -1428,118 +1399,13 @@
         }
     };
 
-    /**
-     * 転生回数を得る。
-     * @return {Number} 転生回数
-     */
-    Game_Actor.prototype.getReincarnationCount = function() {
-        return this._reincarnationCount;
-    };
-    /**
-     * 転生する。
-     * 転生は最大レベルの時だけ使用可能。
-     */
-    Game_Actor.prototype.reincarnation = function() {
-        if (!this.canReincarnation()) {
-            return; // 条件満たしてない。
-        }
-
-        // Gpで習得したスキルを全部永久習得にする。
-        this._gpLearnedSkills = [];
-        
-        // 基本パラメータはボーナスに加算して0にする。
-        // baseとadd(種増加分)はそのままにする。
-        for (var i = 0; i < 6; i++) {
-            var param = this._basicParams[i];
-            var addBonus = Math.floor(param.grown / 10);
-            param.rbonus = (param.rbonus + addBonus).clamp(0, 200); // rbonusの加算値は最大で200まで
-            param.grown = 0;
-        }
-
-        // 育成ボーナスをレベルアップ分だけ引き、リセットする。
-        this._growPoint.max -= 484; // Lv2~Lv99まであげたときのボーナス合計値-10。10はボーナスとして残す。
-        this._growPoint.current = this._growPoint.max;
-
-        // レベルを1に戻す。
-        this.changeLevel(1, false);
-        this._reincarnationCount++;
-
-        // 装備できないアイテムは外す。
-        this.releaseUnequippableItems();
-    };
-
-    /**
-     * 転生可能かどうかを返す。
-     * @return {Boolean} 転生可能な場合にはtrue, それ以外はfalse
-     */
-    Game_Actor.prototype.canReincarnation = function() {
-        return this.isMaxLevel();
-    };
-
-    Game_Actor.prototype.getGrowPoint = function() {
-        return this._growPoint.current;
-    };
-
-    /**
-     * 最大成長ボーナス値を得る。
-     * つまり、使用済み＋残っているポイントね。
-     * @return {Number} 成長ボーナス値合計。
-     */
-    Game_Actor.prototype.getMaxGrowPoint = function() {
-        return this._growPoint.max;
-    };
 
 
 
 
-    /**
-     * paramIdで指定される基本パラメータにvalue値を加算する。
-     * @param {Number} paramId パラメータ番号
-     * @param {Number} value 加減する値
-     */
-    Game_Actor.addBasicParam = function(paramId, value) {
-        var param = this._basicParams[paramId];
-        var addValue = Math.min(200 - param.add, value); // 基本パラメータの種加算は+200まで。
-        if (addValue > 0) {
-            this._basicParams[paramId].add += value;
-            this.refresh();
-        }
-    };
 
-    /**
-     * 指定した基本パラメータの値を得る。
-     * (アクター基本値＋振り分け済みの値＋種による加算値)の合計が返る。
-     * @param {paramId} パラメータ番号
-     */
-    Game_Actor.prototype.getBasicParamBase = function(paramId) {
-        var param = this._basicParams[paramId];
-        return param.base + param.grown + param.add + param.rbonus;
-    };
 
-    /**
-     * 1ポイント加算するためのGPコストを取得する。
-     * @param {Number} paramId パラメータID
-     * @return {Number} 必要GPコストが返る。
-     */
-    Game_Actor.prototype.getBasicParamGrowCost = function(paramId) {
-        var value = this._basicParams[paramId].grown + this._basicParams[paramId].rbonus + 1;
-        return Math.max(1, Math.floor(value/20));
-    };
 
-    /**
-     * GPを消費して1ポイント加算する。
-     * @param {Number} paramId パラメータID
-     */
-    Game_Actor.prototype.growBasicParamByGp = function(paramId) {
-        var gpCost = this.getBasicParamGrowCost(paramId);
-        if (this._growPoint.current < gpCost) {
-            return; // GP足りない。
-        }
-
-        this._growPoint.current -= gpCost;
-        this._basicParams[paramId].grown += 1;
-        this.refresh();
-    };
 
     /**
      * 装備品パラメータによる加算値合計を取得する。
