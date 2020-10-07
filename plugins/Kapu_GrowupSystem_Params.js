@@ -8,333 +8,47 @@
  * @base Kapu_GrowupSystem
  * @orderAfter Kapu_GrowupSystem
  * 
- * @param maxHP
- * @text 最大HP
+ * @param growupItem0
+ * @text MaxHP
+ * @type struct<growupItemEntry>
+ * @default { "enabled":"true", "growRate":"30", "costRate":"1", "iconIndex":"0", "name":"MaxHPを上げる。", "description":"MaxHPが向上します。" }
  * 
- * @param growRate0
- * @text MaxHP成長レート
- * @desc 1割り振る毎に加算する最大HPの値。
- * @type number
- * @default 30
- * @min 1
- * @parent maxHP
+ * @param growupItem1
+ * @text MaxMP
+ * @type struct<growupItemEntry>
+ * @default { "enabled":"true", "growRate":"10", "costRate":"1", "iconIndex":"0", "name":"MaxMPを上げる。", "description":"MaxMPが向上します。" }
  * 
- * @param growCostRate0
- * @text MaxHPコストレート
- * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
- * @type number
- * @default 1
- * @min 1
- * @parent maxHP
- * 
- * @param iconIndex0
- * @text アイコンインデックス
- * @desc 育成画面に表示するアイコン番号
- * @type number
- * @default 0
- * @min 0
- * @parent maxHP
- * 
- * @param itemName0
- * @text 育成項目名
- * @desc 育成画面で表示する名前
- * @type string
- * @default 最大HPを上げる。
- * @parent maxHP
- * 
- * @param itemDescription0
- * @text 説明
- * @desc 育成画面に表示する説明
- * @type string
- * @default 最大HPが上昇します。
- * @parent maxHP
- * 
- * @param maxMP
- * @text 最大MP
- * 
- * @param growRate1
- * @text maxMP成長レート
- * @desc 1割り振る毎に加算する最大MPの値。
- * @type number
- * @default 10
- * @min 1
- * @parent maxMP
- * 
- * @param growCostRate1
- * @text maxMPコストレート
- * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
- * @type number
- * @default 1
- * @min 1
- * @parent maxMP
- * 
- * @param iconIndex1
- * @text アイコンインデックス
- * @desc 育成画面に表示するアイコン番号
- * @type number
- * @default 0
- * @min 0
- * @parent maxMP
- * 
- * @param itemName1
- * @text 育成項目名
- * @desc 育成画面で表示する名前
- * @type string
- * @default 最大MPが上昇します。
- * @parent maxMP
- * 
- * @param itemDescription1
- * @text 説明
- * @desc 育成画面に表示する項目名
- * @type string
- * @default 最大MPが向上します。
- * @parent maxMP
- *  
- * @param atk
+ * @param growupItem2
  * @text ATK
+ * @type struct<growupItemEntry>
+ * @default { "enabled":"true", "growRate":"5", "costRate":"1", "iconIndex":"0", "name":"ATKを上げる。", "description":"ATKが向上します。" }
  * 
- * @param growRate2
- * @text ATK成長レート
- * @desc 1割り振る毎に加算するATKの値。
- * @type number
- * @default 5
- * @min 1
- * @parent atk
- * 
- * @param growCostRate2
- * @text atkコストレート
- * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
- * @type number
- * @default 1
- * @min 1
- * @parent atk
- * 
- * @param iconIndex2
- * @text アイコンインデックス
- * @desc 育成画面に表示するアイコン番号
- * @type number
- * @default 0
- * @min 0
- * @parent atk
- * 
- * @param itemName2
- * @text 育成項目名
- * @desc 育成画面で表示する名前
- * @type string
- * @default ATKが上昇します。
- * @parent atk
- * 
- * @param itemDescription2
- * @text 説明
- * @desc 育成画面に表示する項目名
- * @type string
- * @default ATKが向上します。
- * @parent atk
- * 
- * @param def
+ * @param growupItem3
  * @text DEF
+ * @type struct<growupItemEntry>
+ * @default { "enabled":"true", "growRate":"3", "costRate":"1", "iconIndex":"0", "name":"DEFを上げる。", "description":"DEFが向上します。" }
  * 
- * @param growRate3
- * @text DEF成長レート
- * @desc 1割り振る毎に加算するDEFの値。
- * @type number
- * @default 3
- * @min 1
- * @parent def
- * 
- * @param growCostRate3
- * @text defコストレート
- * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
- * @type number
- * @default 1
- * @min 1
- * @parent def
- * 
- * @param iconIndex3
- * @text アイコンインデックス
- * @desc 育成画面に表示するアイコン番号
- * @type number
- * @default 0
- * @min 0
- * @parent def
- * 
- * @param itemName3
- * @text 育成項目名
- * @desc 育成画面で表示する名前
- * @type string
- * @default DEFが上昇します。
- * @parent def
- * 
- * @param itemDescription3
- * @text 説明
- * @desc 育成画面に表示する項目名
- * @type string
- * @default DEFが向上します。
- * @parent def
- * 
- * @param mat
+ * @param growupItem4
  * @text MAT
+ * @type struct<growupItemEntry>
+ * @default { "enabled":"true", "growRate":"5", "costRate":"1", "iconIndex":"0", "name":"MATを上げる。", "description":"MATが向上します。" }
  * 
- * @param growRate4
- * @text MAT成長レート
- * @desc 1割り振る毎に加算するMATの値。
- * @type number
- * @default 5
- * @min 1
- * @parent mat
- * 
- * @param growCostRate4
- * @text matコストレート
- * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
- * @type number
- * @default 1
- * @min 1
- * @parent mat
- * 
- * @param iconIndex4
- * @text アイコンインデックス
- * @desc 育成画面に表示するアイコン番号
- * @type number
- * @default 0
- * @min 0
- * @parent mat
- * 
- * @param itemName4
- * @text 育成項目名
- * @desc 育成画面で表示する名前
- * @type string
- * @default MATが上昇します。
- * @parent mat
- * 
- * @param itemDescription4
- * @text 説明
- * @desc 育成画面に表示する項目名
- * @type string
- * @default MATが向上します。
- * @parent mat
- * 
- * @param mdf
+ * @param growupItem5
  * @text MDF
+ * @type struct<growupItemEntry>
+ * @default { "enabled":"true", "growRate":"3", "costRate":"1", "iconIndex":"0", "name":"MDFを上げる。", "description":"MDFが向上します。" }
  * 
- * @param growRate5
- * @text MDF成長レート
- * @desc 1割り振る毎に加算するMDFの値。
- * @type number
- * @default 3
- * @min 1
- * @parent mdf
- * 
- * @param growCostRate5
- * @text mdfコストレート
- * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
- * @type number
- * @default 1
- * @min 1
- * @parent mdf
- * 
- * @param iconIndex5
- * @text アイコンインデックス
- * @desc 育成画面に表示するアイコン番号
- * @type number
- * @default 0
- * @min 0
- * @parent mdf
- * 
- * @param itemName5
- * @text 育成項目名
- * @desc 育成画面で表示する名前
- * @type string
- * @default MDFが上昇します。
- * @parent mdf
- * 
- * @param itemDescription5
- * @text 説明
- * @desc 育成画面に表示する項目名
- * @type string
- * @default MDFが向上します。
- * @parent mdf
- * 
- * @param agi
+ * @param growupItem6
  * @text AGI
+ * @type struct<growupItemEntry>
+ * @default { "enabled":"true", "growRate":"1", "costRate":"1", "iconIndex":"0", "name":"AGIを上げる。", "description":"AGIが向上します。" }
  * 
- * @param growRate6
- * @text AGI成長レート
- * @desc 1割り振る毎に加算するAGIの値。
- * @type number
- * @default 1
- * @min 1
- * @parent agi
  * 
- * @param growCostRate6
- * @text agiコストレート
- * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
- * @type number
- * @default 1
- * @min 1
- * @parent agi
- * 
- * @param iconIndex6
- * @text アイコンインデックス
- * @desc 育成画面に表示するアイコン番号
- * @type number
- * @default 0
- * @min 0
- * @parent agi
- * 
- * @param itemName6
- * @text 育成項目名
- * @desc 育成画面で表示する名前
- * @type string
- * @default AGIが上昇します。
- * @parent agi
- * 
- * @param itemDescription6
- * @text 説明
- * @desc 育成画面に表示する項目名
- * @type string
- * @default AGIが向上します。
- * @parent agi
- * 
- * @param luk
+ * @param growupItem7
  * @text LUK
+ * @type struct<growupItemEntry>
+ * @default { "enabled":"true", "growRate":"1", "costRate":"1", "iconIndex":"0", "name":"LUKを上げる。", "description":"LUKが向上します。" }
  * 
- * @param growRate7
- * @text LUK成長レート
- * @desc 1割り振る毎に加算するLUKの値。
- * @type number
- * @default 1
- * @min 1
- * @parent luk
- * 
- * @param growCostRate7
- * @text lukコストレート
- * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
- * @type number
- * @default 1
- * @min 1
- * @parent luk
- * 
- * @param iconIndex7
- * @text アイコンインデックス
- * @desc 育成画面に表示するアイコン番号
- * @type number
- * @default 0
- * @min 0
- * @parent luk
- * 
- * @param itemName7
- * @text 育成項目名
- * @desc 育成画面で表示する名前
- * @type string
- * @default LUKが上昇します。
- * @parent luk
- * 
- * @param itemDescription7
- * @text 説明
- * @desc 育成画面に表示する項目名
- * @type string
- * @default LUKが向上します。
- * @parent luk
  * 
  * @help 
  * MaxHP/MaxMP/ATK/DEF/MAT/MDF/AGI/LUKをGPで育成させるためのプラグイン
@@ -360,7 +74,47 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 プラグインパラメータのenabledが効いていない不具合を修正した。
  * Version.0.1.0 GrowupSystemテスト用に作成。
+ */
+/*~struct~growupItemEntry:
+ *
+ * @param enabled
+ * @text 育成対象
+ * @desc 育成対象とする場合にはtrue, しない場合はfalseにする。
+ * @type boolean
+ *
+ * @param growRate
+ * @text 成長レート
+ * @desc 1割り振る毎に加算する値。
+ * @type number
+ * @default 1
+ * @min 1
+ * @parent luk
+ * 
+ * @param costRate
+ * @text コストレート
+ * @desc 1割り振る毎に増加するコストレート。2にすると、0->1はコスト1、1->2はコスト1+1*2=3になる
+ * @type number
+ * @default 1
+ * @min 0
+ * 
+ * @param iconIndex
+ * @text アイコンインデックス
+ * @desc 育成画面に表示するアイコン番号
+ * @type number
+ * @default 0
+ * @min 0
+ * 
+ * @param name
+ * @text 育成項目名
+ * @desc 育成画面で表示する名前。
+ * @type string
+ * 
+ * @param description
+ * @text 説明
+ * @desc 育成画面に表示する説明。
+ * @type string
  */
 (() => {
     const pluginName = "Kapu_GrowupSystem_Params";
@@ -368,23 +122,14 @@
 
     const growupItemEntries = [];
     for (let i = 0; i < 8; i++) {
-        const key = "growRate" + i;
-        const rate = Math.max(1, Number(parameters[key]) || 1);
-        const costRate = Math.max(0, Number(parameters["growCostRate" + i]) || 0);
-        const iconIndex = String(parameters["iconIndex" + i]) || 0;
-        const name = String(parameters["itemName" + i]) || ("Up " + TextManager.param(i));
-        const description = String(parameters["itemDescription" + i]) || "";
-        growupItemEntries.push({
-            rate : rate,
-            costRate : costRate,
-            iconIndex : iconIndex,
-            name : name,
-            description : description,
-        });
+        const growupItem = JSON.parse(parameters["growupItem" + i]);
+        growupItem.enabled = (typeof growupItem.enabled === "undefined") 
+                ? false : (growupItem.enabled === "true");
+        growupItem.growRate = Number(growupItem.growRate) || 1;
+        growupItem.costRate = Number(growupItem.costRate) || 0;
+        growupItem.iconIndex = Number(growupItem.iconIndex) || 0;
+        growupItemEntries.push(growupItem);
     }
-
-    //------------------------------------------------------------------------------
-    // DataManager
 
     //------------------------------------------------------------------------------
     // Game_Actor
@@ -439,7 +184,7 @@
      * @return {Number} GP加算パラメータ値
      */
     Game_Actor.prototype.gpParam = function(paramId) {
-        return Math.floor(this._gpParams[paramId] * growupItemEntries[paramId].rate);
+        return Math.floor(this._gpParams[paramId] * growupItemEntries[paramId].growRate);
     };
 
     // 4.Game_Actor.resetGrowsをフックし、育成リセットを追加。
@@ -464,8 +209,8 @@
     Game_Actor.prototype.growupItems = function() {
         const items = _Game_Actor_growupItems.call(this);
         for (let i = 0; i < this._gpParams.length; i++) {
-            if (this.gpParamGrowable(i)) {
-                const entry = growupItemEntries[i];
+            const entry = growupItemEntries[i];
+            if (entry.enabled && this.gpParamGrowable(i)) {
                 items.push({
                     iconIndex : entry.iconIndex,
                     name : entry.name,

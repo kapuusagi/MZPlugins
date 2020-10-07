@@ -63,7 +63,8 @@
 (() => {
     const pluginName = "Kapu_Twld_GrowupSystem";
     const parameters = PluginManager.parameters(pluginName);
-    const canReincarnateAtMenu = Boolean(parameters["canReincarnateAtMenu"]) || true;
+    const canReincarnateAtMenu = (typeof parameters["canReincarnateAtMenu"] === "undefined")
+            ? false : (parameters["canReincarnateAtMenu"] === "true");
     const reincarnationIconId = Number(parameters["reincarnationIconId"]) || 0;
     const reincarnationLabel = String(parameters["reincarnationLabel"]) || "";
     const reincarnationDescription = String(parameters["reincarnationDescription"]) || 0;

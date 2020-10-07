@@ -82,7 +82,8 @@
 
     Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE = Number(parameters["weaponPerformanceTraitCode"]) || 0;
     Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE = Number(parameters["armorPerformanceTraitCode"]) || 0;
-    const applyRelativeOnly = Boolean(parameters["applyRelativeOnly"]) || false;
+    const applyRelativeOnly = (typeof parameters["applyRelativeOnly"] === "undefined")
+            ? false : (parameters["applyRelativeOnly"] === "true");
 
     if (!Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE) {
         console.error(pluginName + ":TRAIT_WEPON_PERFORMANCE is not valid.");

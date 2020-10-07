@@ -108,11 +108,13 @@ function Scene_Growup() {
 (() => {
     const pluginName = "Kapu_GrowupSystem_UI";
     const parameters = PluginManager.parameters(pluginName);
-    const menuEnable = Boolean(parameters["menuEnable"]) || false;
+    const menuEnable = (typeof parameters["menuEnable"] === "undefined")
+            ? false : (parameters["menuEnable"] === "true");
     const menuCommandText = String(parameters["menuCommandText"]) || "";
     const confirmMessageText = String(parameters["confirmMessageText"]) || "%1(%2-%3)";
     const actorPicture = String(parameters["actorPicture"]) || "";
-    const growupOnDead = Boolean(parameters["growupOnDead"]) || false;
+    const growupOnDead = (typeof parameters["growupOnDead"] === "undefined")
+            ? false : (parameters["growupOnDead"] === "true");
 
     PluginManager.registerCommand(pluginName, "startGrowupScene", args => {
         SceneManager.push(Scene_Growup);
@@ -439,37 +441,6 @@ function Scene_Growup() {
             return;
         }
         this._items = this._actor.growupItems();
-        // if (this._actor.canReincarnation()) {
-        //     var rItem = new GrowupItem('reincarnation');
-        //     rItem.iconIndex = TWLD.Core.ReincarnationIconIndex;
-        //     rItem.text = "レベルを1に戻して再成長させる。";
-        //     rItem.id = -1;
-        //     rItem.cost = 0;
-        //     rItem.description = "再成長ボーナスを得て、レベル1から育てなおします。";
-        //     this._items.push(rItem);
-        // }
-    
-        // var statusNames = TWLD.Core.StatusNames;
-        // for (var i = 0; i < 6; i++) {
-        //     var paramItem = new GrowupItem('basicParam');
-        //     paramItem.iconIndex = TWLD.Core.BasicParamIcons[i];
-        //     paramItem.text = statusNames[i] + "を1ポイント上昇させる。";
-        //     paramItem.id = i;
-        //     paramItem.cost = this._actor.getBasicParamGrowCost(i);
-        //     paramItem.description = TWLD.Core.BasicParamDescriptions[i];
-        //     this._items.push(paramItem);
-        // }
-        
-        // this._actor.updateGpLearnableSkills();
-        // this._actor.getGpLearnableSkills().forEach(function (skill) {
-        //     var skillItem = new GrowupItem('skill');
-        //     skillItem.iconIndex = skill.iconIndex,
-        //     skillItem.text = skill.name + "を習得する。",
-        //     skillItem.id = skill.id,
-        //     skillItem.cost = skill.gpCost;
-        //     skillItem.description = skill.description;
-        //     this._items.push(skillItem);
-        // }, this);
         this._items.push({
             iconIndex:0,
             name:TextManager.cancel,

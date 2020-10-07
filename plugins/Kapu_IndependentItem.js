@@ -206,15 +206,18 @@
     const independentItemCount = Number(parameters["independentItemCount"]) || 0;
     const independentItemStartIndex = Number(parameters["independentItemStartIndex"]) || 1000;
     const independentItemStockCount = Number(parameters["independentItemStockCount"]) || 200;
-    const independentItemDefault = Boolean(parameters["independentItemDefault"]) || false;
+    const independentItemDefault = (typeof parameters["independentItemDefault"])
+            ? false : (parameters["independentItemDefault"] === "true");
     const independentWeaponCount = Number(parameters["independentWeaponCount"]) || 0;
     const independentWeaponStartIndex = Number(parameters["independentWeaponStartIndex"]) || 1000;
     const independentWeaponStockCount = Number(parameters["independentWeaponStockCount"]) || 200;
-    const independentWeaponDefault = Boolean(parameters["independentWeaponDefault"]) || false;
+    const independentWeaponDefault = (typeof parameters["independentWeaponDefault"])
+            ? false : (parameters["independentWeaponDefault"] === "true");
     const independentArmorCount = Number(parameters["independentArmorCount"]) || 0;
     const independentArmorStartIndex = Number(parameters["independentArmorStartIndex"]) || 1000;
     const independentArmorStockCount = Number(parameters["independentArmorStockCount"]) || 200;
-    const independentArmorDefault = Boolean(parameters["independentArmorDefault"]) || false;
+    const independentArmorDefault = (typeof parameters["independentArmorDefault"])
+            ? false : (parameters["independentArmorDefault"] === "true");
     const gainFailureEventId = Number(parameters["gainFailureEventId"]) || 0;
 
     //-------------------------------------------------------------------------

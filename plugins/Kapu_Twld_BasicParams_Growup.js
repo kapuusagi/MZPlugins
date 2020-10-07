@@ -12,43 +12,43 @@
  * @text STR育成項目
  * @desc STR育成項目
  * @type struct<growupItem>
- * @default '{ enabled:true, iconIndex:0, name:"STRを上昇させる。", description:"物理ダメージ量に影響します。" }'
+ * @default { "enabled":"true", "iconIndex":"0", "name":"STRを上昇させる。", "description":"物理ダメージ量に影響します。" }
  * 
  * @param growupItem1
  * @text DEX育成項目
  * @desc DEX育成項目
  * @type struct<growupItem>
- * @default '{ enabled:true, iconIndex:0, name:"DEXを上昇させる。", description:"命中率(接近/遠距離)とクリティカル率に影響します。" }'
+ * @default { "enabled":"true", "iconIndex":"0", "name":"DEXを上昇させる。", "description":"命中率(接近/遠距離)とクリティカル率に影響します。" }
  * 
  * @param growupItem2
  * @text VIT育成項目
  * @desc VIT育成項目
  * @type struct<growupItem>
- * @default '{ enabled:true, iconIndex:0, name:"VITを上昇させる。", description:"最大HPと物理/魔法被ダメージ量に影響します。" }'
+ * @default { "enabled":"true", "iconIndex":"0", "name":"VITを上昇させる。", "description":"最大HPと物理/魔法被ダメージ量に影響します。" }
  * 
  * @param growupItem3
  * @text INT育成項目
  * @desc INT育成項目
  * @type struct<growupItem>
- * @default '{ enabled:true, iconIndex:0, name:"INTを上昇させる。", description:"最大MPと魔法ダメージ量および魔法被ダメージ量に影響します。" }'
+ * @default { "enabled":"true", "iconIndex":"0", "name":"INTを上昇させる。", "description":"最大MPと魔法ダメージ量および魔法被ダメージ量に影響します。" }
  * 
  * @param growupItem4
  * @text MEN育成項目
  * @desc MEN育成項目
  * @type struct<growupItem>
- * @default '{ enabled:true, iconIndex:0, name:"MENを上昇させる。", description:"最大MPと魔法被ダメージ量に影響します。" }'
+ * @default { "enabled":"true", "iconIndex":"0", "name":"MENを上昇させる。", "description":"最大MPと魔法被ダメージ量に影響します。" }
  * 
  * @param growupItem5
  * @text AGI育成項目
  * @desc AGI育成項目
  * @type struct<growupItem>
- * @default '{ enabled:true, iconIndex:0, name:"AGIを上昇させる。", description:"命中率(接近)と回避率および行動順に影響します。" }'
+ * @default { "enabled":"true", "iconIndex":"0", "name":"AGIを上昇させる。", "description":"命中率(接近)と回避率および行動順に影響します。" }
  * 
  * @param growupItem6
  * @text LUK育成項目
  * @desc LUK育成項目
  * @type struct<growupItem>
- * @default '{ enabled:true, iconIndex:0, name:"LUKを上昇させる。", description:"" }'
+ * @default { "enabled":"true", "iconIndex":"0", "name":"LUKを上昇させる。", "description":"様々な要素に影響します。" }
  * 
  * @help 
  * TWLD向けに作成した、基本パラメータ(STR/DEX/VIT/INT/MEN/AGI)を成長システムと結合させるプラグイン。
@@ -103,6 +103,9 @@
     const growupItems = [];
     for (let i = 0; i < 7; i++) {
         const item = JSON.parse(parameters["growupItem" + i]);
+        item.enabled = (typeof item.enabled === "undefined")
+                ? false : (item.enabled === "true");
+        item.iconIndex = Number(item.iconIndex);
         growupItems.push(item);
     }
 
@@ -116,7 +119,14 @@
      */
     Game_Actor.prototype.initMembers = function() {
         _Game_Actor_initMembers.call(this);
-        this._basicParamsGrown = [0, 0, 0, 0, 0, 0];
+        this.initBasicParamsGrown();
+    };
+
+    /**
+     * 育成パラメータを初期化する。
+     */
+    Game_Actor.prototype.initBasicParamsGrown = function() {
+        this._basicParamsGrown = [0, 0, 0, 0, 0, 0, 0];
     };
 
     // 2.Game_Actor.setupをフックし、ノートタグを解析して初期値を設定する処理を追加。
@@ -162,7 +172,7 @@
      */
     Game_Actor.prototype.resetGrows = function() {
         _Game_Actor_resetGrows.call(this);
-        this._basicParamsGrown = [0, 0, 0, 0, 0, 0];
+        this.initBasicParamsGrown();
     };
     // 5.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
     const _Game_Actor_growupItems = Game_Actor.prototype.growupItems;
@@ -207,7 +217,7 @@
      * @param {Number} paramId パラメータID
      * @return {Number} 育成コスト
      */
-    Game_Actor.prototype.gpParamCost = function(paramId) {
+    Game_Actor.prototype.gpBasicParamCost = function(paramId) {
         const value = this._basicParamsGrown[paramId];
         return Math.max(1, Math.floor(value / 20));
     };

@@ -171,7 +171,8 @@
     Game_Action.EFFECT_RESET_GROWS = Number(parameters["resetEffectCode"]) || 0;
     const growPointAtLevelUp = parameters["growPointAtLevelUp"] || 0;
     const growPointText = String(parameters["growPointText"]) || "GP";
-    const enableProperty = Boolean(parameters["enableProperty"]) || false;
+    const enableProperty = (typeof parameters["enableProperty"] === "undefined")
+            ? false : (parameters["enableProperty"] === "true");
 
     Object.defineProperty(TextManager, "growPoint", { get: () => growPointText, configurable:true});
 

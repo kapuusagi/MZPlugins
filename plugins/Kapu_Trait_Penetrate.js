@@ -113,7 +113,8 @@
     Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR = Number(parameters['traitXParamDidPDRPR']) || 0;
     Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR = Number(parameters['traitXParamDidMDFPR']) || 0;
     Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR = Number(parameters['traitXParamDidMDRPR']) || 0;
-    enableProperty = Boolean(parameters["enableProperty"]) || false;
+    enableProperty = (typeof parameters["enableProperty"] === "undefined")
+            ? false : (parameters["enableProperty"] === "true");
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR) {
         console.error(pluginName + ":TRAIT_XPARAM_DID_DEFPR is not valid.");
     }

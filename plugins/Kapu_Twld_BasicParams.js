@@ -266,10 +266,12 @@
     Game_BattlerBase.TRAIT_BASIC_PARAM = Number(parameters["basciParamTraitCode"]) || 0;
     Game_BattlerBase.TRAIT_BASIC_PARAM_RATE = Number(parameters["basciParamRateTraitCode"]) || 0;
     Game_BattlerBase.BASIC_PARAM_MAX = Number(parameters["basicParamMax"]) || 999;
-    Game_Action.EFFECT_GAIN_BASIC_PARAM = Number(parameters(basicParamAddEffectCode)) || 0;
+    Game_Action.EFFECT_GAIN_BASIC_PARAM = Number(parameters["basicParamAddEffectCode"]) || 0;
 
-    const overwriteAGI = Boolean(parameters["overwriteAGI"]) || true;
-    const overwriteLUK = Boolean(parameters["overwriteLUK"]) || true;
+    const overwriteAGI = (typeof parameters["overwriteAGI"] === "undefined")
+            ? false : (parameters["overwriteAGI"] === "true");
+    const overwriteLUK = (typeof parameters["overwriteLUK"] === "undefined")
+            ? false : (parameters["overwriteLUK"] === "true");
 
     const paramLabels = [
         String(parameters["paramLabel0"]) || "STR",
@@ -419,7 +421,7 @@
         }
     };
 
-    DataManager.addNotetagClasses(_processNonBattlerNotetag);
+    DataManager.addNotetagParserClasses(_processNonBattlerNotetag);
     DataManager.addNotetagParserWeapons(_processNonBattlerNotetag);
     DataManager.addNotetagParserArmors(_processNonBattlerNotetag);
 
@@ -480,7 +482,7 @@
                 get: function() { return this.basicParam(5); }, configurable:true });
     }
     if (overwriteLUK) {
-        Object.defineProperties(Game_BattlerBase.prototype, "luk", {
+        Object.defineProperty(Game_BattlerBase.prototype, "luk", {
                 get: function() { return this.basicParam(6); }, configurable:true });
     }
 
@@ -492,6 +494,42 @@
         _Game_BattlerBase_initMembers.call(this);
         this._basicParams = [20, 20, 20, 20, 20, 20, 20]
     };
+
+    if (overwriteAGI || overwriteLUK) {
+        const _Game_BattlerBase_param = Game_BattlerBase.prototype.param;
+        /**
+         * パラメータを得る。
+         * 
+         * @param {Number} paramId パラメータID
+         * @return {Number} パラメータ値
+         */
+        Game_BattlerBase.prototype.param = function(paramId) {
+            if (overwriteAGI && (paramId === 6)) {
+                return this.basicParam(5);
+            } else if (overwriteLUK && (paramId === 7)) {
+                return this.basicParam(6);
+            } else {
+                return _Game_BattlerBase_param.call(this, paramId);
+            }
+        };
+
+        const _Game_BattlerBase_paramBasePlus = Game_BattlerBase.prototype.paramBasePlus
+        /**
+         * パラメータを得る。
+         * 
+         * @param {Number} paramId パラメータID
+         * @return {Number} パラメータ値
+         */
+        Game_BattlerBase.prototype.paramBasePlus = function(paramId) {
+            if (overwriteAGI && (paramId === 6)) {
+                return this.basicParamBase(5);
+            } else if (overwriteLUK && (paramId === 7)) {
+                return this.basicParamBase(6);
+            } else {
+                return _Game_BattlerBase_paramBasePlus.call(this, paramId);
+            }
+        };
+    }
 
     /**
      * 基本パラメータを得る。
@@ -581,18 +619,6 @@
         return Game_BattlerBase.BASIC_PARAM_MAX;
     };
 
-    //------------------------------------------------------------------------------
-    // Game_Battler
-    if (overwriteAGI) {
-        /**
-         * このGame_BattlerのTPB速度。
-         * クラスやTraiatの乗算レートを抜いたAGIに対してtpbSpeedを得た値が返る。
-         */
-        Game_Battler.prototype.tpbBaseSpeed = function() {
-            const baseAgility = this.basicParam(5);
-            return Math.sqrt(baseAgility) + 1;
-        };        
-    }
     //------------------------------------------------------------------------------
     // Game_Actor
     const _Game_Actor_setup = Game_Actor.prototype.setup;

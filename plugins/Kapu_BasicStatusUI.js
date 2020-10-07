@@ -162,7 +162,8 @@
     const statusPictureMethod = String(parameters["statusPictureMethod"]) || "";
     const labelClassText = String(parameters["labelClass"]) || "Class";
     const labelNickNameText = String(parameters["labelNickName"]) || "NickName";
-    const displayTp = Boolean(parameters["displayTp"]) || false;
+    const displayTp = (typeof parameters["displayTp"] === "undefined")
+            ? false : (parameters["displayTp"] === "true");
     const labelWidth1 = 64;
     const labelWidth2 = 32;
     const labelWidth3 = 96;
@@ -170,13 +171,18 @@
     const statusBlock4Items = [];
     for (let i = 0; i < 4; i++) {
         const statusEntry = JSON.parse(parameters["status" + i]);
+        statusEntry.enabled = (typeof statusEntry.enabled === "undefined")
+                ? false : (statusEntry.enabled === "true");
         statusBlock4Items.push(statusEntry);
     }
 
     // なんか添付のプラグインと動作が違うんだけど。
     // JSON.parse しないとオブジェクトにならない。テキストのまんま。どういうこと？
     const customParams = JSON.parse(parameters["customParams"]).map(str => JSON.parse(str));
-
+    for (const customParam of customParams) {
+        customParam.enabled = (typeof customParam.enabled === "undefined")
+                ? false : (customParam.enabled === "true");
+    }
 
     //------------------------------------------------------------------------------
     // Window_Status

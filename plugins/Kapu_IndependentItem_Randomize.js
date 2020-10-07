@@ -70,10 +70,12 @@
     const pluginName = "Kapu_IndependentItem_Randomize"
 
     const parameters = PluginManager.parameters(pluginName);
-    const isShopRandomize = Boolean(parameters["isShopRandomize"]) || false;
+    const isShopRandomize = (typeof parameters["isShopRandomize"])
+            ? false : (parameters["isShopRandomize"] === "true");
 
     PluginManager.registerCommand(pluginName, "setRandomize", args => {
-        const enabled = Boolean(args.enabled) || false;
+        const enabled = (typeof args.enabled === "undefined")
+                ? false : (args.enabled === "true");
         $gameTemp.setIndependentItemRandomize(enabled);
     });
 
