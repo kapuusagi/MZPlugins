@@ -1474,17 +1474,6 @@
 
 
 
-    /**
-     * ロングレンジスキルかどうかを判定して返す。
-     */
-    Game_Action.prototype.isLongRange = function() {
-        // スキルにロングレンジ属性がついているかどうかで判定する。
-        if (this.isSkill()) {
-            return this.item().range === Game_Item.RANGE_LONG
-        } else {
-            return false;
-        }
-    };
 
 
 
@@ -1502,37 +1491,8 @@
         return rate;
     };
 
-    /**
-     * 相対的な補正値を得る。
-     * 一方の値に対してもう一方の値が大きいほど、補正値が大きくなる。
-     * 
-     * @param {Number} left 左辺値
-     * @param {Number} right 右辺値
-     * @return 相対補正値
-     */
-    Game_Action.prototype.getRelativeDiff = function(left, right) {
-        var diff = left - right;
-        return diff /= Math.min(left, right);
-    };
 
-    /** 
-     * クリティカル発生率を返す。
-     * @param {Game_Battler} target
-     * @return クリティカル率(0.0～1.0、1.0で100％発生)が返る。
-     */
-    Game_Action.prototype.itemCri = function(target) {
-        var subject = this.subject(); // 使用者
-        var rate = subject.cri  - target.cev + (subject.luk - target.luk) * 0.01 / 2;
-        if (this.isPhysical()) {
-            // 物理の場合にはDEXが効いてくる。
-            // この計算式だと、対象より技量が2倍以上あると確率が100％になってしまうので
-            // clampにより加算値が0.0～0.5の範囲に収まるようにする。
-            var dexadd = (subject.dex - target.dex) / Math.min(subject.dex, target.dex);
-            rate += dexadd.clamp(0, 0.5);
-        }
-        rate *= this.lukEffectRate(target);
-        return rate;
-    };
+
 
 
 

@@ -7,6 +7,7 @@
  * @orderAfter Kapu_Base_Params
  * @base Kapu_Base_Hit
  * @orderAfter Kapu_Base_Hit
+ * @base Kapu_Twld_BasicParams
  * 
  * @param passiveSkillType
  * @text パッシブスキルタイプ
@@ -30,8 +31,6 @@
  *       [{(クラス値)+(種増減分)} x (特性レート) + (装備品)] x (バフ増減レート)
  *   に変更する。
  * 
- * 
- * 
  * ■ 使用時の注意
  * 
  * 
@@ -47,6 +46,9 @@
  * ============================================
  * ノートタグ
  * ============================================
+ * アイテム/スキル
+ *     <longRange>
+ *         物理命中判定で、DEXのみを使用する。
  * 
  * ============================================
  * 変更履歴
@@ -139,62 +141,122 @@
         }
     };
 
-    // /**
-    //  * 当たるかどうかを判定する。
-    //  * 
-    //  * @param {Game_Battler} target 対象
-    //  */
-    // Game_Action.prototype.testHit = function(target) {
-    //     if (this.isPhysical()) {
-    //         return this.testHitPhysical(target);
-    //         // var pev = target.eva // 回避率は純粋に効いてくる
-    //         //     - (hitRate - 1.0) // 命中率分の補正。1.0超えた分は命中しやすくなる。
-    //         //     + (target.luk - subject.luk) * 0.01; // LUKによるあたり判定(LUK高いやつは当てやすい)
-    //         // if (this.isLongRange()) {
-    //         //     // 長距離の場合には相手の素早さと使用者の器用さを比較する。
-    //         //     pev += this.getRelativeDiff(target.agi, subject.dex);
-    //         // } else {
-    //         //     // 接近戦の場合にはDEXとAGIの合計値を比較する。
-    //         //     pev += this.getRelativeDiff((target.dex + target.agi), (subject.dex + subject.agi));
-    //         // }
-    //         // return Math.random() >= pev;
-    //     } else if (this.isMagical()) {
-    //         return this.testHitMagical(target);
-    //         // var mev = target.mev // 魔法回避率は純粋に効いてくる。
-    //         //     - (hitRate - 1.0) // 命中率の1.0超えた分は相手の回避率を減らす方向に効く。
-    //         //     + this.getRelativeDiff(target.men, subject.men) / 2
-    //         //     + (target.luk - subject.luk) * 0.01; // LUKによるあたり判定(LUK高いやつは当てやすい)
-    //         //     return Math.random() >= mev;
-    //     } else {
-    //         return true; // その他は100%成功
-    //     }
-    // };
+    /** 
+     * クリティカル発生率を返す。
+     * 
+     * @param {Game_Battler} target
+     * @return {Number} クリティカル率(0.0～1.0、1.0で100％発生)が返る。
+     * !!!overwrite!!! Game_Action.itemCri()
+     */
+    Game_Action.prototype.itemCri = function(target) {
+        const subject = this.subject(); // 使用者
+        let rate = subject.cri  - target.cev + (subject.luk - target.luk) * 0.01 / 2;
+        if (this.isPhysical()) {
+            // 物理の場合にはDEXが効いてくる。
+            // この計算式だと、対象より技量が2倍以上あると確率が100％になってしまうので
+            // clampにより加算値が0.0～0.5の範囲に収まるようにする。
+            const addRate = this.relativeDiffRate(subject.dex, target.dex);
+            rate += addRate.clamp(0, 0.5);
+        }
+        rate *= this.lukEffectRate(target);
+        return rate;
+    };
 
-    // /**
-    //  * 物理攻撃時の命中判定を行う。
-    //  * 
-    //  * @param {Game_Battler} target 対象
-    //  * @return {Boolean} 命中した場合にはtrue, それ以外はfalse
-    //  */
-    // Game_Action.prototype.testHitPhysical = function(target) {
-    //     const hitRate = this.itemHit(target); 
-    //     const evaRate = this.itemEva(target);
-    //     const hitRate = hitRate - evaRate;
-    //     return Math.random() < hitRate;
-    // };
+    /**
+     * ミスしたかどうかを評価する。
+     * 
+     * @param {Game_Battler} target 対象
+     * @return {Boolean} ミスした場合にtrue, それ以外はfalse
+     */
+    Game_Action.prototype.testMissed = function(target) {
+        return false;
+    };
+    /**
+     * 回避したかどうかを評価する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {Boolean} 回避できた場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.testEvaded = function(target) {
+        if (this.isPhysical()) {
+            return this.testEvaPhysical(target);
+        } else if (this.isMagical()) {
+            return this.testEvaMagical(target);
+        } else {
+            return true; // その他は100%成功
+        }
+    };
 
-    // /**
-    //  * 魔法攻撃時の命中判定を行う。
-    //  * 
-    //  * @param {Game_Battler} target 対象
-    //  * @return {Boolean} 命中した場合にはtrue, それ以外はfalse
-    //  */
-    // Game_Action.prototype.testHitMagical = function(target) {
-    //     const hitRate = this.itemHit(target); 
-    //     const evaRate = this.itemEva(target);
-    //     const hitRate = hitRate - evaRate;
-    //     return Math.random() < hitRate;
-    // };
+    /**
+     * このスキルがロングレンジかどうかを得る。
+     * 
+     * @return {Boolean} ロングレンジの場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.isLongRangeItem = function() {
+        return this.item().meta.longRange;
+    };
+
+
+    /**
+     * 物理攻撃時の回避判定を行う。
+     * 
+     * @param {Game_Battler} target 対象
+     * @return {Boolean} 命中した場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.testEvaPhysical = function(target) {
+        let pev = target.eva; // 回避率は純粋に効いてくる
+        pev += (1.0 - this.itemHit(target));// 命中率分の補正。1.0超えた分は回避しにくくなる。
+        pev += this.lukEffeectRate(target); // LUKによる補正
+        if (this.isLongRangeItem(target) > 1) {
+            // 長距離の場合には相手の素早さと使用者の器用さを比較する。
+            pev += this.relativeDiffRate(target.agi, subject.dex);
+        } else {
+            // 接近戦の場合にはDEXとAGIの合計値を比較する。
+            pev += this.relativeDiffRate((target.dex + target.agi), (subject.dex + subject.agi));
+        }
+        return Math.random() <= pev;
+    };
+
+    /**
+     * 魔法攻撃時の回避判定を行う。
+     * 
+     * @param {Game_Battler} target 対象
+     * @return {Boolean} 命中した場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.testEvaMagical = function(target) {
+        let mev = target.mev; // 魔法回避率は純粋に効いてくる。
+        mev += (1.0 - this.itemHit(target)); // 命中率の1.0超えると回避しにくくなる。
+        mev += this.lukEffeectRate(target);
+        mev += (this.relativeDiffRate(target.men, subject.men) / 2);
+        return Math.random() >= mev;
+    };
+    /**
+     * 相対的な補正値を得る。
+     * 一方の値に対してもう一方の値が大きいほど、補正値が大きくなる。
+     * 
+     * なかなかえげつない計算式になっていて、
+     * ターゲットの値 > (使用者の値x2)
+     * だと1.0になる。
+     * 逆に
+     * (ターゲットの値x2) < 使用者の値)
+     * だと-1.0になる。
+     * 
+     * 例）使用者 25 ターゲット35 -> 補正値 (35 - 25) / 25 = 0.4
+     *     使用者 82 ターゲット92 -> 補正値 (92 - 82) / 82 = 0.12
+     * 
+     * 小さい側の値が大きくなるほど、差分によるレートの差が出にくくなるようにした。
+     * あと使用者より2倍速い相手にそう簡単に当てられないでしょ？という考えによる。
+     * 
+     * @param {Number} targetVal ターゲットの値
+     * @param {Number} subjectVal 使用者の値
+     * @return {Number} 相対補正値
+     */
+
+    Game_Action.prototype.relativeDiffRate = function(targetVal, subjectVal) {
+        const diff = targetVal - subjectVal;
+        const min = Math.max(1, Math.min(targetVal, subjectVal)); // 1以上の値になるように。ゼロ除算防止
+        return (diff / min);
+    };
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
