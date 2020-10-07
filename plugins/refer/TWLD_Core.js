@@ -1116,34 +1116,7 @@
 
 
 
-    TWLD.Core.Game_Actor_learnSkill = Game_Actor.prototype.learnSkill;
 
-    /**
-     * skillIdで指定されるスキルを習得する。
-     * @param {Number} skillId スキルID
-     */
-    Game_Actor.prototype.learnSkill = function(skillId) {
-        TWLD.Core.Game_Actor_learnSkill.call(this, skillId);
-
-        // スキル並び順に登録されてなかったら末尾に追加。
-        if (!this._skillOrder.contains(skillId)) {
-            this._skillOrder.push(skillId);
-        }
-        // スキルタイプが追加されていなかったら追加する。
-        // 尚forget側では実装しない。
-        var skill = $dataSkills[skillId];
-        if (skill.stypeId > 0) {
-            var stypeList = this.addedSkillTypes();
-            if (!stypeList.contains(skill.stypeId)) {
-                // スキルタイプが無いので追加する。
-                this._uniqueTraits.push({
-                    code:Game_BattlerBase.TRAIT_STYPE_ADD,
-                    dataId:skill.stypeId,
-                    value:1,
-                });
-            }
-        }
-    };
 
 
 
