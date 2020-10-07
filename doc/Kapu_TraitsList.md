@@ -46,6 +46,7 @@ __TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
 |__FLAG_ID_CERTAINLY_HIT_MAG__|104|CERTAINLY_EVAがある相手以外には確実にヒットする。|
 |__FLAG_ID_CERTAINLY_EVA_PHY__|105|必中スキル以外は確実に回避する。|
 |__FLAG_ID_CERTAINLY_EVA_MAG__|106|必中スキル以外は確実に回避する。|
+|__FLAG_ID_BLOCK_CAST_BREAK__|107|TPBキャストブレークを防ぐフラグ。|
 
 ## エフェクトコード
 
@@ -59,6 +60,9 @@ __TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
 |||1|-|-|後ろに下がる効果。|
 |__EFFECT_RESET_GROWS__|102|-|-|-|成長リセットする効果|
 |__EFFECT_ADD_GPLEARN_SKILL__|103|スキルID|-|-|GP習得可能スキルに追加する。|
+|__EFFECT_GAIN_TPB_CHARGE_TIME__|104|-|確率|効果量|チャージタイムを加減する効果。|
+|__EFFECT_GAIN_TPB_CAST_TIME__|105|-|確率|効果量|キャストタイムを加減する効果。|
+|__EFFECT_BREAK_TPB_CASTING__|106|-|確率|-|キャスト中のアクションをキャンセルさせる効果。|
 |||||||
 |__EFFECT_BASIC_PARAM_ADD__|1001|パラメータID|増減させる値|-|基本パラメータを指定した値だけ増減させる|
 |__EFFECT_UPDATE_LUK__|1002|0|-|-|LUKを既定値でランダム変動させる。|
