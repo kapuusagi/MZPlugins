@@ -311,6 +311,17 @@
     };
     //------------------------------------------------------------------------------
     // Game_Action
+    /**
+     * LUKの差分による確率上昇効果を得る。
+     * LUK値は0～100なので、1ポイント差分による影響度を上げ、対象より1多い毎に0.5%差が出る。。
+     * 
+     * @param {Game_Battler} target 対象
+     * @return {Number} 確率上昇効果
+     * !!!overwrite!!!
+     */
+    Game_Action.prototype.lukEffectRate = function(target) {
+        return Math.max(0.0, 1.0 + (this.subject().luk - target.luk) * 0.005);
+    };
 
     if (Game_Action.EFFECT_GAIN_GROWPOINT) {
         const _Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
