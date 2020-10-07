@@ -8,6 +8,7 @@
  * @base Kapu_Base_Hit
  * @orderAfter Kapu_Base_Hit
  * @base Kapu_Twld_BasicParams
+ * @base Kapu_UniqueTraits
  * 
  * @param passiveSkillType
  * @text パッシブスキルタイプ
@@ -319,8 +320,43 @@
         return Game_Battler.prototype.paramPlus.call(this, paramId);
     };
     
+    const _Game_Actor_learnSkill = Game_Actor.prototype.learnSkill;
+
+    /**
+     * skillIdで指定されるスキルを習得する。
+     * 
+     * @param {Number} skillId スキルID
+     */
+    Game_Actor.prototype.learnSkill = function(skillId) {
+        _Game_Actor_learnSkill.call(this, skillId);
+
+        // スキル並び順に登録されてなかったら末尾に追加。
+        if (!this._skillOrder.includes(skillId)) {
+            this._skillOrder.push(skillId);
+        }
+        // スキルタイプが追加されていなかったら追加する。
+        // 尚forget側では実装しない。
+        const skill = $dataSkills[skillId];
+        if (skill.stypeId > 0) {
+            const stypeList = this.addedSkillTypes();
+            if (!stypeList.includes(skill.stypeId)) {
+                // スキルタイプが無いので追加する。
+                this.addUniqueTrait("UseSkillType" + skill.stypeId, {
+                    code:Game_BattlerBase.TRAIT_STYPE_ADD,
+                    dataId:skill.stypeId,
+                    value:1,
+                })
+            }
+        }
+    };
+    //------------------------------------------------------------------------------
+    // Game_Party
+    
     /**
      * ablitiyIdで指定されるdataIdのパーティーアビリティを持っているかどうかを判定する。
+     * 
+     * Note: ベーシックシステムではアクターがDead状態でもスキルがあるかどうかを判定していた。
+     *       Dead状態は判定対象から外すため、オーバーライドする。
      * 
      * @param {Number} abilityId アビリティID
      * !!!overwrite!!! Game_Party.partyAbility
