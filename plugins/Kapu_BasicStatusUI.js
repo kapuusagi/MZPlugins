@@ -30,27 +30,28 @@
  * @param status0
  * @text 表示項目1
  * @desc ステータス画面に表示する項目。
- * @type struct<displayEntry>
+ * @type struct<displayItemEntry>
  * 
  * @param status1
  * @text 表示項目2
  * @desc ステータス画面に表示する項目。
- * @type struct<displayEntry>
+ * @type struct<displayItemEntry>
  * 
  * @param status2
  * @text 表示項目3
  * @desc ステータス画面に表示する項目。
- * @type struct<displayEntry>
+ * @type struct<displayItemEntry>
  * 
  * @param status3
  * @text 表示項目4
  * @desc ステータス画面に表示する項目。
- * @type struct<displayEntry>
+ * @type struct<displayItemEntry>
  * 
  * @param customParams
  * @text カスタムパラメータ
  * @desc ステータス画面に表示するパラメータ
  * @type struct<paramEntry>[]
+ * @default ["{\"enabled\":\"true\",\"name\":\"命中率\",\"propertyName\":\"hit\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"回避率\",\"propertyName\":\"eva\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"クリティカル率\",\"propertyName\":\"cri\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"クリティカル回避\",\"propertyName\":\"cev\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"魔法回避率\",\"propertyName\":\"mev\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"魔法反射率\",\"propertyName\":\"mrf\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"カウンター率\",\"propertyName\":\"cnt\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"HP自動回復率\",\"propertyName\":\"hrg\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"MP自動回復率\",\"propertyName\":\"mrg\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"TP自然回復率\",\"propertyName\":\"trg\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"物理被ダメージ率\",\"propertyName\":\"pdr\",\"type\":\"rate\"}","{\"enabled\":\"true\",\"name\":\"魔法被ダメージ率\",\"propertyName\":\"mdr\",\"type\":\"rate\"}"]
  * 
  * @help 
  * ベーシックシステムのステータス画面は情報量が乏しすぎてしんどいので、
@@ -90,9 +91,9 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 作成した。
  */
-/*~struct~displayEntry:
+/*~struct~displayItemEntry:
  *
  * @param enabled
  * @desc 有効にする場合にはtrue, それ以外はfalse
@@ -168,20 +169,44 @@
     const labelWidth2 = 32;
     const labelWidth3 = 96;
 
+    /**
+     * strを解析し、statusEntryオブジェクトを生成する。
+     * 
+     * @param {String} str 文字列
+     * @return {Object} statusEntryオブジェクト
+     */
+    const _parseDisplayItemEntry = function(str) {
+        try {
+            if (str) {
+                const statusEntry = JSON.parse(parameters["status" + i]);
+                statusEntry.enabled = (typeof statusEntry.enabled === "undefined")
+                        ? false : (statusEntry.enabled === "true");
+                return statusEntry;
+            }
+        }
+        catch (e) {
+        }
+        return { enabled: false, name: "", propertyName: "", type: "int" };
+    };
     const statusBlock4Items = [];
     for (let i = 0; i < 4; i++) {
-        const statusEntry = JSON.parse(parameters["status" + i]);
-        statusEntry.enabled = (typeof statusEntry.enabled === "undefined")
-                ? false : (statusEntry.enabled === "true");
+        const statusEntry = _parseDisplayItemEntry(parameters["status" + i]);
         statusBlock4Items.push(statusEntry);
     }
 
+    const customParams = [];
     // なんか添付のプラグインと動作が違うんだけど。
     // JSON.parse しないとオブジェクトにならない。テキストのまんま。どういうこと？
-    const customParams = JSON.parse(parameters["customParams"]).map(str => JSON.parse(str));
-    for (const customParam of customParams) {
-        customParam.enabled = (typeof customParam.enabled === "undefined")
-                ? false : (customParam.enabled === "true");
+    try {
+        const entries = JSON.parse(parameters["customParams"]).map(str => JSON.parse(str));
+        for (const entry of entries) {
+            entry.enabled = (typeof entry.enabled === "undefined")
+                    ? false : (entry.enabled === "true");
+            customParams.push(entry);
+        }
+    }
+    catch (e) {
+        console.error(e);
     }
 
     //------------------------------------------------------------------------------
@@ -685,14 +710,14 @@
      */
     Window_StatusParams.prototype.makePages = function() {
         this.addPage(this.drawParamPage.bind(this), null);
-        const customPageCount = Math.ceil(customParams.length / 18)
+        const customPageCount = Math.ceil(customParams.length / 12)
         for (let i = 0; i < customPageCount; i++) {
-            this.addPage(this.drawCustomizeParamPage.bind(this), 18 * i);
+            this.addPage(this.drawCustomizeParamPage.bind(this), 12 * i);
         } 
         const elementCount = $dataSystem.elements.length - 1;
-        const elementPageCount = Math.ceil(elementCount / 18);
+        const elementPageCount = Math.ceil(elementCount / 12);
         for (let i = 0; i < elementPageCount; i++) {
-            this.addPage(this.drawElementRatePage.bind(this), i * 18 + 1);
+            this.addPage(this.drawElementRatePage.bind(this), i * 12 + 1);
         }
     };
 
@@ -774,7 +799,7 @@
         const rect = this.baseTextRect();
         const padding = this.itemPadding();
         const x1 = rect.x + padding;
-        const width = Math.min(160, rect.width / 2 - padding * 8);
+        const width = Math.min(200, rect.width / 2 - padding * 8);
         const height = this.lineHeight();
         let paramId = 0;
         for (let i = 0; i < 6; i++) {
@@ -814,7 +839,7 @@
         const rect = this.baseTextRect();
         const padding = this.itemPadding();
         const x1 = rect.x + padding;
-        const width = Math.min(160, rect.width / 3 - padding * 6);
+        const width = Math.min(200, rect.width / 2 - padding * 6);
         const height = this.lineHeight();
         let id = arg;
         for (let i = 0; i < 6; i++) {
@@ -840,18 +865,6 @@
             }
             id++;
         }
-        const x3 = x2 + width + padding * 4;
-        for (let i = 0; i < 6; i++) {
-            if (id >= customParams.length) {
-                break;
-            }
-            const item = customParams[id];
-            const y = rect.y + height * i;
-            if (this.isCustomParamEnabled(item)) {
-                this.drawCustomizeParam(item, x3, y, width);
-            }
-            id++;
-        }
     };
     /**
      * カスタム項目を描画する。
@@ -865,14 +878,14 @@
         const name = item.name;
         const value = this._actor[item.propertyName];
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText(name, x, y, 56);
+        this.drawText(name, x, y, 112);
         this.resetTextColor();
         if (item.type === "int") {
-            this.drawText(value, x + 64, y, width - 80, "right");
+            this.drawText(value, x + 116, y, width - 120, "right");
         } else if (item.type === "rate") {
             const rateStr = (Math.round(value * 1000) / 10);
-            this.drawText(rateStr, x + 64, y, width - 80, "right");
-            this.drawText("%", x + 64 + (width - 80) + 6, y, 16, "left");
+            this.drawText(rateStr, x + 116, y, width - 120, "right");
+            this.drawText("%", x + 116 + (width - 120) + 6, y, 16, "left");
         }
     };
     /**
@@ -993,6 +1006,7 @@
      * 前のページを描画する。
      */
     Scene_Status.prototype.onPreviousPage = function() {
+        SoundManager.playCursor();
         let page = this._statusParamsWindow.page() - 1;
         if (page < 0) {
             page = this._statusParamsWindow.pageCount() - 1;
@@ -1005,6 +1019,7 @@
      * 次のページを描画する。
      */
     Scene_Status.prototype.onNextPage = function() {
+        SoundManager.playCursor();
         let page = this._statusParamsWindow.page() + 1;
         if (page >= this._statusParamsWindow.pageCount()) {
             page = 0;
