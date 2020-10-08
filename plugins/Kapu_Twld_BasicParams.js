@@ -678,7 +678,7 @@
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
         _Game_Enemy_setup.call(this, enemyId, x, y);
 
-        const enemy = $dataEnemis[enemyId];
+        const enemy = $dataEnemies[enemyId];
         if (enemy.meta.basicParams) {
             const tokens = enemy.meta.basicParams.split(",");
             const count = Math.min(enemy.basicParams.length, tokens.length);
