@@ -466,156 +466,12 @@
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     //
-    TWLD.Core.Game_BattlerBase_initMembers = Game_BattlerBase.prototype.initMembers;
-
-
-    Object.defineProperties(Game_BattlerBase.prototype, {
-        pdr : { get: function() { return this.getPhysicalDamageRate(); }, configurable:true}, // 再定義
-        mdr : { get: function() { return this.getMagicalDamegeRate(); }, configurable:true }, // 再定義
-        ppr: { get: function() { return this.getPhysicalPenetrationRate(); }, configurable:true },
-        mpr: { get: function() { return this.getMagicalPenetrationRate(); }, configurable:true },
-        /** 攻撃計算式補正値 */  
-        atkcoef: { get: function() { return this.getPhysicalAttackRate(); }, configurable:true },
-        /** 防御力計算式補正式 */
-        defcoef: { get: function() { return this.getPhysicalDefenceRate(); }, configurable:true },
-        /** 魔法攻撃力計算式補正値 */
-        matkcoef: { get: function() { return this.getMagicalAttackRate(); }, configurable:true },
-        /** 魔法防御力計算式補正式 */
-        mdefcoef: { get : function() { return this.getMagicalDefenceRate(); }, configurable:true }
-    });
-
-    /**
-     * 物理防御貫通率を取得する。
-     * 
-     * @return {Number} 物理防御貫通率。
-     */
-    Game_BattlerBase.prototype.getPhysicalPenetrationRate = function() {
-        var rate = Math.max(0, this.str - 30) * 0.01;
-        rate += this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_PPR);
-        return rate;
-    };
-
-    /**
-     * 魔法防御貫通率を取得する。
-     * 
-     * @return {Number} 魔法防御貫通率。
-     */
-    Game_BattlerBase.prototype.getMagicalPenetrationRate = function() {
-        var rate = Math.max(0, this.int - 30) * 0.01;
-        rate += this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_MPR);
-        return rate;
-    };
-
-    /**
-     * ATK/DEF/MATK/MDEFパラメータを得る。
-     * @return {Number} パラメータ
-     */
-    Game_BattlerBase.prototype.param = function(paramId) {
-        var value = this.paramBase(paramId) * this.paramRate(paramId)
-        value += this.paramPlus(paramId);
-        value *= this.paramBuffRate(paramId);
-        var maxValue = this.paramMax(paramId);
-        var minValue = this.paramMin(paramId);
-        return Math.round(value.clamp(minValue, maxValue));
-    };
 
 
 
-    /**
-     * 物理攻撃力補正値を得る。
-     * @return {Number} 物理攻撃力補正値(倍率)
-     */
-    Game_BattlerBase.prototype.getPhysicalAttackRate = function() {
-        // 物理攻撃補正
-        var str = this.str;
-        if (str < 10) {
-            // STRが10以下の場合、1の差が6％の影響を与える。
-            return 0.4 + str * 0.06;
-        } else if (str < 30) {
-            // STRが10以上、30未満の場合、1向上毎に5%向上する。
-            return 1.0 + (str - 10) * 0.05;
-        } else if (str < 70) {
-            // STRが30以上、70未満の場合、1向上毎に2.5%向上する。
-            return 2.0 + (str - 30) * 0.025;
-        } else {
-            // STRが70以上の場合、1向上毎に1.25%向上する。
-            return 3.0 + (str - 70) * 0.0125;
-        }
-    };
-
-    /**
-     * 物理防御力補正値を得る。
-     * @return {Number} 物理防御力補正値(倍率)
-     */
-    Game_BattlerBase.prototype.getPhysicalDefenceRate = function() {
-        // 物理防御補正
-        //   VITが10以上で1向上毎に4%の影響を与える。
-        return 1.0 + Math.max(0, (this.vit - 10) * 0.04);
-    };
-
-    /**
-     * 魔法攻撃力補正値を得る。
-     * @return {Number} 補正値(倍率)
-     */
-    Game_BattlerBase.prototype.getMagicalAttackRate = function() {
-        // 魔法攻撃補正
-        var int = this.int;
-        if (int < 10) {
-            // INTが10未満の場合、1低いごとに5%効果が減少する。
-            return 1.0 + (int - 10) * 0.05;
-        } else if (int < 25) {
-            // INTが10以上、25未満の場合、1向上毎に3%効果が上昇する。
-            return 1.0 + (int - 10) * 0.03;
-        } else if (int < 45) {
-            // INTが25以上45未満の場合、1向上毎に4%効果が上昇する。
-            return 1.45 + (int - 25) * 0.04;
-        } else if (int < 70) {
-            // INTが45以上70未満の場合、1向上毎に5%効果が上昇する。
-            return 2.25 + (int - 45) * 0.05;
-        } else {
-            // INTが70以上の場合、1向上毎に7％効果が上昇する。
-            return 2.25 + (int - 70) * 0.07;
-        }
-    };
-
-    /**
-     * 魔法防御力補正値値を得る。 
-     * @return {Number} 魔法防御力補正値(倍率)
-     */
-    Game_BattlerBase.prototype.getMagicalDefenceRate = function() {
-        // 魔法防御補正
-        //   VITが10以上で1向上毎に2%の影響を与える。
-        //   MENが10以上で1向上毎に4%の影響を与える。
-        return 1.0
-            + Math.max(0, (this.vit - 10) * 0.02)
-            + Math.max(0, (this.men - 10) * 0.04);
-    };
 
 
-    /**
-     * 物理被ダメ倍率を得る。
-     * @return {Number} 物理被ダメ倍率。
-     */
-    Game_BattlerBase.prototype.getPhysicalDamageRate = function() {
-        var rate = this.sparam(6);
-        // 物理ダメージ軽減率
-        // VITが10以上の場合、1上げる毎に0.5%軽減する。
-        var reduce =  Math.max(0, this.vit - 10) * 0.005;
-        return Math.max(0, rate - reduce);
-    };
 
-    /**
-     * 魔法被ダメ倍率を得る。
-     * @return {Number} 魔法被ダメ倍率
-     */
-    Game_BattlerBase.prototype.getMagicalDamegeRate = function() {
-        var rate = this.sparam(7);
-        // 魔法ダメージ軽減率
-        // VITが10以上の場合、VITが1上げる毎に0.25%軽減する。
-        // MENが10以上の場合、MENが1上げる毎に0.5%軽減する。
-        var reduce = Math.max(0, (this.vit - 10) * 0.0025 + (this.men - 10) * 0.005);
-        return Math.max(0, rate - reduce);
-    };
 
 
 
@@ -808,26 +664,7 @@
         }
     };
 
-    TWLD.Core.Game_Actor_setup = Game_Actor.prototype.setup;
-    /**
-     * このActorを指定されたactorIdのデータで初期化する。
-     * @param {Number} actorId アクターID
-     */
-    Game_Actor.prototype.setup = function(actorId) {
-        TWLD.Core.Game_Actor_setup.call(this, actorId);
-        this.setupBasicParams(actorId);
-        this.setupWeaponMastery(actorId);
-        this.setupProfile(actorId);
-        this.setupUniqueTraits(actorId);
-    };
 
-    /**
-     * このActorを指定されたactorIdのデータで初期化する。
-     * @param {Number} actorId アクターID
-     */
-    Game_Actor.prototype.setupBasicParams = function(actorId) {
-        var actor = $dataActors[actorId];
-    };
 
     /**
      * ウェポンマスタりを設定する。
@@ -1070,7 +907,7 @@
         // 基本パラメータによる補正値を返す。
         switch (paramId) {
             case 0: // 最大HP
-                // 最大HP = (VIT * 4) + FLOOR(VIT / 5) * 7
+                
                 var vit = this.vit;
                 value += (vit * 4) + Math.floor(vit / 5) * 7;
                 break;
@@ -1093,19 +930,7 @@
     };
 
 
-    /**
-     * パラメータの加算値を得る。
-     * 
-     * 既定の実装では種加算値と装備品加算値を返していたが、
-     * 種加算分は装備なしでも効果あるのでparamBaseに適用すべきと考える。
-     * そのため、アクターでは装備加算値だけ返すようにした。
-     * @return {Number} パラメータ加算値
-     */
-    Game_Actor.prototype.paramPlus = function(paramId) {
-        return this.equips().reduce(function(prev, item) {
-            return prev + ((item) ? item.params[paramId] : 0);
-        }, 0);
-    };
+
 
 
 

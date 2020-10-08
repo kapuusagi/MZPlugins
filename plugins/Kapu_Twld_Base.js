@@ -8,6 +8,7 @@
  * @base Kapu_Base_Hit
  * @orderAfter Kapu_Base_Hit
  * @base Kapu_Twld_BasicParams
+ * @orderAfter Kapu_Twld_BasicParams
  * @base Kapu_UniqueTraits
  * 
  * @param passiveSkillType
@@ -29,7 +30,7 @@
  *   ベーシックシステムでは
  *       {(クラス値)+(種増減分)+(装備品)} x (特性レート) x (バフ増減レート)
  *   となっていた。これを
- *       [{(クラス値)+(種増減分)} x (特性レート) + (装備品)] x (バフ増減レート)
+ *       [{(パラメータベース値計算式) + (種増加分)}x (特性によるレート) + (装備品)] x (バフ増減レート)
  *   に変更する。
  * 
  * ■ 使用時の注意
@@ -279,16 +280,6 @@
     //------------------------------------------------------------------------------
     // Game_Actor
     /**
-     * パッシブスキルを持っているかどうかを判定する。
-     * @return パッシブスキルを持っている場合にはtrue, それ以外はfalse
-     */
-    Game_Actor.prototype.hasPassiveSkill = function() {
-        return this.skills().some(function(skill) {
-            return skill && (skill.stypeId == Game_BattlerBase.PASSIVE_SKILL_TYPE);
-        });
-    };
-
-    /**
      * パラメータを得る。
      * 
      * Note: 装備品増加分には特性によるレートボーナスを適用外とするため、
@@ -305,6 +296,58 @@
         const minValue = this.paramMin(paramId);
         return Math.round(value.clamp(minValue, maxValue));
     };
+    /**
+     * 基本パラメータベース値を得る。
+     * 
+     * @param paramId {Number} パラメータID
+     * @return {Number} パラメータ値
+     */
+    Game_Actor.prototype.paramBase = function(paramId) {
+        const value = this.currentClass().params[paramId][this._level];
+        switch (paramId) {
+            case 0: // MaxHP
+                {
+                    // 最大HP = (VIT * 4) + FLOOR(VIT / 5) * 7
+                    const vit = this.vit;
+                    return value + (vit * 4) + Math.floor(vit / 5) * 7;
+                }
+            case 1: // MaxMP
+                {
+                    const int = this.int;
+                    const men = this.men;
+                    return value + (int * 2) + Math.floor(int / 5) * 4
+                            + men + Math.floor(men / 7) * 5;
+                }
+            case 2: // ATK
+                if (this.hasNoWeapons()) {
+                    return 0;
+                } else {
+                    return value;
+                }
+            case 3: // DEF
+                return value;
+            case 4: // VIT
+                return value;
+            case 5: // MDF
+                return value;
+            case 6: // AGI
+                return this.basicParam(6); // BasicParam(6) AGIを返す。
+            case 7: // LUK
+                return this.basicParam(7); // LUKを返す。
+        }
+        return 0;
+    };
+    /**
+     * パッシブスキルを持っているかどうかを判定する。
+     * @return パッシブスキルを持っている場合にはtrue, それ以外はfalse
+     */
+    Game_Actor.prototype.hasPassiveSkill = function() {
+        return this.skills().some(function(skill) {
+            return skill && (skill.stypeId == Game_BattlerBase.PASSIVE_SKILL_TYPE);
+        });
+    };
+
+
 
     /**
      * 基本パラメータ加算値を得る。
@@ -341,7 +384,7 @@
             const stypeList = this.addedSkillTypes();
             if (!stypeList.includes(skill.stypeId)) {
                 // スキルタイプが無いので追加する。
-                this.addUniqueTrait("UseSkillType" + skill.stypeId, {
+                this.addUniqueTrait("useSkillType" + skill.stypeId, {
                     code:Game_BattlerBase.TRAIT_STYPE_ADD,
                     dataId:skill.stypeId,
                     value:1,
