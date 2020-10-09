@@ -1370,3 +1370,26 @@ Sprite_Clickableを派生してボタンとか作るならば、setFrameでSprit
 |2|誰かを攻撃(混乱など)|
 |3|味方を攻撃(魅了など)|
 |4|行動不能(麻痺など)|
+
+### いろいろなGame_BattlerBaseの変化に対応するメソッド調査
+
+全回復 -> recoverAll
+アクター初期化 -> setup -> initEquips -> refresh
+                       -> recoverAll
+エネミー初期化 -> setup -> recoverAll
+
+HPダメージやHP回復 -> gainHp -> setHp -> refresh
+MPダメージやMP回復 -> gainMp -> setMp -> refresh
+TP初期化 -> initTp -> setTp -> refresh
+TP増減 -> gainTp -> setTp -> refresh
+チャージによるTP増減 gainSilentTp -> setTp -> refresh
+TPクリア -> clearTp -> setTp -> refresh
+ステート付与 -> addState -> refresh
+ステート削除 -> removeState -> refresh
+装備変更 -> changeEquip -> refresh
+クラス変更 -> changeClass -> refresh 
+コマンドによるレベルアップ -> changeLevel -> changeExp -> refresh
+経験値増減 -> changeExp -> refresh
+バフ付与 -> addBuff -> refresh
+デバフ付与 -> addDebuff -> refresh
+アイテムによるパラメータ増減 -> addParam -> refresh
