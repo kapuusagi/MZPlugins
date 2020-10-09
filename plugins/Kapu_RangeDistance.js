@@ -3,8 +3,7 @@
  * @plugindesc 射程距離システムプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
-
- * ■ setEnemyBattlePosition
+ *
  * @command setEnemyBattlePosition
  * @text エネミー戦闘位置設定
  * @desc エネミーの戦闘位置を設定する。戦闘中以外は無効。
@@ -170,6 +169,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 射程2のスキル使用時はカウンターを受けないようにした。
  * Version.0.1.1 各特性について、ID未指定時は動作しないように変更した。
  * Version.0.1.0 作成した。
  */
@@ -506,7 +506,7 @@
      * 
      * @return {Number} 射程距離
      */
-    Game_Action.prototype.rangeDistance = function() {
+    Game_Action.prototype.itemRangeDistance = function() {
         const item = this.item();
         if (item) {
             return this.subject().itemRangeDistance(item);
@@ -526,7 +526,7 @@
         if (unit.members().includes(subject)) {
             return Game_Action.RANGE_MIDDLE; // To firendの場合には1（全員対象）
         } else {
-            return this.rangeDistance() - subject.battlePosition();
+            return this.ietmRangeDistance() - subject.battlePosition();
         }
     };
 
@@ -694,7 +694,19 @@
             return unit.members();
         }
     };
-
+    const _Game_Action_itemCnt = Game_Action.prototype.itemCnt;
+    /**
+     * カウンター率を得る
+     * 
+     * @param {Game_Battler} target ターゲット
+     */
+    Game_Action.prototype.itemCnt = function(target) {
+        if (this.itemRangeDistance() > 1) {
+            return 0;
+        } else {
+            return _Game_Action_itemCnt.call(this, target);
+        }
+    };
     //------------------------------------------------------------------------------
     // Game_System
     /**
