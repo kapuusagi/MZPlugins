@@ -6,49 +6,6 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @command setBasicParam
- * @text 基本パラメータ設定
- * @desc 基本パラメータを所定の値に設定する。
- * 
- * @arg actorId
- * @text アクターID
- * @desc 変更するアクターのID
- * @type actor
- * 
- * @arg variableId
- * @text 変数ID
- * @desc アクターを変数の値で指定する場合に指定する変数ID
- * @type number
- * 
- * @arg paramId
- * @text パラメータ
- * @desc 対象パラメータ
- * @type select
- * @option STR
- * @value 0
- * @option DEX
- * @value 1
- * @option VIT
- * @value 2
- * @option INT
- * @value 3
- * @option MEN
- * @value 4
- * @option AGI
- * @value 5
- * @option LUK
- * @value 6
- * 
- * @arg value
- * @text 値
- * @desc 設定する値
- * @type number
- * 
- * @arg valueVariableId
- * @text 値(変数指定)
- * @desc 設定する値
- * @type number
- * 
  * @command gainBasicParam
  * @text 基本パラメータ増減
  * @desc 基本パラメータを所定の値増減させる。
@@ -130,6 +87,20 @@
  * @min 65
  * @max 9999
  * 
+ * @param minBasicParamPlus
+ * @text 基本パラメータ増減補正値最小値
+ * @desc 基本パラメータの増減補正の最小値
+ * @type number
+ * @default -100
+ * @min -1000
+ * 
+ * @param maxBasicParamAdd
+ * @text 基本パラメータ増減補正値最大値
+ * @desc 基本パラメータの増減補正の最大値
+ * @type number
+ * @default 100
+ * @max 1000
+ * 
  * @param basicParamAddEffectCode
  * @text 基本パラメータ加算効果コード
  * @desc 基本パラメータを恒久的に増減させる効果コード
@@ -202,7 +173,8 @@
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * gainBasicParam
+ *     指定アクターの基本パラメータを増減させる。
  * 
  * ============================================
  * ノートタグ
@@ -211,7 +183,7 @@
  *     <basicParams:str#,dex#,vit#,int#,men#,agi#,luk#>
  * 
  *         アクター/エネミーについては1以上の値。
- *         未指定時はデフォルト値として全て20二セットされる。
+ *         未指定時はデフォルト値として全て20にセットされる。
  *         クラス/ウェポン/アーマーについては正負の値。
  * 
  * エネミー
@@ -267,6 +239,8 @@
     Game_BattlerBase.TRAIT_BASIC_PARAM_RATE = Number(parameters["basciParamRateTraitCode"]) || 0;
     Game_BattlerBase.BASIC_PARAM_MAX = Number(parameters["basicParamMax"]) || 999;
     Game_Action.EFFECT_GAIN_BASIC_PARAM = Number(parameters["basicParamAddEffectCode"]) || 0;
+    const minBasicParamPlus = Number(parameters["minBasicParamPlus"]) || 100;
+    const maxBasicParamAdd = Number(parameters["maxBasicParamAdd"]) || 100;
 
     const overwriteAGI = (typeof parameters["overwriteAGI"] === "undefined")
             ? false : (parameters["overwriteAGI"] === "true");
@@ -326,16 +300,6 @@
         }
     };
 
-    PluginManager.registerCommand(pluginName, "setBasicParam", args => {
-        const actorId = _getActorId(args);
-        const paramId = Number(args.paramId) || 0;
-        const value = _getValue(arg);
-        if ((actorId > 0) && (paramId >= 0) && (paramId < 7) && (value >= 0)) {
-            const actor = $gameActors.actor(actorId);
-            actor.setBasicParamRaw(paramId, value);
-        }
-    });
-
     PluginManager.registerCommand(pluginName, "gainBasicParam", args => {
         const actorId = _getActorId(args);
         const paramId = Number(args.paramId) || 0;
@@ -343,7 +307,7 @@
         if ((actorId > 0) && (paramId >= 0) && (paramId < 7) && (value >= 0)) {
             const actor = $gameActors.actor(actorId);
             const newValue = actor.basicParam(paramId) + value;            
-            actor.setBasicParamRaw(paramId, newValue);
+            actor.addBasicParam(paramId, newValue);
         }
     });
     //------------------------------------------------------------------------------
@@ -493,6 +457,7 @@
     Game_BattlerBase.prototype.initMembers = function() {
         _Game_BattlerBase_initMembers.call(this);
         this._basicParams = [20, 20, 20, 20, 20, 20, 20]
+        this._basicParamsAdd = [0, 0, 0, 0, 0, 0, 0];
     };
 
     if (overwriteAGI || overwriteLUK) {
@@ -552,7 +517,7 @@
      * @return {Number} パラメータの値
      */
     Game_BattlerBase.prototype.basicParamBase = function(paramId) {
-        return this._basicParams[paramId];
+        return this._basicParams[paramId] + this._basicParamsAdd[paramId];
     };
 
     // 実行効率を上げるため、if-elseで実装を分岐する。
@@ -644,15 +609,18 @@
     };
 
     /**
-     * 基本パラメータ生値を設定する。
+     * 基本パラメータを増減する。
      * 
      * @param {Number} paramId パラメータID
      * @param {Number} value 値
      */
-    Game_Actor.prototype.setBasicParamRaw = function(paramId, value) {
-        if ((paramId >= 0) && (paramId < this._basicParams.length)) {
-            this._basicParams[paramId] = value;
+    Game_Actor.prototype.addBasicParam = function(paramId, value) {
+        if ((paramId >= 0) && (paramId < this._basicParamsPlus.length)) {
+            const paramPlus = this._basicParamsPlus[paramId] + value;
+            this._basicParamsPlus[paramId] = paramPlus.clamp(minBasicParamPlus, maxBasicParamAdd);
+            this.refresh();
         }
+
     };
 
     /**
@@ -719,7 +687,7 @@
         Game_Action.prototype.testItemEffect = function(target, effect) {
             if (effect.code === Game_Action.EFFECT_GAIN_BASIC_PARAM) {
                 const paramId = effect.dataId;
-                return (target.isActor() && (target.basicParamRaw(paramId) < target.basicParamMax(paramId)));
+                return (target.isActor() && (target.basicParamAdd(paramId) < maxBasicParamAdd));
             } else {
                 return _Game_Action_testItemEffect.call(this, target, effect);
             }
@@ -749,9 +717,7 @@
         Game_Action.prototype.applyItemEffectGainBasicParam = function(target, effect) {
             if (target.isActor()) {
                 const paramId = effect.dataId;
-                const oldValue = target.basicParamRaw(paramId);
-                const newValue = oldValue + effect.value1;
-                target.setBasicParamRaw(paramId, newValue);
+                target.addBasicParam(paramId, effect.value1);
                 this.makeSuccess(target);
             }
         };
