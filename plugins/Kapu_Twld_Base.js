@@ -63,7 +63,8 @@
     
     Game_BattlerBase.PASSIVE_SKILL_TYPE = Number(parameters['passiveSkillType']) || 0;
 
-
+    const actorParamMax = [ 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999];
+    const enemyParamMax = [ 999999, 9999, 9999, 9999, 9999, 9999, 9999, 9999]
 
     // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
     //     // TODO : コマンドの処理。
@@ -392,6 +393,15 @@
             }
         }
     };
+    /**
+     * パラメータの最大値を得る。
+     * 
+     * @return {Number} パラメータ最大値。
+     * !!!overwrite!!! Game_Actor.paramMax()
+     */
+    Game_Actor.prototype.paramMax = function(paramId) {
+        return actorParamMax[paramId];
+    };
     //------------------------------------------------------------------------------
     // Game_Party
     
@@ -402,11 +412,24 @@
      *       Dead状態は判定対象から外すため、オーバーライドする。
      * 
      * @param {Number} abilityId アビリティID
-     * !!!overwrite!!! Game_Party.partyAbility
+     * !!!overwrite!!! Game_Party.partyAbility()
      */
     Game_Party.prototype.partyAbility = function(abilityId) {
         return this.battleMembers().some(function(actor) {
             return !actor.isDead() && actor.partyAbility(abilityId);
         });
     };
+
+    //------------------------------------------------------------------------------
+    // Game_Enemy
+    /**
+     * パラメータの最大値を得る。
+     * 
+     * @return {Number} パラメータ最大値。
+     * !!!overwrite!!! Game_Enemy.paramMax()
+     */
+    Game_Enemy.prototype.paramMax = function(paramId) {
+        return enemyParamMax[paramId];
+    };
+
 })();
