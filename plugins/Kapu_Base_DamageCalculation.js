@@ -55,6 +55,9 @@
  *     リカバリレートを返す。
  *     プラグインで定義されたTraitで、
  *     リカバリーレートを増減させたい場合にフックすることを想定します。
+ * Game_Action.maxDamage(target:Game_Battler) : number
+ *      最大ダメージを返す。
+ *      既定ではInifinityなので制限なし。
  * Game_Battler.prototype.additionalTargetTraits() : Array<Trait>
  *     ダメージ計算時、相手に一時的に付与する特性を得る。
  *     貫通効果とか、そのあたりを実現するためのインタフェース。
@@ -71,6 +74,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 最大ダメージをmaxDamageメソッドで制限できるようにした。
+ *               おくとらの限界突破みたいなのやりたいかもね。
  * Version.0.2.0 ダメージ計算時、一時的に付与するTraitを設定出来るようにした。
  *               ステート付与という作戦もあるけど、
  *               データベースのリソースを使ったりするのでやめた。
@@ -159,8 +164,17 @@
 
         target.clearTempTraits();
         this.subject().clearTempTraits();
+        return Math.min(value, this.maxDamage(target));
+    };
 
-        return value;
+    /**
+     * 最大ダメージを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {Number} 最大ダメージ
+     */
+    Game_Action.prototype.maxDamage = function(target) {
+        return Infinity;
     };
 
     /**
