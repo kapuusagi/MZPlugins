@@ -20,6 +20,7 @@
 |||100|__TRAIT_SPARAM_DID_MAXTP_RATE__ 最大TPレート|
 |||101|__TRAIT_SPARAM_DID_HPCOST_RATE__ HPコストレート|
 |||102|__TRAIT_SPARAM_DID_TPCOST_RATE__ TPコストレート|
+|||103|__TRAIT_SPARAM_DID_VARIANCE_RATE__ ばらつきレート|
 |TRAIT_SPECIAL_FLAG|62|フラグID|特別な機能を提供するためのフラグ。|
 |TRAIT_PARTY_ABILITY|64||パーティーアビリティ。既定の実装はdataIdで指定された値の効果を持っているかどうか、だけの判定に使われる。dataIdはGame_Party.ABILITY_～で定義されてる。|
 |||0～5|ベーシックシステムで使用|
