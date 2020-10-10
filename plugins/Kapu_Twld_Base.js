@@ -321,7 +321,7 @@
                 }
             case 2: // ATK
                 if (this.hasNoWeapons()) {
-                    return 0;
+                    return this.bareHandAtk();
                 } else {
                     return value;
                 }
@@ -337,6 +337,16 @@
                 return this.basicParam(7); // LUKを返す。
         }
         return 0;
+    };
+
+    /**
+     * 素手時の攻撃力を得る。
+     * 
+     * @param {Number} value 値
+     * @return {Number} 攻撃力
+     */
+    Game_Actor.prototype.bareHandAtk = function(value) {
+        return value;
     };
     /**
      * パッシブスキルを持っているかどうかを判定する。
