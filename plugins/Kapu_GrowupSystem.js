@@ -161,6 +161,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 全てのスキル/アイテムに育成リセット効果が付与されていた不具合を修正した。
  * Version.0.1.0 TWLD向けコードから抜粋して移植。 
  */
 (() => {
@@ -243,7 +244,7 @@
                 });
             }
         }
-        if (Game_Action.EFFECT_RESET_GROWS) {
+        if (Game_Action.EFFECT_RESET_GROWS && obj.meta.resetGrows) {
             obj.effects.push({
                 code: Game_Action.EFFECT_RESET_GROWS,
                 dataId: 0,
