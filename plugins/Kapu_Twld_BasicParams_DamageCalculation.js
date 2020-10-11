@@ -3,8 +3,8 @@
  * @plugindesc 基本パラメータによるダメージ計算補正プラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_DamageCalculation
- * @orderAfter Kapu_DamageCalculation
+ * @base Kapu_Base_DamageCalculation
+ * @orderAfter Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Trait_Penetrate
  * @base Kapu_Twld_BasicParams
  * @orderAfter Kapu_Twld_BasicParams

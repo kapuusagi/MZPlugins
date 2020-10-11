@@ -37,21 +37,6 @@
     //------------------------------------------------------------------------------
     // Game_Actor
     /**
-     * パラメータを得る。
-     * 
-     * @param {Number} paramId パラメータID
-     * !!!overwrite!!! Game_Actor.param
-     */
-    Game_Actor.prototype.param = function(paramId) {
-        const baseValue = this.paramBasePlus(paramId);
-        const value = baseValue * this.paramRate(paramId) * this.paramBuffRate(paramId);
-        const maxValue = this.paramMax(paramId);
-        const minValue = this.paramMin(paramId);
-        return Math.round(value.clamp(minValue, maxValue));
-    };
-
-
-    /**
      * 基本パラメータ加算値を得る。
      * クラスのベース値を除いた、種による加算値と装備品による加算値の合計を返す。
      * 

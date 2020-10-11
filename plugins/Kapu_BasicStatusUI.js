@@ -168,6 +168,7 @@
     const labelWidth1 = 64;
     const labelWidth2 = 32;
     const labelWidth3 = 96;
+    const propertyNames = ["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"];
 
     /**
      * strを解析し、statusEntryオブジェクトを生成する。
@@ -824,7 +825,8 @@
      */
     Window_StatusParams.prototype.drawParam = function(paramId, x, y, width) {
         const name = TextManager.param(paramId);
-        const value = this._actor.param(paramId);
+        const propertyName = propertyNames[paramId];
+        const value = this._actor[propertyName];
         this.changeTextColor(ColorManager.systemColor());
         this.drawText(name, x, y, 72);
         this.resetTextColor();
