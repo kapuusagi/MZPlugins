@@ -49,6 +49,7 @@ __TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
 |__FLAG_ID_CERTAINLY_EVA_PHY__|105|必中スキル以外は確実に回避する。|
 |__FLAG_ID_CERTAINLY_EVA_MAG__|106|必中スキル以外は確実に回避する。|
 |__FLAG_ID_BLOCK_CAST_BREAK__|107|TPBキャストブレークを防ぐフラグ。|
+|__FLAG_ID_BLOCK_TPB_LOSE__|108|TPB減少効果を防ぐフラグ。|
 
 ## エフェクトコード
 
