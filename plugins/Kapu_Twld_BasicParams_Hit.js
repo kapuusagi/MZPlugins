@@ -60,7 +60,7 @@
         } else if (this.isMagical()) {
             return this.testEvaMagical(target);
         } else {
-            return true; // その他は100%成功
+            return false; // その他は回避されない。
         }
     };
 
