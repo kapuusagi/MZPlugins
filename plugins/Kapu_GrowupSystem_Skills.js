@@ -6,7 +6,7 @@
  * @base Kapu_GrowupSystem
  * @orderAfter Kapu_GrowupSystem
  * @base Kapu_Utility
- * @orderAfter kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @command addGpLearnableSkill
  * @text 習得可能スキル追加

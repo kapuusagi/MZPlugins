@@ -3,6 +3,8 @@
  * @plugindesc 条件ステートプラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @help 
  * 条件によりステートを付与するプラグイン。
