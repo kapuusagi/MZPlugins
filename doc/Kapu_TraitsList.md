@@ -29,6 +29,7 @@
 |__TRAIT_ELEMENT_ABSORB__|100|属性ID|指定した属性の攻撃を受けたとき、ダメージを急襲する特性|
 |__TRAIT_WEAPON_PERFORMANCE__|101|武器タイプ|指定した武器タイプの性能を向上させる特性|
 |__TRAIT_ARMOR_PERFORMANCE__|102|防具タイプ|指定した防具タイプの性能を向上させる特性|
+|__TRAIT_DAMAGE_LIMIT__|103|-|最大ダメージ制限を変更する特性。|
 ||||
 |__TRAIT_BASIC_PARAM__|1001|基本パラメータを加算する特性|
 |__TRAIT_BASIC_PARAM_RATE__|1002|基本パラメータ乗算レート特性|
