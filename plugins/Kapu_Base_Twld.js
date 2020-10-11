@@ -189,7 +189,7 @@
      * @return {Number} TPB速度。
      */
     Game_Battler.prototype.tpbSpeed = function() {
-        return 0.01 + ((this.agi - 20) * 0.0001).clamp(0, 0.01);
+        return 10 + ((this.agi - 20) * 0.2).clamp(0, 15);
     };
 
     /**
@@ -198,7 +198,22 @@
      * @return {Number} TPBベース速度
      */
     Game_Battler.prototype.tpbBaseSpeed = function() {
-        return 0.02;
+        return 25;
+    };
+    /**
+     * キャスト時間を得る。
+     * 既定の実装では以下の通り。
+     * 1. 有効なアクションのspeed(負数)の合計を算出。
+     *    (このとき、加算する方向のspeedは無視される)
+     * 2. Sqrt(1の結果) / TPB速度を算出して返す。
+     * 
+     * @return {Number} キャスト時間
+     */
+    Game_Battler.prototype.tpbRequiredCastTime = function() {
+        const actions = this._actions.filter(action => action.isValid());
+        const items = actions.map(action => action.item());
+        const delay = items.reduce((r, item) => r + Math.max(0, -item.speed), 0);
+        return delay / this.tpbSpeed();
     };
     /**
      * パラメータを得る。
