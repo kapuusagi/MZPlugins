@@ -164,7 +164,8 @@
 
         target.clearTempTraits();
         this.subject().clearTempTraits();
-        return Math.min(value, this.maxDamage(target));
+        const maxDamage = this.maxDamage(target);
+        return value.clamp(-maxDamage, maxDamage)
     };
 
     /**
