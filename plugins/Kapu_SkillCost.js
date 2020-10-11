@@ -93,6 +93,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 現在HP/MP/TPを元にしたコスト算出で、
+ *               現在HP/MP/TPがゼロの場合、コストもゼロになる不具合を修正した。
  * Version.0.1.0 確認した。
  */
 (() => {
@@ -209,11 +211,13 @@
      * @return {Number] HPコスト
      */
     Game_BattlerBase.prototype.skillHpCost = function(skill) {
-        const cost = skill.hpCost + this.hp * skill.hpRateCost + this.mhp * skill.mhpRateCost;
+        const cost = skill.hpCost
+            + ((skill.hpRateCost === 0) ? 0 : Math.max(1, this.hp * skill.hpRateCost))
+            + this.mhp * skill.mhpRateCost;
         if (skill.meta.ignorehpcr) {
-            return Math.ceil(cost);
+            return Math.floor(cost);
         } else {
-            return Math.ceil(cost * this.hpCostRate());
+            return Math.floor(cost * this.hpCostRate());
         }
     };
     // Game_BattlerBase
@@ -224,11 +228,13 @@
      * !!!overwrite!!! Game_BattlerBase.skillMpCost
      */
     Game_BattlerBase.prototype.skillMpCost = function(skill) {
-        const cost = skill.mpCost + this.mp * skill.tpRateCost + this.mmp * skill.mmpRateCost;
+        const cost = skill.mpCost
+                + ((skill.mpRateCost === 0) ? 0 : Math.max(1, this.mp * skill.mpRateCost))
+                + this.mmp * skill.mmpRateCost;
         if (skill.meta.ignorempcr) {
-            return Math.ceil(cost);
+            return Math.floor(cost);
         } else {
-            return Math.ceil(cost * this.mcr);
+            return Math.floor(cost * this.mcr);
         }
     };
 
@@ -239,11 +245,13 @@
      * !!!overwrite!!! Game_BattlerBase.skillTpCost()
      */
     Game_BattlerBase.prototype.skillTpCost = function(skill) {
-        const cost = skill.tpCost + this.tp * skill.tpRateCost + this.maxTp() * skill.mtpRateCost;
+        const cost = skill.tpCost
+                + ((skill.tpRateCost === 0) ? 0 : (this.tp * skill.tpRateCost))
+                + this.maxTp() * skill.mtpRateCost;
         if (skill.meta.ignoretpcr) {
-            return Math.ceil(cost);
+            return Math.floor(cost);
         } else {
-            return Math.ceil(cost * this.tpCostRate());
+            return Math.floor(cost * this.tpCostRate());
         }
     };
     const _Game_BattlerBas_canPaySkillCost = Game_BattlerBase.prototype.canPaySkillCost;

@@ -41,24 +41,11 @@
 
 (function() {
 
-    /**
-     * TRAITTの追加(あれば)
-     */
 
 
 
-    //var params = PluginManager.parameters('TWLD_Core');
 
 
-
-    // 定数。他のプラグインと衝突するなら変更する事。
-    // grep で EFFECT_を検索して調べれば良い。
-    Game_Action.EFFECT_TWLD_BASICPARAM_ADD = 990;
-    Game_Action.EFFECT_TWLD_GROWPONT_ADD = 991;
-    Game_Action.EFFECT_TWLD_LEARNABLESKILL_ADD = 992;
-    Game_Action.EFFECT_TWLD_UPDATE_LUK = 993;
-
-    TWLD.Core.StatusNames = [ "STR", "DEX", "VIT", "INT", "MEN", "AGI" ];
     TWLD.Core.BasicParamIcons = [ -1, -1, -1, -1, -1, -1 ];
     TWLD.Core.ReincarnationIconIndex = -1;
     TWLD.Core.PhysicalElements = [ 1,2,3 ]; // 打,斬,突
@@ -66,10 +53,7 @@
 
 
 
-    /**
-     * クリティカルアニメーションID
-     */
-    TWLD.Core.CriticalAnimationId = -1;
+
 
     /**
      * ウェポンマスタリーアイコン番号。
@@ -109,14 +93,7 @@
         }
     };
 
-    /**
-     * ウェポンマスタりのレベルアップに必用な経験値を得る。
-     * @param {Number} level 現在のレベル
-     * @return {Number} 必用経験値。
-     */
-    TWLD.Core.getWMNextExp = function(level) {
-        return Math.pow(level + 1, 2);
-    };
+
 
     /**
      * 物理属性かどうかを判定する。
@@ -479,160 +456,23 @@
 
 
 
-    /**
-     * 武器熟練度レベルを得る。
-     * @param {Number} wmTypeId ウェポンマスタリータイプID
-     * @return レベルが返る。
-     */
-    // eslint-disable-next-line no-unused-vars
-    Game_BattlerBase.prototype.getWMLevel = function(wmTypeId) {
-        return 0;
-    };
 
-    /**
-     * 武器熟練度レベルを得る。
-     * @param {Game_Object} item 使用するアイテム。スキルかもしれない。
-     * @return レベルが返る。
-     */
-    // eslint-disable-next-line no-unused-vars
-    Game_BattlerBase.prototype.getWMLevel = function(item) {
-        return 1;
-    }
 
-    /**
-     * 基本パラメータの倍率補正を得る。
-     * @return {Number} 倍率補正値
-     */
-    Game_BattlerBase.prototype.getBasicParamRate = function(paramId) {
-        return this.getBasicParamRateByStates(paramId);
-    };
 
-    /**
-     * 基本パラメータのステートによる倍率補正を得る。
-     * @return {Number} 倍率補正値
-     */
-    Game_BattlerBase.prototype.getBasicParamRateByStates = function(paramId) {
-        return this.states().reduce(function(prev, state) {
-            return prev + state.basicParams[paramId].rate;
-        }, 1.0);
-    };
 
-    /**
-     * 基本パラメータの装備品による補正値合計を取得する。
-     * @param {Number} paramId パラメータID
-     * @return 補正値。
-     */
-    // eslint-disable-next-line no-unused-vars
-    Game_BattlerBase.prototype.getBasicParamCorrectByEquips = function(paramId) {
-        return 0;
-    };
 
-    /**
-     * ステートによる基本パラメータの加算補正値を得る。
-     * 
-     * @param {Number} paramId パラメータ番号
-     * @return 加算補正値が返る。
-     */
-    Game_BattlerBase.prototype.getBasicParamCorrectByStates = function(paramId) {
-        // ステートから算出する。
-        return this.states().reduce(function(prev, state) {
-            return prev + state.basicParams[paramId].add;
-        }, 0);
-    };
 
-    TWLD.Core.Game_BattlerBase_canEquip = Game_BattlerBase.prototype.canEquip;
 
-    /**
-     * 装備可能かどうかを判定する。
-     * @param {Data_Item} item Weapon または Armor
-     */
-    Game_BattlerBase.prototype.canEquip = function(item) {
-        if (!TWLD.Core.Game_BattlerBase_canEquip.call(this, item)) {
-            return false;
-        }
-        for (var i = 0; i < 6; i++) {
-            if (this.getBasicParamBase(i) < item.basicParams[i].req) {
-                return false;
-            }
-        }
-        // eslint-disable-next-line no-unused-vars
-        var actor = this; // used at eval)
-        if (item.equipCondition && !eval(item.equipCondition)) {
-            return false;
-        }
 
-        return true;
-    };
-    /**
-     * skillを使用するためのHPコストを取得する。
-     * @param {Data_Item} skill スキル
-     * @return HPコストが返る。
-     */
-    Game_BattlerBase.prototype.skillHpCost = function(skill) {
-        return skill.hpCost + Math.floor(this.mhp * skill.hpCostRate);
-    };
-    /**
-     * skillを使用するためのMPコストを取得する。
-     * @return MPコストが返る。
-     */
-    Game_BattlerBase.prototype.skillMpCost = function(skill) {
-        return Math.floor((skill.mpCost + this.mmp * skill.mpCostRate) * this.mcr);
-    };
-    /**
-     * スキルのTPコストを取得する。
-     * @param {Game_Skill} skill スキル
-     * @return TPコストが返る。
-     */
-    Game_BattlerBase.prototype.skillTpCost = function(skill) {
-        return skill.tpCost;
-    };
-    /**
-     * スキルのコストを払えるかを判定する。
-     * canUse判定の先で呼ばれる。
-     * @param {Game_Skill} skill スキル
-     * @return {Boolean} 払える場合にはtrue, 払えない場合にはfalse
-     */
-    Game_BattlerBase.prototype.canPaySkillCost = function(skill) {
-        return this._hp > this.skillHpCost(skill)
-                && this._tp >= this.skillTpCost(skill) && this._mp >= this.skillMpCost(skill);
-    };
 
-    /**
-     * スキルを使用したコストを消費する。
-     */
-    Game_BattlerBase.prototype.paySkillCost = function(skill) {
-        this._hp -= this.skillHpCost(skill);
-        if (this._hp < 0) {
-            this._hp = 1; // 
-        }
-        this._mp -= this.skillMpCost(skill);
-        this._tp -= this.skillTpCost(skill);
-    };
+
+
 
     
 
-    TWLD.Core.Game_BattlerBase_allTraits = Game_BattlerBase.prototype.allTraits;    
-    /**
-     * 全ての特性を返す。
-     * @return {Array<Trait>} 全ての特性値を格納した配列を返す。
-     */
-    Game_BattlerBase.prototype.allTraits = function() {
-        return TWLD.Core.Game_BattlerBase_allTraits.call(this).concat(this._uniqueTraits);
-    };
 
-    //------------------------------------------------------------------------------
-    // WeaponMastery
-    //
-    /**
-     * 新しいWeaponMasteryを構築する
-     * @param [Number] wmTypeId タイプ番号
-     */
-    function WeaponMastery(wmTypeId) {
-        this.wmTypeId = wmTypeId || 1;
-        this.level = 0; // レベル
-        this.exp = 0; // EXP
-        this.nextExp = 1; // TWLD.Core.getWMNextExp(0) = 4;
-    }
+
+
 
     //------------------------------------------------------------------------------
     // Game_Actor
@@ -640,48 +480,10 @@
     //     growPoint   : 成長処理用振り分けボーナス値
     //                   
     //
-    TWLD.Core.Game_Actor_initMembers = Game_Actor.prototype.initMembers;
-
-    /**
-     * Game_Actorのパラメータを初期化する。
-     */
-    Game_Actor.prototype.initMembers = function() {
-        TWLD.Core.Game_Actor_initMembers.call(this);
-        this.initWeaponMastaries();
-        this._profilePictureName = "";
-    };
 
 
 
-    /**
-     * ウェポンマスタリーのパラメータを初期化する。
-     */
-    Game_Actor.prototype.initWeaponMastaries = function() {
-        this._WM = [];
-        // とりあえずID分だけ追加。
-        for (var i = 0; i < $dataSystem.weaponTypes.length; i++) {
-            this._WM.push(new WeaponMastery(i));
-        }
-    };
 
-
-
-    /**
-     * ウェポンマスタりを設定する。
-     * @param {Number} actorId アクターID
-     */
-    Game_Actor.prototype.setupWeaponMastery = function(actorId) {
-        var actor = $dataActors[actorId];
-        for (var i = 0; i < actor.WM.length; i++) {
-            var wmInitial = actor.WM;
-            var wm = this.getWeaponMastery(wmInitial.id);
-            if (wm !== null) {
-                wm.level = wmInitial.level;
-                wm.exp = wmInitial.exp;
-                wm.nextExp =  TWLD.Core.getWMNextExp(wmInitial.level);
-            }
-        }
-    };
 
     /**
      * プロフィール用のデータを用意する。
@@ -716,182 +518,20 @@
 
 
 
-    /**
-     * 武器熟練度レベルを得る。
-     * @param {Number} wmTypeId ウェポンマスタリータイプID
-     * @return {Number} 武器熟練度レベル
-     */
-    Game_Actor.prototype.getWMLevel = function(wmTypeId) {
-        var wm = this.getWeaponMastery(wmTypeId);
-        return (wm !== null) ? wm.level : 0;
-    }
 
-    /**
-     * 武器熟練度Expを得る。
-     * @param {Number} wmTypeId ウェポンマスタりタイプID
-     * @return {Number} 熟練度Exp
-     */
-    Game_Actor.prototype.getWMExp = function(wmTypeId) {
-        var wm = this.getWeaponMastery(wmTypeId);
-        return (wm !== null) ? wm.exp : 0;
-    };
 
-    /**
-     * 武器熟練度レベルアップするためのExpを得る。
-     * @param {Number} wmTypeId ウェポンマスタりタイプID
-     * @return {Number} レベルアップに必用なExp
-     */
-    Game_Actor.prototype.getWMNextExp = function(wmTypeId) {
-        var wm = this.getWeaponMastery(wmTypeId);
-        return (wm !== null) ? wm.nextExp : 0;
-    };
 
-    /**
-     * 武器熟練度の経験値を増やす。
-     * 
-     * @param {Number} wmType ウェポンマスタりタイプID
-     * @param {Number} exp 加算するEXP
-     */
-    Game_Actor.prototype.gainWMExp = function(wmTypeId, exp) {
-        var wm = this.getWeaponMastery(wmTypeId);
-        if ((exp > 0) && (wm !== null)) {
-            wm.exp += exp;
-            if (wm.exp >= wm.nextExp) {
-                if (wm.level < 99) {
-                    wm.level++;
-                    wm.exp = 0;
-                    wm.nextExp = TWLD.Core.getWMNextExp(wm.level);
-                } else {
-                    wm.exp = wm.nextExp; // 上限を超えることはない。
-                }
-            }
-        }
-    };
 
-    /**
-     * skillを使用するためのHPコストを取得する。
-     * @param {Data_Item} skill スキル
-     * @return HPコストが返る。
-     */
-    Game_Actor.prototype.skillHpCost = function(skill)
-    {
-        var cost = Game_BattlerBase.prototype.skillHpCost.call(this, skill);
-        if (cost > 1) {
-            var wmTypeId = skill.wmTypeId;
-            if (wmTypeId > 0) {
-                var level = this.getWMLevel(wmTypeId);
-                cost -= Math.floor(cost * (level + 1) * 0.005); // Lv100で最大50%軽減する。
-            }
-        }
 
-        return cost;
-    }
 
-    TWLD.Core.Game_Actor_skillMpCost = Game_Actor.prototype.skillMpCost;
 
-    /**
-     * skillを使用するためのMPコストを取得する。
-     * @param {Data_Item} skill スキル
-     * @return MPコストが返る。
-     */
-    Game_Actor.prototype.skillMpCost = function(skill) {
-        var cost = TWLD.Core.Game_Actor_skillMpCost.call(this, skill);
-        if (cost > 1) {
-            var wmTypeId = skill.wmTypeId;
-            if (wmTypeId > 0) {
-                var level = this.getWMLevel(wmTypeId);
-                cost -= Math.floor(cost * (level + 1) * 0.005); // Lv100で最大50%軽減する。
-            }
-        }
 
-        return cost;
-    };
 
-    TWLD.Core.Game_Actor_skillTpCost = Game_Actor.prototype.skillTpCost;
 
-    /**
-     * skillを使用するためのTPコストを取得する。
-     * @param {Data_Item} skill スキル
-     * @return TPコストが返る。
-     */
-    Game_Actor.prototype.skillTpCost = function(skill) {
-        var cost = TWLD.Core.Game_Actor_skillTpCost.call(this, skill);
-        if (cost > 1) {
-            var wmTypeId = skill.wmTypeId;
-            if (wmTypeId > 0) {
-                var level = this.getWMLevel(wmTypeId);
-                cost -= Math.floor(cost * (level + 1) * 0.005); // Lv100で最大50%軽減する。
-            }
-        }
 
-        return cost;
-    };
 
-    TWLD.Core.Game_Actor_useItem = Game_Actor.prototype.useItem;
 
-    /**
-     * item(スキルまたは道具)を使用する。
-     * @param {Data_Item} item アイテム
-     */
-    Game_Actor.prototype.useItem = function(item) {
-        TWLD.Core.Game_Actor_useItem.call(this, item);
-        if (DataManager.isSkill(item)) {
-            var wmTypeId = item.wmTypeId;
-            if (!wmTypeId || (wmTypeId < 0)) {
-                var weapons = this.weapons();
-                wmTypeId = (weapons.length > 0) ? weapons[0].wtypeId : 1;
-            }
-            this.gainWMExp(wmTypeId, 1);
-        }
-    };
 
-    /**
-     * typeIdに対応するウェポンマスタりを取得する。
-     * 該当するIDがない場合には追加して返す。
-     * @param {Number} typeId 武器タイプID(省略時はインデックス0のを返す)
-     * @return {Game_Object} ウェポンマスタりオブジェクト。typeIdが不正(負数)な場合にはnull
-     */
-    Game_Actor.prototype.getWeaponMastery = function(typeId) {
-        typeId = typeId || 0;
-        if (typeId < 0) {
-            return null;
-        } else {
-            if (typeof this._WM[typeId] === 'undefined') {
-                this._WM = new WeaponMastery(typeId);
-            }
-            return this._WM[typeId];
-        }
-    };
-
-    /**
-     * ウェポンマスタリーのデータを返す。
-     * @return {Array<WeaponMastery>} ウェポンマスタリーデータ(習得しているやつのみ。未着手は返さない) 
-     */
-    Game_Actor.prototype.getWeaponMasteries = function() {
-        var ret = [];
-        for (var i = 1; i < this._WM.length; i++) {
-            var wm = this._WM[i];
-            if (wm && ((wm.level > 0) || (wm.exp > 0))) {
-                ret.push(wm);
-            }
-        }
-        return ret;
-    };
-
-    /**
-     * 装備している武器のウェポンマスタリーレベルを得る。
-     * @return {Number} マスタリーレベル。
-     */
-    Game_Actor.prototype.getEquipWMLevel = function() {
-        var level = (this._WM[0]) ? this._WM[0].level : 1;
-        this.weapons().forEach(function(weapon) {
-            var wm = this.getWeaponMastery(weapon.wTypeId);
-            if ((wm != null) && (wm.level > level)) {
-                level = wm.level;
-            }
-        });
-        return level;
-    };
 
 
     /**
@@ -973,37 +613,12 @@
 
 
 
-    /**
-     * エネミーの基本パラメータをセットアップする。
-     * @param {Number} enemyId エネミーID
-     */
-    Game_Enemy.prototype.setupBasicParams = function(enemyId) {
-        var enemyData = $dataEnemies[enemyId];
-    };
-
-    /**
-     * 固有特性をセットアップする。
-     * @param {Number} エネミーID
-     */
-    Game_Enemy.prototype.setupUniqueTraits = function(enemyId) {
-        var enemyData = $dataEnemies[enemyId];
-        this.initUniqueTraits();
-        for (var i = 0; i < enemyData.uniqueTraits.length; i++) {
-            this.addUniqueTrait(enemyData.uniqueTraits[i]);
-        }
-
-    };
 
 
-    /**
-     * 武器熟練度レベルを得る。
-     * @param {Number} wmTypeId ウェポンマスタりータイプID
-     * @return {Number} 武器熟練度レベル
-     */
-    // eslint-disable-next-line no-unused-vars
-    Game_Enemy.prototype.getWMLevel = function(wmTypeId) {
-        return Number(this.enemy().WM) || 1;
-    };
+
+
+
+
 
     /**
      * 攻撃属性を得る。
