@@ -9,6 +9,51 @@
  * @orderAfter Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Twld_Base
  * 
+ * @command gainWmExp
+ * @text ウェポンマスタリEXPを上げる
+ * @desc ウェポンマスタリのEXPを加算します。
+ * 
+ * @arg target
+ * @text 対象
+ * @desc 上昇させる対象
+ * @option アクター指定
+ * @value actorId
+ * @option アクター指定(変数)
+ * @value variableId
+ * @value パーティー全体
+ * @value allMembers
+ * 
+ * @arg actorId
+ * @text アクター指定時の対象
+ * @desc アクター指定を選択したときの対象
+ * @type actor
+ * 
+ * @arg variableId
+ * @text アクター指定(変数)時の変数ID
+ * @desc アクター指定(変数)時の変数ID
+ * @type variable
+ *
+ * @arg wmTypeId
+ * @text ウェポンマスタリタイプID
+ * @desc ウェポンマスタリのタイプ値。
+ * @type number
+ * @default 1
+ * @min 1
+ * 
+ * @arg exp
+ * @text 加算する経験値
+ * @desc 加算する経験値を指定します。
+ * @type number
+ * @default 1
+ * @min 1
+ * 
+ * @param maxWmLevel
+ * @text 最大レベル
+ * @desc ウェポンマスタリの最大レベル。
+ * @type number
+ * @default 99
+ * @min 1
+ * 
  * @param bareHandsWmTypeId
  * @text 素手武器タイプID
  * @desc 素手の武器タイプとして使用するID
@@ -29,7 +74,16 @@
  * ============================================
  * プラグインコマンド
  * ============================================
+ * プラグインコマンド使うより、スクリプト挿入の方が楽よ。
  * 
+ * 特定のアクターのウェポンマスタリ タイプ7のEXPを80上げる
+ *     $gameActor.actor(actorId).gainWmExp(7, 80);
+ * パーティーメンバ3人目のウェポンマスタリ タイプ7のEXPを80上げる
+ *     $gameParty.allMembers()[3].gainWmExp(7, 80);
+ * 全パーティーメンバーのウェポンマスタリ タイプ7のEXPを80上げる
+ *     for (const member of $gameParty.allMembers()) {
+ *         member.gainWmExp(7, 80);
+ *     }
  * 
  * ============================================
  * ノートタグ
@@ -56,14 +110,54 @@
 (() => {
     const pluginName = "Kapu_Twld_WeaponMastery";
     const parameters = PluginManager.parameters(pluginName);
-    const maxWmLevel = 99;
+    const maxWmLevel = Number(parameters["maxWmLevel"]) || 99;
     const bareHandsWmTypeId = Number(parameters["bareHandsWmTypeId"]) || 0;
 
-    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-    //     // TODO : コマンドの処理。
-    //     // パラメータメンバは @argで指定した名前でアクセスできる。
-    // });
+    /**
+     * プラグインコマンドの対象を得る。
+     * 
+     * @param {Object} args プラグインコマンド引数
+     * @return {Array<Game_Actor>} 対象のGame_Actorオブジェクト
+     */
+    const _getTargets = function(args) {
+        switch (args.target) {
+            case "actorId":
+                const actorId = Number(args.actorId) || 0;
+                if (actorId > 0) {
+                    const actor = $gameActors.actor(actorId)
+                    if (actor) {
+                        return [actor];
+                    }
+                }
+                break;
+            case "variableId":
+                const variableId = Number(args.variableId) || 0;
+                if (variableId > 0) {
+                    const actor = $gameActors.actor($gameVariables.value(variableId));
+                    if (actor) {
+                        return [actor];
+                    }
+                }
+                break;
+            case "allMembers":
+                return $gameParty.allMembers();
+        }
 
+        return [];
+    };
+
+    PluginManager.registerCommand(pluginName, "gainWmExp", args => {
+        const targets = _getTargets(args);
+        const wmTypeId = Number(args.wmTypeId);
+        const exp = Number(args.exp) || 0;
+        if ((targets.length > 0) && (wmTypeId > 0) && (wmTypeId < $dataSystem.weaponTypes.length) && (exp > 0)) {
+            for (const target of targets) {
+                target.gainWmExp()
+            }
+
+        }
+
+    });
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     /**
@@ -75,7 +169,6 @@
     Game_BattlerBase.prototype.wmLevel = function(typeId) {
         return 0;
     };
-
 
     //------------------------------------------------------------------------------
     // Game_Actor
@@ -185,7 +278,7 @@
                 this._wm[typeId] = { level:0, exp:0 };
             }
             const nextExp = this.wmExpNext(typeId);
-            this._wm[typeId].exp = (this._wm[typeId].exp + value).clamp(0, nextExp);
+            this._wm[typeId].exp = (this._wm[typeId].exp + exp).clamp(0, nextExp);
             if ((this._wm[typeId].level < maxWmLevel)
                     && (this._wm[typeId].exp >= nextExp)) {
                 this._wm[typeId].level += 1;
