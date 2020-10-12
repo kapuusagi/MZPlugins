@@ -1,6 +1,6 @@
 /*:ja
  * @target MZ 
- * @plugindesc hogehoge
+ * @plugindesc TWLD向けLUKシステム。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
@@ -37,12 +37,15 @@
  * @text 下限値（省略可)
  * @desc 変動させる下限値
  * @type number
+ * @min -100
+ * @max 100
  * 
  * @arg max
  * @text 上限値（省略可)
  * @desc 変動させる上限値
  * @type number
- * 
+ * @min -100
+ * @max 100
  * 
  * @param effectCode
  * @text エフェクトコード
@@ -95,7 +98,7 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "Kapu_Twld_BasicParams_Luk";
+    const pluginName = "Kapu_Twld_LukSystem";
     const parameters = PluginManager.parameters(pluginName);
 
     Game_Action.EFFECT_UPDATE_LUK = Number(parameters["effectCode"]) || 0;
@@ -144,6 +147,7 @@
             target.updateLuk(min, max);            
         }
     });
+
     //------------------------------------------------------------------------------
     // DataManager
     if (Game_Action.EFFECT_UPDATE_LUK) {
@@ -203,6 +207,36 @@
         configurable:true,
     });
 
+    const _Game_BattlerBase_param = Game_BattlerBase.prototype.param;
+    /**
+     * パラメータを得る。
+     * 
+     * @param {Number} paramId パラメータID
+     */
+    Game_BattlerBase.prototype.param = function(paramId) {
+        if (paramId === 7) {
+            return this.getLuk();
+        } else {
+            return _Game_BattlerBase_param.call(this, paramId);
+        }
+    };
+
+    const _Game_BattlerBase_paramBasePlus = Game_BattlerBase.prototype.paramBasePlus;
+    /**
+     * ベース値を得る。
+     * バフやステートの特性による変動を除外した値を指す。
+     * 既定の実装では以下の通り。
+     * 
+     * @param {Number} paramId パラメータID
+     */
+    Game_BattlerBase.prototype.paramBasePlus = function(paramId) {
+        if (paramId === 7) {
+            return this.getLuk();
+        } else {
+            return _Game_BattlerBase_paramBasePlus.call(this, paramId);
+        }
+    };    
+
     /**
      * LUK値を得る。
      * 
@@ -260,6 +294,7 @@
         if (actor.meta.lukBase) {
             this._luk.base = Math.floor((Number(enemy.meta.lukBase) || 0));
         }
+        this.updateLuk();
     };
     const _Game_Actor_levelUp = Game_Actor.prototype.levelUp;
     /**
@@ -276,7 +311,7 @@
      */
     Game_Actor.prototype.getLukPlus = function() {
         const equips = this.equips();
-        return equips.reduce((r, equipItem) => (equipItem) ? r + equipItem.param[7] : r, 0);
+        return equips.reduce((r, equipItem) => (equipItem) ? r + equipItem.params[7] : r, 0);
     };
     //------------------------------------------------------------------------------
     // Game_Enemy
@@ -289,7 +324,7 @@
      * @param {Number} y Y位置
      */
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
-        _Game_Enemy_setup.call(enemyId, x, y);
+        _Game_Enemy_setup.call(this, enemyId, x, y);
         const enemy = $dataEnemies[enemyId];
         if (enemy.meta.lukBase) {
             this._luk.base = Math.floor((Number(enemy.meta.lukBase) || 0));

@@ -6,7 +6,7 @@
  * @base Kapu_GrowupSystem
  * @orderAfter Kapu_GrowupSystem
  * @base Kapu_Utility
- * @orderAfter kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @command addGpLearnableSkill
  * @text 習得可能スキル追加
@@ -67,7 +67,7 @@
  *         習得条件評価式。アクターとして"a"が使用できる。
  *         他、以下のメソッドが使用可能。
  *         hasSkillType(id) : スキルタイプ id# が使用可能かどうか
- *         isLearned(id, id, id,...) : id#のスキルを全て習得しているかどうか
+ *         isLearned(id) : id#のスキルを習得しているかどうか
  *     <gpCost>
  *         習得に必要なGPコスト
  * スキル/アイテム
@@ -268,14 +268,7 @@
             // eslint-disable-next-line no-unused-vars
             const a = this; // conditionの判定で使用。
             const hasSkillType = (type) => this.skillTypes().includes(type);
-            const isLearned = (args) => {
-                for (let i = 0; i < args.length; i++) {
-                    if (!this.isLearnedSkill(id)) {
-                        return false;
-                    }
-                }
-                return true;
-            };
+            const isLearned = (id) => this.isLearnedSkill(id);
 
             try {
                 return skill.gpLearnCondition.some((condition) => eval(condition))

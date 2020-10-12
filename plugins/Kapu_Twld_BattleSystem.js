@@ -129,6 +129,12 @@
  * @type number
  * @parent layout
  * 
+ * @param displayEnemyGauge
+ * @text エネミーゲージを表示する
+ * @desc trueにするとエネミーのHP/TPBゲージを表示するようになります。
+ * @type boolean
+ * @default true
+ * 
  * @requiredAssets img/hud/ActiveHud
  * 
  * @help 
@@ -246,11 +252,12 @@ function Sprite_BattleHudPicture() {
     const parameters = PluginManager.parameters(pluginName);
     const maxBattleMembers = Number(parameters["maxBattleMembers"]) || 4;
     const tpbCastLabel = parameters["tpbCastLabel"] || "Casting";
-    const gaugeLabelHpFontSize = parameters["labelHpFontSize"] || 16;
-    const gaugeValueHpFontSize = parameters["valueHpFontSize"] || 24;
-    const gaugeLabelFontSize = parameters["labelFontSize"] || 12;
-    const gaugeValueFontSize = parameters["valueFontSize"] || 12;
-
+    const gaugeLabelHpFontSize = Number(parameters["labelHpFontSize"]) || 16;
+    const gaugeValueHpFontSize = Number(parameters["valueHpFontSize"]) || 24;
+    const gaugeLabelFontSize = Number(parameters["labelFontSize"]) || 12;
+    const gaugeValueFontSize = Number(parameters["valueFontSize"]) || 12;
+    const displayEnemyGauge = (typeof parameters["displayEnemyGauge"] === "undefined")
+            ? false : (parameters["displayEnemyGauge"] === "true");
 
     const listWindowWidth = Number(parameters["listWindowWidth"]) || 816;
     const commandWindowX = Number(parameters["commandWindowX"]) || 1068;
@@ -579,6 +586,19 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudHpGauge.prototype.initialize = function() {
         Sprite_Gauge.prototype.initialize.call(this);
+        this._drawValue = true;
+    };
+
+    /**
+     * 値を描画するかどうかを設定する。
+     * 
+     * @param {Boolean} isDraw 値を描画するかどうか
+     */
+    Sprite_BattleHudHpGauge.prototype.setDrawValue = function(isDraw) {
+        if (this._drawValue !== isDraw) {
+            this._drawValue = isDraw;
+            this.redraw();
+        }
     };
     /**
      * ラベルのフォントサイズを得る。
@@ -634,6 +654,21 @@ function Sprite_BattleHudPicture() {
         this.bitmap.textColor = this.valueColor();
         this.bitmap.outlineColor = this.valueOutlineColor();
         this.bitmap.outlineWidth = this.valueOutlineWidth();
+    };
+
+    /**
+     * ゲージを再描画する。
+     */
+    Sprite_BattleHudHpGauge.prototype.redraw = function() {
+        this.bitmap.clear();
+        const currentValue = this.currentValue();
+        if (!isNaN(currentValue)) {
+            this.drawGauge();
+            this.drawLabel();
+            if (this._drawValue && this.isValid()) {
+                this.drawValue();
+            }
+        }
     };
     //------------------------------------------------------------------------------
     // Sprite_BattleHudMpTpGauge
@@ -1097,7 +1132,15 @@ function Sprite_BattleHudPicture() {
 
     //------------------------------------------------------------------------------
     // Sprite_Enemy
-
+    const _Sprite_Enemy_initMembers = Sprite_Enemy.prototype.initMembers;
+    /**
+     * Sprite_Enemyのメンバーを初期化する。
+     */
+    Sprite_Enemy.prototype.initMembers = function() {
+        _Sprite_Enemy_initMembers.call(this);
+        this.createHpGaugeSprite();
+        this.createTpbGaugeSprite();
+    };
     /**
      * ステートアイコンスプライトを作成する。
      */
@@ -1106,6 +1149,29 @@ function Sprite_BattleHudPicture() {
         this._stateIconSprite.anchor.x = 0.5;
         this._stateIconSprite.anchor.y = 0.5;
         this.addChild(this._stateIconSprite);
+    };
+
+    /**
+     * HPゲージスプライトを作成する。
+     */
+    Sprite_Enemy.prototype.createHpGaugeSprite = function() {
+        this._hpGaugeSprite = new Sprite_BattleHudHpGauge();
+        this._hpGaugeSprite.setDrawValue(false);
+        this._hpGaugeSprite.anchor.x = 0.5;
+        this._hpGaugeSprite.anchor.y = 0.5;
+        this._hpGaugeSprite.y = 0;
+        this.addChild(this._hpGaugeSprite);
+    };
+
+    /**
+     * TPBゲージスプライトを作成する。
+     */
+    Sprite_Enemy.prototype.createTpbGaugeSprite = function() {
+        this._tpbGaugeSprite = new Sprite_BattleHudTpbGauge();
+        this._tpbGaugeSprite.anchor.x = 0.5;
+        this._tpbGaugeSprite.anchor.y = 0.5;
+        this._tpbGaugeSprite.y = 20;
+        this.addChild(this._tpbGaugeSprite);
     };
 
     const _Sprite_Enemy_setHome = Sprite_Enemy.prototype.setHome;
@@ -1117,6 +1183,49 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_Enemy.prototype.setHome = function(x, y) {
         _Sprite_Enemy_setHome.call(this, x + enemyAreaOffsetX, y);
+    };
+
+    const _Sprite_Enemy_setBattler = Sprite_Enemy.prototype.setBattler;
+    /**
+     * このSprite_Enemyが表現するエネミーを設定する。
+     * 
+     * @param {Game_Battler} battler Game_Battlerオブジェクト
+     */
+    Sprite_Enemy.prototype.setBattler = function(battler) {
+        _Sprite_Enemy_setBattler.call(this, battler);
+        this._hpGaugeSprite.setup(battler, "hp");
+        if (BattleManager.isTpb()) {
+            this._tpbGaugeSprite.setup(battler, "time");
+        }
+    };
+
+    const _Sprite_Enemy_updateVisibility = Sprite_Enemy.prototype.updateVisibility;
+    /**
+     * このSpriteの可視状態を更新する。
+     */
+    Sprite_Enemy.prototype.updateVisibility = function() {
+        _Sprite_Enemy_updateVisibility.call(this);
+        if (this.isGaugeVisible()) {
+            if (BattleManager.isTpb()) {
+                this._tpbGaugeSprite.visible = true;
+            }
+            this._hpGaugeSprite.visible = true;
+        } else {
+            if (BattleManager.isTpb()) {
+                this._tpbGaugeSprite.visible = false;
+            }
+            this._hpGaugeSprite.visible = false;
+        }
+    };
+
+    /**
+     * ゲージが可視状態かどうかを取得する。
+     * 
+     * @return {Boolean} 可視状態の場合にはtrue, それ以外はfalse
+     */
+    Sprite_Enemy.prototype.isGaugeVisible = function() {
+        return displayEnemyGauge && this._battler && this._battler.isSpriteVisible()
+                && BattleManager.isInputting();
     };
 
     //------------------------------------------------------------------------------

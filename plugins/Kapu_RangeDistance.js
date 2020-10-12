@@ -526,7 +526,7 @@
         if (unit.members().includes(subject)) {
             return Game_Action.RANGE_MIDDLE; // To firendの場合には1（全員対象）
         } else {
-            return this.ietmRangeDistance() - subject.battlePosition();
+            return this.itemRangeDistance() - subject.battlePosition();
         }
     };
 

@@ -180,6 +180,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.4 各カテゴリの既定の個別アイテム設定でtrueを設定しても効果がない不具合を修正した。
  * Version.0.4.3 個別アイテム/非個別アイテムの指定が全くできていなかった不具合を修正した。
  * Version.0.4.2 個別アイテムが無限に使用できる不具合を修正した。
  * Version.0.4.1 装備解除時、解除した個別アイテムが、
@@ -206,17 +207,17 @@
     const independentItemCount = Number(parameters["independentItemCount"]) || 0;
     const independentItemStartIndex = Number(parameters["independentItemStartIndex"]) || 1000;
     const independentItemStockCount = Number(parameters["independentItemStockCount"]) || 200;
-    const independentItemDefault = (typeof parameters["independentItemDefault"])
+    const independentItemDefault = (typeof parameters["independentItemDefault"] === "undefined")
             ? false : (parameters["independentItemDefault"] === "true");
     const independentWeaponCount = Number(parameters["independentWeaponCount"]) || 0;
     const independentWeaponStartIndex = Number(parameters["independentWeaponStartIndex"]) || 1000;
     const independentWeaponStockCount = Number(parameters["independentWeaponStockCount"]) || 200;
-    const independentWeaponDefault = (typeof parameters["independentWeaponDefault"])
+    const independentWeaponDefault = (typeof parameters["independentWeaponDefault"] === "undefined")
             ? false : (parameters["independentWeaponDefault"] === "true");
     const independentArmorCount = Number(parameters["independentArmorCount"]) || 0;
     const independentArmorStartIndex = Number(parameters["independentArmorStartIndex"]) || 1000;
     const independentArmorStockCount = Number(parameters["independentArmorStockCount"]) || 200;
-    const independentArmorDefault = (typeof parameters["independentArmorDefault"])
+    const independentArmorDefault = (typeof parameters["independentArmorDefault"] === "undefined")
             ? false : (parameters["independentArmorDefault"] === "true");
     const gainFailureEventId = Number(parameters["gainFailureEventId"]) || 0;
 

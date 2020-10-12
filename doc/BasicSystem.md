@@ -206,6 +206,44 @@ Trait __TRAIT_ELEMENT_RATE__ の1.0に対する乗算合成。
 #### TPB速度
 
 実体は __Game_BattlerBase.tpbSpeed__ で定義されている。
+ここはちょっと計算が複雑だ。
+
+行動実行は 0 からTPBチャージタイム(chargeTime)が
+TPB加算量(tpbAcceleration)分加算され、
+1.0以上になるとコマンド入力になる。
+スキル発動時、ディレイ(速度補正のマイナス分)に
+対応した時間だけキャストが行われる。
+
+
+
+* __アクター基準速度(tpbBaseSpeed)__ = Sqrt(バフ/乗算補正なしAGI) + 1
+* __アクターTPB速度(tpbSpeed)__ = Sqrt(AGI) + 1
+* __パーティー基準速度(tpbBaseSpeed)__ = パーティーメンバーの基準速度(tpbBaseSpeed)で最大の値
+* __アクターTPB相対速度(tpbRelativeSpeed)__ = アクターTPB速度(tpbSpeed) / パーティー基準速度(tpbBaseSpeed)
+* __リファレンス速度__ = アクティブ時60, ノンアクティブ時240の固定量。
+* __アクターTPB加算量__ = アクターTPB相対速度(tpbRelativeSpeed) / パーティーリファレンス時間(tpbReferenceTime)
+
+* * AGI=100(係数1.0)のアクター1名の場合(TPB非アクティブ)
+
+        アクター基準速度(tpbBaseSpeed) = Sqrt(100) + 1 = 11
+        アクターTPB速度(tpbSpeed) = Sqrt(100) + 1 = 11
+        パーティー基準速度(tpbBaseSpeed) = 11 (1名だけなので11)
+        アクターTPB相対速度(tpbRelativeSpeed) = 11 / 11 = 1
+        リファレンス速度=240
+        アクターTPB加算量=1/240=0.0041
+        たぶん、240フレーム時間で1回行動できる計算になる。
+
+* __キャスト時間(tpbRequiredCastTime)__ 
+
+        有効なアクションに対し、0以下のディレイを加算した結果にたいし、
+        Sqrt(delay) / アクターTPB速度
+
+
+
+
+
+
+
 
 ### ステート
 

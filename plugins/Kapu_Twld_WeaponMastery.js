@@ -8,6 +8,7 @@
  * @base Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Twld_Base
+ * @orderAfter Kapu_Base_Params
  * 
  * @command gainWmExp
  * @text ウェポンマスタリEXPを上げる
@@ -430,16 +431,22 @@
         return this._wmLevel;
     };
 
-    if ("bareHandAtk" in Game_Actor.prototype) {
+    if ("paramEquip" in Game_Actor.prototype) {
+        const _Game_Actor_paramEquip = Game_Actor.prototype.paramEquip;
         /**
-         * 素手時の攻撃力を得る。
+         * 装備品のパラメータ値合計を得る。
          * 
-         * @param {Number} value 値
-         * @return {Number} 攻撃力
+         * @param {Number} paramId パラメータID
+         * @return {Number} 全装備品のパラメータ値合計
          */
-        Game_Actor.prototype.bareHandAtk = function(value) {
-            const wmLevel = this.wmLevel(bareHandsWmTypeId);
-            return value + Math.floor(wmLevel * this.str * 0.02);
+        Game_Actor.prototype.paramEquip = function(paramId) {
+            const value = _Game_Actor_paramEquip.call(paramId);
+            if ((paramId === 2) && (bareHandsWmTypeId > 0) && this.hasNoWeapons()) {
+                const wmLevel = this.wmLevel(bareHandsWmTypeId);
+                return value += Math.floor(wmLevel * this.str * 0.02);
+            } else {
+                return value;
+            }
         };
     }
 

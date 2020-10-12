@@ -37,11 +37,12 @@
  * ばらつきに関するプラグインと競合する可能性があります。
  * 
  * ■ プラグイン開発者向け
+ * パラメータSPARAMを使用し、 Game_BattlerBase.TRAIT_SPARAM_DID_VARIANCE_RATE が追加されます。
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * プラグインコマンドはありません。
  * 
  * ============================================
  * ノートタグ
@@ -55,7 +56,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 追加した。
  */
 (() => {
     const pluginName = "Kapu_Trait_Variance";
@@ -78,20 +79,20 @@
      * @apram {TraitObject} obj Actor/Class/Weapon/Armor/State/Enemyのいずれか。traitsを持ってるデータ
      */
     const _processNotetag = function(obj) {
-        if (!obj.meta.castTimeRate) {
+        if (!obj.meta.varianceRate) {
             return;
         }
-        const valueStr = obj.meta.castTimeRate;
-        let speed;
+        const valueStr = obj.meta.varianceRate;
+        let rate;
         if (valueStr.slice(-1) === "%") {
-            speed = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
+            rate = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
         } else {
-            speed = Number(valueStr);
+            rate = Number(valueStr);
         }
         obj.traits.push({ 
-            code:Game_BattlerBase.TRAIT_XPARAM, 
-            dataId:Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE, 
-            value:speed
+            code:Game_BattlerBase.TRAIT_SPARAM, 
+            dataId:Game_BattlerBase.TRAIT_SPARAM_DID_VARIANCE_RATE, 
+            value:rate
         });
     };
 
@@ -110,7 +111,7 @@
      * 
      * @return {Number} 変動レート。
      */
-    Game_BattlerBase.prototyp.varianceRate = function() {
+    Game_BattlerBase.prototype.varianceRate = function() {
         return this.sparam(Game_BattlerBase.TRAIT_SPARAM_DID_VARIANCE_RATE);
     };
 

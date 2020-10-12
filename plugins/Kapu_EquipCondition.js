@@ -37,7 +37,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 TWLD向けに作ったものから抜粋。動作未確認。
+ * Version.0.1.0 TWLD向けに作ったものから抜粋。
  */
 (() => {
     const pluginName = "Kapu_EquipCondition";
@@ -59,7 +59,7 @@
             if (re) {
                 const cond = re[1].trim();
                 if (cond) {
-                    pattern.equipConditions.push(cond);
+                    obj.equipConditions.push(cond);
                 }
             }
         }
@@ -97,6 +97,7 @@
      * @return {Boolean} 装備可能条件を1つでも満たす場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.testEquipCondition = function(item) {
+        const a = this;
         for (const cond of item.equipConditions) {
             try {
                 if (eval(cond)) {
