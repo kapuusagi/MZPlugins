@@ -60,14 +60,22 @@
  * @type number
  * @default 0
  * 
+ * @param gainWmExpEffectCode
+ * @text エフェクトコード
+ * @desc ウェポンマスタリーEXPを加算するエフェクトコード
+ * @type number
+ * @default 1003
+ * @min 65
+ * 
  * @help 
  * ウェポンマスタリーのプラグイン。
  * 1回スキルなどを使用する毎に経験値が1たまり、
  * 所定の量に達するとウェポンマスタリがレベルアップする。
  * ウェポンマスタリのレベルが上がると、
- * スキル使用時のATK,HIT,MATKにボーナスが加算される。
+ * スキル使用時のATK,HIT,MATにボーナスが加算される。
  * 
  * ■ 使用時の注意
+ * なし。
  * 
  * ■ プラグイン開発者向け
  * 
@@ -101,7 +109,15 @@
  *     <wmType:typeId#>
  *         このスキルが関係する、マスタリータイプに割り当てる武器タイプID。
  *         未指定時は装備品のものが適用される。
+ *     <wmExp:value#>
+ *         スキル使用時のウェポンマスタリー経験値を指定する。
+ *         省略時は1になる。
  * 
+ * アイテム/スキル
+ *     <gainWmExp:wmTypeId#,exp#,exprate#>
+ *          使用すると、対象のウェポンマスタリーEXPを
+ *          exp#(固定量)+(exprate#)割合だけ上昇させる。
+
  * ============================================
  * 変更履歴
  * ============================================
@@ -112,6 +128,11 @@
     const parameters = PluginManager.parameters(pluginName);
     const maxWmLevel = Number(parameters["maxWmLevel"]) || 99;
     const bareHandsWmTypeId = Number(parameters["bareHandsWmTypeId"]) || 0;
+    Game_Action.EFFECT_GAIN_WM_EXP = Number(parameters["gainWmExpEffectCode"]) || 0;
+
+    if (!Game_Action.EFFECT_GAIN_WM_EXP) {
+        console.error(pluginName + ":EFFECT_GAIN_WM_EXP is not valid.");
+    }
 
     /**
      * プラグインコマンドの対象を得る。
@@ -158,6 +179,54 @@
         }
 
     });
+    //------------------------------------------------------------------------------
+    // DataManager
+    if (Game_Action.EFFECT_GAIN_WM_EXP) {
+        /**
+         * 値文字列からレートを得る。
+         * 
+         * @param {String} str 値文字列
+         * @return {Number} レート文字列
+         */
+        const _getRate = function(str) {
+            if (str.slice(-1) === "%") {
+                return Number(str.slice(0, str.length - 1)) / 100.0;
+            } else {
+                return Number(str);
+            }
+    
+        };
+        /**
+         * ノートタグを処理する。
+         * 
+         * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
+         */
+        const _processNotetag = function(obj) {
+            if (obj.meta.gainWmExp) {
+                const tokens = obj.meta.gainWmExp.split(",");
+                if (tokens.length >= 3) {
+                    const wmTypeId = Math.floor((Number(tokens[0]) || 0));
+                    const exp = Math.floor((Number(tokens[1]) || 0));
+                    const expRate = _getRate(tokens[2]);
+                    if ((wmTypeId > 0) && (wmTypeId < $dataSystem.weaponTypes.length)
+                            && ((exp > 0) || (expRate > 0))) {
+                        obj.effects.push({
+                            code: Game_Action.EFFECT_GAIN_WM_EXP,
+                            dataId: wmTypeId,
+                            value1: exp,
+                            value2: expRate
+                        });
+                    }
+                }
+
+            }
+        };
+
+        DataManager.addNotetagParserSkills(_processNotetag);
+        DataManager.addNotetagParserItems(_processNotetag);
+    }
+
+
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     /**
@@ -302,10 +371,26 @@
                 wmTypeId = (weapons.length > 0) ? weapons[0].wtypeId : bareHandsWmTypeId;
             }
             if (wmTypeId > 0) {
-                this.gainWmExp(wmTypeId, 1);
+                this.gainWmExp(wmTypeId, this.skillWmExp(item));
             }
         }
         _Game_Actor_useItem.call(this, item);
+    };
+
+    /**
+     * スキル使用時のウェポンマスタリーEXPを取得する。
+     * 
+     * @param {DataSkill} skill スキル 
+     * @return {Number} ウェポンマスタリーEXP
+     */
+    Game_Actor.prototype.skillWmExp = function(skill) {
+        if (skill.meta.wmExp) {
+            const exp = Math.floor((Number(skill.meta.wmExp) || 0));
+            if (exp > 0) {
+                return exp;
+            }
+        }
+        return 1;
     };
 
     //------------------------------------------------------------------------------
@@ -425,4 +510,41 @@
             }
         }
     };
+
+    if (Game_Action.EFFECT_GAIN_WM_EXP) {
+        const _Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
+        /**
+         * 効果を適用する。
+         * 
+         * @param {Game_Battler} target ターゲット
+         * @param {DataEffect} effect エフェクトデータ
+         */
+        Game_Action.prototype.applyItemEffect = function(target, effect) {
+            if (effect.code === Game_Action.EFFECT_GAIN_WM_EXP) {
+                this.applyItemEffectGainWmExp(target, effect);
+            } else if (Game_Action.EFFECT_RESET_GROWS
+                    && (effect.code === Game_Action.EFFECT_RESET_GROWS)) {
+                this.applyItemEffectResetGrows(target, effect);
+            } else {
+                _Game_Action_applyItemEffect.call(this, target, effect);
+            }
+        };
+    
+        /**
+         * 効果を適用する。
+         * 
+         * @param {Game_Battler} target ターゲット
+         * @param {DataEffect} effect エフェクトデータ
+         */
+        Game_Action.prototype.applyItemEffectGainWmExp = function(target, effect) {
+            if (target.isActor()) {
+                const wmTypeId = effect.dataId;
+                const exp = effect.value1 + effect.value2 * target.wmExpNext(wmTypeId);
+                target.gainWmExp(wmTypeId, exp);
+                this.makeSuccess(target);
+            }
+        };
+    
+    }
+
 })();

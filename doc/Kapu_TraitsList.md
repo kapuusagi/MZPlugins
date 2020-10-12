@@ -69,6 +69,7 @@ __TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
 |__EFFECT_BASIC_PARAM_ADD__|1001|パラメータID|増減させる値|-|基本パラメータを指定した値だけ増減させる|
 |__EFFECT_UPDATE_LUK__|1002|0|-|-|LUKを既定値でランダム変動させる。|
 |||1|下限値|上限値|LUKをランダムで変動させる。|
+|__EFFECT_GAIN_WM_EXP__|1003|武器タイプID|固定量|割合|ウェポンマスタリーのEXPを上昇させる効果。|
 
 
 
