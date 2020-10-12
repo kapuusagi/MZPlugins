@@ -256,6 +256,8 @@
             if (item) {
                 if (typeof item.meta.independent === "undefined") {
                     item.independent = independent;
+                } else if (typeof item.meta.independent === "boolean") {
+                    item.independent = item.meta.independent;
                 } else {
                     item.independent = (item.meta.independent !== "no")
                             && (item.meta.independent !== "false");
