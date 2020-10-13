@@ -24,8 +24,11 @@
 |TRAIT_SPECIAL_FLAG|62|フラグID|特別な機能を提供するためのフラグ。|
 |TRAIT_PARTY_ABILITY|64||パーティーアビリティ。既定の実装はdataIdで指定された値の効果を持っているかどうか、だけの判定に使われる。dataIdはGame_Party.ABILITY_～で定義されてる。|
 |||0～5|ベーシックシステムで使用|
-|||100|__ABILITY_DROP_GOLD_RATE__ アイテムドロップ倍率。|
+|||100|__ABILITY_DROP_ITEM_RATE__ アイテムドロップ倍率。|
 |||101|__ABILITY_DROP_GOLD_RATE__ 取得ゴールド倍率。|
+|||102|__ABILITY_BUYING_PRICE_RATE__ 売却価格レート倍率。|
+|||103|__ABILITY_SELLING_PRICE_RATE__ 購入価格レート倍率。|
+|||||
 |__TRAIT_ELEMENT_ABSORB__|100|属性ID|指定した属性の攻撃を受けたとき、ダメージを急襲する特性|
 |__TRAIT_WEAPON_PERFORMANCE__|101|武器タイプ|指定した武器タイプの性能を向上させる特性|
 |__TRAIT_ARMOR_PERFORMANCE__|102|防具タイプ|指定した防具タイプの性能を向上させる特性|
