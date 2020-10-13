@@ -144,6 +144,13 @@
  * @min 0
  * @max 9999
  * 
+ * @param defaultSellingPriceRate
+ * @text デフォルト売却レート
+ * @desc 店に売却価格レートが指定されていないときの、売却レート
+ * @type number
+ * @decimals 2
+ * @default 0.5
+ * 
  * @help 
  * TWLDシステム向けに作成したショップです。
  * 
@@ -256,6 +263,7 @@ function Scene_TwldShop() {
 
     const labelStock = String(parameters["labelStock"]) || "Stock";
     const maxShopStock = Number(parameters["maxShopStock"]) || 99;
+    const defaultSellingPriceRate = (Number(parameters["defaultSellingPriceRate"]) || 0.5).clamp(0, 1.0);
 
     /**
      * ショップIDを得る。
@@ -709,7 +717,7 @@ function Scene_TwldShop() {
      * @param {Number} 売却価格レート(1.0で等倍)
      */
     Game_Shop.prototype.sellingPriceRate = function() {
-        return this.shop().sellingPriceRate || 0.5;
+        return this.shop().sellingPriceRate || defaultSellingPriceRate;
     };
 
     /**
