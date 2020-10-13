@@ -84,11 +84,11 @@
     };
 
     /**
-     * elementAbsorb ノートタグを処理する。
+     * ノートタグを処理する。
      * 
      * @param {Object} obj データオブジェクト
      */
-    const _processElementAttackRateNoteTag = function(obj) {
+    const _processNoteTag = function(obj) {
         if (!obj.meta.elementAttackRate) {
             return;
         }
@@ -110,12 +110,12 @@
         }
     };
 
-    DataManager.addNotetagParserActors(_processElementAttackRateNoteTag);
-    DataManager.addNotetagParserClasses(_processElementAttackRateNoteTag);
-    DataManager.addNotetagParserWeapons(_processElementAttackRateNoteTag);
-    DataManager.addNotetagParserArmors(_processElementAttackRateNoteTag);
-    DataManager.addNotetagParserStates(_processElementAttackRateNoteTag);
-    DataManager.addNotetagParserEnemies(_processElementAttackRateNoteTag);
+    DataManager.addNotetagParserActors(_processNoteTag);
+    DataManager.addNotetagParserClasses(_processNoteTag);
+    DataManager.addNotetagParserWeapons(_processNoteTag);
+    DataManager.addNotetagParserArmors(_processNoteTag);
+    DataManager.addNotetagParserStates(_processNoteTag);
+    DataManager.addNotetagParserEnemies(_processNoteTag);
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase

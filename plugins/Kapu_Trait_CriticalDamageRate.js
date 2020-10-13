@@ -96,11 +96,11 @@
 
     if (Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {
         /**
-         * criticalDamageRate ノートタグを処理する。
+         * ノートタグを処理する。
          * 
          * @param {Object} obj データオブジェクト
          */
-        const _processCriticalDamageRateNoteTag = function(obj) {
+        const _processNoteTag = function(obj) {
             if (obj.meta.criticalDamageRate) {
                 const valueStr = obj.meta.criticalDamageRate;
                 let cdr;
@@ -117,12 +117,12 @@
             }
         };
 
-        DataManager.addNotetagParserActors(_processCriticalDamageRateNoteTag);
-        DataManager.addNotetagParserClasses(_processCriticalDamageRateNoteTag);
-        DataManager.addNotetagParserWeapons(_processCriticalDamageRateNoteTag);
-        DataManager.addNotetagParserArmors(_processCriticalDamageRateNoteTag);
-        DataManager.addNotetagParserStates(_processCriticalDamageRateNoteTag);
-        DataManager.addNotetagParserEnemies(_processCriticalDamageRateNoteTag);
+        DataManager.addNotetagParserActors(_processNoteTag);
+        DataManager.addNotetagParserClasses(_processNoteTag);
+        DataManager.addNotetagParserWeapons(_processNoteTag);
+        DataManager.addNotetagParserArmors(_processNoteTag);
+        DataManager.addNotetagParserStates(_processNoteTag);
+        DataManager.addNotetagParserEnemies(_processNoteTag);
     }
 
     //------------------------------------------------------------------------------

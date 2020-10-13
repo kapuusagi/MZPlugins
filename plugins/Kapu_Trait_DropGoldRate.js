@@ -62,10 +62,11 @@
     // DataManager
 
     /**
-     * ドロップレートのノートタグを処理する。
+     * ノートタグを処理する。
+     * 
      * @param {Object} obj データ
      */
-    const _processCriticalDamageRateNoteTag = function(obj) {
+    const _processNoteTag = function(obj) {
         if (!obj.meta.dropGoldRate) {
             return;
         }
@@ -82,11 +83,11 @@
         });
     };
 
-    DataManager.addNotetagParserActors(_processCriticalDamageRateNoteTag);
-    DataManager.addNotetagParserClasses(_processCriticalDamageRateNoteTag);
-    DataManager.addNotetagParserWeapons(_processCriticalDamageRateNoteTag);
-    DataManager.addNotetagParserArmors(_processCriticalDamageRateNoteTag);
-    DataManager.addNotetagParserStates(_processCriticalDamageRateNoteTag);
+    DataManager.addNotetagParserActors(_processNoteTag);
+    DataManager.addNotetagParserClasses(_processNoteTag);
+    DataManager.addNotetagParserWeapons(_processNoteTag);
+    DataManager.addNotetagParserArmors(_processNoteTag);
+    DataManager.addNotetagParserStates(_processNoteTag);
 
 
     //------------------------------------------------------------------------------
