@@ -268,8 +268,7 @@
      * @return {Number} 最大値
      */
     Game_Party.prototype.partyTraitsSumMax = function(abilityId) {
-        return this.battleMembers().max(function(actor) {
-            return actor.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, abilityId);
-        });
+        return this.members().reduce(
+            (r, actor) => Math.max(r, actor.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, abilityId)), 0);
     };
 })();
