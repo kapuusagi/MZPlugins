@@ -144,20 +144,24 @@
     const _getTargets = function(args) {
         switch (args.target) {
             case "actorId":
-                const actorId = Number(args.actorId) || 0;
-                if (actorId > 0) {
-                    const actor = $gameActors.actor(actorId)
-                    if (actor) {
-                        return [actor];
+                {
+                    const actorId = Number(args.actorId) || 0;
+                    if (actorId > 0) {
+                        const actor = $gameActors.actor(actorId)
+                        if (actor) {
+                            return [actor];
+                        }
                     }
                 }
                 break;
             case "variableId":
-                const variableId = Number(args.variableId) || 0;
-                if (variableId > 0) {
-                    const actor = $gameActors.actor($gameVariables.value(variableId));
-                    if (actor) {
-                        return [actor];
+                {
+                    const variableId = Number(args.variableId) || 0;
+                    if (variableId > 0) {
+                        const actor = $gameActors.actor($gameVariables.value(variableId));
+                        if (actor) {
+                            return [actor];
+                        }
                     }
                 }
                 break;
@@ -236,6 +240,7 @@
      * @param {Number} typeId タイプID
      * @return {Number} レベル
      */
+    // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.wmLevel = function(typeId) {
         return 0;
     };
@@ -427,6 +432,7 @@
      * @param {Number} typeId タイプID
      * @return {Number} レベル
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Enemy.prototype.wmLevel = function(typeId) {
         return this._wmLevel;
     };
@@ -443,7 +449,7 @@
             const value = _Game_Actor_paramEquip.call(paramId);
             if ((paramId === 2) && (bareHandsWmTypeId > 0) && this.hasNoWeapons()) {
                 const wmLevel = this.wmLevel(bareHandsWmTypeId);
-                return value += Math.floor(wmLevel * this.str * 0.02);
+                return value + Math.floor(wmLevel * this.str * 0.02);
             } else {
                 return value;
             }

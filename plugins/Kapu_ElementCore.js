@@ -48,8 +48,8 @@
  * Version.0.1.0 新規作成。
  */
 (() => {
-    const pluginName = "Kapu_ElementCore";
-    const parameters = PluginManager.parameters(pluginName);
+    //const pluginName = "Kapu_ElementCore";
+    //const parameters = PluginManager.parameters(pluginName);
 
 
     //------------------------------------------------------------------------------
@@ -60,7 +60,7 @@
      * @param {Object} obj データオブジェクト
      */
     const _processElementIdsNotetag = function(obj) {
-        if (!"damage" in obj) {
+        if (!("damage" in obj)) {
             return;
         }
         obj.damage.elementIds = [];

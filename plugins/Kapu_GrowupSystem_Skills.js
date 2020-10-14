@@ -267,7 +267,9 @@
         if (skill.gpLearnCondition.length > 0) {
             // eslint-disable-next-line no-unused-vars
             const a = this; // conditionの判定で使用。
+            // eslint-disable-next-line no-unused-vars
             const hasSkillType = (type) => this.skillTypes().includes(type);
+            // eslint-disable-next-line no-unused-vars
             const isLearned = (id) => this.isLearnedSkill(id);
 
             try {

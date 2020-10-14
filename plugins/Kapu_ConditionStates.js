@@ -25,9 +25,15 @@
  * ノートタグ
  * ============================================
  * アクター、クラス、エネミー、スキル、ウェポン、アーマー
- *     <conditionState:conditoinEval$,stateId#, stateId#,...>
- *         eval(conditionEval$)がtrueの時、stateIdのステートが付与される。
+ *     <conditionState:passive:conditoinEval$,stateId#, stateId#,...>
+ *         passive:を省略時と同じ。
  *         1つのオブジェクトあたり、任意数指定可能。
+ *     <conditionState:add:conditionEval$,stateId#,stateId#,...>
+ *         eval(conditionEval$)がtrueが満たされた時、stateIdのステートが付与される。
+ *         既に付与されている場合には付与されない。
+ *     <conditionState:remove:conditionEval$,stateId#,stateId#,...>
+ *         eval(conditionEval$)がtrueが満たされた時、stateIdのステートが消去される。
+ *         既に付与されている場合には付与されない。
  * 
  * ============================================
  * 変更履歴
@@ -35,7 +41,7 @@
  * Version.0.1.0 新規作成。
  */
 (() => {
-    //const pluginName = "Kapu_StatesWithCondition";
+    //const pluginName = "Kapu_ConditionState";
 
     /**
      * 条件付きパッシブステートを解析し、オブジェクトを生成する。
@@ -44,7 +50,12 @@
      * @return {ConditionState} 条件付きパッシブステートオブジェクト。解析エラーの場合にはnull.
      */
     const _parseCondition = function(str) {
-        const tokens = str.split(",");
+        const index = str.indexOf(':');
+        if (index === -1) {
+            return null;
+        }
+        const type = str.substring(0, index);
+        const tokens = str.substring(index + 1).split(",");
         if (tokens.length > 1) {
             const states = [];
             for (let i = 1; i < tokens.length; i++) {
@@ -55,6 +66,7 @@
             }
             if (states.length > 0) {
                 return {
+                    type: type,
                     condition : tokens[0],
                     states : states
                 };

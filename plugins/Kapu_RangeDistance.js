@@ -393,7 +393,6 @@
             obj.defaultRange = Game_Action.RANGE_SHORT;
             _processTraitsNoteTag(obj);
             if (obj.meta.defaultRange) {
-                const range = Number(obj.meta.defaultRange) || 0;
                 obj.defaultRange = _getRange(obj.meta.defaultRange).clamp(0, 1);
             }
 
@@ -782,6 +781,7 @@
      * 
      * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
      */
+    // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.defaultRangeDistance = function(item) {
         return Game_Action.RANGE_SHORT;
     };
@@ -835,6 +835,7 @@
      * 
      * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Enemy.prototype.defaultRangeDistance = function(item) {
         const enemy = this.enemy();
         if (enemy) {
@@ -850,6 +851,7 @@
      * 
      * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Actor.prototype.defaultRangeDistance = function(item) {
         // 装備武器レンジを返す。
         const ranges = this.weapons().map(item => item.range);
@@ -1219,6 +1221,7 @@
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
+    // eslint-disable-next-line no-unused-vars
     Window_BattleEnemy.prototype.initialize = function(rect) {
         _Window_BattleEnemy_initialize.call(this, ...arguments);
         this._actionRangeDistance = 0;
@@ -1293,7 +1296,7 @@
      * !!!overwrite!!! Window_BattleEnemy_select
      */
     Window_BattleEnemy.prototype.select = function(index) {
-        Window_Selectable.prototype.select.call(this, index);
+        _Window_BattleEnemy_select.call(this, index);
 
         const action = BattleManager.inputtingAction();
         if (action) {

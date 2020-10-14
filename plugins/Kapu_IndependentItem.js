@@ -431,6 +431,7 @@
      * @param {DataItem} newItem 新しい個別アイテム
      * @param {DataItem} baseItem ベースアイテム
      */
+    // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentCommon = function(newItem, baseItem) {
 
     };
@@ -459,6 +460,7 @@
      * @param {DataItem} newItem 新しい個別アイテム
      * @param {DataItem} baseItem 元となるアイテムデータ
      */
+    // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentItem = function(newItem, baseItem) {
 
     };
@@ -507,6 +509,7 @@
      * @param {DataWeapon} newWeapon 新しい個別武器
      * @param {DataWeapon} baseWeapon ベース武器データ
      */
+    // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentWeapon = function(newWeapon, baseWeapon) {
 
     };
@@ -553,6 +556,7 @@
      * @param {DataArmor} newArmor 新しい個別防具
      * @param {DataArmor} baseArmor ベース防具データ
      */
+    // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentArmor = function(newArmor, baseArmor) {
 
     };

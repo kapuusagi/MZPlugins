@@ -38,8 +38,8 @@ function Window_StatusActor() {
 }
 
 (() => {
-    const pluginName = "Kapu_Twld_StatusUI";
-    const parameters = PluginManager.parameters(pluginName);
+    //const pluginName = "Kapu_Twld_StatusUI";
+    //const parameters = PluginManager.parameters(pluginName);
 
     //------------------------------------------------------------------------------
     // Window_StatusActor

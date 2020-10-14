@@ -109,10 +109,11 @@
 
     /**
      * Window_SkillListを初期化する。
+     * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_SkillList.prototype.initialize = function(rect) {
-        _WindowSkillList_initialize.call(this, ...arguments);
+        _WindowSkillList_initialize.call(this, rect);
         this._pendingIndex = -1;
         this._orderEditEnable = false;
     }

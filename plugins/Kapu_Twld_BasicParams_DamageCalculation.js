@@ -46,7 +46,7 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "Kapu_Twld_BasicParams_DamageCalculation";
+    //const pluginName = "Kapu_Twld_BasicParams_DamageCalculation";
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase

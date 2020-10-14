@@ -70,7 +70,7 @@
     const pluginName = "Kapu_IndependentItem_Randomize"
 
     const parameters = PluginManager.parameters(pluginName);
-    const isShopRandomize = (typeof parameters["isShopRandomize"])
+    const isShopRandomize = (typeof parameters["isShopRandomize"] === "undefined")
             ? false : (parameters["isShopRandomize"] === "true");
 
     PluginManager.registerCommand(pluginName, "setRandomize", args => {
@@ -119,7 +119,7 @@
         Scene_Shop.prototype.doBuy = function(number) {
             const prevEnabled = $gameTemp.independentItemRandomize();
             $gameTemp.setIndependentItemRandomize(false);
-            _Scene_Shop_doBuy.call(this, ...arguments);
+            _Scene_Shop_doBuy.call(this, number);
             $gameTemp.setIndependentItemRandomize(prevEnabled); // 元に戻す。
         };
     }

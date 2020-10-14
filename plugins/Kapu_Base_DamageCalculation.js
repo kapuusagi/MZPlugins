@@ -174,6 +174,7 @@
      * @param {Game_Battler} target ターゲット
      * @return {Number} 最大ダメージ
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.maxDamage = function(target) {
         return Infinity;
     };
@@ -194,6 +195,7 @@
      * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
      * @param {Array<Trait>} trait 特性オブジェクト配列
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.additionalTargetTraits = function(target, critical) {
         return this.subject().additionalTargetTraits();
     };
@@ -248,6 +250,7 @@
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
      * @return {Number} 乗算ボーナスレート
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.multiplyDamageRate = function(target, critical) {
         return 1.0;
     };
@@ -274,6 +277,7 @@
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
      * @return {Number} 物理ダメージレート
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.itemPdr = function(target, critical) {
         return target.pdr;
     };
@@ -285,6 +289,7 @@
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
      * @return {Number} 魔法ダメージレート。(0.0～、等倍は1.0)
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.itemMdr = function(target, critical) {
         return target.mdr;
     };

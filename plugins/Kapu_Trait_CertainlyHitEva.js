@@ -243,7 +243,6 @@
                 || _Game_Action_isCertainlyHit.call(this, target);
     };
 
-    const _Game_Action_isCertainlyEvad = Game_Action.prototype.isCertainlyEvad;
     /**
      * 確実に回避できるかどうかを取得する。
      * 

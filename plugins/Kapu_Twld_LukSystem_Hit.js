@@ -33,8 +33,8 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "Kapu_Twld_LukSystem_Hit";
-    const parameters = PluginManager.parameters(pluginName);
+    //const pluginName = "Kapu_Twld_LukSystem_Hit";
+    //const parameters = PluginManager.parameters(pluginName);
 
     //------------------------------------------------------------------------------
     // Game_Action

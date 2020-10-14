@@ -110,6 +110,7 @@
      * @return {Number} 最大ダメージ
      * !!!overwrite!!!
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.maxDamage = function(target) {
         const subject = this.subject();
         const item = this.item();

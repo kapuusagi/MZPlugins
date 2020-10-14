@@ -32,7 +32,7 @@
  * Version.0.1.0 Trait_Certianly_HitEvaとTwld_Baseを実現するために作成。
  */
 (() => {
-    const pluginName = "Kapu_Base_Hit";
+    //const pluginName = "Kapu_Base_Hit";
 
     //------------------------------------------------------------------------------
     // Game_Action
@@ -88,6 +88,7 @@
      * @param {Game_Battler} target 対象
      * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.isCertainlyHit = function(target) {
         return false;
     };
@@ -98,6 +99,7 @@
      * @param {Game_Battler} target 対象
      * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.isCertainlyEvad = function(target) {
         return false;
     };

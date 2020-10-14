@@ -116,6 +116,7 @@ function Scene_Growup() {
     const growupOnDead = (typeof parameters["growupOnDead"] === "undefined")
             ? false : (parameters["growupOnDead"] === "true");
 
+    // eslint-disable-next-line no-unused-vars
     PluginManager.registerCommand(pluginName, "startGrowupScene", args => {
         SceneManager.push(Scene_Growup);
     });
@@ -331,6 +332,7 @@ function Scene_Growup() {
      * @param {Number} y 描画領域左上y
      * @param {Number} width 幅
      */
+    // eslint-disable-next-line no-unused-vars
     Window_GrowupActorStatus.prototype.drawActorLevel = function(actor, x, y, width) {
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());

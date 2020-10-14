@@ -538,6 +538,7 @@
          * @param {Number} paramId パラメータID
          * @return {Number} パラメータの値
          */
+        // eslint-disable-next-line no-unused-vars
         Game_BattlerBase.prototype.basicParamPlus = function(paramId) {
             return 0;
         }
@@ -560,6 +561,7 @@
          * @param {Number} paramId パラメータID
          * @return {Number} 基本パラメータレート
          */
+        // eslint-disable-next-line no-unused-vars
         Game_BattlerBase.prototype.basicParamRate = function(paramId) {
             return 1.0;
         };
@@ -571,6 +573,7 @@
      * @param {Number} paramId パラメータID
      * @return {Number} パラメータ最大値
      */
+    // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.basicParamMin = function(paramId) {
         return 1;
     };
@@ -580,6 +583,7 @@
      * @param {Number} paramId パラメータID
      * @return {Number} パラメータ最大値
      */
+    // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.basicParamMax = function(paramId) {
         return Game_BattlerBase.BASIC_PARAM_MAX;
     };

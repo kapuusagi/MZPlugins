@@ -40,8 +40,8 @@
  * Version.0.1.0 TWLD向けに作ったものから抜粋。
  */
 (() => {
-    const pluginName = "Kapu_EquipCondition";
-    const parameters = PluginManager.parameters(pluginName);
+    //const pluginName = "Kapu_EquipCondition";
+    //const parameters = PluginManager.parameters(pluginName);
 
     //------------------------------------------------------------------------------
     // DataManager

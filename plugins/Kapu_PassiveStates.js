@@ -41,7 +41,7 @@
  *               Visustellaプラグインを使った方が良いです。
  */
 (() => {
-    const pluginName = "Kapu_PassiveStates";
+    //const pluginName = "Kapu_PassiveStates";
 
 
     //------------------------------------------------------------------------------

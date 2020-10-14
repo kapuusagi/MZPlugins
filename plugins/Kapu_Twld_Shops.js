@@ -201,7 +201,7 @@ $gameShops = null;
  */
 function Game_Shop() {
     this.initialize(...arguments);
-};
+}
 /**
  * Game_Shops.
  * Game_Shopの配列。
@@ -233,7 +233,7 @@ function Window_TwldShopBuy() {
  */
 function Window_TwldShopItemCategory() {
     this.initialize(...arguments);
-};
+}
 
 /**
  * Window_TwldShopNumber
@@ -242,7 +242,7 @@ function Window_TwldShopItemCategory() {
  */
 function Window_TwldShopNumber() {
     this.initialize(...arguments);
-};
+}
 
 /**
  * Scene_TwldShop.

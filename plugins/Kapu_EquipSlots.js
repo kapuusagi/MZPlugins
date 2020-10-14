@@ -35,7 +35,7 @@
  * Version.0.1.0 作成。
  */
 (() => {
-    const pluginName = "Kapu_EquipSlots";
+    //const pluginName = "Kapu_EquipSlots";
 
     /**
      * 装備スロットのノートタグを処理する。

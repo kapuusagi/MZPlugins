@@ -29,12 +29,10 @@
  * Version.0.1.0 TWLD向けに作成した。
  */
 
- function Sprite_MenuStatusActor() {
-     this.initialize(...arguments);
- };
+
 (() => {
-    const pluginName = "Kapu_Twld_Menu";
-    const parameters = PluginManager.parameters(pluginName);
+    //const pluginName = "Kapu_Twld_Menu";
+    //const parameters = PluginManager.parameters(pluginName);
 
     const statusY = 260;
 
@@ -88,7 +86,6 @@
             this.drawItemImageFace(index);
         }
 
-        const rect = this.itemRect(index);
         this.changePaintOpacity(false);
         const statusRect = this.statusRect(index);
         this.contents.fillRect(statusRect.x, statusRect.y, statusRect.width, statusRect.height, "#000000");
@@ -301,6 +298,7 @@
      * @param {Number} y 描画領域左上y
      * @param {Number} width 幅
      */
+    // eslint-disable-next-line no-unused-vars
     Window_MenuStatus.prototype.drawActorLevel = function(actor, x, y, width) {
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());
@@ -381,6 +379,7 @@
      * @param {Number} y ラベル左上位置 y
      * @param {Number} width 幅
      */
+    // eslint-disable-next-line no-unused-vars
     Window_MenuStatus.prototype.drawGaugeText = function(data, x, y, width) {
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());

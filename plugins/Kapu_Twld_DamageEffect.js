@@ -48,7 +48,6 @@
     };
 
 
-    const _Sprite_Damage_setup = Sprite_Damage.prototype.setup;
     /**
      * Sprite_Damageを表示させるための準備をする。
      * 

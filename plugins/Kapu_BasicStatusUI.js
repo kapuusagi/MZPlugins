@@ -186,6 +186,7 @@
             }
         }
         catch (e) {
+            console.error(e);
         }
         return { enabled: false, name: "", propertyName: "", type: "int" };
     };
@@ -357,7 +358,7 @@
         const y2 = y + 92;
         this.drawStatusBlock2(x, y2);
         this.drawStates(x + 240, y2);
-        const y3 = y2 + this.lineHeight();
+        const y3 = y2 + lineHeight;
         this.drawStatusBlock3(x + 240, y3);
         this.drawStatusBlock4(x + 560, y3);
     };
@@ -490,6 +491,7 @@
      * @param {Number} y 描画領域左上y
      * @param {Number} width 幅
      */
+    // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawActorLevel = function(actor, x, y, width) {
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());
@@ -621,6 +623,7 @@
      * @param {Number} y ラベル左上位置 y
      * @param {Number} width 幅
      */
+    // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawGaugeText = function(data, x, y, width) {
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());
@@ -796,6 +799,7 @@
      * 
      * @param {Object} arg 引数
      */
+    // eslint-disable-next-line no-unused-vars
     Window_StatusParams.prototype.drawParamPage = function(arg) {
         const rect = this.baseTextRect();
         const padding = this.itemPadding();

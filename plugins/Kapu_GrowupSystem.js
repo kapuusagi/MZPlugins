@@ -116,7 +116,7 @@
  * 2.Game_Actor.setupをフックし、ノートタグを解析して初期値を設定する処理を追加。
  *   （必要な場合）
  * 3.Game_Actorの適切なメソッドをフックし、育成データを反映する場所を追加。
- * 　例えばMaxHPならGame_Actor.paramBaseかGame_Actor.paramPlusをフックする。
+ *   例えばMaxHPならGame_Actor.paramBaseかGame_Actor.paramPlusをフックする。
  * 4.Game_Actor.resetGrowsをフックし、育成リセットを追加。
  * 5.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
  * 6.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
@@ -311,6 +311,7 @@
      * @param {Number} level レベル
      * @return {Number} 加算するGrowPoint
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Actor.prototype.growPointAtLevelUp = function(level) {
         return Math.floor(eval(growPointAtLevelUp) || 0);
     };
@@ -390,6 +391,7 @@
      * @param {GrowupItem} growupItem 育成項目
      * @return {Boolean} 適用できたかどうか。
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Actor.prototype.applyGrowup = function(growupItem) {
         return false;
     };
@@ -481,6 +483,7 @@
      * @param {Game_Battler} target ターゲット
      * @param {DataEffect} effect エフェクトデータ
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.applyItemEffectResetGrows = function(target, effect) {
         if (target.isActor()) {
             target.resetGrows();

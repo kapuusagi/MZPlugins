@@ -188,7 +188,7 @@
  */
 function Sprite_BattleHudHpGauge() {
     this.initialize(...arguments);
-};
+}
 
 
 /**
@@ -197,7 +197,7 @@ function Sprite_BattleHudHpGauge() {
  */
 function Sprite_BattleHudMpTpGauge() {
     this.initialize(...arguments);
-};
+}
 
 
 /**
@@ -206,7 +206,7 @@ function Sprite_BattleHudMpTpGauge() {
  */
 function Sprite_BattleHudTpbGauge() {
     this.initialize(...arguments);
-};
+}
 
 
 
@@ -216,7 +216,7 @@ function Sprite_BattleHudTpbGauge() {
  */
 function Sprite_BattleHudActorName() {
     this.initialize(...arguments);
-};
+}
 
 
 /**
@@ -227,7 +227,7 @@ function Sprite_BattleHudActorName() {
  */
 function Sprite_HudStateIcons() {
     this.initialize(...arguments);
-};
+}
 
 
 /**
@@ -237,7 +237,7 @@ function Sprite_HudStateIcons() {
  */
 function Sprite_BattleHudActor() {
     this.initialize(...arguments);
-};
+}
 
 /**
  * Sprite_BattleHudPicture。
@@ -245,7 +245,7 @@ function Sprite_BattleHudActor() {
  */
 function Sprite_BattleHudPicture() {
     this.initialize(...arguments);
-};
+}
 
 (() => {
     const pluginName = "Kapu_Twld_BattleSystem";
@@ -1649,7 +1649,7 @@ function Sprite_BattleHudPicture() {
      */
     function DisplayBattlePictureFilter() {
         this.initialize(...arguments);
-    };
+    }
 
     DisplayBattlePictureFilter.prototype = Object.create(PIXI.Filter.prototype);
     DisplayBattlePictureFilter.prototype.constructor = DisplayBattlePictureFilter;
@@ -1707,7 +1707,7 @@ function Sprite_BattleHudPicture() {
      */
     function BattleHudActorFilter() {
         this.initialize(...arguments);
-    };
+    }
 
     BattleHudActorFilter.prototype = Object.create(PIXI.Filter.prototype);
     BattleHudActorFilter.prototype.constructor = BattleHudActorFilter;
@@ -2124,7 +2124,7 @@ function Sprite_BattleHudPicture() {
      */
     Scene_Battle.prototype.partyCommandWindowRect = function() {
         const itemNameRect = this.itemNameWindowRect();
-        const ww = commandWindowWidth;;
+        const ww = commandWindowWidth;
         const wh = this.windowAreaHeight();
         const wx = commandWindowX;
         const wy = itemNameRect.y + itemNameRect.height;
