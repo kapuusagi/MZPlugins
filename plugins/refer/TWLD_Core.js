@@ -534,40 +534,6 @@
 
 
 
-    /**
-     * 基本パラメータのベース値を取得する。
-     * @param {Number} paramId パラメータID
-     * @return {Number} ベース値
-     */
-    Game_Actor.prototype.paramBase = function(paramId) {
-        // ベース値は現在のクラスとレベルのテーブルから得られる値になる。
-        var value = this.currentClass().params[paramId][this._level];
-        value += Game_BattlerBase.prototype.paramPlus.call(this, paramId); // 種加算値
-
-        // 基本パラメータによる補正値を返す。
-        switch (paramId) {
-            case 0: // 最大HP
-                
-                var vit = this.vit;
-                value += (vit * 4) + Math.floor(vit / 5) * 7;
-                break;
-            case 1: // 最大MP
-                var int = this.int;
-                var men = this.men;
-                value += (int * 2) + Math.floor(int / 5) * 4;
-                value += men + Math.floor(men / 7) * 5;
-                break;
-            case 2: // ATK
-                if (this.hasNoWeapons()) {
-                    // 素手の場合、WMとSTRでATKにボーナスを与える。
-                    var wm = this.getWeaponMastery(this.bareHandsElementId());
-                    value += Math.floor(wm.level * this.str * 0.02);
-                }
-                break;
-        }
-
-        return value;
-    };
 
 
 
