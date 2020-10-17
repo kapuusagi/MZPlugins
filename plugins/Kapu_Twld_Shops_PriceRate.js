@@ -31,7 +31,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 追加した。
  */
 (() => {
     //const pluginName = "Kapu_Twld_Shops_PriceRate";
@@ -64,7 +64,7 @@
     Game_Shop.prototype.sellingPriceRate = function() {
         const rate = _Game_Shop_sellingPriceRate.call(this);
         if ($gameTemp.enableSellingPriceRateTrait()) {
-            return rate * $gameTemp.sellingPriceRate();
+            return rate * $gameParty.sellingPriceRate();
         } else {
             return rate;
         }

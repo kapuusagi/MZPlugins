@@ -22,6 +22,20 @@
  * @type boolean
  * @default true
  * 
+ * @param enableDefaultSellingPriceRate
+ * @text 基本売却レート有効
+ * @desc 基本売却レートを有効にするかどうか。有効にするとオーバーライドされる。
+ * @type boolean
+ * @default false
+ * 
+ * @param basicSellingPriceRate
+ * @text 基本売却レート
+ * @desc 店頭売却時の基本売却レート。
+ * @type number
+ * @decimals 2
+ * @default 0.50
+ * @parent enableDefaultSellingPriceRate
+ * 
  * 
  * @param buyingPriceRateTraitPartyAbilityId
  * @text 購入価格レート特性ID
@@ -60,9 +74,9 @@
  * Game_Temp.enableSellingPriceRateTrait() : Boolean
  *     売却価格レート特性が有効かどうかを得る。
  * Game_Party.buyingPriceRate() : Number
- *     購入価格レートを得る。
+ *     購入価格レート(0.0～1.0)を得る。
  * Game_Party.sellingPriceRate() : Number
- *     売却価格レートを得る。
+ *     売却価格レート(0.0～1.0)を得る。
  * 
  * ============================================
  * プラグインコマンド
@@ -77,10 +91,10 @@
  * アクター/クラス/ステート/武器/防具
  *     <buyingPriceRate:rate>
  *         rate: 購入価格倍率値の値。
- *               -0.1で-10％。つまり1割引。10パーセット♪10パーセント♪10パーセント引き～♪
+ *               0.1で-10％。つまり1割引。10パーセット♪10パーセント♪10パーセント引き～♪
  *     <buyingPriceRate:rateStr%>
  *          rateStr: 購入価格倍率値の値。
- *                   -10で-10％。
+ *                   10で-10％。
  *     <sellingPriceRate:rate>
  *         rate: 売却価格倍率の値。
  *               0.1で+10%、つまり1割増し。
@@ -91,11 +105,15 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 (() => {
     const pluginName = "Kapu_Trait_PriceRate";
     const parameters = PluginManager.parameters(pluginName);
+
+    enableDefaultSellingPriceRate = (typeof parameters["enableDefaultSellingPriceRate"] === "undefined")
+            ? false : (parameters["enableDefaultSellingPriceRate"] === "true");
+    basicSellingPriceRate = Number(parameters["basicSellingPriceRate"]) || 0;
 
     Game_Party.ABILITY_BUYING_PRICE_RATE = Number(parameters["buyingPriceRateTraitPartyAbilityId"]) || 0;
     Game_Party.ABILITY_SELLING_PRICE_RATE = Number(parameters["sellingPriceRateTraitPartyAbilityId"]) || 0;
@@ -236,7 +254,8 @@
      * @return {Number} 購入価格レート
      */
     Game_Party.prototype.buyingPriceRate = function() {
-        return Math.max(0, 1 + this.partyTraitsSumMax(Game_Party.ABILITY_BUYING_PRICE_RATE));
+        const discountRate = this.partyTraitsSumMax(Game_Party.ABILITY_BUYING_PRICE_RATE);
+        return Math.max(0, 1 - discountRate);
     };
 
     /**
@@ -272,20 +291,36 @@
 
     //------------------------------------------------------------------------------
     // Scene_Shop
-    // Note: 売却価格はこちらで処理する必要がある。
+    // Note: 店頭表示価格があるため、売却価格はこちらで処理する必要がある。
+    
+    if (enableDefaultSellingPriceRate) {
+        /**
+         * 売却価格を得る。
+         * 
+         * @return {Number} 売却価格
+         */
+        Scene_Shop.prototype.sellingPrice = function() {
+            let sellingPrice = this._item.price * basicSellingPriceRate;
+            if ($gameTemp.enableSellingPriceRateTrait()) {
+                sellingPrice *= $gameParty.sellingPriceRate();
+            }
+            return Math.floor(sellingPrice);
+        };
+    } else {
+        const _Scene_Shop_sellingPrice = Scene_Shop.prototype.sellingPrice;
+        /**
+         * 売却価格を得る。
+         * 
+         * @return {Number} 売却価格
+         */
+        Scene_Shop.prototype.sellingPrice = function() {
+            const price = _Scene_Shop_sellingPrice.call(this);
+            if ($gameTemp.enableSellingPriceRateTrait()) {
+                return Math.floor(price * $gameParty.sellingPriceRate());
+            } else {
+                return price;
+            }
+        };
+    }
 
-    const _Scene_Shop_sellingPrice = Scene_Shop.prototype.sellingPrice;
-    /**
-     * 売却価格を得る。
-     * 
-     * @return {Number} 売却価格
-     */
-    Scene_Shop.prototype.sellingPrice = function() {
-        const price = _Scene_Shop_sellingPrice.call(this);
-        if ($gameTemp.enableSellingPriceRateTrait()) {
-            return Math.floor(price * $gameParty.sellingPriceRate());
-        } else {
-            return price;
-        }
-    };
 })();
