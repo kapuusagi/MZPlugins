@@ -73,21 +73,42 @@
     //------------------------------------------------------------------------------
     // Game_BattlerBase
 
-    const _Game_BattlerBase_canEquip = Game_BattlerBase.prototype.canEquip;
+    const _Game_BattlerBase_canEquipWeapon = Game_BattlerBase.prototype.canEquipWeapon;
+    /**
+     * 武器が装備可能かどうかを取得する。
+     * 
+     * @param {Object} item DataWeaponオブジェクト
+     * @return {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
+     */
+    Game_BattlerBase.prototype.canEquipWeapon = function(item) {
+        return _Game_BattlerBase_canEquipWeapon.call(this, item)
+                && this.meetsEquipCondition(item);
+    };
+
+    const _Game_BattlerBase_canEquipArmor = Game_BattlerBase.prototype.canEquipArmor;
+    /**
+     * 防具が装備可能かどうかを取得する。
+     * 
+     * @param {Object} item DataArmorオブジェクト
+     * @return {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
+     */
+    Game_BattlerBase.prototype.canEquipArmor = function(item) {
+        return _Game_BattlerBase_canEquipArmor.call(this, item)
+                && this.meetsEquipCondition(item);
+    };
+
     /**
      * itemが装備可能かどうかを取得する。
      * 
      * @param {Object} item アイテム
      * @return {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
      */
-    Game_BattlerBase.prototype.canEquip = function(item) {
-        if (item.equipConditions.length > 0) {
-            if (!this.testEquipCondition(item)) {
-                return false;
-            }
+    Game_BattlerBase.prototype.meetsEquipCondition = function(item) {
+        if (item.equipConditions && (item.equipConditions.length > 0)) {
+            return this.testEquipCondition(item);
+        } else {
+            return true;
         }
-
-        return _Game_BattlerBase_canEquip.call(this, item);
     };
 
     /**
