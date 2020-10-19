@@ -54,6 +54,10 @@
  * ============================================
  * ノートタグ
  * ============================================
+ * スキル
+ *     <noReincarnation>
+ *         育成での習得スキルのみ対象。
+ *         転生時にスキル習得状態にしない。
  * 
  * ============================================
  * 変更履歴
@@ -119,8 +123,16 @@
             return; // 条件満たしてない。
         }
 
-        // GPで習得したスキルを全部永久習得にする。
+        // GPで習得したスキルを一部を除いて全部永久習得にする。
         if (this._gpLearnedSkills) {
+            for (const skillId of this._gpLearnedSkills) {
+                const skill = $dataSkills[skillId];
+                if (skill.meta.noReincarnation) {
+                    // このスキルは転生時に習得状態にはしない。
+                    this._gpLearnableSkills.push(skillId);
+                    this.forgetSkill(skillId);
+                }
+            }
             this._gpLearnedSkills = [];
         }
         
@@ -142,7 +154,7 @@
         this.resetGrows();
     };
 
-    const _Game_Actor_basicParamBase = Game_BattlerBase.prototype.basicParamBase;
+    const _Game_Actor_basicParamBase = Game_Actor.prototype.basicParamBase;
     /**
      * 基本パラメータを得る。
      * 
@@ -168,13 +180,15 @@
                     iconIndex : reincarnationIconId,
                     name : reincarnationLabel,
                     type : "reincarnation",
-                    id : i,
+                    id : 0,
                     cost : 0,
                     description : reincarnationDescription
                 });
             }
             return items.concat(_Game_Actor_growupItems.call(this));
         };
+
+        const _Game_Actor_applyGrowup = Game_Actor.prototype.applyGrowup;
         /**
          * 育成項目を適用する。
          * 
