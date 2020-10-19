@@ -151,7 +151,8 @@
  * @default LUK
  *
  * @help 
- * TWLD向けに作成した、基本パラメータ(STR/DEX/VIT/INT/MEN/AGI/LUK)を追加するプラグイン。
+ * TWLD向けに作成した、基本パラメータ(STR/DEX/VIT/INT/MEN/AGI/LUK)を
+ * 追加するプラグイン。
  * デフォルトでは既存のAGI/LUKが上書きされます。
  * LUK/AGIの上書きを行わない場合、プラグインパラメータの
  * 「AGIを上書きする」「LUKを上書きする」をfalseに設定します。
@@ -230,7 +231,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 追加した。
  */
 (() => {
     const pluginName = "Kapu_Twld_BasicParams";
@@ -552,7 +553,7 @@
          * @return {Number} 基本パラメータレート
          */
         Game_BattlerBase.prototype.basicParamRate = function(paramId) {
-            return Math.max(0, 1.0 + this.traitsSum(Game_BattlerBase.TRAIT_BASIC_PARAM_RATE), paramId);
+            return Math.max(0, 1.0 + this.traitsSum(Game_BattlerBase.TRAIT_BASIC_PARAM_RATE, paramId));
         };
     } else {
         /**
