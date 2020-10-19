@@ -395,6 +395,15 @@
         }
     };
 
+    const _Game_Actor_onGrown = Game_Actor.prototype.onGrown;
+    /**
+     * 成長処理が行われたときの処理を行う。
+     */
+    Game_Actor.prototype.onGrown = function() {
+        _Game_Actor_onGrown.call(this);
+        this.updateGpLearnableSkills();
+    };
+
     //------------------------------------------------------------------------------
     // Game_Action
     if (Game_Action.EFFECT_ADD_GPLEARN_SKILL) {
