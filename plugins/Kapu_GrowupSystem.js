@@ -123,6 +123,11 @@
  * 
  * サンプルはKapu_GrowupSystem_Params等を参照。
  * 
+ * その他
+ * Game_Actor.grown()
+ *      なんらかの育成項目が適用されたときの処理を行う。
+ *      育成アイテムの更新処理を行う場合などにフックする。
+ * 
  * 育成項目は Game_Actor.growupItems にて配列を返す。
  * GrowupItem = {
  *     iconIndex : {Number} アイコンインデックス
@@ -161,6 +166,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 育成状態変更時に通知を受け取るonGrownメソッドを追加。
  * Version.0.1.1 全てのスキル/アイテムに育成リセット効果が付与されていた不具合を修正した。
  * Version.0.1.0 TWLD向けコードから抜粋して移植。 
  */
@@ -359,6 +365,7 @@
     Game_Actor.prototype.resetGrows = function() {
         this._growPoint.current = this._growPoint.max;
         this.releaseUnequippableItems();
+        this.onGrown();
         this.refresh();
     };
 
@@ -380,9 +387,17 @@
         if (growupItem.cost <= this.growPoint()) {
             if (this.applyGrowup(growupItem)) {
                 this._growPoint.current -= growupItem.cost;
+                this.onGrown();
                 this.refresh();
             }
         }
+    };
+
+    /**
+     * 成長処理が行われたときの処理を行う。
+     */
+    Game_Actor.prototype.onGrown = function() {
+
     };
 
     /**

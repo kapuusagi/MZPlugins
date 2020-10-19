@@ -7,3 +7,5 @@ rmmz_objects.js
 rmmz_scenes.js
 rmmz_sprites.js
 rmmz_windows.js
+plugins/*.js
+!plugins/Kapu_*.js
