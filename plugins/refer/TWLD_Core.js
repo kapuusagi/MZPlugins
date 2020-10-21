@@ -95,14 +95,7 @@
 
 
 
-    /**
-     * 物理属性かどうかを判定する。
-     * @param {Number} elementId 属性ID
-     * @return {Boolean} 物理属性の場合にture, それ以外はfalse
-     */
-    TWLD.Core.isPhysicalElement = function(elementId) {
-        return TWLD.Core.PhysicalElements.contains(elementId);
-    };
+
 
     // DataManager
     TWLD.Core.DatabaseLoaded = false;
@@ -555,19 +548,6 @@
 
 
 
-
-
-    /**
-     * 装備品パラメータによる加算値合計を取得する。
-     * 
-     * @param {Number} paramId パラメータID
-     */
-    Game_Actor.prototype.getBasicParamCorrectByEquips = function (paramId) {
-        var equips = this.equips();
-        return equips.reduce(function (prev, equipItem) {
-            return prev + ((equipItem !== null) ? equipItem.basicParams[paramId].add : 0);
-        }, 0);
-    };
 
 
 
