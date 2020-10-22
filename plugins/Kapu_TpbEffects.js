@@ -36,6 +36,16 @@
  * @type number
  * @default 108
  * 
+ * @param defaultTpbCost
+ * @text 標準TPBコスト
+ * @desc ノートタグ未指定時のTPBコスト値。
+ * @type number
+ * @default 1.00
+ * @decimals 2
+ * @min 0
+ * @max 1
+ * 
+ * 
  * @help 
  * TPBに関して、以下の機能を追加します。
  * ・TPBゲージ加算/減算効果の追加。
@@ -88,10 +98,14 @@
  *   
  *   <breakTpbCast:rate#>
  *       キャストブレーク効果をrate#の割合で発動。
+ *   <tpbCost:cost#>
+ *       このスキル/アイテム使用時のTPB消費をcost#にする。
+ *       cost#は0.0～1.0の範囲。
  * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 行動終了時のTPB減少量を指定できるようにした。動作未確認。
  * Version.0.1.0 作成した。
  */
 (() => {
@@ -102,6 +116,7 @@
     Game_Action.EFFECT_BREAK_TPB_CASTING = Number(parameters["breakTpbCastEffectCode"]) || 0;
     Game_BattlerBase.FLAG_ID_BLOCK_TPB_CAST_BREAK = Number(parameters["blockBreakTpbCastFlagId"]) || 0;
     Game_BattlerBase.FLAG_ID_BLOCK_TPB_LOSE = Number(parameters["blockTpbLoseFlagId"]) || 0;
+    const defaultTpbCost = (Number(parameters["defaultTpbCost"]) || 1.0);
 
     if (!Game_Action.EFFECT_GAIN_TPB_CHARGE_TIME) {
         console.error(pluginName + ":EFFECT_GAIN_TPB_CHARGE_TIME is not valid.");
@@ -212,6 +227,50 @@
     DataManager.addNotetagParserSkills(_processEffectNotetag);
     DataManager.addNotetagParserItems(_processEffectNotetag);
     //------------------------------------------------------------------------------
+    // Game_BattlerBase
+
+    /**
+     * スキルのTPBコストを得る。
+     * 
+     * @param {DataSkill} skill スキル
+     * @return {Number} TPBコスト
+     */
+    Game_BattlerBase.prototype.skillTpbCost = function(skill) {
+        if (skill.meta.tpbCost) {
+            return Math.max(0, (Number(item.meta.tpbCost) || 0));
+        } else {
+            return this.defaultTpbCost();
+        }
+    };
+    /**
+     * TPBコストを得る。
+     * 
+     * @param {Object} item 
+     * @return {Number} TPBコスト(0～1)を得る。
+     */
+    Game_BattlerBase.prototype.tpbCost = function(item) {
+        if (DataManager.isSkill(item)) {
+            return this.skillTpbCost(item);
+        } else if (DataManager.isItem(item)) {
+            if (item.meta.tpbCost) {
+                return Math.max(0, (Number(item.meta.tpbCost) || 0));
+            } else {
+                return defaultTpbCost;
+            }
+        } else {
+            return defaultTpbCost;
+        }
+    };
+
+    /**
+     * デフォルトのTPBコストを得る。
+     * 
+     * @return {Number} デフォルトのTPBコスト
+     */
+    Game_BattlerBase.prototype.defaultTpbCost = function() {
+        return defaultTpbCost;
+    };
+    //------------------------------------------------------------------------------
     // Game_Battler
     if (Game_BattlerBase.FLAG_ID_BLOCK_TPB_LOSE) {
         /**
@@ -292,6 +351,36 @@
             this._tpbCastTime = 0;
             this._tpbState = "charging";
         }
+    };
+    const _Game_Battler_makeActions = Game_Battler.prototype.makeActions;
+    /**
+     * アクションを作成する。
+     */
+    Game_Battler.prototype.makeActions = function() {
+        _Game_Battler_makeActions.call(this);
+        this._tpbConsumeTime = 0;
+    };
+
+    const _Game_Battler_performActionStart = Game_Battler.prototype.performActionStart;
+    /**
+     * アクションを実行する。
+     * 
+     * @param {Game_Action} action 
+     */
+    Game_Battler.prototype.performActionStart = function(action) {
+        _Game_Battler_performActionStart.call(this, action);
+        this._tpbConsumeTime += this.tpbCost(action.item());
+    };
+
+    /**
+     * TPBチャージタイムを消費する。
+     * 
+     * @param {Number} time 消費するTPB時間
+     */
+    Game_Battler.prototype.consumeTpbChargeTime = function() {
+        this._tpbState = "charging";
+        this._tpbChargeTime = Math.max(0, this._tpbChargeTime - this._tpbConsumeTime);
+        this._tpbConsumeTime = 0;
     };
 
     //------------------------------------------------------------------------------
@@ -389,6 +478,25 @@
             target.breakTpbCast(effect.value2);
             this.makeSuccess(target);
         }
+    };
+
+
+    //------------------------------------------------------------------------------
+    // BattleManager
+    /**
+     * 全てのアクションの終了処理をする。
+     * 
+     * Note: clearTpbChargeTime()をコールする代わりに、consumeTpbChargeTimeをコールするため、
+     *       メソッドをオーバーライドする。
+     * 
+     * @param {Game_Battler} battler アクション使用者
+     * !!!overwrite!!! BattleManager.endBattlerActions()
+     */
+    BattleManager.endBattlerActions = function(battler) {
+        battler.setActionState(this.isTpb() ? "undecided" : "done");
+        battler.onAllActionsEnd();
+        battler.consumeTpbChargeTime();
+        this.displayBattlerStatus(battler, true);
     };
 
 })();
