@@ -5,6 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
+ * @orderAfter Kapu_Base_Hit
+ * @orderAfter Kapu_Base_DamageCalculation
  * 
  * @param actorParameter
  * @text アクターパラメータ
@@ -165,6 +167,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 スキルによる回復倍率を、使用者と対象のMENを参照するようにした。動作未確認。
  * Version.0.1.0 追加した。
  */
 (() => {
@@ -341,5 +344,21 @@
             result.critical = false;
         }
     };
-
+    /**
+     * 回復レートを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {Number} 回復レート(0.0～、等倍は1.0)
+     * !!!overwrite!!! Game_Action.itemRec()
+     */
+    Game_Action.prototype.itemRec = function(target) {
+        if (this.isSkill() && this.isRecover()) {
+            // スキルの場合には使用者のRECと平均化する。
+            const subject = this.subject();
+            return (subject.rec + target.rec) * 0.5;
+        } else {
+            // スキル以外の場合には対象のRECだけ使用する。
+            return target.rec;
+        }
+    };
 })();

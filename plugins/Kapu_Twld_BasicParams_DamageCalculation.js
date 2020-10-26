@@ -18,7 +18,7 @@
  * ・INTが高いほどmatcoefが上がる
  * ・VITが高いほどvitcoefが上がる。
  * ・MDFが高いほどmdfcoefが上がる。
- * 
+ * ・スキルによるHP回復の場合、使用者のMENにより、回復効果にボーナスが付与される。
  * 
  * Penetrate特性が有効な場合
  * ・STRが30以上あるとき、貫通特性ボーナス。
@@ -239,6 +239,28 @@
         // MENが20以上の場合、MENを1上げる毎に0.5%軽減する。
         rate -= Math.max(0, ((this.men - 20) * 0.005));
         return Math.max(0, rate);
+    };
+
+    //------------------------------------------------------------------------------
+    // Game_Action
+    const _Game_Action_itemRec = Game_Action.prototype.itemRec;
+
+    /**
+     * 回復レートを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {Number} 回復レート(0.0～、等倍は1.0)
+     * !!!overwrite!!! Game_Action.itemRec()
+     */
+    Game_Action.prototype.itemRec = function(target) {
+        const recRate = _Game_Action_itemRec.call(this, target);
+        if (this.isSkill() && this.isRecover()) {
+            // スキルによるHP回復の場合には使用者のMENが倍率加算される。
+            const subject = this.subject();
+            return recRate + Math.max(0, (subject.men - 20) * 0.01);
+        } else {
+            return recRate;
+        }
     };
 
 
