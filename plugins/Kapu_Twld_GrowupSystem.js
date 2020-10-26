@@ -55,10 +55,10 @@
  * ノートタグ
  * ============================================
  * スキル
- *     <noReincarnation>
+ *     <keepOnReincarnation>
  *         育成での習得スキルのみ対象。
- *         転生時にスキル習得状態にしない。
- * 
+ *         転生時にスキル習得済みにする。
+ *         
  * ============================================
  * 変更履歴
  * ============================================
@@ -127,8 +127,10 @@
         if (this._gpLearnedSkills) {
             for (const skillId of this._gpLearnedSkills) {
                 const skill = $dataSkills[skillId];
-                if (skill.meta.noReincarnation) {
-                    // このスキルは転生時に習得状態にはしない。
+                if (skill.meta.keepOnReincarnation) {
+                    // このスキルは転生時に習得済み(恒久習得)にする。
+                } else {
+                    // このスキルは転生時に習得可能状態にする。
                     this._gpLearnableSkills.push(skillId);
                     this.forgetSkill(skillId);
                 }

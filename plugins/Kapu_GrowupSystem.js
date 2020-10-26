@@ -113,13 +113,14 @@
  * 
  * 独自の育成項目を追加するには、以下を実装します。
  * 1.Game_Actor.initMembersをフックして育成データを格納する場所を追加。
- * 2.Game_Actor.setupをフックし、ノートタグを解析して初期値を設定する処理を追加。
+ * 2.Game_Actor.initGrowsをフックし、ノートタグを解析して初期値を設定する処理を追加。
  *   （必要な場合）
- * 3.Game_Actorの適切なメソッドをフックし、育成データを反映する場所を追加。
+ * 3.Game_Actor.usedGrowupPointをフックし、使用済みGP値の計算を追加。
+ * 4.Game_Actorの適切なメソッドをフックし、育成データを反映する場所を追加。
  *   例えばMaxHPならGame_Actor.paramBaseかGame_Actor.paramPlusをフックする。
- * 4.Game_Actor.resetGrowsをフックし、育成リセットを追加。
- * 5.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
- * 6.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
+ * 5.Game_Actor.resetGrowsをフックし、育成リセットを追加。
+ * 6.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
+ * 7.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
  * 
  * サンプルはKapu_GrowupSystem_Params等を参照。
  * 
@@ -153,9 +154,6 @@
  * アクター
  *     <growPoint:max#>
  *          加入時の成長ポイント現在値と最大値をmaxで指定した値にする。
- *     <growPoint:current#/max#>
- *     <growPoint:current#,max#>
- *          加入時の成長ポイント現在値をcurrent#に、最大値をmax#で指定した値にする。
  * 
  * アイテム/スキル
  *     <growPoint:value#>
@@ -166,6 +164,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 使用済みGrowPointを計算するインタフェースを追加。
+ *               セットアップの煩わしさを軽減する。
  * Version.0.2.0 育成状態変更時に通知を受け取るonGrownメソッドを追加。
  * Version.0.1.1 全てのスキル/アイテムに育成リセット効果が付与されていた不具合を修正した。
  * Version.0.1.0 TWLD向けコードから抜粋して移植。 
@@ -283,20 +283,36 @@
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
+
+        this.initGrows();
+
         const actor = $dataActors[actorId];
-        if (actor.meta.growPoint) {
-            const tokens = actor.meta.growPoint.split(/[,/]/);
-            if (tokens.length >= 2) {
-                this._growPoint.current = Matn.floor(Number(tokens[0]) || 0);
-                this._growPoint.max = Math.floor(Number(tokens[1]) || 0);
-            } else {
-                this._gorwPoint.current = Math.floor(Number(tokens[0]) || 0);
-                this._growPoint.max = this._growPoint.current;
-            }
+        const growPoint = Number(actor.meta.growPoint) || 0;
+        const usedGrowPoint = this.usedGrowupPoint();
+        const calcGrowPoint = this.growPointOfLevel();
+        this._growPoint.max = Math.max(usedGrowPoint, calcGrowPoint,
+            growPoint).clamp(0, Game_Actor.MAX_GROW_POINT);
+        this._growPoint.current = Math.max(0, this._growPoint.max - usedGrowPoint);
+    };
+
+    /**
+     * 現在のレベルに対応するGrowPoint合計値を計算する。
+     * 
+     * @return {Number} 育成ポイント合計
+     */
+    Game_Actor.prototype.growPointOfLevel = function() {
+        let value = 10;
+        for (let lv = 2; lv <= this.level; lv++) {
+            value += this.growPointAtLevelUp(lv);
         }
-        if (this._growPoint.current > this._growPoint.max) {
-            this._growPoint.current = this._growPoint.max;
-        }
+
+        return value.clamp(0, Game_Actor.MAX_GROW_POINT);
+    };
+
+    /**
+     * 育成状態を初期化する。
+     */
+    Game_Actor.prototype.initGrows = function() {
     };
 
     const _Game_Actor_levelUp = Game_Actor.prototype.levelUp;
@@ -330,6 +346,16 @@
      */
     Game_Actor.prototype.growPoint = function() {
         return this._growPoint.current;
+    };
+
+    /**
+     * 使用済みGrowPointを得る。
+     * setup()時に、使用済みGrowPointを計算するために使用される。
+     * 
+     * @return {Number} 使用済み育成ポイント。
+     */
+    Game_Actor.prototype.usedGrowupPoint = function() {
+        return 0;
     };
 
     /**

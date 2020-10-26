@@ -74,6 +74,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 GrowupSystem Version.0.3.0に対応した。
  * Version.0.1.1 プラグインパラメータのenabledが効いていない不具合を修正した。
  * Version.0.1.0 GrowupSystemテスト用に作成。
  */
@@ -144,17 +145,15 @@
         this._gpParams = [0, 0, 0, 0, 0, 0, 0, 0];
     };
 
-    // 2.Game_Actor.setupをフックし、ノートタグを解析して初期値を設定する処理を追加。
-    const _Game_Actor_setup = Game_Actor.prototype.setup;
+    // 2.Game_Actor.initGrows()をフックし、ノートタグを解析して初期値を設定する処理を追加。
+    const _Game_Actor_initGrows = Game_Actor.prototype.initGrows;
     /**
-     * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
-     * 
-     * @param {Number} actorId アクターID
+     * 育成状態を初期化する。
      */
-    Game_Actor.prototype.setup = function(actorId) {
-        _Game_Actor_setup.call(this, actorId);
+    Game_Actor.prototype.initGrows = function() {
+        _Game_Actor_initGrows.call(this);
         
-        const actor = $dataActors[actorId];
+        const actor = this.actor();
         if (actor.meta.gpParams) {
             const tokens = actor.meta.gpParams.split(',');
             const count = Math.min(tokens.length, this._gpParams.length);
@@ -165,7 +164,25 @@
         }
     };
 
-    // 3.Game_Actorの適切なメソッドをフックし、育成データを反映する場所を追加。
+    // 3.Game_Actor.usedGrowupPointをフックし、使用済みGP値の計算を追加。
+    const _Game_Actor_usedGrowupPoint = Game_Actor.prototype.usedGrowupPoint;
+    /**
+     * 使用済みGrowPointを得る。
+     * 
+     * @return {Number} 使用済み育成ポイント。
+     */
+    Game_Actor.prototype.usedGrowupPoint = function() {
+        let usedPoint = _Game_Actor_usedGrowupPoint.call(this);
+        for (let paramId = 0; paramId < this._gpParams.length; paramId++) {
+            const paramValue = this._gpParams[paramId];
+            for (let i = 0; i < paramValue; i++) {
+                usedPoint = this.calcGrowupParamCost(i, growupItemEntries[paramId].costRate)
+            }
+        }
+        return usedPoint;
+    };
+
+    // 4.Game_Actorの適切なメソッドをフックし、育成データを反映する場所を追加。
     const _Game_Actor_paramBase = Game_Actor.prototype.paramBase;
     /**
      * 基本パラメータベース値を得る。
@@ -187,7 +204,7 @@
         return Math.floor(this._gpParams[paramId] * growupItemEntries[paramId].growRate);
     };
 
-    // 4.Game_Actor.resetGrowsをフックし、育成リセットを追加。
+    // 5.Game_Actor.resetGrowsをフックし、育成リセットを追加。
     const _Game_Actor_resetGrows = Game_Actor.prototype.resetGrows;
     /**
      * 成長リセットする。
@@ -199,7 +216,7 @@
         }
     };
 
-    // 5.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
+    // 6.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
     const _Game_Actor_growupItems = Game_Actor.prototype.growupItems;
     /**
      * 育成項目を返す。
@@ -241,10 +258,21 @@
      * @return {Number} コスト
      */
     Game_Actor.prototype.gpParamCost = function(paramId) {
-        return 1 + Math.floor(this._gpParams[paramId] * growupItemEntries[paramId].costRate);
+        return this.calcGrowupParamCost(this._gpParams[paramId], growupItemEntries[paramId].costRate);
     };
 
-    // 6.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
+    /**
+     * パラメータ育成に必要なコストを計算する。
+     * 
+     * @param {Number} currentValue 現在値
+     * @param {Number} rate コスト上昇レート
+     * @return {Number} コスト
+     */
+    Game_Actor.prototype.calcGrowupParamCost = function(currentValue, rate) {
+        return 1 + Math.floor(currentValue * rate);
+    };
+
+    // 7.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
     const _Game_Actor_applyGrowup = Game_Actor.prototype.applyGrowup;
     /**
      * 育成項目を適用する。

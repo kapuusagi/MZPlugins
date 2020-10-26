@@ -55,13 +55,15 @@
  * 
  * 
  * ■ 使用時の注意
+ * 特になし。
  * 
  * ■ プラグイン開発者向け
+ * 特になし。
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * 特になし。
  * 
  * ============================================
  * ノートタグ
@@ -74,7 +76,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 作成した。
  */
 /*~struct~growupItem:
  *
@@ -129,30 +131,46 @@
         this._basicParamsGrown = [0, 0, 0, 0, 0, 0, 0];
     };
 
-    // 2.Game_Actor.setupをフックし、ノートタグを解析して初期値を設定する処理を追加。
-    //   （必要な場合）
-    const _Game_Actor_setup = Game_Actor.prototype.setup;
+    // 2.Game_Actor.initGrowsをフックし、ノートタグを解析して初期値を設定する処理を追加。
+    const _Game_Actor_initGrows = Game_Actor.prototype.initGrows;
     /**
-     * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
-     * 
-     * @param {Number} actorId アクターID
+     * 育成状態を初期化する。
      */
-    Game_Actor.prototype.setup = function(actorId) {
-        _Game_Actor_setup.call(this, actorId);
-        const actor = $dataActors[actorId];
+    Game_Actor.prototype.initGrows = function() {
+        _Game_Actor_initGrows.call(this);
+        const actor = this.actor();
         if (actor.meta.basicParamsGrown) {
-            const tokens = obj.meta.basicParamsGrown.split(",");
-            const count = Math.min(obj.basicParams.length, tokens.length);
+            const tokens = actor.meta.basicParamsGrown.split(",");
+            const count = Math.min(this._basicParamsGrown.length, tokens.length);
             for (let i = 0; i < count; i++) {
                 const value = Number(tokens[i]);
                 if (!isNaN(value)) {
-                    obj.basicParamsGrown[i] = value;
+                    this._basicParamsGrown[i] = value;
                 }
             }
         }
     };
 
-    // 3.Game_Actorの適切なメソッドをフックし、育成データを反映する場所を追加。
+    // 3.Game_Actor.usedGrowupPointをフックし、使用済みGP値の計算を追加。
+    const _Game_Actor_usedGrowupPoint = Game_Actor.prototype.usedGrowupPoint;
+    /**
+     * 使用済みGrowPointを得る。
+     * 
+     * @return {Number} 使用済み育成ポイント。
+     */
+    Game_Actor.prototype.usedGrowupPoint = function() {
+        let usedPoint = _Game_Actor_usedGrowupPoint.call(this);
+        for (let paramId = 0; paramId < this._basicParamsGrown.length; paramId++) {
+            const paramValue = this._basicParamsGrown[paramId];
+            for (let i = 0; i < paramValue; i++) {
+                usedPoint += this.calcGrowupBasicParamCost(i);
+            }
+        }
+
+        return usedPoint;
+    };
+
+    // 4.Game_Actorの適切なメソッドをフックし、育成データを反映する場所を追加。
     const _Game_Actor_basicParamBase = Game_BattlerBase.prototype.basicParamBase;
     /**
      * 基本パラメータを得る。
@@ -165,7 +183,7 @@
                 + this._basicParamsGrown[paramId];
     };
 
-    // 4.Game_Actor.resetGrowsをフックし、育成リセットを追加。
+    // 5.Game_Actor.resetGrowsをフックし、育成リセットを追加。
     const _Game_Actor_resetGrows = Game_Actor.prototype.resetGrows;
     /**
      * 成長リセットする。
@@ -174,7 +192,7 @@
         _Game_Actor_resetGrows.call(this);
         this.initBasicParamsGrown();
     };
-    // 5.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
+    // 6.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
     const _Game_Actor_growupItems = Game_Actor.prototype.growupItems;
     /**
      * 育成項目を返す。
@@ -219,10 +237,20 @@
      */
     Game_Actor.prototype.gpBasicParamCost = function(paramId) {
         const value = this._basicParamsGrown[paramId];
-        return Math.max(1, Math.floor(value / 20));
+        return this.calcGrowupBasicParamCost(value);
     };
 
-    // 6.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
+    /**
+     * 育成コストを計算する。
+     * 
+     * @param {Number} currentValue 現在値
+     * @return {Number} 育成コスト
+     */
+    Game_Actor.prototype.calcGrowupBasicParamCost = function(currentValue) {
+        return Math.max(1, Math.floor(currentValue / 20))
+    };
+
+    // 7.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
     const _Game_Actor_applyGrowup = Game_Actor.prototype.applyGrowup;
     /**
      * 育成項目を適用する。

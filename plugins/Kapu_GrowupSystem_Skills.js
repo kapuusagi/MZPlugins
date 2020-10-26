@@ -70,6 +70,8 @@
  *         isLearned(id) : id#のスキルを習得しているかどうか
  *     <gpCost>
  *         習得に必要なGPコスト
+ *     <keepOnResetGrown>
+ *         育成リセット時に習得可能スキルとして維持するかどうか。
  * スキル/アイテム
  *     <addGpLearn:id1#,id2#,...>
  *          使用するとGP習得可能スキルにid#で指定したスキルが追加される。
@@ -77,6 +79,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 GrowupSystem Version.0.3.0に対応した。
+ *               ノートタグで習得済みスキルが正しく処理されていない不具合を修正した。
  * Version.0.1.0 TWLD向けに作成したものをベースに作成。
  */
 (() => {
@@ -192,29 +196,28 @@
         this._gpLearnedSkills = [];
         this._gpLearnableSkills = [];
     };
-    // 2.Game_Actor.setupをフックし、ノートタグを解析して初期値を設定する処理を追加。
-    const _Game_Actor_setup = Game_Actor.prototype.setup;
+    // 2.Game_Actor.initGrowsをフックし、ノートタグを解析して初期値を設定する処理を追加。
+    const _Game_Actor_initGrows = Game_Actor.prototype.initGrows;
     /**
-     * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
-     * 
-     * @param {Number} actorId アクターID
+     * 育成状態を初期化する。
      */
-    Game_Actor.prototype.setup = function(actorId) {
-        _Game_Actor_setup.call(this, actorId);
-        
-        const actor = $dataActors[actorId];
+    Game_Actor.prototype.initGrows = function() {
+        _Game_Actor_initGrows.call(this);
+
+        const actor = this.actor();
         if (actor.meta.gpLearnedSkills) {
             const ids = actor.meta.gpLearnedSkills.split(",").map(token => Math.floor(Number(token)));
             for (const id of ids) {
-                if ((id > 0) && !this.isLearnedSkill(id) && !this.isGpLearnedSkill(id)) {
+                if ((id > 0) && (id < $dataSkills.length) && !this.isLearnedSkill(id) && !this.isGpLearnedSkill(id)) {
                     this._gpLearnedSkills.push(id);
+                    this.learnSkill(id);
                 }
             }
         }
         if (actor.meta.gpLearnableSkills) {
             const ids = actor.meta.gpLearnableSkills.split(",").map(token => Math.floor(Number(token)));
             for (const id of ids) {
-                if ((id > 0) && !this.isLearnedSkill(id) && !this.isGpLearnedSkill(id)
+                if ((id > 0) && (id < $dataSkills.length) && !this.isLearnedSkill(id) && !this.isGpLearnedSkill(id)
                         && !this.isGpLearnableSkill(id)) {
                     this._gpLearnableSkills.push(id);
                 }
@@ -222,6 +225,23 @@
             this._gpLearnableSkills.sort((a, b) => a - b);
         }
         this.updateGpLearnableSkills();
+    };
+
+    // 3.Game_Actor.usedGrowupPointをフックし、使用済みGP値の計算を追加。
+    const _Game_Actor_usedGrowupPoint = Game_Actor.prototype.usedGrowupPoint;
+    /**
+     * 使用済みGrowPointを得る。
+     * 
+     * @return {Number} 使用済み育成ポイント。
+     */
+    Game_Actor.prototype.usedGrowupPoint = function() {
+        let usedPoint = _Game_Actor_usedGrowupPoint.call(this);
+        for (const skillId of this._gpLearnedSkills) {
+            const skill = $dataSkills[skillId];
+            usedPoint += skill.gpCost;
+        }
+
+        return usedPoint;
     };
 
     const _Game_Actor_levelUp = Game_Actor.prototype.levelUp;
@@ -320,7 +340,7 @@
             return false;
         }
     };
-    // 3.育成データを反映する場所を追加。
+    // 4.育成データを反映する場所を追加。
     /**
      * GrowPointを消費してスキルを習得する。
      * 
@@ -338,7 +358,7 @@
         }
     };
 
-    // 4.Game_Actor.resetGrowsをフックし、育成リセットを追加。
+    // 5.Game_Actor.resetGrowsをフックし、育成リセットを追加。
     const _Game_Actor_resetGrows = Game_Actor.prototype.resetGrows;
     /**
      * 成長リセットする。
@@ -351,9 +371,19 @@
             this.forgetSkill(id);
         }
         this._gpLearnedSkills = [];
+
+        // リセット時、キープされるスキルだけ習得可能スキルに渡す。
+        const gpLearnableSkills = [];
+        for (const id of this._gpLearnableSkills) {
+            const skill = $dataSkills[id];
+            if (skill.meta.keepOnResetGrown) {
+                gpLearnableSkills.push(id);
+            }
+        }
+        this._gpLearnableSkills = gpLearnableSkills;
         this._gpLearnableSkills.sort((a, b) => a - b);
     };
-    // 5.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
+    // 6.Game_Actor.growupItemsをフックし、育成項目を返す処理を追加
     const _Game_Actor_growupItems = Game_Actor.prototype.growupItems;
     /**
      * 育成項目を返す。
@@ -376,7 +406,7 @@
 
         return items;
     };
-    // 6.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
+    // 7.Game_Actor.applyGrowupをフックし、育成適用処理を追加。
     const _Game_Actor_applyGrowup = Game_Actor.prototype.applyGrowup;
     /**
      * 育成項目を適用する。
