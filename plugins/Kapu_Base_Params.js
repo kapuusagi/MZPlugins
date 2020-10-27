@@ -35,6 +35,46 @@
  */
 (() => {
     //------------------------------------------------------------------------------
+    // Game_BattlerBase
+    /**
+     * パラメータを得る。
+     * 
+     * @param {Number} paramId パラメータID
+     * !!!overwrite!!! Game_BattlerBase.param
+     */
+    Game_BattlerBase.prototype.param = function(paramId) {
+        const baseValue = this.paramWithoutBuff(paramId);
+        const value = this.applyBuff(paramId, baseValue);
+        const maxValue = this.paramMax(paramId);
+        const minValue = this.paramMin(paramId);
+        return Math.round(value.clamp(minValue, maxValue));
+    };
+
+    /**
+     * パラメータのバフ/デバフ適用前のベース値を得る。
+     * 
+     * @param {Number} paramId パラメータID
+     * @return {Number} バフ/デバフ適用前のベース値
+     */
+    Game_BattlerBase.prototype.paramWithoutBuff = function(paramId) {
+        return this.paramBasePlus(paramId) * this.paramRate(paramId);
+    };
+
+    /**
+     * バフを適用する。
+     * 
+     * @param {Number} paramId パラメータID
+     * @param {Number} baseValue バフの適用元のベース値
+     * @return {Number} バフを適用した後の値。
+     */
+    Game_BattlerBase.prototype.applyBuff = function(paramId, baseValue) {
+        return baseValue * this.paramBuffRate(paramId);
+    };
+
+
+
+
+    //------------------------------------------------------------------------------
     // Game_Actor
     /**
      * 基本パラメータ加算値を得る。

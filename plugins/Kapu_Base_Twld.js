@@ -184,7 +184,7 @@
     }
 
     //------------------------------------------------------------------------------
-    // Game_Actor
+    // Game_Battler
     /**
      * このGame_BattlerのTPB速度を得る。
      * ベースパラメータからのTPB速度計算式を変更したいならば、本メソッドをオーバーライドする。
@@ -218,22 +218,21 @@
         const delay = items.reduce((r, item) => r + Math.max(0, -item.speed), 0);
         return delay / this.tpbSpeed();
     };
+
+    //------------------------------------------------------------------------------
+    // Game_Actor
     /**
-     * パラメータを得る。
+     * パラメータのバフ/デバフ適用前のベース値を得る。
      * 
-     * Note: 装備品増加分には特性によるレートボーナスを適用外とするため、
+     * Note: 装備品増加分にはTraitによるレートボーナスを適用外とするため、
      *       オーバーライドする。
      * 
      * @param {Number} paramId パラメータID
-     * !!!overwrite!!! Game_Actor.param
+     * @return {Number} バフ/デバフ適用前のベース値
+     * !!!overwrite!!! Game_BattlerBase.paramWithoutBuff()
      */
-    Game_Actor.prototype.param = function(paramId) {
-        let baseValue = this.paramBasePlus(paramId)
-                *  this.paramRate(paramId) + this.paramEquip(paramId);
-        const value = baseValue * this.paramBuffRate(paramId);
-        const maxValue = this.paramMax(paramId);
-        const minValue = this.paramMin(paramId);
-        return Math.round(value.clamp(minValue, maxValue));
+    Game_Actor.prototype.paramWithoutBuff = function(paramId) {
+        return this.paramBasePlus(paramId) * this.paramRate(paramId) + this.paramEquip(paramId);
     };
 
     /**

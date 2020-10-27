@@ -536,8 +536,8 @@ Traitの持ってるメンバ
 |EFFECT_ADD_STATE|21|0|付与率(0.0～1.0)|-|攻撃ステート付与効果。使用者のattackStates()を付与効果。|
 |||ステートID|付与率|-|通常ステート付与効果。dataIdで指定されたステートの付与効果。|
 |EFFECT_REMOVE_STATE|22|||||
-|EFFECT_ADD_BUFF|31|||||
-|EFFECT_ADD_DEBUFF|32|||||
+|EFFECT_ADD_BUFF|31|パラメータID|適用ターン数|-|指定したパラメータのバフレベルを1段階向上させる。効果期間はvalue1ターン。|
+|EFFECT_ADD_DEBUFF|32|パラメータID|適用ターン数|-|指定したパラメータのバフレベルを1段階低下させる。効果期間はvalue1ターン。|
 |EFFECT_REMOVE_BUFF|33|||||
 |EFFECT_REMOVE_DEBUFF|34|||||
 |EFFECT_SPECIAL|41|||||
