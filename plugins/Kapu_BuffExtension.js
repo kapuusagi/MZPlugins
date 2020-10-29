@@ -23,6 +23,21 @@
  * @default 108
  * 
  * 
+ * @param stateRateBuffTraitCode 
+ * @text ステート割合バフ特性コード
+ * @param ステートに付与する割合増加の特性に割り当てるコード値。
+ * @type number
+ * @min 65
+ * @default 104
+ * 
+ * @param stateFixedBuffTraitCode
+ * @text ステート固定バフ特性コード
+ * @param ステートに付与する固定量増加の特性に割り当てるコード値。
+ * @type number
+ * @min 65
+ * @default 105
+ * 
+ * 
  * 
  * @help 
  * バフの拡張をするプラグイン。
@@ -36,9 +51,20 @@
  *    無バフ時に100で、5%減少がかかった状態に対し、バフ5%減を重ねがけしても減少しない。
  *    対象ターン数だけ、長い方に上書きされる。
  * 
+ * 2. ステート用のバフ追加
+ *    ベーシックシステムでは最大HP割合増加などが使用出来るのでそちらでも良い。
+ *    固定量増減や、レート特性の適用対象を変更している場合用に作成した。
+ *    例えば装備品による増減分を、レート特性から外していた場合、
+ *    バフ側で適用しないと増えない。
+ *    複数のレート、加算値がある場合、いずれも和をとって適用する。
+ *    また1のバフ仕様変更により、一番効果が高いものが適用されるようになるが、
+ *    それとは別系統でバフ/デバフを適用したい場合にはこちらを使用する。
  * 
  * ■ 使用時の注意
  * 他のバフを変更する系統のプラグインと競合します。
+ * 固定量バフに計算式を使用するとき、参照するパラメータに注意が必要です。
+ * 詳細はノートタグの説明を参照。
+ * 
  * 
  * ■ プラグイン開発者向け
  * なし。
@@ -89,9 +115,49 @@
  *          :
  *     <debuffValue7:eval$>
  *         各パラメータのデバフ計算式としてevalを使用する。
+ *         a:使用者
+ *         b:対象
+ *         v:変数
+ *         参照パラメータに注意すること。
+ *         例えば b.atk * 1.5 とすると、使用者のバフ込みの値を1.5倍した効果量になり、
+ *         使用毎に効果量が激増してしまう。
+ *         バフの対象になるパラメータを参照しないか、b.paramWithoutBuff(2)など、
+ *         バフ無しパラメータを使うようにする。
  * 
  *     <debuffValue:eval$>
  *         デバフ量の計算式としてeval$を使用する。
+ *         a:使用者
+ *         b:対象
+ *         v:変数
+ *         参照パラメータに注意すること。
+ *         例えば b.atk * 1.5 とすると、使用者のバフ込みの値を1.5倍した効果量になり、
+ *         使用毎に効果量が激増してしまう。
+ *         バフの対象になるパラメータを参照しないか、b.paramWithoutBuff(2)など、
+ *         バフ無しパラメータを使うようにする。
+ * 
+ * ステート
+ *     <addRateBuff:target,rate>
+ *          割合バフを付与する効果を持たせる。
+ *          targetで指定するパラメータにrate割合だけ加算するバフになる。
+ *          複数指定可。
+ *          target:MaxHP,MaxMP,ATK,DEF,MAT,MDF,AGI,LUK
+ *     <addRateDebuff:target,rate>
+ *          割合デバフを付与する効果を持たせる。
+ *          targetで指定するパラメータにrate割合だけ減算するデバフになる。
+ *          複数指定可。
+ *          target:MaxHP,MaxMP,ATK,DEF,MAT,MDF,AGI,LUK
+ *     <addFixedBuff:target,value>
+ *          固定バフを付与する効果を持たせる。
+ *          targetで指定するパラメータにvalueだけ加算するバフになる。
+ *          計算式は使用出来ない。（処理が重すぎるため）
+ *          複数指定可。
+ *          target:MaxHP,MaxMP,ATK,DEF,MAT,MDF,AGI,LUK
+ *     <addFixedDebuff:target,value>
+ *          固定バフを付与する効果を持たせる。
+ *          targetで指定するパラメータにvalueだけ減算するデバフになる。
+ *          複数指定可。
+ *          計算式は使用出来ない。（処理が重すぎるため）
+ *          target:MaxHP,MaxMP,ATK,DEF,MAT,MDF,AGI,LUK
  * ============================================
  * 変更履歴
  * ============================================
@@ -109,12 +175,20 @@ function Game_Buff() {
     const parameters = PluginManager.parameters(pluginName);
     Game_Action.EFFECT_ADD_BUFF_FIXED = Number(parameters["fixedBuffEffectCode"]) || 0;
     Game_Action.EFFECT_ADD_DEBUFF_FIXED = Number(parameters["fixedDebuffEffectCode"]) || 0;
+    Game_BattlerBase.TRAIT_STATE_RATEBUFF = Number(parameters["stateRateBuffTraitCode"]) || 0;
+    Game_BattlerBase.TRAIT_STATE_FIXEDBUFF = Number(parameters["stateFixedBuffTraitCode"]) || 0;
 
     if (!Game_Action.EFFECT_ADD_BUFF_FIXED) {
         console.error(pluginName + ":EFFECT_ADD_BUFF_FIXED is not valid.");
     }
     if (!Game_Action.EFFECT_ADD_DEBUFF_FIXED) {
         console.error(pluginName + ":EFFECT_ADD_DEBUFF_FIXED is not valid.");
+    }
+    if (!Game_BattlerBase.TRAIT_STATE_RATEBUFF) {
+        console.error(pluginName + ":TRAIT_STATE_RATEBUFF is not valid.");
+    }
+    if (!Game_BattlerBase.TRAIT_STATE_FIXEDBUFF) {
+        console.error(pluginName + ":TRAIT_STATE_FIXEDBUFF is not valid.");
     }
 
     //------------------------------------------------------------------------------
@@ -158,7 +232,7 @@ function Game_Buff() {
      * 
      * @param {Object} obj データオブジェクト
      */
-    const _processNoteTag = function(obj) {
+    const _processEffectNoteTag = function(obj) {
         // ノートタグを処理する。
         const effectTargets = ["MaxHP", "MaxMP", "ATK", "DEF", "MAT", "MDF", "AGI", "LUK"];
         const patternRateBuff = /<addRateBuff:([a-zA-Z]+) *, *(\d+%?) *, *(\d+) *>/;
@@ -200,10 +274,70 @@ function Game_Buff() {
             }
         }
     };
-    DataManager.addNotetagParserSkillis(_processNoteTag);
-    DataManager.addNotetagParserItems(_processNoteTag);
+    DataManager.addNotetagParserSkillis(_processEffectNoteTag);
+    DataManager.addNotetagParserItems(_processEffectNoteTag);
 
 
+    /**
+     * ノートタグを処理する。
+     * 
+     * @param {Object} obj データオブジェクト
+     */
+    const _processStateNoteTag = function(obj) {
+        // ノートタグを処理する。
+        const effectTargets = ["MaxHP", "MaxMP", "ATK", "DEF", "MAT", "MDF", "AGI", "LUK"];
+        const patternRateBuff = /<addRateBuff:([a-zA-Z]+) *, *(\d+%?) *>/;
+        const patternRateDebuff = /<addRateDebuff:([a-zA-Z]+) *, *(\d+%?) *>/;
+        const patternFixedBuff = /<addFixedBuff:([a-zA-Z]+) *, *(\d+%?) *>/;
+        const patternFixedDebuff = /<addFixedDebuff:([a-zA-Z]+) *, *(\d+%?) *>/;
+
+        const lines = obj.note.split(/[\r\n]+/);
+        for (line of lines) {
+            let re;
+            if ((re = line.match(patternRateBuff)) !== null) {
+                const target = effectTargets.indexOf(re[1]);
+                const rate = _getRate(re[2]);
+                if ((target >= 0) && (rate > 0)) {
+                    obj.traits.push({
+                        code:Game_BattlerBase.TRAIT_STATE_RATEBUFF,
+                        dataId:target,
+                        value:rate
+                    })
+                }
+            } else if ((re = line.match(patternRateDebuff)) !== null) {
+                const target = effectTargets.indexOf(re[1]);
+                const rate = _getRate(re[2]);
+                if ((target >= 0) && (rate > 0)) {
+                    obj.traits.push({
+                        code:Game_BattlerBase.TRAIT_STATE_RATEBUFF,
+                        dataId:target,
+                        value:-rate
+                    })
+                }
+            } else if ((re = line.match(patternFixedBuff)) !== null) {
+                const target = effectTargets.indexOf(re[1]);
+                const value = Number(re[2]) || 0;
+                if ((target >= 0) && (value > 0)) {
+                    obj.traits.push({
+                        code:Game_BattlerBase.TRAIT_STATE_FIXEDBUFF,
+                        dataId:target,
+                        value:value
+                    })
+                }
+            } else if ((re = line.match(patternFixedDebuff)) !== null) {
+                const target = effectTargets.indexOf(re[1]);
+                const value = Number(re[2]) || 0;
+                if ((target >= 0) && (value > 0)) {
+                    obj.traits.push({
+                        code:Game_BattlerBase.TRAIT_STATE_FIXEDBUFF,
+                        dataId:target,
+                        value:-value
+                    })
+                }
+            }
+        }
+    };
+    DataManager.addNotetagParserStattes(_processStateNoteTag);
 
     //------------------------------------------------------------------------------
     // Game_Buff
@@ -377,8 +511,21 @@ function Game_Buff() {
      */
     Game_BattlerBase.prototype.applyBuff = function(paramId, baseValue) {
         const buffValue = this._buffs[paramId].calcBuffValue(baseValue);
-        const stateBuffValue = 0;/* ステートによるバフ加算量 */
+        const stateBuffValue = this.stateBuff(paramid, baseValue);/* ステートによるバフ加算量 */
         return baseValue + buffValue + stateBuffValue;
+    };
+
+    /**
+     * ステートバフの加減量を得る。
+     * 
+     * @param {パラメータID} paramId パラメータID 
+     * @param {ベース値} baseValue ベース値
+     * @return {Number} 加減する値。
+     */
+    Game_BattlerBase.prototype.stateBuff = function(paramId, baseValue) {
+        const rate = this.traitsSum(Game_BattlerBase.TRAIT_STATE_RATEBUFF, paramId);
+        const fixedValue = this.traitsSum(Game_BattlerBase.TRAIT_STATE_FIXEDBUFF);
+        return Math.round(baseValue * rate) + fixedValue;
     };
 
 
@@ -782,10 +929,9 @@ function Game_Buff() {
         const evalStr = item.meta["buffValue" + paramId] || item.meta.buffValue;
         if (evalStr) {
             try {
-                // eslint-disable-next-line no-unused-vars
-                const a = this.subject();
-                // eslint-disable-next-line no-unused-vars
-                const b = target;
+                const a = this.subject(); // eslint-disable-line no-unused-vars
+                const b = target; // eslint-disable-line no-unused-vars
+                const v = $gameVariables._data; // eslint-disable-line no-unused-vars
                 return Math.max(0, Math.round(eval(evalStr)));
             }
             catch (e) {
@@ -821,10 +967,9 @@ function Game_Buff() {
         const evalStr = item.meta["debuffValue" + paramId] || item.meta.debuffValue;
         if (evalStr) {
             try {
-                // eslint-disable-next-line no-unused-vars
-                const a = this.subject();
-                // eslint-disable-next-line no-unused-vars
-                const b = target;
+                const a = this.subject(); // eslint-disable-line no-unused-vars
+                const b = target; // eslint-disable-line no-unused-vars
+                const v = $gameVariables._data; // eslint-disable-line no-unused-vars
                 return Math.max(0, Math.round(eval(evalStr)));
             }
             catch (e) {
