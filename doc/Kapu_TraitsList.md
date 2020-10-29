@@ -70,6 +70,8 @@ __TRAIT_SPECIAL_FLAG__ の __dataId__ として使用される。
 |__EFFECT_GAIN_TPB_CHARGE_TIME__|104|-|確率|効果量|チャージタイムを加減する効果。|
 |__EFFECT_GAIN_TPB_CAST_TIME__|105|-|確率|効果量|キャストタイムを加減する効果。|
 |__EFFECT_BREAK_TPB_CASTING__|106|-|確率|-|キャスト中のアクションをキャンセルさせる効果。|
+|__EFFECT_ADD_BUFF_FIXED__|107|パラメータID|ターン数|値|固定量加算する効果。|
+|__EFFECT_ADD_DEBUFF_FIXED__|108|パラメータID|ターン数|値|固定量減算する効果。|
 |||||||
 |__EFFECT_BASIC_PARAM_ADD__|1001|パラメータID|増減させる値|-|基本パラメータを指定した値だけ増減させる|
 |__EFFECT_UPDATE_LUK__|1002|0|-|-|LUKを既定値でランダム変動させる。|
