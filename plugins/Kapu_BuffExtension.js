@@ -277,10 +277,10 @@ function Game_Buff() {
     const _processEffectNoteTag = function(obj) {
         // ノートタグを処理する。
         const effectTargets = ["MaxHP", "MaxMP", "ATK", "DEF", "MAT", "MDF", "AGI", "LUK"];
-        const patternRateBuff = /<addRateBuff:([a-zA-Z]+) *, *(\d+%?) *, *(\d+) *>/;
-        const patternRateDebuff = /<addRateDebuff:([a-zA-Z]+) *, *(\d+%?) *, *(\d+) *>/;
-        const patternFixedBuff = /<addFixedBuff:([a-zA-Z]+) *, *(\d+%?) *, *(\d+) *>/;
-        const patternFixedDebuff = /<addFixedDebuff:([a-zA-Z]+) *, *(\d+%?) *, *(\d+) *>/;
+        const patternRateBuff = /<addRateBuff:([a-zA-Z]+) *, *(\d+\.?\d+%?) *, *(\d+) *>/;
+        const patternRateDebuff = /<addRateDebuff:([a-zA-Z]+) *, *(\d+\.?\d+%?) *, *(\d+) *>/;
+        const patternFixedBuff = /<addFixedBuff:([a-zA-Z]+) *, *(\d+) *, *(\d+) *>/;
+        const patternFixedDebuff = /<addFixedDebuff:([a-zA-Z]+) *, *(\d+) *, *(\d+) *>/;
 
         const lines = obj.note.split(/[\r\n]+/);
         for (line of lines) {
@@ -345,10 +345,10 @@ function Game_Buff() {
     const _processStateNoteTag = function(obj) {
         // ノートタグを処理する。
         const effectTargets = ["MaxHP", "MaxMP", "ATK", "DEF", "MAT", "MDF", "AGI", "LUK"];
-        const patternRateBuff = /<addRateBuff:([a-zA-Z]+) *, *(\d+%?) *>/;
-        const patternRateDebuff = /<addRateDebuff:([a-zA-Z]+) *, *(\d+%?) *>/;
-        const patternFixedBuff = /<addFixedBuff:([a-zA-Z]+) *, *(\d+%?) *>/;
-        const patternFixedDebuff = /<addFixedDebuff:([a-zA-Z]+) *, *(\d+%?) *>/;
+        const patternRateBuff = /<addRateBuff:([a-zA-Z]+) *, *(\d+\.?\d+%?) *>/;
+        const patternRateDebuff = /<addRateDebuff:([a-zA-Z]+) *, *(\d+\.?\d+%?) *>/;
+        const patternFixedBuff = /<addFixedBuff:([a-zA-Z]+) *, *(\d+) *>/;
+        const patternFixedDebuff = /<addFixedDebuff:([a-zA-Z]+) *, *(\d+) *>/;
 
         const lines = obj.note.split(/[\r\n]+/);
         for (line of lines) {
