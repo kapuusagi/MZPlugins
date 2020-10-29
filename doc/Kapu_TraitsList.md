@@ -66,7 +66,10 @@ __Game_BattlerBase.TRAIT_SPECIAL_FLAG__(値=62)で定義される。
 |106|__FLAG_ID_CERTAINLY_EVA_MAG__|必中スキル以外は確実に回避する。|
 |107|__FLAG_ID_BLOCK_CAST_BREAK__|TPBキャストブレークを防ぐフラグ。|
 |108|__FLAG_ID_BLOCK_TPB_LOSE__|TPB減少効果を防ぐフラグ。|
-|||
+|109|__FLAG_ID_BUFFTURN_ADD__|特性保持者がバフを付与する場合、効果ターンを+1する。|
+|110|__FLAG_ID_DEBUFFTURN_ADD__|特性保持者がデバフを付与する場合、効果ターンを+1する。|
+|111|__FLAG_ID_ACPT_BUFFTURN_UP__|特性保持者がバフを受けた場合、効果ターンを+1する。|
+|111|__FLAG_ID_ACPT_DEBUFFTURN_DOWN__|特性保持者がデバフを受けた場合、効果ターンを-1する。|
 
 ### パーティーアビリティ
 

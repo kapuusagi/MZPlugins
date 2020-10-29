@@ -37,7 +37,33 @@
  * @min 65
  * @default 105
  * 
+ * @param buffTurnAddSpecialFlagId
+ * @text バフ付与ターン数増加スペシャルフラグ
+ * @desc バフ付与ターン数増加特性に割り当てるフラグ値
+ * @type number
+ * @min 5
+ * @default 109
  * 
+ * @param debuffTurnAddSpecialFlagId
+ * @text デバフ付与ターン数増加スペシャルフラグ
+ * @desc デバフ付与ターン数増加特性に割り当てるフラグ値
+ * @type number
+ * @min 5
+ * @default 110
+ * 
+ * @param acceptBuffTurnUpSpecialFlagId
+ * @text バフ付与ターン数増加スペシャルフラグ
+ * @desc バフ付与ターン数増加特性に割り当てるフラグ値
+ * @type number
+ * @min 5
+ * @default 111
+ * 
+ * @param acceptDebuffTurnDownSpecialFlagId
+ * @text デバフ付与ターン数減少スペシャルフラグ
+ * @desc デバフ付与ターン数減少特性に割り当てるフラグ値
+ * @type number
+ * @min 5
+ * @default 112
  * 
  * @help 
  * バフの拡張をするプラグイン。
@@ -177,6 +203,10 @@ function Game_Buff() {
     Game_Action.EFFECT_ADD_DEBUFF_FIXED = Number(parameters["fixedDebuffEffectCode"]) || 0;
     Game_BattlerBase.TRAIT_STATE_RATEBUFF = Number(parameters["stateRateBuffTraitCode"]) || 0;
     Game_BattlerBase.TRAIT_STATE_FIXEDBUFF = Number(parameters["stateFixedBuffTraitCode"]) || 0;
+    Game_BattlerBase.FLAG_ID_BUFFTURN_ADD = Number(parameters["buffTurnAddSpecialFlagId"]) || 0;
+    Game_BattlerBase.FLAG_ID_DEBUFFTURN_ADD = Number(parameters["debuffTurnAddSpecialFlagId"]) || 0;
+    Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP = Number(parameters["acceptBuffTurnUpSpecialFlagId"]) || 0;
+    Game_BattlerBase.FLAG_ID_ACPT_DEBUFFTURN_DOWN = Number(parameters["acceptDebuffTurnDownSpecialFlagId"]) || 0;
 
     if (!Game_Action.EFFECT_ADD_BUFF_FIXED) {
         console.error(pluginName + ":EFFECT_ADD_BUFF_FIXED is not valid.");
@@ -189,6 +219,18 @@ function Game_Buff() {
     }
     if (!Game_BattlerBase.TRAIT_STATE_FIXEDBUFF) {
         console.error(pluginName + ":TRAIT_STATE_FIXEDBUFF is not valid.");
+    }
+    if (!Game_BattlerBase.FLAG_ID_BUFFTURN_ADD) {
+        console.error(pluginName + ":FLAG_ID_BUFFTURN_ADD is not valid.");
+    }
+    if (!Game_BattlerBase.FLAG_ID_DEBUFFTURN_ADD) {
+        console.error(pluginName + ":FLAG_ID_DEBUFFTURN_ADD is not valid.");
+    }
+    if (!Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP) {
+        console.error(pluginName + ":FLAG_ID_ACPT_BUFFTURN_UP is not valid.");
+    }
+    if (Game_BattlerBase.FLAG_ID_ACPT_DEBUFFTURN_DOWN) {
+        console.error(pluginName + ":FLAG_ID_ACPT_DEBUFFTURN_DOWN is not valid.");
     }
 
     //------------------------------------------------------------------------------
@@ -277,6 +319,23 @@ function Game_Buff() {
     DataManager.addNotetagParserSkillis(_processEffectNoteTag);
     DataManager.addNotetagParserItems(_processEffectNoteTag);
 
+    /**
+     * 特性を追加する。
+     * 
+     * @param {Object} obj データオブジェクト。
+     * @param {Number} code コード
+     * @param {Number} dataId データID
+     * @param {Number} value 値
+     */
+    const _addTrait = function(obj, code, dataId, value) {
+        if (code) {
+            obj.traits.push({
+                code:code,
+                dataId:dataId,
+                value:value
+            })
+        }
+    };
 
     /**
      * ノートタグを処理する。
@@ -298,46 +357,61 @@ function Game_Buff() {
                 const target = effectTargets.indexOf(re[1]);
                 const rate = _getRate(re[2]);
                 if ((target >= 0) && (rate > 0)) {
-                    obj.traits.push({
-                        code:Game_BattlerBase.TRAIT_STATE_RATEBUFF,
-                        dataId:target,
-                        value:rate
-                    })
+                    _addTrait(obj, Game_BattlerBase.TRAIT_STATE_RATEBUFF, target, rate);
                 }
             } else if ((re = line.match(patternRateDebuff)) !== null) {
                 const target = effectTargets.indexOf(re[1]);
                 const rate = _getRate(re[2]);
                 if ((target >= 0) && (rate > 0)) {
-                    obj.traits.push({
-                        code:Game_BattlerBase.TRAIT_STATE_RATEBUFF,
-                        dataId:target,
-                        value:-rate
-                    })
+                    _addTrait(obj, Game_BattlerBase.TRAIT_STATE_RATEBUFF, target, -rate);
                 }
             } else if ((re = line.match(patternFixedBuff)) !== null) {
                 const target = effectTargets.indexOf(re[1]);
                 const value = Number(re[2]) || 0;
                 if ((target >= 0) && (value > 0)) {
-                    obj.traits.push({
-                        code:Game_BattlerBase.TRAIT_STATE_FIXEDBUFF,
-                        dataId:target,
-                        value:value
-                    })
+                    _addTrait(obj, Game_BattlerBase.TRAIT_STATE_FIXEDBUFF, target, value);
                 }
             } else if ((re = line.match(patternFixedDebuff)) !== null) {
                 const target = effectTargets.indexOf(re[1]);
                 const value = Number(re[2]) || 0;
                 if ((target >= 0) && (value > 0)) {
-                    obj.traits.push({
-                        code:Game_BattlerBase.TRAIT_STATE_FIXEDBUFF,
-                        dataId:target,
-                        value:-value
-                    })
+                    _addTrait(obj, Game_BattlerBase.TRAIT_STATE_FIXEDBUFF, target, -value);
                 }
             }
         }
+
+        _processTraitNoteTag(obj);
     };
     DataManager.addNotetagParserStattes(_processStateNoteTag);
+    /**
+     * ノートタグを処理する。
+     * 
+     * @param {Object} obj データオブジェクト
+     */
+    const _processTraitNoteTag = function(obj) {
+        if (Game_BattlerBase.FLAG_ID_BUFFTURN_ADD && obj.meta.buffTurnAdd) {
+            _addTrait(obj, Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP,
+                    Game_BattlerBase.FLAG_ID_BUFFTURN_ADD, 0);
+        }
+        if (Game_BattlerBase.FLAG_ID_DEBUFFTURN_ADD && obj.meta.debuffTurnAdd) {
+            _addTrait(obj, Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP,
+                    Game_BattlerBase.FLAG_ID_DEBUFFTURN_ADD, 0);
+        }
+        if (Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP && obj.meta.acceptBuffTurnUp) {
+            _addTrait(obj, Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP,
+                    Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP, 0);
+        }
+        if (Game_BattlerBase.FLAG_ID_ACPT_DEBUFFTURN_DOWN && obj.meta.acceptBuffTurnDown) {
+            _addTrait(obj, Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP,
+                    Game_BattlerBase.FLAG_ID_ACPT_DEBUFFTURN_DOWN, 0);
+        }
+    };
+    DataManager.addNotetagParserActors(_processTraitNoteTag);
+    DataManager.addNotetagParserClasses(_processTraitNoteTag);
+    DataManager.addNotetagParserWeapons(_processTraitNoteTag);
+    DataManager.addNotetagParserArmors(_processTraitNoteTag);
+    DataManager.addNotetagParserEnemies(_processTraitNoteTag);
+
 
     //------------------------------------------------------------------------------
     // Game_Buff
@@ -756,6 +830,86 @@ function Game_Buff() {
         }
     };
 
+    if (Game_BattlerBase.FLAG_ID_BUFFTURN_ADD) {
+        /**
+         * バフを付与する時のターンボーナスを得る。
+         * 
+         * @return {Number} 加算するターン数
+         */
+        Game_BattlerBase.prototype.giveBuffTurnBonus = function() {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_BUFFTURN_ADD) ? 1 : 0;
+        };
+    } else {
+        /**
+         * バフを付与する時のターンボーナスを得る。
+         * 
+         * @return {Number} 加算するターン数
+         */
+        Game_BattlerBase.prototype.giveBuffTurnBonus = function() {
+            return 0;
+        };
+    }
+
+    if (Game_BattlerBase.FLAG_ID_DEBUFFTURN_ADD) {
+        /**
+         * デバフを付与する時のターンボーナスを得る。
+         * 
+         * @return {Number} 加算するターン数
+         */
+        Game_BattlerBase.prototype.giveDebuffTurnBonus = function() {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_DEBUFFTURN_ADD) ? 1 : 0;
+        };
+    } else {
+        /**
+         * デバフを付与する時のターンボーナスを得る。
+         * 
+         * @return {Number} 加算するターン数
+         */
+        Game_BattlerBase.prototype.giveDebuffTurnBonus = function() {
+            return 0;
+        };
+    }
+
+    if (Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP) {
+        /**
+         * バフを受けるときのターンボーナスを得る。
+         * 
+         * @return {Number} 加算するターン数
+         */
+        Game_BattlerBase.prototype.acceptBuffTurnBonus = function() {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP) ? 1 : 0;
+        };
+    } else {
+        /**
+         * バフを受けるときのターンボーナスを得る。
+         * 
+         * @return {Number} 加算するターン数
+         */
+        Game_BattlerBase.prototype.acceptBuffTurnBonus = function() {
+            return 0;
+        };
+    }
+    if (Game_BattlerBase.FLAG_ID_ACPT_DEBUFFTURN_DOWN) {
+        /**
+         * デバフを受けるときのターンボーナスを得る。
+         * 
+         * @return {Number} 加算するターン数
+         */
+        Game_BattlerBase.prototype.acceptDebuffTurnBonus = function() {
+            return this.specialFlag(Game_BattlerBase.FLAG_ID_ACPT_DEBUFFTURN_DOWN) ? -1 : 0;
+        };
+    } else {
+        /**
+         * デバフを受けるときのターンボーナスを得る。
+         * 
+         * @return {Number} 加算するターン数
+         */
+        Game_BattlerBase.prototype.acceptDebuffTurnBonus = function() {
+            return 0;
+        };
+    }
+
+
     //------------------------------------------------------------------------------
     // Game_Battler
     /**
@@ -881,7 +1035,7 @@ function Game_Buff() {
      * !!!overwrite!!! Game_Action.itemEffectAddBuff()
      */
     Game_Action.prototype.itemEffectAddBuff = function(target, effect) {
-        const turns = effect.value1;
+        const turns = this.itemBuffTurns(target, effect.value1);
         const rate = effect.value2 || 0.25; // 0.25はベーシックシステムのデフォルト
         target.addRateBuff(effect.dataId, rate, turns);
         this.makeSuccess(target);
@@ -898,7 +1052,7 @@ function Game_Buff() {
     Game_Action.prototype.itemEffectAddDebuff = function(target, effect) {
         let chance = target.debuffRate(effect.dataId) * this.lukEffectRate(target);
         if (Math.random() < chance) {
-            const turns = effect.value1;
+            const turns = this.itemDebuffTurns(effect.value1);
             const rate = effect.value2 || 0.25; // 0.25はベーシックシステムのデフォルト
             target.addRateDebuff(effect.dataId, rate, turns);
             this.makeSuccess(target);
@@ -912,8 +1066,9 @@ function Game_Buff() {
      * @param {Effect} effect エフェクトデータ
      */
     Game_Action.prototype.itemEffectAddBuffFixed = function(target, effect) {
+        const turns = this.itemBuffTurns(target, effect.value1);
         const buffValue = this.itemBuffValue(target, effect.dataId, effect.value2)
-        target.addRateBuff(effect.dataId, effect.value1, buffValue);
+        target.addFixedBuff(effect.dataId, buffValue, turns);
         this.makeSuccess(target);
     };
 
@@ -950,8 +1105,9 @@ function Game_Buff() {
     Game_Action.prototype.itemEffectAddDebuffFixed = function(target, effect) {
         let chance = target.debuffRate(effect.dataId) * this.lukEffectRate(target);
         if (Math.random() < chance) {
+            const turns = this.itemDebuffTurns(target, effect.value1);
             const buffValue = this.itemDebuffValue(effect.dataId, effect.value2)
-            target.addRateDebuff(effect.dataId, effect.value1, buffValue);
+            target.addFixedDebuff(effect.dataId, buffValue, turns);
             this.makeSuccess(target);
         }
     };
@@ -977,6 +1133,34 @@ function Game_Buff() {
             }
         }
         return value;
+    };
+
+    /**
+     * バフターン数を得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {Number} turns 基本ターン数
+     * @return {Number 効果ターン数が返る。
+     */
+    Game_Action.prototype.itemBuffTurns = function(target, turns) {
+        const subject = this.subject();
+        turns += subject.giveBuffTurnBonus();
+        turns += target.acceptBuffTurnBonus();
+        return Math.max(1, turns);
+    };
+
+    /**
+     * デバフターン数を得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {Number} turns 基本ターン数
+     * @return {Number 効果ターン数が返る。
+     */
+    Game_Action.prototype.itemDebuffTurns = function(target, turns) {
+        const subject = this.subject();
+        turns += subject.giveDebuffTurnBonus();
+        turns += target.acceptDebuffTurnBonus();
+        return Math.max(1, turns);
     };
 
 
