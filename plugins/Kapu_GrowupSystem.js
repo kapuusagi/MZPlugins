@@ -72,9 +72,16 @@
  * @default 102
  * @min 4
  * 
+ * @param initialGrowPoint
+ * @text 初期育成ポイント
+ * @desc 育成ポイント初期値
+ * @type number
+ * @default 10
+ * @min 0
+ * 
  * @param growPointText
  * @text 成長ポイント名
- * @desc 成長ポイントの名前
+ * @desc 成長ポイントの名前。UI表示などでTextManager.growPointで取得するラベルに使用する。
  * @type string
  * @default GP
  * 
@@ -164,6 +171,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 Lv1時のGrowPointをプラグインパラメータで用意できるようにした。
  * Version.0.3.0 使用済みGrowPointを計算するインタフェースを追加。
  *               セットアップの煩わしさを軽減する。
  * Version.0.2.0 育成状態変更時に通知を受け取るonGrownメソッドを追加。
@@ -180,6 +188,7 @@
     const growPointText = String(parameters["growPointText"]) || "GP";
     const enableProperty = (typeof parameters["enableProperty"] === "undefined")
             ? false : (parameters["enableProperty"] === "true");
+    const initialGrowPoint = Number(parameters["initialGrowPoint"]) || 10;
 
     Object.defineProperty(TextManager, "growPoint", { get: () => growPointText, configurable:true});
 
@@ -272,7 +281,7 @@
      */
     Game_Actor.prototype.initMembers = function() {
         _Game_Actor_initMembers.call(this);
-        this._growPoint = { current : 10, max : 10 };
+        this._growPoint = { current : initialGrowPoint, max : initialGrowPoint };
     };
 
     const _Game_Actor_setup = Game_Actor.prototype.setup;
@@ -298,10 +307,13 @@
     /**
      * 現在のレベルに対応するGrowPoint合計値を計算する。
      * 
+     * Note: Lvアップ毎にランダムで増減する拡張もあり得るため、
+     *       setup()時の初期値を計算する時だけ使用する。
+     * 
      * @return {Number} 育成ポイント合計
      */
     Game_Actor.prototype.growPointOfLevel = function() {
-        let value = 10;
+        let value = initialGrowPoint;
         for (let lv = 2; lv <= this.level; lv++) {
             value += this.growPointAtLevelUp(lv);
         }

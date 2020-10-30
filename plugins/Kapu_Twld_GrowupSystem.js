@@ -43,8 +43,10 @@
  * 育成に転生要素とボーナスを追加する。
  * 
  * ■ 使用時の注意
+ * 特になし。
  * 
  * ■ プラグイン開発者向け
+ * 特になし。
  * 
  * ============================================
  * プラグインコマンド
@@ -98,6 +100,13 @@
     };
 
     /**
+     * 転生させたときに減算するGrowPointを得る。
+     */
+    Game_Actor.prototype.updateGrowPointOfReincarnation = function() {
+        this._growPoint.max -= 484; // Lv2~Lv99まであげたときのボーナス合計値-10。10はボーナスとして残す。
+    };
+
+    /**
      * 転生カウントを得る。
      * 
      * @return {Number} 転生回数
@@ -145,8 +154,9 @@
             this._basicParamsReBonus[i] = newValue.clamp(0, 200);
         }
 
-        // 育成ボーナスをレベルアップ分だけ引き、リセットする。
-        this._growPoint.max -= 484; // Lv2~Lv99まであげたときのボーナス合計値-10。10はボーナスとして残す。
+        // 育成ボーナスを転生時の値にセットする。
+        this.updateGrowPointOfReincarnation();
+
 
         // レベルを1に戻す。
         this.changeLevel(1, false);
