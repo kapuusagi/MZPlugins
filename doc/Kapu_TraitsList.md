@@ -11,6 +11,7 @@
 |103|__TRAIT_DAMAGE_LIMIT__|-|最大ダメージ制限を変更する特性。|
 |104|__TRAIT_STATE_RATEBUFF__|パラメータID|ステートの特性として使用するバフ効果。ベーシックシステムの割合増減とは別のレートになる。|
 |105|__TRAIT_STATE_FIXEDBUFF__|パラメータID|ステートの特性として使用するバフ効果。|
+|106|__TRAIT_UNRECOVER__|ブロック効果対象|ブロック効果対象特性。|
 ||||
 |1001|__TRAIT_BASIC_PARAM__|基本パラメータを加算する特性|
 |1002|__TRAIT_BASIC_PARAM_RATE__|基本パラメータ乗算レート特性|
@@ -69,7 +70,7 @@ __Game_BattlerBase.TRAIT_SPECIAL_FLAG__(値=62)で定義される。
 |109|__FLAG_ID_BUFFTURN_ADD__|特性保持者がバフを付与する場合、効果ターンを+1する。|
 |110|__FLAG_ID_DEBUFFTURN_ADD__|特性保持者がデバフを付与する場合、効果ターンを+1する。|
 |111|__FLAG_ID_ACPT_BUFFTURN_UP__|特性保持者がバフを受けた場合、効果ターンを+1する。|
-|111|__FLAG_ID_ACPT_DEBUFFTURN_DOWN__|特性保持者がデバフを受けた場合、効果ターンを-1する。|
+|112|__FLAG_ID_ACPT_DEBUFFTURN_DOWN__|特性保持者がデバフを受けた場合、効果ターンを-1する。|
 
 ### パーティーアビリティ
 
