@@ -71,6 +71,7 @@ __Game_BattlerBase.TRAIT_SPECIAL_FLAG__(値=62)で定義される。
 |110|__FLAG_ID_DEBUFFTURN_ADD__|特性保持者がデバフを付与する場合、効果ターンを+1する。|
 |111|__FLAG_ID_ACPT_BUFFTURN_UP__|特性保持者がバフを受けた場合、効果ターンを+1する。|
 |112|__FLAG_ID_ACPT_DEBUFFTURN_DOWN__|特性保持者がデバフを受けた場合、効果ターンを-1する。|
+|113|__FLAG_ID_ENDURE_DYING__|ダメージを受けたとき、HP1で耐える特性。|
 
 ### パーティーアビリティ
 
