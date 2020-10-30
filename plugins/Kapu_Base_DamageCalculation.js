@@ -4,6 +4,11 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
+ * @param debug
+ * @text デバッグ
+ * @desc ダメージ計算をデバッグするかどうか。
+ * @type boolean
+ * @default false
  * 
  * @help 
  * ダメージ計算処理を拡張するためのプラグイン。
@@ -74,6 +79,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 デバッグ用にログにデータを出力するようにした。
  * Version.0.3.0 最大ダメージをmaxDamageメソッドで制限できるようにした。
  *               おくとらの限界突破みたいなのやりたいかもね。
  * Version.0.2.0 ダメージ計算時、一時的に付与するTraitを設定出来るようにした。
@@ -83,6 +89,11 @@
  *               コアプラグインは競合しやすいので、あんまりやりたくないけど..。
  */
 (() => {
+    const pluginName = "Kapu_Base_DamageCalculation";
+    const parameters = PluginManager.parameters(pluginName);
+    const isDebug = (typeof parameters["debug"] === "undefined")
+            ? false : (parameters["debug"] === "true");
+
     //------------------------------------------------------------------------------
     // Game_Battler
     const _Game_Battler_allTraits = Game_BattlerBase.prototype.allTraits;
@@ -136,37 +147,85 @@
 
     //------------------------------------------------------------------------------
     // Game_Action
-    /**
-     * ダメージ値を計算する。
-     * 
-     * @param {Game_BattlerBase} target 対象
-     * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} ダメージ値
-     * !!!overwrite!!! Game_Action.makeDamageValue
-     */
-    Game_Action.prototype.makeDamageValue = function(target, critical) {
-        const subjectAddtionalTraits = this.additionalSubjectTraits(target);
-        const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
-        this.subject().setTempTraits(subjectAddtionalTraits);
-        target.setTempTraits(targetAdditionalTraits);
+    if (isDebug) {
+        /**
+         * ダメージ値を計算する。
+         * 
+         * @param {Game_BattlerBase} target 対象
+         * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+         * @return {Number} ダメージ値
+         * !!!overwrite!!! Game_Action.makeDamageValue
+         */
+        Game_Action.prototype.makeDamageValue = function(target, critical) {
+            const subjectAddtionalTraits = this.additionalSubjectTraits(target);
+            const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
+            this.subject().setTempTraits(subjectAddtionalTraits);
+            target.setTempTraits(targetAdditionalTraits);
 
-        const item = this.item();
-        const baseValue = this.evalDamageFormula(target);
-        let value = baseValue * this.calcElementRate(target);
-        value = this.applyDamageRate(value, target, critical);
-        value = this.applyRecoveryRate(value, target);
-        if (critical) {
-            value = this.applyCritical(value);
-        }
-        value = this.applyVariance(value, item.damage.variance);
-        value = this.applyGuard(value, target);
-        value = Math.round(value);
+            const item = this.item();
+            const baseValue = this.evalDamageFormula(target);
+            const elementRate = this.calcElementRate(target)
+            let value = baseValue * elementRate;
 
-        target.clearTempTraits();
-        this.subject().clearTempTraits();
-        const maxDamage = this.maxDamage(target);
-        return value.clamp(-maxDamage, maxDamage)
-    };
+            console.log(this.subject().name() + " --(" + item.name + ")--> " + target.name());
+            console.log("  eval:" + item.damage.formula + "=" + baseValue);
+            console.log("  elementRate:" + (Math.round(elementrate * 1000) / 10) + "%");
+
+            value = this.applyDamageRate(value, target, critical);
+            console.log("  -> applyDamageRate() = " + value);
+
+            value = this.applyRecoveryRate(value, target);
+            console.log("  -> applyRecoveryRate() = " + value);
+            if (critical) {
+                value = this.applyCritical(value);
+                console.log("  -> applyCritical() = " + value);
+            }
+            value = this.applyVariance(value, item.damage.variance);
+            console.log("  -> applyVariance() = " + value);
+            value = this.applyGuard(value, target);
+            console.log("  -> applyGuard() = " + value);
+            value = Math.round(value);
+
+            target.clearTempTraits();
+            this.subject().clearTempTraits();
+            const maxDamage = this.maxDamage(target);
+            const result = value.clamp(-maxDamage, maxDamage)
+            console.log("  -> result = " + result);
+            return result;
+        };
+    } else {
+        /**
+         * ダメージ値を計算する。
+         * 
+         * @param {Game_BattlerBase} target 対象
+         * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+         * @return {Number} ダメージ値
+         * !!!overwrite!!! Game_Action.makeDamageValue
+         */
+        Game_Action.prototype.makeDamageValue = function(target, critical) {
+            const subjectAddtionalTraits = this.additionalSubjectTraits(target);
+            const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
+            this.subject().setTempTraits(subjectAddtionalTraits);
+            target.setTempTraits(targetAdditionalTraits);
+
+            const item = this.item();
+            const baseValue = this.evalDamageFormula(target);
+            let value = baseValue * this.calcElementRate(target);
+            value = this.applyDamageRate(value, target, critical);
+            value = this.applyRecoveryRate(value, target);
+            if (critical) {
+                value = this.applyCritical(value);
+            }
+            value = this.applyVariance(value, item.damage.variance);
+            value = this.applyGuard(value, target);
+            value = Math.round(value);
+
+            target.clearTempTraits();
+            this.subject().clearTempTraits();
+            const maxDamage = this.maxDamage(target);
+            return value.clamp(-maxDamage, maxDamage)
+        };
+    }
 
     /**
      * 最大ダメージを得る。
