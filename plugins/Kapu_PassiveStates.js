@@ -30,6 +30,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.1 パッシブステートで装備可能品を増やしている場合に、
+ *               装備初期化時に装備可能品が反映されない不具合を修正した。
  * Version.0.3.0 負荷低減のため、パッシブステートをキャッシュする構造に変更した。
  *               条件付きパッシブステートはやめたのでシンプルな構造に戻した。
  * Version.0.2.0 条件付きパッシブステートを実現するため、構造を変更した。
@@ -83,6 +85,17 @@
     Game_BattlerBase.prototype.initMembers = function() {
         _Game_BattlerBase_initMembers.call(this);
         this._passiveStateIds = [];
+    };
+
+    const _Game_Actor_initEquips = Game_Actor.prototype.initEquips;
+    /**
+     * 装備を初期化する。
+     * 
+     * @param {Array<Number>} equips 装備品ID配列
+     */
+    Game_Actor.prototype.initEquips = function(equips) {
+        this.updatePassiveStates();
+        _Game_Actor_initEquips.call(this, equips);
     };
 
     const _Game_BattlerBase_states = Game_BattlerBase.prototype.states;
