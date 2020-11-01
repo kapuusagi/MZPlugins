@@ -24,6 +24,14 @@
  * ============================================
  * ノートタグ
  * ============================================
+ * アクター
+ *     <equippedItems:entry,entry,...>
+ *        初期装備品を指定する。
+ *        entryは以下のように指定する。
+ *          "weapon(id)": id#の武器
+ *          "armor(id)":  id#の防具
+ * 
+ *        未指定時はデータベースでアクターに設定された装備品が適用される。
  * クラス
  *     <equipSlots:type1#,type2#,...>
  *           装備品タイプをカンマ区切りで並べる。
@@ -77,6 +85,7 @@
         // 装備品オブジェクト配列を作成する。
         // データベース上での指定は、$dataSystem.equipTypes準拠だからだ。
         const equipItems = [];
+        const actor = this.actor();
         for (let i = 0; i < equips.length; i++) {
             const itemId = equips[i];
             if (itemId <= 0) {
@@ -91,6 +100,23 @@
                 equipItems.push($dataArmors[itemId]);
             }
         }
+        if (actor.meta.equippedItems) {
+            const tokens = actor.meta.equippedItems.split(',');
+            for (const token of tokens) {
+                let re;
+                if ((re = token.match(/weapon\((\d+)\)/)) !== null) {
+                    const id = Number(re[1]);
+                    if ((id > 0) && (id < $dataWeapons.length)) {
+                        equipItems.push($dataWeapons[id]);
+                    }
+                } else if ((re = token.match(/armor\((\d+)\)/)) !== null) {
+                    const id = Number(re[1]);
+                    if ((id > 0) && (id < $dataArmors.length)) {
+                        equipItems.push($dataArmors[id]);
+                    }
+                }
+            }
+        }
 
         const equipSlots = this.equipSlots();
         this._equips = [];
@@ -103,7 +129,7 @@
             }
             const equipType = equipItem.etypeId;
             // 装備可能な未装備スロットを探す。
-            // 装備可能スロットを探して
+            // 装備可能スロットを探して装備させる
             let slotNo = -1;
             for (let i = 0; i < equipSlots.length; i++) {
                 if ((equipSlots[i] === equipType) && this._equips[i].isNull()) {
