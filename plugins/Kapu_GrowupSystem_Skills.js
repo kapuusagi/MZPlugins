@@ -196,13 +196,13 @@
         this._gpLearnedSkills = [];
         this._gpLearnableSkills = [];
     };
-    // 2.Game_Actor.initGrowsをフックし、ノートタグを解析して初期値を設定する処理を追加。
-    const _Game_Actor_initGrows = Game_Actor.prototype.initGrows;
+    // 2.Game_Actor.initSkillsをフックし、ノートタグを解析して初期値を設定する処理を追加。
+    const _Game_Actor_initSkills = Game_Actor.prototype.initSkills;
     /**
-     * 育成状態を初期化する。
+     * スキルを初期化する。
      */
-    Game_Actor.prototype.initGrows = function() {
-        _Game_Actor_initGrows.call(this);
+    Game_Actor.prototype.initSkills = function() {
+        _Game_Actor_initSkills.call(this);
 
         const actor = this.actor();
         if (actor.meta.gpLearnedSkills) {
@@ -285,12 +285,10 @@
             return false;
         }
         if (skill.gpLearnCondition.length > 0) {
-            // eslint-disable-next-line no-unused-vars
-            const a = this; // conditionの判定で使用。
-            // eslint-disable-next-line no-unused-vars
-            const hasSkillType = (type) => this.skillTypes().includes(type);
-            // eslint-disable-next-line no-unused-vars
-            const isLearned = (id) => this.isLearnedSkill(id);
+            const a = this;  // eslint-disable-line no-unused-vars
+            const hasSkillType = (type) => this.skillTypes().includes(type); // eslint-disable-line no-unused-vars
+            const isLearned = (id) => this.isLearnedSkill(id); // eslint-disable-line no-unused-vars
+            const v = $gameVariables._data; // eslint-disable-line no-unused-vars
 
             try {
                 return skill.gpLearnCondition.some((condition) => eval(condition))
