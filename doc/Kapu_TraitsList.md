@@ -26,13 +26,14 @@ __Game_BattlerBase.TRAIT_XPARAM__(値=22)で定義される。
 |---|---|---|
 |0～9|(未定義)|ベーシックシステムで使用|
 |200|__TRAIT_XPARAM_DID_CDR__|クリティカルダメージレート。|
-|202|__TRAIT_XPARAM_DID_CASTTIME_RATE__|スキル発動時間率。|
+|202|__TRAIT_XPARAM_DID_CASTTIME_RATE__|スキル発動時間率(魔法以外)。|
 |203|__TRAIT_XPARAM_DID_AUTOGUARD_RATE__|自動防御率。|
 |204|__TRAIT_XPARAM_DID_DEFPR__|物理貫通レート。指定した割合だけDEFを減衰させる。|
 |205|__TRAIT_XPARAM_DID_PDRPR__|物理ダメージレート貫通。指定した割合だけPDRを減衰させる。|
 |206|__TRAIT_XPARAM_DID_MDFPR__|魔法貫通レート。指定した割合だけMDEFを減衰させる。|
 |207|__TRAIT_XPARAM_DID_MDRPR__|魔法ダメージレート貫通。指定した割合だけMDRを減衰させる。|
 |208|__TRAIT_XPARAM_DID_INITTP_RATE__|戦闘開始時のTPチャージ量を指定する。|
+|209|__TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE__|スキル発動時間率(魔法)。|
 |||
 
 ### SPARAM
