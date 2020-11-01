@@ -24,6 +24,8 @@
  * (3) カウント減らす。カウントがゼロになるとステート解除。
  *     -> 条件発動アクション ステートプラグインを作る(本プラグイン)
  * 
+ * アクションの発動判定はBattleManagerでresultを元に判定すると良さそう。
+ * 
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -35,12 +37,12 @@
  * ステート
  *     <action:condition$,skillId#,target$,count#>
  *          condition$ 発動タイミング
- *              damaged:何かしらダメージを受けたとき
- *              healed:回復した時
- *              actioned:行動した時(全ての行動が終わったとき1回)
- *              stateAdded(id,id,id,...):
+ *              "damaged":何かしらダメージを受けたとき
+ *              "healed":回復した時
+ *              "actioned":行動した時(全ての行動が終わったとき1回)
+ *              "stateAdded(id,id,id,...)":
  *                  id#のステート(いずれか)が付与された時
- *              stateRemoved(id,id.id,...):
+ *              "stateRemoved(id,id.id,...)":
  *                  id#のステート(いずれか)が解除された時
  *          skillId#
  *              発動するスキルID
@@ -48,6 +50,8 @@
  *              発動対象。self(ステート保持者)またはsubject(対象)
  *          count#
  *              発動回数。0で無制限。
+ * 
+ * 
  * 
  * ============================================
  * 変更履歴
@@ -142,9 +146,66 @@
     DataManager.addNotetagParserEnemies(_processNoteTag);
 
     //------------------------------------------------------------------------------
-    // Game_Battler
+    // Game_BattlerBase
+    const _Game_BattlerBase_clearStates = Game_BattlerBase.prototype.clearStates;
+    /**
+     * このGame_BattlerBaseのステートをクリアする。
+     */
+    Game_BattlerBase.prototype.clearStates = function() {
+        _Game_BattlerBase_clearStates.call(this);
+        this._stateRaiseCounts = {};
+    };
 
+    const _Game_BattlerBase_eraseState = Game_BattlerBase.prototype.eraseState;
+    /**
+     * このGame_BattlerBaseからstateIdで指定されるステートを取り除く。
+     * _statesと_stateTurnsに対する操作を行う。
+     * 
+     * @param {Number} stateId ステートID
+     */
+    Game_BattlerBase.prototype.eraseState = function(stateId) {
+        _Game_BattlerBase_eraseState.call(this, stateId);
+        delete this._stateRaiseCounts[stateId];
+    };
 
+    const _Game_BattlerBase_resetStateCounts = Game_BattlerBase.prototype.resetStateCounts;
+    /**
+     * 指定したステートのカウンタをリセットする。
+     * 
+     * @param {Number} stateId ステートID
+     */
+    Game_BattlerBase.prototype.resetStateCounts = function(stateId) {
+        _Game_BattlerBase_resetStateCounts.call(this, stateId);
+        const state = $dataStates[stateId];
+        this._stateRaiseCounts[stateId] = state.action ? state.action.count : 0;
+    };
 
+    /**
+     * ステートアクションの残りカウントがなくなったかどうかを取得する。
+     * 
+     * @param {Number} stateId ステートID
+     * @return {Boolean} ステートアクションの残りカウントが無い場合にはtrue, それ以外はfalse.
+     */
+    Game_BattlerBase.prototype.isStateActionNoLeft = function(stateId) {
+        return this._stateRaiseCounts[stateId] === 0;
+    };
+
+    /**
+     * ステートアクションのカウントを減算する。
+     * 
+     * @param {Number} stateId ステートID
+     */
+    Game_BattlerBase.prototype.decreaseStateActionCount = function(stateId) {
+        this._stateRaiseCounts[stateId]--;
+    };
+
+    /**
+     * このGame_BattlerBaseのStateActionを持ったステートを返す。
+     * 
+     * @return {Array<DataState>} ステート配列
+     */
+    Game_BattlerBase.stateActions = function() {
+        return this.states().filter(state => state.action !== null);
+    };
 
 })();
