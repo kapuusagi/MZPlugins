@@ -466,6 +466,7 @@
         /**
          * パラメータを得る。
          * 
+         * Note: AGI, LUKについて置き換えるためフックする。
          * @param {Number} paramId パラメータID
          * @return {Number} パラメータ値
          */
@@ -483,6 +484,7 @@
         /**
          * パラメータを得る。
          * 
+         * Note: 一部のメソッドで直接呼び出されるため、フックして置き換える必要がある。
          * @param {Number} paramId パラメータID
          * @return {Number} パラメータ値
          */
