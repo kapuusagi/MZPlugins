@@ -52,13 +52,13 @@
             case 0: // MaxHP
                 {
                     // 最大HP = (VIT * 4) + FLOOR(VIT / 5) * 7
-                    const vit = this.vit;
+                    const vit = Math.max(0, this.vit - 20);
                     return value + (vit * 4) + Math.floor(vit / 5) * 7;
                 }
             case 1: // MaxMP
                 {
-                    const int = this.int;
-                    const men = this.men;
+                    const int = Math.max(0, this.int - 20);
+                    const men = Math.max(0, this.men - 20);
                     return value + (int * 2) + Math.floor(int / 5) * 4
                             + men + Math.floor(men / 7) * 5;
                 }
