@@ -5,6 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_Tpb
+ * @orderAfter Kapu_Base_Twld
  * 
  * @param traitXParamDid
  * @text TPB速度倍率-特性ID
@@ -105,9 +107,33 @@
      * @return {Number} TPB速度。
      */
     Game_Battler.prototype.tpbSpeed = function() {
-        let speed = _Game_Battler_tpbSpeed.call(this);
-        const rate = 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED);
-        return speed * Math.max(rate, 0);
+        const speed = _Game_Battler_tpbSpeed.call(this);
+        const rate = this.tpbSpeedRate();
+        return speed * rate;
     };
+
+    /**
+     * TPB速度レートを得る。
+     * 
+     * @return {Number} TPB速度レート
+     */
+    Game_Battler.prototype.tpbSpeedRate = function() {
+        return Math.max(0, 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED));
+    };
+
+    if (Game_Battler.prototype.tpbCastSpeed) {
+        const _Game_Battler_tpbCastSpeed = Game_Battler.prototype.tpbCastSpeed;
+        /**
+         * このGame_BattlerのTPB詠唱速度を得る。
+         * 
+         * 魔法速度の計算だけ変更したい場合にはオーバーライドする。
+         * @return {Number} TPB詠唱速度
+         */
+        Game_Battler.prototype.tpbCastSpeed = function() {
+            const speed = _Game_Battler_tpbCastSpeed.call(this);
+            const rate = this.tpbSpeedRate();
+            return speed * rate;
+        };
+    }
 
 })();

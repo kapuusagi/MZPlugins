@@ -5,6 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
+ * @base Kapu_Base_Tpb
+ * @orderAfter Kapu_Base_Tpb
  * @orderAfter Kapu_Base_Hit
  * @orderAfter Kapu_Base_DamageCalculation
  * 
@@ -186,37 +188,83 @@
     //------------------------------------------------------------------------------
     // Game_Battler
     /**
-     * このGame_BattlerのTPB速度を得る。
-     * ベースパラメータからのTPB速度計算式を変更したいならば、本メソッドをオーバーライドする。
+     * 速度からTPB速度を得る。
      * 
+     * @param {Number} value 値
      * @return {Number} TPB速度。
+     * !!!overwrite!!! Game_Battler.calcTpbSpeed()
+     *     TPB速度の計算式を変更する。
      */
-    Game_Battler.prototype.tpbSpeed = function() {
-        return 10 + ((this.agi - 20) * 0.2).clamp(0, 15);
+    Game_Battler.prototype.calcTpbSpeed = function(value) {
+        return 10 + ((value - 20) * 0.2).clamp(0, 15);
     };
 
     /**
-     * このGame_BattlerのTPB基準速度。
+     * アクションの発動に必要な時間を得る。
      * 
-     * @return {Number} TPBベース速度
+     * @param {Number} delay ディレイ
+     * @return {Number} 必要な時間
+     * !!!overwrite!!! Game_Battler.calcCastTime()
+     *     キャスト時間の計算を単純にするため、オーバーライドする。
      */
-    Game_Battler.prototype.tpbBaseSpeed = function() {
-        return 25;
+    Game_Battler.prototype.calcCastTime = function(delay) {
+        return delay / this.tpbSpeed();
+    };
+
+    /**
+     * TPB基準速度の計算に使用するパラメータ値を得る。
+     * 
+     * @return {Number} TPB基準速度の計算に使用するパラメータ。
+     * !!!overwrite!!!! Game_Battler.tpbBaseSpeedParam()
+     *     バフ適用外のパラメータを元に計算するため、オーバーライドする。
+     */
+    Game_Battler.prototype.tpbBaseSpeedParam = function() {
+        return this.paramWithoutBuff(6);
     };
     /**
-     * キャスト時間を得る。
-     * 既定の実装では以下の通り。
-     * 1. 有効なアクションのspeed(負数)の合計を算出。
-     *    (このとき、加算する方向のspeedは無視される)
-     * 2. Sqrt(1の結果) / TPB速度を算出して返す。
-     * 
-     * @return {Number} キャスト時間
+     * このGame_BattlerのTPB詠唱速度を得る。
+     *
+     * @return {Number} TPB詠唱速度
+     * !!!overwrite!!! Game_Battler.tpbCastSpeed()
+     *     魔法速度の計算だけ変更するためオーバーライドする。
      */
-    Game_Battler.prototype.tpbRequiredCastTime = function() {
+    Game_Battler.prototype.tpbCastSpeed = function() {
         const actions = this._actions.filter(action => action.isValid());
         const items = actions.map(action => action.item());
-        const delay = items.reduce((r, item) => r + Math.max(0, -item.speed), 0);
-        return delay / this.tpbSpeed();
+        if (items.some(item => DataManager.isSkill(item) && $dataSystem.magicSkills.includes(item.stypeId))) {
+            // 魔法アクション時
+            return this.tpbMagicCastSpeed();
+        } else {
+            return this.tpbOtherCastSpeed();
+        }
+    };
+
+    /**
+     * このGame_BattlerのTPB魔法詠唱速度を得る。
+     * 
+     * @return {Number} TPB魔法詠唱速度
+     */
+    Game_Battler.prototype.tpbMagicCastSpeed = function() {
+        const paramValue = tpbMagicCastSpeedParam();
+        return this.calcTpbSpeed(paramValue);
+    };
+
+    /**
+     * このGame_BattlerのTPB詠唱速度を得る。
+     * 
+     * @return {Number} TPB詠唱速度
+     */
+    Game_Battler.prototype.tpbOtherCastSpeed = function() {
+        const paramValue = this.tpbSpeedParam();
+        return this.calcTpbSpeed(paramValue);
+    };
+    /**
+     * TPB基準速度の計算に使用するパラメータ値を得る。
+     * 
+     * @return {Number} TPB基準速度の計算に使用するパラメータ。
+     */
+    Game_Battler.prototype.tpbMagicCastSpeedParam = function() {
+        return this.agi;
     };
 
     //------------------------------------------------------------------------------

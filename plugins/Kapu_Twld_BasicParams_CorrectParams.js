@@ -78,4 +78,17 @@
         return 0;
     };
 
+
+    //------------------------------------------------------------------------------
+    // Game_Battler
+    /**
+     * TPB基準速度の計算に使用するパラメータ値を得る。
+     * 
+     * @return {Number} TPB基準速度の計算に使用するパラメータ。
+     * !!!overwrite!!! Game_Battler.tpbMagicCastSpeedParam
+     *     TPB魔法発動時のキャスト処理にDEXを使用するため、オーバーライドする。
+     */
+    Game_Battler.prototype.tpbMagicCastSpeedParam = function() {
+        return this.dex;
+    };
 })();

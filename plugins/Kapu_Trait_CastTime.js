@@ -5,11 +5,21 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @base Kapu_Base_Tpb
+ * @orderAfter Kapu_Base_Tpb
  * 
  * @param traitXParamDid
  * @text キャストタイム倍率-特性ID
  * @desc キャストタイムの特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
  * @default 202
+ * @type number
+ * @max 999
+ * @min 10
+ * 
+ * @param traitXParamDidMagical
+ * @text 魔法キャストタイム倍率-特性ID
+ * @desc 魔法キャストタイムの特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
+ * @default 209
  * @type number
  * @max 999
  * @min 10
@@ -42,15 +52,26 @@
  * ノートタグ
  * ============================================
  * アクター/クラス/ステート/武器/防具/エネミー
- *     <castTimeRate:rate>
- *        rate: 倍率の値。1.0で100％増加。0.3で30%増加。
- *     <castTimeRate:rateStr%>
- *        rateStr: 倍率の値。100で100%増加。
+ *   <castTimeRate:rate>
+ *     rate: 倍率の値。1.0で100％増加。0.3で30%増加。
+ *           詠唱時間を短くするには負数を指定する。
+ *   <castTimeRate:rateStr%>
+ *     rateStr: 倍率の値。100で100%増加。0.3で30%増加。
+ *           詠唱時間を短くするには負数を指定する。
+ *   <magicCastTimeRate:rate>
+ *     rate: 倍率の値。1.0で100％増加。0.3で30%増加。
+ *           詠唱時間を短くするには負数を指定する。
+ *   <magicCastTimeRate:rateStr%>
+ *     rateStr: 倍率の値。100で100%増加。0.3で30%増加。
+ *           詠唱時間を短くするには負数を指定する。
  * 
  * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 魔法キャストタイムレートと、
+ *               魔法以外のキャストタイムレートを
+ *               設定できるように変更した。
  * Version.0.1.2 TRAIT_XPARAM_DID_CASTTIME_RATE未指定時は
  *               ログに出力して動作しないように変更した。
  * Version.0.1.1 IDのデフォルト値を変更した。
@@ -62,14 +83,30 @@
     const parameters = PluginManager.parameters(pluginName);
 
     Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE = Number(parameters["traitXParamDid"]) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE = Number(parameters["traitXParamDidMagical"]) || 0;
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE) {
         console.log(pluginName + ":TRAIT_XPARAM_DID_CASTTIME_RATE is not valid.");
-        return;
+    }
+    if (!Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE) {
+        console.log(pluginName + ":TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE is not valid.");
     }
 
     //------------------------------------------------------------------------------
     // DataManager
 
+    /**
+     * 文字列を解析してレートを得る。
+     * 
+     * @param {String} valueStr 文字列
+     * @return {Number} 値
+     */
+    const _getRate = function(valueStr) {
+        if (valueStr.slice(-1) === "%") {
+            return Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
+        } else {
+            return Number(valueStr);
+        }
+    };
 
     /**
      * itemの特性にvalueStrのキャストタイム倍率を加減する特性を追加する。
@@ -77,21 +114,22 @@
      * @apram {TraitObject} obj Actor/Class/Weapon/Armor/State/Enemyのいずれか。traitsを持ってるデータ
      */
     const _processNotetag = function(obj) {
-        if (!obj.meta.castTimeRate) {
-            return;
+        if (Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE && obj.meta.castTimeRate) {
+            const speed = _getRate(obj.meta.castTimeRate);
+            obj.traits.push({ 
+                code:Game_BattlerBase.TRAIT_XPARAM, 
+                dataId:Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE, 
+                value:speed
+            });
         }
-        const valueStr = obj.meta.castTimeRate;
-        let speed;
-        if (valueStr.slice(-1) === "%") {
-            speed = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
-        } else {
-            speed = Number(valueStr);
+        if (Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE && obj.meta.magicCastTimeRate) {
+            const speed = _getRate(obj.meta.magicCastTimeRate);
+            obj.traits.push({ 
+                code:Game_BattlerBase.TRAIT_XPARAM, 
+                dataId:Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE, 
+                value:speed
+            });
         }
-        obj.traits.push({ 
-            code:Game_BattlerBase.TRAIT_XPARAM, 
-            dataId:Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE, 
-            value:speed
-        });
     };
 
     DataManager.addNotetagParserActors(_processNotetag);
@@ -102,22 +140,63 @@
     DataManager.addNotetagParserEnemies(_processNotetag);
 
     //------------------------------------------------------------------------------
-    // Game_Battler
+    // Game_BattlerBase
 
-    const _Game_Battler_tpbRequiredCastTime = Game_Battler.prototype.tpbRequiredCastTime;
+    if (Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE) {
+        /**
+         * キャストタイム時間レートを得る。
+         * 
+         * @return {Number} キャストタイム時間レート
+         */
+        Game_BattlerBase.prototype.castTimeRate = function() {
+            return Math.max(0, 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE));
+        };
+    } else {
+        /**
+         * キャストタイム時間レートを得る。
+         * 
+         * @return {Number} キャストタイム時間レート
+         */
+        Game_BattlerBase.prototype.castTimeRate = function() {
+            return 1;
+        };
+    }
 
+    if (Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE) {
+        /**
+         * 魔法キャストタイム時間レートを得る。
+         * 
+         * @return {Number} 魔法キャストタイム時間レート
+         */
+        Game_BattlerBase.prototype.magicCastTimeRate = function() {
+            return Math.max(0, 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE));
+        };
+    } else {
+        /**
+         * 魔法キャストタイム時間レートを得る。
+         * 
+         * @return {Number} 魔法キャストタイム時間レート
+         */
+        Game_BattlerBase.prototype.magicCastTimeRate = function() {
+            return 1;
+        }
+    }
+
+    const _Game_BattlerBase_tpbSkillCastTime = Game_BattlerBase.prototype.tpbSkillCastTime;
     /**
-     * キャスト時間を得る。
+     * スキルのキャスト時間を得る。
      * 
+     * @param {Object} item スキル/アイテム
      * @return {Number} キャスト時間
      */
-    Game_Battler.prototype.tpbRequiredCastTime = function() {
-        const castTime = _Game_Battler_tpbRequiredCastTime.call(this);
-        if (castTime <= 0) {
-            return castTime;
+    Game_BattlerBase.prototype.tpbSkillCastTime = function(item) {
+        const castTime = _Game_BattlerBase_tpbSkillCastTime.call(this, item);
+        if ($dataSystem.magicSkills.includes(item.stypeId)) {
+            // 魔法スキルかどうか
+            return castTime * this.magicCastTimeRate();
         } else {
-            const rate = Math.max(0, 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE));
-            return castTime * rate;
+            // その他
+            return castTime * this.castTimeRate();
         }
     };
 
