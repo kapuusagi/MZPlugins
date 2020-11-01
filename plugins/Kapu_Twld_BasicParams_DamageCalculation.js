@@ -19,6 +19,12 @@
  * ・VITが高いほどvitcoefが上がる。
  * ・MDFが高いほどmdfcoefが上がる。
  * ・スキルによるHP回復の場合、使用者のMENにより、回復効果にボーナスが付与される。
+ * ・物理攻撃時
+ *   ダメージ計算で0になっても、一定確率で1ダメージ与える。
+ *   使用者のSTRが対象のVITより高いほど、1ダメージが出る確率が上がる。
+ * ・魔法攻撃時
+ *   ダメージ計算で0になっても、一定確率で1ダメージ与える。
+ *   使用者のINTが対象のMENより高いほど、1ダメージが出る確率が上がる。
  * 
  * Penetrate特性が有効な場合
  * ・STRが30以上あるとき、貫通特性ボーナス。
@@ -43,7 +49,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 作成中。
  */
 (() => {
     //const pluginName = "Kapu_Twld_BasicParams_DamageCalculation";
@@ -263,6 +269,32 @@
         }
     };
 
-
+    const _Game_Action_calcBaseDamageValue = Game_Action.prototype.calcBaseDamageValue;
+    /**
+     * ベースとなるダメージ値を計算する。
+     * 
+     * @param {Game_Battler} target 対象
+     */
+    Game_Action.prototype.calcBaseDamageValue = function(target) {
+        const damage = _Game_Action_calcBaseDamageValue.call(this, target);
+        if ((damage === 0) && this.isDamage() && this.isHpEffect()) {
+            // 一定の確率で1以上のダメージとする。
+            const subject = this.subject();
+            if (this.isPhysical()) {
+                const rate = 0.5 + (subject.str - target.vit) * 0.01;
+                if (Math.random() < rate) {
+                    return 1;
+                }
+            } else if (this.isMagical()) {
+                const rate = 0.5 + (subject.int - target.men) * 0.01;
+                if (Math.random() < rate) {
+                    return 1;
+                }
+            } else {
+                return 1;
+            }
+        }
+        return damage;
+    };
 
 })();

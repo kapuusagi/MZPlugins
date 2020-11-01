@@ -33,6 +33,11 @@
  * コアプラグインの競合で実現できなかったりとかねぇ...。
  * 
  * ■ プラグイン開発者向け
+ * Game_Action.calcBaseDamageValue(target:Game_Battler) : number
+ *     アイテム/スキルを元にダメージ計算する。
+ *     evalDamageFormulaは設定された式を元に計算するものなので、
+ *     ダメージ基本値を計算する意味合いを明確にするため、用意した。
+ *     最低1ダメージ出す、とかいった処理をフックして入れるために使用する。
  * Game_Action.applyDamageRate(value:number, target:Game_Battler) : number
  *     ダメージ倍率の処理を行う。
  *     プラグインで定義されたTraitで、
@@ -80,6 +85,7 @@
  * 変更履歴
  * ============================================
  * Version.0.4.0 デバッグ用にログにデータを出力するようにした。
+ *               calcBaseDamageValueメソッドを用意した。
  * Version.0.3.0 最大ダメージをmaxDamageメソッドで制限できるようにした。
  *               おくとらの限界突破みたいなのやりたいかもね。
  * Version.0.2.0 ダメージ計算時、一時的に付与するTraitを設定出来るようにした。
@@ -163,13 +169,13 @@
             target.setTempTraits(targetAdditionalTraits);
 
             const item = this.item();
-            const baseValue = this.evalDamageFormula(target);
+            const baseValue = this.calcBaseDamageValue(target);
             const elementRate = this.calcElementRate(target)
             let value = baseValue * elementRate;
 
             console.log(this.subject().name() + " --(" + item.name + ")--> " + target.name());
             console.log("  eval:" + item.damage.formula + "=" + baseValue);
-            console.log("  elementRate:" + (Math.round(elementrate * 1000) / 10) + "%");
+            console.log("  elementRate:" + elementRate);
 
             value = this.applyDamageRate(value, target, critical);
             console.log("  -> applyDamageRate() = " + value);
@@ -209,7 +215,7 @@
             target.setTempTraits(targetAdditionalTraits);
 
             const item = this.item();
-            const baseValue = this.evalDamageFormula(target);
+            const baseValue = this.calcBaseDamageValue(target);
             let value = baseValue * this.calcElementRate(target);
             value = this.applyDamageRate(value, target, critical);
             value = this.applyRecoveryRate(value, target);
@@ -226,6 +232,16 @@
             return value.clamp(-maxDamage, maxDamage)
         };
     }
+
+    /**
+     * ベースとなるダメージ値を計算する。
+     * 
+     * @param {Game_Battler} target 対象
+     */
+    Game_Action.prototype.calcBaseDamageValue = function(target) {
+        return this.evalDamageFormula(target);
+    };
+
 
     /**
      * 最大ダメージを得る。
