@@ -211,8 +211,14 @@
             if (!obj) {
                 continue;
             }
-            for (let method of methods) {
-                method.call(this, obj);
+            try {
+                for (let method of methods) {
+                    method.call(this, obj);
+                }
+            }
+            catch (e) {
+                console.error("Notetag parse fail. [name:" + obj.name + "]");
+                console.error(e);
             }
         }
     };
