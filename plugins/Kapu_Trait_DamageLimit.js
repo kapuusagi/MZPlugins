@@ -1,6 +1,6 @@
 /*:ja
  * @target MZ 
- * @plugindesc hogehoge
+ * @plugindesc ダメージリミット特性プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
