@@ -5,6 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @base Kapu_Base_Param
+ * @orderAfter Kapu_Base_Param
  * 
  * @param traitSParamDid
  * @text 最大TPレート特性DiD
@@ -43,6 +45,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_ParamsのmaxTpRateをフックするように変更した。
  * Version.0.1.0 作成した。
  */
 (() => {
@@ -89,22 +92,15 @@
     DataManager.addNotetagParserEnemies(_processNotetag);
     //------------------------------------------------------------------------------
     // Game_BattlerBase
-    const _Game_BattlerBase_maxTp = Game_BattlerBase.prototype.maxTp;
-    /**
-     * 最大TPを得る。
-     * @return {Number} TP最大値
-     */
-    Game_BattlerBase.prototype.maxTp = function() {
-        const maxTp = _Game_BattlerBase_maxTp.call(this);
-        return Math.floor(maxTp * this.maxTpRate());
-    };
-
+    const _Game_BattlerBase_maxTpRate = Game_BattlerBase.prototype.maxTpRate;
     /**
      * 最大TPレートを得る。
      * 
-     * @return {Number} 最大TPレート
+     * @return {Number} 最大TPレート。
      */
     Game_BattlerBase.prototype.maxTpRate = function() {
-        return this.sparam(Game_BattlerBase.TRAIT_SPARAM_DID_MAXTP_RATE);
+        const maxTp = _Game_BattlerBase_maxTpRate.call(this);
+        const rate = this.sparam(Game_BattlerBase.TRAIT_SPARAM_DID_MAXTP_RATE);
+        return Math.floor(maxTp * rate);
     };
 })();
