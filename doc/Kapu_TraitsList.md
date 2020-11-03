@@ -13,6 +13,7 @@
 |105|__TRAIT_STATE_FIXEDBUFF__|パラメータID|ステートの特性として使用するバフ効果。|
 |106|__TRAIT_UNRECOVER__|ブロック効果対象|ブロック効果対象特性。|
 |107|__TRAIT_PARAM_ADD__|パラメータID|単純にパラメータを加算する特性。|
+|108|__TRAIT_MAXTP_ADD__|-|最大TP加算特性。|
 ||||
 |1001|__TRAIT_BASIC_PARAM__|基本パラメータを加算する特性|
 |1002|__TRAIT_BASIC_PARAM_RATE__|基本パラメータ乗算レート特性|
