@@ -87,7 +87,6 @@
         }
         for (let paramId = 0; paramId < addParams.length; paramId++) {
             if (addParams[paramId] !== 0) {
-                console.log(obj.name + ":" + params[paramId] + " " + addParams[paramId]);
                 obj.traits.push({ 
                     code:Game_BattlerBase.TRAIT_PARAM_ADD, 
                     dataId:paramId, 
@@ -112,9 +111,6 @@
     Game_BattlerBase.prototype.paramPlus = function(paramId) {
         const paramValue = _Game_BattlerBase_paramPlus.call(this, paramId);
         const paramAdd = this.traitsSum(Game_BattlerBase.TRAIT_PARAM_ADD, paramId);
-        if (paramAdd !== 0) {
-            console.log(paramId + ":" + paramAdd);
-        }
         return paramValue + paramAdd;
     };
 
