@@ -151,7 +151,16 @@
         return baseValue * this.paramBuffRate(paramId);
     };
 
+    //------------------------------------------------------------------------------
+    // Game_Battler
 
+    /**
+     * TPをリジェネレートする。
+     */
+    Game_Battler.prototype.regenerateTp = function() {
+        const value = Math.floor(this.maxTp() * this.trg);
+        this.gainSilentTp(value);
+    };
 
 
     //------------------------------------------------------------------------------
