@@ -695,8 +695,9 @@
     };
     const _Game_Action_itemCnt = Game_Action.prototype.itemCnt;
     /**
-     * カウンター率を得る
+     * このアクションに対するtargetのカウンター率を得る。
      * 
+     * Note: 遠距離攻撃時はカウンター無効とするため、メソッドをフックする。
      * @param {Game_Battler} target ターゲット
      */
     Game_Action.prototype.itemCnt = function(target) {
