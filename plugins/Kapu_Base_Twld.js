@@ -408,4 +408,53 @@
             return target.rec;
         }
     };
+
+    /**
+     * ユーザーエフェクトを適用する。
+     * 既定ではTPの加算処理を行う。
+     * 
+     * @param {Game_Battler} 対象
+     * !!!overwrite!!!
+     *     TP加算は効果を及ぼした数じゃなくて、行動1回につき、1回加算するように変更するため、
+     *     オーバーライドする。
+     */
+    Game_Action.prototype.applyItemUserEffect = function(/*target*/) {
+        // const value = Math.floor(this.item().tpGain * this.subject().tcr);
+        // this.subject().gainSilentTp(value);
+    };
+
+    /**
+     * 行動によるTP上昇量を得る。
+     * 
+     * @param {Object} item DataItem/DataSKill
+     * @return {Number} TP上昇量
+     */
+    Game_Battler.prototype.actionTpValue = function(item) {
+        return item.tpGain;
+    };
+
+    /**
+     * 行動によるTP上昇処理を行う。
+     * 
+     * @param {Object} item DataItem/DataSkill
+     */
+    Game_Battler.prototype.gainTpByAction = function(item) {
+        const value = Math.floor(this.actionTpValue(item) * this.tcr);
+        this.gainSilentTp(value);
+    };
+
+    //------------------------------------------------------------------------------
+    // BattleManager
+    const _BattleManager_endAction = BattleManager.endAction;
+
+    /**
+     * アクターまたはエネミーのアクションが完了したときの処理を行う。
+     */
+    BattleManager.endAction = function() {
+        const item = this._action 
+                ? this._action.item()
+                : $dataSkills[this._subject.guardSkillId()];
+        this._subject.gainTpByAction(item);
+        _BattleManager_endAction.call(this);
+    };
 })();

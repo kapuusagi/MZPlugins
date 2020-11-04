@@ -64,6 +64,19 @@
         return this.dex;
     };
 
+    const _Game_Battler_actionTpValue = Game_Battler.prototype.actionTpValue;
+    /**
+     * 行動によるTP上昇量を得る。
+     * 
+     * @param {Object} item DataItem/DataSKill
+     * @return {Number} TP上昇量
+     */
+    Game_Battler.prototype.actionTpValue = function(item) {
+        const gainValue = _Game_Battler_actionTpValue.call(this, item);
+        const tpBonus = Math.max(this.str, this.dex, this.vit, this.int, this.men) / 5;
+        return gainValue + tpBonus;
+    };
+
     //------------------------------------------------------------------------------
     // Game_Actor
 
