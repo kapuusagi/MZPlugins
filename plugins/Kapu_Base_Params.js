@@ -11,6 +11,15 @@
  * @default 100
  * @min 0
  * 
+ * @param damageTpGainRateMax
+ * @text ダメージTP上昇レート最大
+ * @desc ダメージを受けたときのTP上昇量の、最大TPに対する割合。
+ * @type number
+ * @decimals 2
+ * @default 0.50
+ * @min 0.00
+ * @max 1.00
+ * 
  * @help 
  * 基本パラメータを拡張可能にするためのプラグイン。
  * ベーシックシステムからの動作変更は無い。
@@ -59,6 +68,7 @@
     const parameters = PluginManager.parameters(pluginName);
 
     const defaultMaxTp = Number(parameters["defaultMaxTp"]) || 100;
+    const damageTpGainRateMax = (Number(parameters["damageTpGainRateMax"]) || 0.5).clamp(0, 1);
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
@@ -162,6 +172,18 @@
         this.gainSilentTp(value);
     };
 
+    /**
+     * ダメージによるTPチャージ処理を行う。
+     * 
+     * @param {Number} damageRate ダメージレート。最大HPに対する割合
+     * !!!overwrite!!! Game_Battler.changeTpByDamage()
+     *      TP最大値が変更になることに従いオーバーライドする。
+     */
+    Game_Battler.prototype.chargeTpByDamage = function(damageRate) {
+        const max = this.maxTp() * damageTpGainRateMax;
+        const value = Math.floor(max * damageRate * this.tcr);
+        this.gainSilentTp(value);
+    };
 
     //------------------------------------------------------------------------------
     // Game_Actor
