@@ -245,7 +245,7 @@
      * @return {Number} TPB魔法詠唱速度
      */
     Game_Battler.prototype.tpbMagicCastSpeed = function() {
-        const paramValue = tpbMagicCastSpeedParam();
+        const paramValue = this.tpbMagicCastSpeedParam();
         return this.calcTpbSpeed(paramValue);
     };
 
