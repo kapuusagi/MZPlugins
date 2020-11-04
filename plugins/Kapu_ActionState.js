@@ -37,8 +37,8 @@
  * ステート
  *     <action:condition$,skillId#,target$,count#>
  *          condition$ 発動タイミング
- *              "damaged":何かしらダメージを受けたとき
- *              "healed":回復した時
+ *              "damaged":何かしらHPダメージを受けたとき
+ *              "healed":HPが回復した時
  *              "actioned":行動した時(全ての行動が終わったとき1回)
  *              "stateAdded(id,id,id,...)":
  *                  id#のステート(いずれか)が付与された時
@@ -206,6 +206,36 @@
      */
     Game_BattlerBase.stateActions = function() {
         return this.states().filter(state => state.action !== null);
+    };
+
+    //------------------------------------------------------------------------------
+    // Game_Battler
+
+    //------------------------------------------------------------------------------
+    // BattleManager
+    const _BattleManager_invokeAction = BattleManager.invokeAction;
+    
+    /**
+     * アクションを実行する。
+     * 
+     * @param {Game_BattlerBase} subject 使用者
+     * @param {Game_BattlerBase} target 対象
+     */
+    BattleManager.invokeAction = function(subject, target) {
+        _BattleManager_invokeAction.call(this, subject, target);
+
+        /* ダメージが入った/回復した/ステート付与/ステート解除 時の処理はここ */
+    };
+
+
+    const _BattleManager_endAction = BattleManager.endAction;
+    /**
+     * アクターまたはエネミーのアクションが完了したときの処理を行う。
+     */
+    BattleManager.endAction = function() {
+        // 行動終了時の判定はここ。
+
+        _BattleManager_endAction.call(this);
     };
 
 })();
