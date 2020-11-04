@@ -99,7 +99,12 @@
  * @type boolean
  * @parent independentArmorSetting
  * 
- * 
+ * @param gainFailureEventId
+ * @text アイテム加算失敗時イベントID
+ * @desc 空きイベントリが無くて加算に失敗した場合に呼び出すコモンイベントID。
+ * @default 0
+ * @type common_event
+ *  
  * @help 
  * 道具/武器/防具を個別化するためのプラグイン。
  * Yanfly氏がMVでItemCoreとしてリリースしていたプラグインの、
@@ -130,6 +135,11 @@
  * 処理が重そうなら実装を見直す。
  * 数が増えると多分影響が大きくなるんじゃ無いかな。
  * 
+ * インタプリタからのgainItemで増やしたとき、
+ * 所持最大数を超える場合には加算されなくなる。
+ * この場合、 gainFailureEventId で指定したコモンイベントで通知をうけるか、
+ * $gameTemp.isGailFailure()で結果を得られる。
+ * 
  * ■ プラグイン開発者向け
  * 機能拡張するなら、以下のメソッドをフックする。
  * DataManager.initializeIndependentCommon(newItem:object, baseItem:object) : void
@@ -154,10 +164,13 @@
  * ============================================
  * ノートタグ
  * ============================================
- * <independent>
- *    アイテム/武器/防具に適用可能。
- *    入手時、個別アイテムとして加算されるものとして処理される。
- *    未定義または<independent:false>で個別無効。
+ * アイテム/武器/防具
+ *     <independent>
+ *        アイテム/武器/防具に適用可能。
+ *        入手時、個別アイテムとして加算されるものとして処理される。
+ *        未定義の場合にはプラグインパラメータで設定された、
+ *        カテゴリのデフォルト値が採用される。
+ *        <independent:no>または<independent:false>で明示的に無効。
  * 
  * <allowCollectSell>
  *    ショップでの売却時、まとめて売ることを可能にする。
@@ -167,6 +180,18 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.3 個別アイテム/非個別アイテムの指定が全くできていなかった不具合を修正した。
+ * Version.0.4.2 個別アイテムが無限に使用できる不具合を修正した。
+ * Version.0.4.1 装備解除時、解除した個別アイテムが、
+ *               初期化された別のアイテムになってしまう不具合を修正した。
+ *               個別アイテム装備変更時、変更対象が同じベースアイテムだと、
+ *               装備変更できない不具合を修正した。
+ * Version.0.4.0 アイテム所持数を超えて入手できなかった場合に、
+ *               コモンイベント及び条件分岐で通知する仕組みを追加した。
+ *               アイテム所持可能数の処理が誤っていたので修正した。
+ * Version.0.3.1 個別アイテムとして扱われない場合がある不具合を修正。
+ *               個別道具が使用できない不具合を修正。
+ *               装備品の一致判定が誤っていたのを修正。
  * Version.0.3.0 プラグイン拡張用に個別アイテムの再初期化メソッドを追加した。
  * Version.0.2.0 装備したときにイベントリから削除されない問題を修正した。
  *               コメント誤りを修正した。
@@ -178,18 +203,19 @@
 (() => {
     const pluginName = "Kapu_IndependentItem";
     const parameters = PluginManager.parameters(pluginName);
-    const independentItemCount = Number(parameters['independentItemCount']) || 0;
-    const independentItemStartIndex = Number(parameters['independentItemStartIndex']) || 1000;
-    const independentItemStockCount = Number(parameters['independentItemStockCount']) || 200;
-    const independentItemDefault = parameters['independentItemDefault'] || false;
-    const independentWeaponCount = Number(parameters['independentWeaponCount']) || 0;
-    const independentWeaponStartIndex = Number(parameters['independentWeaponStartIndex']) || 1000;
-    const independentWeaponStockCount = Number(parameters['independentWeaponStockCount']) || 200;
-    const independentWeaponDefault = parameters['independentWeaponDefault'] || false;
-    const independentArmorCount = Number(parameters['independentArmorCount']) || 0;
-    const independentArmorStartIndex = Number(parameters['independentArmorStartIndex']) || 1000;
-    const independentArmorStockCount = Number(parameters['independentArmorStockCount']) || 200;
-    const independentArmorDefault = parameters['independentArmorDefault'] || false;
+    const independentItemCount = Number(parameters["independentItemCount"]) || 0;
+    const independentItemStartIndex = Number(parameters["independentItemStartIndex"]) || 1000;
+    const independentItemStockCount = Number(parameters["independentItemStockCount"]) || 200;
+    const independentItemDefault = Boolean(parameters["independentItemDefault"]) || false;
+    const independentWeaponCount = Number(parameters["independentWeaponCount"]) || 0;
+    const independentWeaponStartIndex = Number(parameters["independentWeaponStartIndex"]) || 1000;
+    const independentWeaponStockCount = Number(parameters["independentWeaponStockCount"]) || 200;
+    const independentWeaponDefault = Boolean(parameters["independentWeaponDefault"]) || false;
+    const independentArmorCount = Number(parameters["independentArmorCount"]) || 0;
+    const independentArmorStartIndex = Number(parameters["independentArmorStartIndex"]) || 1000;
+    const independentArmorStockCount = Number(parameters["independentArmorStockCount"]) || 200;
+    const independentArmorDefault = Boolean(parameters["independentArmorDefault"]) || false;
+    const gainFailureEventId = Number(parameters["gainFailureEventId"]) || 0;
 
     //-------------------------------------------------------------------------
     // Scene_Boot
@@ -199,15 +225,15 @@
      */
     Scene_Boot.prototype.start = function () {
         if ($dataItems.length >= independentItemStartIndex) {
-            throw new Error('independentItemStartIndex is illegal. (< $dataItem.length)');
+            throw new Error("independentItemStartIndex is illegal. (< $dataItem.length)");
         }
         DataManager.processIndependentNotetag($dataItems, independentItemDefault);
         if ($dataWeapons.length >= independentWeaponStartIndex) {
-            throw new Error('independentWeaponStartIndex is illegal. (< $dataWeapons.length');
+            throw new Error("independentWeaponStartIndex is illegal. (< $dataWeapons.length");
         }
         DataManager.processIndependentNotetag($dataWeapons, independentWeaponDefault);
         if ($dataArmors.length >= independentArmorStartIndex) {
-            throw new Error('independentArmorStartIndex is illegal. (< $dataArmors.length');
+            throw new Error("independentArmorStartIndex is illegal. (< $dataArmors.length");
         }
         DataManager.processIndependentNotetag($dataArmors, independentArmorDefault);
 
@@ -225,8 +251,11 @@
     DataManager.processIndependentNotetag = function(dataArray, independent) {
         for (let item of dataArray) {
             if (item) {
-                if (!item.meta.independent) {
-                    item.meta.independent = independent;
+                if (typeof item.meta.independent === "undefined") {
+                    item.independent = independent;
+                } else {
+                    item.independent = (item.meta.independent !== "no")
+                            && (item.meta.independent !== "false");
                 }
             }
         }
@@ -323,7 +352,7 @@
         if (DataManager.isBattleTest()) {
             return false; // 戦闘テストでは個別アイテム無効。
         }
-        if (!item.meta.independent && !item.baseItemId) {
+        if (!item.independent) {
             return false; // 個別アイテムでない。
         }
 
@@ -338,7 +367,18 @@
      */
     DataManager.isIndependentItem = function(item) {
         return (item && item.baseItemId);
-    }
+    };
+
+    /**
+     * itemが個別アイテムのベースアイテムかどうかを判定する。
+     * 
+     * @param {Object} item ベースアイテムまたは個別アイテム(DataItem/DataWeapon/DataArmor)
+     * @return {Boolean} 個別アイテムのベースアイテムの場合にはtrue,
+     *                   個別アイテム、もしくは非個別アイテムの場合にはfalse
+     */
+    DataManager.isIndependentBaseItem = function(item) {
+        return DataManager.isIndependent(item) && !DataManager.isIndependentItem(item);
+    };
 
     /**
      * 新しい個別アイテムを登録する。
@@ -400,7 +440,7 @@
         let newItem = JsonEx.makeDeepCopy(baseItem);
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
-        newItem.note = '';
+        newItem.note = "";
         DataManager.initializeIndependentCommon(newItem, baseItem);
         DataManager.initializeIndependentItem(newItem, baseItem);
         return newItem;
@@ -448,7 +488,7 @@
         let newItem = JsonEx.makeDeepCopy(baseItem);
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
-        newItem.note = '';
+        newItem.note = "";
         DataManager.initializeIndependentCommon(newItem, baseItem);
         DataManager.initializeIndependentWeapon(newItem, baseItem);
         return newItem;
@@ -495,7 +535,7 @@
         let newItem = JsonEx.makeDeepCopy(baseItem);
         newItem.id = newItemId;
         newItem.baseItemId = baseItem.id;
-        newItem.note = '';
+        newItem.note = "";
         DataManager.initializeIndependentCommon(newItem, baseItem);
         DataManager.initializeIndependentArmor(newItem, baseItem);
         return newItem;
@@ -640,12 +680,12 @@
      */
     const _resetIndependentItemData = function(item, baseItem) {
         for (const key of Object.keys(baseItem)) {
-            if (key !== 'id') {
+            if (key !== "id") {
                 delete item[key];
             }
         }
         for (const key of Object.keys(baseItem)) {
-            if (key !== 'id') {
+            if (key !== "id") {
                 item[key] = JsonEx.makeDeepCopy(baseItem[key]);
             }
         }
@@ -673,6 +713,56 @@
         }
     };
 
+    /**
+     * ベースアイテムが一致してるかどうかを取得する。
+     * 
+     * @param {Object} item1 アイテム
+     * @param {Object} item2 アイテム
+     * 
+     * @return {Boolean} 一致している場合にはtrue, それ以外はfalse
+     */
+    DataManager.isBaseItemMatch = function(item1, item2) {
+        if ((DataManager.isItem(item1) !== DataManager.isItem(item2))
+                || (DataManager.isWeapon(item1) !== DataManager.isWeapon(item2))
+                || (DataManager.isArmor(item1) !== DataManager.isArmor(item2))) {
+            return false;
+        }
+        const baseItemId1 = item1.baseItemId || item1.id;
+        const baseItemId2 = item2.baseItemId || item2.id;
+        return baseItemId1 === baseItemId2;
+    };
+
+    //-------------------------------------------------------------------------
+    // Game_Temp
+    _Game_Temp_initialize = Game_Temp.prototype.initialize;
+    /**
+     * 初期化する。
+     */
+    Game_Temp.prototype.initialize = function() {
+        _Game_Temp_initialize.call(this);
+        this._gainItemFailure = false;
+    };
+    /**
+     * インタプリタからの要求でアイテムの加算に成功したかどうかを設定する。
+     * 
+     * @param {Boolean} isFailure 加算に失敗した場合にはtrue, それ以外はfalse
+     */
+    Game_Temp.prototype.setItemGainFailure = function(isFailure) {
+        this._gailItemFailure = isFailure;
+        if (isFailure && gainFailureEventId) {
+            if (!this._commonEventQueue.includes(gainFailureEventId)) {
+                this.reserveCommonEvent(gainFailureEventId);
+            }
+        }
+    };
+    /**
+     * インタプリタからの要求でアイテムの加算に成功したかどうかを取得する。
+     * 
+     * @return {Boolean} 加算に失敗した場合にはtrue, それ以外はfalse
+     */
+    Game_Temp.prototype.isItemGainFailure = function() {
+        return this._gailItemFailure;
+    };
 
     //-------------------------------------------------------------------------
     // Game_Actor
@@ -685,7 +775,7 @@
      * @return {Boolean} 装備中の場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isEquipped = function(item) {
-        if (DataManager.isIndependent(item) && !item.baseItemid) {
+        if (DataManager.isIndependentBaseItem(item)) {
             // 個別アイテムのベースアイテムが指定された場合、
             // IDが一致しているものを持っているかどうかで判定する。
             return (this.findEquippedSlot(item) >= 0);
@@ -716,20 +806,19 @@
     };
 
     /**
-     * 装備中スロット番号を得る。
+     * baseItemを装備しているスロット番号を得る。
      * 
      * @param {Object} baseItem ベースアイテム(DataWeapon/DataArmor)
      * @return {Number} 装備中スロット番号。該当するものが無い場合には-1。
      */
     Game_Actor.prototype.findEquippedSlot = function(baseItem) {
         const equips = this.equips();
-        const id = baseItem.id;
-        const isWeapon = DataManager.isWeapon(baseItem);
         for (let slotId = 0; slotId < equips.length; slotId++) {
             const equippedItem = equips[slotId];
-            if (equippedItem
-                    && (DataManager.isWeapon(equippedItem) === isWeapon)
-                    && ((equippedItem.id == id) || (equippedItem.baseItemId == id))) {
+            if (!equippedItem) {
+                continue;
+            }
+            if (DataManager.isBaseItemMatch(equippedItem, baseItem)) {
                 return slotId;
             }
         }
@@ -837,7 +926,9 @@
     Game_Party.prototype.gainIndependentItem = function(item, amount, includeEquip = false) {
         if (amount > 0) {
             for (let i = 0; i < amount; i++) {
-                const newItem = DataManager.registerNewIndependentData(item);
+                // Note: 装備を解除したときにもgainItem()がコールされる。
+                const newItem = DataManager.isIndependentItem(item)
+                        ? item : DataManager.registerNewIndependentData(item);
                 if (newItem) {
                     let container = this.itemContainer(item); // newItemじゃなくてitemを渡して効率化
                     container[newItem.id] = 1;
@@ -1062,18 +1153,22 @@
      * @return {Number} 最大アイテム数
      */
     Game_Party.prototype.getMaxIndependentItemCount = function(item) {
+        const specifiedMaxCount = _Game_Party_maxItems.call(item); // データベース上で指定されている最大数
         const baseItem = DataManager.getBaseItem(item);
         if (DataManager.isItem(baseItem)) {
-            return independentItemStockCount - this.numItems(baseItem);
+            const itemInventoryCount = this.useableItemInventoryCount() + this.numItems(baseItem);
+            return Math.min(specifiedMaxCount, itemInventoryCount);
         } else if (DataManager.isWeapon(baseItem)) {
-            return independentWeaponStockCount - this.numItems(baseItem);
+            const itemInventoryCount = this.useableWeaponInventoryCount() + this.numItems(baseItem);
+            return Math.min(specifiedMaxCount, itemInventoryCount);
         } else if (DataManager.isArmor(baseItem)) {
-            return independentArmorStockCount - this.numItems(baseItem);
+            const itemInventoryCount = this.useableArmorInventoryCount() + this.numItems(baseItem);
+            return Math.min(specifiedMaxCount, itemInventoryCount);
         } else {
             return 0;
         }
     };
-    
+
     const _Game_Party_hasItem = Game_Party.prototype.hasItem;
     /**
      * itemで指定されるアイテムを持っているかどうか判定する。
@@ -1083,7 +1178,9 @@
      * @return {Boolean} アイテムを持っている場合にはtrue, それ以外はfalse.
      */
     Game_Party.prototype.hasItem = function (item, includeEquip) {
-        if (DataManager.isIndependent(item)) {
+        if (DataManager.isIndependentBaseItem(item)) {
+            // 個別アイテムのベースアイテムが指定されたときは、
+            // 一致する個別アイテムがあるかを調べる。
             const baseItem = DataManager.getBaseItem(item);
             var independentItem = this.getMatchingIndependentItem(baseItem, includeEquip);
             return (independentItem !== null);
@@ -1102,10 +1199,124 @@
      */
     Game_Party.prototype.isAnyMemberEquipped = function(item) {
         if (DataManager.isIndependent(item)) {
-            // Note: ベーススクリプトでincludesを直接書いてるやつはバグじゃないかな。
+            // Note: ベーススクリプトの処理がID一致をべた書きしてるので、
+            //       Game_Actor.isEquipped()をコールして調べるように変更する。
             return this.members().some(actor => actor.isEquipped(item));
         } else {
             return _Game_Party_isAnyMemberEquipped.call(this, ...arguments);
+        }
+    };
+
+    /**
+     * イベントリにある個別アイテムのリストを得る。
+     * 
+     * @return {Array<DataItem>} 個別アイテムのリスト
+     */
+    Game_Party.prototype.independentItems = function() {
+        return this.items().filter(item => DataManager.isIndependentItem(item));
+    };
+
+    /**
+     * イベントリにある個別武器のリストを得る。
+     * 
+     * @return {Array<DataWeapon>} 個別武器のリスト
+     */
+    Game_Party.prototype.independentWeapons = function() {
+        return this.weapons().filter(weapon => DataManager.isIndependentItem(weapon));
+    };
+
+    /**
+     * イベントリにある個別防具のリストを得る。
+     * 
+     * @return {Array<DataArmor>} 個別防具のリスト
+     */
+    Game_Party.prototype.independentArmors = function() {
+        return this.armors().filter(armor => DataManager.isIndependentItem(armor));
+    };
+
+    /**
+     * 使用可能な個別アイテムのイベントリ数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+
+    Game_Party.prototype.useableItemInventoryCount = function() {
+        return independentItemStockCount - this.independentItems().length;
+    };
+
+    /**
+     * 使用可能な個別武器のイベントリ数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+
+    Game_Party.prototype.useableWeaponInventoryCount = function() {
+        return independentWeaponStockCount - this.independentWeapons().length;
+    };
+
+    /**
+     * 使用可能な個別防具のイベントリ数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+    Game_Party.prototype.useableArmorInventoryCount = function() {
+        return independentArmorStockCount - this.independentArmors().length;
+    };
+
+    //-------------------------------------------------------------------------
+    /**
+     * アイテムの増減コマンドを処理する。
+     * 
+     * @param {Object} params パラメータ
+     * !!!overwrite!!! Game_Interpreter.command126 // アイテムの増減
+     */
+    Game_Interpreter.prototype.command126 = function(params) {
+        let value = this.operateValue(params[1], params[2], params[3]);
+        this.commandGainItem($dataItems[params[0]], value, false);
+        return true;
+    };
+
+    /**
+     * 武器の増減コマンドを処理する。
+     * 
+     * @param {Object} params パラメータ
+     * !!!overwrite!!! Game_Interpreter.command127 // 武器の増減
+     */
+    Game_Interpreter.prototype.command127 = function(params) {
+        let value = this.operateValue(params[1], params[2], params[3]);
+        this.commandGainItem($dataWeapons[params[0]], value, params[4]);
+        return true;
+    };
+
+    /**
+     * 防具の増減コマンドを処理する。
+     * 
+     * @param {Object} params パラメータ
+     * !!!overwrite!!! Game_Interpreter.command128 // 防具の増減
+     */
+    Game_Interpreter.prototype.command128 = function(params) {
+        let value = this.operateValue(params[1], params[2], params[3]);
+        this.commandGainItem($dataArmors[params[0]], value, params[4]);
+        return true;
+    };
+
+
+    /**
+     * アイテム増減コマンドを処理する。
+     * 
+     * @param {Object} item アイテムデータ(DataItem/DataWeapon/DataArmor)
+     * @param {Number} value 増減する値
+     * @param {Boolean} includesEquip 装備を品を含めるかどうか。
+     */
+    Game_Interpreter.prototype.commandGainItem = function(item, value, includesEquip) {
+        const maxAppendCount = $gameParty.maxItems(item) - $gameParty.numItems(item);
+        const isGainFailure = (value > 0) && (value > maxAppendCount);
+        if (isGainFailure) {
+            value = maxAppendCount;
+        }
+        $gameTemp.setItemGainFailure(isGainFailure);
+        if (value !== 0) {
+            $gameParty.gainItem(item, value, includesEquip);
         }
     };
 

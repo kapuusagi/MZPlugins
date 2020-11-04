@@ -45,10 +45,10 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 新規作成。動作未確認。
+ * Version.0.1.0 新規作成。
  */
 (() => {
-    const pluginName = 'Kapu_ElementCore';
+    const pluginName = "Kapu_ElementCore";
     const parameters = PluginManager.parameters(pluginName);
 
 
@@ -64,7 +64,7 @@
             return;
         }
         obj.damage.elementIds = [];
-        if (obj.damage.elementId) {
+        if (obj.damage.elementId > 0) {
             obj.damage.elementIds.push(obj.damage.elementId);
         }
 
@@ -72,7 +72,7 @@
             return;
         }
         const valueStr = obj.meta.elementIds;
-        const tokens = valueStr.split(',');
+        const tokens = valueStr.split(",");
         for (token of tokens) {
             const elementId = Number(token);
             if (elementId) {
@@ -83,7 +83,7 @@
             obj.damage.elementId = Math.min(...obj.damage.elementIds);
         }
     };
-    DataManager.addNotetagParserWeapons(_processElementIdsNotetag);
+    DataManager.addNotetagParserSkills(_processElementIdsNotetag);
     DataManager.addNotetagParserItems(_processElementIdsNotetag);
 
     //------------------------------------------------------------------------------
@@ -96,8 +96,9 @@
      * !!!overwrite!!!
      */
     Game_Action.prototype.calcElementRate = function(target) {
-        const elements = (this.item().damge.elementIds.length > 0) 
-            ? this.item().damage.elementIds : this.subject().attackElements();
+        const item = this.item();
+        const elements = (item.damage.elementIds.length > 0) 
+            ? item.damage.elementIds : this.subject().attackElements();
         return this.elementsMaxRate(target, elements);
     };
 
@@ -110,7 +111,7 @@
      * !!!overwrite!!!
      */
     Game_Action.prototype.elementsMaxRate = function(target, elements) {
-        const elementRates = [];
+        const elementRates = new Array($dataSystem.elements.length).fill(0);
         for (elementId of elements) {
             elementRates[elementId] = this.singleElementRate(target, elementId);
         }

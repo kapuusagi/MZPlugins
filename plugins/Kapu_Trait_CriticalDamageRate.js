@@ -69,8 +69,8 @@
     const pluginName = "Kapu_Trait_CriticalDamageRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_XPARAM_DID_CDR = Number(parameters['TraitXParamDid']) || 0;
-    const basicCriticalRate = Number(parameters['BasicRate']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_CDR = Number(parameters["TraitXParamDid"]) || 0;
+    const basicCriticalRate = Number(parameters["BasicRate"]) || 0;
 
     //------------------------------------------------------------------------------
     // DataManager

@@ -25,15 +25,18 @@
  * @default false
  * 
  * @help 
- * 
- * ■ 使用時の注意
- * 
- * ■ プラグイン開発者向け
+ * 個別アイテム入手時、一部の性能にばらつきを持たせます。
+ * ばらつきを持たせられるのは以下のものです。
+ * アイテム
+ *    HP回復効果量/MP回復効果量
+ * 武器・防具
+ *    MaxHP/MaxMP/ATK/DEF/MATK/MDEF/AGI/LUK加算値
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * setRandomize
+ *    ショップでの個別アイテム購入時、ばらつきを有効にするかどうか。
  * 
  * ============================================
  * ノートタグ
@@ -42,36 +45,46 @@
  *     <varianceEffect:value#>
  *        -value#～valueの範囲の値を効果量に加算する。
  *        効果があるのは、HP回復効果/MP回復効果の固定回復量。割合の方は変化させない。
+ *        ばらつき加算結果は0以下にしない。
  *     <varianceEffect:value1#,value2#>
  *        -value#～valueの範囲の値を効果量に加算する。
  *        value1は割合。value2は固定子回復量
+ *        value1は10と指定すると、±10%になる。
+ *        ばらつき加算結果は0以下にしない。
  * 武器/防具
  *     <varianceParam:value#>
  *        0～valueの範囲で、全ての0でないパラメータに加算させる。
  *     <varianceParam:N=value#,...>
  *        0～valueの範囲で指定パラメータを加算する。Nはパラメータ名。
  *        Nに指定可能なものは次の通り。
- *        'MaxHP','MaxMP','ATK','DEF','MATK','MDEF','AGI','LUK'
+ *        "MaxHP","MaxMP","ATK","DEF","MATK","MDEF","AGI","LUK"
  *        
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 
  */
 (() => {
-    'use strict'
+    "use strict"
 
-    const pluginName = 'Kapu_IndependentItem_Randomize'
+    const pluginName = "Kapu_IndependentItem_Randomize"
 
     const parameters = PluginManager.parameters(pluginName);
-    const isShopRandomize = Boolean(parameters['isShopRandomize']) || false;
+    const isShopRandomize = Boolean(parameters["isShopRandomize"]) || false;
 
-    PluginManager.registerCommand(pluginName, 'setRandomize', args => {
-        $gameTemp.setIndependentItemRandomize(Boolean(args.enabled));
+    PluginManager.registerCommand(pluginName, "setRandomize", args => {
+        const enabled = Boolean(args.enabled) || false;
+        $gameTemp.setIndependentItemRandomize(enabled);
     });
 
     //-------------------------------------------------------------------------
     // Game_Temp
+    const _Game_Temp_initialize = Game_Temp.prototype.initialize;
+
+    Game_Temp.prototype.initialize = function() {
+        _Game_Temp_initialize.call(this, ...arguments);
+        this._isIndependentItemRandomize = true;
+    };
 
     /**
      * 個別アイテムの性能ランダム化を有効にするかどうかを設定する。
@@ -79,7 +92,7 @@
      * @param {Boolean} enabled 有効にするかどうか。
      */
     Game_Temp.prototype.setIndependentItemRandomize = function(enabled) {
-        this._isIndependentItemRandomize = enabled || false;
+        this._isIndependentItemRandomize = enabled;
     };
 
     /**
@@ -125,7 +138,7 @@
      */
     DataManager.initializeIndependentItem = function(newItem, baseItem) {
         _DataManager_initializeIndependentItem.call(this, ...arguments);
-        if ($gameTemp.randomizeIndependenetItem()) {
+        if ($gameTemp.independentItemRandomize()) {
             DataManager.randomizeEffectPerformance(newItem, baseItem);
         }
     };
@@ -140,7 +153,7 @@
      */
     DataManager.initializeIndependentWeapon = function(newWeapon, baseWeapon) {
         _DataManager_initializeIndependentWeapon.call(this, ...arguments);
-        if ($gameTemp.randomizeIndependenetItem()) {
+        if ($gameTemp.independentItemRandomize()) {
             DataManager.randomizeEquipPerformance(newWeapon, baseWeapon);
         }
     };
@@ -186,9 +199,15 @@
      * @return {object} 効果変動量オブジェクト
      */
     const _parseVarianceEffect = function(varianceStr) {
-        const tokens = varianceStr.split(',');
-        const v1 = (tokens.length >= 1) ? (Number(tokens[0]) || 0) : 0;
-        const v2 = (tokens.length >= 2) ? (Number(tokens[1]) || 0) : 0;
+        const tokens = varianceStr.split(",");
+        let v1 = 0;
+        let v2 = 0;
+        if (tokens.length == 1) {
+            v2 = (tokens.length >= 1) ? (Number(tokens[0]) || 0) : 0;
+        } else {
+            v1 = (tokens.length >= 1) ? (Number(tokens[0]) || 0) : 0;
+            v2 = (tokens.length >= 2) ? (Number(tokens[1]) || 0) : 0;
+        }
         return { value1:v1, value2:v2 };
     };
 
@@ -223,7 +242,7 @@
         const varianceEffect = _parseVarianceEffect(baseItem.meta.varianceEffect);
         for (const effect of item.effects) {
             if ((effect.code === Game_Action.EFFECT_RECOVER_HP)
-                    || (effect.code === Game_Action.EFFECT_RECOVER_MP)) {]
+                    || (effect.code === Game_Action.EFFECT_RECOVER_MP)) {
                 const baseValue1 = Math.round(effect.value1 * 100);
                 const value1 = _calcEffectValue(baseValue1, varianceEffect.value1);
                 effect.value1 = (value1 / 100).toFixed(2);
@@ -246,9 +265,9 @@
                 varianceParam[i] = singleNumber;
             }
         } else {
-            const paramArray = [ 'MaxHP', 'MaxMP', 'ATK', 'DEF', 'MATK', 'MDEF', 'AGI', 'LUK'];
-            for (const token of varianceStr.split(',')) {
-                const arg = token.split('=');
+            const paramArray = [ "MaxHP", "MaxMP", "ATK", "DEF", "MATK", "MDEF", "AGI", "LUK"];
+            for (const token of varianceStr.split(",")) {
+                const arg = token.split("=");
                 if (arg.length > 1) {
                     const index = paramArray.indexOf(arg[0]);
                     const variance = Number(arg[1]);
@@ -284,10 +303,10 @@
      * @param {object} baseItem ベースアイテム
      */
     DataManager.randomizeEquipPerformance = function(item, baseItem) {
-        if (!baseItem.meta.randomVariance) {
+        if (!baseItem.meta.varianceParam) {
             return;
         }
-        const varianceParam = _parseVarianceParam(baseItem.meta.randomVariance);
+        const varianceParam = _parseVarianceParam(baseItem.meta.varianceParam);
         for (let i = 0; i < 8; ++i) {
             item.params[i] = _calcParamValue(baseItem.params[i], varianceParam[i]);
         }

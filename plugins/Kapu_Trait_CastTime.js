@@ -58,7 +58,7 @@
     const pluginName = "Kapu_Trait_CastTime";
     const parameters = PluginManager.parameters(pluginName);
 
-    Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE = Number(parameters['TraitXParamDid']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE = Number(parameters["TraitXParamDid"]) || 0;
 
     //------------------------------------------------------------------------------
     // DataManager
