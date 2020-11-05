@@ -180,6 +180,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.5 アイテム一覧で、個別アイテムを複数持っていた場合の表示がおかしい不具合を修正した。
  * Version.0.4.4 各カテゴリの既定の個別アイテム設定でtrueを設定しても効果がない不具合を修正した。
  * Version.0.4.3 個別アイテム/非個別アイテムの指定が全くできていなかった不具合を修正した。
  * Version.0.4.2 個別アイテムが無限に使用できる不具合を修正した。
@@ -1329,7 +1330,25 @@
             $gameParty.gainItem(item, value, includesEquip);
         }
     };
-
+    //-------------------------------------------------------------------------
+    // Window_ItemList
+    /**
+     * アイテム個数を描画する。
+     * 
+     * @param {Data_Item} アイテム。(Weapon/Armor/Item)
+     * @param {Number} x x描画位置
+     * @param {Number} y y描画位置
+     * @param {Number} width 幅
+     * !!!overwrite!!! Window_ItemList.drawItemNumber()
+     *     個別アイテム時には、個数1を表示するためオーバーライドする。
+     */
+    Window_ItemList.prototype.drawItemNumber = function(item, x, y, width) {
+        if (this.needsNumber()) {
+            this.drawText(':', x, y, width - this.textWidth('00'), 'right');
+            var num = DataManager.isIndependent(item) ? 1 : $gameParty.numItems(item);
+            this.drawText(num, x, y, width, 'right');
+        }
+    };
     //-------------------------------------------------------------------------
     // Secene_Shop
 
