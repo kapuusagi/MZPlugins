@@ -1256,7 +1256,16 @@
     };
 
     /**
-     * 使用可能な個別武器のイベントリ数を得る。
+     * 使用可能な個別アイテムの最大数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+    Game_Party.prototype.maxItemInventoryCount = function() {
+        return independentItemStockCount;
+    };
+
+    /**
+     * 所持可能な個別武器のイベントリ数を得る。
      * 
      * @return {Number} イベントリ数
      */
@@ -1266,12 +1275,30 @@
     };
 
     /**
-     * 使用可能な個別防具のイベントリ数を得る。
+     * 所持可能な個別武器の最大数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+    Game_Party.prototype.maxWeaponInventoryCount = function() {
+        return independentWeaponStockCount;
+    };
+
+    /**
+     * 所持可能な個別防具のイベントリ数を得る。
      * 
      * @return {Number} イベントリ数
      */
     Game_Party.prototype.useableArmorInventoryCount = function() {
         return independentArmorStockCount - this.independentArmors().length;
+    };
+
+    /**
+     * 個別防具の所持可能最大数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+    Game_Party.prototype.maxArmorInventoryCount = function() {
+        return independentArmorStockCount;
     };
 
     //-------------------------------------------------------------------------

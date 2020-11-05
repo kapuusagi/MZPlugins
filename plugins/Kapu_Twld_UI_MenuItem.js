@@ -188,10 +188,10 @@ function Window_ItemCommand() {
                 this.drawNormalItemCount(x, rect.y, numWidth);
                 break;
             case 'weapon':
-                this.drawWeponCount(x, rect.y, numWidth);
+                this.drawWeaponItemCount(x, rect.y, numWidth);
                 break;
             case 'armor':
-                this.drawArmorCount(x, rect.y, numWidth);
+                this.drawArmorItemCount(x, rect.y, numWidth);
                 break;
             case 'keyItem':
                 // キーアイテムは個数表示しない。
@@ -213,7 +213,7 @@ function Window_ItemCommand() {
             return DataManager.isIndependentItem(item) && (item.itypeId == 1); 
         });
         const itemCount = normaIndependentlItems.length;
-        const maxItemCount = $gameParty.useableItemInventoryCount();
+        const maxItemCount = $gameParty.maxItemInventoryCount();
         const numLabel = itemCount + '/' + maxItemCount;
         if (itemCount >= maxItemCount) {
             this.changeTextColor(ColorManager.textColor(2));
@@ -227,10 +227,10 @@ function Window_ItemCommand() {
      * @param {Number} y 描画位置y
      * @param {Number} width 幅
      */
-    Window_ItemCategoryVertical.prototype.drawWeaponCount = function(x, y, width) {
+    Window_ItemCategoryVertical.prototype.drawWeaponItemCount = function(x, y, width) {
         const independentWeapons = $gameParty.weapons().filter((weapon) => DataManager.isIndependentItem(weapon));
         const itemCount = independentWeapons.length;
-        const maxItemCount = $gameParty.useableWeaponInventoryCount();
+        const maxItemCount = $gameParty.maxWeaponInventoryCount();
         const numLabel = itemCount + '/' + maxItemCount;
         if (itemCount >= maxItemCount) {
             this.changeTextColor(ColorManager.textColor(2));
@@ -245,10 +245,10 @@ function Window_ItemCommand() {
      * @param {Number} y 描画位置y
      * @param {Number} width 幅
      */
-    Window_ItemCategoryVertical.prototype.useableArmorInventoryCount = function(x, y, width) {
+    Window_ItemCategoryVertical.prototype.drawArmorItemCount = function(x, y, width) {
         const independentArmors = $gameParty.armors().filter((armor) => DataManager.isIndependentItem(armor));
         const itemCount = independentArmors.length;
-        const maxItemCount = $gameParty.getIndependentItemTypeMax($dataArmors[1]);
+        const maxItemCount = $gameParty.maxArmorInventoryCount();
         const numLabel = itemCount + '/' + maxItemCount;
         if (itemCount >= maxItemCount) {
             this.changeTextColor(this.textColor(2));
@@ -359,7 +359,7 @@ function Window_ItemCommand() {
         const rect = this.categoryWindowRect();
         this._categoryWindow = new Window_ItemCategoryVertical(rect);
         this._categoryWindow.setHelpWindow(this._helpWindow);
-        this._categoryWindow.setHelpWindow("ok", this.onCategoryOk.bind(this));
+        this._categoryWindow.setHandler("ok", this.onCategoryOk.bind(this));
         this._categoryWindow.setHandler("cancel", this.popScene.bind(this));
         this.addWindow(this._categoryWindow);
     };
