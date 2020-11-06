@@ -6,7 +6,7 @@
  * 
  * @param statusPictureMethod
  * @text ステータス画像メソッド名
- * @desc アクターのステータス画像を取得するメソッド名。
+ * @desc アクターのステータス画像を取得するメソッドまたはプロパティ名。
  * @type string
  * 
  * @param labelClass
@@ -268,12 +268,34 @@
      */
     Window_Status.prototype.drawBackgroundImage = function() {
         const actor = this._actor;
-        if ((statusPictureMethod in actor) && actor[statusPictureMethod]()) {
+        const statusPicture = this.statusPictureName();
+        if (statusPicture) {
             this.drawActorPicture();
         } else {
             const y = this.block2Y();
             this.drawActorFace(actor, 12, y);    
         }
+    };
+
+    /**
+     * ステータス画面に表示する画像ファイル名を得る。
+     * 
+     * @return {String} 画像ファイル名。未定義の場合には空文字列。
+     */
+    Window_Status.prototype.statusPictureName = function() {
+        const actor = this._actor;
+        if (actor) {
+            if (statusPictureMethod in actor) {
+                const valueType = typeof actor[statusPictureMethod];
+                if (valueType === "function") {
+                    return actor[statusPictureMethod]();
+                } else if (valueType === "string") {
+                    return actor[statusPictureMethod];
+                }
+            }
+        }
+
+        return "";
     };
 
     /**
@@ -283,7 +305,7 @@
      */
     Window_Status.prototype.drawActorPicture = function() {
         const actor = this._actor;
-        const pictureName = actor[statusPictureMethod]();
+        const pictureName = this.statusPictureName();
         const bitmap = ImageManager.loadPicture(pictureName);
         if (!bitmap.isReady()) {
             return;
