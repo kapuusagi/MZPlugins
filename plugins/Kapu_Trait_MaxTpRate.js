@@ -5,8 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
- * @base Kapu_Base_Param
- * @orderAfter Kapu_Base_Param
+ * @base Kapu_Base_Params
+ * @orderAfter Kapu_Base_Params
  * 
  * @param traitSParamDid
  * @text 最大TPレート特性DiD
