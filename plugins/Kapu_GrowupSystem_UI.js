@@ -446,10 +446,10 @@ function Scene_Growup() {
         this._items.push({
             iconIndex:0,
             name:TextManager.cancel,
-            type:'',
-            id:'',
+            type:"",
+            id:"",
             cost:0,
-            description:''
+            description:""
         });
     };
 
@@ -521,7 +521,7 @@ function Scene_Growup() {
      */
     Window_GrowupSelect.prototype.isEnabled = function(item) {
         if (item) {
-            if (item.type === '') {
+            if (item.type === "") {
                 // キャンセル項目
                 return true;
             }
@@ -558,7 +558,7 @@ function Scene_Growup() {
      * @param {Rectangle} rect ウィンドウ矩形領域。
      */
     Window_ConfirmApply.prototype.initialize = function (rect) {
-        this._items = [ '', TextManager.cancel];
+        this._items = [ "", TextManager.cancel];
         Window_Selectable.prototype.initialize.call(this, rect);
         this.activate();
     };
@@ -625,7 +625,7 @@ function Scene_Growup() {
     Window_ConfirmApply.prototype.drawItem = function (index) {
         var rect = this.itemRect(index);
         this.resetTextColor();
-        this.drawText(this._items[index], rect.x, rect.y, rect.width, 'left');
+        this.drawText(this._items[index], rect.x, rect.y, rect.width, "left");
         this.resetTextColor();
     };
 
@@ -704,10 +704,10 @@ function Scene_Growup() {
         this._selectWindow = new Window_GrowupSelect(this.selectWindowRect());
         this._selectWindow.setActor(this.actor());
         this._selectWindow.setHelpWindow(this._helpWindow);
-        this._selectWindow.setHandler('ok', this.onGrowupSelectOk.bind(this));
-        this._selectWindow.setHandler('cancel', this.onGrowupSelectCancel.bind(this));
-        this._selectWindow.setHandler('pageup', this.nextActor.bind(this));
-        this._selectWindow.setHandler('pagedown', this.previousActor.bind(this));
+        this._selectWindow.setHandler("ok", this.onGrowupSelectOk.bind(this));
+        this._selectWindow.setHandler("cancel", this.onGrowupSelectCancel.bind(this));
+        this._selectWindow.setHandler("pageup", this.nextActor.bind(this));
+        this._selectWindow.setHandler("pagedown", this.previousActor.bind(this));
         this._selectWindow.select(0);
         this._selectWindow.show();
         this._selectWindow.open();
@@ -735,8 +735,8 @@ function Scene_Growup() {
         this._confirmApplyWindow = new Window_ConfirmApply(this.confirmApplyWindowRect());
         this._confirmApplyWindow.hide();
         this._confirmApplyWindow.deactivate();
-        this._confirmApplyWindow.setHandler('ok', this.onConfirmOK.bind(this));
-        this._confirmApplyWindow.setHandler('cancel', this.onConfirmCancel.bind(this));
+        this._confirmApplyWindow.setHandler("ok", this.onConfirmOK.bind(this));
+        this._confirmApplyWindow.setHandler("cancel", this.onConfirmCancel.bind(this));
         this.addWindow(this._confirmApplyWindow);
     };
 
@@ -764,7 +764,7 @@ function Scene_Growup() {
             this.popScene();
         } else {
             this._confirmApplyWindow.setMessage(this.confirmMessage(item));
-            // if (item.type == 'reincarnation') {
+            // if (item.type == "reincarnation") {
             //     this._confirmApplyWindow.setMessage(item.description);
             // } else {
             //     // GPを X 消費して XX を1ポイント上昇させる。
@@ -804,20 +804,6 @@ function Scene_Growup() {
             var item = this._selectWindow.item();
             var actor = this.actor();
             actor.growup(item);
-            // switch (item.type) {
-            //     case 'reincarnation':
-            //         actor.reincarnation();
-            //         break;
-            //     case 'basicParam':
-            //         var paramId = item.id;
-            //         actor.growBasicParamByGp(paramId);
-            //         break;
-            //     case 'skill':
-            //         var skillId = item.id;
-            //         actor.learnSkillByGp(skillId);
-            //         break;
-            // }
-
             this._actorStatusWindow.refresh();
             this._selectWindow.refresh();
         }

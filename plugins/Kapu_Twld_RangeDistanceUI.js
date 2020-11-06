@@ -48,8 +48,8 @@
 (() => {
     const pluginName = "Kapu_Twld_RangeDistanceUI";
     const parameters = PluginManager.parameters(pluginName);
-    const frontIconId = Number(parameters['frontIconId']) || 0;
-    const rearIconId = Number(parameters['rearIconId']) || 0;
+    const frontIconId = Number(parameters["frontIconId"]) || 0;
+    const rearIconId = Number(parameters["rearIconId"]) || 0;
 
     //------------------------------------------------------------------------------
     // Sprite_PositionIcon

@@ -53,7 +53,7 @@
     const _processEquipSlotsNoteTag = function(obj) {
         obj.equipSlots = [];
         if (obj.meta.equipSlots) {
-            const tokens = obj.meta.equipSlots.split(',');
+            const tokens = obj.meta.equipSlots.split(",");
             for (const token of tokens) {
                 const equipType = Number(token);
                 if ((equipType > 0) && (equipType < $dataSystem.equipTypes.length)) {
@@ -101,7 +101,7 @@
             }
         }
         if (actor.meta.equippedItems) {
-            const tokens = actor.meta.equippedItems.split(',');
+            const tokens = actor.meta.equippedItems.split(",");
             for (const token of tokens) {
                 let re;
                 if ((re = token.match(/weapon\((\d+)\)/)) !== null) {

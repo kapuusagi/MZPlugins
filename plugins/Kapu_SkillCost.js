@@ -446,7 +446,7 @@
                 // コスト描画
                 this.drawText(dispCost.cost, drawX, y, paramWidth, "right");
 
-                // '/'描画
+                // "/"描画
                 if (i > 0) {
                     this.resetFontSettings();
                     drawX -= 8;

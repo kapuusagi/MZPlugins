@@ -50,7 +50,7 @@
      * @return {ConditionState} 条件付きパッシブステートオブジェクト。解析エラーの場合にはnull.
      */
     const _parseCondition = function(str) {
-        const index = str.indexOf(':');
+        const index = str.indexOf(":");
         if (index === -1) {
             return null;
         }

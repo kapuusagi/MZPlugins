@@ -85,8 +85,8 @@
 
     Game_BattlerBase.TRAIT_XPARAM_DID_CDR = Number(parameters["traitXParamDid"]) || 0;
     const basicCriticalRate = Number(parameters["BasicRate"]) || 0;
-    const propertyEnable = (typeof parameters['propertyEnable'] === "undefined")
-            ? false : (parameters['propertyEnable'] === "true");
+    const propertyEnable = (typeof parameters["propertyEnable"] === "undefined")
+            ? false : (parameters["propertyEnable"] === "true");
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {
         console.error(pluginName + ":TRAIT_XPARAM_DID_CDR is not valid.");
     }

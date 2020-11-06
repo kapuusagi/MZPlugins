@@ -109,10 +109,10 @@
 (() => {
     const pluginName = "Kapu_Trait_Penetrate";
     const parameters = PluginManager.parameters(pluginName);
-    Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR = Number(parameters['traitXParamDidDEFPR']) || 0;
-    Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR = Number(parameters['traitXParamDidPDRPR']) || 0;
-    Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR = Number(parameters['traitXParamDidMDFPR']) || 0;
-    Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR = Number(parameters['traitXParamDidMDRPR']) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR = Number(parameters["traitXParamDidDEFPR"]) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR = Number(parameters["traitXParamDidPDRPR"]) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR = Number(parameters["traitXParamDidMDFPR"]) || 0;
+    Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR = Number(parameters["traitXParamDidMDRPR"]) || 0;
     enableProperty = (typeof parameters["enableProperty"] === "undefined")
             ? false : (parameters["enableProperty"] === "true");
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR) {

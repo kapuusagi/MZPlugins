@@ -1371,9 +1371,9 @@
      */
     Window_ItemList.prototype.drawItemNumber = function(item, x, y, width) {
         if (this.needsNumber()) {
-            this.drawText(':', x, y, width - this.textWidth('00'), 'right');
+            this.drawText(":", x, y, width - this.textWidth("00"), "right");
             var num = DataManager.isIndependent(item) ? 1 : $gameParty.numItems(item);
-            this.drawText(num, x, y, width, 'right');
+            this.drawText(num, x, y, width, "right");
         }
     };
     //-------------------------------------------------------------------------

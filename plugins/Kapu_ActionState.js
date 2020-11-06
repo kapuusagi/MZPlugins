@@ -77,7 +77,7 @@
      * @return {Object} StateActionオブジェクト
      */
     const _parseAction = function(str) {
-        const tokens = str.split(',');
+        const tokens = str.split(",");
         if (tokens.length < 4) {
             return null;
         }
@@ -96,7 +96,7 @@
                 when = _RAISE_ACTIONED;
             } else if ((re = tokens[0].match(/stateAdded\(([\d,]+)\)/)) !== null) {
                 when = _RAISE_STATE_ADDED;
-                const ids = re[1].split(',').map(token => Number(token) || 0);
+                const ids = re[1].split(",").map(token => Number(token) || 0);
                 for (const id of ids) {
                     if ((id > 0) && (id < $dataStates.length) && !stateIds.includes(id)) {
                         stateIds.push(id);

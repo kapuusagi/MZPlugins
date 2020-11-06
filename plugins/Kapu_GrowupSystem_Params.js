@@ -155,7 +155,7 @@
         
         const actor = this.actor();
         if (actor.meta.gpParams) {
-            const tokens = actor.meta.gpParams.split(',');
+            const tokens = actor.meta.gpParams.split(",");
             const count = Math.min(tokens.length, this._gpParams.length);
             for (let i = 0; i < count;  i++) {
                 // 0以上(Math.max)の整数値(Math.floor)を格納する。

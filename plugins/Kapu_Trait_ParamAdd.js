@@ -74,9 +74,9 @@
 
         const params = ["MaxHP", "MaxMP", "ATK", "DEF", "MAT", "MDF", "AGI", "LUK" ];
         const addParams = [0, 0, 0, 0, 0, 0, 0, 0];
-        const tokens = obj.meta.paramAdd.split(',');
+        const tokens = obj.meta.paramAdd.split(",");
         for (const token of tokens) {
-            const keyval = token.split('=');
+            const keyval = token.split("=");
             if (keyval.length >= 2) {
                 const paramIndex = params.indexOf(keyval[0].trim());
                 const value = Math.round(Number(keyval[1]) || 0);

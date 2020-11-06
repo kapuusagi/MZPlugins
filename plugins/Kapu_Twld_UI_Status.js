@@ -13,6 +13,30 @@
  * @type boolean
  * @default false
  * 
+ * @param textPassiveSkill
+ * @text パッシブスキルラベル
+ * @desc 「パッシブスキル」として使用するラベル。
+ * @type string
+ * @default パッシブスキル
+ * 
+ * @param textStatus1
+ * @text ステータスウィンドウ1ラベル
+ * @desc 「基本ステータス表示1」として使用するラベル
+ * @type string
+ * @default ページ1
+ * 
+ * @param textStatus2
+ * @text ステータスウィンドウ2ラベル
+ * @desc 「基本ステータス表示2」として使用するラベル
+ * @desc string
+ * @default ページ2
+ * 
+ * @param textStatus3
+ * @text ステータスウィンドウ3ラベル
+ * @desc 「装備標示」として使用されるラベル。
+ * @desc string
+ * @default ページ3
+ * 
  * @param textProfile
  * @text プロフィールラベル
  * @desc 「プロフィール」として使用するラベル。
@@ -23,6 +47,12 @@
  * @text ステータス画像メソッド名
  * @desc アクターのステータス画像を取得するメソッドまたはプロパティ名。
  * @type string
+ * 
+ * @param commandWindowWidth
+ * @text コマンド幅
+ * @desc コマンドウィンドウ領域の幅
+ * @type number
+ * @default 240
  * 
  * @help 
  * TWLD向けステータス画面UIプラグイン。
@@ -76,13 +106,18 @@ function Window_StatusProfile() {
 }
 
 (() => {
-    const pluginName = "Kapu_Twld_StatusUI";
+    const pluginName = "Kapu_Twld_UI_Status";
     const parameters = PluginManager.parameters(pluginName);
 
     const enableProfile = (typeof parameters["enableProfile"] === "undefined") 
             ? false : (parameters["enableProfile"] == "true");
-    const textProfile = parameters["textProfile"] || "profile";
+    const textPassiveSkill = parameters["textPassiveSkill"] || "PassiveSkill";
+    const textStatus1 = parameters["textStatus1"] || "Page.1";
+    const textStatus2 = parameters["textStatus2"] || "Page.2";
+    const textStatus3 = parameters["textStatus3"] || "Page.3";
+    const textProfile = parameters["textProfile"] || "Profile";
     const statusPictureMethod = String(parameters["statusPictureMethod"]) || "";
+    const commandWindowWidth = Number(parameters["commandWindowWidth"]) || 240;
 
     
     // MVではステータス表示（一部）/スキル表示/装備表示/プロフィール表示だけであった。
@@ -91,7 +126,7 @@ function Window_StatusProfile() {
     // レイアウトを先に決めないと作れない。
 
     // ベーシックシステムでは
-    //   プロフィールウィンドウ (_profileWindow : Window_Help)
+    //   プロフィールウィンドウ (_statusProfileWindow : Window_Help)
     //       2行のプロフィールを表示するウィンドウ。
     //   ステータスウィンドウ (_statusWindow : Window_Status)
     //       顔グラフィックを始め、いくつかの項目を表示するウィンドウ。
@@ -170,11 +205,12 @@ function Window_StatusProfile() {
      * コマンドリストを作成する。
      */
     Window_StatusCategory.prototype.makeCommandList = function() {
-        this.addCommand(TextManager.status, 'status');
-        this.addCommand(TextManager.equip, 'equip');
-        this.addCommand(TextManager.skill, 'skill');
+        this.addCommand(textStatus1, "status1");
+        this.addCommand(textStatus2, "status2");
+        this.addCommand(textStatus3, "status3");
+        this.addCommand(TextManager.skill, "skill");
         if (enableProfile) {
-            this.addCommand(textProfile, 'profile');
+            this.addCommand(textProfile, "profile");
         }
     };
 
@@ -244,7 +280,7 @@ function Window_StatusProfile() {
         // if (rcnt > 0) {
         //     var rcountText = "(再成長" + rcnt + "回)";
         //     this.changeTextColor(this.systemColor());
-        //     this.drawText(rcountText, x2 + 120, y + lineHeight * 3, 120, 'left');
+        //     this.drawText(rcountText, x2 + 120, y + lineHeight * 3, 120, "left");
         // }
 
         // this.changeTextColor(this.systemColor());
@@ -260,16 +296,16 @@ function Window_StatusProfile() {
         // var expText = actor.currentExp();
         // var nextText = actor.nextRequiredExp();
         // if (actor.isMaxLevel()) {
-        //     expText = '------';
-        //     nextText = '-------';
+        //     expText = "------";
+        //     nextText = "-------";
         // }
-        // this.drawText(expText, x2 + 120, y + lineHeight * 4, expWidth, 'right');
-        // this.drawText(nextText, x2 + 120, y + lineHeight * 5, expWidth, 'right');
+        // this.drawText(expText, x2 + 120, y + lineHeight * 4, expWidth, "right");
+        // this.drawText(nextText, x2 + 120, y + lineHeight * 5, expWidth, "right");
 
         // // ギルドランク
         // var x3 = this.contentsWidth() - 240;
         // this.changeTextColor(this.systemColor());
-        // this.drawText("ギルドランク:", x3, y, 180, 'right');
+        // this.drawText("ギルドランク:", x3, y, 180, "right");
         // this.resetTextColor();
         // this.drawText(actor.guildRankName(), x3 + 180, y, 60);
     // };
@@ -281,6 +317,8 @@ function Window_StatusProfile() {
      */
     Window_Status.prototype.refresh = function() {
         Window_StatusBase.prototype.refresh.call(this);
+        const itemRect = this.itemRect();
+        this.drawText(textStatus1, itemRect.x, itemRect.y, itemRect.width, "right");
     };
 
     //------------------------------------------------------------------------------
@@ -289,7 +327,8 @@ function Window_StatusProfile() {
         if (this.contents) {
             this.contents.clear();
         }
-
+        const itemRect = this.itemRect();
+        this.drawText(textStatus2, itemRect.x, itemRect.y, itemRect.width, "right");
     };
 
     // /**
@@ -352,13 +391,13 @@ function Window_StatusProfile() {
     //     this.drawText("ステータス", x, y, 320);
 
     //     var basicParamList = [
-    //         { name:'STR', current:actor.str, base:actor.getBasicParamBase(0) },
-    //         { name:'DEX', current:actor.dex, base:actor.getBasicParamBase(1) },
-    //         { name:'VIT', current:actor.vit, base:actor.getBasicParamBase(2) },
-    //         { name:'INT', current:actor.int, base:actor.getBasicParamBase(3) },
-    //         { name:'MEN', current:actor.men, base:actor.getBasicParamBase(4) },
-    //         { name:'AGI', current:actor.agi, base:actor.getBasicParamBase(5) },
-    //         { name:'LUK', current:actor.getLuk(), base:actor.getLuk() }
+    //         { name:"STR", current:actor.str, base:actor.getBasicParamBase(0) },
+    //         { name:"DEX", current:actor.dex, base:actor.getBasicParamBase(1) },
+    //         { name:"VIT", current:actor.vit, base:actor.getBasicParamBase(2) },
+    //         { name:"INT", current:actor.int, base:actor.getBasicParamBase(3) },
+    //         { name:"MEN", current:actor.men, base:actor.getBasicParamBase(4) },
+    //         { name:"AGI", current:actor.agi, base:actor.getBasicParamBase(5) },
+    //         { name:"LUK", current:actor.getLuk(), base:actor.getLuk() }
     //     ];
     //     var y1 = y + lineHeight;
     //     for (var i = 0; i < basicParamList.length; i++) {
@@ -370,30 +409,30 @@ function Window_StatusProfile() {
     //     var x2 = x + 220;
     //     var atk = actor.param(2);
     //     var baseAtk = actor.paramBase(2);
-    //     this.drawBasicParameter('ATK', atk, atk - baseAtk, x2, y1 + lineHeight * 0);
-    //     this.drawRate('PPR', actor.ppr, x2, y1 + lineHeight * 1);
+    //     this.drawBasicParameter("ATK", atk, atk - baseAtk, x2, y1 + lineHeight * 0);
+    //     this.drawRate("PPR", actor.ppr, x2, y1 + lineHeight * 1);
     //     var def = actor.param(3);
     //     var baseDef = actor.paramBase(3);
-    //     this.drawBasicParameter('DEF', def, def - baseDef, x2, y1 + lineHeight * 2);
-    //     this.drawRate('PDRR', 1 - actor.pdr, x2, y1 + lineHeight * 3);
+    //     this.drawBasicParameter("DEF", def, def - baseDef, x2, y1 + lineHeight * 2);
+    //     this.drawRate("PDRR", 1 - actor.pdr, x2, y1 + lineHeight * 3);
 
     //     var matk = actor.param(4);
     //     var baseMatk = actor.paramBase(4);
-    //     this.drawBasicParameter('MATK', matk, matk - baseMatk, x2, y1 + lineHeight * 5);
-    //     this.drawRate('MPR', actor.mpr, x2, y1 + lineHeight * 6);
+    //     this.drawBasicParameter("MATK", matk, matk - baseMatk, x2, y1 + lineHeight * 5);
+    //     this.drawRate("MPR", actor.mpr, x2, y1 + lineHeight * 6);
     //     var mdef = actor.param(5);
     //     var baseMdef = actor.paramBase(5);
-    //     this.drawBasicParameter('MDEF', mdef, mdef - baseMdef, x2, y1 + lineHeight * 7);
-    //     this.drawRate('MDRR', 1 - actor.mdr, x2, y1 + lineHeight * 8);
+    //     this.drawBasicParameter("MDEF", mdef, mdef - baseMdef, x2, y1 + lineHeight * 7);
+    //     this.drawRate("MDRR", 1 - actor.mdr, x2, y1 + lineHeight * 8);
 
     //     var x3 = x2 + 220;
     //     var rParamList = [
-    //         { name:'HIT', rate:actor.hit },
-    //         { name:'EVA', rate:actor.eva },
-    //         { name:'MEVA', rate:actor.mev },
-    //         { name:'CRI', rate:actor.cri }, 
-    //         { name:'CRR', rate:actor.pcr - TWLD.Core.BasicCriticalRate }, // 標準倍率は1.5なので差分を引く。
-    //         { name:'MCRR', rate:actor.mcrr - TWLD.Core.BasicCriticalRate }, // 標準倍率は1.5なので差分を引く。
+    //         { name:"HIT", rate:actor.hit },
+    //         { name:"EVA", rate:actor.eva },
+    //         { name:"MEVA", rate:actor.mev },
+    //         { name:"CRI", rate:actor.cri }, 
+    //         { name:"CRR", rate:actor.pcr - TWLD.Core.BasicCriticalRate }, // 標準倍率は1.5なので差分を引く。
+    //         { name:"MCRR", rate:actor.mcrr - TWLD.Core.BasicCriticalRate }, // 標準倍率は1.5なので差分を引く。
     //     ];
     //     for (var l = 0; l < rParamList.length; l++) {
     //         var rp = rParamList[l];
@@ -438,6 +477,8 @@ function Window_StatusProfile() {
             this.contents.clear();
         // TODO : 描画
         }
+        const itemRect = this.itemRect();
+        this.drawText(textStatus3, itemRect.x, itemRect.y, itemRect.width, "right");
     };
     // /**
     //  * Window_StatusEquip
@@ -499,7 +540,7 @@ function Window_StatusProfile() {
     //     // スロット名
     //     this.changeTextColor(this.systemColor());
     //     this.drawText(slotName, x, y, 120);
-    //     this.drawText(':', x + 120, y, 16);
+    //     this.drawText(":", x + 120, y, 16);
 
     //     // 装備品アイコン
     //     if (equipItem && (equipItem.iconIndex >= 0)) {
@@ -513,40 +554,40 @@ function Window_StatusProfile() {
     //     var x3 = x + 180;
     //     if (equipItem) {
     //         this.changeTextColor(this.itemNameColor(equipItem));
-    //         this.drawText(equipItem.name, x3, y, 320, 'left');
+    //         this.drawText(equipItem.name, x3, y, 320, "left");
     //     } else {
     //         this.resetTextColor();
-    //         this.drawText('(なし)', x3, y, 320, 'left');
+    //         this.drawText("(なし)", x3, y, 320, "left");
     //     }
 
     //     // 装備品の情報テキトーに。
     //     if (equipItem) {
     //         // 装備効果を列挙する。
     //         // 差分でいいのかなあ。
-    //         var paramNameTable = ['HP', 'MP', 'ATK', 'DEF', 'MAT', 'MDEF'];
-    //         var upgradeText = '';
+    //         var paramNameTable = ["HP", "MP", "ATK", "DEF", "MAT", "MDEF"];
+    //         var upgradeText = "";
     //         for (var i = 0; i < 6; i++) {
     //             var pup = equipItem.params[i] - equipItem.initialParams[i];
     //             if (pup > 0) {
-    //                 upgradeText += paramNameTable[i] + '+' + pup + ' ';
+    //                 upgradeText += paramNameTable[i] + "+" + pup + " ";
     //             } else if (pup < 0) {
-    //                 upgradeText += paramNameTable[i] + '' + pup + ' ';
+    //                 upgradeText += paramNameTable[i] + "" + pup + " ";
     //             }
     //         }
-    //         var bParamNameTable = ['STR', 'DEX', 'VIT', 'INT', 'MEN', 'AGI'];
+    //         var bParamNameTable = ["STR", "DEX", "VIT", "INT", "MEN", "AGI"];
     //         for (var j = 0; j < 6; j++) {
     //             var bpup = equipItem.basicParams[j] - equipItem.initialBasicParams[j];
     //             if (bpup > 0) {
-    //                 upgradeText += bParamNameTable[j] + '+' + pup + ' ';
+    //                 upgradeText += bParamNameTable[j] + "+" + pup + " ";
     //             } else if (bpup < 0) {
-    //                 upgradeText += bParamNameTable[j] + '' + pup + ' ';
+    //                 upgradeText += bParamNameTable[j] + "" + pup + " ";
     //             }
     //         }
     //         if (upgradeText.length > 0) {
     //             this.changeTextColor(this.itemNameColor(equipItem));
     //             var x4 = x3 + 330;
     //             var textWidth = x + this.contentsWidth() - x4;
-    //             this.drawText(upgradeText, x4, y, textWidth, 'left');
+    //             this.drawText(upgradeText, x4, y, textWidth, "left");
     //         }
     //     }
     // };
@@ -583,20 +624,21 @@ function Window_StatusProfile() {
      */
     Window_StatusSkillType.prototype.makeCommandList = function() {
         if (this._actor) {
-            var skillTypes = this._actor.addedSkillTypes();
+            const skillTypes = this._actor.addedSkillTypes();
             skillTypes.sort(function(a, b) {
                 return a - b;
             });
-            skillTypes.forEach(function(stypeId) {
+            for (const stypeId of skillTypes) {
                 if (stypeId > 0) {
-                    var name = $dataSystem.skillTypes[stypeId];
-                    this.addCommand(name, 'skill', true, stypeId);
+                    const name = $dataSystem.skillTypes[stypeId];
+                    this.addCommand(name, "skill", true, stypeId);
                 }
-            }, this);
+            }
             
             // 更にパッシブスキルを追加
             if (this._actor.hasPassiveSkill()) {
-                this.addCommand("パッシブ", 'passive', true, 0);
+                const stypeId = Game_BattlerBase.PASSIVE_SKILL_TYPE || 0;
+                this.addCommand(textPassiveSkill, "passive", true, stypeId);
             }
         }
     };
@@ -860,6 +902,7 @@ function Window_StatusProfile() {
      * Sprite_StatusBackgroundPictureを初期化する。
      */
     Sprite_StatusBackgroundPicture.prototype.initialize = function() {
+        Sprite.prototype.initialize.call(this);
         this._actor = null;
         this._pictureName = "";
         this._displayArea = new Rectangle(0, 0, Graphics.boxWidth, Graphics.boxHeight);
@@ -905,7 +948,7 @@ function Window_StatusProfile() {
     Sprite_StatusBackgroundPicture.prototype.pictureName = function() {
         const actor = this._actor;
         if (actor && statusPictureMethod) {
-            const typeStr = typeof actor[statusPictureMethod]
+            const typeStr = typeof actor[statusPictureMethod];
             if (typeStr === "function") {
                 const pictureName = actor[statusPictureMethod]();
                 if (pictureName) {
@@ -950,7 +993,7 @@ function Window_StatusProfile() {
         // y は下基準
         const dispWidth = Math.min(this._displayArea.width, this.bitmap.width);
         const displayHeight = Math.min(this._displayArea.height, this.bitmap.height);
-        const dispX = (bitmap.width - displayWidth) / 2;
+        const dispX = (this.bitmap.width - dispWidth) / 2;
         const dispY = 0;
         this.setFrame(dispX, dispY, dispWidth, displayHeight);
 
@@ -995,7 +1038,7 @@ function Window_StatusProfile() {
      */
     Scene_Status.prototype.createBackgroundImageLayer = function() {
         this._backgroundImageLayer = new Sprite();
-        this.addChild(this._clerkLayer);
+        this.addChild(this._backgroundImageLayer);
     };
 
     /**
@@ -1036,8 +1079,9 @@ function Window_StatusProfile() {
      * @return {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Status.prototype.statusCategoryWindowRect = function() {
+        const lineCount = enableProfile ? 5 : 4;
         const ww = this.commandWindowWidth();
-        const wh = this.calcWindowHeight(4, true);
+        const wh = this.calcWindowHeight(lineCount, true);
         const wx = 0;
         const wy = this.mainAreaTop();
         return new Rectangle(wx, wy, ww, wh);
@@ -1048,7 +1092,7 @@ function Window_StatusProfile() {
      * @return {Number} コマンドウィンドウ幅。
      */
     Scene_Status.prototype.commandWindowWidth = function() {
-        return 340;
+        return commandWindowWidth;
     };
 
     /**
@@ -1063,7 +1107,7 @@ function Window_StatusProfile() {
     Scene_Status.prototype.createStatusWindow = function() {
         const rect = this.statusWindowRect();
         this._statusWindow = new Window_Status(rect);
-        this.addWindow(this._actorWindow);
+        this.addWindow(this._statusWindow);
     };
 
     /**
@@ -1078,7 +1122,7 @@ function Window_StatusProfile() {
         const wx = rect.x + rect.width;
         const wy = this.mainAreaTop();
         const ww = Graphics.boxWidth - wx;
-        const wh = this.mainAreaHeight();
+        const wh = Graphics.boxHeight - wy;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -1094,7 +1138,7 @@ function Window_StatusProfile() {
         const wx = rect.x + rect.width;
         const wy = this.mainAreaTop();
         const ww = Graphics.boxWidth - wx;
-        const wh = this.mainAreaHeight();
+        const wh = Graphics.boxHeight - wy;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -1110,7 +1154,7 @@ function Window_StatusProfile() {
         const wx = rect.x + rect.width;
         const wy = this.mainAreaTop();
         const ww = Graphics.boxWidth - wx;
-        const wh = this.mainAreaHeight();
+        const wh = Graphics.boxHeight - wy;
         return new Rectangle(wx, wy, ww, wh);
     }
 
@@ -1119,15 +1163,15 @@ function Window_StatusProfile() {
      */
     Scene_Status.prototype.createStatusSkillTypeWindow = function() {
         const rect = this.statusSkillTypeWindowRect();
-        this._skillTypeWindow = new Window_StatusSkillType(rect);
-        this._skillTypeWindow.setHandler("ok", this.onSkillTypeWindowOk.bind(this));
-        this._skillTypeWindow.setHandler("cancel", this.onSkillTypeWindowCancel.bind(this));
-        this._skillTypeWindow.setHandler("pagedown", this.nextActor.bind(this));
-        this._skillTypeWindow.setHandler("pageup", this.previousActor.bind(this));
-        this._skillTypeWindow.deactivate();
-        this._skillTypeWindow.hide();
-        this._skillTypeWindow.setHelpWindow(this._helpWindow);
-        this.addWindow(this._skillTypeWindow);
+        this._statusSkillTypeWindow = new Window_StatusSkillType(rect);
+        this._statusSkillTypeWindow.setHandler("ok", this.onSkillTypeWindowOk.bind(this));
+        this._statusSkillTypeWindow.setHandler("cancel", this.onSkillTypeWindowCancel.bind(this));
+        this._statusSkillTypeWindow.setHandler("pagedown", this.nextActor.bind(this));
+        this._statusSkillTypeWindow.setHandler("pageup", this.previousActor.bind(this));
+        this._statusSkillTypeWindow.deactivate();
+        this._statusSkillTypeWindow.hide();
+        this._statusSkillTypeWindow.setHelpWindow(this._helpWindow);
+        this.addWindow(this._statusSkillTypeWindow);
     };
 
     /**
@@ -1136,11 +1180,11 @@ function Window_StatusProfile() {
      * @return {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Status.prototype.statusSkillTypeWindowRect = function() {
-        const ww = this.commandWindowWidth();
-        const wh = this.calcWindowHeight(4, true);
         const rect = this.statusCategoryWindowRect();
         const wx = rect.x;
-        const wy = rect.y;
+        const wy = rect.y + rect.height;
+        const ww = rect.width;
+        const wh = this.calcWindowHeight(4, true);
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -1149,25 +1193,26 @@ function Window_StatusProfile() {
      */
     Scene_Status.prototype.createStatusSkillWindow = function() {
         const rect = this.skillListWindowRect();
-        this._skillListWindow = new Window_SkillList(rect);
-        this._skillListWindow.isEnabled = function( /* item */) { return true; }
-        this._skillListWindow.setHandler('ok', this.onSkillListWindowOk.bind(this));
-        this._skillListWindow.setHandler('cancel', this.onSkillListWindowCancel.bind(this));
-        this._skillListWindow.setHelpWindow(this._helpWindow);
-        this._skillListWindow.deactivate();
-        this._skillListWindow.hide();
+        this._statusSkillListWindow = new Window_SkillList(rect);
+        this._statusSkillListWindow.isEnabled = function( /* item */) { return true; }
+        this._statusSkillListWindow.setHandler("ok", this.onSkillListWindowOk.bind(this));
+        this._statusSkillListWindow.setHandler("cancel", this.onSkillListWindowCancel.bind(this));
+        this._statusSkillListWindow.setHelpWindow(this._helpWindow);
+        this._statusSkillListWindow.deactivate();
+        this._statusSkillListWindow.hide();
 
-        this._skillTypeWindow.setSkillWindow(this._skillListWindow);
+        this._statusSkillTypeWindow.setSkillWindow(this._statusSkillListWindow);
 
-        this.addWindow(this._skillListWindow);
+        this.addWindow(this._statusSkillListWindow);
     };
+
     /**
      * スキル一覧のウィンドウ表示領域を得る。
      * 
      * @return {Rectangle} ウィンドウ表示領域。
      */
     Scene_Status.prototype.skillListWindowRect = function() {
-        const rect = this.skillTypeWindowRect();
+        const rect = this.statusCategoryWindowRect();
         const wx = rect.x + rect.width;
         const wy = this.mainAreaTop();
         const ww = Graphics.boxWidth - wx;
@@ -1182,29 +1227,43 @@ function Window_StatusProfile() {
         // 表示するステータス画面の切り替え。
         this.hideDetailWindows();
         switch (this._categoryWindow.currentSymbol()) {
-            case 'status':
-                this._statusWindow.show();
+            case "status1":
+                //this._statusWindow.show();
                 break;
-            case 'equip':
-                this._equipWindow.show();
+            case "status2":
+                //this._statusParamsWindow.show();
                 break;
-            case 'profile':
-                this._profileWindow.show();
+            case "status3":
+                this._statusEquipWindow.show();
                 break;
-            case 'skill':
-                this._skillTypeWindow.show();
-                this._skillListWindow.show();
+            case "profile":
+                //this._statusProfileWindow.show();
+                break;
+            case "skill":
+                this._statusSkillTypeWindow.show();
+                this._statusSkillListWindow.show();
                 this._helpWindow.show();
                 break;
         }
     };
-
+    /**
+     * 詳細ウィンドウを全て隠す
+     */
+    Scene_Status.prototype.hideDetailWindows = function() {
+        this._statusWindow.hide();
+        this._statusParamsWindow.hide();
+        this._statusEquipWindow.hide();
+        this._statusSkillTypeWindow.hide();
+        this._statusSkillListWindow.hide();
+        this._helpWindow.hide();
+        this._statusProfileWindow.hide();
+    };
     /**
      * スキルタイプ選択画面で、OKボタンが押された時に通知を受け取る。
      */
     Scene_Status.prototype.onSkillTypeWindowOk = function() {
-        this._skillListWindow.activate();
-        this._skillListWindow.select(0);
+        this._statusSkillListWindow.activate();
+        this._statusSkillListWindow.select(0);
     };
 
     /**
@@ -1218,38 +1277,38 @@ function Window_StatusProfile() {
      * スキルリスト画面でOKボタンが押された時に通知を受け取る。
      */
     Scene_Status.prototype.onSkillListWindowOk = function() {
-        if (this._skillListWindow.setPendingIndex) {
-            const pendingIndex = this._skillListWindow.getPendingIndex();
+        if (this._statusSkillListWindow.setPendingIndex) {
+            const pendingIndex = this._statusSkillListWindow.getPendingIndex();
             if (pendingIndex === -1) {
                 // 未選択
-                this._skillListWindow.setPendingIndex(this._skillListWindow.index());
-                this._skillListWindow.activate();
+                this._statusSkillListWindow.setPendingIndex(this._statusSkillListWindow.index());
+                this._statusSkillListWindow.activate();
             } else {
-                const index = this._skillListWindow.index();
+                const index = this._statusSkillListWindow.index();
                 if (index === pendingIndex) {
                     // スキル使用はしない。
-                    this._skillListWindow.setPendingIndex(-1);
+                    this._statusSkillListWindow.setPendingIndex(-1);
                 } else {
-                    const srcItem = this._skillListWindow.itemAt(pendingIndex);
-                    const dstItem = this._skillListWindow.itemAt(index);
+                    const srcItem = this._statusSkillListWindow.itemAt(pendingIndex);
+                    const dstItem = this._statusSkillListWindow.itemAt(index);
                     if (srcItem && dstItem) {
-                        this.actor.swapSkillOrder(srcItem.id, dstItem.id);
+                        this._actor.swapSkillOrder(srcItem.id, dstItem.id);
                     }
-                    this._skillListWindow.setPendingIndex(-1);
-                    this._skillListWindow.refresh();
+                    this._statusSkillListWindow.setPendingIndex(-1);
+                    this._statusSkillListWindow.refresh();
                 }
             }
         }
         // スキルリスト画面を引き続きアクティブ状態にする。
-        this._skillListWindow.activate();
+        this._statusSkillListWindow.activate();
     };
 
     /**
      * スキルリスト画面でキャンセルボタンが押された時に通知を受け取る。
      */
     Scene_Status.prototype.onSkillListWindowCancel = function() {
-        this._skillListWindow.setPendingIndex(-1);
-        this._skillTypeWindow.activate();
+        this._statusSkillListWindow.setPendingIndex(-1);
+        this._statusSkillTypeWindow.activate();
     };
 
 
@@ -1258,9 +1317,9 @@ function Window_StatusProfile() {
      */
     Scene_Status.prototype.createStatusProfileWindow = function() {
         const rect = this.profileWindowRect();
-        this._profileWindow = new Window_StatusProfile(rect);
-        this._profileWindow.hide();
-        this.addWindow(this._profileWindow);
+        this._statusProfileWindow = new Window_StatusProfile(rect);
+        this._statusProfileWindow.hide();
+        this.addWindow(this._statusProfileWindow);
     };
 
     /**
@@ -1270,7 +1329,7 @@ function Window_StatusProfile() {
      * !!!overwrite!!! Scene_Status.profileWindowRect()
      *     ステータス画面変更のため、オーバーライドする。
      */
-    Scene_status.prototype.profileWindowRect = function() {
+    Scene_Status.prototype.profileWindowRect = function() {
         const rect = this.statusCategoryWindowRect();
         const wx = rect.x + rect.width;
         const wy = 0;
@@ -1304,33 +1363,19 @@ function Window_StatusProfile() {
     };
 
 
-    /**
-     * 詳細ウィンドウを全て隠す
-     */
-    Scene_Status.prototype.hideDetailWindows = function() {
-        this._statusWindow.hide();
-        this._statusParamsWindow.hide();
-        this._equipWindow.hide();
-        this._skillTypeWindow.hide();
-        this._skillListWindow.hide();
-        this._helpWindow.hide();
-        this._profileWindow.hide();
-    };
+
 
     /**
      * ステータス種類ウィンドウでOK操作がされたときに通知を受け取る。
      */
     Scene_Status.prototype.onStatusCategoryWindowOk = function() {
         switch (this._categoryWindow.currentSymbol()) {
-            case 'skill':
-                this._skillTypeWindow.activate();
-                break;
-            case 'equip':
+            case "status3":
                 // 装備画面でOKが押されたら、装備シーンに移る
                 SceneManager.push(Scene_Equip);
                 break;
-            case 'profile':
-                this._categoryWindow.activate();
+            case "skill":
+                this._statusSkillTypeWindow.activate();
                 break;
             default:
                 this._categoryWindow.activate();
@@ -1356,27 +1401,26 @@ function Window_StatusProfile() {
     /**
      * 表示するアクターの情報を更新する。
      * 
-     * !!!overwrite!!! Scene_status.refreshActor()
+     * !!!overwrite!!! Scene_Status.refreshActor()
      *     ステータス画面レイアウト変更のため、オーバーライドする。
      */
     Scene_Status.prototype.refreshActor = function() {
         var actor = this.actor();
         this._statusWindow.setActor(actor);
         this._statusParamsWindow.setActor(actor);
-        this._equipWindow.setActor(actor);
-        this._skillTypeWindow.setActor(actor);
-        this._skillListWindow.setActor(actor);
+        this._statusEquipWindow.setActor(actor);
+        this._statusSkillTypeWindow.setActor(actor);
+        this._statusSkillListWindow.setActor(actor);
         //this._helpWindow.setActor(actor);
-        this._profileWindow.setActor(actor);
+        this._statusProfileWindow.setActor(actor);
         this._backgroundImage.setActor(actor);
-        this._skillListWindow.deactivate();
-        this._skillTypeWIndow.deactivate();
+        this._statusSkillListWindow.deactivate();
+        this._statusSkillTypeWindow.deactivate();
         this._categoryWindow.activate();
     };
 
     /**
      * アクターが変更されたときの処理をおこなう。
-     * 
      * 
      * !!!overwrite!!! Scene_Status.onActorChange()
      *     _statusWindowではなく、_categoryWindowをアクティブにするため、オーバーライドする。

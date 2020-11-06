@@ -184,16 +184,16 @@ function Window_ItemCommand() {
         // 道具種類数を書く
         const x = rect.x + rect.width - numWidth;        
         switch (this.commandSymbol(index)) {
-            case 'item':
+            case "item":
                 this.drawNormalItemCount(x, rect.y, numWidth);
                 break;
-            case 'weapon':
+            case "weapon":
                 this.drawWeaponItemCount(x, rect.y, numWidth);
                 break;
-            case 'armor':
+            case "armor":
                 this.drawArmorItemCount(x, rect.y, numWidth);
                 break;
-            case 'keyItem':
+            case "keyItem":
                 // キーアイテムは個数表示しない。
                 break;
             default:
@@ -214,11 +214,11 @@ function Window_ItemCommand() {
         });
         const itemCount = normaIndependentlItems.length;
         const maxItemCount = $gameParty.maxItemInventoryCount();
-        const numLabel = itemCount + '/' + maxItemCount;
+        const numLabel = itemCount + "/" + maxItemCount;
         if (itemCount >= maxItemCount) {
             this.changeTextColor(ColorManager.textColor(2));
         }
-        this.drawText(numLabel, x, y, width, 'right');
+        this.drawText(numLabel, x, y, width, "right");
     };
     /**
      * 武器個数を表示する。
@@ -231,11 +231,11 @@ function Window_ItemCommand() {
         const independentWeapons = $gameParty.weapons().filter((weapon) => DataManager.isIndependentItem(weapon));
         const itemCount = independentWeapons.length;
         const maxItemCount = $gameParty.maxWeaponInventoryCount();
-        const numLabel = itemCount + '/' + maxItemCount;
+        const numLabel = itemCount + "/" + maxItemCount;
         if (itemCount >= maxItemCount) {
             this.changeTextColor(ColorManager.textColor(2));
         }
-        this.drawText(numLabel, x, y, width, 'right');
+        this.drawText(numLabel, x, y, width, "right");
     };
 
     /**
@@ -249,11 +249,11 @@ function Window_ItemCommand() {
         const independentArmors = $gameParty.armors().filter((armor) => DataManager.isIndependentItem(armor));
         const itemCount = independentArmors.length;
         const maxItemCount = $gameParty.maxArmorInventoryCount();
-        const numLabel = itemCount + '/' + maxItemCount;
+        const numLabel = itemCount + "/" + maxItemCount;
         if (itemCount >= maxItemCount) {
             this.changeTextColor(this.textColor(2));
         }
-        this.drawText(numLabel, x, y, width, 'right');
+        this.drawText(numLabel, x, y, width, "right");
     };
 
     //------------------------------------------------------------------------------
@@ -410,8 +410,8 @@ function Window_ItemCommand() {
     Scene_Item.prototype.createItemCommandWindow = function() {
         const rect = this.itemCommandWindowRect();
         this._itemCommandWindow = new Window_ItemCommand(rect);
-        this._itemCommandWindow.setHandler('ok',     this.onItemCommandOk.bind(this));
-        this._itemCommandWindow.setHandler('cancel', this.onItemCommandCancel.bind(this));
+        this._itemCommandWindow.setHandler("ok",     this.onItemCommandOk.bind(this));
+        this._itemCommandWindow.setHandler("cancel", this.onItemCommandCancel.bind(this));
         this._itemCommandWindow.hide();
         this.addWindow(this._itemCommandWindow);
     };
@@ -466,11 +466,11 @@ function Window_ItemCommand() {
     Scene_Item.prototype.onItemCommandOk = function() {
         this._itemCommandWindow.hide();
         switch (this._itemCommandWindow.currentSymbol()) {
-            case 'use':
+            case "use":
                 $gameParty.setLastItem(this.item());
                 this.determineItem(); // メソッドの意味合い的におかしいけど、このままにする。
                 break;
-            case 'discard':
+            case "discard":
                 this.discardItem();
                 break;
         }

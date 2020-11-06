@@ -59,7 +59,7 @@
     const pluginName = "Kapu_Twld_System";
     const parameters = PluginManager.parameters(pluginName);
     
-    Game_BattlerBase.PASSIVE_SKILL_TYPE = Number(parameters['passiveSkillType']) || 0;
+    Game_BattlerBase.PASSIVE_SKILL_TYPE = Number(parameters["passiveSkillType"]) || 0;
 
 
 

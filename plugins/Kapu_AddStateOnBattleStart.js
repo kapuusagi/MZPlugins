@@ -53,7 +53,7 @@
     const _processNoteTag = function(obj) {
         obj.givenStatesOnBattleStart = [];
         if (obj.meta.givenStatesOnBattleStart) {
-            const ids = obj.meta.givenStatesOnBattleStart.split(',').map(token => Number(token) || 0);
+            const ids = obj.meta.givenStatesOnBattleStart.split(",").map(token => Number(token) || 0);
             for (const id of ids) {
                 if ((id > 0) && (id < $dataStates.length) && !obj.givenStatesOnBattleStart.includes(id)) {
                     obj.givenStatesOnBattleStart.push(id);

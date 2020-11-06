@@ -259,13 +259,13 @@
             return Math.round(num);
         } else {
             switch (rangeStr) {
-                case 'short':
+                case "short":
                     return Game_Action.RANGE_SHORT;
-                case 'middle':
+                case "middle":
                     return Game_Action.RANGE_MIDDLE;
-                case 'long':
+                case "long":
                     return Game_Action.RANGE_LONG;
-                case 'depends':
+                case "depends":
                     return Game_Action.RANGE_DEPENDS;
                 default:
                     return Game_Action.RANGE_SHORT;
