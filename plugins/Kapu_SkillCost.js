@@ -24,6 +24,18 @@
  * @type boolean
  * @default true
  * 
+ * @param enableUI
+ * @text UI表示変更反映
+ * @desc trueにするとUIにHP/MP/TPコストを表示するようにメソッドをオーバーライドする。
+ * @type boolean
+ * @default true
+ * 
+ * @param skillCostWidth
+ * @text コスト表示欄の幅
+ * @desc (UI表示する場合のみ)コスト表示欄の幅。使用するシステムフォントのサイズに合わせて、うまいこと調整してください。
+ * @type number
+ * @default 90
+ * 
  * @help 
  * ベーシックシステムでのスキルコストは
  * シンプルにMPコスト(mpCost)及びTPコスト(tpCost)になっています。
@@ -93,6 +105,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 スキルコスト表示の変更機能を追加した。動作未確認。
  * Version.0.1.1 現在HP/MP/TPを元にしたコスト算出で、
  *               現在HP/MP/TPがゼロの場合、コストもゼロになる不具合を修正した。
  * Version.0.1.0 確認した。
@@ -104,6 +117,10 @@
     Game_BattlerBase.TRAIT_SPARAM_DID_TPCOST_RATE = Number(parameters["tpCostRateTraitSParamDid"]) || 0;
     const enableProperty = (typeof parameters["enableProperty"] === "undefined")
             ? false : (parameters["enableProperty"] === "true");
+    const enableUI = (typeof parameters["enableUI"] === "undefined")
+            ? true : (parameters["enableUI"] === "true");
+    const skillCostWidth = Number(parameters["skillCostWidth"]) || 90;
+
     if (!Game_BattlerBase.TRAIT_SPARAM_DID_HPCOST_RATE) {
         console.error(pluginName + ":TRAIT_SPARAM_DID_HPCOST_RATE is not valid.");
     }
@@ -342,6 +359,88 @@
 
 
     //------------------------------------------------------------------------------
-    // Game_Action
+    // Window_SkillCost
+    if (enableUI) {
+        /**
+         * コスト描画幅を得る。
+         * 
+         * @return {Number} コスト描画幅
+         * !!!overwrite!!! Window_SkillList.drawSkillCost
+         *     スキルコストの表示を変更するためにオーバーライドする。
+         */
+        Window_SkillList.prototype.costWidth = function() {
+            return skillCostWidth;
+        };
+        /**
+         * スキルコストを描画する。
+         * 
+         * @param {DataSkill} skill スキル
+         * @param {Number} x 描画位置x
+         * @param {Number} y 描画位置y
+         * @param {Number} width 幅
+         * !!!overwrite!!! Window_SkillList.drawSkillCost
+         *     スキルコストの表示を変更するためにオーバーライドする。
+         */
+        Window_SkillList.prototype.drawSkillCost = function(skill, x, y, width) {
+            const dispCosts = {};
+            const hpCost = this._actor.skillHpCost(skill);
+            if (hpCost > 0) {
+                dispCosts.push({
+                    label:TextManager.hpA,
+                    cost:hpCost,
+                    color:ColorManager.normalColor()
+                });
+            }
+            const mpCost = this._actor.skillMpCost(skill);
+            if (mpCost > 0) {
+                dispCosts.push({
+                    label:TextManager.mpA,
+                    cost:mpCost,
+                    color:mpCostColor()
+                });
+            }
+            const tpCost = this._actor.skillTpCost(skill);
+            if (tpCost > 0) {
+                dispCosts.push({
+                    label:TextManager.tpA,
+                    cost:tpCost,
+                    color:ColorManager.tpCostColor()
+                });
+            }
 
+            if (dispCosts.length === 0) {
+                // このスキルはコストが無い。
+                return;
+            }
+
+            // XXhp/YYmp/ZZtpのような表示にする。
+            // 左寄せだと楽だけど、逆だとめんどい。
+            const slashCount = dispCosts.length - 1;
+            const costWidth = Math.floor((width - slashCount * 8) / dispCosts.length);
+            const labelWidth = Math.floor(costWidth * 0.3);
+            const paramWidth = costWidth - labelWidth;
+            let drawX = x + width;
+            for (let i = dispCosts.length - 1; i >= 0; i--) {
+                const dispCost = dispCosts[i];
+                this.resetFontSettings();
+                this.changeTextColor(dispCost.color);
+                this.makeFontSmaller();
+                drawX -= labelWidth;
+                // ラベル描画
+                this.drawText(dispCost.label, drawX, y + 12, costWidth);
+
+                this.makeFontBigger();
+                drawX -= costWidth;
+                // コスト描画
+                this.drawText(dispCost.cost, drawX, y, paramWidth, "right");
+
+                // '/'描画
+                if (i > 0) {
+                    this.resetFontSettings();
+                    drawX -= 8;
+                    this.drawText("/", drawX, y, 8);
+                }
+            }
+        };
+    }
 })();
