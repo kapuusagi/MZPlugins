@@ -34,7 +34,7 @@
  * @text コスト表示欄の幅
  * @desc (UI表示する場合のみ)コスト表示欄の幅。使用するシステムフォントのサイズに合わせて、うまいこと調整してください。
  * @type number
- * @default 90
+ * @default 150
  * 
  * @help 
  * ベーシックシステムでのスキルコストは
@@ -105,7 +105,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.2.0 スキルコスト表示の変更機能を追加した。動作未確認。
+ * Version.0.2.0 スキルコスト表示の変更機能を追加した。
  * Version.0.1.1 現在HP/MP/TPを元にしたコスト算出で、
  *               現在HP/MP/TPがゼロの場合、コストもゼロになる不具合を修正した。
  * Version.0.1.0 確認した。
@@ -361,6 +361,17 @@
     //------------------------------------------------------------------------------
     // Window_SkillCost
     if (enableUI) {
+        if (!ColorManager.hpCostColor) {
+            /**
+             * HPコストカラーを得る。
+             * 
+             * @return {String} HPコストカラー
+             */
+            ColorManager.hpCostColor = function() {
+                return this.normalColor();
+            };
+        }
+
         /**
          * コスト描画幅を得る。
          * 
@@ -375,20 +386,20 @@
          * スキルコストを描画する。
          * 
          * @param {DataSkill} skill スキル
-         * @param {Number} x 描画位置x
+         * @param {Number} x 描画位置x(名前を含めた領域の左端が渡る)
          * @param {Number} y 描画位置y
-         * @param {Number} width 幅
+         * @param {Number} width 幅(名前を含めた領域の幅が渡る)
          * !!!overwrite!!! Window_SkillList.drawSkillCost
          *     スキルコストの表示を変更するためにオーバーライドする。
          */
         Window_SkillList.prototype.drawSkillCost = function(skill, x, y, width) {
-            const dispCosts = {};
+            const dispCosts = [];
             const hpCost = this._actor.skillHpCost(skill);
             if (hpCost > 0) {
                 dispCosts.push({
                     label:TextManager.hpA,
                     cost:hpCost,
-                    color:ColorManager.normalColor()
+                    color:ColorManager.hpCostColor()
                 });
             }
             const mpCost = this._actor.skillMpCost(skill);
@@ -396,7 +407,7 @@
                 dispCosts.push({
                     label:TextManager.mpA,
                     cost:mpCost,
-                    color:mpCostColor()
+                    color:ColorManager.mpCostColor()
                 });
             }
             const tpCost = this._actor.skillTpCost(skill);
@@ -416,21 +427,22 @@
             // XXhp/YYmp/ZZtpのような表示にする。
             // 左寄せだと楽だけど、逆だとめんどい。
             const slashCount = dispCosts.length - 1;
-            const costWidth = Math.floor((width - slashCount * 8) / dispCosts.length);
-            const labelWidth = Math.floor(costWidth * 0.3);
-            const paramWidth = costWidth - labelWidth;
+            const costWidth = this.costWidth();
+            const singleCostWidth = Math.floor((costWidth - slashCount * 8) / dispCosts.length);
+            const labelWidth = Math.floor(singleCostWidth * 0.3);
+            const paramWidth = singleCostWidth - labelWidth;
             let drawX = x + width;
             for (let i = dispCosts.length - 1; i >= 0; i--) {
                 const dispCost = dispCosts[i];
                 this.resetFontSettings();
                 this.changeTextColor(dispCost.color);
-                this.makeFontSmaller();
+                this.contents.fontSize -= 8;
                 drawX -= labelWidth;
                 // ラベル描画
-                this.drawText(dispCost.label, drawX, y + 12, costWidth);
+                this.drawText(dispCost.label, drawX, y + 4, labelWidth, "center");
 
-                this.makeFontBigger();
-                drawX -= costWidth;
+                this.contents.fontSize += 8;
+                drawX -= paramWidth;
                 // コスト描画
                 this.drawText(dispCost.cost, drawX, y, paramWidth, "right");
 
