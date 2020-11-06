@@ -1235,7 +1235,7 @@ function Scene_TwldShop() {
      * ウィンドウレイヤーを構築する。
      */
     Scene_TwldShop.prototype.createWindowLayer = function() {
-        this.createClerkLayer.call(this);
+        this.createClerkLayer();
         Scene_MenuBase.prototype.createWindowLayer.call(this);
     };
 
