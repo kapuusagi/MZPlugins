@@ -31,7 +31,7 @@
 
 
 (() => {
-    //const pluginName = "Kapu_Twld_Menu";
+    //const pluginName = "Kapu_Twld_UI_Menu";
     //const parameters = PluginManager.parameters(pluginName);
 
     const statusY = 260;
@@ -58,7 +58,8 @@
      * 最大カラム数を得る。
      * 
      * @return {Number} カラム数
-     * !!!overwrite!!!
+     * !!!overwrite!!! Window_MenuStatus.maxCols()
+     *     メニューのカラム数を動的に設定するためにオーバーライドする。
      */
     Window_MenuStatus.prototype.maxCols = function() {
         return Math.min($gameParty.members().length, $gameParty.maxBattleMembers());
@@ -68,6 +69,7 @@
      * 
      * @return {Number} 行数
      * !!!overwrite!!! Window_MenuStatus.numVisibleRows 
+     *     メニューのレイアウト変更のため、オーバーライドする。
      */
     Window_MenuStatus.prototype.numVisibleRows = function() {
         return 1;
@@ -190,6 +192,7 @@
     };
 
     /**
+     * ステータス矩形領域を得る。
      * 
      * @param {Number} index インデックス番号
      * @return {Rectangle} ステータス領域の矩形領域
@@ -207,6 +210,7 @@
      * 
      * @param {Number} index インデックス番号
      * !!!overwrite!!! Window_MenuStatus.drawItemStatus()
+     *     表示内容を変更するためオーバーライドする。
      */
     Window_MenuStatus.prototype.drawItemStatus = function(index) {
         const actor = this.actor(index);
@@ -368,9 +372,6 @@
         this.contents.gradientFillRect(x + 1, y + 1, fillW, fillH, color1, color2);
     };
 
-    const paramWidth = 36;
-    const currentValueWidth = 56;
-    const maxValueWidth = 40;
     /**
      * ゲージのテキストを描画する。
      * 
@@ -381,6 +382,10 @@
      */
     // eslint-disable-next-line no-unused-vars
     Window_MenuStatus.prototype.drawGaugeText = function(data, x, y, width) {
+        const paramWidth = Math.floor(width * 0.2);
+        const maxValueWidth = Math.floor(width * 0.3);
+        const currentValueWidth = width - paramWidth - maxValueWidth - 16;
+
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());
         this.drawText(data.label, x, y + 10, paramWidth, "left");
