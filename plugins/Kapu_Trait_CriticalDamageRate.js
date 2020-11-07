@@ -50,10 +50,13 @@
  * 値はプラグインパラメータで指定したものになります。
  * 
  * その他の要素でクリティカルダメージ倍率を加算したい場合には、
- * Game_BattlerBase.prototype.getPhysicalCriticalRate
- * Game_BattlerBase.prototype.getMagicalCriticalRate
+ * Game_BattlerBase.prototype.criticalDamageRatePhysical
+ * Game_BattlerBase.prototype.criticalDamageRateMagical
  * をフックして倍率に加算すれば変更できます。
  *  
+ * Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE は
+ * クリティカルダメージレートの基本値として定義されます。
+ * 
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -71,6 +74,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE を定義するようにした。
  * Version.0.3.0 Game_BattlerBaseにプロパティ pcdr, mcdrを追加できるようにした。
  *               TRAIT_XPARAM_DID_CDR 指定エラー時にログ出力するように変更した。
  * Version.0.2.1 デフォルト値を変更した。
@@ -84,7 +88,7 @@
 
 
     Game_BattlerBase.TRAIT_XPARAM_DID_CDR = Number(parameters["traitXParamDid"]) || 0;
-    const basicCriticalRate = Number(parameters["BasicRate"]) || 0;
+    Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE = Number(parameters["BasicRate"]) || 0;
     const propertyEnable = (typeof parameters["propertyEnable"] === "undefined")
             ? false : (parameters["propertyEnable"] === "true");
     if (!Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {
@@ -138,7 +142,7 @@
             pcdr: {
                 /** @return {Number} */
                 get: function() {
-                    return this.getPhysicalCriticalRate();
+                    return this.criticalDamageRatePhysical();
                 },
                 configurable: true
             },
@@ -149,7 +153,7 @@
             mcdr: {
                 /** @return {Number} */
                 get: function() {
-                    return this.getMagicalCriticalRate();
+                    return this.criticalDamageRateMagical();
                 },
                 configurable: true
             },
@@ -160,7 +164,7 @@
      * 
      * @return {Number} クリティカル倍率。
      */
-    Game_BattlerBase.prototype.getPhysicalCriticalRate = function () {
+    Game_BattlerBase.prototype.criticalDamageRatePhysical = function () {
         return this.criticalDamageRate();
     };
 
@@ -169,7 +173,7 @@
      * 
      * @return {Number} クリティカル倍率。
      */
-    Game_BattlerBase.prototype.getMagicalCriticalRate = function() {
+    Game_BattlerBase.prototype.criticalDamageRateMagical = function() {
         return this.criticalDamageRate();
     };
 
@@ -180,7 +184,7 @@
          * @return {Number} クリティカルダメージレート
          */
         Game_BattlerBase.prototype.criticalDamageRate = function() {
-            return basicCriticalRate + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CDR);
+            return Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CDR);
         };
     } else {
         /**
@@ -189,7 +193,7 @@
          * @return {Number} クリティカルダメージレート
          */
         Game_BattlerBase.prototype.criticalDamageRate = function() {
-            return basicCriticalRate;
+            return Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE;
         };
     }
 
@@ -202,7 +206,7 @@
         pcdr: {
             /** @return {Number} */
             get: function() {
-                return this.getPhysicalCriticalRate();
+                return this.criticalDamageRatePhysical();
             },
             configurable: true
         },
@@ -213,7 +217,7 @@
         mcdr: {
             /** @return {Number} */
             get: function() {
-                return this.getMagicalCriticalRate();
+                return this.criticalDamageRateMagical();
             },
             configurable: true
         }
@@ -238,7 +242,7 @@
         } else if (this.isMagical()) {
             rate = subject.mcdr;
         } else {
-            rate = basicCriticalRate;
+            rate = Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE;
         }
         return (rate > 1) ? Math.round(damage * rate) : damage;
     };
