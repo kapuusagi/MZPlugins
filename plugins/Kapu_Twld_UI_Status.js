@@ -6,12 +6,44 @@
  * @base Kapu_Base_Twld
  * @orderAfter Kapu_Base_Twld
  * @orderAfter Kapu_UserSkillOrder
+ * @base Kapu_Twld_WeaponMastery
+ * @base Kapu_GrowupSystem
+ * 
+ * @param statusLabelWidth
+ * @text ラベル幅
+ * @desc ラベルの幅。
+ * @type number
+ * @default 48
  * 
  * @param enableProfile
  * @text プロフィールを専用画面にする
  * @desc trueにすると、プロフィールを専用ウィンドウで提供する。
  * @type boolean
  * @default false
+ * 
+ * @param textClassName
+ * @text クラス名ラベル
+ * @desc 「クラス名」として使用するラベル。
+ * @type string
+ * @default クラス
+ * 
+ * @param textNickname
+ * @text ニックネームラベル
+ * @desc 「ニックネーム」として使用するラベル。
+ * @type string
+ * @default 通り名
+ * 
+ * @param textGuildRank
+ * @text ギルド欄比べる
+ * @desc 「ギルドランク」として使用するラベル。
+ * @type string
+ * @default ギルドランク
+ * 
+ * @param textMaxTp
+ * @text 最大Tp
+ * @desc 「最大TP」として使用するラベル。
+ * @type string
+ * @default 最大TP
  * 
  * @param textPassiveSkill
  * @text パッシブスキルラベル
@@ -21,15 +53,15 @@
  * 
  * @param textStatus1
  * @text ステータスウィンドウ1ラベル
- * @desc 「基本ステータス表示1」として使用するラベル
+ * @desc 「基本パラメータ表示」として使用するラベル
  * @type string
- * @default ページ1
+ * @default 基本パラメータ
  * 
  * @param textStatus2
  * @text ステータスウィンドウ2ラベル
- * @desc 「基本ステータス表示2」として使用するラベル
+ * @desc 「属性耐性・特性」として使用するラベル
  * @desc string
- * @default ページ2
+ * @default 属性耐性・特性
  * 
  * @param textStatus3
  * @text ステータスウィンドウ3ラベル
@@ -42,6 +74,72 @@
  * @desc 「プロフィール」として使用するラベル。
  * @type string
  * @default プロフィール
+ * 
+ * @param textPhyPenetration
+ * @text 物理貫通率ラベル
+ * @desc 「物理貫通率」として使用するラベル。
+ * @type string
+ * @default 物理貫通
+ * 
+ * @param textPhyAttenuation
+ * @text 物理減衰ラベル
+ * @desc 「物理減衰」として使用するラベル。
+ * @type string
+ * @default 物理減衰
+ * 
+ * @param textHit
+ * @text 基本命中ラベル
+ * @desc 「基本命中」として使用するラベル。
+ * @type string
+ * @default 基本命中
+ * 
+ * @param textPhyEvacuation
+ * @text 物理回避ラベル
+ * @desc 「物理回避」として使用するラベル。
+ * @type string
+ * @default 物理回避
+ * 
+ * @param textMagPenetration
+ * @text 魔法貫通ラベル
+ * @desc 「魔法貫通」として使用するラベル。
+ * @type string
+ * @default 魔法貫通
+ * 
+ * @param textMagAttenuation
+ * @text 魔法減衰ラベル
+ * @desc 「魔法減衰」として使用するラベル。
+ * @type string
+ * @default 魔法減衰
+ * 
+ * @param textMagEvacuation
+ * @text 魔法回避ラベル
+ * @desc 「魔法回避」として使用するラベル。
+ * @type string
+ * @default 魔法回避
+ * 
+ * @param textCriticalRate
+ * @text 会心率ラベル
+ * @desc 「会心率」として使用するラベル。
+ * @type string
+ * @default クリティカル率
+ * 
+ * @param textCriticalEvacuation
+ * @text 会心回避ラベル
+ * @desc 「会心回避」として使用するラベル。
+ * @type string
+ * @default クリティカル回避
+ * 
+ * @param textPhyCriDamageRate
+ * @text クリティカル倍率（物）ラベル
+ * @desc 「クリティカル倍率（物）」として使用するラベル。
+ * @type string
+ * @default クリティカル倍率（物）
+ * 
+ * @param textMagCriDamageRate
+ * @text クリティカル倍率（魔）ラベル
+ * @desc 「クリティカル倍率（魔）」として使用するラベル。
+ * @type string
+ * @default クリティカル倍率（魔）
  * 
  * @param statusPictureMethod
  * @text ステータス画像メソッド名
@@ -58,17 +156,20 @@
  * TWLD向けステータス画面UIプラグイン。
  * 
  * ■ 使用時の注意
+ * 特にありません。
  * 
  * ■ プラグイン開発者向け
+ * 特にありません。
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * プラグインコマンドはありません。
  * 
  * ============================================
  * ノートタグ
  * ============================================
+ * ノートタグはありません。
  * 
  * ============================================
  * 変更履歴
@@ -110,12 +211,29 @@ function Window_StatusProfile() {
     const parameters = PluginManager.parameters(pluginName);
 
     const enableProfile = (typeof parameters["enableProfile"] === "undefined") 
-            ? false : (parameters["enableProfile"] == "true");
+            ? false : (parameters["enableProfile"] === "true");
+
+    const statusLabelWidth = Number(parameters["statusLabelWidth"]) || 80;
+    const textClassName = parameters["textClassName"] || "Class";
+    const textNickname = parameters["textNickname"] || "Nickname";
     const textPassiveSkill = parameters["textPassiveSkill"] || "PassiveSkill";
+    const textGuildRank = parameters["textGuildRank"] || "GuildRank";
+    const textMaxTp = parameters["textMaxTp"] || "MaxTP";
     const textStatus1 = parameters["textStatus1"] || "Page.1";
     const textStatus2 = parameters["textStatus2"] || "Page.2";
     const textStatus3 = parameters["textStatus3"] || "Page.3";
     const textProfile = parameters["textProfile"] || "Profile";
+    const textPhyPenetration = parameters["textPhyPenetration"] || "P.PEN";
+    const textPhyAttenuation = parameters["textPhyAttenuation"] || "DEF.RATE";
+    const textHit = parameters["textHit"] || "HIT";
+    const textPhyEvacuation = parameters["textPhyEvacuation"] || "P.EVA";
+    const textMagPenetration = parameters["textMagPenetration"] || "M.PEN";
+    const textMagAttenuation = parameters["textMagAttenuation"] || "MDF.RATE";
+    const textMagEvacuation = parameters["textMagEvacuation"] || "M.EVA";
+    const textCriticalRate = parameters["textCriticalRate"] || "CRI";
+    const textCriticalEvacuation = parameters["textCriticalEvacuation"] || "CEV";
+    const textPhyCriDamageRate = parameters["textPhyCriDamageRate"] || "P.CDR";
+    const textMagCriDamageRate = parameters["textMagCriDamageRate"] || "M.CDR";
     const statusPictureMethod = String(parameters["statusPictureMethod"]) || "";
     const commandWindowWidth = Number(parameters["commandWindowWidth"]) || 240;
 
@@ -149,13 +267,13 @@ function Window_StatusProfile() {
     // ・ステータス1
     //   HP/MPやATK/DEF, STR/DEXなどの基本ステータス表示。
     //   HIT等の一部パラメータも表示できれば全部やりたいなあ。-> 表示項目を一覧にする。
-    //     顔グラフィック
-    //     Lv/クラス名/通り名/GP
-    //     HP/MaxHP/Mp/MaxMP/MaxTP
-    //     STR/DEX/VIT/INT/MEN/AGI/LUK (LUKはニコニコマークとかにしたい)
-    //     ATK/DEF/DEF.Rate/MAT/MDF/MDF.Rate
-    //     HIT/EVA/MEV/CRI/CEV/CDR/
-    //     PEN/PDR/
+    //     ✓顔グラフィック
+    //     ✓Lv/✓クラス名/✓通り名/✓GP
+    //     ✓HP/✓MaxHP/✓Mp/✓MaxMP/✓MaxTP
+    //     ✓STR/✓DEX/✓VIT/✓INT/✓MEN/✓AGI/✓LUK (LUKはニコニコマークとかにしたい)
+    //     ✓ATK/✓DEF/✓DEF.Rate/✓MAT/✓MDF/✓MDF.Rate
+    //     ✓HIT/✓EVA/✓MEV/CRI/CEV/CDR/
+    //     ✓PEN.PDR/✓PEN.MDR/
     //     いっぱいあるけど全部はいらない。
     // ・ステータス2
     //     属性レート
@@ -208,10 +326,10 @@ function Window_StatusProfile() {
         this.addCommand(textStatus1, "status1");
         this.addCommand(textStatus2, "status2");
         this.addCommand(textStatus3, "status3");
-        this.addCommand(TextManager.skill, "skill");
         if (enableProfile) {
             this.addCommand(textProfile, "profile");
         }
+        this.addCommand(TextManager.skill, "skill");
     };
 
     /**
@@ -266,7 +384,7 @@ function Window_StatusProfile() {
         // const nameWidth = 240;
         // this.drawText(actor, x1, y, nameWidth);
         // this.drawActorLevel(actor, x1, y + lineHeight);
-        // var iconWidth = x + this.contentsWidth() - x1;
+        // var iconWidth = x + this.innerWidth - x1;
         // this.drawActorIcons(actor, x1, y + lineHeight * 2, iconWidth);
         // this.drawActorHp(actor, x1, y + lineHeight * 3, nameWidth);
         // this.drawActorMp(actor, x1, y + lineHeight * 4, nameWidth);
@@ -274,7 +392,7 @@ function Window_StatusProfile() {
 
         // var x2 = x1 + nameWidth + padding;
         // this.drawActorClass(actor, x2, y, nameWidth);
-        // this.drawActorNickname(actor, x2, y + lineHeight, expWidth);
+        // this.labelWidth(actor, x2, y + lineHeight, expWidth);
         // this.drawActorGrowPoint(actor, x2, y + lineHeight *3, 120);
         // var rcnt = actor.getReincarnationCount();
         // if (rcnt > 0) {
@@ -291,7 +409,7 @@ function Window_StatusProfile() {
         // this.resetTextColor();
 
         // var x3 = x2 + nameWidth + padding;
-        // var expWidth = Math.min(x + this.contentsWidth() - x3, 160);
+        // var expWidth = Math.min(x + this.innerWidth - x3, 160);
 
         // var expText = actor.currentExp();
         // var nextText = actor.nextRequiredExp();
@@ -303,7 +421,7 @@ function Window_StatusProfile() {
         // this.drawText(nextText, x2 + 120, y + lineHeight * 5, expWidth, "right");
 
         // // ギルドランク
-        // var x3 = this.contentsWidth() - 240;
+        // var x3 = this.innerWidth - 240;
         // this.changeTextColor(this.systemColor());
         // this.drawText("ギルドランク:", x3, y, 180, "right");
         // this.resetTextColor();
@@ -317,8 +435,618 @@ function Window_StatusProfile() {
      */
     Window_Status.prototype.refresh = function() {
         Window_StatusBase.prototype.refresh.call(this);
-        const itemRect = this.itemRect();
-        this.drawText(textStatus1, itemRect.x, itemRect.y, itemRect.width, "right");
+        if (this.contents) {
+            this.drawHeader();
+            this.drawBlock1();
+            this.drawBlock2();
+            if (!enableProfile) {
+                this.drawBlock3();
+            }
+        }
+    };
+    /**
+     * ヘッダを描画する。
+     */
+    Window_Status.prototype.drawHeader = function() {
+        const rect = this.headerRect();
+        const lineHeight = this.lineHeight();
+        this.resetFontSettings();
+        this.drawText(textStatus1, rect.x, rect.y, rect.width, "right");
+        this.drawHorzLine(rect.x, rect.y + lineHeight, rect.width);
+    };
+
+    /**
+     * ヘッダの矩形領域を得る。
+     * 
+     * @return {Rectangle} ヘッダ矩形領域。
+     */
+    Window_Status.prototype.headerRect = function() {
+        const x = 0;
+        const y = 0;
+        const w = this.innerWidth;
+        const h = this.lineHeight() + 16;
+        return new Rectangle(x, y, w, h);
+    };
+
+    /**
+     * ブロック1を描画する。
+     */
+    Window_Status.prototype.drawBlock1 = function() {
+        const rect = this.block1Rect();
+        const actor = this._actor;
+        if (actor) {
+            const spacing = 16;
+            const lineHeight = this.lineHeight();
+            const textWidth = (rect.width - 172 - spacing * 3) / 3;
+            this.resetFontSettings();
+            this.drawActorFace(actor, rect.x, rect.y, 160, 160);
+            const x1 = rect.x + 172;
+            const x2 = x1 + textWidth + spacing;
+            const x3 = x2 + textWidth + spacing;
+            const y1 = rect.y;
+            const y2 = y1 + lineHeight;
+            const y3 = y2 + lineHeight;
+            const y4 = y3 + lineHeight;
+            const y6 = y4 + lineHeight * 2;
+            this.drawText(actor.name(), x1, y1, textWidth, "left");
+            this.drawActorClass(actor, x1, y2, textWidth);
+            this.drawActorNickname(actor, x2, y2, textWidth);
+            this.drawActorLevel(actor, x1, y3, textWidth);
+            this.drawActorGrowPoint(actor, x2, y3, textWidth);
+            this.drawActorGuildRank(actor, x3, y3, textWidth);
+            this.drawActorHp(actor, x1, y4 + 8, textWidth);
+            this.drawActorMp(actor, x2, y4 + 8, textWidth);
+            this.drawActorTp(actor, x3, y4 + 8, textWidth);
+            this.drawActorExp(actor, x1, y6, textWidth);
+            this.drawActorNext(actor, x2, y6, textWidth);
+        }
+        this.drawHorzLine(rect.x, rect.y + this.lineHeight() * 6, rect.width);
+    };
+
+    /**
+     * 装備の描画領域を得る。
+     * 
+     * @return {Rectangle} プロフィール描画領域。
+     */
+    Window_Status.prototype.block1Rect = function() {
+        const x = 0;
+        const y = this.lineHeight() + 16;
+        const w = this.innerWidth;
+        const h = this.lineHeight() * 6 + 16;
+        return new Rectangle(x, y, w, h);
+    };
+
+    /**
+     * ブロック2を描画する。
+     */
+    Window_Status.prototype.drawBlock2 = function() {
+        const actor = this._actor;
+        if (actor) {
+            const rect = this.block2Rect();
+            const spacing = 16;
+            const lineHeight = this.lineHeight();
+            const textWidth = (rect.width - spacing * 3) / 4;
+            const lineCount = Math.floor(rect.height / lineHeight);
+
+            const noEquipActor = JsonEx.makeDeepCopy(this._actor);
+            const slots = noEquipActor.equipSlots();
+            for (let slot = 0; slot < slots.length; slot++) {
+                noEquipActor.forceChangeEquip(slot, null);
+            }
+
+            let x = rect.x;
+            this.drawBlock2A(actor, noEquipActor, x, rect.y, textWidth, lineCount);
+            x += (textWidth + spacing);
+            this.drawBlock2B(actor, noEquipActor, x, rect.y, textWidth, lineCount);
+            x += (textWidth + spacing);
+            this.drawBlock2C(actor, noEquipActor, x, rect.y, textWidth, lineCount);
+            x += (textWidth + spacing);
+            this.drawBlock2D(actor, noEquipActor, x, rect.y, textWidth, lineCount);
+        }
+    };
+
+    /**
+     * 2-Aを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Game_Actor} noEquipActor 未装備アクター
+     * @param {Number} x 描画開始x位置
+     * @param {Number} y 描画開始y位置
+     * @param {Number} width 幅
+     * @param {Number} maxLineCount 最大行数
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_Status.prototype.drawBlock2A = function(actor, noEquipActor, x, y, width, maxLineCount) {
+        const lineHeight = this.lineHeight();
+        this.drawParamValue(TextManager.basicParam(0), actor.str, noEquipActor.str,
+                x, y + lineHeight * 0, width);
+        this.drawParamValue(TextManager.basicParam(1), actor.dex, noEquipActor.dex,
+                x, y + lineHeight * 1, width);
+        this.drawParamValue(TextManager.basicParam(2), actor.vit, noEquipActor.vit,
+                x, y + lineHeight * 2, width);
+        this.drawParamValue(TextManager.basicParam(3), actor.int, noEquipActor.int,
+                x, y + lineHeight * 3, width);
+        this.drawParamValue(TextManager.basicParam(4), actor.men, noEquipActor.men,
+                x, y + lineHeight * 4, width);
+        this.drawParamValue(TextManager.param(6), actor.agi, noEquipActor.agi,
+                x, y + lineHeight * 5, width);
+        this.drawParamValue(TextManager.param(7), actor.luk, noEquipActor.luk,
+                x, y + lineHeight * 6, width);
+    };
+
+    /**
+     * 2-Bを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Game_Actor} noEquipActor 未装備アクター
+     * @param {Number} x 描画開始x位置
+     * @param {Number} y 描画開始y位置
+     * @param {Number} width 幅
+     * @param {Number} maxLineCount 最大行数
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_Status.prototype.drawBlock2B = function(actor, noEquipActor, x, y, width, maxLineCount) {
+        const lineHeight = this.lineHeight();
+        this.drawParamValue(TextManager.param(2), actor.atk, noEquipActor.atk,
+                x, y + lineHeight * 0, width);
+        this.drawParamRate(textPhyPenetration, actor.penetratePDR(), noEquipActor.penetratePDR(),
+                x, y + lineHeight * 1, width);
+        this.drawParamValue(TextManager.param(3), actor.def, noEquipActor.def,
+                x, y + lineHeight * 2, width);
+        this.drawParamRate(textPhyAttenuation, 1 - actor.pdr, 1 - noEquipActor.pdr,
+                x, y + lineHeight * 3, width);
+        this.drawParamRate(textHit, actor.hit, noEquipActor.hit,
+                x, y + lineHeight * 4, width);
+        this.drawParamRate(textPhyEvacuation, actor.eva, noEquipActor.eva,
+                x, y + lineHeight * 5, width);
+    };
+
+    /**
+     * 2-Cを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Game_Actor} noEquipActor 未装備アクター
+     * @param {Number} x 描画開始x位置
+     * @param {Number} y 描画開始y位置
+     * @param {Number} width 幅
+     * @param {Number} maxLineCount 最大行数
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_Status.prototype.drawBlock2C = function(actor, noEquipActor, x, y, width, maxLineCount) {
+        const lineHeight = this.lineHeight();
+        this.drawParamValue(TextManager.param(3), actor.mat, noEquipActor.mat,
+                x, y + lineHeight * 0, width);
+        this.drawParamRate(textMagPenetration, actor.penetrateMDR(), noEquipActor.penetrateMDR(),
+                x, y + lineHeight * 1, width);
+        this.drawParamValue(TextManager.param(4), actor.mdf, noEquipActor.mdf,
+                x, y + lineHeight * 2, width);
+        this.drawParamRate(textMagAttenuation, 1 - actor.mdr, 1 - noEquipActor.mdr,
+                x, y + lineHeight * 3, width);
+       this.drawParamRate(textMagEvacuation, actor.mev, noEquipActor.mev,
+                x, y + lineHeight * 5, width);
+    };
+    /**
+     * 2-Dを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Game_Actor} noEquipActor 未装備アクター
+     * @param {Number} x 描画開始x位置
+     * @param {Number} y 描画開始y位置
+     * @param {Number} width 幅
+     * @param {Number} maxLineCount 最大行数
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_Status.prototype.drawBlock2D = function(actor, noEquipActor, x, y, width, maxLineCount) {
+        // CRI/CEV/CDR
+        const lineHeight = this.lineHeight();
+        this.drawParamRate(textCriticalRate, actor.cri, noEquipActor.cri,
+                x, y + lineHeight * 0, width);
+        this.drawParamRate(textCriticalEvacuation, actor.cev, noEquipActor.cev,
+                x, y + lineHeight * 1, width);
+        this.drawParamRate(textPhyCriDamageRate, actor.pcdr, noEquipActor.pcdr, 
+                x, y + lineHeight * 2, width);
+        this.drawParamRate(textMagCriDamageRate, actor.mcdr, noEquipActor.mcdr,
+                x, y + lineHeight * 3, width);
+
+    };
+
+    /**
+     * 整数値タイプのパラメータを描画する。
+     * 
+     * @param {String} paramName パラメータ名
+     * @param {Number} value1 値1（現在値）
+     * @param {Number} value2 値2（未装備値）
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawParamValue = function(paramName, value1, value2, x, y, width) {
+        if (typeof value1 === "undefined") {
+            return;
+        }
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(paramName, x, y, statusLabelWidth);
+        const valueWidth = Math.floor((width - statusLabelWidth) * 0.5);
+        this.resetTextColor();
+        this.drawText(value1, x + statusLabelWidth, y, valueWidth, "right");
+        const diff = value1 - value2;
+        if (diff === 0) {
+            return;
+        }
+        this.contents.fontSize -= 8;
+        const diffStr = "(" + ((diff > 0) ? "+" : "") + diff + ")";
+        this.changePaintOpacity(false);
+        this.drawText(diffStr, x + statusLabelWidth + valueWidth, y + 2, valueWidth, "left");
+        this.changePaintOpacity(true);
+    };
+
+    /**
+     * 割合タイプのパラメータを描画する。
+     * 
+     * @param {String} paramName パラメータ名
+     * @param {Number} value1 値1（現在値）
+     * @param {Number} value2 値2（未装備値）
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawParamRate = function(paramName, value1, value2, x, y, width) {
+        if (typeof value1 === "undefined") {
+            return;
+        }
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(paramName, x, y, statusLabelWidth);
+        const valueWidth = Math.floor((width - statusLabelWidth) * 0.5);
+        this.resetTextColor();
+        const rateStr = Math.floor(value1 * 1000) / 10;
+        this.drawText(rateStr, x + statusLabelWidth, y, valueWidth, "right");
+        const charWidth = this.textWidth("%");
+        this.drawText("%", x + statusLabelWidth + valueWidth, y, charWidth);
+        const diff = value1 - value2;
+        if (diff === 0) {
+            return;
+        }
+        this.contents.fontSize -= 8;
+        const diffRateStr = Math.floor(diff * 1000) / 10;
+        const diffStr = "(" + ((diff > 0) ? "+" : "") + diffRateStr + "%)";
+        this.changePaintOpacity(false);
+        this.drawText(diffStr, x + statusLabelWidth + valueWidth + charWidth, y + 2,
+             valueWidth - charWidth, "left");
+        this.changePaintOpacity(true);
+    };
+    /**
+     * ブロック2の描画領域を得る。
+     * 
+     * @return {Rectangle} 描画領域。
+     */
+    Window_Status.prototype.block2Rect = function() {
+        const block1Rect = this.block1Rect();
+        const block3Rect = this.block3Rect();
+        const x = 0;
+        const y = block1Rect.y + block1Rect.height;
+        const w = this.innerWidth;
+        const h = block3Rect.y - y;
+        return new Rectangle(x, y, w, h);
+    };
+
+    /**
+     * ブロック3を描画する。
+     */
+    Window_Status.prototype.drawBlock3 = function() {
+        const rect = this.block3Rect();
+        this.drawHorzLine(rect.x, rect.y, rect.width);
+
+        const actor = this._actor;
+        if (actor) {
+            this.drawTextEx(actor.profile(), rect.x, rect.y + 16, rect.width);
+        }
+    };
+
+    /**
+     * ブロック3の描画領域を得る。
+     * Block3はプロフィール
+     * 
+     * @return {Rectangle} 描画領域。
+     */
+    Window_Status.prototype.block3Rect = function() {
+        const w = this.innerWidth;
+        const h = (enableProfile) ? 0 : (this.lineHeight() * 2 + 16);
+        const x = 0;
+        const y = this.innerHeight - h;
+        return new Rectangle(x, y, w, h);
+    };
+
+    /**
+     * 水平ラインを描画する。
+     * 
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawHorzLine = function(x, y, width) {
+        this.changePaintOpacity(false);
+        this.drawRect(x, y + 5, width, 5);
+        this.changePaintOpacity(true);
+    };
+
+    /**
+     * レベルを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_Status.prototype.drawActorLevel = function(actor, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(TextManager.levelA, x, y, statusLabelWidth);
+        this.resetTextColor();
+        const valueWidth = Math.min(this.textWidth("000"), width - statusLabelWidth);
+        this.drawText(actor.level, x + statusLabelWidth, y, valueWidth, "right");
+    };
+    /**
+     * 育成ポイントを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawActorGrowPoint = function(actor, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(TextManager.growPoint, x, y, statusLabelWidth);
+        this.resetTextColor();
+        const valueWidth = Math.min(this.textWidth("000"), width - statusLabelWidth);
+        this.drawText(actor.growPoint(), x + statusLabelWidth, y, valueWidth, "right");
+    };
+    /**
+     * ギルドランクを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawActorGuildRank = function(actor, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(textGuildRank, x, y, statusLabelWidth);
+        this.resetTextColor();
+        const valueWidth = Math.min(this.textWidth("000"), width - statusLabelWidth);
+        this.drawText("-", x + statusLabelWidth, y, valueWidth, "right");
+    };
+    /**
+     * EXPを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawActorExp = function(actor, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(TextManager.exp, x, y, statusLabelWidth);
+        this.resetTextColor();
+        const valueWidth = width - statusLabelWidth;
+        this.drawText(this.expTotalValue(), x + statusLabelWidth, y, valueWidth, "right");
+    };
+    /**
+     * NextExpを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawActorNext = function(actor, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        const expNext = TextManager.expNext.format(TextManager.level);
+        this.drawText(expNext, x, y, statusLabelWidth);
+        this.resetTextColor();
+        const valueWidth = width - statusLabelWidth;
+        this.drawText(this.expNextValue(), x + statusLabelWidth, y, valueWidth, "right");
+    };
+    
+    /**
+     * アクターのHPを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawActorHp = function(actor, x, y, width) {
+        // ゲージ描画
+        const current = actor.hp;
+        const max = actor.mhp;
+        const gaugeData = {
+            rate:((max > 0) ? current / max : 0),
+            backColor:ColorManager.gaugeBackColor(),
+            color1:ColorManager.hpGaugeColor1(),
+            color2:ColorManager.hpGaugeColor2()
+        };
+        this.drawGaugeRect(gaugeData,
+                x + statusLabelWidth, y + 24, width - statusLabelWidth, 12);
+        // テキスト描画
+        const data = {
+            label:TextManager.hpA,
+            color:ColorManager.hpColor(actor),
+            current:current,
+            max:max
+        };
+        this.drawGaugeText(data, x, y, width);
+    };
+
+    /**
+     * アクターのMPを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawActorMp = function(actor, x, y, width) {
+        // ゲージ描画
+        const current = actor.mp;
+        const max = actor.mmp;
+        const gaugeData = {
+            rate:((max > 0) ? current / max : 0),
+            backColor:ColorManager.gaugeBackColor(),
+            color1:ColorManager.mpGaugeColor1(),
+            color2:ColorManager.mpGaugeColor2()
+        };
+        this.drawGaugeRect(gaugeData,
+                x + statusLabelWidth, y + 24, width - statusLabelWidth, 12);
+        // テキスト描画
+        const data = {
+            label:TextManager.mpA,
+            color:ColorManager.mpColor(actor),
+            current:current,
+            max:max
+        };
+        this.drawGaugeText(data, x, y, width);
+    };
+
+    /**
+     * アクターのTPを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上x
+     * @param {Number} y 描画領域左上y
+     * @param {Number} width 幅
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_Status.prototype.drawActorTp = function(actor, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(textMaxTp, x, y + 8, statusLabelWidth, "left");
+        const valueWidth = this.textWidth("000");
+        this.changeTextColor(ColorManager.tpColor(actor));
+        this.contents.fontSize = $gameSystem.mainFontSize() + 8;
+        this.drawText(actor.maxTp(), x + statusLabelWidth + 16, y, valueWidth, "right");
+    };
+
+
+    /**
+     * ゲージを描画する。
+     * 
+     * @param {Object} gaugeData ゲージデータ。rate, backColor, color1, color2メンバを持つ。
+     * @param {Number} x ゲージ左上位置x
+     * @param {Number} y ゲージ左上位置y
+     * @param {Number} width 幅
+     * @param {Number} height 高さ
+     */
+    Window_Status.prototype.drawGaugeRect = function(gaugeData, x, y, width, height) {
+        const rate = gaugeData.rate;
+        const fillW = Math.floor((width - 2) * rate);
+        const fillH = height - 2;
+        const color0 = gaugeData.backColor;
+        const color1 = gaugeData.color1;
+        const color2 = gaugeData.color2;
+        this.contents.fillRect(x, y, width, height, color0);
+        this.contents.gradientFillRect(x + 1, y + 1, fillW, fillH, color1, color2);
+    };
+
+    /**
+     * ゲージのテキストを描画する。
+     * 
+     * @param {Object} data データ
+     * @param {Number} x ラベル左上位置 x
+     * @param {Number} y ラベル左上位置 y
+     * @param {Number} width 幅
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_Status.prototype.drawGaugeText = function(data, x, y, width) {
+        const paramWidth = Math.floor(width * 0.2);
+        const maxValueWidth = Math.floor(width * 0.3);
+        const currentValueWidth = width - paramWidth - maxValueWidth - 16;
+
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(data.label, x, y + 8, paramWidth, "left");
+        x += paramWidth;
+        this.changeTextColor(data.color);
+        this.contents.fontSize = $gameSystem.mainFontSize() + 8;
+        this.drawText(data.current, x, y, currentValueWidth, "right");
+        x += currentValueWidth;
+        this.contents.fontSize = $gameSystem.mainFontSize() - 2;
+        this.drawText("/", x, y + 8, 16, "center");
+        x += 16;
+        this.contents.fontSize = $gameSystem.mainFontSize() + 8;
+        this.drawText(data.max, x, y, maxValueWidth, "right");
+    };
+    /**
+     * アクターの顔グラフィックを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上X
+     * @param {Number} y 描画領域左上Y
+     * @param {Number} width 幅
+     * @param {Number} height 高さ
+     */
+    Window_Status.prototype.drawActorFace = function(actor, x, y, width, height) {
+        if (actor.isDead()) {
+            this.contents.context.filter = "grayscale(100%)";
+        }
+        this.drawFace(actor.faceName(), actor.faceIndex(), x, y, width, height);
+        this.contents.context.filter = "none";
+    };
+
+    /**
+     * アクターのクラスを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上X
+     * @param {Number} y 描画領域左上Y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawActorClass = function(actor, x, y, width) {
+        if (textClassName && statusLabelWidth) {
+            // ニックネームラベル描画あり
+            const spacing = 8;
+            const nameWidth = width - statusLabelWidth - spacing;
+            this.changeTextColor(ColorManager.systemColor());
+            this.drawText(textClassName, x, y, statusLabelWidth);
+            this.resetTextColor();
+            this.drawText(actor.currentClass().name, x + statusLabelWidth + spacing, y, nameWidth, "left");
+        } else {
+            // ニックネーム描画なし。
+            this.drawText(actor.currentClass().name, x, y, textWidth, "left");
+        }
+
+    };
+
+    /**
+     * アクターのニックネームを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上X
+     * @param {Number} y 描画領域左上Y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawActorNickname = function(actor, x, y, width) {
+        const nickName = actor.nickname();
+        if (nickName) {
+            if (textNickname && statusLabelWidth) {
+                // ニックネームラベル描画あり
+                const spacing = 8;
+                const nameWidth = width - statusLabelWidth - spacing;
+                this.changeTextColor(ColorManager.systemColor());
+                this.drawText(textNickname, x, y, statusLabelWidth);
+                this.resetTextColor();
+                this.drawText(actor.nickname(), x + statusLabelWidth + spacing, y, nameWidth, "left");
+            } else {
+                // ニックネームラベル描画なし。
+                this.drawText(actor.nickname(), x, y, textWidth, "left");
+            }
+        }
     };
 
     //------------------------------------------------------------------------------
@@ -326,9 +1054,71 @@ function Window_StatusProfile() {
     Window_StatusParams.prototype.refresh = function() {
         if (this.contents) {
             this.contents.clear();
+            this.drawHeader();
         }
-        const itemRect = this.itemRect();
-        this.drawText(textStatus2, itemRect.x, itemRect.y, itemRect.width, "right");
+    };
+    /**
+     * ヘッダを描画する。
+     */
+    Window_StatusParams.prototype.drawHeader = function() {
+        const rect = this.headerRect();
+        const lineHeight = this.lineHeight();
+        this.resetFontSettings();
+        this.drawText(textStatus2, rect.x, rect.y, rect.width, "right");
+        this.drawHorzLine(rect.x, rect.y + lineHeight, rect.width);
+    };
+
+    /**
+     * ヘッダの矩形領域を得る。
+     * 
+     * @return {Rectangle} ヘッダ矩形領域。
+     */
+    Window_StatusParams.prototype.headerRect = function() {
+        const x = 0;
+        const y = 0;
+        const w = this.innerWidth;
+        const h = this.lineHeight() + 16;
+        return new Rectangle(x, y, w, h);
+    };
+
+
+    /**
+     * 装備の描画領域を得る。
+     * 
+     * @return {Rectangle} プロフィール描画領域。
+     */
+    Window_StatusParams.prototype.block1Rect = function() {
+        const x = 0;
+        const y = this.lineHeight() + 16;
+        const w = this.innerWidth;
+        const h = this.lineHeight() * 8 + 16;
+        return new Rectangle(x, y, w, h);
+    };
+
+    /**
+     * ウェポンマスタリの描画領域を得る。
+     * 
+     * @return {Rectangle} 描画領域。
+     */
+    Window_StatusParams.prototype.block2Rect = function() {
+        const rect = this.equipRect();
+        const x = 0;
+        const y = rect.y + rect.height;
+        const w = this.innerWidth;
+        const h = this.innerHeight - y;
+        return new Rectangle(x, y, w, h);
+    };
+    /**
+     * 水平ラインを描画する。
+     * 
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 幅
+     */
+    Window_StatusParams.prototype.drawHorzLine = function(x, y, width) {
+        this.changePaintOpacity(false);
+        this.drawRect(x, y + 5, width, 5);
+        this.changePaintOpacity(true);
     };
 
     // /**
@@ -472,14 +1262,94 @@ function Window_StatusProfile() {
 
     //------------------------------------------------------------------------------
     // Window_StatusEquip
+    /**
+     * Window_Status_Equipを描画する。
+     */
     Window_StatusEquip.prototype.refresh = function() {
         if (this.contents) {
             this.contents.clear();
-        // TODO : 描画
+            this.drawHeader();
+            this.drawEquip();
         }
-        const itemRect = this.itemRect();
-        this.drawText(textStatus3, itemRect.x, itemRect.y, itemRect.width, "right");
     };
+
+    /**
+     * ヘッダを描画する。
+     */
+    Window_StatusEquip.prototype.drawHeader = function() {
+        const rect = this.headerRect();
+        const lineHeight = this.lineHeight();
+        this.resetFontSettings();
+        this.drawText(textStatus3, rect.x, rect.y, rect.width, "right");
+        this.drawHorzLine(rect.x, rect.y + lineHeight, rect.width);
+    };
+    /**
+     * ヘッダの矩形領域を得る。
+     * 
+     * @return {Rectangle} ヘッダ矩形領域。
+     */
+    Window_StatusEquip.prototype.headerRect = function() {
+        const x = 0;
+        const y = 0;
+        const w = this.innerWidth;
+        const h = this.lineHeight() + 16;
+        return new Rectangle(x, y, w, h);
+    };
+    /**
+     * 装備の描画領域を得る。
+     */
+    Window_StatusEquip.prototype.drawEquip = function() {
+        const lineHeight = this.lineHeight();
+        const rect = this.equipRect();
+
+        // 装備一覧を描画する。
+
+
+
+
+        this.drawHorzLine(rect.x, rect.y + lineHeight * 8, rect.width);
+    };
+
+    /**
+     * 装備の描画領域を得る。
+     * 
+     * @return {Rectangle} プロフィール描画領域。
+     */
+    Window_StatusEquip.prototype.equipRect = function() {
+        const x = 0;
+        const y = this.lineHeight() + 16;
+        const w = this.innerWidth;
+        const h = this.lineHeight() * 8 + 16;
+        return new Rectangle(x, y, w, h);
+    };
+
+    /**
+     * ウェポンマスタリの描画領域を得る。
+     * 
+     * @return {Rectangle} 描画領域。
+     */
+    Window_StatusEquip.prototype.WeaponMasteryRect = function() {
+        const rect = this.equipRect();
+        const x = 0;
+        const y = rect.y + rect.height;
+        const w = this.innerWidth;
+        const h = this.innerHeight - y;
+        return new Rectangle(x, y, w, h);
+    };
+    /**
+     * 水平ラインを描画する。
+     * 
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 幅
+     */
+    Window_StatusEquip.prototype.drawHorzLine = function(x, y, width) {
+        this.changePaintOpacity(false);
+        this.drawRect(x, y + 5, width, 5);
+        this.changePaintOpacity(true);
+    };
+
+
     // /**
     //  * Window_StatusEquip
     //  * 装備表示
@@ -586,7 +1456,7 @@ function Window_StatusProfile() {
     //         if (upgradeText.length > 0) {
     //             this.changeTextColor(this.itemNameColor(equipItem));
     //             var x4 = x3 + 330;
-    //             var textWidth = x + this.contentsWidth() - x4;
+    //             var textWidth = x + this.innerWidth - x4;
     //             this.drawText(upgradeText, x4, y, textWidth, "left");
     //         }
     //     }
@@ -670,182 +1540,6 @@ function Window_StatusProfile() {
         this.select(0);
     };
 
-    //-----------------------------------------------------------------------------
-    // Window_StatusSkillList
-    //
-
-    // /**
-    //  * 選択されている種類のSkill一覧を表示する。
-    //  * type=0はパッシブを表示する。
-    //  */
-    // function Window_StatusSkillList() {
-    //     this.initialize.apply(this, arguments);
-    // }
-
-    // Window_StatusSkillList.prototype = Object.create(Window_Selectable.prototype);
-    // Window_StatusSkillList.prototype.constructor = Window_StatusSkillList;
-
-    // /**
-    //  * Window_StatusSkillListを初期化する。
-    //  */
-    // Window_StatusSkillList.prototype.initialize = function(x, y, width, height) {
-    //     Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-    //     this._actor = null;
-    //     this._stypeId = 0;
-    //     this._data = [];
-    //     this._pendingIndex = -1;
-    // };
-
-    // /**
-    //  * ペンディングインデックスを設定する。
-    //  * @param {Number} index ペンディングインデックス
-    //  */
-    // Window_StatusSkillList.prototype.setPendingIndex = function(index) {
-    //     if (this._pendingIndex !== index) {
-    //         this._pendingIndex = index;
-    //         this.refresh();
-    //     }
-    // };
-
-    // /**
-    //  * ペンディングインデックスを取得する。
-    //  */
-    // Window_StatusSkillList.prototype.getPendingIndex = function() {
-    //     return this._pendingIndex;
-    // };
-
-
-    // /**
-    //  * indexに対応する項目を取得する。
-    //  * @param {Number} index インデックス
-    //  * @return {Game_Skill} スキル
-    //  */
-    // Window_StatusSkillList.prototype.getItem = function(index) {
-    //     if (this._data) {
-    //         if ((index >= 0) && (index < this._data.length)) {
-    //             return this._data[index];
-    //         }
-
-    //     }
-    //     return null;
-    // };
-
-    // /**
-    //  * アクターを設定する。
-    //  */
-    // Window_StatusSkillList.prototype.setActor = function(actor) {
-    //     if (this._actor !== actor) {
-    //         this._actor = actor;
-    //         this._pendingIndex = -1;
-    //         this.refresh();
-    //         this.resetScroll();
-    //     }
-    // };
-
-    // /**
-    //  * 表示するスキルタイプを設定する。
-    //  */
-    // Window_StatusSkillList.prototype.setStypeId = function(stypeId) {
-    //     if (this._stypeId !== stypeId) {
-    //         this._stypeId = stypeId;
-    //         this.refresh();
-    //         this.resetScroll();
-    //     }
-    // };
-
-    // /**
-    //  * 最大カラム数
-    //  */
-    // Window_StatusSkillList.prototype.maxCols = function() {
-    //     return 2;
-    // };
-
-    // /**
-    //  * スキル間のスペース
-    //  */
-    // Window_StatusSkillList.prototype.spacing = function() {
-    //     return 48;
-    // };
-
-    // /**
-    //  * 最大アイテム数を取得する。
-    //  * @return {Number} 最大アイテム数
-    //  */
-    // Window_StatusSkillList.prototype.maxItems = function() {
-    //     return this._data ? this._data.length : 1;
-    // };
-
-    // /**
-    //  * 選択されている項目を取得する。
-    //  * @return {Data_Item} スキル
-    //  */
-    // Window_StatusSkillList.prototype.item = function() {
-    //     return this._data && this.index() >= 0 ? this._data[this.index()] : null;
-    // };
-
-    // /**
-    //  * 現在選択中の項目が有効かどうかを取得する。
-    //  * @return {Boolean} 有効な場合にはtrue, それ以外はfalse
-    //  */
-    // Window_StatusSkillList.prototype.isCurrentItemEnabled = function() {
-    //     return true;
-    // };
-
-    // /**
-    //  * 項目一覧を作成する。
-    //  */
-    // Window_StatusSkillList.prototype.makeItemList = function() {
-    //     if (this._actor) {
-    //         var stypeId = this._stypeId;
-    //         if (stypeId >= 0) {
-    //             this._data = this._actor.skillsWithOrder().filter(function(item) {
-    //                 return item && (item.stypeId == stypeId);
-    //             });
-    //         }
-    //     }
-    // };
-
-    // /**
-    //  * 最後に選択されていた項目を再選択する。
-    //  */
-    // Window_StatusSkillList.prototype.selectLast = function() {
-    //     this.select(0);
-    // };
-
-    // /**
-    //  * 項目を描画する。
-    //  */
-    // Window_StatusSkillList.prototype.drawItem = function(index) {
-    //     var rect = this.itemRect(index);
-    //     if (index == this._pendingIndex) {
-    //         // 並び替え用の項目は背景色を設定
-    //         var color = this.pendingColor();
-    //         this.changePaintOpacity(false);
-    //         this.contents.fillRect(rect.x, rect.y, rect.width, rect.height, color);
-    //         this.changePaintOpacity(true);
-    //     }
-    //     var skill = this._data[index];
-    //     if (skill) {
-    //         this.drawItemName(skill, rect.x, rect.y, rect.width);
-    //     }
-    // };
-
-    // /**
-    //  * ヘルプウィンドウに説明用項目を設定する。
-    //  */
-    // Window_StatusSkillList.prototype.updateHelp = function() {
-    //     this.setHelpWindowItem(this.item());
-    // };
-
-    // /**
-    //  * 表示を更新する。
-    //  */
-    // Window_StatusSkillList.prototype.refresh = function() {
-    //     this.makeItemList();
-    //     this.createContents();
-    //     this.drawAllItems();
-    // };
-
     //------------------------------------------------------------------------------
     // Window_StatusProfile
     Window_StatusProfile.prototype = Object.create(Window_Base.prototype);
@@ -878,10 +1572,67 @@ function Window_StatusProfile() {
     Window_StatusProfile.prototype.refresh = function() {
         if (this.contents) {
             this.contents.clear();
-            const rect = this.baseTextRect();
-            const actor = this._actor;
-            this.drawTextEx(actor.profile(), rect.x, rect.y, rect.width);
+            this.drawHeader();
+            this.drawProfile();
         }
+    };
+
+    /**
+     * ヘッダを描画する。
+     */
+    Window_StatusProfile.prototype.drawHeader = function() {
+        const rect = this.headerRect();
+        const lineHeight = this.lineHeight();
+        this.resetFontSettings();
+        this.drawText(textProfile, rect.x, rect.y, rect.width, "right");
+        this.drawHorzLine(rect.x, rect.y + lineHeight, rect.width);
+    };
+    /**
+     * ヘッダの矩形領域を得る。
+     * 
+     * @return {Rectangle} ヘッダ矩形領域。
+     */
+    Window_StatusProfile.prototype.headerRect = function() {
+        const x = 0;
+        const y = 0;
+        const w = this.innerWidth;
+        const h = this.lineHeight() + 16;
+        return new Rectangle(x, y, w, h);
+    };
+    /**
+     * プロフォールを描画する。
+     * 
+     * Note:プロフィールを拡張するなら、このメソッドをフックするかオーバーライドする。
+     */
+    Window_StatusProfile.prototype.drawProfile = function() {
+        const rect = this.profileRect();
+        const actor = this._actor;
+        this.drawTextEx(actor.profile(), rect.x, rect.y, rect.width);
+    };
+
+    /**
+     * プロフィールの描画領域を得る。
+     * 
+     * @return {Rectangle} プロフィール描画領域。
+     */
+    Window_StatusProfile.prototype.profileRect = function() {
+        const x = 0;
+        const y = this.lineHeight() + 16;
+        const w = this.innerWidth;
+        const h = this.innerHeight - y;
+        return new Rectangle(x, y, w, h);
+    };
+    /**
+     * 水平ラインを描画する。
+     * 
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 幅
+     */
+    Window_StatusProfile.prototype.drawHorzLine = function(x, y, width) {
+        this.changePaintOpacity(false);
+        this.drawRect(x, y + 5, width, 5);
+        this.changePaintOpacity(true);
     };
 
     //------------------------------------------------------------------------------
@@ -1079,7 +1830,10 @@ function Window_StatusProfile() {
      * @return {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Status.prototype.statusCategoryWindowRect = function() {
-        const lineCount = enableProfile ? 5 : 4;
+        let lineCount = 4;
+        if (enableProfile) {
+            lineCount++;
+        }
         const ww = this.commandWindowWidth();
         const wh = this.calcWindowHeight(lineCount, true);
         const wx = 0;
@@ -1228,16 +1982,16 @@ function Window_StatusProfile() {
         this.hideDetailWindows();
         switch (this._categoryWindow.currentSymbol()) {
             case "status1":
-                //this._statusWindow.show();
+                this._statusWindow.show();
                 break;
             case "status2":
-                //this._statusParamsWindow.show();
+                this._statusParamsWindow.show();
                 break;
             case "status3":
                 this._statusEquipWindow.show();
                 break;
             case "profile":
-                //this._statusProfileWindow.show();
+                this._statusProfileWindow.show();
                 break;
             case "skill":
                 this._statusSkillTypeWindow.show();
@@ -1332,9 +2086,9 @@ function Window_StatusProfile() {
     Scene_Status.prototype.profileWindowRect = function() {
         const rect = this.statusCategoryWindowRect();
         const wx = rect.x + rect.width;
-        const wy = 0;
+        const wy = this.buttonAreaBottom();
         const ww = Graphics.boxWidth - wx;
-        const wh = Graphics.boxHeight;
+        const wh = Graphics.boxHeight - wy;
         return new Rectangle(wx, wy, ww, wh);
     };
 
