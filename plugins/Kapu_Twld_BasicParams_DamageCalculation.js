@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Base_DamageCalculation
+ * @orderAfter Kapu_Trait_CriticalDamageRate
  * @orderAfter Kapu_Trait_Penetrate
  * @base Kapu_Twld_BasicParams
  * @orderAfter Kapu_Twld_BasicParams
@@ -15,7 +16,9 @@
  *     atkcoef, defcoef, matcoef, mdfcoef
  * 補正値
  * ・STRが高いほどatkcoefが上がる。
+ * ・STRが高いほどクリティカルダメージ倍率が上がる。
  * ・INTが高いほどmatcoefが上がる
+ * ・INTが高いほどクリティカルダメージ倍率が上がる。
  * ・VITが高いほどvitcoefが上がる。
  * ・MDFが高いほどmdfcoefが上がる。
  * ・スキルによるHP回復の場合、使用者のMENにより、回復効果にボーナスが付与される。
@@ -25,6 +28,7 @@
  * ・魔法攻撃時
  *   ダメージ計算で0になっても、一定確率で1ダメージ与える。
  *   使用者のINTが対象のMENより高いほど、1ダメージが出る確率が上がる。
+ * 
  * 
  * Penetrate特性が有効な場合
  * ・STRが30以上あるとき、貫通特性ボーナス。
@@ -246,7 +250,31 @@
         rate -= Math.max(0, ((this.men - 20) * 0.005));
         return Math.max(0, rate);
     };
+    if (Game_BattlerBase.prototype.criticalDamageRatePhysical) {
+        const _Game_BattlerBase_criticalDamageRatePhysical = Game_BattlerBase.prototype.criticalDamageRatePhysical;
+        /**
+         * 物理攻撃のクリティカル倍率を取得する。
+         * 
+         * @return {Number} クリティカル倍率。
+         */
+        Game_BattlerBase.prototype.criticalDamageRatePhysical = function () {
+            const pcdr = _Game_BattlerBase_criticalDamageRatePhysical.call(this);
+            return pcdr + Math.max(0, this.str - 20) * 0.01;
+        };
+    }
 
+    if (Game_BattlerBase.prototype.criticalDamageRateMagical) {
+        const _Game_BattlerBase_criticalDamageRateMagical = Game_BattlerBase.prototype.criticalDamageRateMagical;
+        /**
+         * 魔法攻撃のクリティカル倍率を取得する。
+         * 
+         * @return {Number} クリティカル倍率。
+         */
+        Game_BattlerBase.prototype.criticalDamageRateMagical = function() {
+            const mcdr = _Game_BattlerBase_criticalDamageRateMagical.call(this);
+            return mcdr + Math.max(0, this.int - 20) * 0.01;
+        };
+    }
     //------------------------------------------------------------------------------
     // Game_Action
     const _Game_Action_itemRec = Game_Action.prototype.itemRec;
