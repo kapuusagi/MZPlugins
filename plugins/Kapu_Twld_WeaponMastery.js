@@ -263,7 +263,7 @@
      * @param {Number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
-        _Game_Actor_setup.call(this);
+        _Game_Actor_setup.call(this, actorId);
         const actor = $dataActors[actorId];
 
         const pattern = /<weaponMastery: *(\d+) *, *(\d+) *, *(\d+) *>/;
@@ -446,7 +446,7 @@
          * @return {Number} 全装備品のパラメータ値合計
          */
         Game_Actor.prototype.paramEquip = function(paramId) {
-            const value = _Game_Actor_paramEquip.call(paramId);
+            const value = _Game_Actor_paramEquip.call(this, paramId);
             if ((paramId === 2) && (bareHandsWmTypeId > 0) && this.hasNoWeapons()) {
                 const wmLevel = this.wmLevel(bareHandsWmTypeId);
                 return value + Math.floor(wmLevel * this.str * 0.02);
