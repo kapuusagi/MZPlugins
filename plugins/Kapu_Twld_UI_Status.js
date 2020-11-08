@@ -174,6 +174,16 @@
  * @desc 属性表示欄3。
  * @type struct<elementEntry>[]
  * 
+ * @param elementEntries4
+ * @text 属性表示項目4
+ * @desc 属性表示欄4。
+ * @type struct<elementEntry>[]
+ * 
+ * @param statusParamEntries
+ * @text 追加パラメータ
+ * @desc パラメータウィンドウに追加で標示するパラメータ
+ * @type struct<paramEntry>[]
+ * 
  * @help 
  * TWLD向けステータス画面UIプラグイン。
  * 
@@ -209,6 +219,28 @@
  * @text アイコンID
  * @desc 属性に対応するアイコンID
  * @type number
+ */
+/*~struct~paramEntry:
+ *
+ * @param label
+ * @text ラベル
+ * @desc パラメータラベルとして使用するテキスト。
+ * @type string
+ * 
+ * @param getter
+ * @text 取得メソッド
+ * @desc パラメータを取得する方法。(actor.cnt等)
+ * @type string
+ * 
+ * @param valueType
+ * @text 値タイプ
+ * @desc 値の標示タイプ
+ * @type select
+ * @option 割合
+ * @value percent
+ * @option 値
+ * @value value
+ * 
  */
 
 /**
@@ -269,12 +301,17 @@ function Window_StatusProfile() {
     const _parseElementEntries = function(value) {
         const list = [];
         if (value) {
-            const items = JSON.parse(value);
-            for (const item of items) {
-                const elementEntry = JSON.parse(item);
-                elementEntry.id = Number(elementEntry.id);
-                elementEntry.iconId = Number(elementEntry.iconId);
-                list.push(elementEntry);
+            try {
+                const items = JSON.parse(value);
+                for (const item of items) {
+                    const elementEntry = JSON.parse(item);
+                    elementEntry.id = Number(elementEntry.id);
+                    elementEntry.iconId = Number(elementEntry.iconId);
+                    list.push(elementEntry);
+                }
+            }
+            catch (e) {
+                console.error(e);
             }
         }
         return list;
@@ -283,6 +320,26 @@ function Window_StatusProfile() {
     const elementEntries1 = _parseElementEntries(parameters["elementEntries1"]);
     const elementEntries2 = _parseElementEntries(parameters["elementEntries2"]);
     const elementEntries3 = _parseElementEntries(parameters["elementEntries3"]);
+    const elementEntries4 = _parseElementEntries(parameters["elementEntries4"]);
+
+    const _parseStatusParamEntries = function(value) {
+        const list = [];
+        if (value) {
+            try {
+                const items = JSON.parse(value);
+                for (const item of items) {
+                    const entry = JSON.parse(item);
+                    list.push(entry);
+                }
+            }
+            catch (e) {
+                console.error(e);
+            }
+        }
+        return list;
+    };
+
+    const statusParamEntries = _parseStatusParamEntries(parameters["statusParamEntries"]);
     
     // MVではステータス表示（一部）/スキル表示/装備表示/プロフィール表示だけであった。
     // これでいいのか？
@@ -322,8 +379,8 @@ function Window_StatusProfile() {
     //     ✓PEN.PDR/✓PEN.MDR/
     //     いっぱいあるけど全部はいらない。
     // ・ステータス2
-    //     属性レート
-    //     MRF/CNT/HRG/MRG/TRG/TGR/GRD/REC/PHA (0以外なら表示)
+    //     ✓属性レート
+    //     MRF/CNT/HRG/MRG/TRG/TGR/REC/PHA (0以外なら表示)
     //     ドロップレート/取得ゴールドレート/EXPレート
     // ・装備
     //     装備一覧表示
@@ -1050,15 +1107,16 @@ function Window_StatusProfile() {
         const rect = this.block1Rect();
         const actor = this._actor;
         if (actor) {
-            // TODO パラメータ描画
             const spacing = 16;
             const itemWidth = Math.floor((rect.width - spacing * 4) / 4);
             const x1 = rect.x;
             const x2 = x1 + itemWidth + spacing;
             const x3 = x2 + itemWidth + spacing;
+            const x4 = x3 + itemWidth + spacing;
             this.drawElementRates(x1, rect.y, itemWidth, elementEntries1);
             this.drawElementRates(x2, rect.y, itemWidth, elementEntries2);
             this.drawElementRates(x3, rect.y, itemWidth, elementEntries3);
+            this.drawElementRates(x4, rect.y, itemWidth, elementEntries4);
         }
         this.drawHorzLine(rect.x, rect.y + this.lineHeight() * 5, rect.width)
     };
@@ -1128,11 +1186,74 @@ function Window_StatusProfile() {
     Window_StatusParams.prototype.drawBlock2 = function() {
         const actor = this._actor;
         if (actor) {
+            const lineHeight = this.lineHeight();
             const rect = this.block2Rect();
-            // TODO : 描画
+            const maxLineCount = Math.floor(rect.height / lineHeight);
+            const spacing = 16;
+            const itemWidth = Math.floor((rect.width - spacing * 4) / 4);
 
+            const paramItems = this.actorParams(actor);
+            let x = rect.x;
+            let line = 0;
+            for (const paramItem of paramItems) {
+                this.drawParamItem(paramItem, x, rect.y + lineHeight * line, itemWidth);
+                line++;
+                if (line >= maxLineCount) {
+                    x += (itemWidth + spacing);
+                    line = 0;
+                }
+            }
+        }
+    };
+
+    /**
+     * アクターのパラメータ一覧を得る。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @return {Array<Object>} パラメータ一覧
+     */
+    Window_StatusParams.prototype.actorParams = function(actor) {
+        //     MRF/CNT/HRG/MRG/TRG/TGR/GRD/REC/PHA (0以外なら表示)
+        //     ドロップレート/取得ゴールドレート/EXPレート
+        const paramItems = [];
+        for (const paramEntry of statusParamEntries) {
+            if (paramEntry.getter) {
+                const a = actor; // eslint-disable-line no-unused-vars
+                let value = eval(paramEntry.getter);
+                if (value !== 0) {
+                    const paramItem = {};
+                    paramItem.label = paramEntry.label;
+                    if (paramEntry.valueType === "percent") {
+                        const rateStr = (Math.floor(value * 1000) / 10) + "%"
+                        paramItem.value = (value >= 0) ? "+" + rateStr : rateStr;
+                    } else {
+                        paramItem.value = (value >= 0) ? "+" + value : value;
+                    }
+                    paramItems.push(paramItem);
+                }
+            }
         }
 
+        return paramItems;
+    };
+
+
+
+    /**
+     * パラメータを描画する。
+     * 
+     * @param {Object} paramItem パラメータ
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     */
+    Window_StatusParams.prototype.drawParamItem = function(paramItem, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(paramItem.label, x, y, statusLabelWidth);
+        this.resetTextColor();
+        const valueWidth = width - statusLabelWidth - 16;
+        this.drawText(paramItem.value, x + statusLabelWidth + 16, y, valueWidth);
     };
     /**
      * ブロック2の描画領域を得る。
