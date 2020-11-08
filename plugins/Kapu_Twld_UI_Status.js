@@ -141,6 +141,13 @@
  * @type string
  * @default クリティカル倍率（魔）
  * 
+ * @param textGuardDamageRate
+ * @text 防御時軽減率ラベル
+ * @desc 「防御時ダメージ軽減率」として使用するラベル。
+ * @type string
+ * @default 防御軽減率
+ * 
+ * 
  * @param statusPictureMethod
  * @text ステータス画像メソッド名
  * @desc アクターのステータス画像を取得するメソッドまたはプロパティ名。
@@ -151,6 +158,21 @@
  * @desc コマンドウィンドウ領域の幅
  * @type number
  * @default 240
+ * 
+ * @param elementEntries1
+ * @text 属性表示項目1
+ * @desc 属性表示欄1。
+ * @type struct<elementEntry>[]
+ * 
+ * @param elementEntries2
+ * @text 属性表示項目2
+ * @desc 属性表示欄2。
+ * @type struct<elementEntry>[]
+ * 
+ * @param elementEntries3
+ * @text 属性表示項目3
+ * @desc 属性表示欄3。
+ * @type struct<elementEntry>[]
  * 
  * @help 
  * TWLD向けステータス画面UIプラグイン。
@@ -176,6 +198,19 @@
  * ============================================
  * Version.0.1.0 動作未確認。
  */
+/*~struct~elementEntry:
+ *
+ * @param id
+ * @text 属性ID
+ * @desc 標示する属性のID
+ * @type number
+ * 
+ * @param iconId
+ * @text アイコンID
+ * @desc 属性に対応するアイコンID
+ * @type number
+ */
+
 /**
  * Window_StatusCategory
  * ステータスのカテゴリ選択を提供するウィンドウ
@@ -183,13 +218,6 @@
 function Window_StatusCategory() {
     this.initialize(...arguments);
 }
-/**
- * Window_StatusActor.
- * ステータス画面でアクター情報を表示する。
- */
-// function Window_StatusActor() {
-//     this.initialize(...arguments);
-// }
 
 /**
  * スキルタイプ選択画面
@@ -234,9 +262,27 @@ function Window_StatusProfile() {
     const textCriticalEvacuation = parameters["textCriticalEvacuation"] || "CEV";
     const textPhyCriDamageRate = parameters["textPhyCriDamageRate"] || "P.CDR";
     const textMagCriDamageRate = parameters["textMagCriDamageRate"] || "M.CDR";
+    const textGuardDamageRate = parameters["textGuardDamageRate"] || "GRD";
     const statusPictureMethod = String(parameters["statusPictureMethod"]) || "";
     const commandWindowWidth = Number(parameters["commandWindowWidth"]) || 240;
 
+    const _parseElementEntries = function(value) {
+        const list = [];
+        if (value) {
+            const items = JSON.parse(value);
+            for (const item of items) {
+                const elementEntry = JSON.parse(item);
+                elementEntry.id = Number(elementEntry.id);
+                elementEntry.iconId = Number(elementEntry.iconId);
+                list.push(elementEntry);
+            }
+        }
+        return list;
+    }
+
+    const elementEntries1 = _parseElementEntries(parameters["elementEntries1"]);
+    const elementEntries2 = _parseElementEntries(parameters["elementEntries2"]);
+    const elementEntries3 = _parseElementEntries(parameters["elementEntries3"]);
     
     // MVではステータス表示（一部）/スキル表示/装備表示/プロフィール表示だけであった。
     // これでいいのか？
@@ -272,7 +318,7 @@ function Window_StatusProfile() {
     //     ✓HP/✓MaxHP/✓Mp/✓MaxMP/✓MaxTP
     //     ✓STR/✓DEX/✓VIT/✓INT/✓MEN/✓AGI/✓LUK (LUKはニコニコマークとかにしたい)
     //     ✓ATK/✓DEF/✓DEF.Rate/✓MAT/✓MDF/✓MDF.Rate
-    //     ✓HIT/✓EVA/✓MEV/CRI/CEV/CDR/
+    //     ✓HIT/✓EVA/✓MEV/✓CRI/✓CEV/✓CDR
     //     ✓PEN.PDR/✓PEN.MDR/
     //     いっぱいあるけど全部はいらない。
     // ・ステータス2
@@ -341,92 +387,6 @@ function Window_StatusProfile() {
         Window_Command.prototype.select.call(this, index);
         this.callHandler("itemChange");
     };
-
-    //------------------------------------------------------------------------------
-    // Window_StatusActor
-    //
-    // Window_StatusActor.prototype = Object.create(Window_Base.prototype);
-    // Window_StatusActor.prototype.constuctor = Window_StatusActor;
-
-    // /**
-    //  * Window_StatusActorを初期化する。
-    //  */
-    // Window_StatusActor.prototype.initialize = function(rect) {
-    //     Window_Base.prototype.initialize.call(this, rect);
-    //     this._actor = null;
-    // };
-
-    // /**
-    //  * アクターを設定する。
-    //  * @param {Game_Actor} actor アクター
-    //  */
-    // Window_StatusActor.prototype.setActor = function(actor) {
-    //     if (this._actor !== actor) {
-    //         this._actor = actor;
-    //         this.refresh();
-    //     }
-    // };
-
-    // /**
-    //  * 表示を更新する。
-    //  */
-    // Window_StatusActor.prototype.refresh = function() {
-    //     this.contents.clear();
-        // const actor = this._actor;
-        // const padding = this.itemPadding();
-        // const lineHeight = this.lineHeight();
-        // const x = 0;
-        // const y = 0;
-        // const faceOffsetY = 40;
-        // this.drawFace(actor.faceName(), actor.faceIndex(),
-        //         x, y + faceOffsetY, Window_Base._faceWidth, Window_Base.faceHeight);
-        // const x1 = x + Window_Base._faceWidth + padding;
-        // const nameWidth = 240;
-        // this.drawText(actor, x1, y, nameWidth);
-        // this.drawActorLevel(actor, x1, y + lineHeight);
-        // var iconWidth = x + this.innerWidth - x1;
-        // this.drawActorIcons(actor, x1, y + lineHeight * 2, iconWidth);
-        // this.drawActorHp(actor, x1, y + lineHeight * 3, nameWidth);
-        // this.drawActorMp(actor, x1, y + lineHeight * 4, nameWidth);
-        // this.drawActorTp(actor, x1, y + lineHeight * 5, nameWidth);
-
-        // var x2 = x1 + nameWidth + padding;
-        // this.drawActorClass(actor, x2, y, nameWidth);
-        // this.labelWidth(actor, x2, y + lineHeight, expWidth);
-        // this.drawActorGrowPoint(actor, x2, y + lineHeight *3, 120);
-        // var rcnt = actor.getReincarnationCount();
-        // if (rcnt > 0) {
-        //     var rcountText = "(再成長" + rcnt + "回)";
-        //     this.changeTextColor(this.systemColor());
-        //     this.drawText(rcountText, x2 + 120, y + lineHeight * 3, 120, "left");
-        // }
-
-        // this.changeTextColor(this.systemColor());
-        // var expLabel = TextManager.expTotal.format(TextManager.exp);
-        // var nextLabel = TextManager.expNext.format(TextManager.level);
-        // this.drawText(expLabel, x2, y + lineHeight * 4);
-        // this.drawText(nextLabel, x2, y + lineHeight * 5);
-        // this.resetTextColor();
-
-        // var x3 = x2 + nameWidth + padding;
-        // var expWidth = Math.min(x + this.innerWidth - x3, 160);
-
-        // var expText = actor.currentExp();
-        // var nextText = actor.nextRequiredExp();
-        // if (actor.isMaxLevel()) {
-        //     expText = "------";
-        //     nextText = "-------";
-        // }
-        // this.drawText(expText, x2 + 120, y + lineHeight * 4, expWidth, "right");
-        // this.drawText(nextText, x2 + 120, y + lineHeight * 5, expWidth, "right");
-
-        // // ギルドランク
-        // var x3 = this.innerWidth - 240;
-        // this.changeTextColor(this.systemColor());
-        // this.drawText("ギルドランク:", x3, y, 180, "right");
-        // this.resetTextColor();
-        // this.drawText(actor.guildRankName(), x3 + 180, y, 60);
-    // };
 
     //------------------------------------------------------------------------------
     // Window_Status
@@ -647,7 +607,8 @@ function Window_StatusProfile() {
                 x, y + lineHeight * 2, width);
         this.drawParamRate(textMagCriDamageRate, actor.mcdr, noEquipActor.mcdr,
                 x, y + lineHeight * 3, width);
-
+        this.drawParamRate(textGuardDamageRate, actor.grd - 1, noEquipActor.grd - 1,
+            x, y + lineHeight * 5, width);
     };
 
     /**
@@ -1020,7 +981,6 @@ function Window_StatusProfile() {
             // ニックネーム描画なし。
             this.drawText(actor.currentClass().name, x, y, textWidth, "left");
         }
-
     };
 
     /**
@@ -1055,6 +1015,8 @@ function Window_StatusProfile() {
         if (this.contents) {
             this.contents.clear();
             this.drawHeader();
+            this.drawBlock1();
+            this.drawBlock2();
         }
     };
     /**
@@ -1081,9 +1043,74 @@ function Window_StatusProfile() {
         return new Rectangle(x, y, w, h);
     };
 
+    /**
+     * ブロック1を描画する。
+     */
+    Window_StatusParams.prototype.drawBlock1 = function() {
+        const rect = this.block1Rect();
+        const actor = this._actor;
+        if (actor) {
+            // TODO パラメータ描画
+            const spacing = 16;
+            const itemWidth = Math.floor((rect.width - spacing * 4) / 4);
+            const x1 = rect.x;
+            const x2 = x1 + itemWidth + spacing;
+            const x3 = x2 + itemWidth + spacing;
+            this.drawElementRates(x1, rect.y, itemWidth, elementEntries1);
+            this.drawElementRates(x2, rect.y, itemWidth, elementEntries2);
+            this.drawElementRates(x3, rect.y, itemWidth, elementEntries3);
+        }
+        this.drawHorzLine(rect.x, rect.y + this.lineHeight() * 5, rect.width)
+    };
 
     /**
-     * 装備の描画領域を得る。
+     * 属性レート配列を描画する。
+     * 
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 描画幅
+     * @param {Array<Object>} 属性エントリ配列
+     */
+    Window_StatusParams.prototype.drawElementRates = function(x, y, width, elementEntries) {
+        const lineHeight = this.lineHeight();
+        for (let i = 0; i < elementEntries.length; i++) {
+            const entry = elementEntries[i];
+            this.drawElementRate(entry, this._actor, x, y + lineHeight * i, width);
+        }
+    };
+    /**
+     * 属性レートのパラメータを描画する。
+     * 
+     * @param {Object} entry 属性エントリ
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 幅
+     */
+    Window_StatusParams.prototype.drawElementRate = function(entry, actor, x, y, width) {
+        if (!actor) {
+            return;
+        }
+        if ((entry.id <= 0) && (entry.id >= $dataSystem.elements.length)) {
+            return;
+        }
+
+        this.drawIcon(entry.iconId, x, y);
+
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        const elementName = $dataSystem.elements[entry.id];
+        this.drawText(elementName, x + 40, y, statusLabelWidth);
+        
+        const valueWidth = Math.min(width - 40 - statusLabelWidth, this.textWidth("999.9%"));
+        const elementRate = actor.elementRate(entry.id);
+        const rateStr = (Math.floor(elementRate * 1000) / 10) + "%";
+
+        this.resetTextColor();
+        this.drawText(rateStr, x + 40 + statusLabelWidth, y, valueWidth, "right");
+    };
+    /**
+     * ブロック1の描画領域を得る。
      * 
      * @return {Rectangle} プロフィール描画領域。
      */
@@ -1091,17 +1118,29 @@ function Window_StatusProfile() {
         const x = 0;
         const y = this.lineHeight() + 16;
         const w = this.innerWidth;
-        const h = this.lineHeight() * 8 + 16;
+        const h = this.lineHeight() * 5 + 16;
         return new Rectangle(x, y, w, h);
     };
 
     /**
-     * ウェポンマスタリの描画領域を得る。
+     * ブロック2を描画する。
+     */
+    Window_StatusParams.prototype.drawBlock2 = function() {
+        const actor = this._actor;
+        if (actor) {
+            const rect = this.block2Rect();
+            // TODO : 描画
+
+        }
+
+    };
+    /**
+     * ブロック2の描画領域を得る。
      * 
      * @return {Rectangle} 描画領域。
      */
     Window_StatusParams.prototype.block2Rect = function() {
-        const rect = this.equipRect();
+        const rect = this.block1Rect();
         const x = 0;
         const y = rect.y + rect.height;
         const w = this.innerWidth;
