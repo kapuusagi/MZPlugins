@@ -92,6 +92,16 @@
     DataManager.addNotetagParserWeapons(_processDropItemRateTrait);
     DataManager.addNotetagParserArmors(_processDropItemRateTrait);
     DataManager.addNotetagParserStates(_processDropItemRateTrait);
+    //------------------------------------------------------------------------------
+    // Game_BattlerBase
+    /**
+     * ドロップアイテム率(加算値)を得る。
+     * 
+     * @return {Number} ドロップアイテム率(加算値)
+     */
+    Game_BattlerBase.prototype.dropItemRate = function() {
+        return this.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, Game_Party.ABILITY_DROP_ITEM_RATE);
+    };
 
     //------------------------------------------------------------------------------
     // Game_Enemy
@@ -99,7 +109,7 @@
      * ドロップレート補正倍率を得る。
      * @return {Number} ドロップレート補正倍率
      */
-    Game_Party.prototype.getDropRate = function() {
+    Game_Party.prototype.dropItemRate = function() {
         var rate = this.hasDropItemDouble() ? 2 : 1;
         return rate + this.partyTraitsSum(Game_Party.ABILITY_DROP_ITEM_RATE);
     };
@@ -113,6 +123,6 @@
      * !!!overwrite!!! Game_Enmy.dropItemRate
      */
     Game_Enemy.prototype.dropItemRate = function() {
-        return $gameParty.getDropRate();
+        return $gameParty.dropItemRate();
     };
 })();
