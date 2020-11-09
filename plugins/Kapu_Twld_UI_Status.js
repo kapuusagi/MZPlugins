@@ -370,6 +370,8 @@ function Window_StatusProfile() {
     // ・ステータス1
     //   HP/MPやATK/DEF, STR/DEXなどの基本ステータス表示。
     //   HIT等の一部パラメータも表示できれば全部やりたいなあ。-> 表示項目を一覧にする。
+    //     ステートアイコン
+    //     戦闘位置
     //     ✓顔グラフィック
     //     ✓Lv/✓クラス名/✓通り名/✓GP
     //     ✓HP/✓MaxHP/✓Mp/✓MaxMP/✓MaxTP
