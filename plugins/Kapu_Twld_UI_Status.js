@@ -507,9 +507,12 @@ function Window_StatusProfile() {
             const y3 = y2 + lineHeight;
             const y4 = y3 + lineHeight;
             const y6 = y4 + lineHeight * 2;
+            const statesWidth = rect.width - x2;
             this.drawText(actor.name(), x1, y1, textWidth, "left");
+            this.drawActorStates(actor, x2, y1, statesWidth);
             this.drawActorClass(actor, x1, y2, textWidth);
             this.drawActorNickname(actor, x2, y2, textWidth);
+            this.drawActorPosition(actor, x3, y2, textWidth);
             this.drawActorLevel(actor, x1, y3, textWidth);
             this.drawActorGrowPoint(actor, x2, y3, textWidth);
             this.drawActorGuildRank(actor, x3, y3, textWidth);
@@ -1065,6 +1068,39 @@ function Window_StatusProfile() {
                 // ニックネームラベル描画なし。
                 this.drawText(actor.nickname(), x, y, textWidth, "left");
             }
+        }
+    };
+
+    /**
+     * アクターの位置を描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上X
+     * @param {Number} y 描画領域左上Y
+     * @param {Number} width 幅
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_Status.prototype.drawActorPosition = function(actor, x, w, width) {
+        // 何かあれば
+    };
+
+    /**
+     * アクターのステートを標示する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上X
+     * @param {Number} y 描画領域左上Y
+     * @param {Number} width 幅
+     */
+    Window_Status.prototype.drawActorStates = function(actor, x, y, width) {
+        const icons = actor.stateIcons();
+        let i = 0;
+        const iconOffsetX = (36 - ImageManager.iconWidth) / 2;
+        const iconOffsetY = (this.lineHeight() - ImageManager.iconWidth) / 2;
+        const drawWidth = ImageManager.iconWidth + 2;
+        for (let offset = 0; (offset + drawWidth) <= width; offset += drawWidth) {
+            this.drawIcon(icons[i], x + offset + iconOffsetX, y + iconOffsetY);
+            i++;
         }
     };
 

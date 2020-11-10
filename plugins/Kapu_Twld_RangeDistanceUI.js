@@ -5,10 +5,12 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Twld_BattleSystem
  * @base Kapu_RangeDistance
- * @base Kapu_Twld_Menu
+ * @base Kapu_Twld_UI_Menu
+ * @base Kapu_Twld_UI_Status
  * @orderAfter Kapu_Twld_BattleSystem
  * @orderAfter Kapu_RangeDistance
- * @orderAfter Kapu_Twld_Menu
+ * @orderAfter Kapu_Twld_UI_Menu
+ * @orderAfter Kapu_Twld_UI_Status
  * 
  * @param frontIconId
  * @text 前衛アイコンID
@@ -21,6 +23,24 @@
  * @desc アクターHUDに後衛状態を表すためのアイコン
  * @type number
  * @default 0
+ * 
+ * @param textPosition
+ * @text 位置ラベル
+ * @desc 「戦闘位置」として使用するラベル。
+ * @type string
+ * @default 位置
+ * 
+ * @param textFront
+ * @text 前衛ラベル
+ * @desc 「前衛」として使用するテキスト。
+ * @type string
+ * @default 前列
+ * 
+ * @param textRear
+ * @text 後衛ラベル
+ * @desc 「後衛」として使用するテキスト。
+ * @type string
+ * @default 後列
  * 
  * @help 
  * Kapu_RangeDistanceのUI表現をKapu_BattleSystemに適用するためのプラグイン。
@@ -50,6 +70,9 @@
     const parameters = PluginManager.parameters(pluginName);
     const frontIconId = Number(parameters["frontIconId"]) || 0;
     const rearIconId = Number(parameters["rearIconId"]) || 0;
+    const textPosition = parameters["textPosition"] || "Position";
+    const textFront = parameters["textFront"] || "Front";
+    const textRear = parameters["textRear"] || "Rear";
 
     //------------------------------------------------------------------------------
     // Sprite_PositionIcon
@@ -379,4 +402,35 @@
 
         _Window_MenuStatus_drawItemStatus.call(this, index);
     };
+
+    /**
+     * アクターの位置を描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画領域左上X
+     * @param {Number} y 描画領域左上Y
+     * @param {Number} width 幅
+     * !!!overwrite!!! Window_Status.drawActorPosition()
+     *     UI標示のため、オーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_Status.prototype.drawActorPosition = function(actor, x, y, width) {
+        const labelWidth = Math.floor(width * 0.3);
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(textPosition, x, y, labelWidth);
+
+        const iconIndex = (actor.battlePosition() === 0) ? frontIconId : rearIconId;
+        if (iconIndex) {
+            const iconX = x + labelWidth + 16;
+            const iconY = y + 2;
+            this.drawIcon(iconIndex, iconX, iconY);
+        }
+        const textX = x + labelWidth + 52;
+        const textWidth = width - labelWidth - 52;
+        const position = (actor.battlePosition() === 0) ? textFront : textRear;
+        this.resetTextColor();
+        this.drawText(position, textX, y, textWidth);
+        
+    };    
 })();
