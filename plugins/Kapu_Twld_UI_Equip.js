@@ -8,9 +8,15 @@
  * 
  * @param commandWindowWidth
  * @text コマンドウィンドウ幅
- * @desc コマンドウィンドウ幅を得る。
+ * @desc コマンドウィンドウの幅。
  * @type number
  * @default 240
+ * 
+ * @param slotNameWidth
+ * @text スロット名幅
+ * @desc スロット名の幅
+ * @type number
+ * @default 138
  * 
  * @param textEmptySlot
  * @text 空スロット表示テキスト
@@ -67,6 +73,7 @@ function Window_EquipItemName() {
     const pluginName = "Kapu_Twld_UI_Equip";
     const parameters = PluginManager.parameters(pluginName);
     const commandWindowWidth = Number(parameters["commandWindowWidth"]) || 240;
+    const slotNameWidth = Number(parameters["slotNameWidth"]) || 138;
     const textEmptySlot = parameters["textEmptySlot"] || "";
     const changeableSlotInBattle = [];
     try {
@@ -136,7 +143,14 @@ function Window_EquipItemName() {
         }
 
         this.drawActorFace(actor, 0, 0, innerWidth, innerHeight);
-        this.drawText(actor.name(), 0, 0, innerWidth, this.lineHeight(), "center");
+        this.changePaintOpacity(false);
+        const name = actor.name();
+        const backRectWidth = Math.min(Math.max(this.textWidth(name), ImageManager.faceWidth) + 32, innerWidth);
+        const offsX = (innerWidth - backRectWidth) / 2;
+        this.contents.fillRect(offsX, 0, backRectWidth, this.lineHeight(), "black");
+        this.changePaintOpacity(true);
+        this.resetFontSettings();
+        this.drawText(actor.name(), 0, 0, innerWidth, "center");
     };
 
     /**
@@ -199,7 +213,7 @@ function Window_EquipItemName() {
         }
         return 0;
     };
-    const _Window_EquipSlot_drawItem = Window_EquipSlot.prototype.drawItem;
+
     /**
      * スロットウィンドウの項目を描画する。
      * @param {Index} index インデックス
@@ -213,22 +227,39 @@ function Window_EquipItemName() {
             const rect = this.itemLineRect(index);
             this.drawText(TextManager.clear, rect.x, rect.y, rect.width);
         } else {
-            _Window_EquipSlot_drawItem.call(this, index);
+            const slotName = this.actorSlotName(actor, index);
+            const item = this.itemAt(index);
+            const slotNameWidth = this.slotNameWidth();
+            const rect = this.itemLineRect(index);
+            const itemWidth = rect.width - slotNameWidth;
+            this.changeTextColor(ColorManager.systemColor());
+            this.changePaintOpacity(this.isEnabled(index));
+            this.drawText(slotName, rect.x, rect.y, slotNameWidth, rect.height);
+            this.drawEquipItemName(item, rect.x + slotNameWidth, rect.y, itemWidth);
+            this.changePaintOpacity(true);
         }
     };
 
-    const _Window_EquipSlot_drawItemName = Window_EquipSlot.prototype.drawItemName;
     /**
-     * アイテム名を描画する。
+     * スロット名の幅を得る。
      * 
-     * @param {Object} item アイテム(nameプロパティを持つオブジェクト)
+     * @return {Number} スロット名の幅
+     */
+    Window_EquipSlot.prototype.slotNameWidth = function() {
+        return slotNameWidth;
+    };
+
+    /**
+     * 装備品名を描画する。
+     * 
+     * @param {Object} item 装備アイテム(DataWeapon/DataArmor)
      * @param {Number} x 描画位置x
      * @param {Number} y 描画位置y
      * @param {Number} width 描画幅
      */
-    Window_EquipSlot.prototype.drawItemName = function(item, x, y, width) {
+    Window_EquipSlot.prototype.drawEquipItemName = function(item, x, y, width) {
         if (item) {
-            _Window_EquipSlot_drawItemName.call(this, item, x, y, width);
+            this.drawItemName(item, x, y, width);
         } else {
             const textMargin = ImageManager.iconWidth + 4;
             const itemWidth = Math.max(0, width - textMargin);
@@ -310,33 +341,31 @@ function Window_EquipItemName() {
     Window_EquipItemName.prototype.refresh = function() {
         this.contents.clear();
 
-        const slotNameWidth = Math.floor(this.innerWidth * 0.3);
-        this.resetFontSettings();
+        const itemWidth = this.innerWidth - slotNameWidth;
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText(this._slotName, 0, 0, slotNameWidth - 8);
-        this.drawText(":", slotNameWidth - 8, 0, 8, "right");
-
-        // 装備品アイコン
-        const equipItem = this._item;
-        const x2 = slotNameWidth + 40 + 8;
-        if (equipItem && (equipItem.iconIndex >= 0)) {
-            const iconY = 0 + (this.lineHeight() - ImageManager.iconHeight) / 2;
-            this.drawIcon(equipItem.iconIndex, x2 + 2, iconY);
-        }
-
-        // 装備品名称
-        const x3 = x2 + 56;
-        const itemNameWidth = this.innerWidth - x3;
-        if (equipItem) {
-            this.drawText(equipItem.name, x3, 0, itemNameWidth);
-        } else {
-            this.drawText(textEmptySlot, x3, y, itemNameWidth);
-        }
+        this.drawText(this._slotName, 0, 0, slotNameWidth, this.lineHeight());
+        this.drawEquipItemName(this._item, slotNameWidth, 0, itemWidth);
     };
 
-
+    /**
+     * アイテム名を描画する。
+     * 
+     * @param {Object} item アイテム(nameプロパティを持つオブジェクト)
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     */
+    Window_EquipItemName.prototype.drawEquipItemName = function(item, x, y, width) {
+        if (item) {
+            this.drawItemName(item, x, y, width);
+        } else {
+            const textMargin = ImageManager.iconWidth + 4;
+            const itemWidth = Math.max(0, width - textMargin);
+            this.drawText(textEmptySlot, x + textMargin, y, itemWidth);
+        }
+    };
     //------------------------------------------------------------------------------
-    // Scene_EquipStatusの変更
+    // Scene_EquipStatus
 
     /**
      * 表示を更新する。
@@ -513,13 +542,20 @@ function Window_EquipItemName() {
     //------------------------------------------------------------------------------
     // Scene_Equip
     //
-    const _Scene_Equip_create = Scene_Equip.prototype.create;
     /**
      * 装備画面に必要なウィンドウを作成する。
+     * 
+     * !!!overwrite!!! Scene_Equip.create()
+     *     装備画面のレイアウト変更のため、オーバーライドする。
      */
     Scene_Equip.prototype.create = function() {
-        _Scene_Equip_create.call(this);
+        Scene_MenuBase.prototype.create.call(this);
         this.createActorWindow();
+        this.createHelpWindow();
+        this.createStatusWindow();
+        this.createCommandWindow();
+        this.createSlotWindow();
+        this.createItemWindow();
         this.createEquipItemNameWindow();
         this.refreshActor();
     };
@@ -567,7 +603,7 @@ function Window_EquipItemName() {
      */
     Scene_Equip.prototype.equipActorWindowRect = function() {
         const ww = this.commandWindowWidth();
-        const wh = 220;
+        const wh = 180;
         const wx = 0;
         const wy = this.mainAreaTop();
         return new Rectangle(wx, wy, ww, wh);
