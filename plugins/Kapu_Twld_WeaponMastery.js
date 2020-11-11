@@ -68,6 +68,12 @@
  * @default 1003
  * @min 65
  * 
+ * @param debugEnable
+ * @text デバッグ
+ * @desc trueにすると、デバッグログ出力をする。
+ * @type boolean
+ * @default false
+ * 
  * @help 
  * ウェポンマスタリーのプラグイン。
  * 1回スキルなどを使用する毎に経験値が1たまり、
@@ -107,7 +113,7 @@
  *         エネミーのウェポンマスタリレベルをlevel#にする。        
  * 
  * スキル
- *     <wmType:typeId#>
+ *     <wmTypeId:typeId#>
  *         このスキルが関係する、マスタリータイプに割り当てる武器タイプID。
  *         未指定時は装備品のものが適用される。
  *     <wmExp:value#>
@@ -129,6 +135,9 @@
     const parameters = PluginManager.parameters(pluginName);
     const maxWmLevel = Number(parameters["maxWmLevel"]) || 99;
     const bareHandsWmTypeId = Number(parameters["bareHandsWmTypeId"]) || 0;
+    const debugEnable = (typeof parameters["debugEnable"] === "undefined")
+            ? false : (parameters["debugEnable"] === "true");
+
     Game_Action.EFFECT_GAIN_WM_EXP = Number(parameters["gainWmExpEffectCode"]) || 0;
 
     if (!Game_Action.EFFECT_GAIN_WM_EXP) {
@@ -353,6 +362,9 @@
                 this._wm[typeId] = { level:0, exp:0 };
             }
             const nextExp = this.wmExpNext(typeId);
+            if (debugEnable) {
+                console.log(this.name() + ": GainWmExp type=" + typeId + " exp=" + exp + " current=" + this._wm[typeId].exp + "/" + nextExp);
+            }
             this._wm[typeId].exp = (this._wm[typeId].exp + exp).clamp(0, nextExp);
             if ((this._wm[typeId].level < maxWmLevel)
                     && (this._wm[typeId].exp >= nextExp)) {
