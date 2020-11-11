@@ -147,6 +147,11 @@
  * @type string
  * @default 防御軽減率
  * 
+ * @param textAbsorb
+ * @text 吸収属性を表すテキスト
+ * @desc 吸収属性を表すテキスト
+ * @type string
+ * @default 吸収
  * 
  * @param statusPictureMethod
  * @text ステータス画像メソッド名
@@ -184,6 +189,48 @@
  * @desc パラメータウィンドウに追加で標示するパラメータ
  * @type struct<paramEntry>[]
  * 
+ * @param textEmptySlot
+ * @text 空スロット表示テキスト
+ * @desc 空のスロットに表示する文字列。
+ * @type string
+ * @default 
+ * 
+ * @param colorAbsorb
+ * @text 吸収カラー
+ * @desc 吸収属性の文字の描画に使用する色
+ * @type string
+ * @default rgb(100,255,100)
+ *  
+ * @param colorAttenuation
+ * @text 減衰カラー
+ * @desc 減衰属性の文字の描画に使用する色
+ * @type string
+ * @default rgb(100,180,255)
+ *  
+ * @param colorAmplification
+ * @text 増幅カラー
+ * @desc 増幅属性の文字の描画に使用する色
+ * @type string
+ * @default rgb(255,64,64)
+ * 
+ * @param weaponMasteryIcons
+ * @text ウェポンマスタリアイコン
+ * @desc ウェポンマスタリーで使用するアイコン。
+ * @type number[]
+ * @default []
+ * 
+ * @param wmGaugeColor1
+ * @text WMゲージカラー1
+ * @desc ウェポンマスタリゲージカラー1
+ * @type string
+ * @default rgb(40, 100, 40)
+ * 
+ * @param wmGaugeColor2
+ * @text WMゲージカラー2
+ * @desc ウェポンマスタリゲージカラー2
+ * @type string
+ * @default rgb(128, 255, 128)
+ *  
  * @help 
  * TWLD向けステータス画面UIプラグイン。
  * 
@@ -295,6 +342,13 @@ function Window_StatusProfile() {
     const textPhyCriDamageRate = parameters["textPhyCriDamageRate"] || "P.CDR";
     const textMagCriDamageRate = parameters["textMagCriDamageRate"] || "M.CDR";
     const textGuardDamageRate = parameters["textGuardDamageRate"] || "GRD";
+    const textEmptySlot = parameters["textEmptySlot"] || "";
+    const textAbsorb = parameters["textAbsorb"] || "(Abs)";
+    const colorAbsorb = parameters["colorAbsorb"] || "rgb(100,255,100)";
+    const colorAttenuation = parameters["colorAttenuation"] || "rgb(100,180,255)";
+    const colorAmplification = parameters["colorAmplification"] || "rgb(255,64,64)";
+    const wmGaugeColor1 = parameters["wmGaugeColor1"] || "rgb(40, 100, 40)";
+    const wmGaugeColor2 = parameters["wmGaugeColor2"] || "rgb(128, 255, 128)";
     const statusPictureMethod = String(parameters["statusPictureMethod"]) || "";
     const commandWindowWidth = Number(parameters["commandWindowWidth"]) || 240;
 
@@ -340,6 +394,23 @@ function Window_StatusProfile() {
     };
 
     const statusParamEntries = _parseStatusParamEntries(parameters["statusParamEntries"]);
+    const _parseWeponMasteryIcons = function(value) {
+        const icons = [];
+        if (value) {
+            try {
+                const args = JSON.parse(value);
+                for (const arg of args) {
+                    const id = Number(arg) || 0;
+                    icons.push(id);
+                }
+            }
+            catch (e) {
+                console.error(e);
+            }
+        }
+        return icons;
+    };
+    const weaponMasteryIcons = _parseWeponMasteryIcons(parameters["weaponMasteryIcons"]);
     
     // MVではステータス表示（一部）/スキル表示/装備表示/プロフィール表示だけであった。
     // これでいいのか？
@@ -496,7 +567,7 @@ function Window_StatusProfile() {
         if (actor) {
             const spacing = 16;
             const lineHeight = this.lineHeight();
-            const textWidth = (rect.width - 172 - spacing * 3) / 3;
+            const textWidth = Math.floor((rect.width - 172 - spacing * 3) / 3);
             this.resetFontSettings();
             this.drawActorFace(actor, rect.x, rect.y, 160, 160);
             const x1 = rect.x + 172;
@@ -895,8 +966,12 @@ function Window_StatusProfile() {
             color1:ColorManager.hpGaugeColor1(),
             color2:ColorManager.hpGaugeColor2()
         };
-        this.drawGaugeRect(gaugeData,
-                x + statusLabelWidth, y + 24, width - statusLabelWidth, 12);
+        const spacing = 16;
+        const labelWidth = Math.floor(width * 0.2);
+        const gaugeX = x + labelWidth + spacing;
+        const gaugeWidth = width - labelWidth - spacing;
+        this.drawGaugeRect(gaugeData, gaugeX, y + 24, gaugeWidth, 12);
+        
         // テキスト描画
         const data = {
             label:TextManager.hpA,
@@ -925,8 +1000,11 @@ function Window_StatusProfile() {
             color1:ColorManager.mpGaugeColor1(),
             color2:ColorManager.mpGaugeColor2()
         };
-        this.drawGaugeRect(gaugeData,
-                x + statusLabelWidth, y + 24, width - statusLabelWidth, 12);
+        const spacing = 16;
+        const labelWidth = Math.floor(width * 0.2);
+        const gaugeX = x + labelWidth + spacing;
+        const gaugeWidth = width - labelWidth - spacing;
+        this.drawGaugeRect(gaugeData, gaugeX, y + 24, gaugeWidth, 12);
         // テキスト描画
         const data = {
             label:TextManager.mpA,
@@ -1196,14 +1274,29 @@ function Window_StatusProfile() {
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());
         const elementName = $dataSystem.elements[entry.id];
-        this.drawText(elementName, x + 40, y, statusLabelWidth);
+        const labelWidth = Math.min(statusLabelWidth, Math.floor((width - 40) * 0.3));
+        this.drawText(elementName, x + 40, y, labelWidth);
         
-        const valueWidth = Math.min(width - 40 - statusLabelWidth, this.textWidth("999.9%"));
+        const valueWidth = width - 40 - labelWidth;
         const elementRate = actor.elementRate(entry.id);
-        const rateStr = (Math.floor(elementRate * 1000) / 10) + "%";
 
-        this.resetTextColor();
-        this.drawText(rateStr, x + 40 + statusLabelWidth, y, valueWidth, "right");
+        const rateStr = (elementRate >= 0)
+                ? (Math.floor(elementRate * 1000) / 10) + "%"
+                : ((Math.floor(-elementRate * 1000) / 10) + "%" + textAbsorb);
+
+        if (elementRate < 0) {
+            this.changeTextColor(colorAbsorb);
+        } else if (elementRate === 0) {
+            this.changePaintOpacity(false);
+        } else if (elementRate < 1) {
+            this.changeTextColor(colorAttenuation);
+        } else if (elementRate > 1) {
+            this.changeTextColor(colorAmplification);
+        } else {
+            this.resetTextColor();
+        }
+        this.drawText(rateStr, x + 40 + labelWidth, y, valueWidth);
+        this.changePaintOpacity(true);
     };
     /**
      * ブロック1の描画領域を得る。
@@ -1468,6 +1561,7 @@ function Window_StatusProfile() {
             this.contents.clear();
             this.drawHeader();
             this.drawEquip();
+            this.drawWeaponMasteries();
         }
     };
 
@@ -1499,13 +1593,54 @@ function Window_StatusProfile() {
     Window_StatusEquip.prototype.drawEquip = function() {
         const lineHeight = this.lineHeight();
         const rect = this.equipRect();
-
-        // 装備一覧を描画する。
-
-
-
+        const actor = this._actor;
+        if (actor) {
+            // 装備一覧を描画する。
+            const slots = actor.equipSlots();
+            const equips = actor.equips();
+            for (let i = 0; i < slots.length; i++) {
+                const slotName = $dataSystem.equipTypes[slots[i]];
+                this.drawEquipSlot(slotName, equips[i], rect.x, rect.y + lineHeight * i, rect.width);
+            }
+        }
 
         this.drawHorzLine(rect.x, rect.y + lineHeight * 8, rect.width);
+    };
+
+    /**
+     * 装備スロットを描画する。
+     * 
+     * @param {String} スロット名
+     * @param {Object} item 装備品(DataWeapon/DataArmor)
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     */
+    Window_StatusEquip.prototype.drawEquipSlot = function(slotName, item, x, y, width) {
+        const spacing = 16;
+        const labelWidth = Math.min(statusLabelWidth, Math.floor(width * 0.3));
+        const nameWidth = width - labelWidth - spacing;
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(slotName, x, y, labelWidth, this.lineHeight());
+        this.drawEquipItemName(item, x + labelWidth + spacing, y, nameWidth);
+    };
+
+    /**
+     * 装備品名を描画する。
+     * 
+     * @param {Object} item アイテム(DataWeapon/DataSKill)
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     */
+    Window_StatusEquip.prototype.drawEquipItemName = function(item, x, y, width) {
+        if (item) {
+            this.drawItemName(item, x, y, width);
+        } else {
+            const textMargin = ImageManager.iconWidth + 4;
+            const itemWidth = Math.max(0, width - textMargin);
+            this.drawText(textEmptySlot, x + textMargin, y, itemWidth);
+        }
     };
 
     /**
@@ -1522,11 +1657,124 @@ function Window_StatusProfile() {
     };
 
     /**
+     * ウェポンマスタリを描画する。
+     */
+    Window_StatusEquip.prototype.drawWeaponMasteries = function() {
+        const actor = this._actor;
+        if (actor) {
+            const rect = this.weaponMasteryRect();
+            const lineHeight = this.lineHeight();
+            const lineCount = Math.floor(rect.height / lineHeight);
+            const spacing = 16;
+            const itemWidth = Math.floor((rect.width - spacing * 3) / 3);
+            const wms = this.displayWeaponMasteries(actor);
+            let column = 0;
+            let line = 0;
+            let x = rect.x;
+            for (const wm of wms) {
+                this.drawWeaponMastery(wm, x, rect.y + lineHeight * line, itemWidth);
+                line++;
+                if (line > lineCount) {
+                    column++;
+                    x += (itemWidth + spacing);
+                    if (column >= 3) {
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
+    /**
+     * ウェポンマスタリーを描画する。
+     * 
+     * @param {Object} wm ウェポンマスタリー
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 描画幅
+     */
+    Window_StatusEquip.prototype.drawWeaponMastery = function(wm, x, y, width) {
+        const lineHeight = this.lineHeight();
+        if (wm.iconId) {
+            const iconX = x;
+            const iconY = y + (lineHeight - ImageManager.iconHeight) / 2;
+            this.drawIcon(wm.iconId, iconX, iconY);
+        }
+
+        const labelWidth = Math.floor((width - ImageManager.iconWidth - 4) * 0.5);
+        const levelWidth = width - labelWidth - 4;
+        const x1 = x + ImageManager.iconWidth + 4;
+        const x2 = x1 + labelWidth;
+
+        // ゲージ描画
+        const rate = (wm.expNext !== 0) ? wm.exp / wm.expNext : 0;
+        const gaugeHeight = Math.floor(lineHeight * 0.4);
+        const gaugeY = y + lineHeight - gaugeHeight;
+        this.drawExpGauge(rate, x2, gaugeY, levelWidth, gaugeHeight);
+
+
+        // 名前
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(wm.name, x1, y, labelWidth);
+
+        // Lv描画
+        this.resetTextColor();
+        this.drawText(TextManager.levelA + " " + wm.level, x2, y, levelWidth, "right");
+    };
+
+    /**
+     * ゲージを描画する。
+     * 
+     * @param {Number} rate 割合
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     * @param {Number} height 描画高
+     */
+    Window_StatusEquip.prototype.drawExpGauge = function(rate, x, y, width, height) {
+        const fillW = Math.floor((width - 2) * rate);
+        const fillH = height - 2;
+        const color0 = ColorManager.gaugeBackColor();
+        const color1 = wmGaugeColor1;
+        const color2 = wmGaugeColor2;
+        this.contents.fillRect(x, y, width, height, color0);
+        this.contents.gradientFillRect(x + 1, y + 1, fillW, fillH, color1, color2);
+    };
+
+    /**
+     * 標示するウェポンマスタリーを得る。
+     * 
+     * @param {Game_Actor} actor 
+     * @return {Array<Object>} 標示するウェポンマスタリデータの配列。
+     */
+    Window_StatusEquip.prototype.displayWeaponMasteries = function(actor) {
+        const wms = [];
+        for (let id = 1; id < $dataSystem.weaponTypes.length; id++) {
+            const level = actor.wmLevel(id);
+            if (level > 0) {
+                const iconId = weaponMasteryIcons[id - 1] || 0;
+                const name = $dataSystem.weaponTypes[id];
+                const exp = actor.wmExp(id);
+                const expNext = actor.wmExpNext(id);
+                wms.push({
+                    id:id,
+                    iconId:iconId,
+                    name:name,
+                    level:level,
+                    exp:exp,
+                    expNext:expNext
+                });
+            }
+        }
+        return wms;
+    };
+
+    /**
      * ウェポンマスタリの描画領域を得る。
      * 
      * @return {Rectangle} 描画領域。
      */
-    Window_StatusEquip.prototype.WeaponMasteryRect = function() {
+    Window_StatusEquip.prototype.weaponMasteryRect = function() {
         const rect = this.equipRect();
         const x = 0;
         const y = rect.y + rect.height;
