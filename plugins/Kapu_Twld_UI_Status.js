@@ -230,6 +230,12 @@
  * @desc ウェポンマスタリゲージカラー2
  * @type string
  * @default rgb(128, 255, 128)
+ * 
+ * @param displayWeaponMasteries
+ * @text 表示ウェポンマスタリー
+ * @desc 表示するウェポンマスタリータイプIDを配列で指定します。
+ * @type number[]
+ * @default []
  *  
  * @help 
  * TWLD向けステータス画面UIプラグイン。
@@ -394,23 +400,24 @@ function Window_StatusProfile() {
     };
 
     const statusParamEntries = _parseStatusParamEntries(parameters["statusParamEntries"]);
-    const _parseWeponMasteryIcons = function(value) {
-        const icons = [];
+    const _parseIntegerArray = function(value) {
+        const array = [];
         if (value) {
             try {
                 const args = JSON.parse(value);
                 for (const arg of args) {
                     const id = Number(arg) || 0;
-                    icons.push(id);
+                    array.push(id);
                 }
             }
             catch (e) {
                 console.error(e);
             }
         }
-        return icons;
+        return array;
     };
-    const weaponMasteryIcons = _parseWeponMasteryIcons(parameters["weaponMasteryIcons"]);
+    const weaponMasteryIcons = _parseIntegerArray(parameters["weaponMasteryIcons"]);
+    const displayWeaponMasteries = _parseIntegerArray(parameters["displayWeaponMasteries"]);
     
     // MVではステータス表示（一部）/スキル表示/装備表示/プロフィール表示だけであった。
     // これでいいのか？
@@ -1749,7 +1756,7 @@ function Window_StatusProfile() {
      */
     Window_StatusEquip.prototype.displayWeaponMasteries = function(actor) {
         const wms = [];
-        for (let id = 1; id < $dataSystem.weaponTypes.length; id++) {
+        for (let id of displayWeaponMasteries) {
             const level = actor.wmLevel(id);
             if (level > 0) {
                 const iconId = weaponMasteryIcons[id - 1] || 0;
