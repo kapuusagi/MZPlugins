@@ -147,6 +147,11 @@
  *     
  * 4．TPB速度の算出式変更
  *     
+ * 5. TP上昇条件の変更
+ *    ベーシックシステムではアクションがヒットしたとき、
+ *    ターゲット毎に加算されていた。
+ *    TWLDではアクションを行った際に、無条件でスキル毎に設定した値を
+ *    加算するように変更した。
  * 
  * ■ 使用時の注意
  * なし。
@@ -170,6 +175,7 @@
  * 変更履歴
  * ============================================
  * Version.0.2.0 スキルによる回復倍率を、使用者と対象のMENを参照するようにした。動作未確認。
+ *               TP上昇タイミングをスキル行動終了後から使用時に変更した。
  * Version.0.1.0 追加した。
  */
 (() => {
@@ -265,6 +271,27 @@
      */
     Game_Battler.prototype.tpbMagicCastSpeedParam = function() {
         return this.agi;
+    };
+    /**
+     * 行動によるTP上昇量を得る。
+     * 
+     * @param {Object} item DataItem/DataSKill
+     * @return {Number} TP上昇量
+     */
+    Game_Battler.prototype.actionTpValue = function(item) {
+        return item.tpGain;
+    };
+
+    const _Game_Battler_useItem = Game_Battler.prototype.useItem;
+    /**
+     * スキルまたはアイテムを使用する。
+     * 
+     * @param {Object} item DataItemまたはDataSkill
+     */
+    Game_Battler.prototype.useItem = function(item) {
+        _Game_Battler_useItem.call(this, item);
+        const value = Math.floor(this.actionTpValue(item) * this.tcr);
+        this.gainSilentTp(value);
     };
 
     //------------------------------------------------------------------------------
@@ -421,40 +448,5 @@
     Game_Action.prototype.applyItemUserEffect = function(/*target*/) {
         // const value = Math.floor(this.item().tpGain * this.subject().tcr);
         // this.subject().gainSilentTp(value);
-    };
-
-    /**
-     * 行動によるTP上昇量を得る。
-     * 
-     * @param {Object} item DataItem/DataSKill
-     * @return {Number} TP上昇量
-     */
-    Game_Battler.prototype.actionTpValue = function(item) {
-        return item.tpGain;
-    };
-
-    /**
-     * 行動によるTP上昇処理を行う。
-     * 
-     * @param {Object} item DataItem/DataSkill
-     */
-    Game_Battler.prototype.gainTpByAction = function(item) {
-        const value = Math.floor(this.actionTpValue(item) * this.tcr);
-        this.gainSilentTp(value);
-    };
-
-    //------------------------------------------------------------------------------
-    // BattleManager
-    const _BattleManager_endAction = BattleManager.endAction;
-
-    /**
-     * アクターまたはエネミーのアクションが完了したときの処理を行う。
-     */
-    BattleManager.endAction = function() {
-        const item = this._action 
-                ? this._action.item()
-                : $dataSkills[this._subject.guardSkillId()];
-        this._subject.gainTpByAction(item);
-        _BattleManager_endAction.call(this);
     };
 })();
