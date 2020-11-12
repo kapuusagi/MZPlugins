@@ -169,11 +169,14 @@
  * ============================================
  * ノートタグ
  * ============================================
- * ノートタグはありません。
+ * アイテム/武器/防具
+ *   <maxItems:num#>
+ *      アイテムの所持可能数をnum#で指定した数量とする。
  * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 最大アイテム数をノートタグで指定できるようにした。
  * Version.0.2.0 スキルによる回復倍率を、使用者と対象のMENを参照するようにした。動作未確認。
  *               TP上昇タイミングをスキル行動終了後から使用時に変更した。
  * Version.0.1.0 追加した。
@@ -449,4 +452,22 @@
         // const value = Math.floor(this.item().tpGain * this.subject().tcr);
         // this.subject().gainSilentTp(value);
     };
+    //------------------------------------------------------------------------------
+    // Game_Party
+    /**
+     * アイテムの所持最大数を得る。
+     * 
+     * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
+     * @return {Number} 最大所持数
+     * !!!overwrite!!! Game_Party.maxItems()
+     *     maxItemsノートタグ指定を可能にするため、オーバーライドする。
+     */
+    Game_Party.prototype.maxItems = function(item) {
+        if (item.meta.maxItems) {
+            return Math.max(1, Math.floor(Number(item.meta.maxItems) || 1));
+        } else {
+            return 99;
+        }
+    };
+
 })();
