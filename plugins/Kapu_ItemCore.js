@@ -21,6 +21,18 @@
  * コレクションとincludes()による判定から、item自身のitemkindを使う判定に変更。
  * 
  * ============================================
+ * プラグインコマンド
+ * ============================================
+ * プラグインコマンドはありません。
+ * 
+ * ============================================
+ * ノートタグ
+ * ============================================
+ * アイテム/武器/防具
+ *   <maxItems:num#>
+ *      アイテムの所持可能数をnum#で指定した数量とする。
+ * 
+ * ============================================
  * 変更履歴
  * ============================================
  * Version.0.1.0 作成開始
@@ -132,5 +144,21 @@
     Game_Party.prototype.isAnyMemberEquipped = function(item) {
         return this.members().some(actor => actor.isEquipped(item));
     };
-
+    //------------------------------------------------------------------------------
+    // Game_Party
+    /**
+     * アイテムの所持最大数を得る。
+     * 
+     * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
+     * @return {Number} 最大所持数
+     * !!!overwrite!!! Game_Party.maxItems()
+     *     maxItemsノートタグ指定を可能にするため、オーバーライドする。
+     */
+    Game_Party.prototype.maxItems = function(item) {
+        if (item.meta.maxItems) {
+            return Math.max(1, Math.floor(Number(item.meta.maxItems) || 1));
+        } else {
+            return 99;
+        }
+    };
 })();
