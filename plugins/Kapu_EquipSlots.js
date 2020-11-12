@@ -6,6 +6,18 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
+ * @param subWeaponEquipTypeId
+ * @text サブウェポン武器タイプID
+ * @desc サブウェポンに割り当てる武器タイプID
+ * @type number
+ * @default 100
+ * 
+ * @param textSubWeaponSlotName
+ * @text サブウェポンスロット名
+ * @desc サブウェポンに割り当てるスロット名
+ * @type string
+ * @default 武器
+ * 
  * @help 
  * クラス毎に装備スロットを変更するためのプラグイン。UIは基本的に変更しない。
  * また、サブウェポンの概念を追加する。
@@ -50,6 +62,8 @@
  *     二刀流、サブウェポンより優先される。
  *   <subWeaponType:id#,...>
  *     この武器を装備したとき、2番目のスロットにはid#で指定したサブウェポンのみ装備可能である。
+ *   <subWeapon>
+ *     この武器がサブウェポンであることを指定する。
  * 
  * ============================================
  * 変更履歴
@@ -58,8 +72,13 @@
  * Version.0.1.0 作成。
  */
 (() => {
-    // const pluginName = "Kapu_EquipSlots";
-    // const parameters = PluginManager.parameters(pluginName);
+    const pluginName = "Kapu_EquipSlots";
+    const parameters = PluginManager.parameters(pluginName);
+    const subWeaponEquipTypeId = Number(parameters["subWeaponEquipTypeId"]) || 0;
+    const textSubWeaponSlotName = parameters["textSubWeaponSlotName"] || "Weapon";
+    if (!subWeaponEquipTypeId) {
+        console.error(pluginName + ":Sub weapon type id incorrect.");
+    }
 
 
     /**
@@ -94,7 +113,7 @@
      * @param {DataWeapon} obj DataWeaponオブジェクト
      */
     const _processWeaponNoteTag = function(obj) {
-        if (obj.meta.subWeaponType) {
+        if (subWeaponEquipTypeId && obj.meta.subWeaponType) {
             const ids = obj.meta.subWeaponType.split(",").map(token => Number(token));
             const swt = [];
             for (const id of ids) {
@@ -106,25 +125,23 @@
                 obj.subWeaponTypes = swt;
             }
         }
+        if (subWeaponEquipTypeId && obj.meta.subWeapon) {
+            obj.etypeId = subWeaponEquipTypeId;
+        }
     };
     DataManager.addNotetagParserWeapons(_processWeaponNoteTag);
     //------------------------------------------------------------------------------
-    // Game_BattlerBase
-    /**
-     * 武器が装備可能かどうかを取得する。
-     * 
-     * @param {Object} item DataWeaponオブジェクト
-     * @return {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
-     * !!!overwrite!!! Game_BattlerBase.canEquipWeapon()
-     *     装備可能条件からwtypeを外すためにオーバーライドする。
-     *     wtypeをスロット毎に動的に変更し、他のプラグインで派生した際にも判定が使えるようにするため。
-     */
-    Game_BattlerBase.prototype.canEquipWeapon = function(item) {
-        return (
-            //this.isEquipWtypeOk(item.wtypeId) &&
-            !this.isEquipTypeSealed(item.etypeId)
-        );
-    };
+    // Scene_Boot
+    if (subWeaponEquipTypeId) {
+        const _Scene_Boot_start = Scene_Boot.prototype.start;
+        /**
+         * Scene_Bootを開始する。
+         */
+        Scene_Boot.prototype.start = function () {
+            $dataSystem.equipTypes[subWeaponEquipTypeId] = textSubWeaponSlotName;
+            _Scene_Boot_start.call(this);
+        };
+    }
     //------------------------------------------------------------------------------
     // Game_Actor
 
@@ -133,6 +150,7 @@
      * 
      * @param {Array<Number>} equips 装備品ID配列
      * !!!overwrite!!! Game_Actor.initEquips
+     *     スロット構成をカスタマイズできるようにしたため、オーバーライドする。
      */
     Game_Actor.prototype.initEquips = function(equips) {
         // 装備品オブジェクト配列を作成する。
@@ -172,7 +190,8 @@
         }
 
         this._equips = [];
-        for (let i = 0; i < equipSlots.length; i++) {
+        const equipSlotCount = this.equipSlots().length;
+        for (let i = 0; i < equipSlotCount; i++) {
             this._equips[i] = new Game_Item();
         }
         for (const equipItem of equipItems) {
@@ -182,9 +201,9 @@
             const equipType = equipItem.etypeId;
             // 装備可能な未装備スロットを探す。
             // 装備可能スロットを探して装備させる
+            const equipSlots = this.equipSlots();
             let slotNo = -1;
             for (let i = 0; i < equipSlots.length; i++) {
-                const equipSlots = this.equipSlots();
                 if ((equipSlots[i] === equipType) && this._equips[i].isNull()) {
                     slotNo = i;
                     break;
@@ -215,12 +234,22 @@
     };
 
     /**
+     * メインウェポンを得る。
+     * 
+     * @return {DataWeapon} メインウェポン。無い場合にはnull
+     */
+    Game_Actor.prototype.mainWeapon = function() {
+        return this.weapons()[0]
+    };
+
+    /**
      * サブウエポンが必要かどうかを判定する。
      * 
      * @return {Boolean} サブウェポンの場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isNeedsSubWeapon = function() {
-        return (this.subWeaponTypes() !== null);
+        const weapon = this.mainWeapon();
+        return (weapon && weapon.subWeaponTypes)
     };
 
     /**
@@ -229,8 +258,8 @@
      * @return {Array<Number>} サブウエポンタイプ。サブウェポンが無い場合にはnull.
      */
     Game_Actor.prototype.subWeaponTypes = function() {
-        const weapon = this.weapons()[0];
-        return (weapon && weapon.subWeaponTypes) ? weapon.subWeaponTypes : null;
+        const weapon = this.mainWeapon();
+        return (weapon && weapon.subWeaponTypes) ? weapon.subWeaponTypes : [];
     };
 
     /**
@@ -252,8 +281,8 @@
         if (slots.length >= 2) {
             if (this.isBothHands()) {
                 // do nothing.
-            } else if (this.isNeedsSubWeapon()) {
-                slots[1] = 1;
+            } else if (subWeaponEquipTypeId && this.isNeedsSubWeapon()) {
+                slots[1] = subWeaponEquipTypeId;
             } else if (this.isDualWield()) {
                 slots[1] = 1;
             }
@@ -352,51 +381,42 @@
         const slots = this.equipSlots();
         const etypeId = slots[slotNo];
         if (item) {
-            if (!this.canEquip(item)) {
-                return false; // 通常の条件判定満たさず。
-            } else if (item.etypeId !== etypeId) { 
+            if (item.etypeId !== etypeId) { 
                 return false; // 装備タイプ対象外
             } else if ((slotNo === 1) && item.meta.bothHands) {
                 return false; // スロット1に両手装備品
-            } else if ((slotNo === 1) && this.isBothHand()) {
+            } else if ((slotNo === 1) && this.isBothHands()) {
                 // 両手の時は2番目のスロットを強制リジェクト。もうちょっとうまいことやりたいね。
                 // これで判定しちゃうと、1番目の装備を外さないといけないから面倒かも。
                 return false; // 両手持ち装備品装着済み。
-            } else if ((slotNo === 1) && this.isNeedsSubWeapon()) {
-                // サブウェポン指定。
-                if (!DataManager.isWeapon(item)) {
-                    return false;
-                } else if (!this.subWeaponTypes().includes(item.wtypeId)) {
-                    return false;
-                }
-            } else if (etypeId === 1) {
-                // 武器指定 wtypeIdをチェックする。
-                if (!DataManager.isWeapon(item)) {
-                    return false;
-                } else if (!this.this.isEquipWtypeOk(item.wtypeId)) {
-                    return false;
-                }
+            } else {
+                return this.canEquip(item);
             }
         }
         return true;
     };
 
-    //------------------------------------------------------------------------------
-    // Window_EquipItem
-
+    const _Game_Actor_isEquipWtypeOk = Game_Actor.prototype.isEquipWtypeOk;
     /**
-     * itemが含まれるかどうかを判定する。
+     * 装備可能な武器タイプかどうかを判定する。
      * 
-     * @param {Object} item アイテム
+     * @param {Number} wtypeId 武器タイプID
+     * @return {Boolean} 装備可能な武器タイプの場合にはtrue, それ以外はfalseが返る。
      */
-    Window_EquipItem.prototype.includes = function(item) {
-        if (item === null) {
-            return true;
-        }
-        if (this._slotId >= 0) {
-            return (this._actor && this._actor.canEquipAtSlot(this._slotId, item));
-        } else {
-            return false;
-        }
+    Game_Actor.prototype.isEquipWtypeOk = function(wtypeId) {
+        return _Game_Actor_isEquipWtypeOk.call(this, wtypeId)
+                || this.subWeaponTypes().includes(wtypeId);
     };
+
+    const _Game_Actor_isEquipChangeOk = Game_Actor.prototype.isEquipChangeOk;
+    /**
+     * slotIdで指定されるスロットが、装備変更可能かどうかを取得する。
+     * 
+     * @param {Number} slotId スロット番号
+     */
+    Game_Actor.prototype.isEquipChangeOk = function(slotId) {
+        return _Game_Actor_isEquipChangeOk.call(this, slotId)
+                && ((slotId !== 1) || !this.isBothHands());
+    };
+
 })();
