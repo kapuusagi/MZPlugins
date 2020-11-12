@@ -1164,7 +1164,7 @@
      * @return {Number} 最大アイテム数
      */
     Game_Party.prototype.getMaxIndependentItemCount = function(item) {
-        const specifiedMaxCount = _Game_Party_maxItems.call(item); // データベース上で指定されている最大数
+        const specifiedMaxCount = _Game_Party_maxItems.call(this, item); // データベース上で指定されている最大数
         const baseItem = DataManager.getBaseItem(item);
         if (DataManager.isItem(baseItem)) {
             const itemInventoryCount = this.useableItemInventoryCount() + this.numItems(baseItem);
