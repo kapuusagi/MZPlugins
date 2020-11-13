@@ -11,6 +11,7 @@
  * @orderAfter Kapu_RangeDistance
  * @orderAfter Kapu_Twld_UI_Menu
  * @orderAfter Kapu_Twld_UI_Status
+ * @orderAfter Kapu_Twld_UI_Equip
  * 
  * @param frontIconId
  * @text 前衛アイコンID
@@ -41,6 +42,30 @@
  * @desc 「後衛」として使用するテキスト。
  * @type string
  * @default 後列
+ * 
+ * @param textRangeDistance
+ * @text 射程ラベル
+ * @desc 「射程」として使用するテキスト。
+ * @type string
+ * @default 射程
+ * 
+ * @param textShortRange
+ * @text 短距離文字列
+ * @desc 射程「短距離」として使用するテキスト
+ * @type string
+ * @default 近接
+ * 
+ * @param textMiddleRange
+ * @text 中距離文字列
+ * @desc 射程「中距離」として使用するテキスト
+ * @type string
+ * @default 中距離
+ * 
+ * @param textLongRange
+ * @text ロングレンジ文字列
+ * @desc 射程「ロングレンジ」として使用するテキスト
+ * @type string
+ * @default 長距離
  * 
  * @help 
  * Kapu_RangeDistanceのUI表現をKapu_BattleSystemに適用するためのプラグイン。
@@ -73,6 +98,24 @@
     const textPosition = parameters["textPosition"] || "Position";
     const textFront = parameters["textFront"] || "Front";
     const textRear = parameters["textRear"] || "Rear";
+    const textRangeDistance = parameters["textRangeDistance"] || "Range";
+    //------------------------------------------------------------------------------
+    // TextManager
+    TextManager._rangeDistance = [];
+    TextManager._rangeDistance[Game_Action.RANGE_SHORT] = parameters["textShortRange"] || "S";
+    TextManager._rangeDistance[Game_Action.RANGE_MIDDLE] = parameters["textMiddleRange"] || "M";
+    TextManager._rangeDistance[Game_Action.RANGE_LONG] = parameters["textLongRange"] || "L";
+    TextManager.rangeDistance = function(range) {
+        return this._rangeDistance[range] || "";
+    };
+    // Object.defineProperties(TextManager, {
+    //     rangeShort:TextManager.rangeDistance(Game_Action.RANGE_SHORT),
+    //     rangeMiddle:TextManager.rangeDistance(Game_Action.RANGE_MIDDLE),
+    //     rangeLong:TextManager.rangeDistance(Game_Action.RANGE_LONG)
+    // });
+    // Object.defineProperty(TextManager, "rangeShort", { configurable:true, get:TextManager.rangeDistance(Game_Action.RANGE_SHORT)});
+    // Object.defineProperty(TextManager, "rangeMiddle", { configurable:true, get:TextManager.rangeDistance(Game_Action.RANGE_SHORT)});
+    // Object.defineProperty(TextManager, "rangeLong", { configurable:true, get:TextManager.rangeDistance(Game_Action.RANGE_SHORT)});
 
     //------------------------------------------------------------------------------
     // Sprite_PositionIcon
@@ -403,6 +446,8 @@
         _Window_MenuStatus_drawItemStatus.call(this, index);
     };
 
+    //------------------------------------------------------------------------------
+    // Window_Status
     /**
      * アクターの位置を描画する。
      * 
@@ -430,7 +475,69 @@
         const textWidth = width - labelWidth - 52;
         const position = (actor.battlePosition() === 0) ? textFront : textRear;
         this.resetTextColor();
-        this.drawText(position, textX, y, textWidth);
-        
-    };    
+        const text = position + "/" + TextManager.rangeDistance(actor.attackRangeDistance());
+        this.drawText(text, textX, y, textWidth);
+    };
+
+    //------------------------------------------------------------------------------
+    // Window_EquipStatus
+    if (Window_EquipStatus.prototype.drawBlock1C) {
+        const _Window_EquipStatus_drawBlock1C = Window_EquipStatus.prototype.drawBlock1C;
+        /**
+         * ステータスブロック1Cを描画する。
+         * 
+         * @param {Number} x 描画位置x
+         * @param {Number} y 描画位置y
+         * @param {Number} width 描画幅
+         */
+        Window_EquipStatus.prototype.drawBlock1C = function(x, y, width) {
+            _Window_EquipStatus_drawBlock1C.call(this, x, y, width);
+            const actor = this._actor;
+            if (!actor) {
+                return;
+            }
+            const tempActor = this._tempActor || actor;
+            const lineHeight = this.lineHeight();
+            this.drawRangeDistance(actor.attackRangeDistance(), tempActor.attackRangeDistance(),
+                x, y + lineHeight * 7, width);
+        };
+        /**
+         * 整数値タイプのパラメータを描画する。
+         * 
+         * @param {Number} value1 値1（現在値）
+         * @param {Number} value2 値2（装備変更値）
+         * @param {Number} x 描画位置x
+         * @param {Number} y 描画位置y
+         * @param {Number} width 幅
+         */
+        Window_EquipStatus.prototype.drawRangeDistance = function(value1, value2, x, y, width) {
+            if (typeof value1 === "undefined") {
+                return;
+            }
+            const paramWidth = Math.min(this.paramWidth(), Math.floor(width * 0.3));
+            const rightArrowWidth = this.rightArrowWidth();
+            const spacing = 16;
+            const valueWidth = (width - paramWidth - rightArrowWidth - spacing * 3) / 2;
+
+            this.changeTextColor(ColorManager.systemColor());
+            this.drawText(textRangeDistance, x, y, paramWidth);
+
+            const value1X = x + paramWidth + spacing;
+            this.resetTextColor();
+            this.drawText(TextManager.rangeDistance(value1), value1X, y, valueWidth, "center");
+
+            if (value1 === value2) {
+                return;
+            }
+            const arrowX = value1X + valueWidth + spacing;
+            this.drawRightArrow(arrowX, y);
+            if (value2 >= value1) {
+                this.changeTextColor(ColorManager.powerUpColor());
+            } else {
+                this.changeTextColor(ColorManager.powerDownColor());
+            }
+            const value2X = arrowX + rightArrowWidth + spacing;
+            this.drawText(TextManager.rangeDistance(value2), value2X, y, valueWidth, "center");
+        };
+    }
 })();

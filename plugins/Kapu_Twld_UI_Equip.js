@@ -3,8 +3,8 @@
  * @plugindesc TWLD向け装備画面プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base 
- * @orderAfter 
+ * @base Kapu_Trait_Penetrate
+ * @orderAfter Kapu_Trait_Penetrate
  * 
  * @param commandWindowWidth
  * @text コマンドウィンドウ幅
@@ -30,11 +30,129 @@
  * @type number[]
  * @default [ "1" ]
  * 
+ * @param textPhyPenetration
+ * @text 物理貫通率ラベル
+ * @desc 「物理貫通率」として使用するラベル。
+ * @type string
+ * @default 物理貫通
+ * 
+ * @param textPhyAttenuation
+ * @text 物理減衰ラベル
+ * @desc 「物理減衰」として使用するラベル。
+ * @type string
+ * @default 物理減衰
+ * 
+ * @param textHit
+ * @text 基本命中ラベル
+ * @desc 「基本命中」として使用するラベル。
+ * @type string
+ * @default 基本命中
+ * 
+ * @param textPhyEvacuation
+ * @text 物理回避ラベル
+ * @desc 「物理回避」として使用するラベル。
+ * @type string
+ * @default 物理回避
+ * 
+ * @param textMagPenetration
+ * @text 魔法貫通ラベル
+ * @desc 「魔法貫通」として使用するラベル。
+ * @type string
+ * @default 魔法貫通
+ * 
+ * @param textMagAttenuation
+ * @text 魔法減衰ラベル
+ * @desc 「魔法減衰」として使用するラベル。
+ * @type string
+ * @default 魔法減衰
+ * 
+ * @param textMagEvacuation
+ * @text 魔法回避ラベル
+ * @desc 「魔法回避」として使用するラベル。
+ * @type string
+ * @default 魔法回避
+ * 
+ * @param textCriticalRate
+ * @text 会心率ラベル
+ * @desc 「会心率」として使用するラベル。
+ * @type string
+ * @default クリティカル率
+ * 
+ * @param textCriticalEvacuation
+ * @text 会心回避ラベル
+ * @desc 「会心回避」として使用するラベル。
+ * @type string
+ * @default クリティカル回避
+ * 
+ * @param textPhyCriDamageRate
+ * @text クリティカル倍率（物）ラベル
+ * @desc 「クリティカル倍率（物）」として使用するラベル。
+ * @type string
+ * @default クリティカル倍率（物）
+ * 
+ * @param textMagCriDamageRate
+ * @text クリティカル倍率（魔）ラベル
+ * @desc 「クリティカル倍率（魔）」として使用するラベル。
+ * @type string
+ * @default クリティカル倍率（魔）
+ * 
+ * @param textAbsorb
+ * @text 吸収属性を表すテキスト
+ * @desc 吸収属性を表すテキスト
+ * @type string
+ * @default 吸収
+ * 
+ * @param elementEntries1
+ * @text 属性表示項目1
+ * @desc 属性表示欄1。
+ * @type struct<elementEntry>[]
+ * 
+ * @param elementEntries2
+ * @text 属性表示項目2
+ * @desc 属性表示欄2。
+ * @type struct<elementEntry>[]
+ * 
+ * @param elementEntries3
+ * @text 属性表示項目3
+ * @desc 属性表示欄3。
+ * @type struct<elementEntry>[]
+ *  
+ * @param elementEntries4
+ * @text 属性表示項目3
+ * @desc 属性表示欄3。
+ * @type struct<elementEntry>[]
+ * 
+ * @param statusParamEntries
+ * @text 追加パラメータ
+ * @desc パラメータウィンドウに追加で標示するパラメータ
+ * @type struct<paramEntry>[]
+ * 
+ * @param colorAbsorb
+ * @text 吸収カラー
+ * @desc 吸収属性の文字の描画に使用する色
+ * @type string
+ * @default rgb(100,255,100)
+ *  
+ * @param colorAttenuation
+ * @text 減衰カラー
+ * @desc 減衰属性の文字の描画に使用する色
+ * @type string
+ * @default rgb(100,180,255)
+ *  
+ * @param colorAmplification
+ * @text 増幅カラー
+ * @desc 増幅属性の文字の描画に使用する色
+ * @type string
+ * @default rgb(255,64,64)
+ * 
  * @help 
+ * 装備画面を提供する。
  * 
  * ■ 使用時の注意
+ * なし
  * 
  * ■ プラグイン開発者向け
+ * なし。
  * 
  * ============================================
  * プラグインコマンド
@@ -50,6 +168,42 @@
  * 変更履歴
  * ============================================
  * Version.0.1.0 TWLD向けに作成したものをベースに作成。動作未確認。
+ */
+/*~struct~elementEntry:
+ *
+ * @param id
+ * @text 属性ID
+ * @desc 標示する属性のID
+ * @type number
+ * 
+ * @param iconId
+ * @text アイコンID
+ * @desc 属性に対応するアイコンID
+ * @type number
+ */
+/*~struct~paramEntry:
+ *
+ * @param label
+ * @text ラベル
+ * @desc パラメータラベルとして使用するテキスト。
+ * @type string
+ * 
+ * @param getter
+ * @text 取得メソッド
+ * @desc パラメータを取得する方法。(actor.cnt等)
+ * @type string
+ * 
+ * @param valueType
+ * @text 値タイプ
+ * @desc 値の標示タイプ
+ * @type select
+ * @option 割合
+ * @value percent
+ * @option 値
+ * @value value
+ * @option フラグ
+ * @value flag
+ * 
  */
 /**
  * Window_EquipActor
@@ -75,6 +229,7 @@ function Window_EquipItemName() {
     const commandWindowWidth = Number(parameters["commandWindowWidth"]) || 240;
     const slotNameWidth = Number(parameters["slotNameWidth"]) || 138;
     const textEmptySlot = parameters["textEmptySlot"] || "";
+    const textAbsorb = parameters["textAbsorb"] || "(Abs)";
     const changeableSlotInBattle = [];
     try {
         const items = JSON.parse(parameters["changeableSlotInBattle"]);
@@ -88,6 +243,74 @@ function Window_EquipItemName() {
     catch (e) {
         console.error(e);
     }
+    const textPhyPenetration = parameters["textPhyPenetration"] || "P.PEN";
+    const textPhyAttenuation = parameters["textPhyAttenuation"] || "DEF.RATE";
+    const textHit = parameters["textHit"] || "HIT";
+    const textPhyEvacuation = parameters["textPhyEvacuation"] || "P.EVA";
+    const textMagPenetration = parameters["textMagPenetration"] || "M.PEN";
+    const textMagAttenuation = parameters["textMagAttenuation"] || "MDF.RATE";
+    const textMagEvacuation = parameters["textMagEvacuation"] || "M.EVA";
+    const textCriticalRate = parameters["textCriticalRate"] || "CRI";
+    const textCriticalEvacuation = parameters["textCriticalEvacuation"] || "CEV";
+    const textPhyCriDamageRate = parameters["textPhyCriDamageRate"] || "P.CDR";
+    const textMagCriDamageRate = parameters["textMagCriDamageRate"] || "M.CDR";
+    const colorAbsorb = parameters["colorAbsorb"] || "rgb(100,255,100)";
+    const colorAttenuation = parameters["colorAttenuation"] || "rgb(100,180,255)";
+    const colorAmplification = parameters["colorAmplification"] || "rgb(255,64,64)";
+
+    /**
+     * 属性エントリ配列を得る。
+     * 
+     * @param {String} value 値
+     * @return {Array<Object>} 属性エントリ配列
+     */
+    const _parseElementEntries = function(value) {
+        const list = [];
+        if (value) {
+            try {
+                const items = JSON.parse(value);
+                for (const item of items) {
+                    const elementEntry = JSON.parse(item);
+                    elementEntry.id = Number(elementEntry.id);
+                    elementEntry.iconId = Number(elementEntry.iconId);
+                    list.push(elementEntry);
+                }
+            }
+            catch (e) {
+                console.error(e);
+            }
+        }
+        return list;
+    }
+
+    const elementEntries1 = _parseElementEntries(parameters["elementEntries1"]);
+    const elementEntries2 = _parseElementEntries(parameters["elementEntries2"]);
+    const elementEntries3 = _parseElementEntries(parameters["elementEntries3"]);
+    const elementEntries4 = _parseElementEntries(parameters["elementEntries4"]);
+    /**
+     * ステータスに表示するカスタムパラメータを得る。
+     * 
+     * @param {String} value 値文字列
+     * @return {Array<StatusParamEntry>} カスタムパラメータエントリ
+     */
+    const _parseStatusParamEntries = function(value) {
+        const list = [];
+        if (value) {
+            try {
+                const items = JSON.parse(value);
+                for (const item of items) {
+                    const entry = JSON.parse(item);
+                    list.push(entry);
+                }
+            }
+            catch (e) {
+                console.error(e);
+            }
+        }
+        return list;
+    };
+
+    const statusParamEntries = _parseStatusParamEntries(parameters["statusParamEntries"]);
 
     // ベーシックシステムでのUI要素
     //   {Window_Help} _helpWindow 装備品の説明表示
@@ -375,6 +598,8 @@ function Window_EquipItemName() {
      */
     Window_EquipStatus.prototype.refresh = function() {
         this.contents.clear();
+        this.drawBlock1();
+        this.drawBlock2();
 
         // よく考えて表示しよう。
         //
@@ -383,6 +608,472 @@ function Window_EquipItemName() {
         // 装備品選択中かどうかは、this._tempActorがnullかどうかで判断できる。
     };
 
+    /**
+     * ブロック1を描画する。
+     */
+    Window_EquipStatus.prototype.drawBlock1 = function() {
+        const rect = this.block1Rect();
+        const lineHeight = this.lineHeight();
+        const spacing = 16;
+        const itemWidth = Math.floor((rect.width - spacing * 3) / 3);
+        const x1 = rect.x;
+        const x2 = x1 + itemWidth + spacing;
+        const x3 = x2 + itemWidth + spacing;
+        this.drawBlock1A(x1, rect.y, itemWidth);
+        this.drawBlock1B(x2, rect.y, itemWidth);
+        this.drawBlock1C(x3, rect.y, itemWidth);
+        this.resetTextColor();
+        this.drawHorzLine(rect.x, rect.y + lineHeight * 8, rect.width);
+    };
+
+
+    /**
+     * ステータスブロック1Aを描画する。
+     * 
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     */
+    Window_EquipStatus.prototype.drawBlock1A = function(x, y, width) {
+        const actor = this._actor;
+        if (!actor) {
+            return;
+        }
+        const tempActor = this._tempActor || actor;
+        const lineHeight = this.lineHeight();
+        this.drawParamValue(TextManager.param(0), actor.mhp, tempActor.mhp,
+                x, y + lineHeight * 0, width);
+        this.drawParamValue(TextManager.param(1), actor.mmp, tempActor.mmp,
+                x, y + lineHeight * 1, width);
+        this.drawParamValue(TextManager.param(2), actor.atk, tempActor.atk,
+                x, y + lineHeight * 2, width);
+        this.drawParamRate(textPhyPenetration, actor.penetratePDR(), tempActor.penetratePDR(),
+                x, y + lineHeight * 3, width);
+        this.drawParamValue(TextManager.param(3), actor.def, tempActor.def,
+                x, y + lineHeight * 4, width);
+        this.drawParamRate(textPhyAttenuation, 1 - actor.pdr, 1 - tempActor.pdr,
+                x, y + lineHeight * 5, width);
+        this.drawParamRate(textHit, actor.hit, tempActor.hit,
+                x, y + lineHeight * 6, width);
+        this.drawParamRate(textPhyEvacuation, actor.eva, tempActor.eva,
+                x, y + lineHeight * 7, width);
+    };
+    /**
+     * ステータスブロック1Bを描画する。
+     * 
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     */
+    Window_EquipStatus.prototype.drawBlock1B = function(x, y, width) {
+        const actor = this._actor;
+        if (!actor) {
+            return;
+        }
+        const tempActor = this._tempActor || actor;
+        const lineHeight = this.lineHeight();
+        this.drawParamValue(TextManager.tpA, actor.maxTp(), tempActor.maxTp(),
+                x, y + lineHeight * 0, width);
+        this.drawParamValue(TextManager.param(3), actor.mat, tempActor.mat,
+                x, y + lineHeight * 2, width);
+        this.drawParamRate(textMagPenetration, actor.penetrateMDR(), tempActor.penetrateMDR(),
+                x, y + lineHeight * 3, width);
+        this.drawParamValue(TextManager.param(4), actor.mdf, tempActor.mdf,
+                x, y + lineHeight * 4, width);
+        this.drawParamRate(textMagAttenuation, 1 - actor.mdr, 1 - tempActor.mdr,
+                x, y + lineHeight * 5, width);
+       this.drawParamRate(textMagEvacuation, actor.mev, tempActor.mev,
+                x, y + lineHeight * 7, width);
+    };
+    /**
+     * ステータスブロック1Cを描画する。
+     * 
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     */
+    Window_EquipStatus.prototype.drawBlock1C = function(x, y, width) {
+        const actor = this._actor;
+        if (!actor) {
+            return;
+        }
+        const tempActor = this._tempActor || actor;
+        const lineHeight = this.lineHeight();
+        this.drawParamRate(textCriticalRate, actor.cri, tempActor.cri,
+                x, y + lineHeight * 2, width);
+        this.drawParamRate(textCriticalEvacuation, actor.cev, tempActor.cev,
+                x, y + lineHeight * 3, width);
+        this.drawParamRate(textPhyCriDamageRate, actor.pcdr, tempActor.pcdr, 
+                x, y + lineHeight * 4, width);
+        this.drawParamRate(textMagCriDamageRate, actor.mcdr, tempActor.mcdr,
+                x, y + lineHeight * 5, width);
+    };
+
+    /**
+     * ブロック1の描画領域を得る。
+     * 
+     * @return {Rectangle} 描画領域。
+     */
+     Window_EquipStatus.prototype.block1Rect = function() {
+        const x = 0;
+        const y = 0;
+        const w = this.innerWidth;
+        const h = this.lineHeight() * 8 + 16;
+        return new Rectangle(x, y, w, h);
+     };
+
+     /**
+      * ブロック2を描画する。
+      */
+     Window_EquipStatus.prototype.drawBlock2 = function() {
+         if (!this._actor) {
+             return;
+         }
+         if (this._tempActor) {
+            // 装備変更対象選択中はステータス差分のみ表示する。
+            this.drawBlock2DiffOnly();
+         } else {
+            this.drawBlock2Normal();
+         }
+     };
+
+     /**
+      * ブロック2を描画する。
+      * 
+      * Note: 属性耐性レートのみ記載。
+      */
+     Window_EquipStatus.prototype.drawBlock2Normal = function() {
+        const rect = this.block2Rect();
+        const spacing = 16;
+        const itemWidth = Math.floor((rect.width - spacing * 4) / 4);
+        const x1 = rect.x;
+        const x2 = x1 + itemWidth + spacing;
+        const x3 = x2 + itemWidth + spacing;
+        const x4 = x3 + itemWidth + spacing;
+        this.drawElementRates(x1, rect.y, itemWidth, elementEntries1);
+        this.drawElementRates(x2, rect.y, itemWidth, elementEntries2);
+        this.drawElementRates(x3, rect.y, itemWidth, elementEntries3);
+        this.drawElementRates(x4, rect.y, itemWidth, elementEntries4);
+    };
+    /**
+     * 属性レート配列を描画する。
+     * 
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 描画幅
+     * @param {Array<Object>} 属性エントリ配列
+     */
+    Window_EquipStatus.prototype.drawElementRates = function(x, y, width, elementEntries) {
+        const lineHeight = this.lineHeight();
+        for (let i = 0; i < elementEntries.length; i++) {
+            const entry = elementEntries[i];
+            this.drawElementRate(entry, this._actor, x, y + lineHeight * i, width);
+        }
+    };
+    /**
+     * 属性レートのパラメータを描画する。
+     * 
+     * @param {Object} entry 属性エントリ
+     * @param {Game_Actor} actor アクター
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 幅
+     */
+    Window_EquipStatus.prototype.drawElementRate = function(entry, actor, x, y, width) {
+        if (!actor) {
+            return;
+        }
+        if ((entry.id <= 0) && (entry.id >= $dataSystem.elements.length)) {
+            return;
+        }
+
+        this.drawIcon(entry.iconId, x, y);
+
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        const elementName = $dataSystem.elements[entry.id];
+        const labelWidth = Math.min(this.paramWidth(), Math.floor((width - 40) * 0.3));
+        this.drawText(elementName, x + 40, y, labelWidth);
+        
+        const valueWidth = width - 40 - labelWidth;
+        const elementRate = actor.elementRate(entry.id);
+
+        const rateStr = this.elementRateStr(elementRate);
+
+        if (elementRate < 0) {
+            this.changeTextColor(colorAbsorb);
+        } else if (elementRate === 0) {
+            this.changePaintOpacity(false);
+        } else if (elementRate < 1) {
+            this.changeTextColor(colorAttenuation);
+        } else if (elementRate > 1) {
+            this.changeTextColor(colorAmplification);
+        } else {
+            this.resetTextColor();
+        }
+        this.drawText(rateStr, x + 40 + labelWidth, y, valueWidth);
+        this.changePaintOpacity(true);
+    };
+
+    /**
+     * ブロック2を描画する。
+     */
+    Window_EquipStatus.prototype.drawBlock2DiffOnly = function() {
+        const lineHeight = this.lineHeight();
+        const rect = this.block2Rect();
+        const spacing = 16;
+        const itemWidth = Math.floor((rect.width - spacing * 4) / 4);
+        const paramItems = this.diffParams();
+        let x = rect.x;
+        let line = 0;
+        for (const paramItem of paramItems) {
+            this.drawParamItem(paramItem, x, rect.y + lineHeight * line, itemWidth);
+            x += (itemWidth + spacing);
+            if (x >= (rect.x + rect.width)) {
+                x = rect.x;
+                line++;
+                if (line >= maxLineCount) {
+                    break; // これ以上表示できない。
+                }
+            }
+        }
+    };
+
+    /**
+     * 相違があるパラメータを抽出して返す。
+     * 
+     * @return {Array<Object>} 相違パラメータの配列
+     */
+    Window_EquipStatus.prototype.diffParams = function() {
+        let paramItems = [];
+        paramItems = paramItems.concat(this.diffParamsOfElements());
+        paramItems = paramItems.concat(this.diffParamsOfCustom());
+        return paramItems;
+    };
+
+    /**
+     * 属性レートの変化パラメータを得る。
+     * 
+     * @return {Array<Object>} 相違パラメータの配列
+     */
+    Window_EquipStatus.prototype.diffParamsOfElements = function() {
+        let elementIds = [];
+        elementIds = elementIds.concat(elementEntries1.map(entry => entry.id));
+        elementIds = elementIds.concat(elementEntries2.map(entry => entry.id));
+        elementIds = elementIds.concat(elementEntries3.map(entry => entry.id));
+        elementIds = elementIds.concat(elementEntries4.map(entry => entry.id));
+
+        const paramItems = [];
+        for (const elementId of elementIds) {
+            const rate1 = this._actor.elementRate(elementId);
+            const rate2 = this._tempActor.elementRate(elementId);
+            if (rate1 !== rate2) {
+                const paramItem = {};
+                paramItem.label = $dataSystem.elements[elementId];
+                paramItem.value1 = this.elementRateStr(rate1);
+                paramItem.value2 = this.elementRateStr(rate2);
+                paramItem.color = (rate2 < rate1) ? ColorManager.powerUpColor() : ColorManager.powerDownColor();
+                paramItems.push(paramItem);
+            }
+        }
+
+        return paramItems;
+    };
+
+    /**
+     * 属性レートを文字列に変換する。
+     * 
+     * @param {Number} rate 割合
+     * @return {String} 割合を表す文字列
+     */
+    Window_EquipStatus.prototype.elementRateStr = function(rate) {
+        return (rate >= 0)
+            ? (Math.floor(rate * 1000) / 10) + "%"
+            : ((Math.floor(-rate * 1000) / 10) + "%" + textAbsorb);
+    };
+
+    /**
+     * カスタム相違パラメータを得る。
+     * 
+     * @return {Array<Object>} 相違パラメータの配列
+     */
+    Window_EquipStatus.prototype.diffParamsOfCustom = function() {
+        const paramItems = [];
+        for (const paramEntry of statusParamEntries) {
+            if (paramEntry.getter) {
+                let value1 = this.getCustomParam(paramEntry, this._actor);
+                let value2 = this.getCustomParam(paramEntry, this._tempActor);
+                if (value1 !== value2) {
+                    const paramItem = {};
+                    if (paramEntry.valueType === "percent") {
+                        paramItem.label = paramEntry.label;
+                        const rate1Str = (Math.floor(value1 * 1000) / 10) + "%";
+                        paramItem.value1 = (value1 >= 0) ? "+" + rate1Str : rate1Str;
+                        const rate2Str = (Math.floor(value2 * 1000) / 10) + "%";
+                        paramItem.value2 = (value2 >= 0) ? "+" + rate2Str : rate2Str;
+                        paramItem.color = (value2 > value1) ? ColorManager.powerUpColor() : ColorManager.powerDownColor();
+                    } else if (paramEntry.valueType === "flag") {
+                        paramItem.label = "";
+                        paramItem.value1 = (value1) ? paramEntry.label : "";
+                        paramItem.value2 = (value2) ? paramEntry.label : "";
+                        paramItem.color = (value2 && !value1) ? ColorManager.powerUpColor() : ColorManager.powerDownColor();
+                    } else {
+                        paramItem.label = paramEntry.label;
+                        paramItem.value = (value >= 0) ? "+" + value : value;
+                        paramItem.color = (value2 > value1) ? ColorManager.powerUpColor() : ColorManager.powerDownColor();
+                    }
+                    paramItems.push(paramItem);
+                }
+            }
+        }
+
+        return paramItems;
+    };
+
+    Window_EquipStatus.prototype.getCustomParam = function(paramEntry, actor) {
+        try {
+            const a = actor; // eslint-disable-line no-unused-vars
+            return eval(paramEntry.getter);
+        }
+        catch (e) {
+            return 0;
+        }
+    };
+    /**
+     * パラメータを描画する。
+     * 
+     * @param {Object} paramItem パラメータ
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     */
+    Window_EquipStatus.prototype.drawParamItem = function(paramItem, x, y, width) {
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        const labelWidth = Math.min(this.paramWidth(), Math.floor(width * 0.2));
+        const rightArrowWidth = this.rightArrowWidth();
+        this.drawText(paramItem.label, x, y, labelWidth);
+        this.resetTextColor();
+        const spacing = 16;
+        const valueWidth = Math.floor((width - labelWidth - rightArrowWidth - spacing * 3) / 2);
+        const value1X = x + labelWidth + spacing;
+        this.drawText(paramItem.value1, value1X, y, valueWidth);
+        const arrowX = value1X + valueWidth + spacing;
+        this.drawRightArrow(arrowX, y);
+        const value2X = arrowX + rightArrowWidth + spacing;
+        this.changeTextColor(paramItem.color);
+        this.drawText(paramItem.value2, value2X, y, valueWidth);
+    };
+
+     /**
+      * ブロック2の描画領域を得る。
+      * 
+      * @return {Rectangle} 描画領域
+      */
+     Window_EquipStatus.prototype.block2Rect = function() {
+        const rect = this.block1Rect();
+        const x = 0;
+        const y = rect.y + rect.height;
+        const w = this.innerWidth;
+        const h = this.innerHeight - rect.height;
+        return new Rectangle(x, y, w, h);
+     }
+
+    /**
+     * 整数値タイプのパラメータを描画する。
+     * 
+     * @param {String} paramName パラメータ名
+     * @param {Number} value1 値1（現在値）
+     * @param {Number} value2 値2（装備変更値）
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 幅
+     */
+    Window_EquipStatus.prototype.drawParamValue = function(paramName, value1, value2, x, y, width) {
+        if (typeof value1 === "undefined") {
+            return;
+        }
+        const paramWidth = Math.min(this.paramWidth(), Math.floor(width * 0.3));
+        const rightArrowWidth = this.rightArrowWidth();
+        const spacing = 16;
+        const valueWidth = (width - paramWidth - rightArrowWidth - spacing * 3) / 2;
+
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(paramName, x, y, paramWidth);
+
+        const value1X = x + paramWidth + spacing;
+        this.resetTextColor();
+        this.drawText(value1 + " ", value1X, y, valueWidth, "right");
+
+        if (value1 === value2) {
+            return;
+        }
+        const arrowX = value1X + valueWidth + spacing;
+        this.drawRightArrow(arrowX, y);
+        if (value2 >= value1) {
+            this.changeTextColor(ColorManager.powerUpColor());
+        } else {
+            this.changeTextColor(ColorManager.powerDownColor());
+        }
+        const value2X = arrowX + rightArrowWidth + spacing;
+        this.drawText(value2 + " ", value2X, y, valueWidth, "right");
+    };
+
+    /**
+     * 割合タイプのパラメータを描画する。
+     * 
+     * @param {String} paramName パラメータ名
+     * @param {Number} value1 値1（現在値）
+     * @param {Number} value2 値2（装備変更値）
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 幅
+     */
+    Window_EquipStatus.prototype.drawParamRate = function(paramName, value1, value2, x, y, width) {
+        if (typeof value1 === "undefined") {
+            return;
+        }
+        const paramWidth = Math.min(this.paramWidth(), Math.floor(width * 0.3));
+        const rightArrowWidth = this.rightArrowWidth();
+        const spacing = 16;
+        const valueWidth = (width - paramWidth - rightArrowWidth - spacing * 3) / 2;
+
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(paramName, x, y, paramWidth);
+
+        const value1X = x + paramWidth + spacing;
+        this.resetTextColor();
+        const value1Str = (Math.floor(value1 * 1000) / 10) + "%";
+        this.drawText(value1Str, value1X, y, valueWidth, "right");
+
+        if (value1 === value2) {
+            return;
+        }
+        const arrowX = value1X + valueWidth + spacing;
+        this.drawRightArrow(arrowX, y);
+        if (value2 >= value1) {
+            this.changeTextColor(ColorManager.powerUpColor());
+        } else {
+            this.changeTextColor(ColorManager.powerDownColor());
+        }
+        const value2X = arrowX + rightArrowWidth + spacing;
+        const value2Str = (Math.floor(value2 * 1000) / 10) + "%";
+        this.drawText(value2Str, value2X, y, valueWidth, "right");
+    };
+
+
+    /**
+     * 水平ラインを描画する。
+     * 
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 幅
+     */
+    Window_EquipStatus.prototype.drawHorzLine = function(x, y, width) {
+        this.changePaintOpacity(false);
+        this.drawRect(x, y + 5, width, 5);
+        this.changePaintOpacity(true);
+    };
     // /**
     //  * 表示を更新する。
     //  */

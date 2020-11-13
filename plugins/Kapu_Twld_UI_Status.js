@@ -141,12 +141,6 @@
  * @type string
  * @default クリティカル倍率（魔）
  * 
- * @param textGuardDamageRate
- * @text 防御時軽減率ラベル
- * @desc 「防御時ダメージ軽減率」として使用するラベル。
- * @type string
- * @default 防御軽減率
- * 
  * @param textAbsorb
  * @text 吸収属性を表すテキスト
  * @desc 吸収属性を表すテキスト
@@ -293,6 +287,8 @@
  * @value percent
  * @option 値
  * @value value
+ * @option フラグ
+ * @value flag
  * 
  */
 
@@ -347,7 +343,6 @@ function Window_StatusProfile() {
     const textCriticalEvacuation = parameters["textCriticalEvacuation"] || "CEV";
     const textPhyCriDamageRate = parameters["textPhyCriDamageRate"] || "P.CDR";
     const textMagCriDamageRate = parameters["textMagCriDamageRate"] || "M.CDR";
-    const textGuardDamageRate = parameters["textGuardDamageRate"] || "GRD";
     const textEmptySlot = parameters["textEmptySlot"] || "";
     const textAbsorb = parameters["textAbsorb"] || "(Abs)";
     const colorAbsorb = parameters["colorAbsorb"] || "rgb(100,255,100)";
@@ -382,6 +377,12 @@ function Window_StatusProfile() {
     const elementEntries3 = _parseElementEntries(parameters["elementEntries3"]);
     const elementEntries4 = _parseElementEntries(parameters["elementEntries4"]);
 
+    /**
+     * ステータスに表示するカスタムパラメータを得る。
+     * 
+     * @param {String} value 値文字列
+     * @return {Array<StatusParamEntry>} カスタムパラメータエントリ
+     */
     const _parseStatusParamEntries = function(value) {
         const list = [];
         if (value) {
@@ -400,6 +401,12 @@ function Window_StatusProfile() {
     };
 
     const statusParamEntries = _parseStatusParamEntries(parameters["statusParamEntries"]);
+    /**
+     * 整数値配列を得る。
+     * 
+     * @param {String} value 値文字列
+     * @return {Array<Number>} 値配列
+     */
     const _parseIntegerArray = function(value) {
         const array = [];
         if (value) {
@@ -689,8 +696,10 @@ function Window_StatusProfile() {
         const lineHeight = this.lineHeight();
         this.drawParamValue(TextManager.param(2), actor.atk, noEquipActor.atk,
                 x, y + lineHeight * 0, width);
-        this.drawParamRate(textPhyPenetration, actor.penetratePDR(), noEquipActor.penetratePDR(),
-                x, y + lineHeight * 1, width);
+        if ("penetratePDR" in actor) {
+            this.drawParamRate(textPhyPenetration, actor.penetratePDR(), noEquipActor.penetratePDR(),
+                    x, y + lineHeight * 1, width);
+        }
         this.drawParamValue(TextManager.param(3), actor.def, noEquipActor.def,
                 x, y + lineHeight * 2, width);
         this.drawParamRate(textPhyAttenuation, 1 - actor.pdr, 1 - noEquipActor.pdr,
@@ -716,13 +725,15 @@ function Window_StatusProfile() {
         const lineHeight = this.lineHeight();
         this.drawParamValue(TextManager.param(3), actor.mat, noEquipActor.mat,
                 x, y + lineHeight * 0, width);
-        this.drawParamRate(textMagPenetration, actor.penetrateMDR(), noEquipActor.penetrateMDR(),
-                x, y + lineHeight * 1, width);
+        if ("penetrateMDR" in actor) {
+            this.drawParamRate(textMagPenetration, actor.penetrateMDR(), noEquipActor.penetrateMDR(),
+                    x, y + lineHeight * 1, width);
+        }
         this.drawParamValue(TextManager.param(4), actor.mdf, noEquipActor.mdf,
                 x, y + lineHeight * 2, width);
         this.drawParamRate(textMagAttenuation, 1 - actor.mdr, 1 - noEquipActor.mdr,
                 x, y + lineHeight * 3, width);
-       this.drawParamRate(textMagEvacuation, actor.mev, noEquipActor.mev,
+        this.drawParamRate(textMagEvacuation, actor.mev, noEquipActor.mev,
                 x, y + lineHeight * 5, width);
     };
     /**
@@ -747,8 +758,6 @@ function Window_StatusProfile() {
                 x, y + lineHeight * 2, width);
         this.drawParamRate(textMagCriDamageRate, actor.mcdr, noEquipActor.mcdr,
                 x, y + lineHeight * 3, width);
-        this.drawParamRate(textGuardDamageRate, actor.grd - 1, noEquipActor.grd - 1,
-            x, y + lineHeight * 5, width);
     };
 
     /**
@@ -1189,6 +1198,15 @@ function Window_StatusProfile() {
         }
     };
 
+    /**
+     * ステータスラベルの幅を得る。
+     * 
+     * @return {Number} ステータスラベルの幅
+     */
+    Window_Status.prototype.statusLabelWidth = function() {
+        return statusLabelWidth;
+    };
+
     //------------------------------------------------------------------------------
     // Window_StatusParams
     Window_StatusParams.prototype.refresh = function() {
@@ -1335,10 +1353,13 @@ function Window_StatusProfile() {
             let line = 0;
             for (const paramItem of paramItems) {
                 this.drawParamItem(paramItem, x, rect.y + lineHeight * line, itemWidth);
-                line++;
-                if (line >= maxLineCount) {
-                    x += (itemWidth + spacing);
-                    line = 0;
+                x += (itemWidth + spacing);
+                if (x >= (rect.x + rect.width)) {
+                    x = rect.x;
+                    line++;
+                    if (line >= maxLineCount) {
+                        break; // これ以上表示できない。
+                    }
                 }
             }
         }
@@ -1364,6 +1385,8 @@ function Window_StatusProfile() {
                     if (paramEntry.valueType === "percent") {
                         const rateStr = (Math.floor(value * 1000) / 10) + "%"
                         paramItem.value = (value >= 0) ? "+" + rateStr : rateStr;
+                    } else if (paramEntry.valueType === "flag") {
+                        paramItem.value = "";
                     } else {
                         paramItem.value = (value >= 0) ? "+" + value : value;
                     }

@@ -169,6 +169,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 ステータス表示用に、Game_BattlerBaseに通常攻撃射程を得るインタフェースを追加した。
  * Version.0.2.0 射程2のスキル使用時はカウンターを受けないようにした。
  * Version.0.1.1 各特性について、ID未指定時は動作しないように変更した。
  * Version.0.1.0 作成した。
@@ -785,6 +786,17 @@
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.defaultRangeDistance = function(item) {
         return Game_Action.RANGE_SHORT;
+    };
+
+    /**
+     * 通常攻撃射程を得る
+     * 
+     * @return {Number} 通常攻撃射程
+     */
+    Game_BattlerBase.prototype.attackRangeDistance = function() {
+        const attackSkillId = this.attackSkillId();
+        const attackSkill = $dataSkills[attackSkillId];
+        return this.itemRangeDistance(attackSkill);
     };
 
     /**
