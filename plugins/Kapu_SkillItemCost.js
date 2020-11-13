@@ -12,6 +12,7 @@
  * 例えば弓装備して矢を消費するとかできる。
  * 
  * ■ 使用時の注意
+ * 特になし。
  * 
  * ■ プラグイン開発者向け
  * 装備品も含めて消費します。
@@ -25,23 +26,23 @@
  * ノートタグ
  * ============================================
  * スキル
- *   <consumeItem:item(id#))>
+ *   <consumeItem:item(id#)>
  *     id#のアイテムを1つ消費する。
- *   <consumeItem:item(id#)),num#>
+ *   <consumeItem:item(id#),num#>
  *     id#のアイテムをnum#数だけ消費する。
- *   <consumeItem:weapon(id#))>
+ *   <consumeItem:weapon(id#)>
  *     id#の武器を1つ消費する。
- *   <consumeItem:weapon(id#)),num#>
+ *   <consumeItem:weapon(id#),num#>
  *     id#の武器をnum#だけ消費する。
- *   <consumeItem:equipped(id#))>
+ *   <consumeItem:equipped(id#)>
  *     id#のスロットタイプに装備したアイテムを1つ消費する。
- *   <consumeItem:equipped(id#)),num#>
+ *   <consumeItem:equipped(id#),num#>
  *     id#のスロットタイプに装備したアイテムをnum#消費する。
  * 
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 (() => {
     //const pluginName = "Kapu_SkillItemCost";
@@ -59,19 +60,19 @@
             if (tokens.length >= 1) {
                 let re;
                 if ((re = tokens[0].match(/weapon\((\d+)\)/)) !== null) {
-                    const weaponId = re[1];
+                    const weaponId = Number(re[1]) || 0;
                     const num = (tokens.length >= 2) ? Number(tokens[1]) : 1;
                     if ((weaponId > 0) && (weaponId < $dataWeapons.length) && (num >= 0)) {
                         obj.itemCost = { kind:2, id:weaponId, num:num };
                     }
                 } else if ((re = tokens[0].match(/item\((\d+)\)/)) !== null) {
-                    const itemId = re[1];
+                    const itemId = Number(re[1]) || 0;
                     const num = (tokens.length >= 2) ? Number(tokens[1]) : 1;
                     if ((itemId > 0) && (itemId < $dataWeapons.length) && (num >= 0)) {
                         obj.itemCost = { kind:1, id:itemId, num:num };
                     }
                 } else if ((re = tokens[0].match(/equipped\((\d+)\)/)) !== null) {
-                    const equipType = re[1];
+                    const equipType = Number(re[1]) || 0;
                     const num = (tokens.length >= 2) ? Number(tokens[1]) : 1;
                     if (num >= 0) {
                         obj.itemCost = { kind:100, id:equipType, num:num };
