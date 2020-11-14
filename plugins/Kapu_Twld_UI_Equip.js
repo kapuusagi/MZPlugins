@@ -312,20 +312,8 @@ function Window_EquipItemName() {
 
     const statusParamEntries = _parseStatusParamEntries(parameters["statusParamEntries"]);
 
-    // ベーシックシステムでのUI要素
-    //   {Window_Help} _helpWindow 装備品の説明表示
-    //   {Window_EquipStatus} _statusWindow 装備したときのステータスの変化を表示する。
-    //   {Window_EquipCommand} _commandWindow 装備/最適/解除などを選択するウィンドウ
-    //   {Window_EquipSlot} _slotWindow 多分装備スロットと装備品を表示するウィンドウ。
-    //   {Window_EquipItem} _itemWindow 変更対象のアイテムを選択させるウィンドウ
-
-    // TWLDでの設計方針
-    // ステータスがてんこ盛りなので、わかりやすいやつだけ分離したい。
-    // Note:パラメータ名はTextManagerで管理した方がいいなあ。
-
     //------------------------------------------------------------------------------
     // Window_EquipActor
-    // 
 
     Window_EquipActor.prototype = Object.create(Window_Base.prototype);
     Window_EquipActor.prototype.constructor = Window_EquipActor;
@@ -819,10 +807,11 @@ function Window_EquipItemName() {
      * ブロック2を描画する。
      */
     Window_EquipStatus.prototype.drawBlock2DiffOnly = function() {
-        const lineHeight = this.lineHeight();
         const rect = this.block2Rect();
+        const lineHeight = this.lineHeight();
+        const maxLineCount = Math.floor(rect.height / lineHeight);
         const spacing = 16;
-        const itemWidth = Math.floor((rect.width - spacing * 4) / 4);
+        const itemWidth = Math.floor((rect.width - spacing * 3) / 3);
         const paramItems = this.diffParams();
         let x = rect.x;
         let line = 0;
@@ -907,10 +896,8 @@ function Window_EquipItemName() {
                     const paramItem = {};
                     if (paramEntry.valueType === "percent") {
                         paramItem.label = paramEntry.label;
-                        const rate1Str = (Math.floor(value1 * 1000) / 10) + "%";
-                        paramItem.value1 = (value1 >= 0) ? "+" + rate1Str : rate1Str;
-                        const rate2Str = (Math.floor(value2 * 1000) / 10) + "%";
-                        paramItem.value2 = (value2 >= 0) ? "+" + rate2Str : rate2Str;
+                        paramItem.value1 = (Math.floor(value1 * 1000) / 10) + "%";
+                        paramItem.value2 = (Math.floor(value2 * 1000) / 10) + "%";
                         paramItem.color = (value2 > value1) ? ColorManager.powerUpColor() : ColorManager.powerDownColor();
                     } else if (paramEntry.valueType === "flag") {
                         paramItem.label = "";
@@ -930,6 +917,13 @@ function Window_EquipItemName() {
         return paramItems;
     };
 
+    /**
+     * paramEntryで指定されるパラメータを得る。
+     * 
+     * @param {Object} paramEntry パラメータエントリ
+     * @param {Game_Actor} actor アクター
+     * @return {Number} 値
+     */
     Window_EquipStatus.prototype.getCustomParam = function(paramEntry, actor) {
         try {
             const a = actor; // eslint-disable-line no-unused-vars
@@ -950,7 +944,7 @@ function Window_EquipItemName() {
     Window_EquipStatus.prototype.drawParamItem = function(paramItem, x, y, width) {
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());
-        const labelWidth = Math.min(this.paramWidth(), Math.floor(width * 0.2));
+        const labelWidth = Math.floor(width * 0.3);
         const rightArrowWidth = this.rightArrowWidth();
         this.drawText(paramItem.label, x, y, labelWidth);
         this.resetTextColor();
@@ -1074,162 +1068,7 @@ function Window_EquipItemName() {
         this.drawRect(x, y + 5, width, 5);
         this.changePaintOpacity(true);
     };
-    // /**
-    //  * 表示を更新する。
-    //  */
-    // Window_EquipStatus.prototype.refresh = function() {
-    //     this.contents.clear();
-    //     if (this._actor === null) {
-    //         return;
-    //     }
 
-    //     var padding = this.standardPadding();
-    //     var x = padding;
-    //     var y = padding;
-    //     var blockWidth = Math.floor((this.contentsWidth() - padding) / 2);
-
-    //     // 1列目のステータスA描画
-    //     this.drawBlock1(x, y);
-    //     // 1列目のステータスB描画
-    //     this.drawBlock2(x, y + this.lineHeight() * 6 + 8);
-    //     // 2列目のステータス描画
-    //     this.drawBlock3(x + blockWidth + padding, y);
-    // };
-
-    // /**
-    //  * 1列目パラメータ
-    //  */
-    // Window_EquipStatus.prototype.drawBlock1 = function(x, y) {
-    //     var lineHeight = this.lineHeight();
-    //     var actor1 = this._actor;
-    //     var actor2 = this._tempActor;
-    //     var paramList = [
-    //         { name:'HP',   get:function(a) { return a.mhp; } },
-    //         { name:'MP',   get:function(a) { return a.mmp; } },
-    //         { name:'ATK',  get:function(a) { return a.atk; } },
-    //         { name:'MATK', get:function(a) { return a.mat; } },
-    //         { name:'DEF',  get:function(a) { return a.def; } },
-    //         { name:'MDEF', get:function(a) { return a.mdf; } },
-    //     ];
-
-    //     for (var i = 0; i < paramList.length; i++) {
-    //         var param = paramList[i];
-    //         if (param !== null) {
-    //             this.drawValueParam(param, actor1, actor2, x, y + lineHeight * i);
-    //         }
-    //     }
-    // };
-    // /**
-    //  * 2列目パラメータ
-    //  */
-    // Window_EquipStatus.prototype.drawBlock2 = function(x, y) {
-    //     var lineHeight = this.lineHeight();
-    //     var actor1 = this._actor;
-    //     var actor2 = this._tempActor;
-    //     var paramList = [
-    //         { name:'STR',  get:function(a) { return a.str; } },
-    //         { name:'DEX',  get:function(a) { return a.dex; } },
-    //         { name:'VIT',  get:function(a) { return a.vit; } },
-    //         { name:'INT',  get:function(a) { return a.int; } },
-    //         { name:'AGI',  get:function(a) { return a.agi; } },
-    //         { name:'LUK',  get:function(a) { return a.luk; } },
-    //     ];
-
-    //     for (var i = 0; i < paramList.length; i++) {
-    //         var param = paramList[i];
-    //         if (param !== null) {
-    //             this.drawValueParam(param, actor1, actor2, x, y + lineHeight * i);
-    //         }
-    //     }
-    // };
-    // /**
-    //  * 数値パラメータを描画する。
-    //  * @param {} 表示パラメータ
-    //  * @param {Game_Actor} 現在のアクター
-    //  * @param {Game_Actor} 装備後アクター
-    //  * @param {Number} x x位置
-    //  * @param {Number} y y位置
-    //  */
-    // Window_EquipStatus.prototype.drawValueParam = function(param, actor1, actor2, x, y) {
-    //     this.changeTextColor(this.systemColor());
-    //     this.drawText(param.name, x, y, 48);
-    //     this.resetTextColor();
-    //     var current = param.get(actor1);
-    //     this.drawText(current, x + 52, y, 80, 'right');
-
-    //     if (actor2 !== null) {
-    //         var after = param.get(actor2);
-    //         if (current !== after) {
-    //             // 変化があるときだけ描画
-    //             this.drawRightArrow(x + 138, y);
-    //             if (after > current) {
-    //                 this.changeTextColor(this.powerUpColor());
-    //             } else {
-    //                 this.changeTextColor(this.powerDownColor());
-    //             }
-    //             this.drawText(after, x + 150, y, 80, 'right');
-    //         }            
-    //     }
-    // };
-
-    // /**
-    //  * 3列目パラメータ
-    //  */
-    // Window_EquipStatus.prototype.drawBlock3 = function(x, y) {
-    //     var lineHeight = this.lineHeight();
-    //     var actor1 = this._actor;
-    //     var actor2 = this._tempActor;
-    //     var paramList = [
-    //         { name:'PPR', get:function(a) { return a.ppr; } },
-    //         { name:'PDRR', get:function(a) { return 1 - a.pdr; } },
-    //         { name:'MPR', get:function(a) { return a.mpr; } },
-    //         { name:'MDRR', get:function(a) { return 1 - a.mdr; } },
-    //         null,
-    //         { name:'HIT', get:function(a) { return a.hit; } },
-    //         { name:'EVA', get:function(a) { return a.eva; } },
-    //         { name:'MEVA', get:function(a) { return a.mev; } },
-    //         { name:'CRI', get:function(a) { return a.cri; } },
-    //         { name:'CRR', get:function(a) { return a.pcr - TWLD.Core.BasicCriticalRate; }  },
-    //         { name:'MCRR', get:function(a) { return a.mcrr - TWLD.Core.BasicCriticalRate; }},
-    //     ];
-    //     for (var i = 0; i < paramList.length; i++) {
-    //         var param = paramList[i];
-    //         if (param !== null) {
-    //             this.drawRateParam(param, actor1, actor2, x, y + lineHeight * i);
-    //         }
-    //     }
-    // };
-
-    // /**
-    //  * 確率パラメータを描画する。
-    //  * @param {} 表示パラメータ
-    //  * @param {Game_Actor} 現在のアクター
-    //  * @param {Game_Actor} 装備後アクター
-    //  * @param {Number} x x位置
-    //  * @param {Number} y y位置
-    //  */
-    // Window_EquipStatus.prototype.drawRateParam = function(param, actor1, actor2, x, y) {
-    //     this.changeTextColor(this.systemColor());
-    //     this.drawText(param.name, x, y, 60);
-    //     this.resetTextColor();
-    //     var current = Math.floor(param.get(actor1) * 100);
-    //     this.drawText(current + '%', x + 64, y, 80, 'right');
-
-    //     if (actor2 !== null) {
-    //         var after = Math.floor(param.get(actor2) * 100);
-    //         if (current !== after) {
-    //             // 変化があるときだけ描画
-    //             this.drawRightArrow(x + 180, y);
-    //             if (after > current) {
-    //                 this.changeTextColor(this.powerUpColor());
-    //             } else {
-    //                 this.changeTextColor(this.powerDownColor());
-    //             }
-    //             this.drawText(after + '%', x + 190, y, 80, 'right');
-    //         }            
-    //     }
-    // };
-    
     //------------------------------------------------------------------------------
     // Scene_Equip
     //
