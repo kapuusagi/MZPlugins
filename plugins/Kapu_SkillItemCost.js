@@ -106,7 +106,7 @@
      * @return {Boolean} 触媒アイテムがある場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.canPaySkillItemCost = function(skill) {
-        if (skill.itemCost) {
+        if (this.isActor() && skill.itemCost) {
             const item = this.skillConsumeItem(skill);
             if (item) {
                 // アイテム指定あり。装備しているアイテムも含めて数量計算
@@ -130,7 +130,7 @@
      */
     Game_BattlerBase.prototype.paySkillCost = function(skill) {
         _Game_BattlerBase_paySkillCost.call(this, skill);
-        if (skill.itemCost) {
+        if (this.isActor() && skill.itemCost) {
             const item = this.skillConsumeItem(skill);
             if (item) {
                 const num = $gameParty.numItems(item);
