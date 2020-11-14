@@ -253,7 +253,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 TWLD向けに作成したものをベースに作成。
  */
 /*~struct~elementEntry:
  *
@@ -426,60 +426,8 @@ function Window_StatusProfile() {
     const weaponMasteryIcons = _parseIntegerArray(parameters["weaponMasteryIcons"]);
     const displayWeaponMasteries = _parseIntegerArray(parameters["displayWeaponMasteries"]);
     
-    // MVではステータス表示（一部）/スキル表示/装備表示/プロフィール表示だけであった。
-    // これでいいのか？
-    // 属性耐性は表示したい。1280x720レイアウトを考えると、左側or右側に表示内容選択させる方式がいいなあ。
-    // レイアウトを先に決めないと作れない。
-
-    // ベーシックシステムでは
-    //   プロフィールウィンドウ (_statusProfileWindow : Window_Help)
-    //       2行のプロフィールを表示するウィンドウ。
-    //   ステータスウィンドウ (_statusWindow : Window_Status)
-    //       顔グラフィックを始め、いくつかの項目を表示するウィンドウ。
-    //   パラメータウィンドウ (_statusParamsWindow : Window_StatusParams)
-    //       ATKやらなにやらのパラメータ詳細を表示するウィンドウ
-    //   ステータス装備ウィンドウ (_statusEquipWindow : Window_StatusEquip)
-    //       装備表示ウィンドウ
-    // の4つが構築されていた。
-
-
-    //
-    // ・左側にステータスカテゴリ選択ウィンドウ。(ステータス1/ステータス2/装備/スキル/プロフィール)
-    //   スキル選択時はスキルタイプ選択ウィンドウをオーバーラップさせる。
-    //   スキル一覧は並び替えができるようにする。
-    //   操作 up/down:項目切替、 ok:決定 cancel:シーン終了 pageDown:前のアクター, pageUp:次のアクター
-    //   
-    //  ステータス1とステータス2は切替式にする。
-    //     (決定押下毎に切替する。ウィンドウ上に表示内容記載)
-    //
-    // ・ステータス1
-    //   HP/MPやATK/DEF, STR/DEXなどの基本ステータス表示。
-    //   HIT等の一部パラメータも表示できれば全部やりたいなあ。-> 表示項目を一覧にする。
-    //     ステートアイコン
-    //     戦闘位置
-    //     ✓顔グラフィック
-    //     ✓Lv/✓クラス名/✓通り名/✓GP
-    //     ✓HP/✓MaxHP/✓Mp/✓MaxMP/✓MaxTP
-    //     ✓STR/✓DEX/✓VIT/✓INT/✓MEN/✓AGI/✓LUK (LUKはニコニコマークとかにしたい)
-    //     ✓ATK/✓DEF/✓DEF.Rate/✓MAT/✓MDF/✓MDF.Rate
-    //     ✓HIT/✓EVA/✓MEV/✓CRI/✓CEV/✓CDR
-    //     ✓PEN.PDR/✓PEN.MDR/
-    //     いっぱいあるけど全部はいらない。
-    // ・ステータス2
-    //     ✓属性レート
-    //     MRF/CNT/HRG/MRG/TRG/TGR/REC/PHA (0以外なら表示)
-    //     ドロップレート/取得ゴールドレート/EXPレート
-    // ・装備
-    //     装備一覧表示
-    //     ウェポンマスタリ
-    // ・スキル
-    //     並び替えサポート
-    // コマンドウィンドウを持たせて選択させる。
-    // 背景にSpriteを用意。
-
     //-----------------------------------------------------------------------------
     // Window_StatusCategory
-    //
 
     Window_StatusCategory.prototype = Object.create(Window_Command.prototype);
     Window_StatusCategory.prototype.constructor = Window_StatusCategory;
@@ -640,6 +588,7 @@ function Window_StatusProfile() {
             for (let slot = 0; slot < slots.length; slot++) {
                 noEquipActor.forceChangeEquip(slot, null);
             }
+            noEquipActor.clearStates();
 
             let x = rect.x;
             this.drawBlock2A(actor, noEquipActor, x, rect.y, textWidth, lineCount);
@@ -1442,145 +1391,6 @@ function Window_StatusProfile() {
         this.changePaintOpacity(true);
     };
 
-    // /**
-    //  * Window_StatusParam
-    //  * パラメータ情報表示
-    //  */
-    // function Window_StatusParam() {
-    //     this.initialize.apply(this, arguments);
-    // }
-
-    // Window_StatusParam.prototype = Object.create(Window_Base.prototype);
-    // Window_StatusParam.prototype.constructor = Window_StatusParam;
-
-    // /**
-    //  * 新しいWindow_StatusParamを構築する。
-    //  */
-    // Window_StatusParam.initialize = function(x, y, width, height) {
-    //     this._actor = null;
-    //     Window_Base.prototype.initialize.call(this, x, y, width, height);
-    // };
-    // /**
-    //  * アクターを設定する。
-    //  * @param {Game_Actor} actor アクター
-    //  */
-    // Window_StatusParam.prototype.setActor = function(actor) {
-    //     if (this._actor !== actor) {
-    //         this._actor = actor;
-    //         this.refresh();
-    //     }
-    // };
-
-    // /**
-    //  * 表示を更新する。
-    //  */
-    // Window_StatusParam.prototype.refresh = function() {
-    //     var actor = this._actor;
-    //     this.contents.clear();
-        
-    //     // 基本パラメータ                           熟練度 
-    //     // STR   12(+2)   ATK    128 (+78)  HIT     (Icon)LvX ゲージ
-    //     // DEX    7       DEF     43 (+22)  CRI     (Icon)LvX ゲージ
-    //     // VIT    6       PDR     0%        CDR      :
-    //     // INT    5(+1)                     
-    //     // MEN    8(+2)   MATK    15        
-    //     // AGI    9       MDEF    24        
-    //     // LUK    7       MDR   -20%
-    //     this.drawBasicParameters(actor);
-    //     this.drawWeponMasteries(actor);
-    // };
-
-    // /**
-    //  * 基本パラメータを描画する
-    //  */
-    // Window_StatusParam.prototype.drawBasicParameters = function(actor) {
-    //     var padding = this.standardPadding();
-    //     var lineHeight = this.lineHeight();
-    //     var x = padding;
-    //     var y = padding;
-    //     this.changeTextColor(this.systemColor());
-    //     this.drawText("ステータス", x, y, 320);
-
-    //     var basicParamList = [
-    //         { name:"STR", current:actor.str, base:actor.getBasicParamBase(0) },
-    //         { name:"DEX", current:actor.dex, base:actor.getBasicParamBase(1) },
-    //         { name:"VIT", current:actor.vit, base:actor.getBasicParamBase(2) },
-    //         { name:"INT", current:actor.int, base:actor.getBasicParamBase(3) },
-    //         { name:"MEN", current:actor.men, base:actor.getBasicParamBase(4) },
-    //         { name:"AGI", current:actor.agi, base:actor.getBasicParamBase(5) },
-    //         { name:"LUK", current:actor.getLuk(), base:actor.getLuk() }
-    //     ];
-    //     var y1 = y + lineHeight;
-    //     for (var i = 0; i < basicParamList.length; i++) {
-    //         var bp = basicParamList[i];
-    //         var appendVal = bp.current - bp.base;
-    //         this.drawBasicParameter(bp.name, bp.current, appendVal, x, y1 + lineHeight * i);
-    //     }
-
-    //     var x2 = x + 220;
-    //     var atk = actor.param(2);
-    //     var baseAtk = actor.paramBase(2);
-    //     this.drawBasicParameter("ATK", atk, atk - baseAtk, x2, y1 + lineHeight * 0);
-    //     this.drawRate("PPR", actor.ppr, x2, y1 + lineHeight * 1);
-    //     var def = actor.param(3);
-    //     var baseDef = actor.paramBase(3);
-    //     this.drawBasicParameter("DEF", def, def - baseDef, x2, y1 + lineHeight * 2);
-    //     this.drawRate("PDRR", 1 - actor.pdr, x2, y1 + lineHeight * 3);
-
-    //     var matk = actor.param(4);
-    //     var baseMatk = actor.paramBase(4);
-    //     this.drawBasicParameter("MATK", matk, matk - baseMatk, x2, y1 + lineHeight * 5);
-    //     this.drawRate("MPR", actor.mpr, x2, y1 + lineHeight * 6);
-    //     var mdef = actor.param(5);
-    //     var baseMdef = actor.paramBase(5);
-    //     this.drawBasicParameter("MDEF", mdef, mdef - baseMdef, x2, y1 + lineHeight * 7);
-    //     this.drawRate("MDRR", 1 - actor.mdr, x2, y1 + lineHeight * 8);
-
-    //     var x3 = x2 + 220;
-    //     var rParamList = [
-    //         { name:"HIT", rate:actor.hit },
-    //         { name:"EVA", rate:actor.eva },
-    //         { name:"MEVA", rate:actor.mev },
-    //         { name:"CRI", rate:actor.cri }, 
-    //         { name:"CRR", rate:actor.pcr - TWLD.Core.BasicCriticalRate }, // 標準倍率は1.5なので差分を引く。
-    //         { name:"MCRR", rate:actor.mcrr - TWLD.Core.BasicCriticalRate }, // 標準倍率は1.5なので差分を引く。
-    //     ];
-    //     for (var l = 0; l < rParamList.length; l++) {
-    //         var rp = rParamList[l];
-    //         this.drawRate(rp.name, rp.rate, x3, y1 + lineHeight * l);
-    //     }
-    // }
-
-    // /**
-    //  * ウェポンマスタリー欄を描画する。
-    //  */
-    // Window_StatusParam.prototype.drawWeponMasteries = function(actor) {
-    //     var padding = this.standardPadding();
-    //     var lineHeight = this.lineHeight();
-    //     var x = padding + 680;
-    //     var y = padding;
-
-    //     // マスタリーの表示(こりゃ面倒だ)
-    //     var wms = actor.getWeaponMasteries();
-    //     this.changeTextColor(this.systemColor());
-    //     this.drawText("ウェポンマスタリー", x, y, 320);
-    //     var xpos = x;
-    //     var ypos = y + lineHeight;
-    //     for (var i = 0; i < wms.length; i++) {
-    //         // ウェポンマスタリーを描画
-    //         var wm = wms[i];
-    //         this.drawWeaponMastery(wm, xpos, ypos);
-    //         ypos += lineHeight;
-    //         if ((ypos + lineHeight) > (this.height - padding)) {
-    //             ypos = y + lineHeight;
-    //             xpos += 220;
-    //         }
-    //     }
-    // };
-
-
-
-
     //------------------------------------------------------------------------------
     // Window_StatusEquip
     /**
@@ -1824,119 +1634,6 @@ function Window_StatusProfile() {
         this.drawRect(x, y + 5, width, 5);
         this.changePaintOpacity(true);
     };
-
-
-    // /**
-    //  * Window_StatusEquip
-    //  * 装備表示
-    //  */
-    // function Window_StatusEquip() {
-    //     this.initialize.apply(this, arguments);
-    // }
-
-    // Window_StatusEquip.prototype = Object.create(Window_Base.prototype);
-    // Window_StatusEquip.prototype.constructor = Window_StatusEquip;
-
-    // /**
-    //  * 新しいWindow_StatusEquipを構築する。
-    //  */
-    // Window_StatusEquip.initialize = function(x, y, width, height) {
-    //     this._actor = null;
-    //     Window_Base.prototype.initialize.call(this, x, y, width, height);
-    // };
-    // /**
-    //  * アクターを設定する。
-    //  * @param {Game_Actor} actor アクター
-    //  */
-    // Window_StatusEquip.prototype.setActor = function(actor) {
-    //     if (this._actor !== actor) {
-    //         this._actor = actor;
-    //         this.refresh();
-    //     }
-    // };
-
-    // /**
-    //  * 表示を更新する。
-    //  */
-    // Window_StatusEquip.prototype.refresh = function() {
-    //     var actor = this._actor;
-    //     var padding = this.standardPadding();
-    //     var lineHight = this.lineHeight();
-    //     this.contents.clear();
-        
-    //     // 装備一覧を描画する。
-    //     var equipSlots = actor.equipSlots();
-    //     var equips = actor.equips();
-    //     var x = padding;
-    //     var y = padding;
-    //     for (var i = 0; i < equipSlots.length; i++) {
-    //         var slotName = $dataSystem.equipTypes[equipSlots[i]];
-    //         this.drawEquipItem(slotName, equips[i], x, y + lineHight * i);
-    //     }
-    // };
-
-    // /**
-    //  * 装備品情報を描画する。
-    //  * @param {String} slotName
-    //  * @param {Game_item} equipItem 装備品(未装備の場合にはnull)
-    //  * @param {Number} x 描画位置x
-    //  * @param {Number} y 描画位置y
-    //  */
-    // Window_StatusEquip.prototype.drawEquipItem = function(slotName, equipItem, x, y) {
-    //     // スロット名
-    //     this.changeTextColor(this.systemColor());
-    //     this.drawText(slotName, x, y, 120);
-    //     this.drawText(":", x + 120, y, 16);
-
-    //     // 装備品アイコン
-    //     if (equipItem && (equipItem.iconIndex >= 0)) {
-    //         var x2 = x + 140;
-    //         if (equipItem.iconIndex >= 0) {
-    //             this.drawIcon(equipItem.iconIndex, x2 + 2, y + 2);
-    //         }
-    //     }
-
-    //     // 装備品名称
-    //     var x3 = x + 180;
-    //     if (equipItem) {
-    //         this.changeTextColor(this.itemNameColor(equipItem));
-    //         this.drawText(equipItem.name, x3, y, 320, "left");
-    //     } else {
-    //         this.resetTextColor();
-    //         this.drawText("(なし)", x3, y, 320, "left");
-    //     }
-
-    //     // 装備品の情報テキトーに。
-    //     if (equipItem) {
-    //         // 装備効果を列挙する。
-    //         // 差分でいいのかなあ。
-    //         var paramNameTable = ["HP", "MP", "ATK", "DEF", "MAT", "MDEF"];
-    //         var upgradeText = "";
-    //         for (var i = 0; i < 6; i++) {
-    //             var pup = equipItem.params[i] - equipItem.initialParams[i];
-    //             if (pup > 0) {
-    //                 upgradeText += paramNameTable[i] + "+" + pup + " ";
-    //             } else if (pup < 0) {
-    //                 upgradeText += paramNameTable[i] + "" + pup + " ";
-    //             }
-    //         }
-    //         var bParamNameTable = ["STR", "DEX", "VIT", "INT", "MEN", "AGI"];
-    //         for (var j = 0; j < 6; j++) {
-    //             var bpup = equipItem.basicParams[j] - equipItem.initialBasicParams[j];
-    //             if (bpup > 0) {
-    //                 upgradeText += bParamNameTable[j] + "+" + pup + " ";
-    //             } else if (bpup < 0) {
-    //                 upgradeText += bParamNameTable[j] + "" + pup + " ";
-    //             }
-    //         }
-    //         if (upgradeText.length > 0) {
-    //             this.changeTextColor(this.itemNameColor(equipItem));
-    //             var x4 = x3 + 330;
-    //             var textWidth = x + this.innerWidth - x4;
-    //             this.drawText(upgradeText, x4, y, textWidth, "left");
-    //         }
-    //     }
-    // };
 
     //------------------------------------------------------------------------------
     // Window_StatusSkillType
