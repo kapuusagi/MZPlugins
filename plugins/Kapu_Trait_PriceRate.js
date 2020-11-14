@@ -245,6 +245,25 @@
         this._enableSellingPriceRateTrait = enabled;
     };
 
+    //------------------------------------------------------------------------------
+    // Game_BattlerBase
+    /**
+     * 購入価格レート
+     * 
+     * @return {Number} 購入価格レート
+     */
+    Game_BattlerBase.prototype.buyingPriceRate = function() {
+        return this.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, Game_Party.ABILITY_BUYING_PRICE_RATE);
+    };
+
+    /**
+     * 売却価格レート
+     * 
+     * @return {Number} 売却価格レート。
+     */
+    Game_BattlerBase.prototype.sellingPriceRate = function() {
+        return this.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, Game_Party.ABILITY_SELLING_PRICE_RATE);
+    };
 
     //------------------------------------------------------------------------------
     // Game_Party
