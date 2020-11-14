@@ -145,6 +145,12 @@
  * @type string
  * @default rgb(255,64,64)
  * 
+ * @param allowChangeEquipInBattle
+ * @text 戦闘中に装備変更を許可する
+ * @desc truenにすると、戦闘コマンドに装備変更を追加する。
+ * @type boolean
+ * @default false
+ * 
  * @help 
  * 装備画面を提供する。
  * 
@@ -311,6 +317,9 @@ function Window_EquipItemName() {
     };
 
     const statusParamEntries = _parseStatusParamEntries(parameters["statusParamEntries"]);
+
+    const allowChangeEquipInBattle = (typeof parameters["allowChangeEquipInBattle"] === "undefined")
+            ? false : (parameters["allowChangeEquipInBattle"] == "true");
 
     //------------------------------------------------------------------------------
     // Window_EquipActor
@@ -576,7 +585,7 @@ function Window_EquipItemName() {
         }
     };
     //------------------------------------------------------------------------------
-    // Scene_EquipStatus
+    // Window_EquipStatus
 
     /**
      * 表示を更新する。
@@ -587,13 +596,9 @@ function Window_EquipItemName() {
     Window_EquipStatus.prototype.refresh = function() {
         this.contents.clear();
         this.drawBlock1();
-        this.drawBlock2();
-
-        // よく考えて表示しよう。
-        //
-        // 装備変更品選択中は、基本パラメータ以外は変動するやつだけでいいよ。
-        // 装備変更品選択中でない場合、全ステータス表示にしないとあかん。
-        // 装備品選択中かどうかは、this._tempActorがnullかどうかで判断できる。
+        if (!$gameParty.inBattle()) {
+            this.drawBlock2();
+        }
     };
 
     /**
@@ -1160,9 +1165,9 @@ function Window_EquipItemName() {
      */
     Scene_Equip.prototype.createSlotWindow = function() {
         _Scene_Equip_createSlotWindow.call(this);
-        this._slotWindow.setHandler('itemchange', this.onSlotItemChange.bind(this));
-        this._slotWindow.setHandler('pagedown', this.nextActor.bind(this));
-        this._slotWindow.setHandler('pageup',   this.previousActor.bind(this));    
+        this._slotWindow.setHandler("itemchange", this.onSlotItemChange.bind(this));
+        this._slotWindow.setHandler("pagedown", this.nextActor.bind(this));
+        this._slotWindow.setHandler("pageup",   this.previousActor.bind(this));    
     };
 
     /**
@@ -1309,28 +1314,7 @@ function Window_EquipItemName() {
         _Scene_Equip_hideItemWindow.call(this);
         this._equipItemNameWindow.hide();
     };
-    
-    // /**
-    //  * 装備操作ウィンドウでキャンセル操作されたときに通知を受け取る。
-    //  */
-    // Scene_Equip.prototype.onItemCancel = function() {
-    //     this._slotWindow.activate();
-    //     this.refreshHelpWindow();
-    //     this._itemWindow.deselect();
-    //     this._equipItemNameWindow.hide();
-    //     this._itemWindow.hide();
-    // };
 
-    // Scene_Equip.prototype.onItemItemChange = function() {
-    //     const item = this._itemWindow.item();
-    //     this._helpWindow.setItem(item);
-    //     if (this._actor && this._statusWindow) {
-    //         const actor = JsonEx.makeDeepCopy(this._actor);
-    //         const slotId = this._slotWindow.slotId();
-    //         actor.forceChangeEquip(slotId, item);
-    //         this._statusWindow.setTempActor(actor);
-    //     }
-    // };
     /**
      * アクターが変更された時に通知を受け取る。
      * 
@@ -1353,163 +1337,255 @@ function Window_EquipItemName() {
         this._slotWindow.activate();
     };
 
-    // //------------------------------------------------------------------------------
-    // // Window_ActorCommandの変更
-    // //
-    // TWLD.UIEquip.Window_ActorCommand_makeCommandList = Window_ActorCommand.prototype.makeCommandList;
-    // /**
-    //  * コマンドリストを構築する。
-    //  */
-    // Window_ActorCommand.prototype.makeCommandList = function() {
-    //     TWLD.UIEquip.Window_ActorCommand_makeCommandList.call(this);
-    //     if (this._actor) this.addEquipCommand();
-    // };
+    //------------------------------------------------------------------------------
+    // Window_ActorCommand
+    if (allowChangeEquipInBattle) {
+        const _Window_ActorCommand_makeCommandList = Window_ActorCommand.prototype.makeCommandList;
+        /**
+         * コマンドリストを構築する。
+         */
+        Window_ActorCommand.prototype.makeCommandList = function() {
+            _Window_ActorCommand_makeCommandList.call(this);
+            if (this._actor) {
+                this.addEquipCommand();
+            }
+        };
 
-    // /**
-    //  * 装備コマンドを追加する。
-    //  */
-    // Window_ActorCommand.prototype.addEquipCommand = function() {
-    //     this.addCommand(TextManager.equip, 'equip', true);
-    // };
-    // //------------------------------------------------------------------------------
-    // // Scene_Battleの変更
-    // //
-    // TWLD.UIEquip.Scene_Battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
+        /**
+         * 装備コマンドを追加する。
+         */
+        Window_ActorCommand.prototype.addEquipCommand = function() {
+            this.addCommand(TextManager.equip, "equip", true);
+        };
+    }
+    //------------------------------------------------------------------------------
+    // Scene_Battleの変更
+    if (allowChangeEquipInBattle) {
+        const _Scene_Battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 
-    // /**
-    //  * 全てのウィンドウを作成する。
-    //  */
-    // Scene_Battle.prototype.createAllWindows = function() {
-    //     TWLD.UIEquip.Scene_Battle_createAllWindows.call(this);
-    //     this.createEquipSlotWindow();
-    //     this.createEquipStatusWindow();
-    //     this.createEquipItemWindow();
-    // };
+        /**
+         * 全てのウィンドウを作成する。
+         */
+        Scene_Battle.prototype.createAllWindows = function() {
+            _Scene_Battle_createAllWindows.call(this);
+            this.createEquipSlotWindow();
+            this.createEquipCurrentItemWindow();
+            this.createEquipStatusWindow();
+            this.createEquipItemWindow();
+        };
 
-    // TWLD.UIEquip.Scene_Battle_createActorCommandWindow = Scene_Battle.prototype.createActorCommandWindow;
-    // /**
-    //  * アクターのコマンド選択用ウィンドウを作成する。
-    //  */
-    // Scene_Battle.prototype.createActorCommandWindow = function() {
-    //     // Window_ActorCommandを作成したり、ハンドラの登録が行われたりする。
-    //     TWLD.UIEquip.Scene_Battle_createActorCommandWindow.call(this);
-    //     // equipハンドラの処理
-    //     this._actorCommandWindow.setHandler('equip', this.commandEquip.bind(this));
-    // };
-    // /**
-    //  * 装備スロットウィンドウを作成する。
-    //  */
-    // Scene_Battle.prototype.createEquipSlotWindow = function() {
-    //     var x = 0;
-    //     var y = this._helpWindow.height;
-    //     var width = 480;
-    //     var height = Graphics.boxHeight - this._helpWindow.height;
-    //     this._equipSlotWindow = new Window_EquipSlot(x, y, width, height);
-    //     this._equipSlotWindow.hide();
-    //     this._equipSlotWindow.setHelpWindow(this._helpWindow);
-    //     this._equipSlotWindow.setHandler('ok',       this.onEquipSlotOk.bind(this));
-    //     this._equipSlotWindow.setHandler('cancel',   this.onEquipSlotCancel.bind(this));
-    //     this.addWindow(this._equipSlotWindow);
-    // };
+        /**
+         * 装備スロットウィンドウを作成する。
+         */
+        Scene_Battle.prototype.createEquipSlotWindow = function() {
+            const rect = this.equipSlotWindowRect();
+            this._equipSlotWindow = new Window_EquipSlot(rect);
+            this._equipSlotWindow.hide();
+            this._equipSlotWindow.setHelpWindow(this._helpWindow);
+            this._equipSlotWindow.setHandler("ok",       this.onEquipSlotOk.bind(this));
+            this._equipSlotWindow.setHandler("cancel",   this.onEquipSlotCancel.bind(this));
+            this.addWindow(this._equipSlotWindow);
+        };
 
-    // /**
-    //  * 装備ステータス画面を作成する。
-    //  */
-    // Scene_Battle.prototype.createEquipStatusWindow = function() {
-    //     var x = this._equipSlotWindow.width;
-    //     var y = this._helpWindow.height;
-    //     var width = Graphics.boxWidth - x;
-    //     var height = Graphics.boxHeight - y - this._helpWindow.height;
-    //     this._equipStatusWindow = new Window_EquipStatus(x, y, width, height);
-    //     this._equipStatusWindow.hide();
-    //     this.addWindow(this._equipStatusWindow);
+        /**
+         * 装備スロットウィンドウの矩形領域を得る。
+         * 
+         * @return {Rectangle} ウィンドウ矩形領域
+         */
+        Scene_Battle.prototype.equipSlotWindowRect = function() {
+            const rect = this.actorCommandWindowRect();
+            const wx = this.isRightInputMode() ? Graphics.boxWidth - commandWindowWidth : 0;
+            const wy = rect.y;
+            const ww = commandWindowWidth;
+            const wh = Math.min(Graphics.boxHeight - wy, this.calcWindowHeight(8, true));
+            return new Rectangle(wx, wy, ww, wh);
+        };
 
-    //     this._equipSlotWindow.setStatusWindow(this._equipStatusWindow);
-    // };
+        /**
+         * 現在の装備を表示するウィンドウを作成する。
+         */
+        Scene_Battle.prototype.createEquipCurrentItemWindow = function() {
+            const rect = this.equipItemNameWindowRect();
+            this._equipItemNameWindow = new Window_EquipItemName(rect);
+            this._equipItemNameWindow.hide();
+            this.addWindow(this._equipItemNameWindow);
+        };
+        /**
+         * 装備品名表示ウィンドウの表示領域を得る。
+         * 
+         * @return {Rectangle} ウィンドウ表示領域
+         */
+        Scene_Battle.prototype.equipItemNameWindowRect = function() {
+            const rect = this.equipSlotWindowRect();
+            const wh = this.calcWindowHeight(1, false);
+            const ww = rect.width;
+            const wx = rect.x;
+            const wy = rect.y;
+            return new Rectangle(wx, wy, ww, wh);
+        };
+        /**
+         * 装備ステータス画面を作成する。
+         */
+        Scene_Battle.prototype.createEquipStatusWindow = function() {
+            const rect = this.equipStatusWindowRect();
+            this._equipStatusWindow = new Window_EquipStatus(rect);
+            this._equipStatusWindow.hide();
+            this.addWindow(this._equipStatusWindow);
 
-    // /**
-    //  * 装備品選択ウィンドウを作成する。
-    //  */
-    // Scene_Battle.prototype.createEquipItemWindow = function() {
-    //     var x = this._equipSlotWindow.x + 10;
-    //     var y = this._equipSlotWindow.y + 40;
-    //     var width = this._equipSlotWindow.width;
-    //     var height = Graphics.boxHeight - this._helpWindow.height;
-    //     this._equipItemWindow = new Window_EquipItem(x, y, width, height);
-    //     this._equipItemWindow.setHelpWindow(this._helpWindow);
-    //     this._equipItemWindow.setStatusWindow(this._equipStatusWindow);
-    //     this._equipItemWindow.setHandler('ok',     this.onEquipItemOk.bind(this));
-    //     this._equipItemWindow.setHandler('cancel', this.onEquipItemCancel.bind(this));
-    //     this._equipItemWindow.hide();
-    //     this.addWindow(this._equipItemWindow);
-    // };
+            this._equipSlotWindow.setStatusWindow(this._equipStatusWindow);
+        };
 
-    // /**
-    //  * 装備コマンドが選択された時の処理を行う。
-    //  */
-    // Scene_Battle.prototype.commandEquip = function() {
-    //     var actor = BattleManager.actor();
-    //     this._equipStatusWindow.setActor(actor);
-    //     this._equipSlotWindow.setActor(actor);
-    //     this._equipItemWindow.setActor(actor);
-    //     this._equipStatusWindow.open();
-    //     this._equipSlotWindow.open();
-    //     this._equipItemWindow.open();
-    //     this._equipSlotWindow.show();
-    //     this._equipStatusWindow.show();
-    //     this._equipItemWindow.hide();
-    //     this._helpWindow.show();
-    //     this._actorCommandWindow.deactivate();
-    //     this._equipSlotWindow.activate();
-    //     this._equipSlotWindow.select(0);
-    //     this._equipChanged = false;
-    // };
+        /**
+         * 装備ステータスウィンドウの矩形領域を得る。
+         * 
+         * @return {Rectangle} ウィンドウ矩形領域
+         */
+        Scene_Battle.prototype.equipStatusWindowRect = function() {
+            const itemWindowRect = this.itemWindowRect();
+            const slotWindowRect = this.equipSlotWindowRect();
+            const wx = this.isRightInputMode()
+                    ? itemWindowRect.x
+                    : slotWindowRect.x + slotWindowRect.width;
+            const wy = itemWindowRect.y;
+            const ww = this.isRightInputMode()
+                    ? slotWindowRect.x - wx
+                    : itemWindowRect.x + itemWindowRect.width - wx;
+            const wh = Math.min(this.calcWindowHeight(8), slotWindowRect.height);
 
-    // /**
-    //  * 装備スロットウィンドウでOK操作された時の処理を行う。
-    //  */
-    // Scene_Battle.prototype.onEquipSlotOk = function() {
-    //     this._equipItemWindow.show();
-    //     this._equipItemWindow.select(0);
-    //     this._equipStatusWindow.refresh();
-    //     this._equipItemWindow.activate();
-    // };
+            return new Rectangle(wx, wy, ww, wh);
+        };
 
-    // /**
-    //  * 装備スロット画面でキャンセル操作されたときの処理を行う。
-    //  */
-    // Scene_Battle.prototype.onEquipSlotCancel = function() {
-    //     this._equipStatusWindow.close();
-    //     this._equipSlotWindow.close();
-    //     this._equipItemWindow.close();
-    //     this._helpWindow.hide();
-    //     this._actorCommandWindow.activate();
-    //     this._equipSlotWindow.deactivate();
-    // };
+        /**
+         * 装備品選択ウィンドウを作成する。
+         */
+        Scene_Battle.prototype.createEquipItemWindow = function() {
+            const rect = this.equipItemWindowRect();
+            this._equipItemWindow = new Window_EquipItem(rect);
+            this._equipItemWindow.setHelpWindow(this._helpWindow);
+            this._equipItemWindow.setStatusWindow(this._equipStatusWindow);
+            this._equipItemWindow.setHandler("ok",     this.onEquipItemOk.bind(this));
+            this._equipItemWindow.setHandler("cancel", this.onEquipItemCancel.bind(this));
+            this._equipItemWindow.hide();
+            this.addWindow(this._equipItemWindow);
+            this._equipSlotWindow.setItemWindow(this._equipItemWindow);
 
-    // /**
-    //  * 装備選択ウィンドウでOK操作された時の処理を行う。
-    //  */
-    // Scene_Battle.prototype.onEquipItemOk = function() {
-    //     SoundManager.playEquip();
-    //     var actor = BattleManager.actor();
-    //     actor.changeEquip(this._equipSlotWindow.index(), this._equipItemWindow.item());
-    //     this._equipSlotWindow.activate();
-    //     this._equipSlotWindow.refresh();
-    //     this._equipItemWindow.hide();
-    //     this._equipItemWindow.deselect();
-    //     this._equipItemWindow.refresh();
-    //     this._equipStatusWindow.refresh();
-    // };
+        };
 
-    // /**
-    //  * 装備アイテム選択ウィンドウでキャンセル操作されたときの処理を行う。
-    //  */
-    // Scene_Battle.prototype.onEquipItemCancel = function() {
-    //     this._equipItemWindow.deselect();
-    //     this._equipItemWindow.hide();
-    //     this._equipSlotWindow.activate();
+        /**
+         * 装備候補選択ウィンドウの表示領域を得る。
+         * 
+         * @return {Rectangle} ウィンドウ矩形領域
+         */
+        Scene_Battle.prototype.equipItemWindowRect = function() {
+            const rect = this.equipItemNameWindowRect();
+            const wx = rect.x;
+            const wy = rect.y + rect.height;
+            const ww = commandWindowWidth;
+            const wh = Math.min(Graphics.boxHeight - wy, this.calcWindowHeight(8, true));
+            return new Rectangle(wx, wy, ww, wh);
+        };
 
-    // };
+        const _Scene_Battle_createActorCommandWindow = Scene_Battle.prototype.createActorCommandWindow;
+        /**
+         * アクターのコマンド選択用ウィンドウを作成する。
+         */
+        Scene_Battle.prototype.createActorCommandWindow = function() {
+            _Scene_Battle_createActorCommandWindow.call(this);
+            // equipハンドラの処理
+            this._actorCommandWindow.setHandler("equip", this.commandEquip.bind(this));
+        };
+
+        /**
+         * 装備コマンドが選択された時の処理を行う。
+         */
+        Scene_Battle.prototype.commandEquip = function() {
+            const actor = BattleManager.actor();
+            this._equipStatusWindow.setActor(actor);
+            this._equipSlotWindow.setActor(actor);
+            this._equipItemWindow.setActor(actor);
+            this._equipStatusWindow.open();
+            this._equipSlotWindow.open();
+            this._equipItemWindow.open();
+            this._equipSlotWindow.show();
+            this._equipStatusWindow.show();
+            this._equipItemWindow.hide();
+            this._equipItemNameWindow.hide();
+            this._helpWindow.show();
+            this._actorCommandWindow.deactivate();
+            this._equipSlotWindow.activate();
+            this._equipSlotWindow.select(0);
+            this._equipChanged = false;
+        };
+
+        /**
+         * 装備スロットウィンドウでOK操作された時の処理を行う。
+         */
+        Scene_Battle.prototype.onEquipSlotOk = function() {
+            this._equipItemWindow.show();
+            this._equipItemNameWindow.show();
+
+            const index = this._equipSlotWindow.index();
+            const actor = BattleManager.actor();
+            const equipSlots = actor.equipSlots();
+            const slotName = $dataSystem.equipTypes[equipSlots[index]]
+            const equipItem = actor.equips()[index];
+            this._equipItemNameWindow.setEquipItem(slotName, equipItem);
+            this._equipItemWindow.refresh();
+            this._equipItemWindow.select(0);
+            this._equipStatusWindow.refresh();
+            this._equipItemWindow.activate();
+        };
+
+        /**
+         * 装備スロット画面でキャンセル操作されたときの処理を行う。
+         */
+        Scene_Battle.prototype.onEquipSlotCancel = function() {
+            this._equipStatusWindow.close();
+            this._equipSlotWindow.close();
+            this._equipItemWindow.close();
+            this._equipItemNameWindow.close();
+            this._helpWindow.hide();
+            this._actorCommandWindow.activate();
+            this._equipSlotWindow.deactivate();
+        };
+
+        /**
+         * 装備選択ウィンドウでOK操作された時の処理を行う。
+         */
+        Scene_Battle.prototype.onEquipItemOk = function() {
+            SoundManager.playEquip();
+            const actor = BattleManager.actor();
+            actor.changeEquip(this._equipSlotWindow.index(), this._equipItemWindow.item());
+            this._equipSlotWindow.activate();
+            this._equipSlotWindow.refresh();
+            this._equipItemWindow.hide();
+            this._equipItemNameWindow.hide();
+            this._equipItemWindow.deselect();
+            this._equipItemWindow.refresh();
+            this._equipStatusWindow.refresh();
+        };
+
+        /**
+         * 装備アイテム選択ウィンドウでキャンセル操作されたときの処理を行う。
+         */
+        Scene_Battle.prototype.onEquipItemCancel = function() {
+            this._equipItemWindow.deselect();
+            this._equipItemWindow.hide();
+            this._equipItemNameWindow.hide();
+            this._equipSlotWindow.activate();
+        };
+
+        const _Scene_Battle_isAnyInputWindowActive = Scene_Battle.prototype.isAnyInputWindowActive;
+        /**
+         * いずれかの入力ウィンドウがアクティブ（選択中）かどうかを判定する。
+         * 
+         * @return {Boolean} いずれかの入力ウィンドウがアクティブな場合にはtrue, それ以外はfalse
+         */
+        Scene_Battle.prototype.isAnyInputWindowActive = function() {
+            return _Scene_Battle_isAnyInputWindowActive.call(this)
+                    || this._equipItemWindow.active
+                    || this._equipSlotWindow.active;
+        };
+    }
 
 })();
