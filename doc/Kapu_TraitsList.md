@@ -14,6 +14,7 @@
 |106|__TRAIT_UNRECOVER__|ブロック効果対象|ブロック効果対象特性。|
 |107|__TRAIT_PARAM_ADD__|パラメータID|単純にパラメータを加算する特性。|
 |108|__TRAIT_MAXTP_ADD__|-|最大TP加算特性。|
+|109|__TRAIT_ELEMENT_ATTACK_RATE__|属性ID|指定した属性の威力を変更する特性。乗算合計。|
 ||||
 |1001|__TRAIT_BASIC_PARAM__|基本パラメータを加算する特性|
 |1002|__TRAIT_BASIC_PARAM_RATE__|基本パラメータ乗算レート特性|

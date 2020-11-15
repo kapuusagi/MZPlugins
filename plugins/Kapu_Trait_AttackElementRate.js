@@ -9,7 +9,7 @@
  * @param traitCode
  * @text 特性コード
  * @desc 特性として割り当てるID番号。(65以上で他のプラグインとぶつからないやつ)
- * @default 101
+ * @default 109
  * @type number
  * @max 999
  * @min 65
@@ -39,17 +39,17 @@
  * ノートタグ
  * ============================================
  * アクター/クラス/ステート/武器/防具/エネミー
- *     <elementAttackRate:id#:data,...>
- *        吸収特性設定。dataの記述書式は次の通り。
- *        id#:rate# もしくは id#:rate%
- *        id#:属性ID
- *        rate#:加算ダメージレート(0～, 1.0で変化なし)
- *        rate%:加算ダメージレート(0～, 1.0で変化なし)
- *        複数吸収設定はカンマ区切りにします。
+ *   <elementAttackRate:id#:data,...>
+ *     吸収特性設定。dataの記述書式は次の通り。
+ *       id#:rate# もしくは id#:rate%
+ *       id#:属性ID
+ *       rate#:加算ダメージレート(0～, 1.0で変化なし)
+ *       rate%:加算ダメージレート(0～, 1.0で変化なし)
+ *     複数吸収設定はカンマ区切りにします。
  * 
  *     例：
  *        <elementAttackRate:1:20%,3:100%>
- *          属性ID 1 の攻撃を受けたときは20%吸収。 属性ID 3 を受けたときは100%吸収。
+ *          属性ID 1 の効果は20%の威力になり、属性ID 3 の効果は100%の威力になる。
  * ============================================
  * 変更履歴
  * ============================================
@@ -119,6 +119,12 @@
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
+    /**
+     * 攻撃時補正値を得る。
+     * 
+     * @param {Number} elementId 属性ID
+     * @return {Number} 属性レート
+     */
     Game_BattlerBase.prototype.elementAttackRate = function(elementId) {
         return this.traitsPi(Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE, elementId);
     };
