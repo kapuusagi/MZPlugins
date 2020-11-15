@@ -170,7 +170,7 @@
 
             const item = this.item();
             const baseValue = this.calcBaseDamageValue(target);
-            const elementRate = this.calcElementRate(target)
+            const elementRate = this.calcElementRate(target);
             let value = baseValue * elementRate;
 
             console.log(this.subject().name() + " --(" + item.name + ")--> " + target.name());
