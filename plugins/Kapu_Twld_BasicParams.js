@@ -655,20 +655,20 @@
 
         const enemy = $dataEnemies[enemyId];
         if (enemy.meta.basicParams) {
-            const tokens = enemy.meta.basicParams.split(",");
-            const count = Math.min(enemy.basicParams.length, tokens.length);
+            const values = enemy.meta.basicParams.split(",").map(token => Number(token));
+            const count = Math.min(this._basicParams.length, values.length);
             for (let i = 0; i < count; i++) {
-                const value = Number(tokens[i]);
+                const value = values[i];
                 if (value > 0) {
                     this._basicParams[i] = value;
                 }
             }
         }
         if (enemy.meta.basicParamsVariance) {
-            const tokens = enemy.meta.basicParams.split(",");
-            const count = Math.min(enemy.basicParams.length, tokens.length);
+            const values = enemy.meta.basicParams.split(",").map(token => Number(token));
+            const count = Math.min(this._basicParams.length, values.length);
             for (let i = 0; i < count; i++) {
-                const variance = Number(tokens[i]);
+                const variance = values[i];
                 if (variance > 0) {
                     // randomInt(variance * 2 + 1)で0～(variance*2)の正数値が返る。
                     const value = this._basicParams[i] + Math.randomInt(variance * 2 + 1) - variance;
