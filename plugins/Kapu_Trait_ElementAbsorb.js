@@ -56,9 +56,9 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.3 Game_Action.elementsMaxRate()をオーバーライドしない実装にした。
  * Version.0.1.2 TRAIT_ELEMENT_ABSORB未指定時は動作しないように変更した。
  * Version.0.1.1 特性コードデフォルト値を100に変更した。
- *               Game_Action.elementsMaxRate()をオーバーライドしない実装にした。
  *               Kapu_ElementCoreを使う実装に変更した。
  *               プラグインコメントにorderAfterを追加した。
  * Version.0.1.0 新規作成。
@@ -172,32 +172,7 @@
         }
     };
 
-    const _Game_Action_elementMaxRate = Game_Action.prototype.elementsMaxRate;
-
-    /**
-     * elementsで指定される属性の内、最も効果が大きな値を得る。
-     * 吸収属性の効果が1つ以上あるならば、最も吸収効果が高いものが返る。
-     * 
-     * @param {Game_BattlerBase} target 対象
-     * @param {Array<Number>} elements 属性ID配列
-     * @return {Number} 値
-     */
-    Game_Action.prototype.elementsMaxRate = function(target, elements) {
-        
-        if (elements.length > 0) {
-            const rates = elements.map(elementId => target.elementRate(elementId));
-            const minRate = Math.min(...rates);
-            if (minRate < 0) {
-                // 1つ以上吸収する属性がある。
-                return minRate;
-            }
-        }
-
-        return _Game_Action_elementMaxRate.call(this, ...arguments);
-    };
-
     const _Game_Action_getApplyElementRate = Game_Action.prototype.getApplyElementRate;
-
     /**
      * 適用する属性レートを取得する。
      * 
