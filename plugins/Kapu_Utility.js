@@ -24,6 +24,8 @@
  *     $dataStates に対するノートタグパーサーを追加する。
  * DataManager.addNotetagParserTilesets(method:function) : void
  *     $dataTilesets に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserMaps(method:function) : void
+ *     $dataMapに対するノートタグパーサーを追加する。
  * 
  * DataManager.traitsSum(traitObj:TraitObject, code:number, dataId:number) : number
  *     code, dataIdに一致するTraitの特性値の加算合計を得る。
@@ -75,6 +77,16 @@
         DataManager.processGenericNotetags();
         _Scene_Boot_start.call(this);
     };
+    //------------------------------------------------------------------------------
+    // Scene_Map
+    const _Scene_Map_start = Scene_Map.prototype.start;
+    /**
+     * Scene_Mapを開始する。
+     */
+    Scene_Map.prototype.start = function() {
+        DataManager.processMapNotegag();
+        _Scene_Map_start.call(this);
+    };
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -88,6 +100,7 @@
     DataManager._noteTagParserStates = [];
     DataManager._noteTagParserTilesets = [];
     DataManager._noteTagParserTroops = [];
+    DataManager._noteTagParserMaps = [];
 
     /**
      * $dataActorsのノートタグパーサーを追加する。
@@ -179,6 +192,14 @@
         this._noteTagParserTroops.push(method);
     };
 
+    /**
+     * マップのノートタグパーサーを追加する。
+     * 
+     * @param {function} method メソッド。第1引数としてDataMapが渡される。
+     */
+    DataManager.addNotetagParserMaps = function(method) {
+        this._noteTagParserMaps.push(method);
+    };
 
     /**
      * 一般的なノートタグ処理を行う。
@@ -195,6 +216,7 @@
         DataManager.processGenericNotetagsCollections($dataTilesets, this._noteTagParserTilesets);
         DataManager.processGenericNotetagsCollections($dataTroops, this._noteTagParserTroops);
     };
+
 
     /**
      * データコレクションのノートタグを処理する。
@@ -220,6 +242,25 @@
                 console.error("Notetag parse fail. [name:" + obj.name + "]");
                 console.error(e);
             }
+        }
+    };
+
+    /**
+     * マップのノートタグを処理する。
+     */
+    DataManager.processMapNotegag = function() {
+        const methods = this._noteTagParserMaps;
+        if (methods.length === 0) {
+            return;
+        }
+        try {
+            for (let method of methods) {
+                method.call(this, $dataMap);
+            }
+        }
+        catch (e) {
+            console.error("Notetag parse fail. [name:" + $dataMap.displayName + "]");
+            console.error(e);
         }
     };
 

@@ -3,11 +3,22 @@
  * @plugindesc マップのFilterを管理する。
  * @author weakboar kapuusagi
  * @url https://github.com/weakboar/mv_plugin
+ * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @command clear
  * @text フィルタ解除
  * @desc 全てのフィルタを解除する。
+ * 
+ * @command allActivate
+ * @text 全体を有効にする
+ * @desc 全てのフィルタを有効にする。
+ * 
+ * @command allDeactivate
+ * @text 全体を無効にする
+ * @desc 全てのフィルタを無効にする。
  *
+ * 
  * @param debugEnable
  * @text デバッグ
  * @desc trueにするとデバッグ出力する。
@@ -52,14 +63,16 @@
  * (1) PIXI.Filterを派生したクラスを作成する。
  *     rmmz_core.jsのColorFilterが参考になる。
  * (2) MapFilterManager.filterに登録する。
- *     MapFilterManager.registerFilter("hoge", HogeFilter);
- * (3) フィルタのON/OFFをできるようにする。
+ *     MapFilterManager.registerFilter("hoge", HogeFilter, ["param"]);
+ * (3) 取得/設定するプロパティを実装する。
+ *     Object.defineProperty(HogeFilter.prototype, "param" { ... });
+ * (4) フィルタのON/OFFをできるようにする。
  *     各プラグイン側で
  *     MapFilterManager.activate("hoge")
  *     と
  *     MapFilterManager.deactivate("hoge")
  *     をコールするようにすればいい。
- * (4) プラグインコマンドでパラメータを変更できるようにする。
+ * (5) プラグインコマンドでパラメータを変更できるようにする。
  *     各プラグイン側で、
  *     MapFilterManager.filter("hoge").uniforms.XXXX = YYYY
  *     のように設定したあと、
@@ -69,18 +82,30 @@
  * ============================================
  * プラグインコマンド
  * ============================================
- * プラグインコマンドはありません。
- * 
+ * フィルタ解除
+ *     全てのマップフィルタをOFFにする。
+ * 全体を有効にする
+ *     全てのマップフィルタの適用を解除する。
+ * 全体を無効にする
+ *     マップフィルタの適用を有効にする。
+ *     ONになっているフィルタが適用される。
  * ============================================
  * ノートタグ
  * ============================================
- * ノートタグはありません。
- * 
+ * マップ
+ *   <mapFilters:filterNames=state$,..>
+ *     filterNamesで指定したフィルタをstate$にする。
+ *     state$に指定可能なのは"on"または"off"。それ以外は前のマップを引き継ぐ。
+ *   <enableMapFilters>
+ *     マップに移動したとき、フィルタを全て有効にする。
+ *     同マップ中で有効にしたい場合、プラグインコマンドを使用すること。
+ *   <disableMapFilters>
+ *     マップに移動したとき、フィルタを全て無効にする。
+ *     同マップ中で有効にしたい場合、プラグインコマンドを使用すること。
  * ============================================
  * 変更履歴
  * ============================================
  * Version.0.1.0 WeakBoar氏のMVPluginリポジトリのファイルを元に作成。
- *               動作未確認。
  */
 
 /**
@@ -92,7 +117,7 @@ function MapFilterManager() {
 }
 
 (() => {
-    const pluginName = "WeakBoar_MapFilterManager";
+    const pluginName = "Kapu_MapFilterManager";
     const parameters = PluginManager.parameters(pluginName);
 
     const debugEnable = (typeof parameters["debugEnable"] === "undefined")
@@ -103,15 +128,30 @@ function MapFilterManager() {
         MapFilterManager.clear();
     });
 
+    // eslint-disable-next-line no-unused-vars
+    PluginManager.registerCommand(pluginName, "allActivate", args => {
+        MapFilterManager.globalActivate();
+    });
+
+    // eslint-disable-next-line no-unused-vars
+    PluginManager.registerCommand(pluginName, "allDeactive", args => {
+        MapFilterManager.globalDeactivate();
+    });
+
+    //------------------------------------------------------------------------------
+    // MapFilterManager
+
     MapFilterManager._filters =[];
+    MapFilterManager._globalEnable = true;
 
     /**
      * フィルタを登録する。
      * 
      * @param {String} filterName フィルタ識別名
      * @param {Method} constructionMethod 構築メソッド
+     * @param {Array<String>} saveProperties 保存プロパティ名
      */
-    MapFilterManager.registerFilter = function(filterName, constructionMethod) {
+    MapFilterManager.registerFilter = function(filterName, constructionMethod, saveProperties) {
         try {
             const registeredEntry = this.findFilterEntry(filterName);
             if (registeredEntry) {
@@ -121,10 +161,13 @@ function MapFilterManager() {
                 console.log(pluginName + ":Filter overwrtite. " + filterName);
                 entry.active = false;
                 entry.instance = new constructionMethod();
+                entry.saveProperties = saveProperties;
             } else {
                 const instance = new constructionMethod();
                 const entry = {
+                    name: filterName,
                     active : false,
+                    saveProperties : saveProperties,
                     instance : instance
                 };
                 this._filters.push(entry);
@@ -158,6 +201,31 @@ function MapFilterManager() {
     MapFilterManager.filter = function(filterName) {
         const entry = this.findFilterEntry(filterName);
         return entry ? entry.instance : null;
+    };
+
+    /**
+     * フィルタ全体に対する有効設定をする。
+     */
+    MapFilterManager.globalActivate = function() {
+        this._globalEnable = true;
+        this.update();
+    };
+
+    /**
+     * フィルタ全体に対する無効設定をする。
+     */
+    MapFilterManager.globalDeactivate = function() {
+        this._globalEnable = false;
+        this.update();
+    };
+
+    /**
+     * フィルタ全体に対する有効/無効を取得する。
+     * 
+     * @return {Boolean} フィルタ全体に対して有効な場合にはtrue, それ以外はfalse
+     */
+    MapFilterManager.isGlobalActive = function() {
+        return this._globalEnable;
     };
 
     /**
@@ -198,6 +266,17 @@ function MapFilterManager() {
         this.update();
     };
 
+    /**
+     * fileNameで指定したフィルタが有効かどうかを判定する。
+     * 
+     * @param {String} filterName 
+     * @return {Boolean} 有効な場合にはtrue, それ以外はfalse
+     */
+    MapFilterManager.isActive = function(filterName) {
+        const entry = this.findFilterEntry(filterName);
+        return (entry && entry.active);
+    };
+
 
     /**
      * フィルタをクリアする。
@@ -222,8 +301,8 @@ function MapFilterManager() {
         }
         const filters = SceneManager._scene._spriteset.filters;
         for (const entry of this._filters) {
-            if (entry.active) {
-                if (!filters.include(entry.instance)) {
+            if (this._globalEnable && entry.active) {
+                if (!filters.includes(entry.instance)) {
                     filters.push(entry.instance);
                     if (debugEnable) {
                         console.log(pluginName + ":Filter add to map. " + entry.name);
@@ -245,17 +324,19 @@ function MapFilterManager() {
      *  セーブ/ロード時のフィルターの保存/読み込み
      */
     MapFilterManager.saveContents = function() {
-        const contents = [];
+        const contents = {};
+        contents.globalEnable = this._globalEnable;
+        contents.filters = [];
         for (const entry of this._filters) {
             const saveFilterData = {
                 name : entry.name,
                 active : entry.active,
-                uniform : {}
+                properties : {}
             };
-            for (const key of entry.instance) {
-                saveFilterData.uniform[key] = entry.isnstance[key];
+            for (const key of entry.saveProperties) {
+                saveFilterData.properties[key] = entry.instance[key];
             }
-            contents.push(saveFilterData);
+            contents.filters.push(saveFilterData);
         }
         return contents;
     };
@@ -267,14 +348,16 @@ function MapFilterManager() {
      */
     MapFilterManager.loadContents = function(contents) {
         this.clear();
-        for (let i = 0; i < contents.length; i++) {
-            const loadFilterData = contents[i];
+        this._globalEnable = globalEnable;
+        for (let i = 0; i < contents.filters.length; i++) {
+            const loadFilterData = contents.filters[i];
             const entry = this.findFilterEntry(loadFilterData.name);
             if (entry) {
                 entry.active = loadFilterData.active;
-                for (const key of loadFilterData.uniform) {
-                    if (key in entry.instance) {
-                        entry.instance[key] = loadFilterData.uniform[key];
+                for (const key of entry.saveProperties) {
+                    if ((key in entry.instance) 
+                            && (key in loadFilterData.properties)) {
+                        entry.instance[key] = loadFilterData.properties[key];
                     }
                 }
             }
@@ -283,6 +366,36 @@ function MapFilterManager() {
     };
     //------------------------------------------------------------------------------
     // DataManager
+    /**
+     * データマップをパースする。
+     * 
+     * @param {DataMap} dataMap データマップ
+     */
+    const _parseNotetag = function(dataMap) {
+        if (dataMap.meta.mapFilters) {
+            MapFilterManager.clear();
+            const entries = dataMap.meta.mapFilters.split(",");
+            for (const entry of entries) {
+                const tokens = entry.split("=");
+                if (tokens.length >= 2) {
+                    const filterName = tokens[0].trim();
+                    const state = tokens[1].trim();
+                    if (state === "on") {
+                        MapFilterManager.activate(filterName);
+                    } else if (state === "off") {
+                        MapFilterManager.deactivate(filterName);
+                    }
+                }
+            }
+        } else if (dataMap.meta.enableFilters) {
+            MapFilterManager.globalActivate(true);
+        } else if (dataMap.meta.disableFilters) {
+            MapFilterManager.globalDeactivate(false);
+        }
+    };
+
+    DataManager.addNotetagParserMaps(_parseNotetag);
+
     const _DataManager_makeSaveContents = DataManager.makeSaveContents;
     /**
      * セーブデータに入れるデータを構築する。
@@ -317,21 +430,4 @@ function MapFilterManager() {
         MapFilterManager.update();
     };
 
-    //------------------------------------------------------------------------------
-    // Scene_Boot
-    // const _Scene_Boot_start = Scene_Boot.prototype.start;
-    // /**
-    //  * Scene_Bootを開始する。
-    //  */
-    // Scene_Boot.prototype.start = function () {
-    //     // MapFilterManager.add("bloom");
-    //     // MapFilterManager.add("tiltshift");
-    //     _Scene_Boot_start.call(this);
-    // };
-    
-    // MapFilterManager._filters["bloom"] = PIXI.filters.BloomFilter;
-    // MapFilterManager._filters["tiltshift"] = PIXI.filters.TiltShiftFilter;
-    // MapFilterManager._filters["grayscale"] = PIXI.filters.GrayScaleFilter;
-    // MapFilterManager._filters["sepia"] = PIXI.filters.SepiaFilter;
-    
 })();
