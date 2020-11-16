@@ -1,9 +1,13 @@
 /*:ja
  * @target MZ
- * @plugindesc マップのFilterを管理する。MZ移植
+ * @plugindesc マップのFilterを管理する。
  * @author weakboar kapuusagi
  * @url https://github.com/weakboar/mv_plugin
  * 
+ * @command clear
+ * @text フィルタ解除
+ * @desc 全てのフィルタを解除する。
+ *
  * @param debugEnable
  * @text デバッグ
  * @desc trueにするとデバッグ出力する。
@@ -13,17 +17,54 @@
  * @help
  * WeakBoar 氏の作成したMVプラグインを元に作成。
  * https://github.com/weakboar/mv_plugin
- * SceneManager._scene._spriteset.filtersに適用するフィルターを管理する。
- * Filterの各パラメータ値の設定は非対応です。
- * セーブ/ロード対応。
+ * Scene_Mapで使用されるspritesetのfilterに追加したり削除したりする。
+ * 
  * 
  * ■ 使用時の注意
  * 他のマップフィルタ関連と競合する可能性があります。
  * 
  * ■ プラグイン開発者向け
- * MapFilterManager.apply()をコールして適用すると、
- * Scene_Mapの_spritesetに適用するfiltersを上書きします。
- * そのため、他のマップフィルタ関連と競合する可能性があります。
+ * 指定可能なのは、PIXI.Filterの派生クラス。
+ * ベーシックシステムのソースだと、rmmz_core.js にあるColorFilterが単純でよろしい。
+ * 
+ * 新規マップフィルタプラグインを追加する際に便利に使えるようにするためのマネージャ。
+ * 
+ * MapFilterManager.registerFilter(filterName:string, constructionMethod:function) : void
+ *     新しいマップフィルタを追加する。
+ *     registerFilter()をコールした時点で、インスタンスが生成される。
+ *     既に同名のフィルタが登録済みの場合には上書きされる。
+ * 
+ * MapFilterManager.filter(filterName:string):Filter
+ *     指定したフィルタのインスタンスを得る。
+ *     各マップフィルタプラグインで、設定値を適用するために使用する。
+ * 
+ * MapFilterManager.activate(filterName:string):void
+ *     指定したフィルタを有効にする。
+ * 
+ * MapFilterManager.deactivate(filterName:string):void
+ *     指定したフィルタを無効にする。
+ * 
+ * MapFilterManager.clear()
+ *     フィルタを全て無効にする。
+ * 
+ * 
+ * カスタムなフィルタを追加するならば...
+ * (1) PIXI.Filterを派生したクラスを作成する。
+ *     rmmz_core.jsのColorFilterが参考になる。
+ * (2) MapFilterManager.filterに登録する。
+ *     MapFilterManager.registerFilter("hoge", HogeFilter);
+ * (3) フィルタのON/OFFをできるようにする。
+ *     各プラグイン側で
+ *     MapFilterManager.activate("hoge")
+ *     と
+ *     MapFilterManager.deactivate("hoge")
+ *     をコールするようにすればいい。
+ * (4) プラグインコマンドでパラメータを変更できるようにする。
+ *     各プラグイン側で、
+ *     MapFilterManager.filter("hoge").uniforms.XXXX = YYYY
+ *     のように設定したあと、
+ *     MapFilterManager.update()
+ *     を呼ぶ。
  * 
  * ============================================
  * プラグインコマンド
@@ -57,6 +98,11 @@ function MapFilterManager() {
     const debugEnable = (typeof parameters["debugEnable"] === "undefined")
             ? true : (parameters["debugEnable"] === "true");
 
+    // eslint-disable-next-line no-unused-vars
+    PluginManager.registerCommand(pluginName, "clear", args => {
+        MapFilterManager.clear();
+    });
+
     MapFilterManager._filters =[];
 
     /**
@@ -66,22 +112,32 @@ function MapFilterManager() {
      * @param {Method} constructionMethod 構築メソッド
      */
     MapFilterManager.registerFilter = function(filterName, constructionMethod) {
-        if (this.findFilterEntry(filterName)) {
-            console.error(pluginName + ":Filter already registered. " + filterName);
-            return;
-        }
         try {
-            const instance = new constructionMethod();
-            const entry = {
-                active : false,
-                instance : instance
-            };
-            this._filters.push(entry);
+            const registeredEntry = this.findFilterEntry(filterName);
+            if (registeredEntry) {
+                if (registeredEntry.instance.constructor === constructionMethod) {
+                    return ;
+                }
+                console.log(pluginName + ":Filter overwrtite. " + filterName);
+                entry.active = false;
+                entry.instance = new constructionMethod();
+            } else {
+                const instance = new constructionMethod();
+                const entry = {
+                    active : false,
+                    instance : instance
+                };
+                this._filters.push(entry);
+                if (debugEnable) {
+                    console.log(pluginName + ":Filter registered. " + filterName);
+                }
+            }
         }
         catch (e) {
             console.error(e);
         }
     };
+
 
     /**
      * filterNameに一致するフィルタエントリを得る。
@@ -109,7 +165,7 @@ function MapFilterManager() {
      * 
      * @param {String} filterName フィルタ名
      */
-    MapFilterManager.setActive = function(filterName) {
+    MapFilterManager.activate = function(filterName) {
         const entry = this.findFilterEntry(filterName);
         if (entry === null) {
             // 該当するフィルタ無し。
@@ -120,6 +176,7 @@ function MapFilterManager() {
         if (debugEnable) {
             console.log(pluginName + ":Filter activated. " + filterName);
         }
+        this.update();
     };
 
     /**
@@ -127,7 +184,7 @@ function MapFilterManager() {
      * 
      * @param {String} filterName キー名
      */
-    MapFilterManager.setDeactive = function(filterName) {
+    MapFilterManager.deactivate = function(filterName) {
         const entry = this.findFilterEntry(filterName);
         if (entry === null) {
             // 該当するフィルタ無し。
@@ -138,6 +195,7 @@ function MapFilterManager() {
         if (debugEnable) {
             console.log(pluginName + ":Filter deactivated. " + filterName);
         }
+        this.update();
     };
 
 
@@ -148,13 +206,15 @@ function MapFilterManager() {
         for (const entry of this._filters) {
             entry.active = false;
         }
+        this.update();
     };
 
     /**
      * フィルタを適用する。
      */
     MapFilterManager.update = function() {
-        if (!(SceneManager._scene && SceneManager._scene === Scene_Map)) {
+        // Note: "_"付いたメンバに外部からアクセスするのでよろしくない。
+        if (!(SceneManager._scene && SceneManager._scene.constructor === Scene_Map)) {
             if (debugEnable) {
                 console.log(pluginName + ":Current scene is not Scene_Map")
             }
