@@ -105,7 +105,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.2.0 行動終了時のTPB減少量を指定できるようにした。動作未確認。
+ * Version.0.2.0 行動終了時のTPB減少量を指定できるようにした。
  * Version.0.1.0 作成した。
  */
 (() => {
@@ -237,7 +237,7 @@
      */
     Game_BattlerBase.prototype.skillTpbCost = function(skill) {
         if (skill.meta.tpbCost) {
-            return Math.max(0, (Number(item.meta.tpbCost) || 0));
+            return Math.max(0, (Number(skill.meta.tpbCost) || 0));
         } else {
             return this.defaultTpbCost();
         }

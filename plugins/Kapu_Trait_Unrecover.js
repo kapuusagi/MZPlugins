@@ -47,7 +47,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 (() => {
     const pluginName = "Kapu_Trait_Unrecover";
@@ -114,7 +114,7 @@
      * @param {Number} target 対象
      */
     Game_BattlerBase.prototype.isUnrecover = function(target) {
-        return !this.traits(Game_BattlerBase.TRAIT_UNRECOVER).some(
+        return this.traits(Game_BattlerBase.TRAIT_UNRECOVER).some(
             trait => trait.dataId === target
         );
     };

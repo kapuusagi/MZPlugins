@@ -51,7 +51,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 TWLD向けに作成したものを移植して実装。動作未確認。
+ * Version.0.1.0 TWLD向けに作成したものを移植して実装。
  */
 /**
  * Window_ItemCategoryVertical
@@ -511,7 +511,7 @@ function Window_ItemCommand() {
     /**
      * 使用対象アクター選択でキャンセル操作されたときの処理を行う。
      */
-    Scene_ItemBase.prototype.onActorCancel = function() {
+    Scene_Item.prototype.onActorCancel = function() {
         _Scene_Item_onActorCancel.call(this);
         this._itemCommandWindow.hide();
     };

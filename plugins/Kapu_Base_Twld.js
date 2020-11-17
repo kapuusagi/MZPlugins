@@ -174,7 +174,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.2.0 スキルによる回復倍率を、使用者と対象のMENを参照するようにした。動作未確認。
+ * Version.0.2.0 スキルによる回復倍率を、使用者と対象のMENを参照するようにした。
  *               TP上昇タイミングをスキル行動終了後から使用時に変更した。
  * Version.0.1.0 追加した。
  */
@@ -299,12 +299,10 @@
     /**
      * パラメータのバフ/デバフ適用前のベース値を得る。
      * 
-     * Note: 装備品増加分にはTraitによるレートボーナスを適用外とするため、
-     *       オーバーライドする。
-     * 
      * @param {Number} paramId パラメータID
      * @return {Number} バフ/デバフ適用前のベース値
      * !!!overwrite!!! Game_BattlerBase.paramWithoutBuff()
+     *     装備品増加分にはTraitによるレートボーナスを適用外とするため、オーバーライドする。
      */
     Game_Actor.prototype.paramWithoutBuff = function(paramId) {
         return this.paramBasePlus(paramId) * this.paramRate(paramId) + this.paramEquip(paramId);
@@ -319,6 +317,7 @@
      * @param {Number} paramId パラメータID
      * @return {Number} 加算値
      * !!!overwrite!!! Game_Actor.paramPlus()
+     *     装備品増加分を増加レート特性から除外するため、オーバーライドする。
      */
     Game_Actor.prototype.paramPlus = function(paramId) {
         return Game_Battler.prototype.paramPlus.call(this, paramId);
@@ -329,6 +328,7 @@
      * 
      * @return {Number} パラメータ最大値。
      * !!!overwrite!!! Game_Actor.paramMax()
+     *     パラメータ最大値を返すためにオーバーライドする。
      */
     Game_Actor.prototype.paramMax = function(paramId) {
         return actorParamMax[paramId];
@@ -341,6 +341,7 @@
      * 
      * @return {Number} パラメータ最大値。
      * !!!overwrite!!! Game_Enemy.paramMax()
+     *     パラメータ最大値を返すためにオーバーライドする。
      */
     Game_Enemy.prototype.paramMax = function(paramId) {
         return enemyParamMax[paramId];
@@ -354,7 +355,8 @@
      * 命中判定とダメージ算出、効果適用を行う。
      * 
      * @param {Game_BattlerBase} target 対象
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.apply()
+     *     クリティカル判定時、命中するように変更したためオーバーライドする。
      */
     Game_Action.prototype.apply = function(target) {
         const result = target.result();
@@ -389,6 +391,7 @@
      * @param {Game_Battler} target 対象
      * @return {Boolean} 命中できた場合にはtrue, それ以外はfalse
      * !!!overwrite!!! Game_Action.testHit
+     *     クリティカル判定時、命中するように変更したためオーバーライドする。
      */
     Game_Action.prototype.testHit = function(target) {
         const result = target.result();
@@ -424,6 +427,7 @@
      * @param {Game_Battler} target ターゲット
      * @return {Number} 回復レート(0.0～、等倍は1.0)
      * !!!overwrite!!! Game_Action.itemRec()
+     *     回復レートにスキル使用者のレートと平均を取るため、オーバーライドする。
      */
     Game_Action.prototype.itemRec = function(target) {
         if (this.isSkill() && this.isRecover()) {

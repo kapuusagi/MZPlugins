@@ -3,8 +3,6 @@
  * @plugindesc スキル使用前HP/MP/TP適用プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_EvalImmidiatelyStatus
- * @orderAfter Kapu_EvalImmidiatelyStatus
  * 
  * @help 
  * ダメージ計算に、スキル使用前のHP/MP/TPを使用可能にするプラグイン。
@@ -16,7 +14,7 @@
  * なし
  * 
  * ■ プラグイン開発者向け
- * Game_Action.evalDamageFormulaをオーバーライドします。
+ * なし
  * 
  * ============================================
  * プラグインコマンド
@@ -31,11 +29,56 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 (() => {
     // const pluginName = "Kapu_EvalWithImmidiatelyHpMpTp";
     // const parameters = PluginManager.parameters(pluginName);
+
+    //------------------------------------------------------------------------------
+    // Game_Battler
+    const _Game_Battler_initMembers = Game_Battler.prototype.initMembers;
+    /**
+     * メンバーを初期化する。
+     */
+    Game_Battler.prototype.initMembers = function() {
+        _Game_Battler_initMembers.call(this);
+        this._justHp = undefined;
+        this._justMp = undefined;
+        this._justTp = undefined;
+    };
+
+    /**
+     * 直前のHPを設定する。
+     * 
+     * @param {Number} hp HP
+     */
+    Game_Battler.prototype.setJustHp = function(hp) {
+        this._justHp = hp;
+    };
+
+    /**
+     * 直前のMPを設定する。
+     * 
+     * @param {Number} mp MP
+     */
+    Game_Battler.prototype.setJustMp = function(mp) {
+        this._justMp = mp;
+    };
+    /**
+     * 直前のTPを設定する。
+     * 
+     * @param {Number} tp TP
+     */
+    Game_Battler.prototype.setJustTp = function(tp) {
+        this._justTp = tp;
+    };
+
+    Object.defineProperties(Game_Battler.prototype, {
+        justHp : { configurable:true, get: function() { return this._justHp || this.hp; } },
+        justMp : { configurable:true, get: function() { return this._justMp || this.mp; } },
+        justTp : { configurable:true, get: function() { return this._justTp || this.tp; } }
+    });
 
     //------------------------------------------------------------------------------
     // Game_Action
@@ -63,29 +106,20 @@
         this._subjectTp = subject.tp;
     };
 
+    const _Game_Action_evalDamageFormula = Game_Action.prototype.evalDamageFormula;
     /**
      * ダメージ計算をする。
      * アクションに設定された計算式が不正な場合、結果は0になる。
      * 
      * @param {Game_BattlerBase} target 対象
      * @return {Number} ダメージ値。
-     * !!!overwrite!!! Game_Action.evalDamageFormula
      */
     Game_Action.prototype.evalDamageFormula = function(target) {
-        try {
-            const item = this.item();
-            const a = this.subject(); // eslint-disable-line no-unused-vars
-            const b = target; // eslint-disable-line no-unused-vars
-            const v = $gameVariables._data; // eslint-disable-line no-unused-vars
-            const justHp = this._subjectHp; // eslint-disable-line no-unused-vars
-            const justMp = this._subjectMp; // eslint-disable-line no-unused-vars
-            const justTp = this._subjectTp; // eslint-disable-line no-unused-vars
-            const sign = [3, 4].includes(item.damage.type) ? -1 : 1;
-            const value = Math.max(eval(item.damage.formula), 0) * sign;
-            return isNaN(value) ? 0 : value;
-        } catch (e) {
-            return 0;
-        }
+        const subject = this.subject();
+        subject.setJustHp(this._subjectHp);
+        subject.setJustMp(this._subjectMp);
+        subject.setJustTp(this._subjectTp);
+        return _Game_Action_evalDamageFormula.call(this, target);
     };
 
 })();
