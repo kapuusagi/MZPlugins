@@ -143,6 +143,7 @@ function MapFilterManager() {
 
     MapFilterManager._filters =[];
     MapFilterManager._globalEnable = true;
+    MapFilterManager._frameCount = 0;
 
     /**
      * フィルタを登録する。
@@ -320,6 +321,35 @@ function MapFilterManager() {
             }
         }
     };
+
+    /**
+     * 時間を初期化する。
+     */
+    MapFilterManager.initTime = function() {
+        this._frameCount = 0;
+    }
+
+    /**
+     * フィルタのtimeパラメータを更新する。
+     * 
+     * @param {Boolean} sceneActive シーンがアクティブかどうか
+     */
+    MapFilterManager.updateTime = function(sceneActive) {
+        if (sceneActive) {
+            this._frameCount++;
+            if (this._frameCount >= 3600) {
+                this._frameCount = 0;
+            }
+            const time = this._frameCount / 60;
+            for (const entry of this._filters) {
+                if (this._globalEnable && entry.active) {
+                    if ("time" in entry.instance) {
+                        entry.instance.time = time;
+                    }
+                }
+            }
+        }
+    };
     /**
      *  セーブ/ロード時のフィルターの保存/読み込み
      */
@@ -421,6 +451,17 @@ function MapFilterManager() {
         }
     };
 
+    //------------------------------------------------------------------------------
+    // Scene_Map
+    const _Scene_Map_create = Scene_Map.prototype.create;
+    /**
+     * Scene_Mapを構築する
+     */
+    Scene_Map.prototype.create = function() {
+        MapFilterManager.initTime();
+        _Scene_Map_create.call(this);
+    };
+
     const _Scene_Map_createSpriteset = Scene_Map.prototype.createSpriteset;
     /**
      * Scene_Mapで使用するSpritesetを作成する。
@@ -430,4 +471,12 @@ function MapFilterManager() {
         MapFilterManager.update();
     };
 
+    const _Scene_Map_update = Scene_Map.prototype.update;
+    /**
+     * Scene_Mapを更新する。
+     */
+    Scene_Map.prototype.update = function() {
+        MapFilterManager.updateTime(this.isActive());
+        _Scene_Map_update.call(this);
+    };
 })();

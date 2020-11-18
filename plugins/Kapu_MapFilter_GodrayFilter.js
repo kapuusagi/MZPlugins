@@ -20,20 +20,29 @@
  * @text 設定変更
  * @desc フィルタの設定を変更する。
  * 
- * @param angle
+ * @arg angle
  * @text 角度
- * @desc 角度
+ * @desc 入射角。parallelが有効な場合のみ
  * @type number
+ * @min -60
+ * @max 60
  * 
- * @param gain
+ * 
+ * @arg gain
  * @text ゲイン
  * @desc ゲイン量
  * @type number
+ * @decimals 2
+ * @min 0.00
+ * @max 1.00
  * 
- * @param lacunarity
+ * @arg lacunarity
  * @text 空隙性 
- * @desc 隙間に関するもの。
+ * @desc 隙間に関するもの。小さくするほど光が太くなる。
  * @type number
+ * @decimals 2
+ * @min 0.00
+ * @max 5.00
  * 
  * 
  * @help 
@@ -45,6 +54,11 @@
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
+ * 
+ * Note
+ * 以下の設定をできるようにしたい。
+ * parallelのON/OFF
+ * center位置(parallel無効時のみ効果)
  * 
  * ============================================
  * プラグインコマンド
@@ -63,7 +77,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 PIXI.Filtersを元に新規作成。動作未確認。
+ * Version.0.1.0 PIXI.Filtersを元に新規作成。
  */
 (() => {
     const pluginName = "Kapu_MapFilter_GodrayFilter";
@@ -85,7 +99,7 @@
         const angle = Number(args.angle);
         const gain = Number(args.gain);
         const lacunarity = Number(args.lacunarity);
-        if (angle >= 0) {
+        if ((angle >= -60) && (angle <= 60)) {
             MapFilterManager.filter(MapFilterManager.FILTER_GODRAY).angle = angle;
         }
         if (gain >= 0) {
@@ -107,8 +121,8 @@
     /**
      * GodrayFilter を 初期化する。
      */
-    TiltShiftAxisFilter.prototype.initialize = function() {
-        PIXI.Filter.call(this, this._vertexSrc(), this._flagmentSrc());
+    GodrayFilter.prototype.initialize = function() {
+        PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
         this.uniforms.dimensions = new Float32Array(2);
 
         this._angleLight = new PIXI.Point();
@@ -168,15 +182,14 @@
             "{" +
             "    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);" +
             "}" +
-            "// Classic Perlin noise, periodic variant" +
             "float pnoise(vec3 P, vec3 rep)" +
             "{" +
-            "    vec3 Pi0 = mod(floor(P), rep); // Integer part, modulo period" +
-            "    vec3 Pi1 = mod(Pi0 + vec3(1.0), rep); // Integer part + 1, mod period" +
+            "    vec3 Pi0 = mod(floor(P), rep);" +
+            "    vec3 Pi1 = mod(Pi0 + vec3(1.0), rep);" +
             "    Pi0 = mod289(Pi0);" +
             "    Pi1 = mod289(Pi1);" +
-            "    vec3 Pf0 = fract(P); // Fractional part for interpolation" +
-            "    vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0" +
+            "    vec3 Pf0 = fract(P);" +
+            "    vec3 Pf1 = Pf0 - vec3(1.0);" +
             "    vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);" +
             "    vec4 iy = vec4(Pi0.yy, Pi1.yy);" +
             "    vec4 iz0 = Pi0.zzzz;" +
@@ -264,12 +277,11 @@
             "" +
             "    float noise = turb(dir + vec3(time, 0.0, 62.1 + time) * 0.05, vec3(480.0, 320.0, 480.0), lacunarity, gain);" +
             "    noise = mix(noise, 0.0, 0.3);" +
-            "    //fade vertically." +
             "    vec4 mist = vec4(noise, noise, noise, 1.0) * (1.0 - coord.y);" +
             "    mist.a = 1.0;" +
             "" +
             "    gl_FragColor = texture2D(uSampler, vTextureCoord) + mist;" +
-            "}"
+            "}";
 
         return src;
     };
@@ -284,7 +296,7 @@
      */
     GodrayFilter.prototype.apply = function(filterManager, input, output, clear) {
         const {width, height} = input.filterFrame;
-        this.uniforms.light = this.parallel ? this._angleLeLight : this.center;
+        this.uniforms.light = this.parallel ? this._angleLight : this.center;
         this.uniforms.dimensions[0] = width;
         this.uniforms.dimensions[1] = height;
         this.uniforms.aspect = height / width;
@@ -293,6 +305,11 @@
     };
 
     Object.defineProperties(GodrayFilter.prototype, {
+        /**
+         * 角度
+         * 
+         * @member {Number}
+         */
         angle: {
             get: function() { return this._angle; },
             set: function(value) {
@@ -302,10 +319,20 @@
                 this._angleLight.y = Math.sin(radians);
             }
         },
+        /**
+         * ゲイン
+         * 
+         * @member {Number}
+         */
         gain: {
             get: function() { return this.uniforms.gain; },
             set: function(value) { this.uniforms.gain = value; }
         },
+        /**
+         * 隙間
+         * 
+         * @member {Number}
+         */
         lacunarity: {
             get: function() { return this.uniforms.lacunarity; },
             set: function(value) { this.uniforms.lacunarity = value; }
