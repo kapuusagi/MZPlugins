@@ -98,7 +98,7 @@
      * SampleFilterを初期化する。
      */
     SampleFilter.prototype.initialize = function() {
-        PIXI.Filter.call(this, this._vertexSrc(), this._flagmentSrc());
+        PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
         this.uniforms.shadowRate = 0;
     };
 
@@ -126,7 +126,7 @@
      * 
      * @return {String} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
      */
-    SampleFilter.prototype._flagmentSrc = function() {
+    SampleFilter.prototype._fragmentSrc = function() {
         const src =
             "varying vec2 vTextureCoord;" +
             "uniform sampler2D uSampler;" +

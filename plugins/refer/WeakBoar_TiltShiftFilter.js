@@ -46,9 +46,60 @@ function TiltShiftAxisFilter()
 {
     PIXI.Filter.call(this,
         // vertex shader
-        "#define GLSLIFY 1\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat3 projectionMatrix;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void)\n{\n    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n    vTextureCoord = aTextureCoord;\n}",
+        "#define GLSLIFY 1" +
+        "" +
+        "attribute vec2 aVertexPosition;" +
+        "attribute vec2 aTextureCoord;" +
+        "uniform mat3 projectionMatrix;" +
+        "" + 
+        "varying vec2 vTextureCoord;" + 
+        "" + 
+        "void main(void)" + 
+        "{" +
+        "    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);" +
+        "    vTextureCoord = aTextureCoord;" +
+        "}",
         // fragment shader
-        "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\n\nuniform sampler2D uSampler;\nuniform float blur;\nuniform float gradientBlur;\nuniform vec2 start;\nuniform vec2 end;\nuniform vec2 delta;\nuniform vec2 texSize;\n\nfloat random(vec3 scale, float seed)\n{\n    return fract(sin(dot(gl_FragCoord.xyz + seed, scale)) * 43758.5453 + seed);\n}\n\nvoid main(void)\n{\n    vec4 color = vec4(0.0);\n    float total = 0.0;\n\n    float offset = random(vec3(12.9898, 78.233, 151.7182), 0.0);\n    vec2 normal = normalize(vec2(start.y - end.y, end.x - start.x));\n    float radius = smoothstep(0.0, 1.0, abs(dot(vTextureCoord * texSize - start, normal)) / gradientBlur) * blur;\n\n    for (float t = -30.0; t <= 30.0; t++)\n    {\n        float percent = (t + offset - 0.5) / 30.0;\n        float weight = 1.0 - abs(percent);\n        vec4 sample = texture2D(uSampler, vTextureCoord + delta / texSize * percent * radius);\n        sample.rgb *= sample.a;\n        color += sample * weight;\n        total += weight;\n    }\n\n    gl_FragColor = color / total;\n    gl_FragColor.rgb /= gl_FragColor.a + 0.00001;\n}\n"
+        "#define GLSLIFY 1" + 
+        "" +
+        "varying vec2 vTextureCoord;" +
+        "" + 
+        "uniform sampler2D uSampler;" + 
+        "uniform float blur;" + 
+        "uniform float gradientBlur;" + 
+        "uniform vec2 start;" + 
+        "uniform vec2 end;" + 
+        "uniform vec2 delta;" + 
+        "uniform vec2 texSize;" + 
+        "" + 
+        "float random(vec3 scale, float seed)" + 
+        "{" + 
+        "    return fract(sin(dot(gl_FragCoord.xyz + seed, scale)) * 43758.5453 + seed);" + 
+        "}" + 
+        "" + 
+        "void main(void)" + 
+        "{" + 
+        "    vec4 color = vec4(0.0);" + 
+        "    float total = 0.0;" + 
+        "" + 
+        "    float offset = random(vec3(12.9898, 78.233, 151.7182), 0.0);" + 
+        "    vec2 normal = normalize(vec2(start.y - end.y, end.x - start.x));" + 
+        "    float radius = smoothstep(0.0, 1.0, abs(dot(vTextureCoord * texSize - start, normal)) / gradientBlur) * blur;" + 
+        "" +
+        "    for (float t = -30.0; t <= 30.0; t++)" +
+        "    {" +
+        "        float percent = (t + offset - 0.5) / 30.0;" +
+        "        float weight = 1.0 - abs(percent);" +
+        "        vec4 sample = texture2D(uSampler, vTextureCoord + delta / texSize * percent * radius);" + 
+        "        sample.rgb *= sample.a;" +
+        "        color += sample * weight;" +
+        "        total += weight;" +
+        "    }" +
+        "" + 
+        "    gl_FragColor = color / total;" + 
+        "    gl_FragColor.rgb /= gl_FragColor.a + 0.00001;" +
+        "}" +
+        ""
 
     );
 
