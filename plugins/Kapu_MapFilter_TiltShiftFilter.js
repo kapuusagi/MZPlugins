@@ -27,9 +27,21 @@
  * 
  * @arg gradientBlur
  * @text ぼかしの勾配
- * @desc ぼかしの勾配。大きくすると急激にぼける。
+ * @desc ぼかしの勾配。大きくすると中心からのぼけ具合が緩やかになる。
  * @type number
  * 
+ * 
+ * @param defaultBlur
+ * @text デフォルトのぼかし強度
+ * @desc 大きくするとぼけ具合が強くなる。
+ * @type number
+ * @default 30
+ * 
+ * @param defaultGradientBlur
+ * @text デフォルトのぼかし勾配
+ * @desc 大きくすると中心からのぼけ具合が緩やかになる。
+ * @type number
+ * @default 800
  * 
  * @help 
  * Scene_MapにPIXI.Filters.TiltShiftFilterを適用するプラグイン。
@@ -52,6 +64,9 @@
  * Note：
  * アクターの一を中心にしてぼかすように若干変更を加えるようにしたいなあ。
  * あとぼかしの中心位置をずらす機能。
+ * この辺はちょっと厄介で、マップ端にアクターが移動したことによるスクロール固定と、
+ * イベント操作によるスクロールの2つを上手いこと処理しないと行けない。
+ * カメラ中央座標を使う場合と、アクター中央座標を使う場合の2つがあるってこと。
  * 
  * ============================================
  * プラグインコマンド
@@ -70,11 +85,13 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 WeakBoar氏のプラグインを元に作成。動作未確認。
+ * Version.0.1.0 WeakBoar氏のプラグインを元に作成。追従未実装。
  */
 (() => {
     const pluginName = "Kapu_MapFilter_TiltShiftFilter";
-    // const parameters = PluginManager.parameters(pluginName);
+    const parameters = PluginManager.parameters(pluginName);
+    const defaultBlur = Number(parameters["defaultBlur"]) || 30;
+    const defaultGradientBlur = Number(parameters["defaultGradientBlur"]) || 800;
 
     MapFilterManager.FILTER_TILTSHIFT = "TiltShift";
 
@@ -117,11 +134,11 @@
      * TiltShiftAxisFilterを 初期化する。
      */
     TiltShiftAxisFilter.prototype.initialize = function() {
-        PIXI.Filter.call(this, this._vertexSrc(), this._flagmentSrc());
-        this.uniforms.blur = 30;
-        this.uniforms.gradientBlur = 600;
-        this.uniforms.start = new PIXI.Point(0, Graphics.height / 2);
-        this.uniforms.end = new PIXI.Point(Graphics.width, Graphics.height / 2);
+        PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
+        this.uniforms.blur = defaultBlur;
+        this.uniforms.gradientBlur = defaultGradientBlur;
+        this.uniforms.start = new PIXI.Point(0, 360); // 暫定値
+        this.uniforms.end = new PIXI.Point(1280, 360); // 暫定値
         this.uniforms.delta = new PIXI.Point(30, 30);
         this.uniforms.texSize = new PIXI.Point(window.innerWidth, window.innerHeight);
 
@@ -143,23 +160,6 @@
      * @return {String} バーテックスシェーダーソース
      */
     TiltShiftAxisFilter.prototype._vertexSrc = function() {
-        // WeakBore氏のソースではバーテックスシェーダーを設定しているが、
-        // Evan氏のソースではバーテックスシェーダーはnullを渡している。
-
-        // const src = 
-        //     "#define GLSLIFY 1" +
-        //     "" +
-        //     "attribute vec2 aVertexPosition;" +
-        //     "attribute vec2 aTextureCoord;" +
-        //     "uniform mat3 projectionMatrix;" +
-        //     "" + 
-        //     "varying vec2 vTextureCoord;" + 
-        //     "" + 
-        //     "void main(void)" + 
-        //     "{" +
-        //     "    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);" +
-        //     "    vTextureCoord = aTextureCoord;" +
-        //     "}"
         const src = null;
         return src;
     };
@@ -171,42 +171,45 @@
      */
     TiltShiftAxisFilter.prototype._fragmentSrc = function() {
         const src =
-            "uniform sampler2D texture;" +
-            "uniform float blurRadius;" +
-            "uniform float gradientRadius;" +
+            "varying vec2 vTextureCoord;" +
+            "" +
+            "uniform sampler2D uSampler;" +
+            "uniform float blur;" +
+            "uniform float gradientBlur;" +
             "uniform vec2 start;" +
             "uniform vec2 end;" +
             "uniform vec2 delta;" +
             "uniform vec2 texSize;" +
-            "varying vec2 texCoord;" +
             "" +
-            "  float random(vec3 scale, float seed) {" +
+            "float random(vec3 scale, float seed)" +
+            "{" +
             "    return fract(sin(dot(gl_FragCoord.xyz + seed, scale)) * 43758.5453 + seed);" +
-            "  }" +
+            "}" +
             "" +
-            "void main() {" +
-            "  vec4 color = vec4(0.0);" +
-            "  float total = 0.0;" +
-            "  " +
-            "  float offset = random(vec3(12.9898, 78.233, 151.7182), 0.0);" +
-            "  " +
-            "  vec2 normal = normalize(vec2(start.y - end.y, end.x - start.x));" +
-            "  float radius = smoothstep(0.0, 1.0, abs(dot(texCoord * texSize - start, normal)) / gradientRadius) * blurRadius;" +
-            "  for (float t = -30.0; t <= 30.0; t++) {" +
-            "    float percent = (t + offset - 0.5) / 30.0;" +
-            "    float weight = 1.0 - abs(percent);" +
-            "    vec4 sample = texture2D(texture, texCoord + delta / texSize * percent * radius);" +
-            "    " +
-            "    sample.rgb *= sample.a;" +
-            "    " +
-            "    color += sample * weight;" +
-            "    total += weight;" +
-            "  }" +
-            "  " +
-            "  gl_FragColor = color / total;" +
-            "  " +
-            "  gl_FragColor.rgb /= gl_FragColor.a + 0.00001;" +
-            "}"
+            "void main(void)" +
+            "{" +
+            "    vec4 color = vec4(0.0);" +
+            "    float total = 0.0;" +
+            "" +
+            "    float offset = random(vec3(12.9898, 78.233, 151.7182), 0.0);" +
+            "    vec2 normal = normalize(vec2(start.y - end.y, end.x - start.x));" +
+            "    float radius = smoothstep(0.0, 1.0, abs(dot(vTextureCoord * texSize - start, normal)) / gradientBlur) * blur;" +
+            "" +
+            "    for (float t = -30.0; t <= 30.0; t++)" +
+            "    {" +
+            "        float percent = (t + offset - 0.5) / 30.0;" +
+            "        float weight = 1.0 - abs(percent);" +
+            "        vec4 sample = texture2D(uSampler, vTextureCoord + delta / texSize * percent * radius);" +
+            "        sample.rgb *= sample.a;" +
+            "        color += sample * weight;" +
+            "        total += weight;" +
+            "    }" +
+            "" +
+            "    color /= total;" +
+            "    color.rgb /= color.a + 0.00001;" +
+            "" +
+            "    gl_FragColor = color;" +
+            "}";
         return src;
     };
 
@@ -297,16 +300,18 @@
     /**
      * TiltShiftXFilter.
      * 
+     * 水平方向TiltShiftFilter.
      */
     function TiltShiftXFilter() {
         this.initialize(...arguments);
-        
     }
 
     TiltShiftXFilter.prototype = Object.create(TiltShiftAxisFilter.prototype);
     TiltShiftXFilter.prototype.constructor = TiltShiftXFilter;
 
-    
+    /**
+     * TiltShiftXFilterを初期化する。
+     */    
     TiltShiftXFilter.prototype.initialize = function() {
         TiltShiftAxisFilter.prototype.initialize.call(this);
     };
@@ -325,10 +330,8 @@
     //------------------------------------------------------------------------------
     // TiltShiftYFilter
     /**
-     * A TiltShiftYFilter.
-     *
-     * @class
-     * @extends PIXI.TiltShiftAxisFilter
+     * TiltShiftYFilter
+     * 垂直方向TiltShiftFilter
      */
     function TiltShiftYFilter() {
         this.initialize(...arguments);
@@ -337,6 +340,9 @@
     TiltShiftYFilter.prototype = Object.create(TiltShiftAxisFilter.prototype);
     TiltShiftYFilter.prototype.constructor = TiltShiftYFilter;
 
+    /**
+     * TiltShiftYFilterを初期化する。
+     */
     TiltShiftYFilter.prototype.initialize = function() {
         TiltShiftAxisFilter.prototype.initialize.call(this);
     };
@@ -374,30 +380,28 @@
         this._yFilter = new TiltShiftYFilter();
     };
 
-    MapTiltShiftFilter.prototype = Object.create(PIXI.Filter.prototype);
-    MapTiltShiftFilter.prototype.constructor = TiltShiftFilter;
-
     /**
+     * フィルタを適用する。
      * 
      * @param {PIXI.FilterManager} filterManager 
      * @param {PIXI.RenderTexture} input 入力レンダリングターゲット
      * @param {PIXI.RenderTexture} output 出力レンダリングターゲット
      */
     MapTiltShiftFilter.prototype.apply = function(filterManager, input, output) {
-        const renderTarget = filterManager.getRenderTarget(true);
-        this._xFilter.texSize = new PIXI.Point(renderTarget.size.width, renderTarget.size.height);
-        this._yFilter.texSize = new PIXI.Point(renderTarget.size.width, renderTarget.size.height);
-    
-        this._xFilter.apply(filterManager, input, renderTarget, true);
-        this._yFilter.apply(filterManager, renderTarget, output, false);
-    
-        filterManager.returnRenderTarget(renderTarget);
+        let renderTarget = filterManager.getFilterTexture();
+        this._xFilter.apply(filterManager, input, renderTarget);
+        this._yFilter.apply(filterManager, renderTarget, output);
+        filterManager.returnFilterTexture(renderTarget);
+    };
 
-
-        // Note どっちか1つだけ生かしてみル場合には？
-        // this._xFilter.texSize = new PIXI.Point(renderTarget.size.width, renderTarget.size.height);
-        // this._xFilter.apply(filterManager, input, output, false);
-
+    /**
+     * ぼかしの中央を設定する。
+     * 
+     * @param {Number} y 中央位置
+     */
+    MapTiltShiftFilter.prototype.setCenterY = function(y) {
+        this.start = new PIXI.Point(0, y);
+        this.end = new PIXI.Point(Graphics.boxWidth, y);
     };
 
     Object.defineProperties(MapTiltShiftFilter.prototype, {
@@ -469,10 +473,23 @@
             }
         }
     });
+    //------------------------------------------------------------------------------
+    // MapFilterManager
+
+    const _Scene_Map_start = Scene_Map.prototype.start;
+    /**
+     * Scene_Mapを開始する。
+     */
+    Scene_Map.prototype.start = function() {
+        const filter = MapFilterManager.filter(MapFilterManager.FILTER_TILTSHIFT);
+        if (filter) {
+            filter.setCenterY(Graphics.boxHeight / 2);
+        }
+        _Scene_Map_start.call(this);
+    };
 
     //------------------------------------------------------------------------------
     // MapFilterManager
     MapFilterManager.registerFilter(MapFilterManager.FILTER_TILTSHIFT, MapTiltShiftFilter,
         [ "blur", "gradientBlur"] );
-
 })();
