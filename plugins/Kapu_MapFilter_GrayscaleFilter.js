@@ -10,13 +10,21 @@
  * @text フィルタON/OFF
  * @desc フィルタのON/OFFを設定する。
  * 
+ * @arg enabled
+ * @text 有効にする
+ * @desc 有効にする場合にはtrue, それ以外はfalse
+ * @type boolean
+ * @default false
+ * 
  * @help 
  * WeakBoar氏のMV向けソースを元に作成。
  * https://github.com/weakboar/mv_plugin
  * 
  * ■ 使用時の注意
+ * なし。
  * 
  * ■ プラグイン開発者向け
+ * なし。
  * 
  * ============================================
  * プラグインコマンド
@@ -27,11 +35,12 @@
  * ============================================
  * ノートタグ
  * ============================================
+ * ノートタグはありません。
  * 
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 WeakBoar氏のMV向けプラグインを元に作成。動作未確認。
+ * Version.0.1.0 WeakBoar氏のMV向けプラグインを元に作成。
  */
 (() => {
     const pluginName = "Kapu_MapFilter_GrayscaleFilter";
@@ -56,7 +65,7 @@
      * GrayscaleFilter
      * グレースケールにするフィルター。
      */
-    function GrayscaleFilter {
+    function GrayscaleFilter() {
         this.initialize(...arguments);
     }
 
@@ -75,20 +84,6 @@
      * @return {String} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
      */
     GrayscaleFilter.prototype._vertexSrc = function() {
-        // const src = 
-        //     "#define GLSLIFY 1" +
-        //     "attribute vec2 aVertexPosition;" +
-        //     "attribute vec2 aTextureCoord;" +
-        //     "" +
-        //     "uniform mat3 projectionMatrix;" +
-        //     "" +
-        //     "varying vec2 vTextureCoord;" +
-        //     "" +
-        //     "void main(void)" +
-        //     "{" +
-        //     "    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);" +
-        //     "    vTextureCoord = aTextureCoord;" +
-        //     "}";
         const src = null;
         return src;
     };
@@ -100,7 +95,6 @@
     GrayscaleFilter.prototype._fragmentSrc = function() {
         const src = 
                 "precision mediump float;" +
-                "#define GLSLIFY 1" +
                 "" +
                 "uniform sampler2D uSampler;" +
                 "varying vec2      vTextureCoord;" +

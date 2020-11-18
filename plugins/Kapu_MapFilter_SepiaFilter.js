@@ -37,11 +37,12 @@
  * ============================================
  * ノートタグ
  * ============================================
+ * ノートタグはありません。
  * 
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 WeakBoar氏のMV向けプラグインを元に作成。動作未確認。
+ * Version.0.1.0 WeakBoar氏のMV向けプラグインを元に作成。
  */
 (() => {
     const pluginName = "Kapu_MapFilter_SepiaFilter";
@@ -85,20 +86,6 @@
      * @return {String} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
      */
     SepiaFilter.prototype._vertexSrc = function() {
-        // const src = 
-        //     "#define GLSLIFY 1" +
-        //     "attribute vec2 aVertexPosition;" +
-        //     "attribute vec2 aTextureCoord;" +
-        //     "" +
-        //     "uniform mat3 projectionMatrix;" +
-        //     "" +
-        //     "varying vec2 vTextureCoord;" +
-        //     "" +
-        //     "void main(void)" +
-        //     "{" +
-        //     "    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);" +
-        //     "    vTextureCoord = aTextureCoord;" +
-        //     "}";
         const src = null;
         return src;
     };
@@ -110,7 +97,6 @@
     SepiaFilter.prototype._fragmentSrc = function() {
         const src = 
             "precision mediump float;" +
-            "#define GLSLIFY 1" +
             "" +
             "uniform sampler2D uSampler;" +
             "varying vec2      vTextureCoord;" +
