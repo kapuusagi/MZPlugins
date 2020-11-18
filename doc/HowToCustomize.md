@@ -1406,3 +1406,10 @@ TPクリア -> clearTp -> setTp -> refresh
 装備変更をすると、 __refresh()__ が呼び出され、その中で装備解除処理が発生する。
 
 
+
+
+### PIXIのフィルタソースはどこにあるのか？
+
+GitHubにある。
+
+https://github.com/pixijs
