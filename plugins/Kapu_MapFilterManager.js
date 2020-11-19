@@ -105,6 +105,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 セーブデータからの復帰時、フィルタへの値設定で
+ *               エラーが出た場合には例外でログ出力するようにした。
  * Version.0.1.0 WeakBoar氏のMVPluginリポジトリのファイルを元に作成。
  */
 
@@ -378,16 +380,21 @@ function MapFilterManager() {
      */
     MapFilterManager.loadContents = function(contents) {
         this.clear();
-        this._globalEnable = globalEnable;
+        this._globalEnable = contents.globalEnable;
         for (let i = 0; i < contents.filters.length; i++) {
             const loadFilterData = contents.filters[i];
             const entry = this.findFilterEntry(loadFilterData.name);
             if (entry) {
                 entry.active = loadFilterData.active;
                 for (const key of entry.saveProperties) {
-                    if ((key in entry.instance) 
-                            && (key in loadFilterData.properties)) {
-                        entry.instance[key] = loadFilterData.properties[key];
+                    try {
+                        if ((key in entry.instance) 
+                                && (key in loadFilterData.properties)) {
+                            entry.instance[key] = loadFilterData.properties[key];
+                        }
+                    }
+                    catch (e) {
+                        console.error(entry.filterName + ":Set " + key + " error. " + loadFilterData.properties[key]);
                     }
                 }
             }
