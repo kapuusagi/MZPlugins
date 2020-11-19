@@ -30,6 +30,10 @@
  * @desc ぼかしの勾配。大きくすると中心からのぼけ具合が緩やかになる。
  * @type number
  * 
+ * @arg playerCenter
+ * @text プレイヤーに追従させるかどうか
+ * @desc trueにすると追従する。falseにすると画面中央を基準にする。
+ * @type boolean
  * 
  * @param defaultBlur
  * @text デフォルトのぼかし強度
@@ -58,15 +62,16 @@
  * https://github.com/evanw/glfx.js/blob/master/src/filters/common.js
  * 
  * ■ 使用時の注意
+ * デフォルトはプレイヤーの位置を中心として、上下に離れるとぼかす。
+ * プラグインコマンドで playerCenter を false にすると、
+ * 画面中央をぼかすようにする。
+ * 
+ * 残課題
+ *   プレイヤー位置と画面中央がずれているときに、
+ *   playerCenterを急激に切り替えると、変化が目立つ。
  * 
  * ■ プラグイン開発者向け
- * 
- * Note：
- * アクターの一を中心にしてぼかすように若干変更を加えるようにしたいなあ。
- * あとぼかしの中心位置をずらす機能。
- * この辺はちょっと厄介で、マップ端にアクターが移動したことによるスクロール固定と、
- * イベント操作によるスクロールの2つを上手いこと処理しないと行けない。
- * カメラ中央座標を使う場合と、アクター中央座標を使う場合の2つがあるってこと。
+ * 特になし。
  * 
  * ============================================
  * プラグインコマンド
@@ -85,7 +90,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 WeakBoar氏のプラグインを元に作成。追従未実装。
+ * Version.0.1.0 WeakBoar氏のプラグインを元に作成。
  */
 (() => {
     const pluginName = "Kapu_MapFilter_TiltShiftFilter";
@@ -106,14 +111,19 @@
     });
 
     PluginManager.registerCommand(pluginName, "config", args => {
-        const blur = Number(args.blur);
-        const gradientBlur = Number(args.gradientBlur);
+        const blur = (args.blur) ? Number(args.blur) : undefined;
+        const gradientBlur = (args.gradientBlur) ? Number(args.gradientBlur) : undefined;
+        const isPlayerCenter = (typeof args.playerCenter === "undefined") ? undefined
+                : (typeof args.playerCenter === "string") ? (args.playerCenter === "true") : Boolean(args.playerCenter);
         if (blur >= 0) {
             MapFilterManager.filter(MapFilterManager.FILTER_TILTSHIFT).blur = blur;
         }
         if (gradientBlur >= 0) {
             MapFilterManager.filter(MapFilterManager.FILTER_TILTSHIFT).gradientBlur = gradientBlur;
         }
+        if (typeof isPlayerCenter !== "undefined") {
+            MapFilterManager.filter(MapFilterManager.FILTER_TILTSHIFT).playerCenter = isPlayerCenter;
+        } 
     });
 
 
@@ -378,6 +388,8 @@
         PIXI.Filter.call(this);
         this._xFilter = new TiltShiftXFilter();
         this._yFilter = new TiltShiftYFilter();
+        this._isPlayerCenter = true;
+        this._centerY = 0;
     };
 
     /**
@@ -395,13 +407,31 @@
     };
 
     /**
+     * 更新する。
+     */
+    MapTiltShiftFilter.prototype.updatePoint = function() {
+        const width = Graphics.boxWidth;
+        const height = Graphics.boxHeight;
+
+        const y = (this._isPlayerCenter) ? this._centerY : (height / 2);
+
+        const startPoint = new PIXI.Point(0, y);
+        const endPoint = new PIXI.Point(width, y);
+
+        this._xFilter.start = startPoint;
+        this._yFilter.start = startPoint;
+        this._xFilter.end = endPoint;
+        this._yFilter.end = endPoint;
+    };
+
+    /**
      * ぼかしの中央を設定する。
      * 
      * @param {Number} y 中央位置
      */
     MapTiltShiftFilter.prototype.setCenterY = function(y) {
-        this.start = new PIXI.Point(0, y);
-        this.end = new PIXI.Point(Graphics.boxWidth, y);
+        this._centerY = y;
+        this.updatePoint();
     };
 
     Object.defineProperties(MapTiltShiftFilter.prototype, {
@@ -432,64 +462,45 @@
             {
                 return this._xFilter.gradientBlur;
             },
-            set: function (value)
-            {
+            set: function (value) {
                 this._xFilter.gradientBlur = value;
                 this._yFilter.gradientBlur = value;
             }
         },
 
         /**
-         * Y開始位置？？？
-         *
-         * @member {PIXI.Point}
+         * プレイヤーに追従させるかどうか。
+         * 
+         * @return {Boolean}
          */
-        start: {
-            get: function ()
-            {
-                return this._xFilter.start;
+        playerCenter: {
+            get: function() { 
+                return this._isPlayerCenter; 
             },
-            set: function (value)
-            {
-                this._xFilter.start = value;
-                this._yFilter.start = value;
-            }
-        },
-
-        /**
-         * エフェクト終了位置。
-         *
-         * @member {PIXI.Point}
-         */
-        end: {
-            get: function ()
-            {
-                return this.tiltShiftXFilter.end;
-            },
-            set: function (value)
-            {
-                this._xFilter.end = value;
-                this._yFilter.end = value;
+            set: function(value) {
+                this._isPlayerCenter = value;
             }
         }
+
+
     });
     //------------------------------------------------------------------------------
     // MapFilterManager
-
-    const _Scene_Map_start = Scene_Map.prototype.start;
+    const _Scene_Map_updateMain = Scene_Map.prototype.updateMain;
     /**
-     * Scene_Mapを開始する。
+     * メインの更新処理をする。
      */
-    Scene_Map.prototype.start = function() {
+    Scene_Map.prototype.updateMain = function() {
+        _Scene_Map_updateMain.call(this);
         const filter = MapFilterManager.filter(MapFilterManager.FILTER_TILTSHIFT);
         if (filter) {
-            filter.setCenterY(Graphics.boxHeight / 2);
+            const y = $gamePlayer.screenY();
+            filter.setCenterY(y);
         }
-        _Scene_Map_start.call(this);
     };
 
     //------------------------------------------------------------------------------
     // MapFilterManager
     MapFilterManager.registerFilter(MapFilterManager.FILTER_TILTSHIFT, MapTiltShiftFilter,
-        [ "blur", "gradientBlur"] );
+        [ "blur", "gradientBlur", "playerCenter"] );
 })();
