@@ -314,7 +314,7 @@
             get: function() { return this._angle; },
             set: function(value) {
                 this._angle = value;
-                const radians = value * DEG_TO_RAD;
+                const radians = value * PIXI.DEG_TO_RAD;
                 this._angleLight.x = Math.cos(radians);
                 this._angleLight.y = Math.sin(radians);
             }
