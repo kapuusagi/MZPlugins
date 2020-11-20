@@ -44,21 +44,31 @@
  * @min 0.00
  * @max 5.00
  * 
+ * @arg parallel
+ * @text パラレルかどうか
+ * @desc trueにすると左上起点の光源、falseにすると指定した位置の光源
+ * @type boolean
+ * 
+ * @arg centerX
+ * @text 光源中央X
+ * @type number
+ * 
+ * @arg centerY
+ * @text 光源中央Y
+ * @type number
+ * 
  * 
  * @help 
- * 
+ * PIXI.filters.GodrayFilter.jsを元に作成。
  * GLSLのオリジナルソースは Alain Galvan 氏のものである。
  * Alain Galvan
  * https://codepen.io/alaingalvan 
  * 
  * ■ 使用時の注意
+ * なし
  * 
  * ■ プラグイン開発者向け
- * 
- * Note
- * 以下の設定をできるようにしたい。
- * parallelのON/OFF
- * center位置(parallel無効時のみ効果)
+ * なし
  * 
  * ============================================
  * プラグインコマンド
@@ -96,22 +106,46 @@
     });
 
     PluginManager.registerCommand(pluginName, "config", args => {
-        const angle = Number(args.angle);
-        const gain = Number(args.gain);
+        // Note: 未指定の場合には、undefinedではなく、''になる点に注意。Number('')=0である。
+        const angle = (args.angle) ? Number(args.angle) : undefined;
+        const gain = (args.gain) ? Number(args.gain) : undefined;
         const lacunarity = Number(args.lacunarity);
-        if ((angle >= -60) && (angle <= 60)) {
-            MapFilterManager.filter(MapFilterManager.FILTER_GODRAY).angle = angle;
-        }
-        if (gain >= 0) {
-            MapFilterManager.filter(MapFilterManager.FILTER_GODRAY).gain = gain;
-        }
-        if (lacunarity >= 0) {
-            MapFilterManager.filter(MapFilterManager.FILTER_GODRAY).lacunarity = lacunarity;
+        const parallel = (typeof args.parallel === "undefined") ? undefined
+                : ((typeof args.parallel === "string") ? (args.parallel === "true") : Boolean(args.parallel));
+        const centerX = (args.centerX) ? Number(args.centerX) : undefined;
+        const centerY = (args.centerY) ? Number(args.centerY) : undefined;
+
+        const filter = MapFilterManager.filter(MapFilterManager.FILTER_GODRAY);
+        if (filter) {
+            if ((angle >= -60) && (angle <= 60)) {
+                filter.angle = angle;
+            }
+            if (gain >= 0) {
+                filter.gain = gain;
+            }
+            if (lacunarity >= 0) {
+                filter.lacunarity = lacunarity;
+            }
+            if (typeof parallel !== "undefined") {
+                filter.parallel = parallel;
+            }
+            if (typeof centerX !== "undefined") {
+                filter.centerX = centerX;
+            }
+            if (typeof centerY !== "undefined") {
+                filter.centerY = centerY;
+            }
         }
     });
 
     //------------------------------------------------------------------------------
     // GodrayFilter
+    /**
+     * GodrayFilter
+     * 陽光みたいなエフェクトを適用するフィルタ。
+     * 
+     * @note 時間パラメータは0～1[sec]を外部から設定してやる必要がある。
+     */
     function GodrayFilter() {
         this.initialize(...arguments);
     }
@@ -127,8 +161,8 @@
 
         this._angleLight = new PIXI.Point();
         this._angle = 30;
-        this.parallel = true;
-        this.center = [0, 0];
+        this._parallel = true;
+        this._center = [0, 0];
         this.time = 0;
 
         this.uniforms.lacunarity = 2.5;
@@ -296,7 +330,7 @@
      */
     GodrayFilter.prototype.apply = function(filterManager, input, output, clear) {
         const {width, height} = input.filterFrame;
-        this.uniforms.light = this.parallel ? this._angleLight : this.center;
+        this.uniforms.light = this._parallel ? this._angleLight : this._center;
         this.uniforms.dimensions[0] = width;
         this.uniforms.dimensions[1] = height;
         this.uniforms.aspect = height / width;
@@ -336,6 +370,34 @@
         lacunarity: {
             get: function() { return this.uniforms.lacunarity; },
             set: function(value) { this.uniforms.lacunarity = value; }
+        },
+        /**
+         * パラレルかどうか
+         * 
+         * @member {Boolean}
+         */
+        parallel: {
+            get: function() { return this._parallel; },
+            set: function(value) { this._parallel = value; }
+        },
+
+        /**
+         * 光源中央X。(parallel===falseの場合のみ有効)
+         * 
+         * @member {Number}
+         */
+        centerX: {
+            get: function() { return this._center.x; },
+            set: function(value) { this._center.x = value; }
+        },
+        /**
+         * 光源中央y (parallel===falseの場合のみ有効)
+         * 
+         * @member {Number}
+         */
+        centerY: {
+            get: function() { return this._center.y; },
+            set: function(value) { this._center.y = value; }
         }
 
     });
@@ -343,7 +405,7 @@
     //------------------------------------------------------------------------------
     // MapFilterManager
     MapFilterManager.registerFilter(MapFilterManager.FILTER_GODRAY, GodrayFilter,
-        [ "angle", "gain", "lacunarity"] );
+        [ "angle", "gain", "lacunarity", "parallel", "centerX", "centerY" ] );
 
 
 
