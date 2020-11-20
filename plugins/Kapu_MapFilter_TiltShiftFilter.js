@@ -61,6 +61,10 @@
  * https://github.com/evanw/glfx.js/blob/master/src/filters/blur/tiltshift.js
  * https://github.com/evanw/glfx.js/blob/master/src/filters/common.js
  * 
+ * 本来のTiltShiftFilterについて。
+ *   start - end で指定した直線範囲を中心として、
+ *   その領域から離れるほどぼかすもののようである。
+ * 
  * ■ 使用時の注意
  * デフォルトはプレイヤーの位置を中心として、上下に離れるとぼかす。
  * プラグインコマンドで playerCenter を false にすると、
@@ -132,7 +136,7 @@
     /**
      * TiltShiftAxisFilter
      * 
-     * Note: 軸に対するフィルタソース。なんでXYに分けてるのかはよく分からん。
+     * Note: 軸に対するフィルタソース。
      */
     function TiltShiftAxisFilter() {
         this.initialize(...arguments);
