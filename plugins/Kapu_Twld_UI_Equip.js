@@ -1526,7 +1526,7 @@ function Window_EquipItemName() {
             const index = this._equipSlotWindow.index();
             const actor = BattleManager.actor();
             const equipSlots = actor.equipSlots();
-            const slotName = $dataSystem.equipTypes[equipSlots[index]]
+            const slotName = $dataSystem.equipTypes[equipSlots[index]];
             const equipItem = actor.equips()[index];
             this._equipItemNameWindow.setEquipItem(slotName, equipItem);
             this._equipItemWindow.refresh();
@@ -1544,6 +1544,7 @@ function Window_EquipItemName() {
             this._equipItemWindow.close();
             this._equipItemNameWindow.close();
             this._helpWindow.hide();
+            this._actorCommandWindow.refresh();
             this._actorCommandWindow.activate();
             this._equipSlotWindow.deactivate();
         };
