@@ -104,9 +104,28 @@
 
     MapFilterManager.FILTER_TILTSHIFT = "TiltShift";
 
+    /**
+     * 真偽値を得る。
+     * 
+     * @param {Object} valueStr 値文字列
+     * @return {Boolean} 真偽値
+     */
+    const _parseBoolean = function(valueStr) {
+        if (typeof valueStr === "undefined") {
+            return undefined;
+        } else if (typeof valueStr === "string") {
+            if (valueStr) {
+                return valueStr === "true";
+            } else {
+                return undefined;
+            }
+        } else {
+            return Boolean(valueStr);
+        }
+    };
+
     PluginManager.registerCommand(pluginName, "setEnable", args => {
-        const enabled = (typeof args.enabled === "undefined") 
-                ? false : (typeof args.enabled === "string") ? (args.enabled === "true") : args.enabled;
+        const enabled = _parseBoolean(args.enabled);
         if (enabled) {
             MapFilterManager.activate(MapFilterManager.FILTER_TILTSHIFT);
         } else {
@@ -117,8 +136,7 @@
     PluginManager.registerCommand(pluginName, "config", args => {
         const blur = (args.blur) ? Number(args.blur) : undefined;
         const gradientBlur = (args.gradientBlur) ? Number(args.gradientBlur) : undefined;
-        const isPlayerCenter = (typeof args.playerCenter === "undefined") ? undefined
-                : (typeof args.playerCenter === "string") ? (args.playerCenter === "true") : Boolean(args.playerCenter);
+        const isPlayerCenter = _parseBoolean(args.playerCenter);
         if (blur >= 0) {
             MapFilterManager.filter(MapFilterManager.FILTER_TILTSHIFT).blur = blur;
         }

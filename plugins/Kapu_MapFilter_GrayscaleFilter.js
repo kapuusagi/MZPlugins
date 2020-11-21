@@ -48,10 +48,27 @@
 
     MapFilterManager.FILTER_GRAYSCALE = "GrayScale";
 
-
+    /**
+     * 真偽値を得る。
+     * 
+     * @param {Object} valueStr 値文字列
+     * @return {Boolean} 真偽値
+     */
+    const _parseBoolean = function(valueStr) {
+        if (typeof valueStr === "undefined") {
+            return undefined;
+        } else if (typeof valueStr === "string") {
+            if (valueStr) {
+                return valueStr === "true";
+            } else {
+                return undefined;
+            }
+        } else {
+            return Boolean(valueStr);
+        }
+    };
     PluginManager.registerCommand(pluginName, "setEnable", args => {
-        const enabled = (typeof args.enabled === "undefined") 
-                ? false : (typeof args.enabled === "string") ? (args.enabled === "true") : args.enabled;
+        const enabled = _parseBoolean(args.enabled);
         if (enabled) {
             MapFilterManager.activate(MapFilterManager.FILTER_GRAYSCALE);
         } else {
