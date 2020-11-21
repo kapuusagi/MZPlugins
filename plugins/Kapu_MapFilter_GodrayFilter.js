@@ -22,7 +22,7 @@
  * 
  * @arg angle
  * @text 角度
- * @desc 入射角。parallelが有効な場合のみ
+ * @desc 入射角。parallelが有効な場合のみ。デフォルト=30
  * @type number
  * @min -60
  * @max 60
@@ -30,7 +30,7 @@
  * 
  * @arg gain
  * @text ゲイン
- * @desc ゲイン量
+ * @desc ゲイン量。デフォルト=0.5
  * @type number
  * @decimals 2
  * @min 0.00
@@ -38,7 +38,7 @@
  * 
  * @arg lacunarity
  * @text 空隙性 
- * @desc 隙間に関するもの。小さくするほど光が太くなる。
+ * @desc 隙間に関するもの。小さくするほど光が太くなる。デフォルト=2.5
  * @type number
  * @decimals 2
  * @min 0.00
@@ -46,16 +46,26 @@
  * 
  * @arg parallel
  * @text パラレルかどうか
- * @desc trueにすると左上起点の光源、falseにすると指定した位置の光源
+ * @desc trueにすると左上起点の光源、falseにすると指定した位置の光源。デフォルト=true
  * @type boolean
  * 
  * @arg centerX
  * @text 光源中央X
  * @type number
+ * @min -100
  * 
  * @arg centerY
  * @text 光源中央Y
  * @type number
+ * @min -1000
+ * @max -100
+ * 
+ * @param debugEnable
+ * @text デバッグ有効/無効
+ * @desc デバッグの有効/無効を設定する。
+ * @type boolean
+ * @default false
+ * 
  * 
  * 
  * @help 
@@ -82,7 +92,22 @@
  * ============================================
  * ノートタグ
  * ============================================
- * ノートタグはありません。
+ * <godrayFilter:settings...>
+ *   Godrayフィルタの設定を行う。
+ *   settingsの書式は下記をカンマ区切りで指定する。
+ *     angle=value#
+ *       angleをvalue#にする。
+ *     gain=value#
+ *       gainをvalue#にする。
+ *     lacunarity=value#
+ *       lacunarityをvalue#にする。
+ *     parallel=true|false
+ *       parallelをtrueまたはfalseに設定する。
+ *     centerX=value#
+ *       centerXをvalueに設定する。
+ *     centerY=value#
+ *       centerYをvalueに設定する。
+ *     
  * 
  * ============================================
  * 変更履歴
@@ -91,13 +116,34 @@
  */
 (() => {
     const pluginName = "Kapu_MapFilter_GodrayFilter";
-    // const parameters = PluginManager.parameters(pluginName);
+    const parameters = PluginManager.parameters(pluginName);
+    const debugEnable = (typeof parameters["debugEnable"] === "undefined")
+            ? false : (parameters["debugEnable"] === "true");
 
     MapFilterManager.FILTER_GODRAY = "Godray";
 
+    /**
+     * 真偽値を得る。
+     * 
+     * @param {Object} valueStr 値文字列
+     * @return {Boolean} 真偽値
+     */
+    const _parseBoolean = function(valueStr) {
+        if (typeof valueStr === "undefined") {
+            return undefined;
+        } else if (typeof valueStr === "string") {
+            if (valueStr) {
+                return valueStr === "true";
+            } else {
+                return undefined;
+            }
+        } else {
+            return Boolean(valueStr);
+        }
+    };
+
     PluginManager.registerCommand(pluginName, "setEnable", args => {
-        const enabled = (typeof args.enabled === "undefined") 
-                ? false : (typeof args.enabled === "string") ? (args.enabled === "true") : args.enabled;
+        const enabled = _parseBoolean(args.enabled);
         if (enabled) {
             MapFilterManager.activate(MapFilterManager.FILTER_GODRAY);
         } else {
@@ -109,9 +155,8 @@
         // Note: 未指定の場合には、undefinedではなく、''になる点に注意。Number('')=0である。
         const angle = (args.angle) ? Number(args.angle) : undefined;
         const gain = (args.gain) ? Number(args.gain) : undefined;
-        const lacunarity = Number(args.lacunarity);
-        const parallel = (typeof args.parallel === "undefined") ? undefined
-                : ((typeof args.parallel === "string") ? (args.parallel === "true") : Boolean(args.parallel));
+        const lacunarity = (args.lacunarity) ? Number(args.lacunarity) : undefined;
+        const parallel = _parseBoolean(args.parallel);
         const centerX = (args.centerX) ? Number(args.centerX) : undefined;
         const centerY = (args.centerY) ? Number(args.centerY) : undefined;
 
@@ -135,9 +180,56 @@
             if (typeof centerY !== "undefined") {
                 filter.centerY = centerY;
             }
+            if (debugEnable) {
+                filter.dumpSetting();
+            }
         }
     });
+    //------------------------------------------------------------------------------
+    // DataManager
+    /**
+     * データマップをパースする。
+     * 
+     * @param {DataMap} dataMap データマップ
+     */
+    const _parseNotetag = function(dataMap) {
+        if (dataMap.meta.godrayFilter) {
+            const filter = MapFilterManager.filter(MapFilterManager.FILTER_GODRAY);
+            if (filter) {
+                const settings = dataMap.meta.godrayFilter.split(",").map(token => token.split("="));
+                for (const setting of settings) {
+                    const param = setting[0];
+                    const valueStr = (setting.length >= 2) ? setting[1] : undefined;
+                    switch (param) {
+                        case "angle":
+                            filter.angle = (Number(valueStr) || 0).clamp(-60, 60);
+                            break;
+                        case "gain":
+                            filter.gain = Number(valueStr) || 0;
+                            break;
+                        case "lacunarity":
+                            filter.lacunarity = Number(valueStr) || 0;
+                            break;
+                        case "parallel":
+                            filter.parallel = (typeof valueStr === "string")
+                                    ? (valueStr === "true") : Boolean(valueStr);
+                            break;
+                        case "centerX":
+                            filter.centerX = Number(valueStr) || 0;
+                            break;
+                        case "centerY":
+                            filter.centerY = Number(valueStr) || 0;
+                            break;
+                    }
+                }
+                if (debugEnable) {
+                    filter.dumpSetting();
+                }    
+            }
+        }
+    };
 
+    DataManager.addNotetagParserMaps(_parseNotetag);
     //------------------------------------------------------------------------------
     // GodrayFilter
     /**
@@ -159,10 +251,14 @@
         PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
         this.uniforms.dimensions = new Float32Array(2);
 
-        this._angleLight = new PIXI.Point();
         this._angle = 30;
+        const radians = this._angle * PIXI.DEG_TO_RAD;
+        const angleLightX = Math.cos(radians);
+        const angleLightY = Math.sin(radians);
+        this._angleLight = new PIXI.Point(angleLightX, angleLightY);
+
         this._parallel = true;
-        this._center = [0, 0];
+        this._center = new PIXI.Point(-100, -50);
         this.time = 0;
 
         this.uniforms.lacunarity = 2.5;
@@ -331,6 +427,7 @@
     GodrayFilter.prototype.apply = function(filterManager, input, output, clear) {
         const {width, height} = input.filterFrame;
         this.uniforms.light = this._parallel ? this._angleLight : this._center;
+        this.uniforms.parallel = this._parallel;
         this.uniforms.dimensions[0] = width;
         this.uniforms.dimensions[1] = height;
         this.uniforms.aspect = height / width;
@@ -401,6 +498,21 @@
         }
 
     });
+
+    /**
+     * 設定をログにダンプする。
+     */
+    GodrayFilter.prototype.dumpSetting = function() {
+        if (this.parallel) {
+            console.log("GodrayFilter:gain=" + this.gain
+                    + " lacunarity=" + this.lacunarity + " parallel=" + this._parallel
+                    + " angle=" + this._angle + " center=(" + this._angleLight.x + "," + this._angleLight.y + ")");
+        } else {
+            console.log("GodrayFilter:gain=" + this.gain
+                    + " lacunarity=" + this.lacunarity + " parallel=" + this._parallel
+                    + " center=(" + this.centerX + "," + this.centerY + ")");
+        }
+    };
 
     //------------------------------------------------------------------------------
     // MapFilterManager
