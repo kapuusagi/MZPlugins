@@ -6,30 +6,46 @@
  * @help 
  * 追加メソッド
  * ノートタグパーサー追加API。いちいちforでデータコレクションを回さなくて良いように追加。
- * DataManager.addNotetagParserActors(method:function)
- * DataManager.addNotetagParserClasses(method:function)
- * DataManager.addNotetagParserItems(method:function)
- * DataManager.addNotetagParserWeapons(method:function)
- * DataManager.addNotetagParserArmors
- * DataManager.addNotetagParserEnemies
- * DataManager.addNotetagParserSkills
- * DataManager.addNotetagParserStates
- * DataManager.addNotetagParserTilesets
+ * DataManager.addNotetagParserActors(method:function) : void
+ *     $dataActors に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserClasses(method:function) : void
+ *     $dataClasses に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserItems(method:function) : void
+ *     $dataItems に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserWeapons(method:function) : void
+ *     $dataWeapons に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserArmors(method:function) : void
+ *     $dataArmors に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserEnemies(method:function) : void
+ *     $dataEnemies に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserSkills(method:function) : void
+ *     $dataSkills に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserStates(method:function) : void
+ *     $dataStates に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserTilesets(method:function) : void
+ *     $dataTilesets に対するノートタグパーサーを追加する。
+ * DataManager.addNotetagParserMaps(method:function) : void
+ *     $dataMapに対するノートタグパーサーを追加する。
  * 
- * 
- * DataManager.traitsSum(traitObj:TraitObject, code:number, dataId:number)
+ * DataManager.traitsSum(traitObj:TraitObject, code:number, dataId:number) : number
  *     code, dataIdに一致するTraitの特性値の加算合計を得る。
  * 
- * DataManager.traitPi(traitObj:TraitObject, code:number, dataId:number)
+ * DataManager.traitPi(traitObj:TraitObject, code:number, dataId:number) : number
  *     code, dataIdに一致するTraitの特性値の乗算合計を得る。
  * 
- * Game_Party.partyTraitsSum(ability:number)
+ * Game_Party.partyTraitsSum(ability:number) : number
  *     指定したパーティーアビリティIDの特性値合計を得る。
  * 
- * Game_Party.partyTraitsSumMax(abilityId:number)
+ * Game_Party.partyTraitsSumMax(abilityId:number) : number
  *     指定したパーティーアビリティIDについて、
  *     アクターそれぞれに合計をとって最大値を得る。
  *     パーティーメンバーのうち、最も高い値を
+ *     適用したい場合に使用する。
+ * 
+ * Game_Party.partyTraitsSumMin(abilityId:number) : number
+ *     指定したパーティーアビリティIDについて、
+ *     アクターそれぞれに合計をとって最小値を得る。
+ *     パーティーメンバーのうち、最も低い値を
  *     適用したい場合に使用する。
  * 
  * ============================================
@@ -45,6 +61,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 $gameParty.partyTraitsSumMin()を追加した。
+ *               $gameParty.partyTraitsSumMax()が上手く動作していない不具合を修正。
  * Version.0.1.1 コメント誤りを修正した。
  * Version.0.1.0 TWLDで実装したのを移植。
  */
@@ -59,6 +77,16 @@
         DataManager.processGenericNotetags();
         _Scene_Boot_start.call(this);
     };
+    //------------------------------------------------------------------------------
+    // Scene_Map
+    const _Scene_Map_start = Scene_Map.prototype.start;
+    /**
+     * Scene_Mapを開始する。
+     */
+    Scene_Map.prototype.start = function() {
+        DataManager.processMapNotegag();
+        _Scene_Map_start.call(this);
+    };
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -72,6 +100,7 @@
     DataManager._noteTagParserStates = [];
     DataManager._noteTagParserTilesets = [];
     DataManager._noteTagParserTroops = [];
+    DataManager._noteTagParserMaps = [];
 
     /**
      * $dataActorsのノートタグパーサーを追加する。
@@ -163,6 +192,14 @@
         this._noteTagParserTroops.push(method);
     };
 
+    /**
+     * マップのノートタグパーサーを追加する。
+     * 
+     * @param {function} method メソッド。第1引数としてDataMapが渡される。
+     */
+    DataManager.addNotetagParserMaps = function(method) {
+        this._noteTagParserMaps.push(method);
+    };
 
     /**
      * 一般的なノートタグ処理を行う。
@@ -180,6 +217,7 @@
         DataManager.processGenericNotetagsCollections($dataTroops, this._noteTagParserTroops);
     };
 
+
     /**
      * データコレクションのノートタグを処理する。
      * 
@@ -195,9 +233,34 @@
             if (!obj) {
                 continue;
             }
-            for (let method of methods) {
-                method.call(this, obj);
+            try {
+                for (let method of methods) {
+                    method.call(this, obj);
+                }
             }
+            catch (e) {
+                console.error("Notetag parse fail. [name:" + obj.name + "]");
+                console.error(e);
+            }
+        }
+    };
+
+    /**
+     * マップのノートタグを処理する。
+     */
+    DataManager.processMapNotegag = function() {
+        const methods = this._noteTagParserMaps;
+        if (methods.length === 0) {
+            return;
+        }
+        try {
+            for (let method of methods) {
+                method.call(this, $dataMap);
+            }
+        }
+        catch (e) {
+            console.error("Notetag parse fail. [name:" + $dataMap.displayName + "]");
+            console.error(e);
         }
     };
 
@@ -240,8 +303,6 @@
             }
         }, 1);
     };
-    //------------------------------------------------------------------------------
-    // Game_BattlerBase
 
     //------------------------------------------------------------------------------
     // Game_Party
@@ -263,13 +324,24 @@
 
     /**
      * abilityIdで指定される特性値のパーティーでの最大値を得る。
+     * 増加効果の最大値を得たい場合に使用する。
      * 
      * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
      * @return {Number} 最大値
      */
     Game_Party.prototype.partyTraitsSumMax = function(abilityId) {
-        return this.battleMembers().max(function(actor) {
-            return actor.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, abilityId);
-        });
+        return this.members().reduce(
+            (r, actor) => Math.max(r, actor.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, abilityId)), 0);
+    };
+    /**
+     * abilityIdで指定される特性値のパーティーでの最小値を得る。
+     * 減算効果の最大を得たい場合に使用する。
+     * 
+     * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
+     * @return {Number} 最大値
+     */
+    Game_Party.prototype.partyTraitsSumMin = function(abilityId) {
+        return this.members().reduce(
+            (r, actor) => Math.min(r, actor.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, abilityId)), 0);
     };
 })();
