@@ -165,21 +165,23 @@
  * ノートタグ
  * ============================================
  * アイテム/武器/防具
- *     <independent>
- *        アイテム/武器/防具に適用可能。
- *        入手時、個別アイテムとして加算されるものとして処理される。
- *        未定義の場合にはプラグインパラメータで設定された、
- *        カテゴリのデフォルト値が採用される。
- *        <independent:no>または<independent:false>で明示的に無効。
+ *   <independent>
+ *     アイテム/武器/防具に適用可能。
+ *     入手時、個別アイテムとして加算されるものとして処理される。
+ *     未定義の場合にはプラグインパラメータで設定された、
+ *     カテゴリのデフォルト値が採用される。
+ *     <independent:no>または<independent:false>で明示的に無効。
  * 
- * <allowCollectSell>
- *    ショップでの売却時、まとめて売ることを可能にする。
- *    例えば個別アイテムの混紡10個を一度の操作で10個売れるようにする。
- *    装備はともかく、ポーションなどはまとめて売りたいよね？
+ *   <allowCollectSell>
+ *     ショップでの売却時、まとめて売ることを可能にする。
+ *     例えば個別アイテムの混紡10個を一度の操作で10個売れるようにする。
+ *     装備はともかく、ポーションなどはまとめて売りたいよね？
  * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.5 アイテム一覧で、個別アイテムを複数持っていた場合の表示がおかしい不具合を修正した。
+ * Version.0.4.4 各カテゴリの既定の個別アイテム設定でtrueを設定しても効果がない不具合を修正した。
  * Version.0.4.3 個別アイテム/非個別アイテムの指定が全くできていなかった不具合を修正した。
  * Version.0.4.2 個別アイテムが無限に使用できる不具合を修正した。
  * Version.0.4.1 装備解除時、解除した個別アイテムが、
@@ -206,15 +208,18 @@
     const independentItemCount = Number(parameters["independentItemCount"]) || 0;
     const independentItemStartIndex = Number(parameters["independentItemStartIndex"]) || 1000;
     const independentItemStockCount = Number(parameters["independentItemStockCount"]) || 200;
-    const independentItemDefault = Boolean(parameters["independentItemDefault"]) || false;
+    const independentItemDefault = (typeof parameters["independentItemDefault"] === "undefined")
+            ? false : (parameters["independentItemDefault"] === "true");
     const independentWeaponCount = Number(parameters["independentWeaponCount"]) || 0;
     const independentWeaponStartIndex = Number(parameters["independentWeaponStartIndex"]) || 1000;
     const independentWeaponStockCount = Number(parameters["independentWeaponStockCount"]) || 200;
-    const independentWeaponDefault = Boolean(parameters["independentWeaponDefault"]) || false;
+    const independentWeaponDefault = (typeof parameters["independentWeaponDefault"] === "undefined")
+            ? false : (parameters["independentWeaponDefault"] === "true");
     const independentArmorCount = Number(parameters["independentArmorCount"]) || 0;
     const independentArmorStartIndex = Number(parameters["independentArmorStartIndex"]) || 1000;
     const independentArmorStockCount = Number(parameters["independentArmorStockCount"]) || 200;
-    const independentArmorDefault = Boolean(parameters["independentArmorDefault"]) || false;
+    const independentArmorDefault = (typeof parameters["independentArmorDefault"] === "undefined")
+            ? false : (parameters["independentArmorDefault"] === "true");
     const gainFailureEventId = Number(parameters["gainFailureEventId"]) || 0;
 
     //-------------------------------------------------------------------------
@@ -253,6 +258,8 @@
             if (item) {
                 if (typeof item.meta.independent === "undefined") {
                     item.independent = independent;
+                } else if (typeof item.meta.independent === "boolean") {
+                    item.independent = item.meta.independent;
                 } else {
                     item.independent = (item.meta.independent !== "no")
                             && (item.meta.independent !== "false");
@@ -425,6 +432,7 @@
      * @param {DataItem} newItem 新しい個別アイテム
      * @param {DataItem} baseItem ベースアイテム
      */
+    // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentCommon = function(newItem, baseItem) {
 
     };
@@ -453,6 +461,7 @@
      * @param {DataItem} newItem 新しい個別アイテム
      * @param {DataItem} baseItem 元となるアイテムデータ
      */
+    // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentItem = function(newItem, baseItem) {
 
     };
@@ -501,6 +510,7 @@
      * @param {DataWeapon} newWeapon 新しい個別武器
      * @param {DataWeapon} baseWeapon ベース武器データ
      */
+    // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentWeapon = function(newWeapon, baseWeapon) {
 
     };
@@ -547,6 +557,7 @@
      * @param {DataArmor} newArmor 新しい個別防具
      * @param {DataArmor} baseArmor ベース防具データ
      */
+    // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentArmor = function(newArmor, baseArmor) {
 
     };
@@ -1153,7 +1164,7 @@
      * @return {Number} 最大アイテム数
      */
     Game_Party.prototype.getMaxIndependentItemCount = function(item) {
-        const specifiedMaxCount = _Game_Party_maxItems.call(item); // データベース上で指定されている最大数
+        const specifiedMaxCount = _Game_Party_maxItems.call(this, item); // データベース上で指定されている最大数
         const baseItem = DataManager.getBaseItem(item);
         if (DataManager.isItem(baseItem)) {
             const itemInventoryCount = this.useableItemInventoryCount() + this.numItems(baseItem);
@@ -1245,7 +1256,16 @@
     };
 
     /**
-     * 使用可能な個別武器のイベントリ数を得る。
+     * 使用可能な個別アイテムの最大数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+    Game_Party.prototype.maxItemInventoryCount = function() {
+        return independentItemStockCount;
+    };
+
+    /**
+     * 所持可能な個別武器のイベントリ数を得る。
      * 
      * @return {Number} イベントリ数
      */
@@ -1255,12 +1275,30 @@
     };
 
     /**
-     * 使用可能な個別防具のイベントリ数を得る。
+     * 所持可能な個別武器の最大数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+    Game_Party.prototype.maxWeaponInventoryCount = function() {
+        return independentWeaponStockCount;
+    };
+
+    /**
+     * 所持可能な個別防具のイベントリ数を得る。
      * 
      * @return {Number} イベントリ数
      */
     Game_Party.prototype.useableArmorInventoryCount = function() {
         return independentArmorStockCount - this.independentArmors().length;
+    };
+
+    /**
+     * 個別防具の所持可能最大数を得る。
+     * 
+     * @return {Number} イベントリ数
+     */
+    Game_Party.prototype.maxArmorInventoryCount = function() {
+        return independentArmorStockCount;
     };
 
     //-------------------------------------------------------------------------
@@ -1319,7 +1357,25 @@
             $gameParty.gainItem(item, value, includesEquip);
         }
     };
-
+    //-------------------------------------------------------------------------
+    // Window_ItemList
+    /**
+     * アイテム個数を描画する。
+     * 
+     * @param {Data_Item} アイテム。(Weapon/Armor/Item)
+     * @param {Number} x x描画位置
+     * @param {Number} y y描画位置
+     * @param {Number} width 幅
+     * !!!overwrite!!! Window_ItemList.drawItemNumber()
+     *     個別アイテム時には、個数1を表示するためオーバーライドする。
+     */
+    Window_ItemList.prototype.drawItemNumber = function(item, x, y, width) {
+        if (this.needsNumber()) {
+            this.drawText(":", x, y, width - this.textWidth("00"), "right");
+            var num = DataManager.isIndependent(item) ? 1 : $gameParty.numItems(item);
+            this.drawText(num, x, y, width, "right");
+        }
+    };
     //-------------------------------------------------------------------------
     // Secene_Shop
 
