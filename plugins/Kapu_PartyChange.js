@@ -1044,7 +1044,7 @@ function Scene_PartyChange() {
         this._actor = null;
         this._pictureName = "";
         this._displayArea = new Rectangle(0, 0, Graphics.boxWidth, Graphics.boxHeight);
-        this.anchor.x = 1.0; // 右端基準
+        this.anchor.x = 0.5; // 右端基準
         this.anchor.y = 1.0; // 下基準
         this.update();
     };
@@ -1135,8 +1135,8 @@ function Scene_PartyChange() {
         const dispY = 0;
         this.setFrame(dispX, dispY, dispWidth, displayHeight);
 
-        // 右下揃えで配置する。
-        this.x = this._displayArea.x + this._displayArea.width;
+        // 下揃えで配置する。
+        this.x = this._displayArea.x + this._displayArea.width - 80;
         this.y = this._displayArea.y + this._displayArea.height;
     };
     //------------------------------------------------------------------------------
