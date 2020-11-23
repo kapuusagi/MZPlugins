@@ -840,7 +840,7 @@ function Scene_Growup() {
     Window_MenuCommand.prototype.addOriginalCommands = function() {
         _Window_MenuCommand_addOriginalCommands.call(this);
         if (menuEnable && menuCommandText) {
-            this.addCommand(menuCommandText, "growup", true);
+            this.addCommand(menuCommandText, "growup", this.areMainCommandsEnabled());
         }
     };
     //------------------------------------------------------------------------------
