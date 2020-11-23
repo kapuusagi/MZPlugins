@@ -6,20 +6,20 @@
  * 
  * @command start
  * @text パーティー変更
- * @desc パーティー変更シーンを開始する。
+ * @desc パーティー変更シーンを開始します。
  * 
  * @command setMenuEnable
  * @text メニューのパーティー編成ON/OFF
- * @desc パーティー編成の許可/不許可を設定する。
+ * @desc パーティー編成の許可/不許可を設定します。
  * 
  * @arg enabled
  * @text 許可/禁止
- * @desc パーティー編成を許可する場合にはtrue, 禁止する場合はfalse
+ * @desc パーティー編成を許可する場合にはtrue, 禁止する場合はfalseを指定します。
  * @type boolean
  * 
  * @command addPartyChangeMember
  * @text パーティー編成メンバ追加
- * @desc パーティー編成メンバに指定アクターを追加する。
+ * @desc パーティー編成メンバに指定アクターを追加します。
  * 
  * @arg actorId
  * @text アクターID
@@ -28,13 +28,13 @@
  * 
  * @arg variableId
  * @text 変数ID
- * @desc 指定変数のID
+ * @desc 指定変数の値でアクターを指定する場合。(アクター指定が優先されます。)
  * @type number
  * 
  * 
  * @command removePartyChangeMember
  * @text パーティー編成メンバ削除
- * @desc パーティー編成メンバから指定アクターを削除する。
+ * @desc パーティー編成メンバから指定アクターを削除します。
  * 
  * @arg actorId
  * @text アクターID
@@ -43,13 +43,13 @@
  * 
  * @arg variableId
  * @text 変数ID
- * @desc 指定変数のID
+ * @desc 指定変数の値でアクターを指定する場合。(アクター指定が優先されます。)
  * @type number
  * 
  * 
  * @command setPartyChangeEnable
  * @text パーティー変更可否設定
- * @desc パーティー変更の可否を設定する。
+ * @desc パーティー変更の可否を設定します。
  * 
  * @arg actorId
  * @text アクターID
@@ -58,31 +58,31 @@
  * 
  * @arg variableId
  * @text 変数ID
- * @desc 指定変数のID
+ * @desc 指定変数の値で指定する場合。(アクター指定が優先されます。)
  * @type number
  * 
  * @arg enabled
  * @text パーティー変更可否
- * @desc パーティー変更可に設定する場合にはtrue, それ以外はfalse
+ * @desc パーティー変更可に設定する場合にはtrue, それ以外はfalseを指定します。
  * @type boolean
  * @default false
  * 
  *
  * @param debugEnable
  * @text デバッグ有効/無効
- * @desc trueにするとデバッグ出力を有効にする。
+ * @desc trueにするとデバッグ出力を有効にします。
  * @type boolean
  * @default false
  *  
  * @param menuEnable
  * @text メニューに表示
- * @desc メニューに表示する
+ * @desc メニューに表示します。falseにするとメニューに表示されません。
  * @type boolean
  * @default true
  * 
  * @param menuCommandText
  * @text コマンド名
- * @desc メニューに表示するコマンド名
+ * @desc メニューに表示するコマンド名を指定します。
  * @type string
  * @default パーティー編成
  * @parent menuEnable
@@ -90,13 +90,7 @@
  * 
  * @param partyMemberCount
  * @text パーティーメンバー数
- * @desc パーティーメンバー数の最大
- * @type number
- * @default 4
- * 
- * @param partyBattleMemberCount
- * @text パーティー戦闘メンバー数
- * @desc パーティーの戦闘メンバーの最大
+ * @desc パーティーメンバー数の最大を指定します。
  * @type number
  * @default 4
  * 
@@ -113,28 +107,28 @@
  * 
  * @param partyMemberWindowHeight
  * @text パーティーメンバーウィンドウの高さ
- * @desc パーティーメンバーウィンドウの高さを指定する。
+ * @desc パーティーメンバーウィンドウの高さを指定します。
  * @type number
  * @default 240
  * @parent windowLayout
  * 
  * @param statusAreaWidth
  * @text ステータス表示欄の幅
- * @desc ステータス表示欄の幅を指定する。
+ * @desc ステータス表示欄の幅を指定します。
  * @type number
  * @default 480
  * @parent windowLayout
  * 
  * @param activeColor1
  * @text アクティブカラー1
- * @desc メンバー参加中のアクター背景色1。
+ * @desc メンバー参加中のアクター背景色1。上側のグラディエーション色
  * @type string
  * @default rgb(0,64,64)
  * @parent windowLayout
  * 
  * @param activeColor2
  * @text アクティブカラー2
- * @desc メンバー参加中のアクター背景色2。
+ * @desc メンバー参加中のアクター背景色2。下側のグラディエーション色
  * @type string
  * @default rgb(0,128,128)
  * @parent windowLayout
@@ -155,14 +149,16 @@
  * @help 
  * パーティー編成画面を提供するプラグイン。
  * ・変更可能メンバーリストの保持
- *   プラグインコマンドにより追加/削除
- *   現在のパーティーメンバーが未登録の場合、変更/外す操作はできません。
+ *   プラグインコマンドにより追加/削除します。
+ *   現在のパーティーメンバーが未登録の場合、
+ *   外してシーンを切り替えると戻せなくなるため、
+ *   変更/外す操作を禁止しています。
  *   
  * ・メニューにパーティー編成コマンドを追加。(プラグインパラメータでON/OFF可)
- *   パーティー編成コマンドはプラグインコマンドでEnable/Disableを設定できます。
+ *   パーティー編成コマンドはプラグインコマンドでEnable/Disableを設定できません。
  * 
- * ・アクター毎に変更可否状態を設定できる。
- *   一時的にイベントメンバーとして外せなくする場合などに使用する。
+ * ・アクター毎に変更可否状態を設定できます。
+ *   一時的にイベントメンバーとして外せなくする場合などに使用します。
  * 
  * ■ 使用時の注意
  * 戦闘中に呼びだせません。
@@ -170,14 +166,28 @@
  * ■ プラグイン開発者向け
  * パーティー編成画面のステータス表示をカスタマイズしたい場合、
  * Window_PartyChangeStatus.paint()をオーバーライドするか、
- * drawBlock1(), drawBlock2(), drawBlock3() のいずれかをオーバーライドする。
+ * drawBlock1(), drawBlock2(), drawBlock3() のいずれかをオーバーライドします。
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
  * パーティー変更
- *   パーティー変更を開始する。
- *   戦闘中はコールしないことを推奨。
+ *   パーティー変更を開始します。
+ *   戦闘中はコールしても動作しません。
+ *   パーティー変更可否状態に依りません。
+ * 
+ * メニューのパーティー編成ON/OFF
+ *   メニューに表示するパーティー編成コマンドを有効/無効設定します。
+ *   一時的にメニューからパーティー編成を禁止にする場合に使用します。
+ * 
+ * パーティー編成メンバ追加
+ *   指定アクターを編成可能メンバーに追加します。
+ * 
+ * パーティー編成メンバ削除
+ *   指定アクターを編成可能メンバーから削除します。
+ * 
+ * パーティー変更可否設定
+ *   指定アクターのパーティー編成可否を設定します。
  * 
  * ============================================
  * ノートタグ
@@ -187,7 +197,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 
 /**
@@ -247,7 +257,6 @@ function Scene_PartyChange() {
     const statusPictureMethod = String(parameters["statusPictureMethod"]) || "";
 
     const partyMemberCount = Number(parameters["partyMemberCount"]) || 4;
-    const partyBattleMemberCount = Number(parameters["partyBattleMemberCount"]) || 4;
 
     const debugEnable = (typeof parameters["debugEnable"] === "undefined")
             ? false : (parameters["debugEnable"] === "true");
@@ -266,7 +275,6 @@ function Scene_PartyChange() {
                     return array;
                 }
             }
-
         }
         catch (e) {
             console.error(e);
@@ -830,11 +838,7 @@ function Scene_PartyChange() {
      * @return {Number} 項目数。
      */
     Window_PartyChangePartyMembers.prototype.maxItems = function() {
-        if ($gameParty.inBattle()) {
-            return Math.min($gameParty.battleMembers() + 1, partyBattleMemberCount);
-        } else {
-            return Math.min($gameParty.allMembers().length + 1, partyMemberCount);
-        }
+        return Math.min($gameParty.allMembers().length + 1, partyMemberCount);
     };
 
     /**
