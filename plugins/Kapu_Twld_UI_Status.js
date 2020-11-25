@@ -253,6 +253,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 装備が無いときの文字色が正しくない不具合を修正した。
  * Version.0.1.0 TWLD向けに作成したものをベースに作成。
  */
 /*~struct~elementEntry:
@@ -1479,6 +1480,7 @@ function Window_StatusProfile() {
         } else {
             const textMargin = ImageManager.iconWidth + 4;
             const itemWidth = Math.max(0, width - textMargin);
+            this.resetTextColor();
             this.drawText(textEmptySlot, x + textMargin, y, itemWidth);
         }
     };

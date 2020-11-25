@@ -4,6 +4,12 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
+ * @param debugEnable
+ * @text デバッグ有効/無効
+ * @desc trueにするとデバッグログを出力する。
+ * @type boolean
+ * @default false
+ * 
  * @help 
  * コアプラグインの命中判定処理を複数のプラグインで
  * 拡張できるようにするためのプラグインです。
@@ -32,7 +38,10 @@
  * Version.0.1.0 Trait_Certianly_HitEvaとTwld_Baseを実現するために作成。
  */
 (() => {
-    //const pluginName = "Kapu_Base_Hit";
+    const pluginName = "Kapu_Base_Hit";
+    const parameters = PluginManager.parameters(pluginName);
+    const debugEnable = (typeof parameters["debugEnable"] === "undefined")
+            ? false : (parameters["debugEnable"] === "true");
 
     //------------------------------------------------------------------------------
     // Game_Action
@@ -41,7 +50,8 @@
      * 命中判定とダメージ算出、効果適用を行う。
      * 
      * @param {Game_BattlerBase} target 対象
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.apply()
+     *     ダメージ計算適処理を変更するためオーバーライドする。
      */
     Game_Action.prototype.apply = function(target) {
         const result = target.result();
@@ -69,19 +79,37 @@
         }
         this.updateLastTarget(target);
     };
-    /**
-     * クリティカルヒットしたかどうかを取得する。
-     * 
-     * @param {Game_Battler} target 対象
-     * @return {Boolean} クリティカルヒットする場合にはtrue, それ以外はfalse
-     */
-    Game_Action.prototype.testCritical = function(target) {
-        if (this.item().damage.type > 0) {
-            return Math.random() < this.itemCri(target);
-        } else {
-            return false;
-        }
-    };
+    if (debugEnable) {
+        /**
+         * クリティカルヒットしたかどうかを取得する。
+         * 
+         * @param {Game_Battler} target 対象
+         * @return {Boolean} クリティカルヒットする場合にはtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testCritical = function(target) {
+            if (this.item().damage.type > 0) {
+                const rate = this.itemCri(target);
+                console.log("  criticalRate = " + rate);
+                return Math.random() < rate;
+            } else {
+                return false;
+            }
+        };
+    } else {
+        /**
+         * クリティカルヒットしたかどうかを取得する。
+         * 
+         * @param {Game_Battler} target 対象
+         * @return {Boolean} クリティカルヒットする場合にはtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testCritical = function(target) {
+            if (this.item().damage.type > 0) {
+                return Math.random() < this.itemCri(target);
+            } else {
+                return false;
+            }
+        };
+    }
     /**
      * 確実にヒットできるかどうかを取得する。
      * 
@@ -130,25 +158,53 @@
         }
     };
 
-    /**
-     * ミスしたかどうかを評価する。
-     * 
-     * @param {Game_Battler} target 対象
-     * @return {Boolean} ミスした場合にtrue, それ以外はfalse
-     */
-    Game_Action.prototype.testMissed = function(target) {
-        const missRate = 1 - this.itemHit(target);
-        return Math.random() < missRate;
-    };
+    if (debugEnable) {
+        /**
+         * ミスしたかどうかを評価する。
+         * 
+         * @param {Game_Battler} target 対象
+         * @return {Boolean} ミスした場合にtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testMissed = function(target) {
+            const missRate = 1 - this.itemHit(target);
+            console.log(" miss rate = " + missRate);
+            return Math.random() < missRate;
+        };
+    } else {
+        /**
+         * ミスしたかどうかを評価する。
+         * 
+         * @param {Game_Battler} target 対象
+         * @return {Boolean} ミスした場合にtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testMissed = function(target) {
+            const missRate = 1 - this.itemHit(target);
+            return Math.random() < missRate;
+        };
+    }
 
-    /**
-     * 回避したかどうかを評価する。
-     * 
-     * @param {Game_Battler} target ターゲット
-     * @return {Boolean} 回避できた場合にはtrue, それ以外はfalse
-     */
-    Game_Action.prototype.testEvaded = function(target) {
-        return Math.random() < this.itemEva(target);
-    };
+    if (debugEnable) {
+        /**
+         * 回避したかどうかを評価する。
+         * 
+         * @param {Game_Battler} target ターゲット
+         * @return {Boolean} 回避できた場合にはtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testEvaded = function(target) {
+            const rate = this.itemEva(target);
+            console.log("  evaRate = " + rate);
+            return Math.random() < rate;
+        };
+    } else {
+        /**
+         * 回避したかどうかを評価する。
+         * 
+         * @param {Game_Battler} target ターゲット
+         * @return {Boolean} 回避できた場合にはtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testEvaded = function(target) {
+            return Math.random() < this.itemEva(target);
+        };
+    }
 
 })();

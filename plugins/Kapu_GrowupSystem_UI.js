@@ -70,6 +70,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.1 メニューコマンドへの追加メソッドを
+ *               オーバーライドしていた不具合を修正した。
  * Version.0.1.0 MVでTWLD向けに作成したものから移植した。
  */
 /**
@@ -572,25 +574,6 @@ function Scene_Growup() {
         this._items[0] = msg;
         this.refresh();
     };
-
-    // /**
-    //  * コンテンツにあわせて、最適な位置/サイズに変更する。
-    //  */
-    // Window_ConfirmApply.prototype.setPreferredPosition = function() {
-    //     var itemWidth = this.maxItemWidth();
-    //     var prevWidth = this.width;
-    //     var prevHeight = this.height;
-    //     var width = this.padding * 2 + itemWidth;
-    //     var height = this.padding * 2 + this.lineHeight() * this._items.length;
-    //     var x = (Graphics.boxWidth - width) / 2;
-    //     var y = (Graphics.boxHeight - height) / 2;
-    //     this.move(x, y, width, height);
-    //     if ((width !== prevWidth) && (height !== prevHeight)) {
-    //         // ウィンドウサイズが変わったので描画バッファを再構築する。
-    //         this.createContents();
-    //     }
-    //     Window_Selectable.prototype.refresh.call(this);
-    // };
     
     /**
      * コンテンツの幅を取得する。
@@ -850,10 +833,12 @@ function Scene_Growup() {
     };
     //------------------------------------------------------------------------------
     // Window_MenuCommand
+    const _Window_MenuCommand_addOriginalCommands = Window_MenuCommand.prototype.addOriginalCommands;
     /**
      * メニューにオリジナルコマンドを追加する。
      */
     Window_MenuCommand.prototype.addOriginalCommands = function() {
+        _Window_MenuCommand_addOriginalCommands.call(this);
         if (menuEnable && menuCommandText) {
             this.addCommand(menuCommandText, "growup", true);
         }
