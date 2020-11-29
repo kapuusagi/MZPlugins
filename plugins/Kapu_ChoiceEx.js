@@ -36,7 +36,6 @@
  * @type variable
  * @default 1
  * 
- * 
  * @command setChoiceRect
  * @text 選択肢ウィンドウの矩形領域設定
  * 
@@ -190,7 +189,7 @@
     });
 
     PluginManager.registerCommand(pluginName, "setChoiceVariableId", args => {
-        const id = Number(args) || 0;
+        const id = Number(args.variableId) || 0;
         if (id > 0) {
             $gameMessage.setChoiceVariableId(id);
         }
@@ -228,6 +227,7 @@
         _Game_Message_clear.call(this);
         this._choiceEnables = [];
         this._choiceResults = [];
+        this._choiceIndices = [];
         this._helpTexts = [];
         this._choiceX = -1;
         this._choiceY = -1;
@@ -235,8 +235,40 @@
         this._choiceHeight = -1;
         this._choiceMaxRow = maxPageRow;
         this._choiceVariableId = 0;
+        this._choiceSelectedIndex = -1;
+        this._choiceSelectingCallback = null;
         this.choiceUnderMes = false;
     };
+
+    /**
+     * コールバック変数を設定する。
+     * 
+     * @param {function} callback コールバック関数
+     */
+    Game_Message.prototype.setChoiceSelectingCallback = function(callback) {
+        this._choiceSelectingCallback = callback;
+    };
+
+    /**
+     * 選択肢が切り替わったときの処理を行う。
+     */
+    Game_Message.prototype.onChoiceSelecting = function() {
+        if (this._choiceSelectingCallback) {
+            this._choiceSelectingCallback(this._choiceSelectedIndex);
+        }
+    };
+
+    /**
+     * 選択肢ウィンドウの選択が変わったときの処理を行う。
+     * 
+     * @param {Number} index 選択肢ウィンドウの選択インデックス番号
+     */
+    Game_Message.prototype.choiceSelectionChanged = function(index) {
+        this._choiceSelectedIndex = index;
+        this.onChoiceSelecting();
+    };
+
+
 
     /**
      * 選択肢値を格納する変数IDを得る。
@@ -272,6 +304,24 @@
      */
     Game_Message.prototype.setChoiceResults = function(results) {
         this._choiceResults = results;
+    };
+
+    /**
+     * 選択肢毎のスクリプト上のインデックス位置を設定する。
+     * 
+     * @param {Array<Number>} indices インデックス配列
+     */
+    Game_Message.prototype.setChoiceIndices = function(indices) {
+        this._choiceIndices = indices;
+    };
+
+    /**
+     * 選択肢毎のスクリプト上のインデックス位置を得る。
+     * 
+     * @return {Array<Number>} インデックス位置配列
+     */
+    Game_Message.prototype.choiceIndices = function() {
+        return this._choiceIndices;
     };
 
     /**
@@ -427,6 +477,7 @@
             choices: [],
             enables: [],
             results: [],
+            choiceIndices: [],
             helpTexts: [],
             cancelType: -1,
             defaultType: -1,
@@ -452,11 +503,20 @@
             }
             $gameMessage.setChoices(data.choices, defaultType, cancelType);
             $gameMessage.setChoiceEnables(data.enables);
+            $gameMessage.setChoiceIndices(data.choiceIndices);
             $gameMessage.setChoiceResults(data.results);
             $gameMessage.setChoiceHelpTexts(helpTexts);
             $gameMessage.setChoiceBackground(data.background);
             $gameMessage.setChoicePositionType(data.positionType);
-            $gameMessage.setChoiceCallback( n => this._branch[this._indent] = data.results[n] );
+            $gameMessage.setChoiceSelectingCallback( n => {
+                const choiceIndex = data.results[n];
+                console.log(data.results[n]);
+                console.log(data.choiceIndices[choiceIndex]);
+            });
+            $gameMessage.setChoiceCallback( n => {
+                this._branch[this._indent] = data.results[n];
+                this.setChoiceSelectingCallback(null);
+            });
         } else {
             this._branch[this._indent] = -1;
         }
@@ -482,8 +542,8 @@
         if (defaultType >= 0) {
             data.defaultType = defaultType + choiceIndexOffs;
         }
-        data.positionType = params.length > 3 ? params[3] : 2;
-        data.background = params.length > 4 ? params[4] : 0;
+        data.positionType = (params.length > 3) ? params[3] : 2;
+        data.background = (params.length > 4) ? params[4] : 0;
         let command;
         for (;;) {
             scriptIndex++;
@@ -494,7 +554,9 @@
             if (command.indent === this._indent) {
                 if (command.code === 402) {
                     // 条件分岐ラベル
-                    this.getHelpText(data, command.parameters[0] + choiceIndexOffs, scriptIndex + 1);
+                    const choiceIndex = command.parameters[0] + choiceIndexOffs;
+                    data.helpTexts[choiceIndex] = this.getHelpText(scriptIndex);
+                    data.choiceIndices[choiceIndex] = scriptIndex;
                 } else if (command.code === 404) {
                     // 分岐終了
                     break;
@@ -504,7 +566,8 @@
         command = this._list[scriptIndex + 1];
         if (command && (command.code === 102)) {
             // 選択肢の表示があるときは、分岐を合成する。
-            this.addChoices(data, command.parameters, scriptIndex + 1, choiceIndexOffs + 10);
+            this.addChoices(data, command.parameters, scriptIndex + 1,
+                    choiceIndexOffs + 10, scriptIndex + 1);
         }
         return data;
     };
@@ -539,21 +602,19 @@
     /**
      * 選択肢のヘルプテキストを得る。
      * 
-     * @param {Object} data 選択肢データ
-     * @param {Number} choiceIndex 選択肢インデックス
-     * @param {Number} index 選択肢内インデックス
+     * @param {Number} scriptIndex 分岐エントリのスクリプトインデックス
      * @return {String} ヘルプテキスト
      */
-    Game_Interpreter.prototype.getHelpText = function(data, choiceIndex, index) {
-        if ((this._list[index].code === 108)
-                && (this._list[index].parameters[0] === choiceHelpKeyword)) {
-            const texts = [];
-            while (this._list[index + 1].code === 408) {
-                index++;
+    Game_Interpreter.prototype.getHelpText = function(scriptIndex) {
+        const texts = [];
+        const commentIndex = scriptIndex + 1;
+        if ((this._list[commentIndex].code === 108)
+                && (this._list[commentIndex].parameters[0] === choiceHelpKeyword)) {
+            for (let index = commentIndex + 1; this._list[index].code === 408; index++) {
                 texts.push(this._list[index].parameters[0]);
             }
-            data.helpTexts[choiceIndex] = texts;
         }
+        return texts;
     };
     
     /**
@@ -796,10 +857,14 @@
         this._messageWindow.forceClear();
         $gameMessage._texts = $gameMessage.choiceHelpText(this.index());
         this._messageWindow.startMessage();
+        $gameMessage.choiceSelectionChanged(this.index());
     };
     //------------------------------------------------------------------------------
     // Window_Message
     const _Window_Message_updatePlacement = Window_Message.prototype.updatePlacement;
+    /**
+     * 位置を更新する。
+     */
     Window_Message.prototype.updatePlacement = function() {
         _Window_Message_updatePlacement.call(this, ...arguments);
         this.clearUnderChoice();
