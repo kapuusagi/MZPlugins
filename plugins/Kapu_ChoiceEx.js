@@ -27,7 +27,6 @@
  * @type number
  * @default 6
  * 
- * 
  * @command setChoiceVariableId
  * @text 選択肢格納変数ID
  * 
@@ -68,11 +67,15 @@
  * @default -1
  * 
  * 
+ * @command setupChoiceOption
+ * @text 選択肢オプション
+ * @desc 選択肢を選択したときのオプション処理有効・無効を設定する
  * 
- * 
- * 
- * 
- * 
+ * @arg pictureControl
+ * @text 選択毎にピクチャ操作する
+ * @desc 分岐直下にあるピクチャ処理を有効にする。
+ * @type boolean
+ * @default false
  * 
  * 
  * @param maxPageRow
@@ -170,6 +173,7 @@
     const maxPageRow = Number(parameters["maxPageRow"]) || 6;
     const disabledIndex = parameters["disabledIndex"] || "none";
     const choiceHelpKeyword = parameters["choiceHelpKeyword"] || "ChoiceHelp";
+    const CHOICE_OFFSET = 10;
 
 
     PluginManager.registerCommand(pluginName, "setChoicePosition", args => {
@@ -215,6 +219,12 @@
         $gameMessage.setChoiceRect(x, y, width, height);
     });
 
+    // eslint-disable-next-line no-unused-vars
+    PluginManager.registerCommand(pluginName, "setupChoiceOption", args => {
+        const pictureControl = (typeof args.pictureControl === "undefined")
+                ? false : args.pictureControl === "true";
+        $gameMessage.setChoiceControlPicture(pictureControl);
+    });
 
     //------------------------------------------------------------------------------
     // Game_Message
@@ -237,6 +247,7 @@
         this._choiceVariableId = 0;
         this._choiceSelectedIndex = -1;
         this._choiceSelectingCallback = null;
+        this._choiceControlPicture = false;
         this.choiceUnderMes = false;
     };
 
@@ -455,9 +466,52 @@
         this._choiceY += height;
         this._choiceHeight -= height;
     };
+
+    /**
+     * 選択肢選択中に、画像の操作を行うかどうかを設定する。
+     * 
+     * @param {Boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     */
+    Game_Message.prototype.setChoiceControlPicture = function(enabled) {
+        this._choiceControlPicture = enabled;
+    };
+
+    /**
+     * 選択肢選択中に、画像の操作を行うかどうかを取得する。
+     * 
+     * @return {Boolean} 有効な場合にはtrue, それ以外はfalse
+     */
+    Game_Message.prototype.choiceControlPicture = function() {
+        return this._choiceControlPicture;
+    };
+
     //------------------------------------------------------------------------------
     // Game_Interpreter
+    const _Game_Interpreter_clear = Game_Interpreter.prototype.clear;
+    /**
+     * Game_interpreterをクリアする。
+     */
+    Game_Interpreter.prototype.clear = function() {
+        _Game_Interpreter_clear.call(this);
+        this.clearChoiceData();
+    };
 
+    /**
+     * 選択肢データをクリアする。
+     */
+    Game_Interpreter.prototype.clearChoiceData = function() {
+        this._choiceData = {
+            choices: [],
+            enables: [],
+            results: [],
+            choiceIndices: [],
+            helpTexts: [],
+            cancelType: -1,
+            defaultType: -1,
+            positionType: 0,
+            background: 0
+        };
+    };
     /**
      * 選択肢をセットアップする。
      * 
@@ -473,77 +527,122 @@
      *     選択肢の位置などを設定できるようにするため、オーバーライドする。
      */
     Game_Interpreter.prototype.setupChoices = function(params) {
-        const data = {
-            choices: [],
-            enables: [],
-            results: [],
-            choiceIndices: [],
-            helpTexts: [],
-            cancelType: -1,
-            defaultType: -1,
-            positionType: 0,
-            background: 0
-        };
-        this.addChoices(data, params, this._index, 0);
-        if (data.choices.length > 0) {
-            const helpTexts = (data.helpTexts.length > 0)
-                    ? data.results.map( i => data.helpTexts[i]) : [];
+        this.clearChoiceData();
+        this.addChoices(params, this._index, 0);
+        if (this._choiceData.choices.length > 0) {
+            const helpTexts = (this._choiceData.helpTexts.length > 0)
+                    ? this._choiceData.results.map( i => this._choiceData.helpTexts[i]) : [];
             let cancelType = -1;
-            if ((data.cancelType.mod(10) === 8) || data.results.contains(data.cancelType)) {
-                data.results.push(data.cancelType);
-                cancelType = data.choices.length;
+            if ((this._choiceData.cancelType.mod(CHOICE_OFFSET) === 8)
+                    || this._choiceData.results.contains(this._choiceData.cancelType)) {
+                this._choiceData.results.push(this._choiceData.cancelType);
+                cancelType = this._choiceData.choices.length;
             }
-            let index = data.defaultType;
+            let index = this._choiceData.defaultType;
             if ($gameMessage._choiceVariableId > 0) {
                 index = $gameVariables.value($gameMessage._choiceVariableId);
             }
-            let defaultType = data.results.indexOf(index);
+            let defaultType = this._choiceData.results.indexOf(index);
             if ((index >= 0) && (defaultType < 0) && (disabledIndex === "top"))  {
                 defaultType = 0;
             }
-            $gameMessage.setChoices(data.choices, defaultType, cancelType);
-            $gameMessage.setChoiceEnables(data.enables);
-            $gameMessage.setChoiceIndices(data.choiceIndices);
-            $gameMessage.setChoiceResults(data.results);
+            $gameMessage.setChoices(this._choiceData.choices, defaultType, cancelType);
+            $gameMessage.setChoiceEnables(this._choiceData.enables);
+            $gameMessage.setChoiceIndices(this._choiceData.choiceIndices);
+            $gameMessage.setChoiceResults(this._choiceData.results);
             $gameMessage.setChoiceHelpTexts(helpTexts);
-            $gameMessage.setChoiceBackground(data.background);
-            $gameMessage.setChoicePositionType(data.positionType);
-            $gameMessage.setChoiceSelectingCallback( n => {
-                const choiceIndex = data.results[n];
-                console.log(data.results[n]);
-                console.log(data.choiceIndices[choiceIndex]);
-            });
-            $gameMessage.setChoiceCallback( n => {
-                this._branch[this._indent] = data.results[n];
-                this.setChoiceSelectingCallback(null);
-            });
+            $gameMessage.setChoiceBackground(this._choiceData.background);
+            $gameMessage.setChoicePositionType(this._choiceData.positionType);
+            $gameMessage.setChoiceSelectingCallback(this.onChoicing.bind(this));
+            $gameMessage.setChoiceCallback(this.onChoiced.bind(this));
         } else {
             this._branch[this._indent] = -1;
         }
     };
 
     /**
+     * 選択肢が切り替わったときの処理を行う。
+     * 
+     * @param {Number} index インデックス番号
+     */
+    Game_Interpreter.prototype.onChoicing = function(index) {
+        const choiceIndex = this._choiceData.results[index];
+        // 分岐ラベルを探して、該当する分岐の下にある、ピクチャの処理があれば実行する。
+        if ($gameMessage.choiceControlPicture()) {
+            const scriptBranchIndex = this.findChoiceLabelIndex(choiceIndex);
+            if (scriptBranchIndex >= 0) {
+                this.processChoicePictureControl(scriptBranchIndex);
+            }
+        }
+    };
+
+    Game_Interpreter.prototype.processChoicePictureControl = function(scriptBranchIndex) {
+        const indent = this._indent + 1;
+        for (let scriptIndex = scriptBranchIndex + 1; scriptIndex < this._list.length; scriptIndex++) {
+            const command = this._list[scriptIndex];
+            if (!command || (command.code === 0) || (command.indent !== indent)) {
+                // 異なる階層or空のコマンド
+                break;
+            }
+            if ((command.code === 231) || (command.code === 232) || (command.code === 233)
+                    || (command.code === 234) || (command.code === 235)) {
+                const methodName = "command" + command.code;
+                if (typeof this[methodName] === "function") {
+                    this[methodName](command.parameters);
+                }
+            }
+        }
+    };
+
+    Game_Interpreter.prototype.findChoiceLabelIndex = function(choiceIndex) {
+        let choiceOffset = 0;
+        for (let scriptIndex = this._index; scriptIndex < this._list.length; scriptIndex++) {
+            const command = this._list[scriptIndex];
+            if (command.code === 402) {
+                // 条件分岐ラベル
+                if ((command.parameters[0] + choiceOffset) === choiceIndex) {
+                    // この条件分岐ラベルが選択肢と一致するやつ。
+                    return scriptIndex;
+                }
+            } else if (command.code === 404) {
+                choiceOffset += CHOICE_OFFSET;
+            }
+        }
+
+        return -1;
+    };
+
+    /**
+     * 選択肢で選択された時の処理を行う。
+     * 
+     * @param {Number} index インデックス番号
+     */
+    Game_Interpreter.prototype.onChoiced = function(index) {
+        this._branch[this._indent] = this._choiceData.results[index];
+        $gameMessage.setChoiceSelectingCallback(null);
+    };
+
+    /**
      * 選択肢を追加する。再起コール用のインタフェース。
      * 
-     * @param {Object} data 選択肢データ
      * @param {Array<Object>} params パラメータ。
      * @param {Number} scriptIndex スクリプトインデックス
      * @param {Number} choiceIndexOffs 選択肢インデックスオフセット
      */
-    Game_Interpreter.prototype.addChoices = function(data, params, scriptIndex, choiceIndexOffs) {
+    Game_Interpreter.prototype.addChoices = function(params, scriptIndex, choiceIndexOffs) {
         for (let n = 0; n < params[0].length; n++) {
-            this.addChoice(data, n + choiceIndexOffs, params[0][n]);
+            this.addChoice(n + choiceIndexOffs, params[0][n]);
         }
         const cancelType = params[1];
         if (cancelType !== -1) {
-            data.cancelType = cancelType + choiceIndexOffs;
+            this._choiceData.cancelType = cancelType + choiceIndexOffs;
         }
         const defaultType = params.length > 2 ? params[2] : 0;
         if (defaultType >= 0) {
-            data.defaultType = defaultType + choiceIndexOffs;
+            this._choiceData.defaultType = defaultType + choiceIndexOffs;
         }
-        data.positionType = (params.length > 3) ? params[3] : 2;
-        data.background = (params.length > 4) ? params[4] : 0;
+        this._choiceData.positionType = (params.length > 3) ? params[3] : 2;
+        this._choiceData.background = (params.length > 4) ? params[4] : 0;
         let command;
         for (;;) {
             scriptIndex++;
@@ -555,8 +654,8 @@
                 if (command.code === 402) {
                     // 条件分岐ラベル
                     const choiceIndex = command.parameters[0] + choiceIndexOffs;
-                    data.helpTexts[choiceIndex] = this.getHelpText(scriptIndex);
-                    data.choiceIndices[choiceIndex] = scriptIndex;
+                    this._choiceData.helpTexts[choiceIndex] = this.getHelpText(scriptIndex);
+                    this._choiceData.choiceIndices[choiceIndex] = scriptIndex;
                 } else if (command.code === 404) {
                     // 分岐終了
                     break;
@@ -566,20 +665,18 @@
         command = this._list[scriptIndex + 1];
         if (command && (command.code === 102)) {
             // 選択肢の表示があるときは、分岐を合成する。
-            this.addChoices(data, command.parameters, scriptIndex + 1,
-                    choiceIndexOffs + 10, scriptIndex + 1);
+            this.addChoices(command.parameters, scriptIndex + 1,
+                    choiceIndexOffs + CHOICE_OFFSET, scriptIndex + 1);
         }
-        return data;
     };
 
     /**
      * 選択肢を追加する。
      * 
-     * @param {Object} data 選択肢データ
      * @param {Number} choiceIndex 選択肢に割り当てるインデックス番号。
      * @param {String} str 選択肢文字列
      */
-    Game_Interpreter.prototype.addChoice = function(data, choiceIndex, str) {
+    Game_Interpreter.prototype.addChoice = function(choiceIndex, str) {
         const patternCondition = /\s*if\((.+?)\)/;
         const patternEnable = /\s*en\((.+?)\)/;
 
@@ -594,9 +691,9 @@
             str = str.replace(patternEnable, ""); // 該当パターン部分を置き換えて非表示
             enable = this.evalChoice(RegExp.$1);
         }
-        data.choices.push(str);
-        data.enables.push(enable);
-        data.results.push(choiceIndex);
+        this._choiceData.choices.push(str);
+        this._choiceData.enables.push(enable);
+        this._choiceData.results.push(choiceIndex);
     };
     
     /**
@@ -639,7 +736,9 @@
      * キャンセルの時
      */
     Game_Interpreter.prototype.command403 = function() {
-        if (this._branch[this._indent] >= 0) {
+        if (this._branch[this._indent] !== -2) {
+            // 選択された分岐コードが-2でない場合、
+            // このキャンセル時の分岐ラベルは選択されていないので無視する。
             this.skipBranch();
         }
         return true;
@@ -650,7 +749,8 @@
      */
     Game_Interpreter.prototype.command404 = function() {
         if (this.nextEventCode() === 102) {
-            this._branch[this._indent] -= 10;
+            // 分岐終了を検出したら、選択された分岐をオフセット分減算する。
+            this._branch[this._indent] -= CHOICE_OFFSET;
             this._index++;
         }
         return true;
