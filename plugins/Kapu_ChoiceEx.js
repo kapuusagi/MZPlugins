@@ -71,6 +71,12 @@
  * @text 選択肢オプション
  * @desc 選択肢を選択したときのオプション処理有効・無効を設定する
  * 
+ * @arg helpControl
+ * @text 選択肢ヘルプを表示する
+ * @desc 選択切り替え毎に、分岐直下にある「選択肢ヘルプキーワード」の説明をメッセージウィンドウに表示する。
+ * @type boolean
+ * @default false
+ * 
  * @arg pictureControl
  * @text 選択毎にピクチャ操作する
  * @desc 分岐直下にあるピクチャ処理を有効にする。
@@ -222,8 +228,11 @@
     // eslint-disable-next-line no-unused-vars
     PluginManager.registerCommand(pluginName, "setupChoiceOption", args => {
         const pictureControl = (typeof args.pictureControl === "undefined")
-                ? false : args.pictureControl === "true";
+                ? false : (args.pictureControl === "true");
+        const helpControl = (typeof args.helpControl === "undefined")
+                ? false : (args.helpControl === "true");
         $gameMessage.setChoiceControlPicture(pictureControl);
+        $gameMessage.setChoiceControlHelp(helpControl);
     });
 
     //------------------------------------------------------------------------------
@@ -238,7 +247,6 @@
         this._choiceEnables = [];
         this._choiceResults = [];
         this._choiceIndices = [];
-        this._helpTexts = [];
         this._choiceX = -1;
         this._choiceY = -1;
         this._choiceWidth = -1;
@@ -248,6 +256,9 @@
         this._choiceSelectedIndex = -1;
         this._choiceSelectingCallback = null;
         this._choiceControlPicture = false;
+        this._choiceControlHelp = false;
+        this._choiceHelpTexts = [];
+        this._choiceHelpText = [];
         this.choiceUnderMes = false;
     };
 
@@ -350,7 +361,7 @@
      * @param {Array<String>} texts テキスト配列
      */
     Game_Message.prototype.setChoiceHelpTexts = function(texts) {
-        this._helpTexts = texts;
+        this._choiceHelpTexts = texts;
     };
 
     /**
@@ -360,9 +371,19 @@
      * @return {Array<String>} ヘルプテキスト配列
      */
     Game_Message.prototype.choiceHelpText = function(index) {
-        const texts = this._helpTexts[index];
-        return texts ? texts.clone() : [""];
+        const texts = this._choiceHelpTexts[index];
+        return texts || [""];
     };
+
+    /**
+     * 選択肢ヘルプ文字列を更新する。
+     * 
+     * @param {Number} index 選択肢インデックス番号
+     */
+    Game_Message.prototype.updateChoiceHelp = function(index) {
+        this._choiceHelpText = this.choiceHelpText(index)
+        this._texts = this._choiceHelpText;
+    }
 
     /**
      * ヘルプかどうかを得る。
@@ -370,7 +391,7 @@
      * @return {Boolean} ヘルプの場合にはtrue, それ以外はfalse
      */
     Game_Message.prototype.isHelp = function() {
-        return this._helpTexts.length > 0;
+        return this._choiceHelpText.length > 0;
     };
     
     /**
@@ -483,6 +504,24 @@
      */
     Game_Message.prototype.choiceControlPicture = function() {
         return this._choiceControlPicture;
+    };
+
+    /**
+     * ヘルプ操作を有効にするかどうかを設定する。
+     * 
+     * @param {Boolean} enabled ヘルプ操作を有効にする場合にはtrue、それ以外はfalse
+     */
+    Game_Message.prototype.setChoiceControlHelp = function(enabled) {
+        this._choiceControlHelp = enabled;
+    };
+
+    /**
+     * ヘルプ操作が有効かどうかを得る。
+     * 
+     * @return {Boolean} ヘルプ操作が有効な場合にはtrue、それ以外はfalse
+     */
+    Game_Message.prototype.choiceControlHelp = function() {
+        return this._choiceControlHelp;
     };
 
     //------------------------------------------------------------------------------
@@ -945,7 +984,7 @@
      * ヘルプメッセージを更新する。
      */
     Window_ChoiceList.prototype.callUpdateHelp = function() {
-        if (this.active && this._messageWindow && $gameMessage.isHelp()) {
+        if (this.active && this._messageWindow) {
             this.updateHelp();
         }
     };
@@ -954,9 +993,11 @@
      * ヘルプを更新する。
      */
     Window_ChoiceList.prototype.updateHelp = function() {
-        this._messageWindow.forceClear();
-        $gameMessage._texts = $gameMessage.choiceHelpText(this.index());
-        this._messageWindow.startMessage();
+        if ($gameMessage.choiceControlHelp()) {
+            this._messageWindow.forceClear();
+            $gameMessage.updateChoiceHelp(this.index());
+            this._messageWindow.startMessage();
+        }
         $gameMessage.choiceSelectionChanged(this.index());
     };
     //------------------------------------------------------------------------------
