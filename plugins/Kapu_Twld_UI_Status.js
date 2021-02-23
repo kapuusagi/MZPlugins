@@ -34,7 +34,7 @@
  * @default 通り名
  * 
  * @param textGuildRank
- * @text ギルド欄比べる
+ * @text ギルド欄ラベル
  * @desc 「ギルドランク」として使用するラベル。
  * @type string
  * @default ギルドランク
