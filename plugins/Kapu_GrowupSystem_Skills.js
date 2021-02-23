@@ -68,6 +68,10 @@
  *         他、以下のメソッドが使用可能。
  *         hasSkillType(id) : スキルタイプ id# が使用可能かどうか
  *         isLearned(id) : id#のスキルを習得しているかどうか
+ *         hasItem(id) : アイテム id# を持っているかどうか。
+ *                       習得しても消費されはしない。
+ *         hasWeapon(id) : 武器 id# を持っているかどうか。
+ *         hasArmor(id) : 防具 id# を持っているかどうか。
  *     <gpCost>
  *         習得に必要なGPコスト
  *     <keepOnResetGrown>
@@ -288,6 +292,9 @@
             const a = this;  // eslint-disable-line no-unused-vars
             const hasSkillType = (type) => this.skillTypes().includes(type); // eslint-disable-line no-unused-vars
             const isLearned = (id) => this.isLearnedSkill(id); // eslint-disable-line no-unused-vars
+            const hasItem = (id) => $gameParty.hasItem($dataItems[id]) ; // eslint-disable-line no-unused-vars
+            const hasWeapon = (id) => $gameParty.hasItem($dataWeapons[id]); // eslint-disable-line no-unused-vars
+            const hasArmor = (id) => $gameParty.hasItem($dataArmors[id]); // eslint-disable-line no-unused-vars
             const v = $gameVariables._data; // eslint-disable-line no-unused-vars
 
             try {
@@ -389,6 +396,8 @@
      * @return {Array<GrowupItem>} 育成項目
      */
     Game_Actor.prototype.growupItems = function() {
+        // 処理重いかも。
+        this.updateGpLearnableSkills();
         const items = _Game_Actor_growupItems.call(this);
         for (const id of this._gpLearnableSkills) {
             const skill = $dataSkills[id];
