@@ -147,6 +147,10 @@
  * アイテム/スキル
  *   <appraiseEffect:level#>
  *     このアイテム/スキルに鑑定効果を付与する。
+ * 
+ * エネミー
+ *   <appraiseDrop>
+ *     このエネミーがドロップするアイテムを未鑑定アイテムとして入手する。
  *  
  * ============================================
  * 変更履歴
@@ -332,6 +336,8 @@ function Scene_Appraise() {
     }
     //------------------------------------------------------------------------------
     // DataManager
+    DataManager._rewardItems = [];
+
     if (Game_Action.EFFECT_APPRAISE) {
         /**
          * 鑑定効果アイテムのノートタグを処理する。
@@ -410,40 +416,110 @@ function Scene_Appraise() {
         }
     };
 
+    /**
+     * 新しい個別報酬アイテムを登録する。
+     * これをやらないと、registerNewIndependentData を実行したときに
+     * unusedItemで未所持アイテムがクリアされてしまう。
+     * 
+     * @param {Object} baseItem DataItem/DataWeapon/DataArmor のいずれか
+     * @return {Object} 登録したアイテム。登録に失敗した場合にはnull.
+     */
+    DataManager.registerNewIndependentReward = function(baseItem) {
+        const newItem = DataManager.registerNewIndependentData(baseItem);
+        if (newItem) {
+            this._rewardItems.push(newItem);
+        }
+        return newItem;
+    };
+
+    /**
+     * 個別報酬アイテムをクリアする。
+     */
+    DataManager.clearIndependentRewards = function() {
+        this._rewardItems = [];
+    };
+
+    const _DataManager_isIndependentItemUsed = DataManager.isIndependentItemUsed;
+    /**
+     * この個別アイテムが使用されているかどうかを取得する。
+     * 
+     * 既定の実装では、アイテムイベントリとアクターデータ(パーティー外も含む)の装備品の
+     * いずれかに存在している場合にtrueを返す。
+     * 他の場所(倉庫機能実装とか)に保管される場合には、本メソッドに使用判定を追加すること。
+     * 
+     * @param {Object} independentItem 個別アイテムオブジェクト(DataItem/DataWeapon/DataArmor)
+     * @return {Boolean} 使用されている場合にはtrue, それ以外はfalse
+     */
+    DataManager.isIndependentItemUsed = function(independentItem) {
+        return _DataManager_isIndependentItemUsed.call(this, independentItem)
+                || this._rewardItems.includes(independentItem);
+    };
+
+    //------------------------------------------------------------------------------
+    // BattleManager
+    const _BattleManager_setup = BattleManager.setup;
+    /**
+     * 戦闘シーンを開始するための準備を行う。
+     * Note: 個別報酬アイテムをクリアするためフックする。
+     * 
+     * @param {Number} troopId エネミーグループID
+     * @param {Boolean} canEscape 逃走可能な場合にtrue 
+     * @param {Boolean} canLose 敗北できる場合にtrue
+     */
+    BattleManager.setup = function(troopId, canEscape, canLose) {
+        _BattleManager_setup.call(this, troopId, canEscape, canLose);
+        DataManager.clearIndependentRewards();
+    };
+
+    const _BattleManager_endBattle = BattleManager.endBattle;
+    /**
+     * 戦闘を終了させる。
+     * Note: 個別報酬アイテムをクリアするためフックする。
+     * 
+     * @param {Number} result 戦闘結果(0:勝利 , 1:中断(逃走を含む), 2:敗北)
+     */
+    BattleManager.endBattle = function(result) {
+        DataManager.clearIndependentRewards();
+        _BattleManager_endBattle.call(this, result);
+    };
 
     //------------------------------------------------------------------------------
     // Game_Enemy
-    const _Game_Enemy_makeDropItems = Game_Enemy.prototype.makeDropItems;
+
+    const _Game_Enemy_itemObject = Game_Enemy.prototype.itemObject;
     /**
-     * 取得アイテムを生成する。
+     * kind, dataIdで指定されるアイテムを得る。
      * 
-     * @return {Array<Data_IteM>} ドロップアイテムの配列。
+     * @param {Number} kind アイテム種類(1:道具,2:武器,3:防具)
+     * @param {Number} dataId データID
+     * @return {Object} アイテムデータ(DataItem/DataWeapon/DataArmor)。
+     *                 kind,dataIdに相当するデータが無い場合にはnullが返る。
      */
-    Game_Enemy.prototype.makeDropItems = function() {
-        const dropItems = _Game_Enemy_makeDropItems.call(this);
+    Game_Enemy.prototype.itemObject = function(kind, dataId) {
+        const item = _Game_Enemy_itemObject.call(this, kind, dataId);
+
         const enemy = this.enemy();
         if (enemy.meta.appraiseDrop) {
-            for (let i = 0; i < dropItems.length; i++) {
-                const item = dropItems[i];
-                if (!item.meta.appraiseItem) {
-                    continue;
-                }
-                const id = Number(item.meta.appraiseItem);
-                const appraiseItem = $dataItems[id];
-                if (!appraiseItem) {
-                    continue;
-                }
-                // 未鑑定時のアイテムが指定されてる。
-                const newItem = DataManager.registerNewItem(appraiseItem);
-                if (newItem) {
-                    newItem.appraiseLevel = DataManager.getItemAppraiseLevel(item);
-                    newItem.appraisePrice = DataManager.getItemAppraisePrice(item);
-                    newItem.appraisedItem = DataManager.getItemStr(item);
-                    dropItems[i] = newItem;
-                }
+            if (!item.meta.appraiseItem) {
+                return item; // 未鑑定アイテムの指定なし。
+            }
+            const id = Number(item.meta.appraiseItem);
+            const appraiseItem = $dataItems[id];
+            if (!appraiseItem) {
+                return item; // 未鑑定アイテムは存在しない。
+            }
+            // 未鑑定時のアイテムが指定されてる。
+            const newItem = DataManager.registerNewIndependentReward(appraiseItem);
+            if (newItem) {
+                newItem.appraiseLevel = DataManager.getItemAppraiseLevel(item);
+                newItem.appraisePrice = DataManager.getItemAppraisePrice(item);
+                newItem.appraisedItem = DataManager.getItemStr(item);
+                return newItem;
+            } else {
+                return null; // 登録失敗=未鑑定アイテム最大登録可能数越え
             }
         }
-        return dropItems;
+
     };
     //------------------------------------------------------------------------------
     // Game_Party
@@ -849,24 +925,7 @@ function Scene_Appraise() {
     };
 
 
-    //------------------------------------------------------------------------------
-    // Scene_ItemBaseの変更
-    const _Scene_ItemBase_determineItem = Scene_ItemBase.prototype.determineItem;
-    /**
-     * 使用するアイテムが確定した時の処理を行う。
-     */
-    Scene_ItemBase.prototype.determineItem = function() {
-        const item = this.item();
-        const user = this.user()
-        if (typeof item.meta.appraiseLevel !== "undefined") {
-            // 使用条件判定は？
-            const appraiseLevel = Number(item.meta.appraiseLevel) || 99;
-            SceneManager.push(Scene_Appraise);
-            SceneManager.prepareNextScene(appraiseLevel, user, item);
-        } else {
-            _Scene_ItemBase_determineItem.call(this);
-        }
-    };
+
 
     //------------------------------------------------------------------------------
     // Scene_Appraise
@@ -1119,6 +1178,7 @@ function Scene_Appraise() {
             }
         };
     }
+
 
     //------------------------------------------------------------------------------
     // Scene_ItemBase
