@@ -388,7 +388,8 @@
     };
 
     /**
-     * 新しい個別アイテムを登録する。
+     * 新しい個別アイテム(DataItem/DataWeapon/DataArmor)を登録する。
+     * baseItemで指定されたアイテムに合わせ、適切なデータコレクションに登録するように処理を行う。
      * 
      * @param {Object} baseItem ベースとするアイテムオブジェクト(DataItem/DataWeapon/DataArmor)
      * @return {Object} 登録された新しいアイテム。登録できなかった場合にはnull.
