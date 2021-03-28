@@ -151,6 +151,21 @@
  * @decimals 2
  * @default 0.5
  * 
+ * @param defaultTextHelpBuy
+ * @text 購入時ヘルプメッセージ
+ * @type string
+ * @default 品物を購入します。
+ * 
+ * @param defaultTextHelpSell
+ * @text 売却時ヘルプメッセージ
+ * @type string
+ * @default 所持品を売却します。
+ * 
+ * @param defaultTextHelpCancel
+ * @text キャンセル時ヘルプメッセージ。
+ * @type string
+ * @default 購買を中止します。
+ * 
  * @help 
  * TWLDシステム向けに作成したショップです。
  * 
@@ -182,7 +197,13 @@
  * ============================================
  * ノートタグ
  * ============================================
- * ノートタグはありません。
+ * 店データにノートタグを設定できます。
+ *   <helpBuy:text>
+ *     購入コマンドに対するヘルプ。
+ *   <helpSell:text>
+ *     売却コマンドに対するヘルプ。
+ *   <helpCancel:text>
+ *     キャンセルコマンドに対するヘルプ。
  * 
  * ============================================
  * 変更履歴
@@ -264,6 +285,9 @@ function Scene_TwldShop() {
     const labelStock = String(parameters["labelStock"]) || "Stock";
     const maxShopStock = Number(parameters["maxShopStock"]) || 99;
     const defaultSellingPriceRate = (Number(parameters["defaultSellingPriceRate"]) || 0.5).clamp(0, 1.0);
+    const defaultTextHelpBuy = parameters["defaultTextHelpBuy"] || "";
+    const defaultTextHelpSell = parameters["defaultTextHelpSell"] || "";
+    const defaultTextHelpCancel = parameters["defaultTextHelpCancel"] || "";
 
     /**
      * ショップIDを得る。
@@ -1069,6 +1093,16 @@ function Scene_TwldShop() {
         Window_Command.prototype.initialize.call(this, rect);
         this._buyable = true;
         this._sellable = true;
+        this._shopData = null;
+    };
+
+    /**
+     * ショップデータを設定する。
+     * 
+     * @param {Data_Shop} shopData ショップデータ
+     */
+    Window_TwldShopCommand.prototype.setShop = function(shopData) {
+        this._shopData = shopData;
     };
 
     /**
@@ -1107,6 +1141,38 @@ function Scene_TwldShop() {
         this.addCommand(TextManager.sell, "sell", this._sellable)
         this.addCommand(TextManager.cancel, "cancel", true);
     };
+
+    /**
+     * ヘルプメッセージを更新する。
+     */
+    Window_TwldShopCommand.prototype.updateHelp = function() {
+        Window_Command.prototype.updateHelp.call(this);
+        this._helpWindow.setText(this.helpText(this.currentSymbol()));
+    };
+
+    /**
+     * ヘルプテキストを取得する。
+     * 
+     * @param {string} symbol シンボル
+     * @returns {string} テキスト
+     */
+    Window_TwldShopCommand.prototype.helpText = function(symbol) {
+        if (this._shopData == null) {
+            return "";
+        } else {
+            switch (symbol) {
+                case "buy":
+                    return this._shopData.meta.helpBuy || defaultTextHelpBuy;
+                case "sell":
+                    return this._shopData.meta.helpSell || defaultTextHelpSell;
+                case "cancel":
+                    return this._shopData.meta.helpCancel || defaultTextHelpCancel;
+                default:
+                    return "";
+                    
+            }
+        }
+    }
     //------------------------------------------------------------------------------
     // Window_TwldShopItemCategory
     Window_TwldShopItemCategory.prototype = Object.create(Window_Command.prototype);
@@ -1219,8 +1285,8 @@ function Scene_TwldShop() {
      * @param {Number} id 店ID番号
      * @param {Number} mode ショップモード
      * @param {String} clerkFileName 店員画像ファイル名。店員画像が無い場合にはnull
-     * @param {Number} 店員画像表示オフセットX
-     * @param {Number} 店員画像表示オフセットY
+     * @param {Number} clerkOffsetX 店員画像表示オフセットX
+     * @param {Number} clerkOffsetY 店員画像表示オフセットY
      */
     Scene_TwldShop.prototype.prepare = function(id, mode, clerkFileName, clerkOffsetX, clerkOffsetY) {
         this._shop = $gameShops.shop(id); // Game_Shopオブジェクト
@@ -1305,6 +1371,9 @@ function Scene_TwldShop() {
         this._commandWindow.setHandler("ok",     this.onCommandOk.bind(this));
         this._commandWindow.setHandler("cancel", this.onCommandCancel.bind(this));
         this.addWindow(this._commandWindow);
+
+        this._commandWindow.setShop(this._shop.shop());
+        this._commandWindow.setHelpWindow(this._helpWindow);
     };
 
     /**
