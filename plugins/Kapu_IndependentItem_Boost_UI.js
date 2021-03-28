@@ -30,6 +30,21 @@
  * @dir pictures
  * @type file
  * 
+ * @arg textHelpBoost
+ * @text 強化ヘルプテキスト
+ * @type string
+ * 
+ * @arg textHelpResetBoost
+ * @text 強化リセットヘルプテキスト
+ * @type string
+ * 
+ * @arg textHelpReinitialize
+ * @text 再初期化ヘルプテキスト
+ * @type string
+ * 
+ * @arg textHelpCancel
+ * @text キャンセルヘルプテキスト
+ * @type string
  * 
  * 
  * @param textBoost
@@ -86,6 +101,26 @@
  * @type string
  * @default %1の打ち直しを行う
  * 
+ * @param defaultTextHelpBoost
+ * @text 強化コマンドのヘルプメッセージ
+ * @type string
+ * @default 装備品を強化します。
+ * 
+ * @param defaultTextHelpResetBoost
+ * @text 強化リセットコマンドのヘルプメッセージ
+ * @type string
+ * @default 装備品の強化状態をリセットします。
+ * 
+ * @param defaultTextHelpReinitialize
+ * @text 打ち直しコマンドのヘルプメッセージ
+ * @type string
+ * @default 装備品を打ち直します。
+ * 
+ * @param defaultTextHelpCancel
+ * @text キャンセルコマンドのヘルプメッセージ
+ * @type string
+ * @default 店を出ます。
+ * 
  * @param resetBoostAnimationId
  * @text 強化リセットアニメーション
  * @type animation
@@ -107,7 +142,8 @@
  * @default 0
  * 
  * @help 
- * UI実装
+ * BoostプラグインのUIを提供します。
+ * プラグインコマンド openShop/店を開く にて、強化店を開きます。
  * 
  * ■ 使用時の注意
  * 
@@ -129,6 +165,7 @@
  * ============================================
  * Version.0.1.0 動作未確認。
  */
+
 
  /**
   * 鍛冶屋コマンド
@@ -209,6 +246,10 @@ function Window_BlacksmithCatalystItem() {
     const textSuccessRate = parameters["textSuccessRate"] || "SuccessRate";
     const textConfirmResetBoost = parameters["textConfirmResetBoost"] || ""; 
     const textConfirmReinitialize = parameters["textConfirmReinitialize"] || "";
+    const defaultTextHelpBoost = parameters["defaultTextHelpBoost"] || "";
+    const defaultTextHelpResetBoost = parameters["defaultTextHelpResetBoost"] || "";
+    const defaultTextHelpReinitialize = parameters["defaultTextHelpReinitialize"] || "";
+    const defaultTextHelpCancel = parameters["defaultTextHelpCancel"] || "";
     
     const resetBoostAnimationId = Number(parameters["resetBoostAnimationId"]) || 0;
     const reinitializeAnimationId = Number(parameters["reinitializeAnimationId"]) || 0;
@@ -217,6 +258,11 @@ function Window_BlacksmithCatalystItem() {
 
 
     PluginManager.registerCommand(pluginName, "openShop", args => {
+        if ($gameParty.inBattle()) {
+            console.error("Could not open shop in battle.");
+            return ;
+        }
+
         // パラメータメンバは @argで指定した名前でアクセスできる。
         const maxBoost = Number(args.maxBoost) || 0;
         const smithLevel = Number(args.smithLevel) || 0;
@@ -230,10 +276,16 @@ function Window_BlacksmithCatalystItem() {
         }
         const clerkOffsetX = Number(args.clerkOffsetX) || 0;
         const clerkOffsetY = Number(args.clerkOffsetY) || 0;
-
+        const msgs = {
+            textHelpBoost: args.textHelpBoost || "",
+            textHelpResetBoost: args.textHelpResetBoost || "",
+            textHelpReinitialize: args.textHelpReinitialize || "",
+            textHelpCancel : args.textHelpCancel || ""
+            
+        };
 
         SceneManager.push(Scene_BlacksmithShop);
-        SceneManager.prepareNextScene(maxBoost, smithLevel, clerkFileName, clerkOffsetX, clerkOffsetY);
+        SceneManager.prepareNextScene(maxBoost, smithLevel, clerkFileName, clerkOffsetX, clerkOffsetY, msgs);
     });
 
 
@@ -249,6 +301,10 @@ function Window_BlacksmithCatalystItem() {
      */
     Window_BlacksmithShopCommand.prototype.initialize = function(rect) {
         Window_Command.prototype.initialize.call(this, rect);
+        this._textHelpBoost = "";
+        this._textHelpResetBoost = "";
+        this._textHelpReinitialize = "";
+        this._textHelpCancel = "";
     };
 
     /**
@@ -260,6 +316,78 @@ function Window_BlacksmithCatalystItem() {
         this.addCommand(textReinitialize, "reinitialize");
         this.addCommand(TextManager.cancel, "cancel");
     };
+
+    /**
+     * ヘルプメッセージを更新する。
+     */
+    Window_BlacksmithShopCommand.prototype.updateHelp = function() {
+        Window_Command.prototype.updateHelp.call(this);
+        this._helpWindow.setText(this.helpText(this.currentSymbol()));
+    };
+
+    /**
+     * ヘルプテキストを取得する。
+     * 
+     * @param {string} symbol シンボル
+     * @returns {string} テキスト
+     */
+    Window_BlacksmithShopCommand.prototype.helpText = function(symbol) {
+        switch (symbol) {
+            case "boost":
+                return this._textHelpBoost || "";
+            case "reset-boost":
+                return this._textHelpResetBoost || "";
+            case "reinitialize":
+                return this._textHelpReinitialize || "";
+            case "cancel":
+                return this._textHelpCancel || "";
+            default:
+                return "";
+        }
+    };
+
+    /**
+     * 強化コマンドに対応するヘルプメッセージを設定する。
+     * 
+     * @param {string} text ヘルプメッセージ
+     */
+    Window_BlacksmithShopCommand.prototype.setHelpTextBoost = function(text) {
+        this._textHelpBoost = text;
+        this.callUpdateHelp();
+    };
+
+    /**
+     * 強化リセットコマンドに対応するヘルプメッセージを設定する。
+     * 
+     * @param {string} text ヘルプメッセージ
+     */
+    Window_BlacksmithShopCommand.prototype.setHelpTextResetBoost = function(text) {
+        this._textHelpResetBoost = text;
+        this.callUpdateHelp();
+    };
+
+    /**
+     * 再初期化コマンドに対応するヘルプメッセージを設定する。
+     * 
+     * @param {string} text ヘルプメッセージ
+     */
+    Window_BlacksmithShopCommand.prototype.setHelpTextReinitialize = function(text) {
+        this._textHelpReinitialize = text;
+        this.callUpdateHelp();
+    };
+
+    /**
+     * キャンセルコマンドに対応するヘルプメッセージを設定する。
+     * 
+     * @param {string} text ヘルプメッセージ
+     */
+    Window_BlacksmithShopCommand.prototype.setHelpTextCancel = function(text) {
+        this._textHelpCancel = text;
+        this.callUpdateHelp();
+    };
+
+
+
     //------------------------------------------------------------------------------
     // Window_BlacksmithItemList
     Window_BlacksmithItemList.prototype = Object.create(Window_Selectable.prototype);
@@ -929,24 +1057,27 @@ function Window_BlacksmithCatalystItem() {
      */
     Scene_BlacksmithShop.initialize = function() {
         this._mode = Scene_BlacksmithShop.SHOP_MODE_BOOST;
+        this._msgs = {};
         Scene_MenuBase.prototype.initialize.call();
     };
 
     /**
      * 作成前の準備をする。
      * 
-     * @param {Number} maxBoost この鍛冶屋が対応できる最大ブースト数
-     * @param {Number} smithLevel この鍛冶屋の技能レベル。高いほど成功しやすい。
-     * @param {String} clerkFileName  店員の画像として使うファイル名
-     * @param {Number} 店員画像表示オフセットX
-     * @param {Number} 店員画像表示オフセットY
+     * @param {number} maxBoost この鍛冶屋が対応できる最大ブースト数
+     * @param {number} smithLevel この鍛冶屋の技能レベル。高いほど成功しやすい。
+     * @param {string} clerkFileName  店員の画像として使うファイル名
+     * @param {number} clerkOffsetX 店員画像表示オフセットX
+     * @param {number} clerkOffsetY 店員画像表示オフセットY
+     * @param {object} msgs メッセージディクショナリ
      */
-    Scene_BlacksmithShop.prototype.prepare = function(maxBoost, smithLevel, clerkFileName, clerkOffsetX, clerkOffsetY) {
+    Scene_BlacksmithShop.prototype.prepare = function(maxBoost, smithLevel, clerkFileName, clerkOffsetX, clerkOffsetY, msgs) {
         this._maxBoost = maxBoost;
         this._smithLevel = smithLevel;
         this._clerkFileName = clerkFileName;
         this._clerkOffsetX = clerkOffsetX || 0;
         this._clerkOffsetY = clerkOffsetY || 0;
+        this._msgs = msgs;
     };
 
     /**
@@ -1022,6 +1153,12 @@ function Window_BlacksmithCatalystItem() {
         this._commandWindow.setHandler("reinitialize", this.onCommandReinitialize.bind(this));
         this._commandWindow.setHandler("cancel", this.onCommandCancel.bind(this));
         this.addWindow(this._commandWindow);
+
+        this._commandWindow.setHelpWindow(this._helpWindow);
+        this._commandWindow.setHelpTextBoost(this._msgs["textHelpBoost"] || defaultTextHelpBoost);
+        this._commandWindow.setHelpTextResetBoost(this._msgs["textHelpResetBoost"] || defaultTextHelpResetBoost);
+        this._commandWindow.setHelpTextReinitialize(this._msgs["textHelpReinitialize"] || defaultTextHelpReinitialize);
+        this._commandWindow.setHelpTextCancel(this._msgs["textHelpCancel"] || defaultTextHelpCancel);
     };
 
     /**
@@ -1160,7 +1297,6 @@ function Window_BlacksmithCatalystItem() {
         this._numberInputWindow.hide();
         this._numberInputWindow.setHandler("ok", this.onNumberInputOk.bind(this));
         this._numberInputWindow.setHandler("cancel", this.onNumberInputCancel.bind(this));
-        this._numberInputWindow.setHandler("itemchange", this.onNumberInputItemChange.bind(this));
         this.addWindow(this._numberInputWindow);
 
         this._numberInputWindow.setCatalystWindow(this._selectedItemWindow);
