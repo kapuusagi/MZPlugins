@@ -1026,18 +1026,32 @@ function Scene_TwldShop() {
         const item = this._shop.itemAt(index);
         if (item) {
             const rect = this.itemRect(index);
-            const priceWidth = 96;
+            const priceWidth = 128 + this.textWidth(this.currencyUnit());
             const numWidth = 64;
-            const nameWidth = rect.width - numWidth - priceWidth;
+            const padding = this.itemPadding();
+            const nameWidth = rect.width - numWidth - priceWidth - padding * 2;
             rect.width -= this.itemPadding();
             this.changePaintOpacity(this.isEnabled(item));
-            this.drawItemName(item, rect.x, rect.y, nameWidth);
-            this.drawText(labelStock + ":" + this.stok(item), rect.x + nameWidth, rect.y, numWidth, "right");
-            this.drawText(this.price(item), rect.x + nameWidth + numWidth,
-                          rect.y, priceWidth, "right");
+
+            let x = rect.x;
+            this.drawItemName(item, x, rect.y, nameWidth);
+            x += nameWidth + padding;
+            this.drawText(labelStock + ":" + this.stok(item), x, rect.y, numWidth, "right");
+            x += numWidth + padding;
+            this.drawCurrencyValue(this.price(item), this.currencyUnit(), x, rect.y, priceWidth);
             this.changePaintOpacity(true);
         }
     };
+
+    /**
+     * 所持金の単位を得る。
+     * 
+     * @returns {string} 所持金の単位
+     */
+     Window_TwldShopBuy.prototype.currencyUnit = function() {
+        return TextManager.currencyUnit;
+    };
+
 
     //------------------------------------------------------------------------------
     // Window_TwldShopCommand
