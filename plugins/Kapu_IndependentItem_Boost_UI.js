@@ -30,6 +30,16 @@
  * @dir pictures
  * @type file
  * 
+ * @arg enableResetBoost
+ * @text 強化リセット有効
+ * @type boolean
+ * @default true
+ * 
+ * @arg enableReinitialize
+ * @text 再初期化有効
+ * @type boolean
+ * @default true
+ * 
  * @arg textHelpBoost
  * @text 強化ヘルプテキスト
  * @type string
@@ -64,6 +74,18 @@
  * @desc ショップに表示する再初期化メニューとして表示する文字列。
  * @type string
  * @default 打ち直し
+ * 
+ * @param textBoostCount
+ * @text 強化回数テキスト
+ * @desc 強化回数として表示するラベル
+ * @type string
+ * @default 強化回数
+ * 
+ * @param textMaxBoosted
+ * @text 最大強化済みテキスト
+ * @desc 最大強化済みであることを表示するラベル
+ * @type string
+ * @default 最大
  * 
  * @param textInsufficientSkillLevel
  * @text 技能不足テキスト
@@ -240,12 +262,14 @@ function Window_BlacksmithCatalystItem() {
     const textBoost = parameters["textBoost"] || "Boost";
     const textResetBoost = parameters["textResetBoost"] || "Reset boost";
     const textReinitialize = parameters["textReinitialize"] || "reinitialize";
-    const textInsufficientSkillLevel = parameters["textInsufficientSkillLevel"] | "Unboostable";
+    const textInsufficientSkillLevel = parameters["textInsufficientSkillLevel"] || "Unboostable";
     const textBoostItem = parameters["textBoostItem"] || "BoostItem";
     const textCatalystItem = parameters["textCatalystItem"] || "CatalystItem";
     const textSuccessRate = parameters["textSuccessRate"] || "SuccessRate";
     const textConfirmResetBoost = parameters["textConfirmResetBoost"] || ""; 
     const textConfirmReinitialize = parameters["textConfirmReinitialize"] || "";
+    const textBoostCount = parameters["textBoostCount"] || "Boost";
+    const textMaxBoosted = parameters["textMaxBoosted"] || "MAX";
     const defaultTextHelpBoost = parameters["defaultTextHelpBoost"] || "";
     const defaultTextHelpResetBoost = parameters["defaultTextHelpResetBoost"] || "";
     const defaultTextHelpReinitialize = parameters["defaultTextHelpReinitialize"] || "";
@@ -263,9 +287,6 @@ function Window_BlacksmithCatalystItem() {
             return ;
         }
 
-        // パラメータメンバは @argで指定した名前でアクセスできる。
-        const maxBoost = Number(args.maxBoost) || 0;
-        const smithLevel = Number(args.smithLevel) || 0;
         let clerkFileName = String(args.clerkFileName) || "";
         if (clerkFileName.includes("/")) {
             if (clerkFileName.startsWith("pictures/")) {
@@ -274,18 +295,25 @@ function Window_BlacksmithCatalystItem() {
                 clerkFileName = "";
             }
         }
-        const clerkOffsetX = Number(args.clerkOffsetX) || 0;
-        const clerkOffsetY = Number(args.clerkOffsetY) || 0;
-        const msgs = {
+
+        const sceneShopArgs = {
+            maxBoost : Number(args.maxBoost) || 0,
+            smithLevel : Number(args.smithLevel) || 0,
+            clerkFileName : clerkFileName,
+            clerkOffsetX : Number(args.clerkOffsetX) || 0,
+            clerkOffsetY : Number(args.clerkOffsetY) || 0,
+            enableResetBoost : Boolean(args.enableResetBoost),
+            enableReinitialize : Boolean(args.enableReinitialize),
+        };
+        sceneShopArgs.msgs = {
             textHelpBoost: args.textHelpBoost || "",
             textHelpResetBoost: args.textHelpResetBoost || "",
             textHelpReinitialize: args.textHelpReinitialize || "",
             textHelpCancel : args.textHelpCancel || ""
-            
-        };
+        }
 
         SceneManager.push(Scene_BlacksmithShop);
-        SceneManager.prepareNextScene(maxBoost, smithLevel, clerkFileName, clerkOffsetX, clerkOffsetY, msgs);
+        SceneManager.prepareNextScene(sceneShopArgs);
     });
 
 
@@ -305,6 +333,9 @@ function Window_BlacksmithCatalystItem() {
         this._textHelpResetBoost = "";
         this._textHelpReinitialize = "";
         this._textHelpCancel = "";
+        this._enableResetBoost = false;
+        this._enableReinitialize = false;
+        this.refresh();
     };
 
     /**
@@ -312,8 +343,12 @@ function Window_BlacksmithCatalystItem() {
     */
     Window_BlacksmithShopCommand.prototype.makeCommandList = function() {
         this.addCommand(textBoost, "boost");
-        this.addCommand(textResetBoost, "reset-boost");
-        this.addCommand(textReinitialize, "reinitialize");
+        if (this._enableResetBoost) {
+            this.addCommand(textResetBoost, "reset-boost");
+        }
+        if (this._enableReinitialize) {
+            this.addCommand(textReinitialize, "reinitialize");
+        }
         this.addCommand(TextManager.cancel, "cancel");
     };
 
@@ -364,6 +399,25 @@ function Window_BlacksmithCatalystItem() {
     Window_BlacksmithShopCommand.prototype.setHelpTextResetBoost = function(text) {
         this._textHelpResetBoost = text;
         this.callUpdateHelp();
+    };
+
+    /**
+     * 再初期化を有効にするかどうかを設定する。
+     * 
+     * @param {boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     */
+    Window_BlacksmithShopCommand.prototype.setReinitializeEnable = function(enabled) {
+        this._enableReinitialize = enabled;
+        this.refresh();
+    };
+    /**
+     * 強化リセットを有効にするかどうかを設定する。
+     * 
+     * @param {boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     */
+    Window_BlacksmithShopCommand.prototype.setResetBoostEnable = function(enabled) {
+        this._enableResetBoost = enabled;
+        this.refresh();
     };
 
     /**
@@ -488,7 +542,8 @@ function Window_BlacksmithCatalystItem() {
     Window_BlacksmithItemList.prototype.isEnabled = function(item) {
         if (item) {
             if (this._mode === Scene_BlacksmithShop.SHOP_MODE_BOOST) {
-                return (this.price(item) <= this._money) && DataManager.isBoostableItem(item);
+                return (this.price(item) <= this._money) && DataManager.isBoostableItem(item)
+                        && (item.boostCount < this._maxBoostCount);
             } else if (this._mode === Scene_BlacksmithShop.SHOP_MODE_RESET_BOOST) {
                 return (this.price(item) <= this._money) && (item.boostCount);
             } else {
@@ -534,19 +589,22 @@ function Window_BlacksmithCatalystItem() {
         }
 
         const rect = this.itemRect(index);
+        const boostCountWidth = 180;
         const rateWidth = 160;
         const priceWidth = 128 + this.textWidth(this.currencyUnit());
         const padding = this.itemPadding();
         rect.width -= this.itemPadding();
         let x = rect.x;
-        const nameWidth = rect.width - priceWidth - rateWidth - padding * 2;
+        const nameWidth = rect.width - boostCountWidth - priceWidth - rateWidth - padding * 3;
         
         this.changePaintOpacity(this.isEnabled(item));
         this.drawItemName(item, rect.x, rect.y, nameWidth);
         x += nameWidth + padding;
+        this.drawBoostCount(item, x, rect.y, boostCountWidth);
+        x += boostCountWidth + padding;
         this.resetTextColor();
         if ((this._mode === Scene_BlacksmithShop.SHOP_MODE_BOOST)
-                && !DataManager.isBoostableItem(item)) {
+                && (!DataManager.isBoostableItem(item) || (item.boostCount >= this._maxBoostCount))) {
             const textWidth = rect.width - x;
             this.drawText(textInsufficientSkillLevel, x, rect.y, textWidth, "right");
         } else {
@@ -558,6 +616,33 @@ function Window_BlacksmithCatalystItem() {
             this.drawCurrencyValue(this.price(item), this.currencyUnit(), x, rect.y, priceWidth);
         }
         this.changePaintOpacity(true);
+    };
+
+    /**
+     * 強化回数を描画する。
+     * 現在強化回数/最大強化回数で表示する。
+     * 
+     * @param {object} item 強化対象アイテム(DataArmor/DataWeapon)
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 幅
+     */
+     Window_BlacksmithItemList.prototype.drawBoostCount = function(item, x, y, width) {
+        const labelWidth = 64;
+        const valueWidth = (width - 20 - labelWidth) / 2;
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(textBoostCount, x, y, labelWidth);
+        x += labelWidth;
+        this.resetTextColor();
+        if (item.boostCount >= item.maxBoostCount) {
+            this.drawText(textMaxBoosted, x, y, width - labelWidth);
+        } else {
+            this.drawText(item.boostCount, x, y, valueWidth, "right");
+            x += valueWidth;
+            this.drawText("/", x, y, 20, "center");
+            x += 20;
+            this.drawText(item.maxBoostCount, x, y, valueWidth, "right");
+        }
     };
 
     /**
@@ -701,16 +786,49 @@ function Window_BlacksmithCatalystItem() {
     Window_BlacksmithCatalystList.prototype.drawItem = function(index) {
         const item = this._data[index];
         if (item) {
+            const rateWidth = 160;
             const numberWidth = this.textWidth("000");
+            const padding = this.itemPadding();
             const rect = this.itemRect(index);
-            rect.width -= this.itemPadding(); // たぶん全部使おうとするとあふれる。
+            const nameWidth = rect.width - 20 - rateWidth - numberWidth - (padding * 3);
+
+            let x = rect.x;
             this.changePaintOpacity(this.isEnabled(item));
-            const nameWidth = rect.width - numberWidth;
-            this.drawItemName(item, rect.x, rect.y, nameWidth);
+            this.drawItemName(item, x, rect.y, nameWidth);
+            x += (nameWidth + padding)
             this.resetTextColor();
-            this.drawItemNumber(item, rect.x + nameWidth, rect.y, numberWidth);
+            const rate = item.boostSuccessRate;
+            this.drawSuccessRate(rate, x, rect.y, rateWidth);
+            x += rateWidth + padding;
+
+            this.drawText(":", x, rect.y, 20);
+            x += 20;
+            this.drawItemNumber(item, x, rect.y, numberWidth);
             this.changePaintOpacity(true);
         }
+    };
+
+    /**
+     * 成功率「成功率:xx%」を描画する。
+     * 
+     * @param {number} rate 成功率(0～1.0)
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     */
+    Window_BlacksmithCatalystList.prototype.drawSuccessRate = function(rate, x, y, width) {
+        const valueWidth = 56;
+        const labelWidth = width - valueWidth - this.itemPadding();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(textSuccessRate, x, y, labelWidth);
+         
+        const rateStr = Math.floor(rate * 100) + "%";
+        const textColor = (rate > 1.0) ? ColorManager.powerUpColor()
+                : ((rate < 1.0) ? ColorManager.powerDownColor() : ColorManager.normalColor());
+        this.changeTextColor(textColor);
+        const valueText = this.multiplicationSign() + rateStr;
+        this.drawText(valueText, x + labelWidth + this.itemPadding(), y, valueWidth, "left");
+        this.resetTextColor();
     };
 
     /**
@@ -724,6 +842,16 @@ function Window_BlacksmithCatalystItem() {
     Window_BlacksmithCatalystList.prototype.drawItemNumber = function(item, x, y, width) {
         const itemCount = $gameParty.numItems(item);
         this.drawText(itemCount, x, y, width, "right");
+    };
+
+
+    /**
+     * 個数の符号を得る
+     * 
+     * @returns {string} 個数の符号
+     */
+     Window_BlacksmithCatalystList.prototype.multiplicationSign = function() {
+        return "\u00d7";
     };
 
     /**
@@ -1070,14 +1198,20 @@ function Window_BlacksmithCatalystItem() {
      * @param {number} clerkOffsetX 店員画像表示オフセットX
      * @param {number} clerkOffsetY 店員画像表示オフセットY
      * @param {object} msgs メッセージディクショナリ
+     * 
+     * @param {object} sceneShopArgs シーンのパラメータ
+     *                               maxBoost : boolean この鍛冶屋で強化可能な最大レベル。
+     *                               smithLevel : number
      */
-    Scene_BlacksmithShop.prototype.prepare = function(maxBoost, smithLevel, clerkFileName, clerkOffsetX, clerkOffsetY, msgs) {
-        this._maxBoost = maxBoost;
-        this._smithLevel = smithLevel;
-        this._clerkFileName = clerkFileName;
-        this._clerkOffsetX = clerkOffsetX || 0;
-        this._clerkOffsetY = clerkOffsetY || 0;
-        this._msgs = msgs;
+    Scene_BlacksmithShop.prototype.prepare = function(sceneShopArgs) {
+        this._maxBoost = sceneShopArgs.maxBoost;
+        this._smithLevel = sceneShopArgs.smithLevel;
+        this._clerkFileName = sceneShopArgs.clerkFileName;
+        this._clerkOffsetX = sceneShopArgs.clerkOffsetX;
+        this._clerkOffsetY = sceneShopArgs.clerkOffsetY;
+        this._enableResetBoost = sceneShopArgs.enableResetBoost;
+        this._enableReinitialize = sceneShopArgs.enableReinitialize;
+        this._msgs = sceneShopArgs.msgs;
     };
 
     /**
@@ -1154,6 +1288,8 @@ function Window_BlacksmithCatalystItem() {
         this._commandWindow.setHandler("cancel", this.onCommandCancel.bind(this));
         this.addWindow(this._commandWindow);
 
+        this._commandWindow.setResetBoostEnable(this._enableResetBoost);
+        this._commandWindow.setReinitializeEnable(this._enableReinitialize);
         this._commandWindow.setHelpWindow(this._helpWindow);
         this._commandWindow.setHelpTextBoost(this._msgs["textHelpBoost"] || defaultTextHelpBoost);
         this._commandWindow.setHelpTextResetBoost(this._msgs["textHelpResetBoost"] || defaultTextHelpResetBoost);
