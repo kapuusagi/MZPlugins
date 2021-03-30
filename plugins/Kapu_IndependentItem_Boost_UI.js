@@ -296,14 +296,18 @@ function Window_BlacksmithCatalystItem() {
             }
         }
 
+        const enableResetBoost = (typeof args.enableResetBoost === "undefined")
+                ? false : (args.enableResetBoost === "true");
+        const enableReinitialize = (typeof args.enableReinitialize === "undefined")
+                ? false : (args.enableReinitialize === "true");
         const sceneShopArgs = {
             maxBoost : Number(args.maxBoost) || 0,
             smithLevel : Number(args.smithLevel) || 0,
             clerkFileName : clerkFileName,
             clerkOffsetX : Number(args.clerkOffsetX) || 0,
             clerkOffsetY : Number(args.clerkOffsetY) || 0,
-            enableResetBoost : Boolean(args.enableResetBoost),
-            enableReinitialize : Boolean(args.enableReinitialize),
+            enableResetBoost : enableResetBoost,
+            enableReinitialize : enableReinitialize,
         };
         sceneShopArgs.msgs = {
             textHelpBoost: args.textHelpBoost || "",
