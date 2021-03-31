@@ -881,7 +881,8 @@ function Window_BlacksmithCatalystItem() {
      */
     Window_BlacksmithNumberInput.prototype.initialize = function(rect) {
         this._max = 0;
-        Window_ShopNumber.prototype.initialize.call(this, rect);
+        Window_NumberInput.prototype.initialize.call(this);
+        this.move(rect.x, rect.y, rect.width, rect.height);
     };
 
     /**
@@ -960,19 +961,16 @@ function Window_BlacksmithCatalystItem() {
 
         return digit;
     };
-
+    
     /**
-     * 数値変更処理を行う。
+     * キャンセル操作が有効かどうかを取得する。
      * 
-     * Note: キャンセル処理を追加するためにフックする。
+     * @returns {boolean} キャンセル操作が有効な場合にはtrue, それ以外はfalse.
+     * !!!overwrite!!! Window_NumberInput.isCancelEnabled
+     *     キャンセル操作を有効にするため、オーバーライドする。
      */
-    Window_BlacksmithNumberInput.prototype.processDigitChange = function() {
-        if (this.isOpenAndActive()) {
-            if (Input.isRepeated("cancel")) {
-                this.processCancel();
-            }
-        }
-        Window_NumberInput.prototype.processDigitChange.call(this);
+    Window_BlacksmithNumberInput.prototype.isCancelEnabled = function() {
+        return true;
     };
 
     /**
@@ -1162,9 +1160,10 @@ function Window_BlacksmithCatalystItem() {
      * 最大項目数を取得する。
      * @return {Number} 最大項目数
      */
-     Window_BlacksmithConfirm.prototype.maxItems = function() {
+    Window_BlacksmithConfirm.prototype.maxItems = function() {
         return this._items.length;
     };
+
 
     /**
      * 項目を描画する。
@@ -1173,9 +1172,27 @@ function Window_BlacksmithCatalystItem() {
      */
      Window_BlacksmithConfirm.prototype.drawItem = function (index) {
         const rect = this.itemRect(index);
+        const padding = this.itemPadding();
         this.resetTextColor();
-        this.drawText(this._items[index], rect.x, rect.y, rect.width, "left");
+        this.drawText(this._items[index], rect.x + padding, rect.y, rect.width - padding * 2, "left");
         this.changeTextColor(ColorManager.normalColor());
+    };
+
+    /**
+     * OK処理を行う。
+     */
+    Window_BlacksmithConfirm.prototype.processOk = function() {
+        if (this.index() == 0) {
+            this.playOkSound();
+            this.updateInputData();
+            this.deactivate();
+            this.callOkHandler();
+        } else {
+            SoundManager.playCancel();
+            this.updateInputData();
+            this.deactivate();
+            this.callCancelHandler();
+        }
     };
 
     //------------------------------------------------------------------------------
@@ -1607,14 +1624,14 @@ function Window_BlacksmithCatalystItem() {
             case Scene_BlacksmithShop.SHOP_MODE_RESET_BOOST:
                 // 確認してOKなら強化リセット
                 this._confirmWindow.setMessage(textConfirmResetBoost.format(item.name));
-                this._confirmWindow.deselect(); // 未選択状態にする。
+                this._confirmWindow.select(1); // キャンセルを選択状態にする。
                 this._confirmWindow.activate();
                 this._confirmWindow.show();
                 break;
             case Scene_BlacksmithShop.SHOP_MODE_REINITIALIZE:
                 // 確認してOKなら打ち直し。
                 this._confirmWindow.setMessage(textConfirmReinitialize.format(item.name));
-                this._confirmWindow.deselect(); // 未選択状態にする。
+                this._confirmWindow.select(1); // キャンセルを選択状態にする。
                 this._confirmWindow.activate();
                 this._confirmWindow.show();
                 break;
