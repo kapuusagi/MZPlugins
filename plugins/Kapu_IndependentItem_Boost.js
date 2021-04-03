@@ -67,9 +67,14 @@
  *   (a) boostCount 強化回数
  *   (b) maxBoostCount 最大強化回数
  * ・強化の実現方法
- *   traitsフィールドのメンバを変更することで実現する。
- *   
- * 
+ *   params及びtraitsフィールドのメンバを変更することで実現する。
+ *   他のパラメータを変更するように機能追加する場合には、以下のようにフックする。
+ *   DataManager.initializeIndependentWeapon
+ *   DataManager.initializeIndependentArmor
+ *      個別アイテム生成直後のパラメータ初期値をバックアップする。
+ *   DataManager.resetIndependentWeaponBoost
+ *   DataManager.resetIndependentArmorBoost
+ *      保存したパラメータ初期値を適用する。
  * 
  *   
  * ============================================
@@ -106,8 +111,31 @@
  *     初回成功率(0.0～100.0を指定する)。未指定時は100.0になる。
  *   <boostEffect:args%>
  *     args書式
- *     key$=value$をカンマ(,)で区切る。
- *     key及びvalueの書式はboostの追加プラグインに依存。
+ *     key$ または key$=value$ をカンマ(,)で区切る。
+ *     本プラグインで実装済みのエフェクトは以下の通り。
+ *      key  value書式 
+ *     +---- ---------- -------------------------------------------------
+ *      MHP  value#     value#固定値だけ最大HPを増加させる。
+ *           min#:max#  min#～max#の範囲のランダム値だけ最大HPを増加させる。
+ *      MMP  value#     value#固定値だけ最大MPを増加させる。
+ *           min#:max#  min#～max#の範囲のランダム値だけ最大MPを増加させる。
+ *      ATK  value#     value#固定値だけATKを増加させる。
+ *           min#:max#  min#～max#の範囲のランダム値だけATKを増加させる。
+ *      DEF  value#     value#固定値だけDEFを増加させる。
+ *           min#:max#  min#～max#の範囲のランダム値だけDEFを増加させる。
+ *      MAT  value#     value#固定値だけMATを増加させる。
+ *           min#:max#  min#～max#の範囲のランダム値だけMATを増加させる。
+ *      MDF  value#     value#固定値だけMDFを増加させる。
+ *           min#:max#  min#～max#の範囲のランダム値だけMDFを増加させる。
+ *      AGI  value#     value#固定値だけAGIを増加させる。
+ *           min#:max#  min#～max#の範囲のランダム値だけAGIを増加させる。
+ *      LUK  value#     value#固定値だけLUKを増加させる。
+ *           min#:max#  min#～max#の範囲のランダム値だけLUKを増加させる。
+ * 
+ * 
+ *     その他のkey及びvalueの書式はboostの追加プラグインに依存。
+ *     例)
+ *         <boostEffect:ATK=+12,DEF=+4>
  *   <boostCondition:evaluation%>
  *     適用可否を判定する処理。未指定時は常に適用可能。
  *     以下のものが参照可能
@@ -259,7 +287,7 @@
      * @param {Array<Object>} dataCollection DataItemのコレクション
      */
     const _processItemNotetags = function(dataCollection) {
-        const patternBoostEffect = /<boostEffect[ :]?(.+)/;
+        const patternBoostEffect = /<boostEffect[ :]?(.+)>/;
 
         for (let i = 1; i < dataCollection.length; i++) {
             const item = dataCollection[i];
@@ -307,6 +335,8 @@
     // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentWeapon = function(newWeapon, baseWeapon) {
         _DataManager_initializeIndependentWeapon.call(this, newWeapon, baseWeapon);
+        newWeapon.params_org = JsonEx.makeDeepCopy(baseWeapon.params);
+
         newWeapon.boostCount = 0;
         if (baseWeapon.meta.maxBoostCount) {
             newWeapon.maxBoostCount = _getMaxBoostCount(baseWeapon.meta.maxBoostCount);
@@ -338,6 +368,7 @@
         const baseItem = DataManager.getBaseItem(weapon);
         weapon.boostCount = 0; // 強化段階リセット
         weapon.traits = JsonEx.makeDeepCopy(baseItem.traits);
+        weapon.params = JsonEx.makeDeepCopy(weapon.params_org);
         weapon.name = baseItem.name;
     };
 
@@ -351,6 +382,8 @@
     // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentArmor = function(newArmor, baseArmor) {
         _DataManager_initializeIndependentArmor.call(this, newArmor, baseArmor);
+        newArmor.params_org = JsonEx.makeDeepCopy(baseArmor.params);
+
         newArmor.boostCount = 0;
         if (baseArmor.meta.maxBoostCount) {
             newArmor.maxBoostCount = _getMaxBoostCount(baseArmor.meta.maxBoostCount);
@@ -369,6 +402,7 @@
         const baseItem = DataManager.getBaseItem(armor);
         armor.boostCount = 0; // 強化段階リセット
         armor.traits = JsonEx.makeDeepCopy(baseItem.traits);
+        armor.params = JsonEx.makeDeepCopy(armor.params_org);
         armor.name = baseItem.name;
     };
 
@@ -421,7 +455,77 @@
      */
     // eslint-disable-next-line no-unused-vars
     DataManager.applyBoostEffect = function(item, key, value) {
+        switch (key) {
+            case "MHP":
+                item.params[0] += DataManager.getBoostValueInt(value);
+                break;
+            case "MMP":
+                item.params[1] += DataManager.getBoostValueInt(value);
+                break;
+            case "ATK":
+                item.params[2] += DataManager.getBoostValueInt(value);
+                break;
+            case "DEF":
+                item.params[3] += DataManager.getBoostValueInt(value);
+                break;
+            case "MAT":
+                item.params[4] += DataManager.getBoostValueInt(value);
+                break;
+            case "MDF":
+                item.params[5] += DataManager.getBoostValueInt(value);
+                break;
+            case "AGI":
+                item.params[6] += DataManager.getBoostValueInt(value);
+                break;
+            case "LUK":
+                item.params[7] += DataManager.getBoostValueInt(value);
+                break;
+        }
 
+    };
+    /**
+     * 整数の強化値を得る。
+     * 
+     * @param {string} valueStr 
+     * @return {Number} ブースト値
+     */
+    DataManager.getBoostValueInt = function(valueStr) {
+        return Math.round(DataManager.getBoostValueReal(valueStr));
+    };
+
+    
+    /**
+     * 実数の強化値を得る。
+     * 
+     * @param {string} valueStr 
+     * @return {Number} ブースト値
+     */
+     DataManager.getBoostValueReal = function(valueStr) {
+        const tokens = valueStr.split(":");
+        if (tokens.length >= 2) {
+            const min = Number(tokens[0]);
+            const max = Number(tokens[1]);
+            if (isNaN(min)) {
+                if (isNaN(max)) {
+                    return 0;
+                } else {
+                    return max; // maxだけ有効値
+                }
+            } else {
+                if (isNaN(max)) {
+                    return Math.floor(min); // minだけ有効値
+                } else {
+                    return min + (max - min) * Math.random();
+                }
+            }
+        } else {
+            const value = Number(tokens[0]);
+            if (isNaN(value)) {
+                return 0;
+            } else {
+                return value;
+            }
+        }
     };
 
     /**
