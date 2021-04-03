@@ -579,6 +579,9 @@
 
     /**
      * 整数の強化値を得る。
+     * Note : valueStrでフォローしている書式は次の通り。
+     *     value#
+     *     min#:max#
      * 
      * @param {string} valueStr 
      * @return {Number} ブースト値
@@ -590,36 +593,43 @@
     
     /**
      * 実数の強化値を得る。
+     * Note : valueStrでフォローしている書式は次の通り。
+     *     value#
+     *     min#:max#
+     * 
+     * 小数点以下2桁で丸めるように処理する。
      * 
      * @param {string} valueStr 
      * @return {Number} ブースト値
      */
      DataManager.getBoostValueReal = function(valueStr) {
         const tokens = valueStr.split(":");
+        let realValue;
         if (tokens.length >= 2) {
             const min = Number(tokens[0]);
             const max = Number(tokens[1]);
             if (isNaN(min)) {
                 if (isNaN(max)) {
-                    return 0;
+                    realValue = 0;
                 } else {
-                    return max; // maxだけ有効値
+                    realValue = max; // maxだけ有効値
                 }
             } else {
                 if (isNaN(max)) {
-                    return Math.floor(min); // minだけ有効値
+                    realValue = Math.floor(min); // minだけ有効値
                 } else {
-                    return min + (max - min) * Math.random();
+                    realValue = min + (max - min) * Math.random();
                 }
             }
         } else {
             const value = Number(tokens[0]);
             if (isNaN(value)) {
-                return 0;
+                realValue = 0;
             } else {
-                return value;
+                realValue = value;
             }
         }
+        return Math.round(realValue * 100) / 100;
     };
 
     /**
