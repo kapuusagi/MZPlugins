@@ -165,7 +165,7 @@ __Game_BattlerBase.param__ で定義される。
 #### __hit/eva/cri/cev/mev/mrf/cnt/hrg/mrg/trg__
 
 実体は __Game_BattlerBase.xparam__ で定義されている。
-Trait __TRAIT_XPARAM__ の 0に対する加算合成。
+Trait __Game_BattlerBase.TRAIT_XPARAM__ の 0に対する加算合成。
 
 |ID|プロパティ名|説明|
 |---|---|---|
@@ -183,7 +183,7 @@ Trait __TRAIT_XPARAM__ の 0に対する加算合成。
 #### __tgr/grd/rec/pha/mcr/tcr/pdr/mdr/fdr/exr__
 
 実体は __Game_BattlerBase.sparam__ で定義されている。
-Trait __TRAIT_SPARAM__ の 1.0に対する乗算合成。
+Trait __Game_BattlerBase.TRAIT_SPARAM__ の 1.0に対する乗算合成。
 
 |ID|プロパティ名|説明|
 |---|---|---|
