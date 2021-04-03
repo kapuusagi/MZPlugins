@@ -673,8 +673,15 @@ function Window_BlacksmithCatalystItem() {
      * 
      * @returns {string} 所持金の単位
      */
-     Window_BlacksmithItemList.prototype.currencyUnit = function() {
+    Window_BlacksmithItemList.prototype.currencyUnit = function() {
         return TextManager.currencyUnit;
+    };
+
+    /**
+     * ヘルプメッセージを更新する。
+     */
+    Window_BlacksmithItemList.prototype.updateHelp = function() {
+        this.setHelpWindowItem(this.item());
     };
 
     //------------------------------------------------------------------------------
@@ -752,17 +759,7 @@ function Window_BlacksmithCatalystItem() {
         if (!item) {
             return false;
         }
-        if (item.meta.boostCondition) {
-            // eslint-disable-next-line no-unused-vars
-            const equipment = this._targetItem;
-            // eslint-disable-next-line no-unused-vars
-            const isWeapon = DataManager.isWeapon(item);
-            // eslint-disable-next-line no-unused-vars
-            const isArmor = DataManager.isArmor(item);
-            return eval(item.meta.boostCondition) || false;
-        } else {
-            return true; // 条件ないなら全て可
-        }
+        return DataManager.isBoostCatalystApplicable(item, this._targetItem);
     };
 
     /**
@@ -865,6 +862,13 @@ function Window_BlacksmithCatalystItem() {
         this.createContents();
         this.makeItemList();
         this.drawAllItems();
+    };
+
+    /**
+     * ヘルプメッセージを更新する。
+     */
+    Window_BlacksmithCatalystList.prototype.updateHelp = function() {
+        this.setHelpWindowItem(this.item());
     };
 
     //------------------------------------------------------------------------------
@@ -1348,6 +1352,8 @@ function Window_BlacksmithCatalystItem() {
         this._itemWindow.setHandler("cancel", this.onItemWindowCancel.bind(this));
         this._itemWindow.setHandler("itemchange", this.onItemWindowItemChange.bind(this));
         this.addWindow(this._itemWindow);
+
+        this._itemWindow.setHelpWindow(this._helpWindow);
     };
 
     /**
@@ -1375,6 +1381,8 @@ function Window_BlacksmithCatalystItem() {
         this._catalystWindow.setHandler("itemchange", this.onCatalystItemChange.bind(this));
         this._catalystWindow.hide();
         this.addWindow(this._catalystWindow);
+
+        this._catalystWindow.setHelpWindow(this._helpWindow);
     };
 
     /**
