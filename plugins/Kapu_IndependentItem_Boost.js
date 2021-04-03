@@ -112,26 +112,39 @@
  *   <boostEffect:args%>
  *     args書式
  *     key$ または key$=value$ をカンマ(,)で区切る。
- *     本プラグインで実装済みのエフェクトは以下の通り。
- *      key  value書式 
- *     +---- ---------- -------------------------------------------------
- *      MHP  value#     value#固定値だけ最大HPを増加させる。
- *           min#:max#  min#～max#の範囲のランダム値だけ最大HPを増加させる。
- *      MMP  value#     value#固定値だけ最大MPを増加させる。
- *           min#:max#  min#～max#の範囲のランダム値だけ最大MPを増加させる。
- *      ATK  value#     value#固定値だけATKを増加させる。
- *           min#:max#  min#～max#の範囲のランダム値だけATKを増加させる。
- *      DEF  value#     value#固定値だけDEFを増加させる。
- *           min#:max#  min#～max#の範囲のランダム値だけDEFを増加させる。
- *      MAT  value#     value#固定値だけMATを増加させる。
- *           min#:max#  min#～max#の範囲のランダム値だけMATを増加させる。
- *      MDF  value#     value#固定値だけMDFを増加させる。
- *           min#:max#  min#～max#の範囲のランダム値だけMDFを増加させる。
- *      AGI  value#     value#固定値だけAGIを増加させる。
- *           min#:max#  min#～max#の範囲のランダム値だけAGIを増加させる。
- *      LUK  value#     value#固定値だけLUKを増加させる。
- *           min#:max#  min#～max#の範囲のランダム値だけLUKを増加させる。
- * 
+ *     本プラグインで実装済みのkeyは次の通り。
+ *         MHP 最大HP
+ *         MMP 最大MP
+ *         ATK 攻撃力
+ *         DEF 防御力
+ *         MAT 魔法攻撃力
+ *         MDF 魔法防御力
+ *         AGI 素早さ
+ *         LUK 運
+ *         HIT 命中率(1.0が+100%であることに注意。)
+ *         EVA 回避率(1.0が+100%であることに注意。)
+ *         CRI クリティカル率(1.0が+100%であることに注意。)
+ *         CEV クリティカル回避率(1.0が+100%であることに注意。)
+ *         MEV 魔法回避率(1.0が+100%であることに注意。)
+ *         MRF 魔法反射率(1.0が+100%であることに注意。)
+ *         CNT 反撃率(1.0が+100%であることに注意。)
+ *         HRG HP回復率(1.0が+100%であることに注意。)
+ *         MRG MP回復率(1.0が+100%であることに注意。)
+ *         TRG TP回復率(1.0が+100%であることに注意。)
+ *         TGR 被ターゲット率(1.0が+100%であることに注意。)
+ *         GRD ガード時軽減率(1.0が+100%であることに注意。)
+ *         REC リカバリ率(1.0が+100%であることに注意。)
+ *         PHA アイテム使用効果補正率(1.0が+100%であることに注意。)
+ *         MCR MPコストレート(1.0が+100%であることに注意。)
+ *         TCR TPチャージレート(1.0が+100%であることに注意。)
+ *         PDR 物理被ダメージレート(1.0が+100%であることに注意。)
+ *         MDR 魔法被ダメージレート(1.0が+100%であることに注意。)
+ *         FDR 床被ダメージレート(1.0が+100%であることに注意。)
+ *         EXR 経験値レート(1.0が+100%であることに注意。)
+ *         
+ *     valueで指定できる書式は次の通り。
+ *         value#     value#固定値だけパラメータを増加させる。
+ *         min#:max#  min#～max#の範囲のランダム値だけパラメータを増加させる。
  * 
  *     その他のkey及びvalueの書式はboostの追加プラグインに依存。
  *     例)
@@ -142,7 +155,7 @@
  *       equipment : 装備品
  *       item : 素材アイテム
  *       isWeapon : 武器の場合にtrue, それ以外はfalse 
- *       iSArmor : 防具の場合にtrue, それ以外はfalse.
+ *       isArmor : 防具の場合にtrue, それ以外はfalse.
  * 
  * ============================================
  * 変更履歴
@@ -169,7 +182,7 @@
     const _parseRate = function(str, min, max) {
         let rate = 0.0;
         if (str.slice(-1) === "%") {
-            rate = Number(str.slice(0, valueStr.length - 1)) / 100.0;
+            rate = Number(str.slice(0, str.length - 1)) / 100.0;
         } else {
             rate = Number(str);
         }
@@ -480,9 +493,90 @@
             case "LUK":
                 item.params[7] += DataManager.getBoostValueInt(value);
                 break;
+            case "HIT":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 0,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "EVA":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 1,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "CRI":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 2,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "CEV":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 3,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "MEV":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 4,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "MRF":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 5,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "CNT":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 6,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "HRG":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 7,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "MRG":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 8,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "TRG":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 9,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "TGR":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 0,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "GRD":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 1,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "REC":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 2,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "PHA":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 3,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "MCR":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 4,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "TCR":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 5,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "PDR":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 6,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "MDR":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 7,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "FDR":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 8,
+                    DataManager.getBoostValueReal(value));
+                break;
+            case "EXR":
+                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 9,
+                    DataManager.getBoostValueReal(value));
+                break;
         }
 
     };
+
     /**
      * 整数の強化値を得る。
      * 
@@ -552,11 +646,11 @@
      * @param {number} dataId データID
      * @param {number} value 値
      */
-    DataManager.addBoostTraist = function(item, code, dataId, value) {
+    DataManager.addBoostTrait = function(item, code, dataId, value) {
         const trait = item.traits.find(function(t) {
             return (t.code == code) && (t.dataId == dataId);
         });
-        if (trait !== null) {
+        if (trait) {
             trait.value += value;
         } else {
             // 無い場合には新規追加。
@@ -617,4 +711,22 @@
         }
     };
 
+    /**
+     * 素材を適用可能かどうかを取得する。
+     * 
+     * @param {object} item 素材アイテム
+     * @param {object} equipment 装備品(DataWeapon/DataArmor)
+     * @returns {boolean} 適用可能な場合にはtrue, 適用できない場合にはfalse.
+     */
+    DataManager.isBoostCatalystApplicable = function(item, equipment) {
+        if (item.meta.boostCondition) {
+            // eslint-disable-next-line no-unused-vars
+            const isWeapon = DataManager.isWeapon(equipment);
+            // eslint-disable-next-line no-unused-vars
+            const isArmor = DataManager.isArmor(equipment);
+            return eval(item.meta.boostCondition) || false;
+        } else {
+            return true; // 条件ないなら全て可
+        }
+    }
 })();
