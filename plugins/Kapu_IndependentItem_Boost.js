@@ -348,7 +348,9 @@
     // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentWeapon = function(newWeapon, baseWeapon) {
         _DataManager_initializeIndependentWeapon.call(this, newWeapon, baseWeapon);
-        newWeapon.params_org = JsonEx.makeDeepCopy(baseWeapon.params);
+        newWeapon.name_org = newWeapon.name;
+        newWeapon.traits_org = JsonEx.makeDeepCopy(newWeapon.traits);
+        newWeapon.params_org = JsonEx.makeDeepCopy(newWeapon.params);
 
         newWeapon.boostCount = 0;
         if (baseWeapon.meta.maxBoostCount) {
@@ -378,11 +380,10 @@
      * @param {DataWeapon} weapon 武器
      */
     DataManager.resetIndependentWeaponBoost = function(weapon) {
-        const baseItem = DataManager.getBaseItem(weapon);
         weapon.boostCount = 0; // 強化段階リセット
-        weapon.traits = JsonEx.makeDeepCopy(baseItem.traits);
+        weapon.traits = JsonEx.makeDeepCopy(weapon.traits_org);
         weapon.params = JsonEx.makeDeepCopy(weapon.params_org);
-        weapon.name = baseItem.name;
+        weapon.name = weapon.name_org;
     };
 
     const _DataManager_initializeIndependentArmor = DataManager.initializeIndependentArmor;
@@ -395,7 +396,9 @@
     // eslint-disable-next-line no-unused-vars
     DataManager.initializeIndependentArmor = function(newArmor, baseArmor) {
         _DataManager_initializeIndependentArmor.call(this, newArmor, baseArmor);
-        newArmor.params_org = JsonEx.makeDeepCopy(baseArmor.params);
+        newArmor.name_org = newArmor.name;
+        newArmor.traits_org = JsonEx.makeDeepCopy(newArmor.traits);
+        newArmor.params_org = JsonEx.makeDeepCopy(newArmor.params);
 
         newArmor.boostCount = 0;
         if (baseArmor.meta.maxBoostCount) {
@@ -412,11 +415,10 @@
      * @param {DataArmor} armor 防具
      */
     DataManager.resetIndependentArmorBoost = function(armor) {
-        const baseItem = DataManager.getBaseItem(armor);
         armor.boostCount = 0; // 強化段階リセット
-        armor.traits = JsonEx.makeDeepCopy(baseItem.traits);
+        armor.traits = JsonEx.makeDeepCopy(armor.traits_org);
         armor.params = JsonEx.makeDeepCopy(armor.params_org);
-        armor.name = baseItem.name;
+        armor.name = armor.name_org;
     };
 
     /**
@@ -638,13 +640,12 @@
      * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
      */
     DataManager.updateBoostItemName = function(item) {
-        const baseItem = DataManager.getBaseItem(item);
         const prefix = item.namePrefix || "";
         let postfix = item.namePostfix || "";
         if (!postfix) {
             postfix = "+" + item.boostCount;
         }
-        item.name = prefix + baseItem.name + postfix;
+        item.name = prefix + item.name_org + postfix;
     };
 
     /**
