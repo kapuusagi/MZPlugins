@@ -642,7 +642,7 @@
     DataManager.updateBoostItemName = function(item) {
         const prefix = item.namePrefix || "";
         let postfix = item.namePostfix || "";
-        if (!postfix) {
+        if (!postfix && (item.boostCount > 0)) {
             postfix = "+" + item.boostCount;
         }
         item.name = prefix + item.name_org + postfix;
