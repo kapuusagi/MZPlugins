@@ -40,21 +40,40 @@
  * @type boolean
  * @default true
  * 
+ * @arg enableRename
+ * @text 命名有効
+ * @type boolean
+ * @default true
+ * 
  * @arg textHelpBoost
  * @text 強化ヘルプテキスト
  * @type string
+ * @default
  * 
  * @arg textHelpResetBoost
  * @text 強化リセットヘルプテキスト
  * @type string
+ * @default
  * 
  * @arg textHelpReinitialize
  * @text 再初期化ヘルプテキスト
  * @type string
+ * @default
+ * 
+ * @arg textHelpRename
+ * @text リネームヘルプテキスト
+ * @type string
+ * @default
  * 
  * @arg textHelpCancel
  * @text キャンセルヘルプテキスト
  * @type string
+ * 
+ * 
+ * @param maxItemNameWidth
+ * @text リネームウィンドウ入力文字数最大
+ * @type number
+ * @default 16
  * 
  * 
  * @param textBoost
@@ -74,6 +93,12 @@
  * @desc ショップに表示する再初期化メニューとして表示する文字列。
  * @type string
  * @default 打ち直し
+ * 
+ * @param textRename
+ * @text リネームコマンド
+ * @desc ショップに表示するリネームメニューとして表示する文字列。
+ * @type string
+ * @default 命名
  * 
  * @param textBoostCount
  * @text 強化回数テキスト
@@ -137,6 +162,11 @@
  * @text 打ち直しコマンドのヘルプメッセージ
  * @type string
  * @default 装備品を打ち直します。
+ * 
+ * @param defaultTextHelpRename
+ * @text 命名コマンドのヘルプメッセージ
+ * @type string
+ * @default 装備品に名前を付けます。
  * 
  * @param defaultTextHelpCancel
  * @text キャンセルコマンドのヘルプメッセージ
@@ -206,6 +236,7 @@ function Scene_BlacksmithShop() {
 Scene_BlacksmithShop.SHOP_MODE_BOOST = 0;
 Scene_BlacksmithShop.SHOP_MODE_RESET_BOOST = 1;
 Scene_BlacksmithShop.SHOP_MODE_REINITIALIZE = 2;
+Scene_BlacksmithShop.SHOP_MODE_RENAME = 3;
 
 /**
  * Window_BlacksmithItemList
@@ -232,7 +263,7 @@ function Window_BlacksmithCatalystList() {
  * 成功率などは別ウィンドウで表示する。
  */
 function Window_BlacksmithNumberInput() {
-    this.initialize.apply(this, arguments);
+    this.initialize(...arguments);
 }
 
 /**
@@ -252,8 +283,16 @@ function Window_BlacksmithConfirm() {
  * 個数と強化成功率を表示する。
  */
 function Window_BlacksmithCatalystItem() {
-    this.initialize.apply(this, arguments);
+    this.initialize(...arguments);
 }
+
+/**
+ * 名前エディットウィンドウ
+ */
+function Window_BlacksmithNameEdit() {
+    this.initialize(...arguments);
+}
+
 
 (() => {
     const pluginName = "Kapu_IndependentItem_Boost_UI";
@@ -261,7 +300,8 @@ function Window_BlacksmithCatalystItem() {
 
     const textBoost = parameters["textBoost"] || "Boost";
     const textResetBoost = parameters["textResetBoost"] || "Reset boost";
-    const textReinitialize = parameters["textReinitialize"] || "reinitialize";
+    const textReinitialize = parameters["textReinitialize"] || "Reinitialize";
+    const textRename = parameters["textRename"] || "Rename";
     const textInsufficientSkillLevel = parameters["textInsufficientSkillLevel"] || "Unboostable";
     const textBoostItem = parameters["textBoostItem"] || "BoostItem";
     const textCatalystItem = parameters["textCatalystItem"] || "CatalystItem";
@@ -273,7 +313,10 @@ function Window_BlacksmithCatalystItem() {
     const defaultTextHelpBoost = parameters["defaultTextHelpBoost"] || "";
     const defaultTextHelpResetBoost = parameters["defaultTextHelpResetBoost"] || "";
     const defaultTextHelpReinitialize = parameters["defaultTextHelpReinitialize"] || "";
+    const defaultTextHelpRename = parameters["defaultTextHelpRename"] || "";
     const defaultTextHelpCancel = parameters["defaultTextHelpCancel"] || "";
+    const maxItemNameWidth = (Number(parameters["maxItemNameWidth"]) > 0)
+            ? Number(parameters["maxItemNameWidth"]) : 16;
     
     const resetBoostAnimationId = Number(parameters["resetBoostAnimationId"]) || 0;
     const reinitializeAnimationId = Number(parameters["reinitializeAnimationId"]) || 0;
@@ -300,6 +343,8 @@ function Window_BlacksmithCatalystItem() {
                 ? false : (args.enableResetBoost === "true");
         const enableReinitialize = (typeof args.enableReinitialize === "undefined")
                 ? false : (args.enableReinitialize === "true");
+        const enableRename = (typeof args.enableRename === "undefined")
+                ? false : (args.enableRename === "true");
         const sceneShopArgs = {
             maxBoost : Number(args.maxBoost) || 0,
             smithLevel : Number(args.smithLevel) || 0,
@@ -308,12 +353,14 @@ function Window_BlacksmithCatalystItem() {
             clerkOffsetY : Number(args.clerkOffsetY) || 0,
             enableResetBoost : enableResetBoost,
             enableReinitialize : enableReinitialize,
+            enableRename : enableRename
         };
         sceneShopArgs.msgs = {
             textHelpBoost: args.textHelpBoost || "",
             textHelpResetBoost: args.textHelpResetBoost || "",
             textHelpReinitialize: args.textHelpReinitialize || "",
-            textHelpCancel : args.textHelpCancel || ""
+            textHelpRename: args.textHelpRename || "",
+            textHelpCancel: args.textHelpCancel || ""
         }
 
         SceneManager.push(Scene_BlacksmithShop);
@@ -336,9 +383,11 @@ function Window_BlacksmithCatalystItem() {
         this._textHelpBoost = "";
         this._textHelpResetBoost = "";
         this._textHelpReinitialize = "";
+        this._textHelpRename = "";
         this._textHelpCancel = "";
         this._enableResetBoost = false;
         this._enableReinitialize = false;
+        this._enableRename = false;
         this.refresh();
     };
 
@@ -352,6 +401,9 @@ function Window_BlacksmithCatalystItem() {
         }
         if (this._enableReinitialize) {
             this.addCommand(textReinitialize, "reinitialize");
+        }
+        if (this._enableRename) {
+            this.addCommand(textRename, "rename");
         }
         this.addCommand(TextManager.cancel, "cancel");
     };
@@ -378,6 +430,8 @@ function Window_BlacksmithCatalystItem() {
                 return this._textHelpResetBoost || "";
             case "reinitialize":
                 return this._textHelpReinitialize || "";
+            case "rename":
+                return this._textHelpRename || "";
             case "cancel":
                 return this._textHelpCancel || "";
             default:
@@ -425,12 +479,32 @@ function Window_BlacksmithCatalystItem() {
     };
 
     /**
+     * リネームを有効にするかどうかを設定する。
+     * 
+     * @param {boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     */
+    Window_BlacksmithShopCommand.prototype.setRenameEnable = function(enabled) {
+        this._enableRename = enabled;
+        this.refresh();
+    };
+
+    /**
      * 再初期化コマンドに対応するヘルプメッセージを設定する。
      * 
      * @param {string} text ヘルプメッセージ
      */
     Window_BlacksmithShopCommand.prototype.setHelpTextReinitialize = function(text) {
         this._textHelpReinitialize = text;
+        this.callUpdateHelp();
+    };
+
+    /**
+     * リネームコマンドに対応するヘルプメッセージを設定する。
+     * 
+     * @param {strng} text ヘルプメッセージ
+     */
+    Window_BlacksmithShopCommand.prototype.setHelpRename = function(text) {
+        this._textHelpRename = text;
         this.callUpdateHelp();
     };
 
@@ -558,6 +632,7 @@ function Window_BlacksmithCatalystItem() {
     };
     /**
      * itemで指定されるアイテムの価格を得る。
+     * 
      * @param {Data_Item} item アイテム
      * @return {Number} 価格が返る。
      */
@@ -602,22 +677,26 @@ function Window_BlacksmithCatalystItem() {
         const nameWidth = rect.width - boostCountWidth - priceWidth - rateWidth - padding * 3;
         
         this.changePaintOpacity(this.isEnabled(item));
-        this.drawItemName(item, rect.x, rect.y, nameWidth);
-        x += nameWidth + padding;
-        this.drawBoostCount(item, x, rect.y, boostCountWidth);
-        x += boostCountWidth + padding;
-        this.resetTextColor();
-        if ((this._mode === Scene_BlacksmithShop.SHOP_MODE_BOOST)
-                && (!DataManager.isBoostableItem(item) || (item.boostCount >= this._maxBoostCount))) {
-            const textWidth = rect.width - x;
-            this.drawText(textInsufficientSkillLevel, x, rect.y, textWidth, "right");
+        if (this._mode === Scene_BlacksmithShop.SHOP_MODE_RENAME) {
+            this.drawItemName(item, rect.x, rect.y, nameWidth);
         } else {
-            const rate = (this._mode === Scene_BlacksmithShop.SHOP_MODE_BOOST)
-                    ? DataManager.getBoostSuccessRate(item, this._smithLevel, null, 1)
-                    : 1.0;
-            this.drawSuccessRate(textSuccessRate, rate, x, rect.y, rateWidth);
-            x += rateWidth + padding;
-            this.drawCurrencyValue(this.price(item), this.currencyUnit(), x, rect.y, priceWidth);
+            this.drawItemName(item, rect.x, rect.y, nameWidth);
+            x += nameWidth + padding;
+            this.drawBoostCount(item, x, rect.y, boostCountWidth);
+            x += boostCountWidth + padding;
+            this.resetTextColor();
+            if ((this._mode === Scene_BlacksmithShop.SHOP_MODE_BOOST)
+                    && (!DataManager.isBoostableItem(item) || (item.boostCount >= this._maxBoostCount))) {
+                const textWidth = rect.width - x;
+                this.drawText(textInsufficientSkillLevel, x, rect.y, textWidth, "right");
+            } else {
+                const rate = (this._mode === Scene_BlacksmithShop.SHOP_MODE_BOOST)
+                        ? DataManager.getBoostSuccessRate(item, this._smithLevel, null, 1)
+                        : 1.0;
+                this.drawSuccessRate(textSuccessRate, rate, x, rect.y, rateWidth);
+                x += rateWidth + padding;
+                this.drawCurrencyValue(this.price(item), this.currencyUnit(), x, rect.y, priceWidth);
+            }
         }
         this.changePaintOpacity(true);
     };
@@ -1200,6 +1279,50 @@ function Window_BlacksmithCatalystItem() {
     };
 
     //------------------------------------------------------------------------------
+    // 
+    Window_BlacksmithNameEdit.prototype = Object.create(Window_NameEdit.prototype);
+    Window_BlacksmithNameEdit.prototype.constructor = Window_BlacksmithNameEdit;
+
+    /**
+     * Window_BlacksmithNameEditウィンドウを初期化する。
+     * 
+     * @param {Rectangle} rect ウィンドウ矩形領域
+     */
+    Window_BlacksmithNameEdit.prototype.initialize = function(rect) {
+        Window_NameEdit.prototype.initialize.call(this, rect);
+    };
+
+
+    /**
+     * 名前入力ウィンドウを初期化する。
+     * 
+     * @param {object} item リネーム対象の名前。DataWeapon/DataArmor
+     * @param {Number} maxLength 最大長
+     */
+    Window_BlacksmithNameEdit.prototype.setup = function(item, maxLength) {
+        this._maxLength = maxLength;
+        this._name = item.name_org.slice(0, this._maxLength);
+        this._index = this._name.length;
+        this._defaultName = this._name;
+        this.refresh();
+    };
+
+    /**
+     * UIを描画する。
+     */
+    Window_BlacksmithNameEdit.prototype.refresh = function() {
+        this.contents.clear();
+        for (let i = 0; i < this._maxLength; i++) {
+            this.drawUnderline(i);
+        }
+        for (let j = 0; j < this._name.length; j++) {
+            this.drawChar(j);
+        }
+        const rect = this.itemRect(this._index);
+        this.setCursorRect(rect.x, rect.y, rect.width, rect.height);
+    };
+
+    //------------------------------------------------------------------------------
     // Scene_BlacksmithShop
     //
     Scene_BlacksmithShop.prototype = Object.create(Scene_MenuBase.prototype);
@@ -1236,6 +1359,7 @@ function Window_BlacksmithCatalystItem() {
         this._clerkOffsetY = sceneShopArgs.clerkOffsetY;
         this._enableResetBoost = sceneShopArgs.enableResetBoost;
         this._enableReinitialize = sceneShopArgs.enableReinitialize;
+        this._enableRename = sceneShopArgs.enableRename;
         this._msgs = sceneShopArgs.msgs;
     };
 
@@ -1252,6 +1376,8 @@ function Window_BlacksmithCatalystItem() {
         this.createConfirmWindow();
         this.createSelectedItemWindow();
         this.createNumberInputWindow();
+        this.createNameEditWindow();
+        this.createNameInputWindow();
         this.createAnimationTarget();
         this.loadClerkPicture();
     };
@@ -1310,15 +1436,18 @@ function Window_BlacksmithCatalystItem() {
         this._commandWindow.setHandler("boost", this.onCommandBoost.bind(this));
         this._commandWindow.setHandler("reset-boost", this.onCommandResetBoost.bind(this));
         this._commandWindow.setHandler("reinitialize", this.onCommandReinitialize.bind(this));
+        this._commandWindow.setHandler("rename", this.onCommandRename.bind(this));
         this._commandWindow.setHandler("cancel", this.onCommandCancel.bind(this));
         this.addWindow(this._commandWindow);
 
         this._commandWindow.setResetBoostEnable(this._enableResetBoost);
         this._commandWindow.setReinitializeEnable(this._enableReinitialize);
+        this._commandWindow.setRenameEnable(this._enableRename);
         this._commandWindow.setHelpWindow(this._helpWindow);
         this._commandWindow.setHelpTextBoost(this._msgs["textHelpBoost"] || defaultTextHelpBoost);
         this._commandWindow.setHelpTextResetBoost(this._msgs["textHelpResetBoost"] || defaultTextHelpResetBoost);
         this._commandWindow.setHelpTextReinitialize(this._msgs["textHelpReinitialize"] || defaultTextHelpReinitialize);
+        this._commandWindow.setHelpRename(this._msgs["textHelpRename"] || defaultTextHelpRename);
         this._commandWindow.setHelpTextCancel(this._msgs["textHelpCancel"] || defaultTextHelpCancel);
     };
 
@@ -1332,7 +1461,7 @@ function Window_BlacksmithCatalystItem() {
         const wx = rect.x;
         const wy = rect.y + rect.height;
         const ww = this.mainCommandWidth();
-        const wh = this.calcWindowHeight(4, true);
+        const wh = this.calcWindowHeight(5, true);
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -1482,6 +1611,74 @@ function Window_BlacksmithCatalystItem() {
     };
 
     /**
+     * 編集ウィンドウを作成する。
+     */
+    Scene_BlacksmithShop.prototype.createNameEditWindow = function() {
+        const rect = this.nameEditWindowRect();
+        this._editWindow = new Window_BlacksmithNameEdit(rect);
+        this._editWindow.hide();
+        this._editWindow.deactivate();
+        this.addWindow(this._editWindow);
+    };
+
+    /**
+     * 編集ウィンドウのウィンドウ矩形領域を取得する。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域 
+     */
+    Scene_BlacksmithShop.prototype.nameEditWindowRect = function() {
+        const inputWindowHeight = this.calcWindowHeight(9, true);
+        const padding = $gameSystem.windowPadding();
+        const ww = 600;
+        const wh = ImageManager.faceHeight + padding * 2;
+        const wx = (Graphics.boxWidth - ww) / 2;
+        const wy = (Graphics.boxHeight - (wh + inputWindowHeight + 8)) / 2;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * 入力ウィンドウを初期化する。
+     */
+    Scene_BlacksmithShop.prototype.createNameInputWindow = function() {
+        const rect = this.nameInputWindowRect();
+        this._inputWindow = new Window_NameInput(rect);
+        this._inputWindow.setEditWindow(this._editWindow);
+        this._inputWindow.setHandler("ok", this.onInputNameOk.bind(this));
+        this._inputWindow.hide();
+        this._inputWindow.deactivate();
+        this.addWindow(this._inputWindow);
+    };
+
+    /**
+     * 入力ウィンドウの矩形領域を取得する。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_BlacksmithShop.prototype.nameInputWindowRect = function() {
+        const wx = this._editWindow.x;
+        const wy = this._editWindow.y + this._editWindow.height + 8;
+        const ww = this._editWindow.width;
+        const wh = this.calcWindowHeight(9, true);
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * 入力ウィンドウでOKが選択された時の処理を行う。
+     */
+    Scene_BlacksmithShop.prototype.onInputNameOk = function() {
+        const targetItem = this._itemWindow.item();
+        targetItem.name_org = this._editWindow.name();
+        DataManager.updateBoostItemName(targetItem);
+        this._editWindow.hide();
+        this._editWindow.deactivate();
+        this._inputWindow.hide();
+        this._inputWindow.deactivate();
+        this._itemWindow.activate();
+        this._itemWindow.refresh();
+    };
+
+
+    /**
      * アニメーション表示用のターゲットを作成する。
      * これでいいのか分からんけどやってみよう。
      */
@@ -1615,6 +1812,18 @@ function Window_BlacksmithCatalystItem() {
     };
 
     /**
+     * コマンドウィンドウで命名が選択されたときに通知を受け取る。
+     */
+    Scene_BlacksmithShop.prototype.onCommandRename = function() {
+        this._mode = Scene_BlacksmithShop.SHOP_MODE_RENAME;
+        this._itemWindow.setShopMode(this._mode);
+        this._itemWindow.setMoney(this.money());
+        this._helpWindow.setItem(this._itemWindow.item());
+        this._itemWindow.show();
+        this._itemWindow.activate();
+    };
+
+    /**
      * アイテムウィンドウでOK操作されたとき。
      */
     Scene_BlacksmithShop.prototype.onItemWindowOk = function() {
@@ -1642,6 +1851,17 @@ function Window_BlacksmithCatalystItem() {
                 this._confirmWindow.select(1); // キャンセルを選択状態にする。
                 this._confirmWindow.activate();
                 this._confirmWindow.show();
+                break;
+            case Scene_BlacksmithShop.SHOP_MODE_RENAME:
+                // リネーム：リネーム用ウィンドウにセットしてアクティブ化
+                this._editWindow.setup(this._itemWindow.item(), maxItemNameWidth);
+                this._editWindow.show();
+                this._inputWindow.show();
+                this._inputWindow.activate();
+                break;
+            default:
+                console.error("unknown blacksmith mode. " + this._mode);
+                this._itemWindow.activate();
                 break;
         }
 
