@@ -773,7 +773,7 @@ function Scene_UnregisterActor() {
      * 
      * @param {Number} index インデックス番号
      */
-     Window_CharaMakeItemSelection.prototype.drawItem = function(index) {
+    Window_CharaMakeItemSelection.prototype.drawItem = function(index) {
         const rect = this.itemLineRect(index);
         const item = this._items[index];
         this.drawText(item.name, rect.x, rect.y, rect.width);
@@ -893,6 +893,7 @@ function Scene_UnregisterActor() {
         this._registeredActorIds = $gameActors.registeredActorIds();
         this._statusWindow = null;
         Window_Selectable.prototype.initialize.call(this, rect);
+        this.refresh();
     };
 
     /**
@@ -962,6 +963,30 @@ function Scene_UnregisterActor() {
     Window_RegisteredActorList.prototype.callUpdateHelp = function() {
         if (this.active && this._statusWindow) {
             this._statusWindow.setActor(this.actor());
+        }
+    };
+
+    Window_RegisteredActorList.prototype.drawAllItems = function() {
+        const topIndex = this.topIndex();
+        for (let i = 0; i < this.maxVisibleItems(); i++) {
+            const index = topIndex + i;
+            if (index < this.maxItems()) {
+                this.drawItemBackground(index);
+                this.drawItem(index);
+            }
+        }
+    };
+    /**
+     * 項目を描画する。
+     * 
+     * @param {Number} index インデックス番号
+     */
+    Window_RegisteredActorList.prototype.drawItem = function(index) {
+        const rect = this.itemLineRect(index);
+        const actorId = this._registeredActorIds[index];
+        const actor = (actorId > 0) ? $gameActors.actor(actorId) : null;
+        if (actor) {
+            this.drawText(actor.name(), rect.x, rect.y, rect.width);
         }
     };
 
@@ -1104,6 +1129,9 @@ function Scene_UnregisterActor() {
         Scene_MenuBase.prototype.start.call(this, ...arguments);
 
         $gameTemp.setSelectedActorId(0);
+        if (this._storeVariableId > 0) {
+            $gameVariables.setValue(this._storeVariableId, 0);
+        }
 
         if (this._actorId > 0) {
             this._isModify =  $gameActors.isActorDataExists(this._actorId);
@@ -1177,19 +1205,19 @@ function Scene_UnregisterActor() {
     Scene_CharaMake.prototype.terminate = function() {
         Scene_MenuBase.prototype.terminate.call(this, ...arguments);
 
-        if (this._isEditCompleted) {
-            /* 完了した */
-            if (this._storeVariableId > 0) {
-                $gameVariables.setValue(this._storeVariableId, this._actorId);
-            }
-            $gameTemp.setSelectedActorId(this._actorId);
-        } else {
+        const actorId = (this._isEditCompleted) ? this._actorId : 0;
+        if (!this._isEditCompleted) {
             if (!this._isModify) {
                 /* 新規登録でキャンセルされた場合
                  * 一時的に作成したデータを消去する。 */
                 $gameActors.deleteActorData(this._actorId);
             }
         }
+        if (this._storeVariableId > 0) {
+            $gameVariables.setValue(this._storeVariableId, actorId);
+        }
+        $gameTemp.setSelectedActorId(actorId);
+
     };
 
     //------------------------------------------------------------------------------
@@ -1299,8 +1327,12 @@ function Scene_UnregisterActor() {
     Scene_SelectRegisteredActor.prototype.start = function() {
         Scene_MenuBase.prototype.start.call(this, ...arguments);
         $gameTemp.setSelectedActorId(0);
+        if (this._variableId > 0) {
+            $gameVariables.setValue(this._variableId, 0);
+        }
 
         this._listWindow.show();
+        this._statusWindow.show();
         this._listWindow.activate();
     };
 
@@ -1310,6 +1342,9 @@ function Scene_UnregisterActor() {
     Scene_SelectRegisteredActor.prototype.onListWindowOk = function() {
         const actorId = this._listWindow.actorId();
         $gameTemp.setSelectedActorId(actorId);
+        if (this._variableId > 0) {
+            $gameVariables.setValue(this._variableId, actorId);
+        }
         this.popScene();
     };
 
@@ -1317,7 +1352,19 @@ function Scene_UnregisterActor() {
      * アクターリストウィンドウでキャンセル操作されたときの処理を行う。
      */
     Scene_SelectRegisteredActor.prototype.onListWindowCancel = function() {
+        $gameTemp.setSelectedActorId(0);
+        if (this._variableId > 0) {
+            $gameVariables.setValue(this._variableId, 0);
+        }
         this.popScene();
+    };
+
+    /**
+     * 
+     * @param {number} index 
+     */
+    Scene_SelectRegisteredActor.prototype.drawitem = function(index) {
+
     };
 
 
