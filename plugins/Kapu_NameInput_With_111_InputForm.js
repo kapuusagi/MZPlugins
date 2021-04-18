@@ -153,7 +153,6 @@
             return;
         }
         Window_Selectable.prototype.activate.call(this);
-        console.log("Window_NameInput activate.");
 
         /* Init */
         if (this._editWindow) {
@@ -320,7 +319,7 @@
     Window_NameEdit.prototype.setName = function(name) {
         this._name = name;
         this.refresh();
-    }
+    };
 
     
 
