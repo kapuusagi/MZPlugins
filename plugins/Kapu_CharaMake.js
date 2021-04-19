@@ -1359,16 +1359,6 @@ function Scene_UnregisterActor() {
         this.popScene();
     };
 
-    /**
-     * 
-     * @param {number} index 
-     */
-    Scene_SelectRegisteredActor.prototype.drawitem = function(index) {
-
-    };
-
-
-
     //------------------------------------------------------------------------------
     // Scene_UnregisterActor
     Scene_UnregisterActor.prototype = Object.create(Scene_MenuBase.prototype);
