@@ -396,8 +396,9 @@ function Scene_UnregisterActor() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @returns {object} 追加するウィンドウ
      *                   {
-     *                       selectWindow : {Window_Selectable}
-     *                       windows : {Array<Window_Base>}
+     *                       selectWindow : {Window_Selectable} 選択ウィンドウ。このウィンドウに対して"ok"ハンドラが登録される。
+     *                       windows : {Array<Window_Base>} 補助ウィンドウ。(情報表示ウィンドウなど)
+     *                       sprites : {Array<Sprite>} スプライト
      *                   }
      */
     Game_CharaMakeItem.prototype.createSelectWindows = function(rect) {
@@ -405,7 +406,8 @@ function Scene_UnregisterActor() {
         window.setItems(this.items())
         return {
             selectWindow: window,
-            windows: null
+            windows: null,
+            sprites: null
         } ;
     };
 
@@ -545,13 +547,16 @@ function Scene_UnregisterActor() {
     Game_CharaMakeItem_Name.prototype.createSelectWindows = function(rect) {
         const editWindowRect = this.editWindowRect();
         const editWindow = new Window_NameEdit(editWindowRect);
+        editWindow.hide();
+        editWindow.deactivate();
         const inputWindowRect = this.inputWindowRect();
         const inputWindow = new Window_NameInput(inputWindowRect);
         inputWindow.setEditWindow(editWindow);
     
         return {
             selectWindow: inputWindow,
-            windows: [ editWindow ]
+            windows: [ editWindow ],
+            sprites: null
         };
     };
 
@@ -1002,6 +1007,7 @@ function Scene_UnregisterActor() {
     Scene_CharaMake.prototype.initialize = function() {
         Scene_MenuBase.prototype.initialize.call(this, ...arguments);
         this._actorId = 0;
+        this._tempActor = null;
         this._isEditCompleted = false;
         this._isModify = false;
         this._storeVariableId = 0;
@@ -1034,11 +1040,12 @@ function Scene_UnregisterActor() {
         const rect = this.selectWindowRect();
         this._windowEntries = [];
         const actor = $gameActors.actor(this._actorId);
+        this._tempActor = JsonEx.makeDeepCopy(actor);
         for (const item of this._items) {
             const windowEntry = item.createSelectWindows(rect);
             windowEntry.item = item;
             // 初期化
-            item.setCurrent(windowEntry, actor);
+            item.setCurrent(windowEntry, this._tempActor);
             // ハンドラ設定
             windowEntry.selectWindow.setHandler("ok", this.onSelectWindowOk.bind(this));
             // 非表示設定にする。
@@ -1047,14 +1054,33 @@ function Scene_UnregisterActor() {
             windowEntry.selectWindow.deactivate();
             if (windowEntry.windows) {
                 for (const window of windowEntry.windows) {
-                    window.hide();
-                    window.deactivate();
                     this.addWindow(window);
+                }
+            }
+            if (windowEntry.sprites) {
+                for (const sprite of windowEntry.sprites) {
+                    this._subSpriteLayer.addChild(sprite);
                 }
             }
 
             this._windowEntries.push(windowEntry);
         }
+    };
+
+    /**
+     * ウィンドウレイヤーを作成する。
+     */
+    Scene_CharaMake.prototype.createWindowLayer = function() {
+        this.createSubSpriteLayer();
+        Scene_MenuBase.prototype.createWindowLayer.call(this);
+    };
+
+    /**
+     * サブスプライトをのせるレイヤーを構築する。
+     */
+    Scene_CharaMake.prototype.createSubSpriteLayer = function() {
+        this._subSpriteLayer = new Sprite();
+        this.addChild(this._subSpriteLayer);
     };
 
     /**
@@ -1179,14 +1205,24 @@ function Scene_UnregisterActor() {
                 this._itemWindow.activate();
             }
         } else {
-            const actor = $gameActors.actor(this._actorId);
+            // まず、tempActorに適用して名前が有効であることを確認する。
             for (const item of this._items) {
                 const windowEntry = this._windowEntries.find(entry => entry.item === item);
-                item.apply(windowEntry, actor);
+                item.apply(windowEntry, this._tempActor);
             }
-
-            this._isEditCompleted = (actor.name().length > 0);
-            this.popScene();
+            if (this._tempActor.name().length == 0) {
+                SoundManager.playBuzzer();
+                this._itemWindow.activate();
+            } else {
+                // 名前が有効なのでメイキング項目を本適用する。
+                const actor = $gameActors.actor(this._actorId);
+                for (const item of this._items) {
+                    const windowEntry = this._windowEntries.find(entry => entry.item === item);
+                    item.apply(windowEntry, actor);
+                }
+                this._isEditCompleted = true;
+                this.popScene();
+            }
         }
     };
 
