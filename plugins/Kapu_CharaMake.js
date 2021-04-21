@@ -3,8 +3,6 @@
  * @plugindesc TWLD向けキャラクターメイキングプラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base 
- * @orderAfter 
  * 
  * @command startCharacterMaking
  * @text メイキングシーンを開始する。
@@ -78,6 +76,9 @@
  * @type variable
  * @default 0
  * 
+ * 
+ * 
+ * 
  * @param registableIds
  * @text ユーザーが登録/削除可能なID
  * @desc ユーザーが登録/削除可能なIDを設定する。カンマ区切りで数値を指定。ハイフンで範囲指定。例:2,4,7-12
@@ -125,6 +126,8 @@
  * ============================================
  * プラグインコマンド
  * ============================================
+ * 
+ * 
  * 
  * 
  * ============================================
@@ -230,7 +233,7 @@ function Scene_UnregisterActor() {
         return ids;
     };
 
-    const registeableIds = _parseRegistableIds(parameters["registableIds"]);
+    const registableIds = _parseRegistableIds(parameters["registableIds"]);
 
     const textMaxRegistered = parameters["textMaxRegistered"] || "Registable actors are maximum.";
     const textItemNameName = parameters["textItemNameName"] || "Name";
@@ -280,21 +283,23 @@ function Scene_UnregisterActor() {
                 : (args.isCancelable == "true");
         const itemNames = _parseItemNames(args.itemNames);
         const targetActorId = _getTargetActorId(args);
-        if (targetActorId == 0) {
-            const actorId = $gameActors.registableActorId();
-            if (actorId > 0) {
-                SceneManager.push(Scene_CharaMake);
-                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames);
-            } else {
-                // 空きエントリが無い
-                $gameMessage.add(textMaxRegistered);
-            }
-        } else {
+        if (targetActorId > 0) {
             const actorId = targetActorId;
             if (actorId < $dataActors.length) {
                 // アクター指定ありで有効なアクターID
+                const deleteOnCancel = $gameActors.isActorDataExists(actorId);
                 SceneManager.push(Scene_CharaMake);
-                SceneManager.prepareNextScene(actorId, storeVariableId);
+                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, deleteOnCancel);
+            }
+        } else {
+            const actorId = $gameActors.registableActorId();
+            if (actorId > 0) {
+                const deleteOnCancel = true;
+                SceneManager.push(Scene_CharaMake);
+                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, deleteOnCancel);
+            } else {
+                // 空きエントリが無い
+                $gameMessage.add(textMaxRegistered);
             }
         }        
     });
@@ -312,6 +317,10 @@ function Scene_UnregisterActor() {
         if ((variableId >= 0) && (variableId < $dataSystem.variables.length)) {
             SceneManager.push(Scene_SelectRegisteredActor);
             SceneManager.prepareNextScene(variableId, isCancelable, textHelpMessage);
+        } else {
+            if (variableId > 0) {
+                $gameVariables.setValue(variableId, 0);
+            }
         }
     });
 
@@ -649,6 +658,71 @@ function Scene_UnregisterActor() {
 
     //------------------------------------------------------------------------------
     // Game_Actors
+    const _Game_Actors_initialize = Game_Actors.prototype.initialize;
+    /**
+     * 初期化する。
+     */
+    Game_Actors.prototype.initialize = function() {
+        _Game_Actors_initialize.call(this, ...arguments);
+        this._registableIds = registableIds;
+        this._registeredActorIds = []; // 登録したアクターIDを格納する配列
+    };
+
+
+    /**
+     * actorId に対応するGame_Actorオブジェクトを取得する。
+     * 
+     * @param {Number} actorId アクターID
+     * @return {Game_Actor} Game_Actorオブジェクト。該当するIDのアクターが存在しない場合にはnull。
+     * !!!overwrite!!! Game_Actors.actor()
+     *      未登録データのアクターIDが要求されたとき、nullを返すためにオーバーライドする。
+     */
+    Game_Actors.prototype.actor = function(actorId) {
+        if ($dataActors[actorId]) {
+            if (!this._data[actorId] && !this.registableIds().includes(actorId)) {
+                // データ未作成 かつ 登録可能IDリストに無い場合には生成する。
+                this.addActorData(actorId);
+            }
+            return (this._data[actorId]) ? this._data[actorId] : null;
+        }
+        return null;
+    };
+    /**
+     * 登録可能ID配列を得る。
+     * 
+     * @return {Array<number>} ID配列
+     */
+    Game_Actors.prototype.registableIds = function() {
+        return this._registableIds.concat();
+    };
+
+    /**
+     * 登録可能IDを削除する。
+     * 
+     * @param {number} id アクターID
+     */
+    Game_Actors.prototype.removeRegistableId = function(id) {
+        const index = this._registableIds.indexOf(id);
+        if (index >= 0) {
+            this._registableIds.splice(index, 1);
+        }
+
+    };
+
+    /**
+     * 登録可能IDを追加する。
+     * データベースに該当IDのアクターデータがあるもののみ登録可能。
+     * 
+     * @param {number} id アクターID
+     */
+    Game_Actors.prototype.addRegistableId = function(id) {
+        if ((id > 0) && (id < $dataActors.length)
+                && !this._registableIds.includes(id)) {
+            this._registableIds.add(id);
+        }
+    };
+
+
     /**
      * アクターデータが存在するかどうかを取得する。
      * 
@@ -666,7 +740,7 @@ function Scene_UnregisterActor() {
      */
     Game_Actors.prototype.registeredActorIds = function() {
         const ids = [];
-        for (const id of registeableIds) {
+        for (const id of this.registableIds()) {
             if (this.isActorDataExists(id)) {
                 ids.push(id);
             }
@@ -680,7 +754,7 @@ function Scene_UnregisterActor() {
      * @return {number} アクターID。登録可能なアクターIDが無い場合には0が返る。
      */
     Game_Actors.prototype.registableActorId = function() {
-        for (const actorId of registeableIds) {
+        for (const actorId of this.registableIds()) {
             if ((actorId > 0) && (actorId < $dataActors.length)
                     && !this.isActorDataExists(actorId)) {
                 return actorId;
@@ -691,20 +765,38 @@ function Scene_UnregisterActor() {
     };
 
     /**
+     * アクターデータを追加する。
+     * 既に追加済みの場合には何もしない。
+     * 
+     * @param {number} actorId アクターID
+     */
+    Game_Actors.prototype.addActorData = function(actorId) {
+        if ($dataActors[actorId]) {
+            if (!this._data[actorId]) {
+                this._data[actorId] = new Game_Actor(actorId);
+            }
+        }
+    };
+
+
+    /**
      * アクターデータを消去する。
      * 
      * @param {number} actorId アクターID
      */
     Game_Actors.prototype.deleteActorData = function(actorId) {
-        if (this.isActorDataExists(actorId) && registeableIds.includes(actorId)) {
+        if (this.isActorDataExists(actorId) && this.registableIds().includes(actorId)) {
             const actor = this.actor(actorId);
-            if ($gameParty.includes(actor)) {
+            if ($gameParty.allMembers().includes(actor)) {
                 /* このIDのメンバーを外す。 */
-                $gameParty.remveActor(actorId);
+                $gameParty.removeActor(actorId);
             }
             /* 装備を外す。 */
             actor.clearEquipments();
-
+            const index = this._registeredActorIds.indexOf(actorId);
+            if (index >= 0) {
+                this._registableIds.splice(index, 1);
+            }
             delete this._data[actorId];
         }
     };
@@ -717,12 +809,9 @@ function Scene_UnregisterActor() {
      * @returns {boolean} 削除可能なエントリの場合にはtrue, それ以外はfalse.
      */
     Game_Actors.prototype.isDeletableActor = function(actorId) {
-        if ((actorId > 0) && registeableIds.includes(actorId)
+        if ((actorId > 0) && this.registableIds().includes(actorId)
                 && this.isActorDataExists(actorId)) {
-            const memberIds = $gameParty.allMembers().map(member => member.actorId());
-            if (!memberIds.includes(actorId)) {
-                return true;
-            }
+            return true;
         }
 
         return false;
@@ -971,16 +1060,6 @@ function Scene_UnregisterActor() {
         }
     };
 
-    Window_RegisteredActorList.prototype.drawAllItems = function() {
-        const topIndex = this.topIndex();
-        for (let i = 0; i < this.maxVisibleItems(); i++) {
-            const index = topIndex + i;
-            if (index < this.maxItems()) {
-                this.drawItemBackground(index);
-                this.drawItem(index);
-            }
-        }
-    };
     /**
      * 項目を描画する。
      * 
@@ -1009,7 +1088,7 @@ function Scene_UnregisterActor() {
         this._actorId = 0;
         this._tempActor = null;
         this._isEditCompleted = false;
-        this._isModify = false;
+        this._isDeleteOnCancel = false;
         this._storeVariableId = 0;
         this._itemNames = [];
         this._windowEntries = [];
@@ -1022,12 +1101,14 @@ function Scene_UnregisterActor() {
      * @param {number} storeVariableId 格納変数ID。編集したアクターIDを格納する変数ID
      * @param {boolean} isCancelable キャンセル可能かどうか
      * @param {Array<string>} itemNames 選択可能項目
+     * @param {boolean} deleteOnCancel キャンセル操作時、データを消去するかどうか。
      */
-    Scene_CharaMake.prototype.prepare = function(actorId, storeVariableId, isCancelable, itemNames) {
+    Scene_CharaMake.prototype.prepare = function(actorId, storeVariableId, isCancelable, itemNames, deleteOnCancel) {
         this._actorId = actorId;
         this._storeVariableId = storeVariableId;
         this._isCancelEnabled = isCancelable;
         this._itemNames = itemNames;
+        this._isDeleteOnCancel = deleteOnCancel;
     };
 
     /**
@@ -1039,6 +1120,9 @@ function Scene_UnregisterActor() {
         this.createCharaMakeItemListWindow();
         const rect = this.selectWindowRect();
         this._windowEntries = [];
+        if (!$gameActors.isActorDataExists(this._actorId)) {
+            $gameActors.addActorData(this._actorId);
+        }
         const actor = $gameActors.actor(this._actorId);
         this._tempActor = JsonEx.makeDeepCopy(actor);
         for (const item of this._items) {
@@ -1159,9 +1243,7 @@ function Scene_UnregisterActor() {
             $gameVariables.setValue(this._storeVariableId, 0);
         }
 
-        if (this._actorId > 0) {
-            this._isModify =  $gameActors.isActorDataExists(this._actorId);
-        } else {
+        if (!(this._actorId > 0)) {
             this.popScene();
         }
 
@@ -1243,7 +1325,7 @@ function Scene_UnregisterActor() {
 
         const actorId = (this._isEditCompleted) ? this._actorId : 0;
         if (!this._isEditCompleted) {
-            if (!this._isModify) {
+            if (this._isDeleteOnCancel) {
                 /* 新規登録でキャンセルされた場合
                  * 一時的に作成したデータを消去する。 */
                 $gameActors.deleteActorData(this._actorId);
