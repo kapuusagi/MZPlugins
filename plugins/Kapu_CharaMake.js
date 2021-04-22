@@ -705,8 +705,11 @@ function Scene_UnregisterActor() {
         const index = this._registableIds.indexOf(id);
         if (index >= 0) {
             this._registableIds.splice(index, 1);
+            const registeredIdIndex = this._registeredActorIds.indexOf(id);
+            if (registeredIdIndex >= 0) {
+                this._registeredActorIds.splice(registeredIdIndex, 1);
+            }
         }
-
     };
 
     /**
@@ -718,7 +721,11 @@ function Scene_UnregisterActor() {
     Game_Actors.prototype.addRegistableId = function(id) {
         if ((id > 0) && (id < $dataActors.length)
                 && !this._registableIds.includes(id)) {
-            this._registableIds.add(id);
+            this._registableIds.push(id);
+            if (this.isActorDataExists(id)) {
+                // すでにアクターデータが存在するならば、登録済みIDとして入れておく。
+                this._registeredActorIds.push(id);
+            }
         }
     };
 
