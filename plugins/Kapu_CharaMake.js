@@ -79,6 +79,9 @@
  * 
  * 
  * 
+ * 
+ * 
+ * 
  * @param registableIds
  * @text ユーザーが登録/削除可能なID
  * @desc ユーザーが登録/削除可能なIDを設定する。カンマ区切りで数値を指定。ハイフンで範囲指定。例:2,4,7-12
@@ -118,21 +121,90 @@
  * @help 
  * キャラクターメイキングのベースシステムを提供するためのプラグイン。
  * 編集可能項目はプラグインにより拡張することを想定する。
+ * 本プラグインでは名前のみ編集する機能を提供する。
  * 
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
+ * メイキング項目を追加するには、
+ * 1. Game_CharaMakeItemを継承したオブジェクトを用意する。
+ * 2. DataManager.createCharaMakeItemsをフックし、
+ *    1で作成したオブジェクトを追加して返すようにする。
+ * 
+ * Game_CharaMakeItem.createSelectWindows(rect:Rectangle) : object
+ *   項目選択のUIを構築する。rectには選択項目を表示可能なウィンドウ領域が渡される。
+ *   rectは使用してもいいし、使用しなくても良い。
+ *   objectは少なくとも以下のメンバーを持つ。
+ *      selectWindow : {Window_Selectable} 項目選択ウィンドウとして使用するウィンドウ。選択確定時に"ok"ハンドラを呼ぶこと。
+ *   objectには補助データとして以下のメンバを渡すことができる。
+ *      windows : {Array<Window_Base>} 
+ *                   選択項目の情報表示に使用するウィンドウ。(ステータス変化表示などを想定)
+ *                   シーンのウィンドウレイヤーに追加される。無い場合にはnullか空の配列。
+ *      sprites : {Array<Sprite>}
+ *                   選択項目の画像表示に使用するウィンドウ。(フェイス/立ち絵などを想定)
+ *                   スプライトレイヤー(ウィンドウレイヤーの下)に追加される。無い場合にはnullか空の配列
+ *   その他、objectには項目選択に必要なパラメータを持たせても良い。
+ * Game_CharaMakeItem.name() : string
+ *   この項目の名前。メイキング項目として使用される。
+ *   また、キャラクターメイキングを行う際の、設定可能な項目リストお名前として使用される。
+ * Game_CharaMakeItem.description() : string
+ *   この項目の説明。項目が選択されたとき、ヘルプウィンドウに説明として表示される。
+ * Game_CharaMakeItem.editingText(windowEntry:object) : string
+ *   現在選択中の設定値文字列を取得するために使用される。
+ *   適切な設定値を返す必要がある。
+ * Game_CharaMakeItem.setCurrent(windowEntry:object, actor:Game_Actor) : void
+ *   現在値/初期値を選択ウィンドウに反映させるために使用される。
+ *   createSelectWindows()で作成したウィンドウに対し、初期値を設定する必要がある。
+ * Game_CharaMakeItem.apply(windowEntry:object, actor:Game_Actor) : void
+ *   キャラクターメイキング確定時、actorに設定値を反映させるために使用される。
+ *   createSelectWindows()で作成したオブジェクトから選択値を取得し、actorに設定する必要がある。
+ * Game_CharaMakeItem.startSelection(windowEntry.object) : void
+ *   選択開始時に呼び出される。
+ *   既定の実装では selectWindow をアクティブ＆表示、
+ *   windows及びspritesは表示状態に設定する。
+ *   windowsの内、特定のウィンドウだけ有効化したり、特定のspriteだけ表示させたい場合にはオーバーライドする。
+ * Game_CharaMakeItem.endSelection(windowEntry:object) : void
+ *   選択確定時に呼び出される。
+ *   既定の実装では selectWindow を非アクティブ＆非表示、
+ *   windows及びspritesは非表示状態に設定する。
+ *   windowsの内、特定のウィンドウだけ表示したままにしたり、特定のspriteだけ表示させたい場合にはオーバーライドする。
+ * Game_CharaMakeItem.items() : Array<object>
+ *   選択項目リストを取得する。
+ *   単純な選択項目だけならば、ここで選択可能な項目を返すだけで良い。
+ *   objectはnameメンバ/プロパティを持つ必要がある。
+ *   nameの値が選択可能な値として表示される。
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
+ * メイキングシーンを開始する。
+ *   アクターIDまたは編集対象アクター変数IDに有効な値が指定されている場合、
+ *     該当IDのアクターに対してキャラメイクシーンを開始します。
+ *     アクターIDと編集対象アクター変数IDが指定されている場合、アクターIDが優先されます。
+ *     シナリオ固定の登場人物の情報を、一部変更したい場合などに使用します。
+ *   アクターID及び編集対象アクター変数IDが無効(0以下)な場合
+ *     登録可能なIDを取得してキャラメイクシーンを開始します。
+ *     自由にキャラクターメイキングする場合に使用します。
+ *   キャラメイク完了後、結果は指定した変数または$gameTemp.selectedActorId()で取得出来ます。
+ *   キャラメイクが確定終了した場合には1以上のアクターIDが格納されます。
+ *   キャラメイクがキャンセルされた場合には0が格納されます。
  * 
+ * 登録済みアクター選択
+ *   動的にキャラメイクできるアクターIDのうち、登録済みのアクターを選択するシーンを開始します。
+ *   アクター名とステータスが表示されます。
+ *   ステータス画面としてWindow_Statusを使用します。
+ *   結果は指定した変数または$gameTemp.selectedActorId()で取得出来ます。
+ *   パーティー編成のためのメンバー選択や、登録消去するためのメンバー選択に使用します。
  * 
- * 
+ * 指定アクターのデータを削除する。
+ *   アクターIDまたは変数IDで指定したアクターIDのアクターを消去します。
+ *   アクターIDと変数IDが指定された場合にはアクターIDが優先されます。
+ *   確認ウィンドウは表示されないので、イベントで確認処理を行うことを推奨します。
  * 
  * ============================================
  * ノートタグ
  * ============================================
+ * ノートタグはありません。
  * 
  * ============================================
  * 変更履歴
@@ -140,10 +212,16 @@
  * Version.0.1.0 動作未確認。
  */
 
+/**
+ * 1つのキャラクターメイキング項目を表すオブジェクト
+ */
 function Game_CharaMakeItem() {
     this.initialize(...arguments);
 }
 
+/**
+ * 名前を設定・変更するキャラクターメイキング項目を表すオブジェクト。
+ */
 function Game_CharaMakeItem_Name() {
     this.initialize(...arguments);
 }
@@ -466,8 +544,15 @@ function Scene_UnregisterActor() {
         const selectWindow = windowEntry.selectWindow;
         selectWindow.activate();
         selectWindow.show();
-        for (const window of windowEntry.windows) {
-            window.show();
+        if (windowEntry.windows) {
+            for (const window of windowEntry.windows) {
+                window.show();
+            }
+        }
+        if (windowEntry.sprites) {
+            for (const sprite of windowEntry.sprites) {
+                sprite.visible = true;
+            }
         }
     };
 
@@ -480,8 +565,15 @@ function Scene_UnregisterActor() {
         const selectWindow = windowEntry.selectWindow;
         selectWindow.deactivate();
         selectWindow.hide();
-        for (const window of windowEntry.windows) {
-            window.hide();
+        if (windowEntry.windows) {
+            for (const window of windowEntry.windows) {
+                window.hide();
+            }
+        }
+        if (windowEntry.sprites) {
+            for (const sprite of windowEntry.sprites) {
+                sprite.visible = false;
+            }
         }
     };
 
