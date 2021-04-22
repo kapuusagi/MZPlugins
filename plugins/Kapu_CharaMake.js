@@ -611,7 +611,7 @@ function Scene_UnregisterActor() {
      * 初期化する。
      */
     Game_CharaMakeItem_Name.prototype.initialize = function() {
-
+        Game_CharaMakeItem.prototype.initialize.call(this, ...arguments);
     };
     /**
      * この項目の識別名を取得する。
@@ -942,6 +942,16 @@ function Scene_UnregisterActor() {
     Window_CharaMakeItemSelection.prototype.setItems = function(items) {
         this._items = items;
         this.refresh();
+    };
+
+    /**
+     * アイテムリストを取得する。
+     * selectするインデックスを取得するために使用することを想定。
+     * 
+     * @returns {Array<object>} アイテムリスト
+     */
+    Window_CharaMakeItemSelection.prototype.items = function() {
+        return this._items;
     };
 
     /**
