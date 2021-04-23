@@ -114,9 +114,6 @@ function Window_CharaMakeVisualSelection() {
     try {
         const entries = JSON.parse(parameters["charaMakeItems"]).map(str => JSON.parse(str));
         for (entry of entries) {
-            // TODO: もしかしたらcharacterName, faceName, battlerNameからフォルダパスを取り除かないといけないかも。
-            // @fileで渡すとフォルダ名が含まれてた気がする。
-
             graphicItems.push(entry);
         }
     }

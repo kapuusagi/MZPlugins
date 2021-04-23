@@ -288,13 +288,6 @@ function Sprite_BattleHudPicture() {
     PluginManager.registerCommand(pluginName, "setBattlePicture", args => {
         const actorId = _getActorId(args);
         let fileName = args.fileName;
-        if (fileName.includes("/")) {
-            if (fileName.startsWith("pictures/")) {
-                fileName = fileName.substr(9);
-            } else {
-                fileName = "";
-            }
-        }
         if (actorId) {
             $gameActors.actor(actorId).setBattlePicture(fileName);
         }

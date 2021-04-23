@@ -309,13 +309,6 @@ function Scene_TwldShop() {
     PluginManager.registerCommand(pluginName, "openShop", args => {
         const id = _getShopId(args);
         let clerkFileName = String(args.clerkFileName) || "";
-        if (clerkFileName.includes("/")) {
-            if (clerkFileName.startsWith("pictures/")) {
-                clerkFileName = clerkFileName.substr(9);
-            } else {
-                clerkFileName = "";
-            }
-        }
         const clerkOffsetX = Number(args.clerkOffsetX) || 0;
         const clerkOffsetY = Number(args.clerkOffsetY) || 0;
         const mode = Number(args.mode) || Game_Shop.SHOP_MODE_SELL_AND_PURCHASE;
