@@ -340,6 +340,12 @@ function Scene_UnregisterActor() {
         return Number(args.actorId) || 0;
     };
 
+    /**
+     * メイキング項目名を得る。
+     * 
+     * @param {string} itemNamesStr アイテム名文字列
+     * @returns 
+     */
     const _parseItemNames = function(itemNamesStr) {
         const itemNames = [];
         try {
@@ -1108,11 +1114,15 @@ function Scene_UnregisterActor() {
         const rect = this.itemLineRect(index);
         if (index < this._items.length) {
             const item = this._items[index];
-            let text = item.name();
+            const labelWidth = (rect.width > 180) ? 64 : (rect.width * 0.4);
+            const labelText = item.name() + ":";
+            this.drawText(labelText, rect.x, rect.y, labelWidth);
             if (this._valueGetter) {
-                text += ":" + this._valueGetter(item);
+                const valueX = rect.X + labelWidth;
+                const valueWidth = rect.width - labelWidth;
+                const valueText = this._valueGetter(item);
+                this.drawText(valueText, valueX, rect.y, valueWidth);
             }
-            this.drawText(text, rect.x, rect.y, rect.width, "left");
         } else {
             if (index === (this._items.length)) {
                 this.drawText(textItemOk, rect.x, rect.y, rect.width, "left");
@@ -1266,15 +1276,23 @@ function Scene_UnregisterActor() {
      */
     Scene_CharaMake.prototype.create = function() {
         Scene_MenuBase.prototype.create.call(this, ...arguments);
-        this._items = DataManager.charaMakeItems(this._itemNames);
-        this.createCharaMakeItemListWindow();
-        const rect = this.selectWindowRect();
-        this._windowEntries = [];
         if (!$gameActors.isActorDataExists(this._actorId)) {
             $gameActors.addActorData(this._actorId);
         }
         const actor = $gameActors.actor(this._actorId);
         this._tempActor = JsonEx.makeDeepCopy(actor);
+        this.createStatusWindow();
+        this._items = DataManager.charaMakeItems(this._itemNames);
+        this.createCharaMakeItemListWindow();
+        this.createSelectionWindows();
+    };
+    /**
+     * キャラメイクに必要な、各項目のウィンドウ・リソースを作成する。
+     */
+    Scene_CharaMake.prototype.createSelectWindows = function() 
+    {
+        const rect = this.selectWindowRect();
+        this._windowEntries = [];
         for (const item of this._items) {
             const windowEntry = item.createSelectWindows(rect, this._helpWindow);
             windowEntry.item = item;
@@ -1305,6 +1323,33 @@ function Scene_UnregisterActor() {
             this._windowEntries.push(windowEntry);
         }
     };
+
+    /**
+     * ステータスウィンドウを作成する。
+     */
+    Scene_CharaMake.prototype.createStatusWindow = function() {
+        const rect = this.statusWindowRect();
+        this._statusWindow = new Window_Status(rect);
+        this._statusWindow.deactivate();
+        this._statusWindow.hide();
+        this._statusWindow.setActor(this._tempActor);
+        this.addWindow(this._statusWindow);
+    };
+
+    /**
+     * ステータスウィンドウの矩形領域を得る。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_CharaMake.prototype.statusWindowRect = function() {
+        const rect = this.selectWindowRect();
+        const wx = rect.x + rect.width;
+        const wy = rect.y;
+        const ww = Graphics.boxWidth - wx;
+        const wh = rect.height;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
 
     /**
      * ウィンドウレイヤーを作成する。
@@ -1414,6 +1459,7 @@ function Scene_UnregisterActor() {
 
         this._itemWindow.refresh();
         this._itemWindow.show();
+        this._statusWindow.show();
         this._itemWindow.activate();
     };
 
@@ -1425,7 +1471,9 @@ function Scene_UnregisterActor() {
         const windowEntry = this._windowEntries.find(entry => entry.item === item);
         if (windowEntry) {
             item.endSelection(windowEntry);
+            item.apply(windowEntry, this._tempActor);
         }
+        this._statusWindow.refresh();
         this._itemWindow.refresh();
         this._itemWindow.activate();
     };
@@ -1452,11 +1500,6 @@ function Scene_UnregisterActor() {
                 this._itemWindow.activate();
             }
         } else {
-            // まず、tempActorに適用して名前が有効であることを確認する。
-            for (const item of this._items) {
-                const windowEntry = this._windowEntries.find(entry => entry.item === item);
-                item.apply(windowEntry, this._tempActor);
-            }
             if (this._tempActor.name().length == 0) {
                 SoundManager.playBuzzer();
                 this._itemWindow.activate();
