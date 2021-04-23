@@ -1284,13 +1284,12 @@ function Scene_UnregisterActor() {
         this.createStatusWindow();
         this._items = DataManager.charaMakeItems(this._itemNames);
         this.createCharaMakeItemListWindow();
-        this.createSelectionWindows();
+        this.createSelectWindows();
     };
     /**
      * キャラメイクに必要な、各項目のウィンドウ・リソースを作成する。
      */
-    Scene_CharaMake.prototype.createSelectWindows = function() 
-    {
+    Scene_CharaMake.prototype.createSelectWindows = function() {
         const rect = this.selectWindowRect();
         this._windowEntries = [];
         for (const item of this._items) {
@@ -1342,7 +1341,7 @@ function Scene_UnregisterActor() {
      * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_CharaMake.prototype.statusWindowRect = function() {
-        const rect = this.selectWindowRect();
+        const rect = this.charaMakeItemListWindowRect();
         const wx = rect.x + rect.width;
         const wy = rect.y;
         const ww = Graphics.boxWidth - wx;
