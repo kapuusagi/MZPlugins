@@ -45,11 +45,12 @@
  *      スイッチで条件を付けたいならば
  *          <charaMakeSelectable: $gameSwitches.value(12)>
  *      などとする。上記の例は12番のスイッチがONの時に選択可能を表す。
- * 
+ *   <charaMakeDescription: text$>
+ *      キャラクターメイキングの項目選択時に表示する説明文
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.1.0.0 初版作成。
  */
 
 /**
@@ -64,7 +65,20 @@ function Game_CharaMakeItem_Class() {
     const parameters = PluginManager.parameters(pluginName);
     const textItemNameClass = parameters["textItemNameClass"] || "Class";
     const textItemDescriptionClass = parameters["textItemDescriptionClass"] || "Select classs.";
-
+    //------------------------------------------------------------------------------
+    // DataManager
+    const _DataManager_createCharaMakeItems = DataManager.createCharaMakeItems;
+    /**
+     * キャラクターメイキング項目を取得する。
+     * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
+     * 
+     * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+     */
+    DataManager.createCharaMakeItems = function() {
+        const items = _DataManager_createCharaMakeItems.call(this);
+        items.push(new Game_CharaMakeItem_Class());
+        return items;
+    };
     //------------------------------------------------------------------------------
     // Game_CharaMakeItem_Class
     Game_CharaMakeItem_Class.prototype = Object.create(Game_CharaMakeItem.prototype);
@@ -106,11 +120,18 @@ function Game_CharaMakeItem_Class() {
         const selectWindow = windowEntry.selectWindow;
         const currentClass = actor.currentClass();
         const items = selectWindow.items();
-        const index = items.indexOf(currentClass);
-        if (index >= 0) {
+        let index = 0;
+        while (index < items.length) {
+            if (items[index].id === currentClass.id) {
+                break;
+            }
+            index++;
+        }
+        if (index < $dataClasses.length) {
             selectWindow.select(index);
         } else {
-            items.unshift(currentClass);
+            const classEntry = this.generateClassEntry(currentClass);
+            items.unshift(classEntry);
             selectWindow.setItems(items);
             selectWindow.select(0);
         }
@@ -125,9 +146,8 @@ function Game_CharaMakeItem_Class() {
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Class.prototype.apply = function(windowEntry, actor) {
         const selectWindow = windowEntry.selectWindow;
-        const dataClass = selectWindow.item();
-        const classId = dataClass.id;
-        actor.changeClass(classId, true);
+        const classEntry = selectWindow.item();
+        actor.changeClass(classEntry.id, true);
     };
     /**
      * アイテム一覧を得る。
@@ -135,19 +155,37 @@ function Game_CharaMakeItem_Class() {
      * @return {Array<object>} アイテム一覧
      */
     Game_CharaMakeItem_Class.prototype.items = function() {
-        const items = []
-        for (const dataClass of $dataClasses) {
-            if (dataClass.meta.charaMakeSelectable) {
-                try {
-                    if (eval(dataClass.meta.charaMakeSelectable)) {
-                        items.push(dataClass);
+        const items = [];
+        for (let i = 1; i < $dataClasses.length; i++) {
+            const dataClass = $dataClasses[i];
+            if (dataClass !== null) {
+                if (dataClass.meta.charaMakeSelectable) {
+                    try {
+                        if (eval(dataClass.meta.charaMakeSelectable)) {
+                            const classEntry = this.generateClassEntry(dataClass);
+                            items.push(classEntry);
+                        }
                     }
-                }
-                catch (e) {
-                    console.log(e);
+                    catch (e) {
+                        console.log(e);
+                    }
                 }
             }
         }
-        return [];
+        return items;
+    };
+
+    /**
+     * クラスエントリを生成する。
+     * 
+     * @param {DataClass} dataClass クラスデータ
+     * @returns {object} クラスエントリオブジェクト
+     */
+    Game_CharaMakeItem_Class.prototype.generateClassEntry = function(dataClass) {
+        return {
+            id: dataClass.id,
+            name: dataClass.name,
+            description: dataClass.meta.charaMakeDescription || ""
+        };
     };
 })();
