@@ -136,7 +136,9 @@
  *   rectは使用してもいいし、使用しなくても良い。
  *   helpWindowはヘルプメッセージを表示させる場合に使用する。
  *   objectは少なくとも以下のメンバーを持つ。
- *      selectWindow : {Window_Selectable} 項目選択ウィンドウとして使用するウィンドウ。選択確定時に"ok"ハンドラを呼ぶこと。
+ *      selectWindow : {Window_Selectable} 項目選択ウィンドウとして使用するウィンドウ。
+ *                                         選択確定時に"ok"ハンドラを呼ぶこと。
+ *                                         選択キャンセル時に"cancel"ハンドラを呼ぶこと。
  *   objectには補助データとして以下のメンバを渡すことができる。
  *      windows : {Array<Window_Base>} 
  *                   選択項目の情報表示に使用するウィンドウ。(選択中のステータス変化表示などを想定)
@@ -522,7 +524,8 @@ function Scene_UnregisterActor() {
      */
     Game_CharaMakeItem.prototype.editingText = function(windowEntry) {
         const window = windowEntry.selectWindow;
-        return window.item().name;
+        const item = window.item();
+        return item.name;
     };
 
     /**
@@ -1118,7 +1121,7 @@ function Scene_UnregisterActor() {
             const labelText = item.name() + ":";
             this.drawText(labelText, rect.x, rect.y, labelWidth);
             if (this._valueGetter) {
-                const valueX = rect.X + labelWidth;
+                const valueX = rect.x + labelWidth;
                 const valueWidth = rect.width - labelWidth;
                 const valueText = this._valueGetter(item);
                 this.drawText(valueText, valueX, rect.y, valueWidth);
@@ -1281,6 +1284,7 @@ function Scene_UnregisterActor() {
         }
         const actor = $gameActors.actor(this._actorId);
         this._tempActor = JsonEx.makeDeepCopy(actor);
+        this.createHelpWindow();
         this.createStatusWindow();
         this._items = DataManager.charaMakeItems(this._itemNames);
         this.createCharaMakeItemListWindow();
@@ -1299,6 +1303,7 @@ function Scene_UnregisterActor() {
             item.setCurrent(windowEntry, this._tempActor);
             // ハンドラ設定
             windowEntry.selectWindow.setHandler("ok", this.onSelectWindowOk.bind(this));
+            windowEntry.selectWindow.setHandler("cancel", this.onSelectWindowCancel.bind(this));
             // 非表示設定にする。
             this.addWindow(windowEntry.selectWindow);
             windowEntry.selectWindow.hide();
@@ -1459,11 +1464,12 @@ function Scene_UnregisterActor() {
         this._itemWindow.refresh();
         this._itemWindow.show();
         this._statusWindow.show();
+        this._helpWindow.show();
         this._itemWindow.activate();
     };
 
     /**
-     * 選択ウィンドウでOK操作されたときの処理を行う。
+     * 1つのキャラメイク項目で選択値を確定操作されたときの処理を行う。
      */
     Scene_CharaMake.prototype.onSelectWindowOk = function() {
         const item = this._itemWindow.item();
@@ -1471,6 +1477,20 @@ function Scene_UnregisterActor() {
         if (windowEntry) {
             item.endSelection(windowEntry);
             item.apply(windowEntry, this._tempActor);
+        }
+        this._statusWindow.refresh();
+        this._itemWindow.refresh();
+        this._itemWindow.activate();
+    };
+
+    /**
+     * 1つのキャラメイク項目で選択をキャンセル操作されたときの処理を行う。
+     */
+    Scene_CharaMake.prototype.onSelectWindowCancel = function() {
+        const item = this._itemWindow.item();
+        const windowEntry = this._windowEntries.find(entry => entry.item === item);
+        if (windowEntry) {
+            item.endSelection(windowEntry);
         }
         this._statusWindow.refresh();
         this._itemWindow.refresh();
@@ -1489,6 +1509,7 @@ function Scene_UnregisterActor() {
                 const item = this._itemWindow.item();
                 const windowEntry = this._windowEntries.find(entry => entry.item === item);
                 if (windowEntry) {
+                    item.setCurrent(windowEntry, this._tempActor);
                     item.startSelection(windowEntry);
                 } else {
                     /* 該当エントリなし => バグ */
