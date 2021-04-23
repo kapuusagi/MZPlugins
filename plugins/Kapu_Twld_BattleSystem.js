@@ -22,7 +22,7 @@
  * @text ファイル名
  * @desc 設定する画像ファイル
  * @type file
- * @dir pictures
+ * @dir img/pictures/
  * 
  * @param maxBattleMembers
  * @text 最大戦闘参加人数

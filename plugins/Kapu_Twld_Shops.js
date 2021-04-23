@@ -32,7 +32,7 @@
  * @arg clerkFileName
  * @text 店員画像
  * @desc 店員として表示する画像ファイル名。既定ではコマンドウィンドウ下の方に表示される。
- * @dir pictures
+ * @dir img/pictures/
  * @type file
  * 
  * @arg clerkOffsetX
