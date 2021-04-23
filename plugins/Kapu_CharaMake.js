@@ -139,8 +139,11 @@
  *      selectWindow : {Window_Selectable} 項目選択ウィンドウとして使用するウィンドウ。選択確定時に"ok"ハンドラを呼ぶこと。
  *   objectには補助データとして以下のメンバを渡すことができる。
  *      windows : {Array<Window_Base>} 
- *                   選択項目の情報表示に使用するウィンドウ。(ステータス変化表示などを想定)
+ *                   選択項目の情報表示に使用するウィンドウ。(選択中のステータス変化表示などを想定)
  *                   シーンのウィンドウレイヤーに追加される。無い場合にはnullか空の配列。
+ *      infoWindows : {Array<Window_Base>}
+ *                   現在の設定表示に使用するウィンドウ。(現在選択中のステータス変化表示などを想定)
+ *                   シーンのウィンドウレイヤーより下に追加される。無い場合にはnullか空の配列。
  *      sprites : {Array<Sprite>}
  *                   選択項目の画像表示に使用するウィンドウ。(フェイス/立ち絵などを想定)
  *                   スプライトレイヤー(ウィンドウレイヤーの下)に追加される。無い場合にはnullか空の配列
@@ -487,16 +490,20 @@ function Scene_UnregisterActor() {
      *                   {
      *                       selectWindow : {Window_Selectable} 選択ウィンドウ。このウィンドウに対して"ok"ハンドラが登録される。
      *                       windows : {Array<Window_Base>} 補助ウィンドウ。(情報表示ウィンドウなど)
+     *                       infoWindows : {Array<Window_Base>} 補助ウィンドウ(現在選択項目の情報表示など)
      *                       sprites : {Array<Sprite>} スプライト
      *                   }
      */
     Game_CharaMakeItem.prototype.createSelectWindows = function(rect, helpWindow) {
-        const window = new Window_CharaMakeItemSelection(rect);
+        const ww = (rect.width < 240) ? rect.width : 240;
+        const windowRect = new Rectangle(rect.x, rect.y, ww, rect.height);
+        const window = new Window_CharaMakeItemSelection(windowRect);
         window.setItems(this.items())
         window.setHelpWindow(helpWindow);
         return {
             selectWindow: window,
             windows: null,
+            infoWindows: null,
             sprites: null
         } ;
     };
@@ -661,6 +668,7 @@ function Scene_UnregisterActor() {
         return {
             selectWindow: inputWindow,
             windows: [ editWindow ],
+            infoWindows: null,
             sprites: null
         };
     };
@@ -1283,6 +1291,11 @@ function Scene_UnregisterActor() {
                     this.addWindow(window);
                 }
             }
+            if (windowEntry.infoWindows) {
+                for (const window of windowEntry.infoWindows) {
+                    this._subWindowLayer.addChild(window);
+                }
+            }
             if (windowEntry.sprites) {
                 for (const sprite of windowEntry.sprites) {
                     this._subSpriteLayer.addChild(sprite);
@@ -1299,6 +1312,16 @@ function Scene_UnregisterActor() {
     Scene_CharaMake.prototype.createWindowLayer = function() {
         this.createSubSpriteLayer();
         Scene_MenuBase.prototype.createWindowLayer.call(this);
+    };
+
+    /**
+     * サブウィンドウレイヤーを作成する。
+     */
+    Scene_CharaMake.prototype.createSubWindowLayer = function() {
+        this._subWindowLayer = new WindowLayer();
+        this._subWindowLayer.x = (Graphics.width - Graphics.boxWidth) / 2;
+        this._subWindowLayer.y = (Graphics.height - Graphics.boxHeight) / 2;
+        this.addChild(this._subWindowLayer);
     };
 
     /**
