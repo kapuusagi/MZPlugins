@@ -233,14 +233,14 @@ function Game_CharaMakeItem_Name() {
 }
 
 /**
- * キャラクターメイキング項目選択用ウィンドウ
+ * 1つのキャラクターメイキング項目内の設定値選択用ウィンドウ
  */
 function Window_CharaMakeItemSelection() {
     this.initialize(...arguments);
 }
 
 /**
- * キャラクターメイキング項目リスト
+ * キャラクターメイキング項目を選択するためのウィンドウ。
  */
 function Window_CharaMakeItemList() {
     this.initialize(...arguments);
@@ -1119,12 +1119,12 @@ function Scene_UnregisterActor() {
         const rect = this.itemLineRect(index);
         if (index < this._items.length) {
             const item = this._items[index];
-            const labelWidth = (rect.width > 180) ? 64 : (rect.width * 0.4);
+            const labelWidth = (rect.width > 300) ? 120 : (rect.width * 0.4);
             const labelText = item.name() + ":";
             this.drawText(labelText, rect.x, rect.y, labelWidth);
             if (this._valueGetter) {
-                const valueX = rect.x + labelWidth;
-                const valueWidth = rect.width - labelWidth;
+                const valueX = rect.x + labelWidth + this.colSpacing();
+                const valueWidth = rect.width - labelWidth - this.colSpacing();
                 const valueText = this._valueGetter(item);
                 this.drawText(valueText, valueX, rect.y, valueWidth);
             }
@@ -1135,7 +1135,21 @@ function Scene_UnregisterActor() {
         }
     };
 
-
+    /**
+     * 選択項目の説明を更新する。
+     */
+     Window_CharaMakeItemList.prototype.updateHelp = function() {
+        Window_Selectable.prototype.updateHelp.call(this);
+        if (this._helpWindow !== null) {
+            const item = this.item();
+            if (item) {
+                const description = item.description() || "";
+                this._helpWindow.setText(description);
+            } else {
+                this._helpWindow.clear();
+            }
+        }
+    };
 
     //------------------------------------------------------------------------------
     // Window_RegisteredActorList
@@ -1408,6 +1422,7 @@ function Scene_UnregisterActor() {
         this._itemWindow.setValueGetter(this.editingValue.bind(this));
         this._itemWindow.setHandler("ok", this.onItemListOk.bind(this));
         this._itemWindow.setHandler("cancel", this.onItemListCancel.bind(this));
+        this._itemWindow.setHelpWindow(this._helpWindow);
         this.addWindow(this._itemWindow);
     };
 
