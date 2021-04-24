@@ -228,11 +228,6 @@ function Window_CharaMakeVisualSelection() {
         const faceY = rect.y;
         this.drawFace(item.faceName, item.faceIndex, faceX, faceY);
 
-        // DrawCharacter
-        const characterX = rect.x + rect.width - 24 - this.lineHeight();
-        const characterY = rect.y + rect.height;
-        this.drawCharacter(item.characterName, item.characterIndex, characterX, characterY);
-
         // 名前背景
         const nameX = rect.x;
         const nameY = rect.y + rect.height - this.lineHeight();
@@ -242,6 +237,11 @@ function Window_CharaMakeVisualSelection() {
         this.drawRect(nameX, nameY, rect.width, this.lineHeight());
         this.resetTextColor();
         this.changePaintOpacity(true);
+
+        // DrawCharacter
+        const characterX = rect.x + rect.width - 24;
+        const characterY = rect.y + rect.height;
+        this.drawCharacter(item.characterName, item.characterIndex, characterX, characterY);
 
         // 名前
         this.makeFontSmaller();
@@ -300,8 +300,10 @@ function Window_CharaMakeVisualSelection() {
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Visual.prototype.createSelectWindows = function(rect, helpWindow) {
-        const window = new Window_CharaMakeVisualSelection(rect);
-        window.setItems(this.items())
+        const ww = rect.width > 800 ? 800 : rect.width;
+        const windowRect = new Rectangle(rect.x, rect.y, ww, rect.height);
+        const window = new Window_CharaMakeVisualSelection(windowRect);
+        window.setItems(this.items());
         return {
             selectWindow: window,
             windows: null,
