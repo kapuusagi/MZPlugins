@@ -664,7 +664,7 @@ function Scene_UnregisterActor() {
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
-     * @returns {Window_Selectable} ウィンドウ(Window_Selectableの派生クラス)
+     * @returns {object} ウィンドウ類
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Name.prototype.createSelectWindows = function(rect, helpWindow) {
