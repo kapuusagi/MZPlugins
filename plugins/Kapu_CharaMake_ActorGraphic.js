@@ -47,6 +47,16 @@
  * ■ プラグイン開発者向け
  * プラグインパラメータ charaMakeItems のnoteフィールドは item.meta フィールドに展開されます。
  * 
+ * 画像表示用に以下のモジュールを追加してあります。
+ * Sprite_CharaMake_Picture
+ *   指定したピクチャを表示するだけのスプライト。
+ *   setPictureName(pictureName:string) : void
+ *   で img/pictures 下のファイルをピクチャを読み込んで表示します。
+ *   使う側でanchorを設定するようにします。
+ *   sprite = new Sprite_CharaMakePicture();
+ *   sprite.anchor.x = 0.0; // 左端を画像座標の原点にする。
+ *   sprite.anchor.y = 0.0; // 上端を画像座標の原点にする。
+ *   windowEntry.sprites.push(sprite);
  * 
  * ============================================
  * プラグインコマンド
@@ -125,6 +135,13 @@ function Window_CharaMakeVisualSelection() {
     this.initialize(...arguments);
 }
 
+/**
+ * ピクチャを表示するための単純なスプライト
+ */
+function Sprite_CharaMake_Picture() {
+    this.initialize(...arguments);
+}
+
 
 (() => {
     const pluginName = "Kapu_CharaMake_ActorGraphic";
@@ -137,7 +154,7 @@ function Window_CharaMakeVisualSelection() {
         const entries = JSON.parse(parameters["charaMakeItems"]).map(str => JSON.parse(str));
         for (entry of entries) {
             // noteフィールドを展開する。
-            if (entry.node) {
+            if (entry.note) {
                 DataManager.extractMetadata(entry);
             } else {
                 entry.note = "";
@@ -163,7 +180,74 @@ function Window_CharaMakeVisualSelection() {
         const items = _DataManager_createCharaMakeItems.call(this);
         items.push(new Game_CharaMakeItem_Visual());
         return items;
-    };    
+    };
+
+    //------------------------------------------------------------------------------
+    // Sprite_CharaMake_Picture
+    Sprite_CharaMake_Picture.prototype = Object.create(Sprite_Clickable.prototype);
+    Sprite_CharaMake_Picture.prototype.constructor = Sprite_CharaMake_Picture;
+
+    /**
+     * Sprite_Pictureを初期化する。
+     */
+    Sprite_CharaMake_Picture.prototype.initialize = function() {
+        Sprite_Clickable.prototype.initialize.call(this);
+        this._pictureName = "";
+        this._loadedPictureName = "";
+        this.update();
+    };
+
+    /**
+     * ピクチャ名を設定する。
+     * 
+     * @param {string} pictureName ピクチャ名
+     */
+    Sprite_CharaMake_Picture.prototype.setPictureName = function(pictureName) {
+        if (this._pictureName !== pictureName) {
+            this._pictureName = pictureName;
+        }
+    };
+    /**
+     * ピクチャ名を取得する。
+     * 
+     * @returns {string} ピクチャファイル名
+     */
+    Sprite_CharaMake_Picture.prototype.pictureName = function() {
+        return this._pictureName;
+    };
+
+    /**
+     * 更新する。
+     */
+    Sprite_CharaMake_Picture.prototype.update = function() {
+        Sprite_Clickable.prototype.update.call(this);
+        this.updateBitmap();
+    };
+
+    /**
+     * 表示するビットマップを更新する。
+     */
+    Sprite_CharaMake_Picture.prototype.updateBitmap = function() {
+        if (this._loadedPictureName !== this._pictureName) {
+            if (this._pictureName) {
+                this.loadBitmap();
+                this._loadedPictureName = this._pictureName;
+                this.visible = true;
+            } else {
+                this._loadedPictureName = "";
+                this.bitmap = null;
+                this.visible = false;
+            }
+        }
+    };
+
+    /**
+     * 設定された画像ファイル名のピクチャをロードする。
+     */
+    Sprite_CharaMake_Picture.prototype.loadBitmap = function() {
+        this.bitmap = ImageManager.loadPicture(this._pictureName);
+    };
+
     //------------------------------------------------------------------------------
     // Window_CharaMakeVisualSelection
     Window_CharaMakeVisualSelection.prototype = Object.create(Window_CharaMakeItemSelection.prototype);
@@ -339,17 +423,27 @@ function Window_CharaMakeVisualSelection() {
         if (index < items.length) {
             selectWindow.select(index);
         } else {
-            items.unshift({
-                name: actor.name() || textItemNameDefault,
-                characterName: actor.characterName(),
-                characterIndex: actor.characterIndex(),
-                faceName: actor.faceName(),
-                faceIndex: actor.faceIndex(),
-                battlerName: actor.battlerName()
-            });
+            items.unshift(this.createDefaultEntry(actor));
             selectWindow.setItems(items);
             selectWindow.select(0);
         }
+    };
+
+    /**
+     * デフォルトのグラフィックエントリを作成する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @returns {object} 画像エントリ
+     */
+    Game_CharaMakeItem_Visual.prototype.createDefaultEntry = function(actor) {
+        return {
+            name: actor.name() || textItemNameDefault,
+            characterName: actor.characterName(),
+            characterIndex: actor.characterIndex(),
+            faceName: actor.faceName(),
+            faceIndex: actor.faceIndex(),
+            battlerName: actor.battlerName()
+        };
     };
 
     /**
