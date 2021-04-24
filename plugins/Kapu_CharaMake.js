@@ -562,9 +562,11 @@ function Scene_UnregisterActor() {
     Game_CharaMakeItem.prototype.startSelection = function(windowEntry) {
         const selectWindow = windowEntry.selectWindow;
         selectWindow.activate();
+        selectWindow.refresh();
         selectWindow.show();
         if (windowEntry.windows) {
             for (const window of windowEntry.windows) {
+                window.refresh();
                 window.show();
             }
         }
@@ -1477,6 +1479,11 @@ function Scene_UnregisterActor() {
         if (windowEntry) {
             item.endSelection(windowEntry);
             item.apply(windowEntry, this._tempActor);
+            if (windowEntry.infoWindows) {
+                for (const window of windowEntry.infoWindows) {
+                    window.refresh();
+                }
+            }
         }
         this._statusWindow.refresh();
         this._itemWindow.refresh();
