@@ -1500,6 +1500,7 @@ function Scene_UnregisterActor() {
                 }
             }
         }
+        this._statusWindow.show();
         this._statusWindow.refresh();
         this._itemWindow.refresh();
         this._itemWindow.activate();
@@ -1514,6 +1515,7 @@ function Scene_UnregisterActor() {
         if (windowEntry) {
             item.endSelection(windowEntry);
         }
+        this._statusWindow.show();
         this._statusWindow.refresh();
         this._itemWindow.refresh();
         this._itemWindow.activate();
@@ -1531,6 +1533,7 @@ function Scene_UnregisterActor() {
                 const item = this._itemWindow.item();
                 const windowEntry = this._windowEntries.find(entry => entry.item === item);
                 if (windowEntry) {
+                    this._statusWindow.hide();
                     item.setCurrent(windowEntry, this._tempActor);
                     item.startSelection(windowEntry);
                 } else {
