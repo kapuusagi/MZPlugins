@@ -30,6 +30,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 パッシブステートを検索・取得する対象として、習得済みスキルIDリストでなく、
+ *               skills()で取得した対象とするように修正した。
  * Version.0.3.1 パッシブステートで装備可能品を増やしている場合に、
  *               装備初期化時に装備可能品が反映されない不具合を修正した。
  * Version.0.3.0 負荷低減のため、パッシブステートをキャッシュする構造に変更した。
@@ -237,6 +239,19 @@
      * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
      */
     Game_Actor.prototype.passiveStateObjects = function() {
+        if (this._callPassiveStateObjects) {
+            // Note: this.skills()を呼ぶと、特性によるスキル追加を取得するため、以下の処理がコールされる。
+            //       1. 装備品などの特性によって使用可能になっているスキルを調べるため、
+            //          traits()が呼ばれる。
+            //       2. traitsが、特性を持つオブジェクトを取得するため、states() を呼び出す。
+            //       3. states()にてパッシブステートを取得する為、passiveStates()を呼び出す。
+            //       4. passiveStates()がpassiveStateObjects()を呼び出す。
+            //       5. passiveStateObjects()からskills()を呼ぶと1に戻るのでスタックオーバーフローする。
+            // そのため、_callPassiveStateObjects フラグをセットすることで、循環呼び出しを防ぐ。
+            return [];
+        }
+        this._callPassiveStateObjects = true;
+        
         const psObjs = [];
         const actor = this.actor();
         if (actor.passiveStates.length > 0) {
@@ -251,17 +266,14 @@
                 psObjs.push(equip);
             }
         }
-        // Note: this.skills()を呼ぶと、特性によるスキル追加を取得するため、
-        //       traits() -> states() -> passiveStates() -> ... passiveStateObjects()
-        //       と呼ばれて循環し、スタックオーバーフローする。
-        //       そのため、_skillsを参照し、対象を追加する。
-        const skillIds = this._skills;
-        for (let skillId of skillIds) {
-            const skill = $dataSkills[skillId];
+        const skills = this.skills();
+        for (const skill of skills) {
             if (skill && (skill.passiveStates.length > 0)) {
                 psObjs.push(skill);
             }
         }
+
+        delete this._callPassiveStateObjects;
         return psObjs;
     };
 
