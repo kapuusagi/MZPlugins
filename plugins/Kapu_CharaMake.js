@@ -517,6 +517,18 @@ function Scene_UnregisterActor() {
     };
 
     /**
+     * シーンでのキャラメイク操作が終了したときに呼び出される。
+     * 
+     * Note: ウィンドウ以外のリソースを破棄したい場合に処理を行う。
+     * 
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_CharaMakeItem.prototype.terminateSelection = function(windowEntry) {
+
+    };
+
+    /**
      * 編集中のテキストを得る。
      * 
      * @param {object} windowEntry createSelectWindow()で返したウィンドウ
@@ -1592,6 +1604,11 @@ function Scene_UnregisterActor() {
      */
     Scene_CharaMake.prototype.terminate = function() {
         Scene_MenuBase.prototype.terminate.call(this, ...arguments);
+
+        for (const item of this._items) {
+            const windowEntry = this._windowEntries.find(entry => entry.item === item);
+            item.terminateSelection(windowEntry);
+        }
 
         const actorId = (this._isEditCompleted) ? this._actorId : 0;
         if (!this._isEditCompleted) {
