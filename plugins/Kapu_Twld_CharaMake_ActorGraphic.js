@@ -175,7 +175,7 @@
                 item.battlePicture = item.meta.battlePicture || "";
             }
         }
-        return items;
+        return items.concat();
     };
     const _Game_CharaMakeItem_Visual_startSelectin = Game_CharaMakeItem_Visual.prototype.startSelection;
     /**
