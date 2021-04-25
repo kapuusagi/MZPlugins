@@ -33,13 +33,6 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    // const pluginName = "Kapu_Twld_CharaMake_ActorGraphic";
-    // const parameters = PluginManager.parameters(pluginName);
-
-    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-    //     // TODO : コマンドの処理。
-    //     // パラメータメンバは @argで指定した名前でアクセスできる。
-    // });
     //------------------------------------------------------------------------------
     // Window_CharaMakeVisualSelection
 
