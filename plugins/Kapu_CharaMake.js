@@ -435,16 +435,17 @@ function Scene_UnregisterActor() {
      * キャラクターメイキングアイテムを取得する。
      * 
      * @param {Array<string>} 項目冥配列
+     * @param {Game_Actor} キャラメイク対象のアクター
      * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
-    DataManager.charaMakeItems = function(itemNames) {
+    DataManager.charaMakeItems = function(itemNames, actor) {
         if (this._charaMakeItems == null) {
             this._charaMakeItems = this.createCharaMakeItems();
         }
         if (itemNames && (itemNames.length > 0)) {
             return this._charaMakeItems.filter(item => itemNames.includes(item.name()));
         } else {
-            return this._charaMakeItems;
+            return this._charaMakeItems.concat();
         }
     };
 
@@ -1318,7 +1319,7 @@ function Scene_UnregisterActor() {
         this._tempActor = JsonEx.makeDeepCopy(actor);
         this.createHelpWindow();
         this.createStatusWindow();
-        this._items = DataManager.charaMakeItems(this._itemNames);
+        this._items = DataManager.charaMakeItems(this._itemNames, this._tempActor);
         this.createCharaMakeItemListWindow();
         this.createSelectWindows();
     };
