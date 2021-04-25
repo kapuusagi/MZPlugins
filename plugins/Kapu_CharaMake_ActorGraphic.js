@@ -442,7 +442,9 @@ function Sprite_CharaMake_Picture() {
             characterIndex: actor.characterIndex(),
             faceName: actor.faceName(),
             faceIndex: actor.faceIndex(),
-            battlerName: actor.battlerName()
+            battlerName: actor.battlerName(),
+            note: "",
+            meta: {}
         };
     };
 
