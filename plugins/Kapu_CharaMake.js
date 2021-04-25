@@ -155,6 +155,9 @@
  *   また、キャラクターメイキングを行う際の、設定可能な項目リストお名前として使用される。
  * Game_CharaMakeItem.description() : string
  *   この項目の説明。項目が選択されたとき、ヘルプウィンドウに説明として表示される。
+ * Game_CharaMakeItem.canApply(actor: Game_Actor) : boolean
+ *   この項目がactorに対して適用可能かどうかを取得する。既定の実装ではtrueを返す。
+ *   一部のアクターに適用したくない場合などにfalseを返すように実装できる。
  * Game_CharaMakeItem.editingText(windowEntry:object) : string
  *   現在選択中の設定値文字列を取得するために使用される。
  *   適切な設定値を返す必要がある。
@@ -438,7 +441,7 @@ function Scene_UnregisterActor() {
      * @param {Game_Actor} キャラメイク対象のアクター
      * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
-    DataManager.charaMakeItems = function(itemNames, actor) {
+    DataManager.charaMakeItems = function(itemNames) {
         if (this._charaMakeItems == null) {
             this._charaMakeItems = this.createCharaMakeItems();
         }
@@ -487,6 +490,17 @@ function Scene_UnregisterActor() {
      */
     Game_CharaMakeItem.prototype.description = function() {
         return "";
+    };
+
+    /**
+     * アクターに適用可能な項目かどうかを取得する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_CharaMakeItem.prototype.canApply = function(actor) {
+        return true;
     };
 
     /**
@@ -1125,7 +1139,17 @@ function Scene_UnregisterActor() {
     Window_CharaMakeItemList.prototype.item = function() {
         const index = this.index();
         return ((index >= 0) && (index < this._items.length)) ? this._items[index] : null;
-    }
+    };
+
+    /**
+     * アクターを設定する。
+     * 
+     * @param {Game_Actor} actor アクター
+     */
+    Window_CharaMakeItemList.prototype.setActor = function(actor) {
+        this._actor = actor;
+        this.refresh();
+    };
 
     /**
      * 項目を描画する。
@@ -1136,6 +1160,9 @@ function Scene_UnregisterActor() {
         const rect = this.itemLineRect(index);
         if (index < this._items.length) {
             const item = this._items[index];
+            if (this._actor) {
+                this.changePaintOpacity(item.canApply(this._actor));
+            }
             const labelWidth = (rect.width > 300) ? 120 : (rect.width * 0.4);
             const labelText = item.name() + ":";
             this.drawText(labelText, rect.x, rect.y, labelWidth);
@@ -1145,17 +1172,31 @@ function Scene_UnregisterActor() {
                 const valueText = this._valueGetter(item);
                 this.drawText(valueText, valueX, rect.y, valueWidth);
             }
+            this.changePaintOpacity(true);
         } else {
             if (index === (this._items.length)) {
                 this.drawText(textItemOk, rect.x, rect.y, rect.width, "left");
             }
         }
     };
-
+    /**
+     * 現在の選択が選択可能かどうかを取得する。
+     * 
+     * @return {Boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
+     */
+    Window_CharaMakeItemList.prototype.isCurrentItemEnabled = function() {
+        const index = this.index();
+        if (index < this._items.length) {
+            const item = this._items[index];
+            return item.canApply(this._actor);
+        } else {
+            return true;
+        }
+    };
     /**
      * 選択項目の説明を更新する。
      */
-     Window_CharaMakeItemList.prototype.updateHelp = function() {
+    Window_CharaMakeItemList.prototype.updateHelp = function() {
         Window_Selectable.prototype.updateHelp.call(this);
         if (this._helpWindow !== null) {
             const item = this.item();
@@ -1319,7 +1360,7 @@ function Scene_UnregisterActor() {
         this._tempActor = JsonEx.makeDeepCopy(actor);
         this.createHelpWindow();
         this.createStatusWindow();
-        this._items = DataManager.charaMakeItems(this._itemNames, this._tempActor);
+        this._items = DataManager.charaMakeItems(this._itemNames);
         this.createCharaMakeItemListWindow();
         this.createSelectWindows();
     };
@@ -1440,6 +1481,7 @@ function Scene_UnregisterActor() {
         this._itemWindow.setHandler("ok", this.onItemListOk.bind(this));
         this._itemWindow.setHandler("cancel", this.onItemListCancel.bind(this));
         this._itemWindow.setHelpWindow(this._helpWindow);
+        this._itemWindow.setActor(this._tempActor);
         this.addWindow(this._itemWindow);
     };
 
