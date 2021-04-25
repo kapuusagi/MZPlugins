@@ -525,7 +525,11 @@ function Scene_UnregisterActor() {
     Game_CharaMakeItem.prototype.editingText = function(windowEntry) {
         const window = windowEntry.selectWindow;
         const item = window.item();
-        return item.name;
+        if (item && item.name) {
+            return item.name;
+        } else {
+            return "";
+        }
     };
 
     /**
@@ -1550,24 +1554,37 @@ function Scene_UnregisterActor() {
                 this._itemWindow.activate();
             } else {
                 // 名前が有効なのでメイキング項目を本適用する。
-                const actor = $gameActors.actor(this._actorId);
-                for (const item of this._items) {
-                    const windowEntry = this._windowEntries.find(entry => entry.item === item);
-                    item.apply(windowEntry, actor);
-                }
-                this._isEditCompleted = true;
+                this.onCharaMakeComplete();
                 this.popScene();
             }
         }
     };
 
-
     /**
      * 項目リストでキャンセル操作された時の処理を行う。
      */
     Scene_CharaMake.prototype.onItemListCancel = function() {
-        this._isEditCompleted = false;
+        this.onCharaMakeCancel();
         this.popScene();
+    };
+
+    /**
+     * キャラクターメイキングを完了操作した場合の処理を行う。
+     */
+    Scene_CharaMake.prototype.onCharaMakeComplete = function() {
+        const actor = $gameActors.actor(this._actorId);
+        for (const item of this._items) {
+            const windowEntry = this._windowEntries.find(entry => entry.item === item);
+            item.apply(windowEntry, actor);
+        }
+        this._isEditCompleted = true;
+    };
+
+    /**
+     * キャラクターメイキングをキャンセル操作した場合の処理を行う。
+     */
+    Scene_CharaMake.prototype.onCharaMakeCancel = function() {
+        this._isEditCompleted = false;
     };
 
     /**
