@@ -46,7 +46,6 @@
  * @type number
  * @default 40
  * 
- * 
  * @param spacing
  * @text コンポーネント間幅
  * @desc コンポーネント間のスペース
@@ -110,7 +109,14 @@
  * 
  * 
  * ■ プラグイン開発者向け
- * 
+ * 他のプラグインで使えるように MultiLine_TextInput モジュールを追加した。
+ * 使い方
+ *   (1) MultiLine_TextInputのインスタンスを作成する。
+ *   (2) setHandlerメソッドで "OK" 操作、 "Cancel" 操作の処理を追加する。
+ *   (3) setup()を呼び出し、パラメータを設定する。
+ *   (4) create()を呼び出し、リソースを作成する。
+ *   (5) start()を呼び出し、処理を開始する。
+ *   (6) terminate()を呼び出し、リソースを解放する。
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -125,10 +131,19 @@
  * Version.0.1.0 動作未確認。
  */
 
-function Scene_TextInput() {
+/**
+ * 複数行テキスト入力
+ */
+function MultiLine_TextInput() {
     this.initialize(...arguments);
 }
 
+/**
+ * テキスト入力シーン
+ */
+function Scene_TextInput() {
+    this.initialize(...arguments);
+}
 
 (() => {
     const pluginName = "Kapu_MultiLineInput";
@@ -196,17 +211,12 @@ function Scene_TextInput() {
         return this._editingText;
     };
 
-
     //------------------------------------------------------------------------------
-    // Scene_TextInput
-    Scene_TextInput.prototype = Object.create(Scene_MenuBase.prototype);
-    Scene_TextInput.prototype.constructor = Scene_TextInput;
-
+    // MultiLine_TextInput
     /**
-     * Scene_TextInputを初期化する。
+     * MultiLine_TextInputを初期化する。
      */
-    Scene_TextInput.prototype.initialize = function() {
-        Scene_MenuBase.prototype.initialize.call(this, ...arguments);
+    MultiLine_TextInput.prototype.initialize = function() {
         this._interpreter = null;
         this._textArea = null;
         this._submit = null;
@@ -217,19 +227,21 @@ function Scene_TextInput() {
         this._textAreaHeight = defaultTextAreaHeight;
         this._buttonWidth = defaultButtonWidth;
         this._buttonHeight = defaultButtonHeight;
+
+        this._handlers = {};
     };
 
     /**
-     * シーンの準備をする。
+     * 作成前のパラメータをセットアップする。
      * 
      * @param {Game_Interpreter} interpreter インタプリタオブジェクト
-     * @param {string} text テキスト
-     * @param {number} lineCount 入力行数
+     * @param {string} text デフォルトのテキスト
+     * @param {number} lineCount 行数
      * @param {number} width 幅
-     * @param {number} buttonWidth ボタン幅
-     * @param {number} lineHeight ボタン高さ
+     * @param {number} buttonWidth ボタンの幅
+     * @param {number} lineHeight 行の高さ
      */
-    Scene_TextInput.prototype.prepare = function(interpreter, text, lineCount, width, buttonWidth, lineHeight) {
+    MultiLine_TextInput.prototype.setup = function(interpreter, text, lineCount, width, buttonWidth, lineHeight) {
         this._interpreter = interpreter;
         this._inputText = text || "";
 
@@ -243,21 +255,44 @@ function Scene_TextInput() {
     };
 
     /**
-     * シーンを作成する。
+     * ハンドラを設定する。
+     * 
+     * @param {string} symbol シンボル
+     * @param {function} handler ハンドラ
      */
-    Scene_TextInput.prototype.create = function() {
-        Scene_MenuBase.prototype.create.call(this);
+    MultiLine_TextInput.prototype.setHandler = function(symbol, handler) {
+        this._handlers[symbol] = handler;
+    };
+
+    /**
+     * ハンドラを呼び出す
+     * 
+     * @param {string} symbol シンボル
+     */
+    MultiLine_TextInput.prototype.callHandler = function(symbol) {
+        if (this._handlers[symbol]) {
+            this._handlers[symbol]();
+        }
+    };
+    
+
+    /**
+     * 作成する。
+     */
+    MultiLine_TextInput.prototype.create = function() {
         this.createTextArea();
         this.createSubmitButton();
         this.createCancelButton();
         this._resizeEvent = this.onScreenResize.bind(this);
         window.addEventListener("resize", this._resizeEvent, false);
+
+        this.hide();
     };
 
     /**
      * テキスト領域を作成する。
      */
-    Scene_TextInput.prototype.createTextArea = function() {
+    MultiLine_TextInput.prototype.createTextArea = function() {
         this._textArea = document.createElement("textarea");
         this._textArea.setAttribute("id", "_111_input");
         // this._textArea.setAttribute("cols", 32);
@@ -276,7 +311,7 @@ function Scene_TextInput() {
     /**
      * OKボタンを作成する。
      */
-    Scene_TextInput.prototype.createSubmitButton = function() {
+    MultiLine_TextInput.prototype.createSubmitButton = function() {
         this._submit = document.createElement("input");
         this._submit.setAttribute("type", "submit");
         this._submit.setAttribute("id", "_111_submit");
@@ -289,7 +324,7 @@ function Scene_TextInput() {
     /**
      * キャンセルボタンを作成する。
      */
-    Scene_TextInput.prototype.createCancelButton = function() {
+    MultiLine_TextInput.prototype.createCancelButton = function() {
         this._cancel = document.createElement("input");
         this._cancel.setAttribute("type", "submit");
         this._cancel.setAttribute("id", "_111_submit");
@@ -299,52 +334,45 @@ function Scene_TextInput() {
         this._cancel.addEventListener("click", this.onCancelClick.bind(this));
     };
 
-    /**
-     * 背景を作成する。
-     * 
-     * Note: シーン切り替えによる、背景ぼかしを行わないために変更する。
-     */
-    Scene_TextInput.prototype.createBackground = function() {
-        this._backgroundFilter = new PIXI.filters.BlurFilter();
-        this._backgroundSprite = new Sprite();
-        this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
-        this._backgroundSprite.filters = [];
-        this.addChild(this._backgroundSprite);
-        this.setBackgroundOpacity(192);
-    };
 
     /**
-     * シーンを開始する。
+     * 入力を開始する
      */
-    Scene_TextInput.prototype.start = function() {
-        Scene_MenuBase.prototype.start.call(this);
-
-        $gameTemp.setEditingText("");
-
+    MultiLine_TextInput.prototype.start = function() {
         this._textArea.value = this._inputText;
         this._timerCounter = 0;
         this._textArea.focus();
-        this._interpreter.setWaitMode("input_form");
+        if (this._interpreter) {
+            this._interpreter.setWaitMode("input_form");
+        }
         Input.clear();
         Input.form_mode = true;
+        this.show();
+    };
+
+    /**
+     * 表示する
+     */
+    MultiLine_TextInput.prototype.show = function() {
+        this._textArea.hidden = false;
+        this._submit.hidden = false;
+        this._cancel.hidden = false;
         this.updatePlace();
     };
 
     /**
-     * 更新する。
+     * 非表示にする
      */
-    Scene_TextInput.prototype.update = function() {
-        // Scene_MenuBase.prototype.update.call(this);
-        // this._timerCounter++;
-        // if (this._timerCounter >= 180) {
-        //     this.popScene();
-        // }
+    MultiLine_TextInput.prototype.hide = function() {
+        this._textArea.hidden = true;
+        this._submit.hidden = true;
+        this._cancel.hidden = true;
     };
 
     /**
      * 位置を更新する。
      */
-    Scene_TextInput.prototype.updatePlace = function() {
+    MultiLine_TextInput.prototype.updatePlace = function() {
         const _canvas = document.getElementById('UpperCanvas') || document.getElementById('gameCanvas');
         const rect = _canvas.getBoundingClientRect();
         const screen_x = rect.left;
@@ -389,7 +417,7 @@ function Scene_TextInput() {
      * @param {number} height 要素の高さ
      * @param {number} font_size フォントサイズ
      */
-    Scene_TextInput.prototype.setPosition = function(element, screen_x, screen_y, x, y, width, height, font_size) {
+    MultiLine_TextInput.prototype.setPosition = function(element, screen_x, screen_y, x, y, width, height, font_size) {
         element.style.position = "absolute";
         element.style.left = screen_x + x * Graphics._realScale + "px";
         element.style.top  = screen_y + y * Graphics._realScale + "px";
@@ -401,10 +429,59 @@ function Scene_TextInput() {
     };
 
     /**
-     * シーン終了時の処理を行う。
+     * 画面がリサイズされたときの処理を行う。
      */
-    Scene_TextInput.prototype.terminate = function() {
-        Scene_MenuBase.prototype.terminate.call(this);
+    MultiLine_TextInput.prototype.onScreenResize = function() {
+        this.updatePlace();
+    };
+
+    /**
+     * イベント処理を中止するためのコールバック
+     * 
+     * @param {object} event イベントオブジェクト
+     */
+     MultiLine_TextInput.prototype.stopPropagation = function(event) {
+        event.stopPropagation();
+    };
+
+    /**
+     * 確定ボタンがクリックされたときの処理を行う。
+     * 
+     * @returns {boolean} 
+     */
+    MultiLine_TextInput.prototype.onOkClick = function() {
+        this._inputText = this._textArea.value;
+        this.callHandler("ok");
+        this.hide();
+        if (this._interpreter) {
+            this._interpreter.setWaitMode("");
+        }
+        Input.form_mode = false;
+
+        return false;
+    };
+
+    /**
+     * キャンセルボタンがクリックされたときの処理を行う。
+     * 
+     * @returns {boolean} 
+     */
+    MultiLine_TextInput.prototype.onCancelClick = function() {
+        this._inputText = "";
+        this.callHandler("cancel");
+        this.hide();
+        if (this._interpreter) {
+            this._interpreter.setWaitMode("");
+        }
+        Input.form_mode = false;
+        return false;
+    };
+
+
+    /**
+     * 終了処理する。
+     */
+    MultiLine_TextInput.prototype.terminate = function() {
         if (this._textArea) {
             this._textArea.remove();
             this._textArea = null;
@@ -421,50 +498,121 @@ function Scene_TextInput() {
             window.removeEventListener("resize", this._resizeEvent, false);
             this._resizeEvent = null;
         }
-        if (this._interpreter) {
-            this._interpreter.setWaitMode("");
+    };
+
+    /**
+     * テキストを設定する。
+     * 
+     * @param {string} text テキスト
+     */
+    MultiLine_TextInput.prototype.setText = function(text) {
+        this._inputText = text;
+        if (this._textArea) {
+            this._textArea.value = text;
         }
-        Input.form_mode = false;
     };
 
     /**
-     * 画面がリサイズされたときの処理を行う。
-     */
-    Scene_TextInput.prototype.onScreenResize = function() {
-        this.updatePlace();
-    };
-
-    /**
-     * イベント処理を中止するためのコールバック
+     * 入力されたテキスト
      * 
-     * @param {object} event イベントオブジェクト
+     * @returns {string} テキスト
      */
-    Scene_TextInput.prototype.stopPropagation = function(event) {
-        event.stopPropagation();
+    MultiLine_TextInput.prototype.text = function() {
+        return this._inputText;
+    };
+
+
+    //------------------------------------------------------------------------------
+    // Scene_TextInput
+    Scene_TextInput.prototype = Object.create(Scene_MenuBase.prototype);
+    Scene_TextInput.prototype.constructor = Scene_TextInput;
+
+    /**
+     * Scene_TextInputを初期化する。
+     */
+    Scene_TextInput.prototype.initialize = function() {
+        Scene_MenuBase.prototype.initialize.call(this, ...arguments);
+        this._multiLine_TextInput = new MultiLine_TextInput();
     };
 
     /**
-     * 確定ボタンがクリックされたときの処理を行う。
+     * シーンの準備をする。
      * 
-     * @returns {boolean} 
+     * @param {Game_Interpreter} interpreter インタプリタオブジェクト
+     * @param {string} text テキスト
+     * @param {number} lineCount 入力行数
+     * @param {number} width 幅
+     * @param {number} buttonWidth ボタン幅
+     * @param {number} lineHeight ボタン高さ
      */
-    Scene_TextInput.prototype.onOkClick = function() {
-        const value = this._textArea.value;
-        $gameTemp.setEditingText(value);
+    Scene_TextInput.prototype.prepare = function(interpreter, text, lineCount, width, buttonWidth, lineHeight) {
+        this._multiLine_TextInput.setup(interpreter, text, lineCount, width, buttonWidth, lineHeight);
+    };
+
+    /**
+     * シーンを作成する。
+     */
+    Scene_TextInput.prototype.create = function() {
+        Scene_MenuBase.prototype.create.call(this);
+        this._multiLine_TextInput.create();
+        this._multiLine_TextInput.setHandler("ok", this.onInputOk.bind(this));
+        this._multiLine_TextInput.setHandler("cancel", this.onInputCancel.bind(this));
+    };
+
+    /**
+     * 背景を作成する。
+     * 
+     * Note: シーン切り替えによる、背景ぼかしを行わないために変更する。
+     */
+    Scene_TextInput.prototype.createBackground = function() {
+        this._backgroundFilter = new PIXI.filters.BlurFilter();
+        this._backgroundSprite = new Sprite();
+        this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
+        this._backgroundSprite.filters = [];
+        this.addChild(this._backgroundSprite);
+        this.setBackgroundOpacity(192);
+    };
+
+    /**
+     * シーンを開始する。
+     */
+    Scene_TextInput.prototype.start = function() {
+        Scene_MenuBase.prototype.start.call(this);
+        $gameTemp.setEditingText("");
+        this._multiLine_TextInput.start();
+    };
+
+    /**
+     * 更新する。
+     */
+    Scene_TextInput.prototype.update = function() {
+        // Scene_MenuBase.prototype.update.call(this);
+    };
+
+    /**
+     * 入力OK操作されたときの処理を行う。
+     */
+    Scene_TextInput.prototype.onInputOk = function() {
+        $gameTemp.setEditingText(this._multiLine_TextInput.text());
         this.popScene();
-        return false;
     };
 
     /**
-     * キャンセルボタンがクリックされたときの処理を行う。
-     * 
-     * @returns {boolean} 
+     * 入力キャンセル操作されたときの処理を行う。
      */
-    Scene_TextInput.prototype.onCancelClick = function() {
+    Scene_TextInput.prototype.onInputCancel = function() {
         $gameTemp.setEditingText("");
         this.popScene();
-        return false;
     };
+
+    /**
+     * シーン終了時の処理を行う。
+     */
+    Scene_TextInput.prototype.terminate = function() {
+        Scene_MenuBase.prototype.terminate.call(this);
+        this._multiLine_TextInput.terminate();
+    };
+
 
     //------------------------------------------------------------------------------
     // TODO : メソッドフック
