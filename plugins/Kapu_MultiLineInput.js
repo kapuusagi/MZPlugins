@@ -391,8 +391,8 @@ function Scene_TextInput() {
     MultiLine_TextInput.prototype.updatePlace = function() {
         const _canvas = document.getElementById('UpperCanvas') || document.getElementById('gameCanvas');
         const rect = _canvas.getBoundingClientRect();
-        const screen_x = rect.left;
-        const screen_y = rect.top;
+        const screenX = rect.left;
+        const screenY = rect.top;
 
         const totalHeight = this._textAreaHeight + this._buttonHeight + spacing;
 
@@ -406,40 +406,40 @@ function Scene_TextInput() {
         const maxHeight = textAreaHeight + spacing + buttonHeight;
         const textAreaX = (Graphics.boxWidth - maxWidth) / 2;
         const textAreaY = (Graphics.boxHeight - maxHeight) / 2;
-        this.setPosition(this._textArea, screen_x, screen_y, textAreaX, textAreaY, textAreaWidth, textAreaHeight, fontSize);
+        this.setPosition(this._textArea, screenX, screenY, textAreaX, textAreaY, textAreaWidth, textAreaHeight, fontSize);
 
         const submitX = (textAreaX + textAreaWidth) - (buttonWidth + spacing + buttonWidth);
         const submitY = textAreaY + textAreaHeight + spacing;
         const submitWidth = buttonWidth;
         const submitHeight = buttonHeight;
-        this.setPosition(this._submit, screen_x, screen_y, submitX, submitY, submitWidth, submitHeight, fontSize);
+        this.setPosition(this._submit, screenX, screenY, submitX, submitY, submitWidth, submitHeight, fontSize);
         
         const cancelX = (textAreaX + textAreaWidth) - buttonWidth;
         const cancelY = textAreaY + textAreaHeight + spacing;
         const cancelWidth = buttonWidth;
         const cancelHeight = buttonHeight;
-        this.setPosition(this._cancel, screen_x, screen_y, cancelX, cancelY, cancelWidth, cancelHeight, fontSize);
+        this.setPosition(this._cancel, screenX, screenY, cancelX, cancelY, cancelWidth, cancelHeight, fontSize);
     };
 
     /**
      * 位置を設定する。
      * 
      * @param {HTMLElement} element HTML要素
-     * @param {number} screen_x スクリーン位置x
-     * @param {number} screen_y スクリーン位置y
+     * @param {number} screenX スクリーン位置x
+     * @param {number} screenY スクリーン位置y
      * @param {number} x 要素を配置するx位置
      * @param {number} y 要素を配置するy位置
      * @param {number} width 要素の幅
      * @param {number} height 要素の高さ
-     * @param {number} font_size フォントサイズ
+     * @param {number} fontSize フォントサイズ
      */
-    MultiLine_TextInput.prototype.setPosition = function(element, screen_x, screen_y, x, y, width, height, font_size) {
+    MultiLine_TextInput.prototype.setPosition = function(element, screenX, screenY, x, y, width, height, fontSize) {
         element.style.position = "absolute";
-        element.style.left = screen_x + x * Graphics._realScale + "px";
-        element.style.top  = screen_y + y * Graphics._realScale + "px";
+        element.style.left = screenX + x * Graphics._realScale + "px";
+        element.style.top  = screenY + y * Graphics._realScale + "px";
         element.style.width = width * Graphics._realScale + "px";
         element.style.height = height * Graphics._realScale + "px";
-        element.style.fontSize = font_size * Graphics._realScale + "px";
+        element.style.fontSize = fontSize * Graphics._realScale + "px";
         element.style.maxWidth =  "calc(100% - " + element.style.left + ")";
         element.style.maxHeight = "calc(100% - " + element.style.top + ")";
     };
