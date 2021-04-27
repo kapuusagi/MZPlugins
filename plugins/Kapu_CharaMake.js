@@ -38,6 +38,11 @@
  * @type string[]
  * @default 
  * 
+ * @arg isRecoverAtComplete
+ * @text 完了時全快させる
+ * @desc 完了時にメイキングしたアクターを全快させるかどうか。
+ * @type boolean
+ * @default false
  * 
  * @command selectRegisteredActor
  * @text 登録済みアクター選択
@@ -376,20 +381,22 @@ function Scene_UnregisterActor() {
                 : (args.isCancelable == "true");
         const itemNames = _parseItemNames(args.itemNames);
         const targetActorId = _getTargetActorId(args);
+        const isRecoverAtComplete = (typeof args.isRecoverAtComplete === "undefined")
+                ? false : (args.isRecoverAtComplete === "true");
         if (targetActorId > 0) {
             const actorId = targetActorId;
             if (actorId < $dataActors.length) {
                 // アクター指定ありで有効なアクターID
                 const isModify = $gameActors.isActorDataExists(actorId);
                 SceneManager.push(Scene_CharaMake);
-                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, isModify);
+                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, isModify, isRecoverAtComplete);
             }
         } else {
             const actorId = $gameActors.registableActorId();
             if (actorId > 0) {
                 const isModify = false;
                 SceneManager.push(Scene_CharaMake);
-                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, isModify);
+                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, isModify, isRecoverAtComplete);
             } else {
                 // 空きエントリが無い
                 $gameMessage.add(textMaxRegistered);
@@ -1341,6 +1348,7 @@ function Scene_UnregisterActor() {
         this._storeVariableId = 0;
         this._itemNames = [];
         this._windowEntries = [];
+        this._isRecoverAtComplete = false;
     };
 
     /**
@@ -1351,13 +1359,15 @@ function Scene_UnregisterActor() {
      * @param {boolean} isCancelable キャンセル可能かどうか
      * @param {Array<string>} itemNames 選択可能項目
      * @param {boolean} isModify 既存データを変更する操作かどうか。
+     * @param {boolean} isRecoverAtComplete キャラメイク完了時、全快させるかどうか。
      */
-    Scene_CharaMake.prototype.prepare = function(actorId, storeVariableId, isCancelable, itemNames, isModify) {
+    Scene_CharaMake.prototype.prepare = function(actorId, storeVariableId, isCancelable, itemNames, isModify, isRecoverAtComplete) {
         this._actorId = actorId;
         this._storeVariableId = storeVariableId;
         this._isCancelEnabled = isCancelable;
         this._itemNames = itemNames;
         this._isModify = isModify;
+        this._isRecoverAtComplete = isRecoverAtComplete;
     };
 
     /**
@@ -1640,10 +1650,14 @@ function Scene_UnregisterActor() {
      * キャラクターメイキングを完了操作した場合の処理を行う。
      */
     Scene_CharaMake.prototype.onCharaMakeComplete = function() {
+        // 正式なアクターデータに本適用する。
         const actor = $gameActors.actor(this._actorId);
         for (const item of this._items) {
             const windowEntry = this._windowEntries.find(entry => entry.item === item);
             item.apply(windowEntry, actor);
+        }
+        if (this._isRecoverAtComplete) {
+            actor.recoverAll();
         }
         this._isEditCompleted = true;
     };
