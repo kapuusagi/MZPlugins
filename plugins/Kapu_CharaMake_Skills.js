@@ -9,7 +9,7 @@
  * @param itemLists
  * @text 選択項目セット
  * @description 1セットあたり、1つの選択項目になる。
- * @type struct<CharaMakeSkillSelecter>[]
+ * @type struct<CharaMakeSkillSetGroup>[]
  * 
  * @help 
  * キャラメイク時にスキルセットを選択して習得できるようにするプラグイン。
@@ -21,6 +21,10 @@
  * ■ プラグイン開発者向け
  * 特になし。
  * 
+ * Game_Actor
+ *    +- CharaMakeSkillSetGroup[N]
+ *           +- CharaMakeSkillSet[N] ここから選択する。
+ * 
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -31,7 +35,7 @@
  * ============================================
  * Version.0.1.0 動作未確認。
  */
-/*~struct~CharaMakeSkillSelecter:
+/*~struct~CharaMakeSkillSetGroup:
  *
  * @param name
  * @text 選択項目名
@@ -90,14 +94,14 @@ function Game_CharaMakeItem_Skills() {
     const pluginName = "Kapu_CharaMake_Skills";
     const parameters = PluginManager.parameters(pluginName);
 
-    const skillSelectionSets = [];
+    const charaMakeSkillSetGroups = [];
     try {
-        const charaMakeItemLists = JSON.parse(parameters["itemLists"]).map(str => JSON.parse(str));
-        for (const charaMakeItemList of charaMakeItemLists) {
-            charaMakeItemList.isSelectableAtFirst = (typeof charaMakeItemList.isSelectableAtFirst === "undefined")
-                    ? true : (charaMakeItemList.isSelectableAtFirst === "true");
-            if (charaMakeItemList.skillSets) {
-                const skillSets = JSON.parse(charaMakeItemList.skillSets).map(str => JSON.parse(str));
+        const groups = JSON.parse(parameters["itemLists"]).map(str => JSON.parse(str));
+        for (const group of groups) {
+            group.isSelectableAtFirst = (typeof group.isSelectableAtFirst === "undefined")
+                    ? true : (group.isSelectableAtFirst === "true");
+            if (group.skillSets) {
+                const skillSets = JSON.parse(group.skillSets).map(str => JSON.parse(str));
                 for (const skillSet of skillSets) {
                     if (skillSet.skills) {
                         skillSet.skills = JSON.parse(skillSet.skills).map(str => Number(str));
@@ -105,11 +109,11 @@ function Game_CharaMakeItem_Skills() {
                         skillSet.skills = [];
                     }
                 }
-                charaMakeItemList.skillSets = skillSets;
+                group.skillSets = skillSets;
             } else {
-                charaMakeItemList.skillSets = [];
+                group.skillSets = [];
             }
-            skillSelectionSets.push(charaMakeItemList);
+            charaMakeSkillSetGroups.push(group);
         }
         console.log("");
     }
@@ -128,72 +132,77 @@ function Game_CharaMakeItem_Skills() {
      */
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
-        for (let i = 0; i < skillSelectionSets.length; i++) {
-            const skillSelectionSet = skillSelectionSets[i];
-            items.push(new Game_CharaMakeItem_Skills(i, skillSelectionSet));
+        for (let groupNo = 0; groupNo < charaMakeSkillSetGroups.length; groupNo++) {
+            items.push(new Game_CharaMakeItem_Skills(groupNo));
         }
         return items;
     };
     //------------------------------------------------------------------------------
-    // Game_Temp
-    const _Game_Temp_initialize = Game_Temp.prototype.initialize;
+    // Game_Actor
+    const _Game_Actor_initMembers = Game_Actor.prototype.initMembers;
     /**
-     * Game_Tempを初期化する。
+     * Game_Actorのパラメータを初期化する。
      */
-    Game_Temp.prototype.initialize = function() {
-        _Game_Temp_initialize.call(this);
-        this._charaMakeSelectingSkills = [];
-    };
-    /**
-     * キャラクターメイキングのスキルセット中の選択インデックス。
-     * 
-     * @param {number} no スキルセット番号
-     * @returns {number} スキルセット中の選択インデックス
-     */
-    Game_Temp.prototype.charaMakeSelectingSkill = function(no) {
-        return this._charaMakeSelectingSkills[no] || 0;
-    };
-    /**
-     * キャラクターメイキングのスキルセット中の選択インデックスを設定する。
-     * 
-     * @param {number} no スキルセット番号
-     * @param {number} index スキルセット中の選択インデックス
-     */
-    Game_Temp.prototype.setCharaMakeSelectingSkill = function(no, index) {
-        this._charaMakeSelectingSkills[no] = index;
+    Game_Actor.prototype.initMembers = function() {
+        _Game_Actor_initMembers.call(this);
+        this._selectedSkillSet = [];
     };
 
-    //------------------------------------------------------------------------------
-    // Scene_CharaMake
-    const _Scene_CharaMake_start = Scene_CharaMake.prototype.start;
     /**
-     * シーンを開始する。
+     * groupNoで選択されているスキルセット番号を得る。
+     * 
+     * @param {number} groupNo スキルセットグループ番号
+     * @returns スキルセット番号
      */
-    Scene_CharaMake.prototype.start = function() {
-        _Scene_CharaMake_start.call(this);
-        for (let i = 0; i < skillSelectionSets.length; i++) {
-            $gameTemp.setCharaMakeSelectingSkill(i, -1);
+    Game_Actor.prototype.skillSetNo = function(groupNo) {
+        return this._selectedSkillSet[groupNo] || -1;
+    };
+
+    /**
+     * groupNoで選択されているスキルセット番号をnoに設定する。
+     * 
+     * @param {number} groupNo スキルセットグループ番号
+     * @param {number} no スキルセット番号
+     */
+    Game_Actor.prototype.setSkillSetNo = function(groupNo, no) {
+        this._selectedSkills[groupNo] = no;
+        this.refresh();
+    }
+
+    /**
+     * groupNoで選択されているスキルセットを得る。
+     * 
+     * @param {number} groupNo スキルセットグループ番号
+     * @returns {Array<DataSkill>} スキル配列
+     */
+    Game_Actor.prototype.skillSetSkills = function(groupNo) {
+        const no = this.skillSetNo(groupNo);
+        if ((no >= 0) && (no < charaMakeSkillSetGroups[groupNo].skillSets.length)) {
+            return charaMakeSkillSetGroups[groupNo].skillSets.map(id => $dataSkills[id]);
+        } else {
+            return [];
         }
     };
 
-    const _Scene_CharaMake_onCharaMakeComplete = Scene_CharaMake.prototype.onCharaMakeComplete;
+    const _Game_Actor_skills = Game_Actor.prototype.skills;
     /**
-     * キャラクターメイキングを完了操作した場合の処理を行う。
+     * アクターが使用可能なスキル一覧を得る。
+     * Traitによって追加されているスキルも含まれる。
+     * 
+     * @return {Array<DataSkill>} スキル一覧
      */
-    Scene_CharaMake.prototype.onCharaMakeComplete = function() {
-        const actor = $gameActors.actor(this._actorId);
-        /* アクターにスキルを適用する */
-        for (let i = 0; i < skillSelectionSets.length; i++) {
-            const skillSelection = skillSelectionSets[i];
-            const selectedIndex = $gameTemp.charaMakeSelectingSkill(i);
-            if ((selectedIndex >= 0) && (selectedIndex < skillSelection.skillSets.length)) {
-                const skillIds = skillSelection.skillSets[selectedIndex].skills;
-                for (const skillId of skillIds) {
-                    actor.learnSkill(skillId);
+    Game_Actor.prototype.skills = function() {
+        const skills = _Game_Actor_skills.call(this);
+        for (let groupNo = 0; groupNo < charaMakeSkillSetGroups.length; groupNo++) {
+            const selectedSkills = this.skillSetSkills(groupNo);
+            for (const skill of selectedSkills) {
+                if (skill && !skills.includes(skill)) {
+                    skills.push(skill);
                 }
             }
         }
-        _Scene_CharaMake_onCharaMakeComplete.call(this);
+
+        return skills;
     };
     //------------------------------------------------------------------------------
     // Game_CharaMakeItem_Skills
@@ -203,12 +212,11 @@ function Game_CharaMakeItem_Skills() {
     /**
      * Game_CharaMakeItem_Skills を初期化する。
      * 
-     * @param {number} スキルセット番号
-     * @param {CharaMakeSkillSelecter} skillSelectionSet スキル選択セット
+     * @param {number} スキルセットグループ番号
      */
-    Game_CharaMakeItem_Skills.prototype.initialize = function(no, skillSelectionSet) {
-        this._skillSetNo = no;
-        this._skillSelectionSet = skillSelectionSet;
+    Game_CharaMakeItem_Skills.prototype.initialize = function(groupNo) {
+        this._groupNo = groupNo;
+        this._skillSelectionSet = charaMakeSkillSetGroups[groupNo];
         Game_CharaMakeItem.prototype.initialize.call(this, ...arguments);
     };
 
@@ -218,7 +226,8 @@ function Game_CharaMakeItem_Skills() {
      * @return {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Skills.prototype.name = function() {
-        return this._skillSelectionSet.name || "";
+        const group =  this.skillSetGroup();
+        return group.name || "";
     };
     /**
      * この項目の説明を取得する。
@@ -226,7 +235,8 @@ function Game_CharaMakeItem_Skills() {
      * @return {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Skills.prototype.description = function() {
-        return this._skillSelectionSet.description || "";
+        const group =  this.skillSetGroup();
+        return group.description || "";
     };
 
     /**
@@ -238,7 +248,8 @@ function Game_CharaMakeItem_Skills() {
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Skills.prototype.canApply = function(actor, isModify) {
-        return !isModify || this._skillSelectionSet.isSelectableAtFirst;
+        const group =  this.skillSetGroup();
+        return !isModify || group.isSelectableAtFirst;
     };
 
     /**
@@ -253,9 +264,9 @@ function Game_CharaMakeItem_Skills() {
     Game_CharaMakeItem_Skills.prototype.setCurrent = function(windowEntry, actor) {
         const selectWindow = windowEntry.selectWindow;
         const items = selectWindow.items();
-        const selectedIndex = $gameTemp.charaMakeSelectingSkill(this._skillSetNo);
-        if (selectedIndex < items.length) {
-            selectWindow.select(selectedIndex);
+        const no = actor.skillSetNo(this._groupNo);
+        if ((no >= 0) && (no < items.length)) {
+            selectWindow.select(no);
         }
     };
 
@@ -268,16 +279,25 @@ function Game_CharaMakeItem_Skills() {
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Skills.prototype.apply = function(windowEntry, actor) {
         const selectWindow = windowEntry.selectWindow;
-        const selectedIndex = selectWindow.index();
-        $gameTemp.setCharaMakeSelectingSkill(this._skillSetNo, selectedIndex);
+        actor.setSkillSetNo(selectWindow.index());
     };
 
     /**
-     * アイテム一覧を得る。
+     * 項目一覧を得る。
      * 
-     * @return {Array<object>} アイテム一覧
+     * @return {Array<object>} 項目一覧
      */
     Game_CharaMakeItem_Skills.prototype.items = function() {
-        return this._skillSelectionSet.skillSets.concat();
+        const group =  this.skillSetGroup();
+        return group.skillSets.concat();
     };
+
+    /**
+     * スキルセットグループを得る。
+     * 
+     * @returns {CharaMakeSkillSetGroup} スキルセットグループ
+     */
+    Game_CharaMakeItem_Skills.prototype.skillSetGroup = function() {
+        return charaMakeSkillSetGroups[this._groupNo];
+    }
 })();
