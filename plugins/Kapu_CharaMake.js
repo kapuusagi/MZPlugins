@@ -110,6 +110,13 @@
  * @type string
  * @default 名前を変更します。
  * 
+ * @param isSelectableAtFirst
+ * @text 初期時のみ名前を編集可能とする
+ * @desc 初回作成時のみ名前を編集可能にする場合にはtrueにします。
+ * @type boolean
+ * @default true
+ * 
+ * 
  * @param textItemOk
  * @text OKテキスト
  * @type string
@@ -332,6 +339,8 @@ function Scene_UnregisterActor() {
     const textItemDescriptionName = parameters["textItemDescriptionName"] || "Change actor name.";
     const textItemOk = parameters["textItemOk"] || "登録";
     const maxNameLength = Number(parameters["maxNameLength"]) || 8;
+    const isSelectableAtFirst = (typeof parameters["isSelectableAtFirst"] === "undefined")
+            ? true : (parameters["isSelectableAtFirst"] === "true");
 
     /**
      * 対象のアクターIDを得る。
@@ -686,6 +695,18 @@ function Scene_UnregisterActor() {
      */
     Game_CharaMakeItem_Name.prototype.description = function() {
         return textItemDescriptionName;
+    };
+
+    /**
+     * アクターに適用可能な項目かどうかを取得する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
+     * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_CharaMakeItem_Name.prototype.canApply = function(actor, isModify) {
+        return !isModify || isSelectableAtFirst;
     };
     /**
      * 編集中のテキストを得る。
