@@ -40,10 +40,12 @@
  * 
  * 新規マップフィルタプラグインを追加する際に便利に使えるようにするためのマネージャ。
  * 
- * MapFilterManager.registerFilter(filterName:string, constructionMethod:function) : void
+ * MapFilterManager.registerFilter(filterName:string, constructionMethod:function, saveProperties : Array<string>) : void
  *     新しいマップフィルタを追加する。
  *     registerFilter()をコールした時点で、インスタンスが生成される。
  *     既に同名のフィルタが登録済みの場合には上書きされる。
+ *     savePropertiesに渡したプロパティ名配列はセーブファイルに保存される。
+ *     保存するパラメータが無いならば空の配列を渡す。
  * 
  * MapFilterManager.filter(filterName:string):Filter
  *     指定したフィルタのインスタンスを得る。
