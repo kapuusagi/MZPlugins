@@ -6,6 +6,12 @@
  * @base Kapu_CharaMake
  * @orderAfter Kapu_CharaMake
  * 
+ * @param isSelectableAtFirst
+ * @text 初期時のみ選択可能とする
+ * @desc 初回作成時のみ選択可能にする場合にはtrueにします。
+ * @type boolean
+ * @default true
+ * 
  * @param textItemNameClass
  * @text クラス名選択項目テキスト
  * @description キャラクターメイキング項目一覧で、クラスに相当する選択項目として表示されるテキスト
@@ -65,6 +71,8 @@ function Game_CharaMakeItem_Class() {
     const parameters = PluginManager.parameters(pluginName);
     const textItemNameClass = parameters["textItemNameClass"] || "Class";
     const textItemDescriptionClass = parameters["textItemDescriptionClass"] || "Select classs.";
+    const isSelectableAtFirst = (typeof parameters["isSelectableAtFirst"] === "undefined")
+            ? true : (parameters["isSelectableAtFirst"] === "true");
     //------------------------------------------------------------------------------
     // DataManager
     const _DataManager_createCharaMakeItems = DataManager.createCharaMakeItems;
@@ -107,6 +115,19 @@ function Game_CharaMakeItem_Class() {
     Game_CharaMakeItem_Class.prototype.description = function() {
         return textItemDescriptionClass;
     };
+
+    /**
+     * アクターに適用可能な項目かどうかを取得する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
+     * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_CharaMakeItem_Class.prototype.canApply = function(actor, isModify) {
+        return !isModify || isSelectableAtFirst;
+    };
+
     /**
      * 現在のアクターの情報を反映させる
      * 

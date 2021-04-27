@@ -45,6 +45,12 @@
  * @type string
  * @default スキルセットを選択します。
  *
+ * @param isSelectableAtFirst
+ * @text 初期時のみ選択可能とする
+ * @desc 初回作成時のみ選択可能にする場合にはtrueにします。
+ * @type boolean
+ * @default true
+ * 
  * @param skillSets
  * @text 選択可能な項目
  * @description この選択項目で選択可能なスキルセット
@@ -88,6 +94,8 @@ function Game_CharaMakeItem_Skills() {
     try {
         const charaMakeItemLists = JSON.parse(parameters["itemLists"]).map(str => JSON.parse(str));
         for (const charaMakeItemList of charaMakeItemLists) {
+            charaMakeItemList.isSelectableAtFirst = (typeof charaMakeItemList.isSelectableAtFirst === "undefined")
+                    ? true : (charaMakeItemList.isSelectableAtFirst === "true");
             if (charaMakeItemList.skillSets) {
                 const skillSets = JSON.parse(charaMakeItemList.skillSets).map(str => JSON.parse(str));
                 for (const skillSet of skillSets) {
@@ -220,6 +228,19 @@ function Game_CharaMakeItem_Skills() {
     Game_CharaMakeItem_Skills.prototype.description = function() {
         return this._skillSelectionSet.description || "";
     };
+
+    /**
+     * アクターに適用可能な項目かどうかを取得する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
+     * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_CharaMakeItem_Skills.prototype.canApply = function(actor, isModify) {
+        return !isModify || this._skillSelectionSet.isSelectableAtFirst;
+    };
+
     /**
      * 現在のアクターの情報を反映させる
      * 

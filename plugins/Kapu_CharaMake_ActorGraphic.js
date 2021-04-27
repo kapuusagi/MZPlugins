@@ -6,6 +6,12 @@
  * @base Kapu_CharaMake
  * @orderAfter Kapu_CharaMake
  * 
+ * @param isSelectableAtFirst
+ * @text 初期時のみ選択可能とする
+ * @desc 初回作成時のみ選択可能にする場合にはtrueにします。
+ * @type boolean
+ * @default true
+ * 
  * @param textItemNameGraphic
  * @text グラフィック名選択項目テキスト
  * @description キャラクターメイキング項目一覧で、グラフィックに相当する選択項目として表示されるテキスト
@@ -149,6 +155,8 @@ function Sprite_CharaMake_Picture() {
     const textItemNameGraphic = parameters["textItemNameGraphic"] || "Graphic";
     const textItemDescriptionGraphic = parameters["textItemDescriptionGraphic"] || "Select graphic.";
     const textItemNameDefault = parameters["textItemNameDefault"] || "default";
+    const isSelectableAtFirst = (typeof parameters["isSelectableAtFirst"] === "undefined")
+            ? true : (parameters["isSelectableAtFirst"] === "true");
     const graphicItems = [];
     try {
         const entries = JSON.parse(parameters["charaMakeItems"]).map(str => JSON.parse(str));
@@ -374,7 +382,17 @@ function Sprite_CharaMake_Picture() {
     Game_CharaMakeItem_Visual.prototype.description = function() {
         return textItemDescriptionGraphic;
     };
-
+    /**
+     * アクターに適用可能な項目かどうかを取得する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
+     * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_CharaMakeItem_Visual.prototype.canApply = function(actor, isModify) {
+        return !isModify || isSelectableAtFirst;
+    };
     /**
      * 選択・編集用のウィンドウを作成する。
      * 

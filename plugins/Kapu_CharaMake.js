@@ -155,7 +155,7 @@
  *   また、キャラクターメイキングを行う際の、設定可能な項目リストお名前として使用される。
  * Game_CharaMakeItem.description() : string
  *   この項目の説明。項目が選択されたとき、ヘルプウィンドウに説明として表示される。
- * Game_CharaMakeItem.canApply(actor: Game_Actor) : boolean
+ * Game_CharaMakeItem.canApply(actor: Game_Actor, isModify:boolean) : boolean
  *   この項目がactorに対して適用可能かどうかを取得する。既定の実装ではtrueを返す。
  *   一部のアクターに適用したくない場合などにfalseを返すように実装できる。
  * Game_CharaMakeItem.editingText(windowEntry:object) : string
@@ -380,16 +380,16 @@ function Scene_UnregisterActor() {
             const actorId = targetActorId;
             if (actorId < $dataActors.length) {
                 // アクター指定ありで有効なアクターID
-                const deleteOnCancel = $gameActors.isActorDataExists(actorId);
+                const isModify = $gameActors.isActorDataExists(actorId);
                 SceneManager.push(Scene_CharaMake);
-                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, deleteOnCancel);
+                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, isModify);
             }
         } else {
             const actorId = $gameActors.registableActorId();
             if (actorId > 0) {
-                const deleteOnCancel = true;
+                const isModify = false;
                 SceneManager.push(Scene_CharaMake);
-                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, deleteOnCancel);
+                SceneManager.prepareNextScene(actorId, storeVariableId, isCancelable, itemNames, isModify);
             } else {
                 // 空きエントリが無い
                 $gameMessage.add(textMaxRegistered);
@@ -496,10 +496,11 @@ function Scene_UnregisterActor() {
      * アクターに適用可能な項目かどうかを取得する。
      * 
      * @param {Game_Actor} actor アクター
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
      * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
-    Game_CharaMakeItem.prototype.canApply = function(actor) {
+    Game_CharaMakeItem.prototype.canApply = function(actor, isModify) {
         return true;
     };
 
@@ -1080,6 +1081,7 @@ function Scene_UnregisterActor() {
         this._isCancelEnabled = true;
         this._items = [];
         this._valueGetter = null;
+        this._isModify = false;
         Window_Selectable.prototype.initialize.call(this, rect);
         this.refresh();
         this.select(0);
@@ -1152,6 +1154,16 @@ function Scene_UnregisterActor() {
     };
 
     /**
+     * 変更かどうかを設定する。
+     * 
+     * @param {boolean} isModify 変更の場合にはtrue, それ以外はfalse.
+     */
+    Window_CharaMakeItemList.prototype.setModify = function(isModify) {
+        this._isModify = isModify;
+        this.refresh();
+    }
+
+    /**
      * 項目を描画する。
      * 
      * @param {Number} index インデックス番号
@@ -1161,7 +1173,7 @@ function Scene_UnregisterActor() {
         if (index < this._items.length) {
             const item = this._items[index];
             if (this._actor) {
-                this.changePaintOpacity(item.canApply(this._actor));
+                this.changePaintOpacity(item.canApply(this._actor, this._isModify));
             }
             const labelWidth = (rect.width > 300) ? 120 : (rect.width * 0.4);
             const labelText = item.name() + ":";
@@ -1188,7 +1200,7 @@ function Scene_UnregisterActor() {
         const index = this.index();
         if (index < this._items.length) {
             const item = this._items[index];
-            return item.canApply(this._actor);
+            return item.canApply(this._actor, this._isModify);
         } else {
             return true;
         }
@@ -1325,7 +1337,7 @@ function Scene_UnregisterActor() {
         this._actorId = 0;
         this._tempActor = null;
         this._isEditCompleted = false;
-        this._isDeleteOnCancel = false;
+        this._isModify = false;
         this._storeVariableId = 0;
         this._itemNames = [];
         this._windowEntries = [];
@@ -1338,14 +1350,14 @@ function Scene_UnregisterActor() {
      * @param {number} storeVariableId 格納変数ID。編集したアクターIDを格納する変数ID
      * @param {boolean} isCancelable キャンセル可能かどうか
      * @param {Array<string>} itemNames 選択可能項目
-     * @param {boolean} deleteOnCancel キャンセル操作時、データを消去するかどうか。
+     * @param {boolean} isModify 既存データを変更する操作かどうか。
      */
-    Scene_CharaMake.prototype.prepare = function(actorId, storeVariableId, isCancelable, itemNames, deleteOnCancel) {
+    Scene_CharaMake.prototype.prepare = function(actorId, storeVariableId, isCancelable, itemNames, isModify) {
         this._actorId = actorId;
         this._storeVariableId = storeVariableId;
         this._isCancelEnabled = isCancelable;
         this._itemNames = itemNames;
-        this._isDeleteOnCancel = deleteOnCancel;
+        this._isModify = isModify;
     };
 
     /**
@@ -1482,6 +1494,7 @@ function Scene_UnregisterActor() {
         this._itemWindow.setHandler("cancel", this.onItemListCancel.bind(this));
         this._itemWindow.setHelpWindow(this._helpWindow);
         this._itemWindow.setActor(this._tempActor);
+        this._itemWindow.setModify(this._isModify);
         this.addWindow(this._itemWindow);
     };
 
@@ -1655,7 +1668,7 @@ function Scene_UnregisterActor() {
 
         const actorId = (this._isEditCompleted) ? this._actorId : 0;
         if (!this._isEditCompleted) {
-            if (this._isDeleteOnCancel) {
+            if (!this._isModify) {
                 /* 新規登録でキャンセルされた場合
                  * 一時的に作成したデータを消去する。 */
                 $gameActors.deleteActorData(this._actorId);
