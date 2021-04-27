@@ -22,6 +22,12 @@
  * @type string
  * @default
  * 
+ * @arg maxLength
+ * @text 最大文字数
+ * @desc 入力可能な最大文字数。0にするとプラグインパラメータで指定した文字数になる。
+ * @type number
+ * @default 0
+ * 
  * @arg lineCount
  * @text 入力行数
  * @desc 入力行数。0にするとプラグインパラメータで指定した行数になる。
@@ -100,6 +106,11 @@
  * @type string
  * @default キャンセル
  * 
+ * @param maxLength
+ * @text デフォルト入力可能な最大文字数
+ * @desc プラグインコマンドで指定しない場合の、入力可能な最大文字数
+ * @type number
+ * @default 128
  * 
  * @help 
  * 111, くらむぽん様の111_InputForm.jsを元に作成。
@@ -148,13 +159,14 @@ function Scene_TextInput() {
 (() => {
     const pluginName = "Kapu_MultiLineInput";
     const parameters = PluginManager.parameters(pluginName);
-    const spacing = Number(parameters["spacing"]) || 20;
-    const defaultLineCount = Number(parameters["lineCount"]) || 2;
-    const fontSize = Number(parameters["fontSize"]) || 24;
-    const defaultTextAreaWidth = Number(parameters["textAreaWidth"]) || 600;
-    const defaultTextAreaHeight = Number(parameters["textAreaHeight"]) || 120;
-    const defaultButtonWidth = Number(parameters["buttonWidth"]) || 140;
-    const defaultButtonHeight = Number(parameters["buttonHeight"]) || 60;
+    const spacing = Math.floor(Number(parameters["spacing"]) || 20);
+    const defaultLineCount = Math.floor(Number(parameters["lineCount"]) || 2);
+    const fontSize = Math.floor(Number(parameters["fontSize"]) || 24);
+    const defaultTextAreaWidth = Math.floor(Number(parameters["textAreaWidth"]) || 600);
+    const defaultTextAreaHeight = Math.floor(Number(parameters["textAreaHeight"]) || 120);
+    const defaultButtonWidth = Math.floor(Number(parameters["buttonWidth"]) || 140);
+    const defaultButtonHeight = Math.floor(Number(parameters["buttonHeight"]) || 60);
+    const defaultMaxLength = Math.floor(Number(parameters["maxLength"]) || 128);
     const textSubmit = parameters["textSubmit"] || "OK";
     const textCancel = parameters["textCancel"] || "Cancel";
 
@@ -175,12 +187,13 @@ function Scene_TextInput() {
             text = "";
         }
         const lineCount = Number(args.lineCount) || 0;
+        const maxLength = Number(args.maxLength) || 0;
         const width = Number(args.width) || 0;
         const buttonWidth = Number(args.buttonWidth) || 0;
         const lineHeight = Number(args.lineHeight) || 0;
 
         SceneManager.push(Scene_TextInput);
-        SceneManager.prepareNextScene(interpreter, text, lineCount, width, buttonWidth, lineHeight);
+        SceneManager.prepareNextScene(interpreter, text, maxLength, lineCount, width, buttonWidth, lineHeight);
     });
     //------------------------------------------------------------------------------
     // Game_Temp
@@ -220,9 +233,11 @@ function Scene_TextInput() {
         this._interpreter = null;
         this._textArea = null;
         this._submit = null;
+        this._cancel = null;
         this._isPC = Utils.isNwjs();
         this._lineCount = defaultLineCount;
         this._inputText = "";
+        this._maxLength = defaultMaxLength;
         this._textAreaWidth = defaultTextAreaWidth;
         this._textAreaHeight = defaultTextAreaHeight;
         this._buttonWidth = defaultButtonWidth;
@@ -236,22 +251,24 @@ function Scene_TextInput() {
      * 
      * @param {Game_Interpreter} interpreter インタプリタオブジェクト
      * @param {string} text デフォルトのテキスト
+     * @param {number} maxLength 最大長
      * @param {number} lineCount 行数
      * @param {number} width 幅
      * @param {number} buttonWidth ボタンの幅
      * @param {number} lineHeight 行の高さ
      */
-    MultiLine_TextInput.prototype.setup = function(interpreter, text, lineCount, width, buttonWidth, lineHeight) {
+    MultiLine_TextInput.prototype.setup = function(interpreter, text, maxLength, lineCount, width, buttonWidth, lineHeight) {
         this._interpreter = interpreter;
         this._inputText = text || "";
+        this._maxLength = maxLength || this._maxLength;
 
         lineHeight = (lineHeight > 0) ? lineHeight : 40;
 
         this._lineCount = (lineCount > 0) ? lineCount : this._lineCount;
         this._textAreaWidth = (width > 0) ? width : this._textAreaWidth;
-        this._textAreaHeight = lineHeight * this._lineCount + 32;
+        this._textAreaHeight = lineHeight * this._lineCount + 16;
         this._buttonWidth = (buttonWidth > 0) ? buttonWidth : this._buttonWidth;
-        this._buttonHeight = lineHeight + 32;
+        this._buttonHeight = lineHeight + 16;
     };
 
     /**
@@ -297,7 +314,7 @@ function Scene_TextInput() {
         this._textArea.setAttribute("id", "_111_input");
         // this._textArea.setAttribute("cols", 32);
         this._textArea.setAttribute("rows", this._lineCount);
-        this._textArea.setAttribute("maxlength", 128);
+        this._textArea.setAttribute("maxlength", this._maxLength);
         this._textArea.setAttribute("wrap", "off");
         this._textArea.setAttribute("value", "default text.");
         document.body.appendChild(this._textArea);
@@ -340,7 +357,6 @@ function Scene_TextInput() {
      */
     MultiLine_TextInput.prototype.start = function() {
         this._textArea.value = this._inputText;
-        this._timerCounter = 0;
         this._textArea.focus();
         if (this._interpreter) {
             this._interpreter.setWaitMode("input_form");
@@ -545,8 +561,8 @@ function Scene_TextInput() {
      * @param {number} buttonWidth ボタン幅
      * @param {number} lineHeight ボタン高さ
      */
-    Scene_TextInput.prototype.prepare = function(interpreter, text, lineCount, width, buttonWidth, lineHeight) {
-        this._multiLine_TextInput.setup(interpreter, text, lineCount, width, buttonWidth, lineHeight);
+    Scene_TextInput.prototype.prepare = function(interpreter, text, maxLength, lineCount, width, buttonWidth, lineHeight) {
+        this._multiLine_TextInput.setup(interpreter, text, maxLength, lineCount, width, buttonWidth, lineHeight);
     };
 
     /**
