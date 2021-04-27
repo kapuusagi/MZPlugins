@@ -8,7 +8,19 @@
  * ■ startGrowupScene
  * @command startGrowupScene
  * @text 成長画面を開く
- * @desc 成長画面を開きます。
+ * @desc 成長画面を開きます。アクター指定が無い場合には、パーティーメンバーに対する育成画面を立ち上げます。
+ * 
+ * @arg actorId
+ * @text アクターID
+ * @desc 成長画面の対象とするアクター
+ * @type actor
+ * @default 0
+ * 
+ * @arg variableId
+ * @text アクターIDを格納した変数のID
+ * @desc 成長画面の対象とするアクターを変数で指定する
+ * @type variable
+ * @default 0
  * 
  * @param menu
  * @text メニュー
@@ -70,6 +82,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 プラグインコマンドでアクター指定が出来るように修正。
  * Version.0.1.1 メニューコマンドへの追加メソッドを
  *               オーバーライドしていた不具合を修正した。
  * Version.0.1.0 MVでTWLD向けに作成したものから移植した。
@@ -120,7 +133,24 @@ function Scene_Growup() {
 
     // eslint-disable-next-line no-unused-vars
     PluginManager.registerCommand(pluginName, "startGrowupScene", args => {
+        let actor = null;
+        let isAllowActorChange = true;
+        const variableId = Number(args.variableId) || 0;
+        let actorId = $gameVariables.value(variableId);
+        if ((actorId > 0) || (actorId < $dataActors.length)) {
+            actor = $gameActors.actor(actorId);
+            isAllowActorChange = false;
+        } else {
+            actorId = Number(args.actorId);
+            if ((actorId > 0) || (actorId < $dataActors.length)) {
+                actor = $gameActors.actor(actorId);
+                isAllowActorChange = false;
+            } else {
+                actor = $gameParty.menuActor();
+            }
+        }
         SceneManager.push(Scene_Growup);
+        SceneManager.prepareNextScene(actor, isAllowActorChange);
     });
     //------------------------------------------------------------------------------
     // Window_GrowupActorStatus
@@ -626,6 +656,17 @@ function Scene_Growup() {
      */
     Scene_Growup.prototype.initialize = function() {
         Scene_MenuBase.prototype.initialize.apply(this, arguments);
+        this._isAllowActorChange = false;
+    };
+
+    /**
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {boolean} isAllowActorChange ユーザー操作によりアクターの変更を行う場合にはtrue、禁止する場合にはfalse
+     */
+    Scene_Growup.prototype.prepare = function(actor, isAllowActorChange) {
+        this._actor = actor;
+        this._isAllowActorChange = isAllowActorChange;
     };
 
     /**
@@ -689,8 +730,10 @@ function Scene_Growup() {
         this._selectWindow.setHelpWindow(this._helpWindow);
         this._selectWindow.setHandler("ok", this.onGrowupSelectOk.bind(this));
         this._selectWindow.setHandler("cancel", this.onGrowupSelectCancel.bind(this));
-        this._selectWindow.setHandler("pageup", this.nextActor.bind(this));
-        this._selectWindow.setHandler("pagedown", this.previousActor.bind(this));
+        if (this._isAllowActorChange) {
+            this._selectWindow.setHandler("pageup", this.nextActor.bind(this));
+            this._selectWindow.setHandler("pagedown", this.previousActor.bind(this));
+        }
         this._selectWindow.select(0);
         this._selectWindow.show();
         this._selectWindow.open();
@@ -829,7 +872,7 @@ function Scene_Growup() {
      * @return {Boolean} ページボタンが必要な場合にはtrue, それ以外はfalse
      */
     Scene_Growup.prototype.needsPageButtons = function() {
-        return true;
+        return this._isAllowActorChange;
     };
     //------------------------------------------------------------------------------
     // Window_MenuCommand
