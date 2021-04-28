@@ -271,6 +271,49 @@ function Scene_TextInput() {
         this._buttonHeight = lineHeight + 16;
     };
 
+
+    /**
+     * テキスト長の最大値を設定する。
+     * 
+     * @param {number} maxLength テキスト長
+     */
+    MultiLine_TextInput.prototype.setMaxLength = function(maxLength) {
+        this._maxLength = maxLength;
+        if (this._textArea) {
+            this._textArea.setAttribute("maxlength", maxLength);
+        }
+    };
+
+    /**
+     * テキスト長の最大を得る。
+     * 
+     * @returns {number} テキスト長
+     */
+    MultiLine_TextInput.prototype.maxLength = function() {
+        return this._maxLength;
+    };
+    /**
+     * テキストを設定する。
+     * 
+     * @param {string} text テキスト
+     */
+    MultiLine_TextInput.prototype.setText = function(text) {
+        this._inputText = text;
+        if (this._textArea) {
+            this._textArea.value = text;
+        }
+    };
+
+    /**
+     * 入力されたテキスト
+     * 
+     * @returns {string} テキスト
+     */
+    MultiLine_TextInput.prototype.text = function() {
+        return this._inputText;
+    };
+
+
     /**
      * ハンドラを設定する。
      * 
@@ -516,26 +559,6 @@ function Scene_TextInput() {
         }
     };
 
-    /**
-     * テキストを設定する。
-     * 
-     * @param {string} text テキスト
-     */
-    MultiLine_TextInput.prototype.setText = function(text) {
-        this._inputText = text;
-        if (this._textArea) {
-            this._textArea.value = text;
-        }
-    };
-
-    /**
-     * 入力されたテキスト
-     * 
-     * @returns {string} テキスト
-     */
-    MultiLine_TextInput.prototype.text = function() {
-        return this._inputText;
-    };
 
 
     //------------------------------------------------------------------------------
