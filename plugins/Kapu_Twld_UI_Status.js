@@ -615,20 +615,34 @@ function Window_StatusProfile() {
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawBlock2A = function(actor, noEquipActor, x, y, width, maxLineCount) {
         const lineHeight = this.lineHeight();
-        this.drawParamValue(TextManager.basicParam(0), actor.str, noEquipActor.str,
-                x, y + lineHeight * 0, width);
-        this.drawParamValue(TextManager.basicParam(1), actor.dex, noEquipActor.dex,
-                x, y + lineHeight * 1, width);
-        this.drawParamValue(TextManager.basicParam(2), actor.vit, noEquipActor.vit,
-                x, y + lineHeight * 2, width);
-        this.drawParamValue(TextManager.basicParam(3), actor.int, noEquipActor.int,
-                x, y + lineHeight * 3, width);
-        this.drawParamValue(TextManager.basicParam(4), actor.men, noEquipActor.men,
-                x, y + lineHeight * 4, width);
-        this.drawParamValue(TextManager.param(6), actor.agi, noEquipActor.agi,
-                x, y + lineHeight * 5, width);
-        this.drawParamValue(TextManager.param(7), actor.luk, noEquipActor.luk,
-                x, y + lineHeight * 6, width);
+        if (maxLineCount >= 1) {
+            this.drawParamValue(TextManager.basicParam(0), actor.str, noEquipActor.str,
+                    x, y + lineHeight * 0, width);
+        }
+        if (maxLineCount >= 2) {
+            this.drawParamValue(TextManager.basicParam(1), actor.dex, noEquipActor.dex,
+                    x, y + lineHeight * 1, width);
+        }
+        if (maxLineCount >= 3) {
+            this.drawParamValue(TextManager.basicParam(2), actor.vit, noEquipActor.vit,
+                    x, y + lineHeight * 2, width);
+        }
+        if (maxLineCount >= 4) {
+            this.drawParamValue(TextManager.basicParam(3), actor.int, noEquipActor.int,
+                    x, y + lineHeight * 3, width);
+        }
+        if (maxLineCount >= 5) {
+            this.drawParamValue(TextManager.basicParam(4), actor.men, noEquipActor.men,
+                    x, y + lineHeight * 4, width);
+        }
+        if (maxLineCount >= 6) {
+            this.drawParamValue(TextManager.param(6), actor.agi, noEquipActor.agi,
+                    x, y + lineHeight * 5, width);
+        }
+        if (maxLineCount >= 7) {
+            this.drawParamValue(TextManager.param(7), actor.luk, noEquipActor.luk,
+                    x, y + lineHeight * 6, width);
+        }
     };
 
     /**
@@ -644,20 +658,30 @@ function Window_StatusProfile() {
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawBlock2B = function(actor, noEquipActor, x, y, width, maxLineCount) {
         const lineHeight = this.lineHeight();
-        this.drawParamValue(TextManager.param(2), actor.atk, noEquipActor.atk,
-                x, y + lineHeight * 0, width);
-        if ("penetratePDR" in actor) {
+        if (maxLineCount >= 1) {
+            this.drawParamValue(TextManager.param(2), actor.atk, noEquipActor.atk,
+                    x, y + lineHeight * 0, width);
+        }
+        if ((maxLineCount >= 2) && ("penetratePDR" in actor)) {
             this.drawParamRate(textPhyPenetration, actor.penetratePDR(), noEquipActor.penetratePDR(),
                     x, y + lineHeight * 1, width);
         }
-        this.drawParamValue(TextManager.param(3), actor.def, noEquipActor.def,
-                x, y + lineHeight * 2, width);
-        this.drawParamRate(textPhyAttenuation, 1 - actor.pdr, 1 - noEquipActor.pdr,
-                x, y + lineHeight * 3, width);
-        this.drawParamRate(textHit, actor.hit, noEquipActor.hit,
+        if (maxLineCount >= 3) {
+            this.drawParamValue(TextManager.param(3), actor.def, noEquipActor.def,
+                    x, y + lineHeight * 2, width);
+        }
+        if (maxLineCount >= 4) {
+            this.drawParamRate(textPhyAttenuation, 1 - actor.pdr, 1 - noEquipActor.pdr,
+                    x, y + lineHeight * 3, width);
+        }
+        if (maxLineCount >= 5) {
+            this.drawParamRate(textHit, actor.hit, noEquipActor.hit,
                 x, y + lineHeight * 4, width);
-        this.drawParamRate(textPhyEvacuation, actor.eva, noEquipActor.eva,
-                x, y + lineHeight * 5, width);
+        }
+        if (maxLineCount >= 6) {
+            this.drawParamRate(textPhyEvacuation, actor.eva, noEquipActor.eva,
+                    x, y + lineHeight * 5, width);
+        }
     };
 
     /**
@@ -673,18 +697,26 @@ function Window_StatusProfile() {
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawBlock2C = function(actor, noEquipActor, x, y, width, maxLineCount) {
         const lineHeight = this.lineHeight();
-        this.drawParamValue(TextManager.param(3), actor.mat, noEquipActor.mat,
-                x, y + lineHeight * 0, width);
-        if ("penetrateMDR" in actor) {
+        if (maxLineCount >= 1) {
+            this.drawParamValue(TextManager.param(3), actor.mat, noEquipActor.mat,
+                    x, y + lineHeight * 0, width);
+        }
+        if ((maxLineCount >= 2) && ("penetrateMDR" in actor)) {
             this.drawParamRate(textMagPenetration, actor.penetrateMDR(), noEquipActor.penetrateMDR(),
                     x, y + lineHeight * 1, width);
         }
-        this.drawParamValue(TextManager.param(4), actor.mdf, noEquipActor.mdf,
-                x, y + lineHeight * 2, width);
-        this.drawParamRate(textMagAttenuation, 1 - actor.mdr, 1 - noEquipActor.mdr,
-                x, y + lineHeight * 3, width);
-        this.drawParamRate(textMagEvacuation, actor.mev, noEquipActor.mev,
-                x, y + lineHeight * 5, width);
+        if (maxLineCount >= 3) {
+            this.drawParamValue(TextManager.param(4), actor.mdf, noEquipActor.mdf,
+                    x, y + lineHeight * 2, width);
+        }
+        if (maxLineCount >= 4) {
+            this.drawParamRate(textMagAttenuation, 1 - actor.mdr, 1 - noEquipActor.mdr,
+                    x, y + lineHeight * 3, width);
+        }
+        if (maxLineCount >= 6) {
+            this.drawParamRate(textMagEvacuation, actor.mev, noEquipActor.mev,
+                    x, y + lineHeight * 5, width);
+        }
     };
     /**
      * 2-Dを描画する。
