@@ -443,3 +443,59 @@ Note:
 * パーティーメンバーのAGI＞的グループのAGI → 5%の確率
 
 急襲防御のスキルを持っている場合、確率は0になる。
+
+## ■ エネミー/アクターの行動入力の処理
+
+1. TPB時
+
+    __BattleManager.updateTpbBattler()__
+    ↓
+    __Game_Battler.startTpbTurn()__
+    ↓
+    __Game_Battler.makeTpbActions()__
+    ↓
+    __Game_Actor.makeActions()__ または __Game_Enemy.makeActions()__ 
+    ↓
+    入力操作が必要なら入力操作
+    ↓
+    実行待ち（キャストなど)
+    ↓
+    アクション実行
+
+2. 非TPB時
+
+    __BattleManager.startInput__
+    ↓
+    __Game_Unit.makeActions__ (Game_UnitはGame_Party, Game_Troopの親クラス)
+    ↓
+    __Game_Actor.makeActions()__ または __Game_Enemy.makeActions()__ 
+    ↓
+    入力操作が必要なら入力操作
+    ↓
+    __BattleManager.makeActionOrders()__ で行動順設定
+    ↓
+    アクション実行
+
+2. エネミーのmakeAction
+
+    __Game_Battler.makeActions()__ で行動回数分のGame_Action()オブジェクトが作成される。
+    生成されたインスタンスは_actions フィールドに格納される。
+    ↓
+    __Game_Enemy.selectAllActions__ でエネミーデータにある、行動条件と優先度が評価され、実行するアクションがセットされる。
+
+3. アクターのmakeAction
+
+    __Game_Battler.makeActions()__ で行動回数分のGame_Actionオブジェクトが構築される。_actionsフィールドに格納される。
+    ↓
+    自動戦闘設定の場合には __Game_Actor.makeAutoBattleActions__ で自動戦闘時の行動がセットされる。
+    混乱状態の場合には、 __Game_Actor.makeConfusionActions__ で自動戦闘時の行動がセットされる。
+    ↓
+    プレイヤーによる入力操作で、makeActions()で作成されたアクションに対して、選択された行動がセットされる。
+
+
+
+
+
+
+
+
