@@ -435,7 +435,7 @@ Traitの持ってるメンバ
 |メンバ|型|説明|
 |---|---|---|
 |code|Number|TRAITT_XXXXが格納される。特性の種類ということ。Game_BattlerBase.traits(code)などで特定の種類の特性を取得できる。|
-|dataid|Number|データID。データベース上のIDだったり、パラメータIDだったりする。|
+|dataId|Number|データID。データベース上のIDだったり、パラメータIDだったりする。|
 |value|Number|値。加算したり(traitsSum)、乗算したり(traitsPi)したりするのに使う。|
 
 
