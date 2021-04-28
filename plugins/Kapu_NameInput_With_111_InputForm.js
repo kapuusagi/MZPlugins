@@ -17,7 +17,7 @@
  * @text テキストボックスの幅
  * @desc テキストボックスの幅を指定する。
  * @type number
- * @default 200
+ * @default 300
  * 
  * @param buttonWidth
  * @text 確定/キャンセルボタンの幅
@@ -103,6 +103,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.1.0.1 リファクタリングを実施。
  * Version.1.0.0 111_InputForm.js Ver.2020/08/22 との組み合わせにて動作確認。
  */
 
@@ -118,7 +119,7 @@ function Simple_TextInput() {
     const pluginName = "Kapu_NameInput_With_111_InputForm";
     const parameters = PluginManager.parameters(pluginName);
 
-    const defaultTextBoxWidth = Math.floor(Number(parameters["textBoxWidth"]) || 200);
+    const defaultTextBoxWidth = Math.floor(Number(parameters["textBoxWidth"]) || 300);
     const defaultButtonWidth = Math.floor(Number(parameters["buttonWidth"]) || 80);
     const defaultButtonHeight = Math.floor(Number(parameters["buttonHeight"]) || 60);
     const spacing = Math.floor(Number(parameters["spacing"]) || 20);
@@ -164,7 +165,6 @@ function Simple_TextInput() {
 
         lineHeight = (lineHeight > 0) ? lineHeight : 40;
 
-        this._lineCount = (lineCount > 0) ? lineCount : this._lineCount;
         this._textBoxWidth = (width > 0) ? width : this._textBoxWidth;
         this._textBoxHeight = lineHeight + 16;
         this._buttonWidth = (buttonWidth > 0) ? buttonWidth : this._buttonWidth;
@@ -172,6 +172,71 @@ function Simple_TextInput() {
 
         this._isCancelEnabled = isCancelEnabled;
     };
+
+    /**
+     * テキストを設定する。
+     * 
+     * @param {string} text テキスト
+     */
+    Simple_TextInput.prototype.setText = function(text) {
+        this._inputText = text;
+        if (this._textBox) {
+            this._textBox.value = text;
+        }
+    };
+
+    /**
+     * 入力されたテキスト
+     * 
+     * @returns {string} テキスト
+     */
+    Simple_TextInput.prototype.text = function() {
+        return this._inputText;
+    };
+    /**
+     * 最大文字数を得る。
+     * 
+     * @return {number} 最大文字数
+     */
+    Simple_TextInput.prototype.maxLength = function() {
+        return this._maxLength;
+    };
+
+    /**
+     * 最大文字数
+     * 
+     * @param {number} maxLength 
+     */
+    Simple_TextInput.prototype.setMaxLength = function(maxLength) {
+        this._maxLength = maxLength;
+        if (this._textBox) {
+            this._textBox.setAttribute("maxlength", this._maxLength);
+        }
+    };
+
+    /**
+     * キャンセル可能かどうかを取得する。
+     * 
+     * @returns {boolean} キャンセル可能な場合にはtrue, それ以外はfalse
+     */
+    Simple_TextInput.prototype.isCancelEnabled = function() {
+        return this._isCancelEnabled;
+    };
+
+    /**
+     * キャンセル可能かどうかを設定する。
+     * 
+     * @param {boolean} isEnabled キャンセル可能な場合にはtrue, それ以外はfalse
+     */
+    Simple_TextInput.prototype.setCancelEnabled = function(isEnabled) {
+        this._isCancelEnabled = isEnabled;
+        if (this._cancel) {
+            if (!this._isCancelEnabled) {
+                this._cancel.hidden = true;
+            }
+        }
+    }
+
 
     /**
      * ハンドラを設定する。
@@ -414,26 +479,6 @@ function Simple_TextInput() {
         }
     };
 
-    /**
-     * テキストを設定する。
-     * 
-     * @param {string} text テキスト
-     */
-    Simple_TextInput.prototype.setText = function(text) {
-        this._inputText = text;
-        if (this._textBox) {
-            this._textBox.value = text;
-        }
-    };
-
-    /**
-     * 入力されたテキスト
-     * 
-     * @returns {string} テキスト
-     */
-    Simple_TextInput.prototype.text = function() {
-        return this._inputText;
-    };
 
 
 
@@ -450,63 +495,39 @@ function Simple_TextInput() {
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
+    // eslint-disable-next-line no-unused-vars
     Window_NameInput.prototype.initialize = function(rect) {
         _Window_NameInput_initialize.call(this, new Rectangle(0, 0, 0, 0));
-        this._elementPosition = rect;
-        this._is_pc = Utils.isNwjs();
-        this.createInputElement();
-        this.createSubmitElement();
-        this.adjustElementPosition();
-
-        this._resizeEvent = this.adjustElementPosition.bind(this);
-        window.addEventListener("resize", this._resizeEvent, false);
-
-        this._initialized = true;
+        this.createTextInput();
     };
 
     /**
-     * 入力要素を構築する。
+     * テキストインプットオブジェクトを構築する。
      */
-    Window_NameInput.prototype.createInputElement = function() {
-        this._textBox = document.createElement("input");
-        this._textBox.setAttribute("id", "_111_input");
-        this._textBox.hidden = false;
-        this._textBox.setAttribute("value", this._name);
-        document.body.appendChild(this._textBox);
-
-        // 送信するイベント
-        this._textBox.addEventListener("keydown" , this.onKeyDown.bind(this));
-        this._textBox.addEventListener("mousedown", this.onHandleInputEvent.bind(this)); // 裏のゲーム画面のクリック暴発を防ぐ
-        this._textBox.addEventListener("touchstart", this.onHandleInputEvent.bind(this)); // iOSでclickイベント取れない対策
-        
+    Window_NameInput.prototype.createTextInput = function() {
+        this._textInput = new Simple_TextInput();
+        this._textInput.setup(null, "", 16, defaultTextBoxWidth, defaultButtonWidth, defaultButtonHeight, false);
+        this._textInput.setHandler("ok", this.onTextInputOk.bind(this));
+        this._textInput.setHandler("cancel", this.onTextInputCancel.bind(this));
+        this._textInput.create();
+        this._textInput.hide();
     };
 
     /**
-     * 決定要素を構築する。
+     * テキスト入力でOK操作されたときの処理を行う。
      */
-    Window_NameInput.prototype.createSubmitElement = function() {
-        this._submit = document.createElement("input");
-        this._submit.hidden = false;
-        this._submit.setAttribute("type", "submit");
-        this._submit.setAttribute("id", "_111_submit");
-        this._submit.setAttribute("value", textSubmit);
-        document.body.appendChild(this._submit);
-
-        this._submit.addEventListener("mousedown", this.onHandleInputEvent.bind(this)); // 裏のゲーム画面のクリック暴発を防ぐ
-        this._submit.addEventListener("touchstart", this.onHandleInputEvent.bind(this)); // iOSでclickイベント取れない対策
-        this._submit.addEventListener("click" , this.onClick.bind(this)); // 
+    Window_NameInput.prototype.onTextInputOk = function() {
+        SoundManager.playOk();
+        this._editWindow.setName(this._textInput.text());
+        this.callOkHandler();
     };
 
     /**
-     * フォームのイベントを処理する。
-     * 
-     * @param {object} event イベントオブジェクト
+     * テキスト入力でキャンセル操作されたときの処理を行う。
      */
-    Window_NameInput.prototype.onHandleInputEvent = function(event) {
-        if (!this._textBox.hidden) {
-            // 入力フォーム表示中はイベントを伝播させない。
-            event.stopPropagation();
-        }
+    Window_NameInput.prototype.onTextInputCancel = function() {
+        SoundManager.playCancel();
+        this.callCancelHandler();
     };
 
     /**
@@ -517,8 +538,7 @@ function Simple_TextInput() {
      *     コントロールするためオーバーライドする。
      */
     Window_NameInput.prototype.show = function() {
-        this._textBox.hidden = false;
-        this._submit.hidden = false;
+        this._textInput.show();
     };
 
 
@@ -530,32 +550,23 @@ function Simple_TextInput() {
      *     コントロールするためオーバーライドする。
      */
     Window_NameInput.prototype.hide = function() {
-        this._textBox.hidden = true;
-        this._submit.hidden = true;
+        this._textInput.hide();
     };
 
     /**
      * ウィンドウをアクティブ化し、入力を受け取るようにする。
      */
     Window_NameInput.prototype.activate = function() {
-        if (!this._initialized) {
-            return;
-        }
         Window_Selectable.prototype.activate.call(this);
 
         /* Init */
         if (this._editWindow) {
-            const maxLength = this._editWindow.maxLength()
-            this._textBox.setAttribute("maxlength", maxLength);
-            this._textBox.value = this._editWindow.name();
+            const maxLength = this._editWindow.maxLength();
+            this._textInput.setMaxLength(maxLength);
+            this._textInput.setText(this._editWindow.name());
         }
-
-        // 多分これがactivate()本来のメソッド
-        this._textBox.focus();
-
-        /* call start(). */
-        Input.clear();
-        Input.form_mode = true;
+        this._textInput.updatePlace();
+        this._textInput.start();
     };
 
     const _Window_NameInput_destroy = Window_NameInput.prototype.destroy;
@@ -563,101 +574,14 @@ function Simple_TextInput() {
      * ウィンドウを破棄する。
      */
     Window_NameInput.prototype.destroy = function() {
+        this._textInput.terminate();
         _Window_NameInput_destroy.call(this);
-        if (this._textBox) {
-            this._textBox.remove();
-        }
-        if (this._submit) {
-            this._submit.remove();
-        }
-        if (this._resizeEvent) {
-            window.removeEventListener("resize", this._resizeEvent, false);
-        }
-    };
-
-
-    /**
-     * 要素の位置を調整する。
-     */
-    Window_NameInput.prototype.adjustElementPosition = function() {
-        const canvas = document.getElementById("UpperCanvas") || document.getElementById("gameCanvas");
-        const rect = canvas.getBoundingClientRect();
-
-        const screenX = rect.left;
-        const screenY = rect.top;
-
-        const maxWidth = Math.max(defaultTextBoxWidth, defaultButtonWidth);
-        const totalHeight = buttonHeight + 32 + spacing;
-        const textBoxX = (Graphics.boxWidth - maxWidth) / 2;
-        const textBoxY = (Graphics.boxHeight - totalHeight) / 2;
-        const textBoxWidth = defaultTextBoxWidth;
-        const textBoxHeight = defaultButtonHeight;
-        const buttonX = textBoxX + maxWidth - defaultButtonWidth;
-        const buttonY = textBoxY + textBoxHeight + spacing;
-        const buttonWidth = defaultButtonWidth;
-        const buttonHeight = defaultButtonHeight;
-
-        this.setElementPosition(this._textBox, screenX, screenY, textBoxX, textBoxY, textBoxWidth, textBoxHeight, fontSize);
-        this.setElementPosition(this._submit, screenX, screenY, buttonX, buttonY, buttonWidth, buttonHeight, fontSize)
-    };
-
-    /**
-     * 要素の位置を設定する。
-     * 
-     * @param {HTMLElement} element HTML要素
-     * @param {number} screenX スクリーン位置x
-     * @param {number} screenY スクリーン位置y
-     * @param {number} x 要素を配置するx位置
-     * @param {number} y 要素を配置するy位置
-     * @param {number} width 要素の幅
-     * @param {number} height 要素の高さ
-     * @param {number} fontSize フォントサイズ
-     */
-     Window_NameInput.prototype.setElementPosition = function(element, screenX, screenY, x, y, width, height, fontSize) {
-        element.style.position = "absolute";
-        element.style.left = screenX + x * Graphics._realScale + "px";
-        element.style.top  = screenY + y * Graphics._realScale + "px";
-        element.style.width = width * Graphics._realScale + "px";
-        element.style.height = height * Graphics._realScale + "px";
-        element.style.fontSize = fontSize * Graphics._realScale + "px";
-        element.style.maxWidth =  "calc(100% - " + element.style.left + ")";
-        element.style.maxHeight = "calc(100% - " + element.style.top + ")";
-    };
-
-    /**
-     * HTML要素でキーが押されたときの処理を行う。
-     * 
-     * @param {object} e イベントオブジェクト
-     */
-    Window_NameInput.prototype.onKeyDown = function(e) {
-        if (!this._textBox.hidden) {
-            if (e.keyCode === 13){ // 決定キーで送信
-                Input.clear();
-                this.onSuccess();
-                // 親へのイベント伝播を止める（documentのkeydownが反応しないように）
-                e.stopPropagation();
-            } else {
-                // 他のイベントは無視。
-            }
-        }
-    };
-
-    /**
-     * HTML要素のSubmitボタンがクリックされたときの処理を行う。
-     * 
-     * @returns {boolean} 送信完了の場合にはtrue, キャンセル時はfalse.
-     *                    送信完了するとページを閉じる処理が行われるからfalseを返さないといけないはず。
-     */
-    Window_NameInput.prototype.onClick = function(){ // 送信ボタンクリック
-        this.onSuccess();
-        return false;
     };
 
     /**
      * 入力完了を処理する。
      */
     Window_NameInput.prototype.onSuccess = function() {
-        SoundManager.playOk();
         if (this._textBox.value) {
             if (this._editWindow) {
                 this._editWindow.setName(this._textBox.value);
@@ -674,12 +598,6 @@ function Simple_TextInput() {
      */
     Window_NameInput.prototype.deactivate = function() {
         Window_Selectable.prototype.deactivate.call(this);
-
-        // フォーカスを外す
-        if (this._textBox) {
-            this._textBox.blur();
-        }
-        Input.form_mode = false;
     };
 
     /**
