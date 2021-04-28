@@ -163,7 +163,7 @@ function Game_CharaMakeItem_Profile() {
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Profile.prototype.createSelectWindows = function(rect, helpWindow) {
         const textInput = new MultiLine_TextInput();
-        textInput.setup(null, "", 2, 0, 0, 0);
+        textInput.setup(null, "", 128, 2, 0, 0, 0);
         textInput.create();
         textInput.hide();
 
