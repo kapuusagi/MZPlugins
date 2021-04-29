@@ -38,7 +38,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。実装してみたら意外と簡単だった。
+ * Version.1.0.0 動作確認。
  */
 (() => {
     // const pluginName = "Kapu_AttacksOfEachWeapons";
@@ -111,7 +111,7 @@
         } else {
             const weaponActions = this.makeWeaponAttackActions(action);
             for (let index = weaponActions.length - 1; index >= 0; index--) {
-                action.unshift(weaponActions[index]);
+                this._actions.push(weaponActions[index]);
             }
         }
     };
@@ -145,6 +145,7 @@
                             weaponAction.setSkill(skillId);
                             weaponAction.setTarget(action.targetIndex());
                             weaponAction.setWeaponSlot(slotNo);
+                            weaponActions.push(weaponAction);
                         }
                     }
                 }
@@ -240,7 +241,7 @@
     /**
      * ターゲットのインデックス番号を得る。
      * 
-     * @returns {number} ターゲットの印デックス番号
+     * @returns {number} ターゲットのインデックス番号
      */
     Game_Action.prototype.targetIndex = function() {
         return this._targetIndex;
@@ -330,10 +331,12 @@
             subject.setValidWeaponSlot(this._weaponSlot);
         }
 
-        _Game_Action_makeDamageValue.call(this, target, critical);
+        const damage = _Game_Action_makeDamageValue.call(this, target, critical);
 
         if (subject.isActor()) {
             subject.clearIgnoreSlots();
         }
+
+        return damage;
     };
 })();
