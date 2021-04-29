@@ -20,9 +20,15 @@
  * @type number
  * @default 15
  * 
- * @param retryable
+ * @param isRetryable
  * @text 再挑戦可能
  * @desc キャラメイク画面で、成長ポイントの引き直しを可能にするかどうか。
+ * @type boolean
+ * @default true
+ * 
+ * @param isSoundsCursor
+ * @text カーソル音を鳴らす
+ * @desc 成長ポイントが更新されるときにカーソル音を鳴らすかどうか。
  * @type boolean
  * @default true
  * 
@@ -87,6 +93,11 @@ function Window_CharaMakeItem_GrowPoint() {
 (() => {
     const pluginName = "Kapu_CharaMake_GrowupSystem";
     const parameters = PluginManager.parameters(pluginName);
+    const isRetryable = (typeof parameters["isRetryable"] === "undefined")
+            ? true : (parameters["isRetryable"] !== "false");
+    const isSoundsCursor = (typeof parameters["isSoundsCursor"] === "undefined")
+            ? true : (parameters["isSoundsCursor"] !== "false");
+
     const growPointMin = Math.floor(Number(parameters["minimum"]) || 0);
     const growPointMax = Math.floor(Number(parameters["maximum"]) || 10);
     const textItemNameGrowPoint = parameters["textItemNameGrowPoint"] || "GP";
@@ -103,18 +114,20 @@ function Window_CharaMakeItem_GrowPoint() {
 
     //------------------------------------------------------------------------------
     // DataManager
-    const _DataManager_createCharaMakeItems = DataManager.createCharaMakeItems;
-    /**
-     * キャラクターメイキング項目を取得する。
-     * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
-     * 
-     * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
-     */
-    DataManager.createCharaMakeItems = function() {
-        const items = _DataManager_createCharaMakeItems.call(this);
-        items.push(new Game_CharaMakeItem_GrowPoint());
-        return items;
-    };
+    if (isRetryable) {
+        const _DataManager_createCharaMakeItems = DataManager.createCharaMakeItems;
+        /**
+         * キャラクターメイキング項目を取得する。
+         * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
+         * 
+         * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+         */
+        DataManager.createCharaMakeItems = function() {
+            const items = _DataManager_createCharaMakeItems.call(this);
+            items.push(new Game_CharaMakeItem_GrowPoint());
+            return items;
+        };
+    }
     //------------------------------------------------------------------------------
     // Game_Actorの変更
     const _Game_Actor_setup = Game_Actor.prototype.setup;
@@ -197,6 +210,9 @@ function Window_CharaMakeItem_GrowPoint() {
         this._updateFrameCount++;
         if (this._updateFrameCount >= 6) {
             // 100ミリ秒経過したら更新
+            if (isSoundsCursor) {
+                SoundManager.playCursor();
+            }
             this._growPoint = Math.randomInt(this._maximum - this._minimum + 1) + this._minimum;
             this._updateFrameCount = 0;
         }
