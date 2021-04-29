@@ -44,6 +44,16 @@
  * 本プラグインでは育成ポイントの振り分け機能は提供しません。
  * 必要であれば、キャラメイク完了時に振り分けシーンを呼び出すようにスクリプトを組んでください。
  * 
+ * ■ 使用上の注意点
+ * GrowPointシステムの仕様上の制約から、使用済みGP ＋ （min～maxの間のランダム値）になるように
+ * 動作します。
+ * 
+ * そのため、他のキャラメイク項目にて、GrowPointの振り分けを行わないこと。
+ * 振り分けを行った場合、本項目を選択毎にGPが更新されるので、
+ * 無限にGP増殖ができてしまいます。
+ * 
+ * 同様にLv2以上でのキャラメイクはやらないこと。
+ * 
  * 
  * ============================================
  * プラグインコマンド
@@ -58,7 +68,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.1.0.0 初版作成。
  */
 /**
  * Game_CharaMakeItem_GrowPoint
@@ -75,7 +85,7 @@ function Window_CharaMakeItem_GrowPoint() {
     this.initialize(...arguments);
 }
 (() => {
-    const pluginName = "TKapu_CharaMake_GrowupSystem";
+    const pluginName = "Kapu_CharaMake_GrowupSystem";
     const parameters = PluginManager.parameters(pluginName);
     const growPointMin = Math.floor(Number(parameters["minimum"]) || 0);
     const growPointMax = Math.floor(Number(parameters["maximum"]) || 10);
@@ -121,8 +131,8 @@ function Window_CharaMakeItem_GrowPoint() {
             // ノートタグでgrowPointが未指定の場合のみランダム
             const usedGrowPoint = this.maxGrowPoint() - this.growPoint();
             const growPoint = usedGrowPoint + growPointMin + Math.randomInt(growPointMax - growPointMin + 1) ;
-            const diff = actor.maxGrowPoint() - growPoint;
-            actor.gainGrowPoint(diff);
+            const diff = this.maxGrowPoint() - growPoint;
+            this.gainGrowPoint(diff);
         }
     };
 
@@ -175,7 +185,8 @@ function Window_CharaMakeItem_GrowPoint() {
             this.updateGrowPoint();
         }
         Window_Selectable.prototype.update.call(this);
-        if (this._updateGrowPoint && (this._updateFrameCount == 0)) {
+        if (this._updateGrowPoint && (this._updateFrameCount === 0)) {
+            this.updateGrowPoint();
             this.refresh();
         }
     };
@@ -190,6 +201,15 @@ function Window_CharaMakeItem_GrowPoint() {
             this._updateFrameCount = 0;
         }
     };
+
+    /**
+     * タッチされたときの処理を行う。
+     */
+    Window_CharaMakeItem_GrowPoint.prototype.onTouchOk = function() {
+        // Note: refreshされてカーソルが定まらないのでサクッとOKを呼び出す。
+        this.processOk();
+    };
+    
 
     /**
      * 育成ポイントを設定する。
@@ -303,9 +323,11 @@ function Window_CharaMakeItem_GrowPoint() {
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_GrowPoint.prototype.createSelectWindows = function(rect, helpWindow) {
-        const ww = (rect.width < 160) ? rect.width : 160;
-        const wh = 60;
-        const windowRect = new Rectangle(rect.x, rect.y, ww, wh);
+        const ww = (rect.width < 200) ? rect.width : 200;
+        const wh = 80;
+        const wx = (Graphics.boxWidth - ww) / 2;
+        const wy = rect.y;
+        const windowRect = new Rectangle(wx, wy, ww, wh);
         const window = new Window_CharaMakeItem_GrowPoint(windowRect);
         window.deactivate();
         window.hide();
