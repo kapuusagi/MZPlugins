@@ -15,6 +15,7 @@
  * キャラメイク時にスキルセットを選択して習得できるようにするプラグイン。
  * 本プラグイン1つで複数のスキルセットを選択できるようになります。
  * 
+ * 
  * ■ 使用時の注意
  * 特になし。
  * 
@@ -33,7 +34,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.1.0.0 動作確認。
  */
 /*~struct~CharaMakeSkillSetGroup:
  *
@@ -165,7 +166,7 @@ function Game_CharaMakeItem_Skills() {
      * @param {number} no スキルセット番号
      */
     Game_Actor.prototype.setSkillSetNo = function(groupNo, no) {
-        this._selectedSkills[groupNo] = no;
+        this._selectedSkillSet[groupNo] = no;
         this.refresh();
     }
 
@@ -176,11 +177,44 @@ function Game_CharaMakeItem_Skills() {
      * @returns {Array<DataSkill>} スキル配列
      */
     Game_Actor.prototype.skillSetSkills = function(groupNo) {
+        return this.skillSetSkillIds(groupNo).map(id => $dataSkills[id]);
+    };
+
+    /**
+     * groupNoで選択されているスキルセットのID配列を得る。
+     * 
+     * @param {number} groupNo スキルグループ番号
+     * @returns {Array<number>} スキルID配列
+     */
+    Game_Actor.prototype.skillSetSkillIds = function(groupNo) {
         const no = this.skillSetNo(groupNo);
         if ((no >= 0) && (no < charaMakeSkillSetGroups[groupNo].skillSets.length)) {
-            return charaMakeSkillSetGroups[groupNo].skillSets.map(id => $dataSkills[id]);
+            const skillSets = charaMakeSkillSetGroups[groupNo].skillSets[no];
+            return skillSets.skills;
         } else {
             return [];
+        }
+    };
+
+    const _Game_Actor_isLearnedSkill = Game_Actor.prototype.isLearnedSkill;
+    /**
+     * skillIのスキルdが習得済みスキルかどうかを判定する。
+     * 
+     * @param {Number} skillId スキルID
+     * @return {Boolean} 習得済みの場合にはtrue, それ以外はfalse.
+     */
+    Game_Actor.prototype.isLearnedSkill = function(skillId) {
+        if (_Game_Actor_isLearnedSkill.call(this, skillId)) {
+            return true;
+        } else {
+            // スキルセットに含まれるかどうかを調べる。
+            for (let groupNo = 0; groupNo < charaMakeSkillSetGroups.length; groupNo++) {
+                const skillIds = this.skillSetSkillIds(groupNo);
+                if (skillIds.includes(skillId)) {
+                    return true;
+                }
+            }
+            return false;
         }
     };
 
@@ -267,6 +301,8 @@ function Game_CharaMakeItem_Skills() {
         const no = actor.skillSetNo(this._groupNo);
         if ((no >= 0) && (no < items.length)) {
             selectWindow.select(no);
+        } else {
+            selectWindow.deselect();
         }
     };
 
@@ -279,7 +315,7 @@ function Game_CharaMakeItem_Skills() {
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Skills.prototype.apply = function(windowEntry, actor) {
         const selectWindow = windowEntry.selectWindow;
-        actor.setSkillSetNo(selectWindow.index());
+        actor.setSkillSetNo(this._groupNo, selectWindow.index());
     };
 
     /**
