@@ -166,9 +166,15 @@
  *      射程距離無視特性を追加する。
  *   <defaultRange:range#>
  *      デフォルトの射程距離をrange#とする。未指定時は0
+ * 
+ * ターン0のイベント先頭行コメントに
+ *      # SetBattlePosition id# position#
+ * とすると、戦闘開始時に位置を指定できるようになる。
+ * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 エネミーグループのターン0イベントにコメントを記述することで、戦闘位置を設定できるようにした。
  * Version.0.3.0 ステータス表示用に、Game_BattlerBaseに通常攻撃射程を得るインタフェースを追加した。
  * Version.0.2.0 射程2のスキル使用時はカウンターを受けないようにした。
  * Version.0.1.1 各特性について、ID未指定時は動作しないように変更した。
@@ -832,14 +838,20 @@
      * @param {DataEnemyAction} action エネミーアクションデータ 
      */
     Game_Enemy.prototype.isActionValidRange = function(action) {
-        if (this.battlePosition() === 0) {
-            // 前衛にいるなら、対象が存在しないスキルはないので不要。
+        const skill = $dataSkills[action.skillId];
+        const opponentScopes = [7, 8, 9, 10, 11, 12, 13, 14];
+        if (opponentScopes.includes(skill.scope)) {
+            // 味方に対するスキルであれば無条件で発動。
             return true;
         } else {
-            // 後衛にいるなら、射程0のスキルは対象がいないので使用しない。
-            const skill = $dataSkills[action.skillId];
-            const rangeDistance = this.itemRangeDistance(skill);
-            return (rangeDistance > 0); // 射程1以上のスキルはtrue
+            if (this.battlePosition() === 0) {
+                // 前衛にいるなら、対象が存在しないスキルはないので不要。
+                return true;
+            } else {
+                // 後衛にいるなら、射程0のスキルは対象がいないので使用しない。
+                const rangeDistance = this.itemRangeDistance(skill);
+                return (rangeDistance > 0); // 中射程以上のスキルはtrue
+            }
         }
     };
 
@@ -1169,6 +1181,73 @@
             this.membersWithRange(range)[0];
         }
     };
+
+    //------------------------------------------------------------------------------
+    // Game_Troop
+    const _Game_Troop_setup = Game_Troop.prototype.setup;
+    /**
+     * エネミーグループをセットアップする。
+     * 
+     * @param {number} troopId エネミーグループID
+     */
+    Game_Troop.prototype.setup = function(troopId) {
+        _Game_Troop_setup.call(this, troopId);
+        const eventPage = this.getFirstTurnEventPage();
+        if (eventPage) {
+            for (let index = 0; index < eventPage.list.length; index++) {
+                const eventData = eventPage.list[index];
+                if ((eventData.code !== 108) && (eventData.code !== 408)) {
+                    break;
+                } else if (eventData.parameters[0].startsWith("#")) {
+                    const note = eventData.parameters[0].substr(1).trim();
+                    const preprocessParamLists = note.split(',').map(token => token.split(/ +/));
+                    for (const preprocessParams of preprocessParamLists) {
+                        this.doPreprocessSetting(preprocessParams)
+                    }
+                }
+            }
+        }
+    };
+    /**
+     * ターン先頭のイベントページを得る。
+     * 
+     * @returns {object} ページデータ。該当ページが無い場合にはnull.
+     */
+    Game_Troop.prototype.getFirstTurnEventPage = function() {
+        const troop = this.troop();
+        for (let index = 0; index < troop.pages.length; index++) {
+            const page = troop.pages[index];
+            const conditions = page.conditions;
+            if (conditions.turnValid && (conditions.turnA === 0) && (conditions.turnB === 0) && !conditions.turnEnding) {
+                return page;
+            }
+        }
+
+        return null;
+    };
+    /**
+     * 戦闘開始前処理をする。
+     * 
+     * @param {Array<string>} params 
+     */
+    Game_Troop.prototype.doPreprocessSetting = function(params) {
+        switch (params[0]) {
+            case "SetBattlePosition":
+                {
+                    const id = Number(params[1]) || 0;
+                    const position = Number(params[2]) || 0;
+                    if (id > 0) {
+                        const enemy = this.members()[id - 1];
+                        if (enemy) {
+                            enemy.setBattlePosition(position);
+                        }
+                    }
+                }
+                break;
+        }
+    };
+
+
     //------------------------------------------------------------------------------
     // BattleMamager
     const _BattleManager_endAction = BattleManager.endAction;
