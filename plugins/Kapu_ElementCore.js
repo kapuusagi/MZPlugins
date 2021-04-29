@@ -41,11 +41,15 @@
  *     <elementIds:id#>
  *     <elementIds:id#,id#,id#...>
  *         複数属性を適用します。
+ * スキル
+ *     <onlySkillElements>
+ *         ダメージ計算時、特性による属性付与を無視します。
+ *         スキル自体に設定された属性パラメータだけで計算したい場合に使用します。
  *
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 新規作成。
+ * Version.1.0.0 新規作成。
  */
 (() => {
     //const pluginName = "Kapu_ElementCore";
@@ -97,8 +101,15 @@
      */
     Game_Action.prototype.calcElementRate = function(target) {
         const item = this.item();
-        const elements = (item.damage.elementIds.length > 0) 
-            ? item.damage.elementIds : this.subject().attackElements();
+        const elements = [];
+        for (const elementId of item.damage.elementIds) {
+            elements.push(elementId);
+        }
+        if (!item.meta.onlySkillElements) {
+            for (const elementId of this.subject().attackElements()) {
+                elements.push(elementId);
+            }
+        }
         return this.elementsMaxRate(target, elements);
     };
 
