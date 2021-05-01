@@ -144,7 +144,7 @@ function Window_CharaMakeItem_GrowPoint() {
             // ノートタグでgrowPointが未指定の場合のみランダム
             const usedGrowPoint = this.maxGrowPoint() - this.growPoint();
             const growPoint = usedGrowPoint + growPointMin + Math.randomInt(growPointMax - growPointMin + 1) ;
-            const diff = this.maxGrowPoint() - growPoint;
+            const diff = growPoint - this.maxGrowPoint();
             this.gainGrowPoint(diff);
         }
     };
@@ -381,7 +381,7 @@ function Window_CharaMakeItem_GrowPoint() {
     Game_CharaMakeItem_GrowPoint.prototype.apply = function(windowEntry, actor) {
         const selectWindow = windowEntry.selectWindow;
         const growPoint = selectWindow.growPoint();
-        const diff = actor.maxGrowPoint() - growPoint;
+        const diff = growPoint - actor.maxGrowPoint();
         actor.gainGrowPoint(diff);
         
     };
