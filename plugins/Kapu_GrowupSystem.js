@@ -283,7 +283,7 @@
      */
     Game_Actor.prototype.initMembers = function() {
         _Game_Actor_initMembers.call(this);
-        this._growPoint = { current : initialGrowPoint, max : initialGrowPoint };
+        this._growPoint = { current : 0, max : 0 };
     };
 
     const _Game_Actor_setup = Game_Actor.prototype.setup;
@@ -298,11 +298,10 @@
         this.initGrows();
 
         const actor = $dataActors[actorId];
-        const growPoint = Number(actor.meta.growPoint) || 0;
+        const growPoint = Math.floor(Number(actor.meta.growPoint)) || initialGrowPoint;
         const usedGrowPoint = this.usedGrowupPoint();
         const calcGrowPoint = this.growPointOfLevel();
-        this._growPoint.max = Math.max(usedGrowPoint, calcGrowPoint,
-            growPoint).clamp(0, Game_Actor.MAX_GROW_POINT);
+        this._growPoint.max = Math.max(usedGrowPoint + growPoint, calcGrowPoint).clamp(0, Game_Actor.MAX_GROW_POINT);
         this._growPoint.current = Math.max(0, this._growPoint.max - usedGrowPoint);
     };
 
