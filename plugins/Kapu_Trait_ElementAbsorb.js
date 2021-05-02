@@ -14,6 +14,12 @@
  * @max 999
  * @min 65
  * 
+ * @param textTraitElementAbsorb
+ * @text 特性文字列
+ * @desc TextManager.traitElementAbsorb(dataId)で返す文字列。%1に属性名が入る
+ * @type string
+ * @default %1吸収
+ * 
  * @help 
  * 属性吸収の特性を追加します。
  * 複数の吸収特性を持っている場合、最も高い吸収率が採用されます。
@@ -56,6 +62,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.1.4 TextManager.traitElementAbsorbを追加。
  * Version.0.1.3 Game_Action.elementsMaxRate()をオーバーライドしない実装にした。
  * Version.0.1.2 TRAIT_ELEMENT_ABSORB未指定時は動作しないように変更した。
  * Version.0.1.1 特性コードデフォルト値を100に変更した。
@@ -66,6 +73,7 @@
 (() => {
     const pluginName = "Kapu_Trait_ElementAbsorb";
     const parameters = PluginManager.parameters(pluginName);
+    const textTraitElementAbsorb = parameters["textTraitElementAbsorb"] || "";
 
     Game_BattlerBase.TRAIT_ELEMENT_ABSORB = Number(parameters["traitCode"]) || 0;
     if (!Game_BattlerBase.TRAIT_ELEMENT_ABSORB) {
@@ -123,6 +131,24 @@
     DataManager.addNotetagParserArmors(_processElementAbsorbNoteTag);
     DataManager.addNotetagParserStates(_processElementAbsorbNoteTag);
     DataManager.addNotetagParserEnemies(_processElementAbsorbNoteTag);
+
+    //------------------------------------------------------------------------------
+    // TextManager
+    /**
+     * 属性吸収特性のテキストを得る。
+     * 
+     * @param {number} dataId データID
+     * @returns {string} 属性吸収特性を表すテキスト
+     */
+    TextManager.traitElementAbsorb = function(dataId) {
+        const fmt = textTraitElementAbsorb;
+        const elementName = $dataSystem.elements[dataId];
+        if (fmt) {
+            return fmt.format(elementName);
+        } else {
+            return "";
+        }
+    };
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
