@@ -7,6 +7,7 @@
  * @orderAfter Kapu_Utility
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param weaponPerformanceTraitCode
  * @text 特性コード
@@ -29,6 +30,18 @@
  * @desc trueにすると武器レートはATK/MATのみ、防具レートはDEF/MDFのみを変動させます。
  * @default false
  * @type boolean
+ * 
+ * @param textTraitWeaponPerformance
+ * @text 武器性能強化特性
+ * @desc 武器性能強化特性文字列。%1に武器タイプ名
+ * @type string
+ * @default %1性能強化
+ * 
+ * @param textTraitArmorPerformance
+ * @text 防具性能強化特性。
+ * @desc 防具性能強化特性文字列。%1に防具タイプ名
+ * @type string
+ * @default %1性能強化
  * 
  * @help 
  * 特定の武器タイプ/防具タイプを装備したとき、
@@ -74,6 +87,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_ParamNameに対応
  * Version.0.1.0 新規作成。
  */
 (() => {
@@ -90,7 +104,7 @@
     }
     if (!Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE) {
         console.error(pluginName + ":TRAIT_ARMOR_PERFORMANCE is not valid.")
-    } 
+    }
 
 
     //------------------------------------------------------------------------------
@@ -148,9 +162,58 @@
     DataManager.addNotetagParserClasses(_processNoteTag);
     DataManager.addNotetagParserArmors(_processNoteTag);
     DataManager.addNotetagParserStates(_processNoteTag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE) {
+        const textTraitWeaponPerformance = parameters["textTraitWeaponPerformance"] || "";
+        /**
+         * 武器性能強化特性文字列を得る。
+         * 
+         * @param {number} dataId データID
+         * @returns {string} 文字列
+         */
+        TextManager.traitWeaponPerformance = function(dataId) {
+            const fmt = textTraitWeaponPerformance;
+            const wtypeStr = this.weaponTypeName(dataId);
+            if (fmt && wtypeStr) {
+                return fmt.format(wtypeStr);
+            } else {
+                return "";
+            }
+        };
+        if (TextManager._traitConverters) {
+            TextManager._traitConverters[Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE] = {
+                name:TextManager.traitWeaponPerformance, value:TextManager.traitValueSum, str:TextManager.traitValueStrRate, baseValue:1
+            };
+        }
+    }
+    if (Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE) {
+        const textTraitArmorPerformance = parameters["textTraitArmorPerformance"] || "";
+
+        /**
+         * 防具特性強化文字列を得る。
+         * 
+         * @param {number} dataId データID
+         * @returns {string} 文字列
+         */
+        TextManager.traitArmorPerformance = function(dataId) {
+            const fmt = textTraitArmorPerformance;
+            const atypeStr = this.armorTypeName(dataId);
+            if (fmt && atypeStr) {
+                return fmt.format(atypeStr);
+            } else {
+                return "";
+            }
+        };
+        if (TextManager._traitConverters) {
+            TextManager._traitConverters[Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE] = {
+                name:TextManager.traitArmorPerformance, value:TextManager.traitValueSum, str:TextManager.traitValueStrRate, baseValue:1
+            };
+        }
+    }
 
     //------------------------------------------------------------------------------
-    // DataManager
+    // Game_Actor
     const _Game_Actor_paramEquipValue = Game_Actor.prototype.paramEquipValue;
 
     /**
@@ -192,6 +255,7 @@
          * @param {Number} wtypeId 武器タイプ
          * @return {Number} 変動レート
          */
+        // eslint-disable-next-line no-unused-vars
         Game_Actor.prototype.paramEquipValueRateWeapon = function(wtypeId) {
             return 1;
         };
@@ -214,6 +278,7 @@
          * @param {Number} wtype 武器タイプ
          * @return {Number} 変動レート
          */
+        // eslint-disable-next-line no-unused-vars
         Game_Actor.prototype.paramEquipValueRateArmor = function(atypeId) {
             return 1;
         };
