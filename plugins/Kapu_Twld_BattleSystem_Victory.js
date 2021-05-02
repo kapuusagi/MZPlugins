@@ -1,6 +1,6 @@
 /*:ja
  * @target MZ 
- * @plugindesc hogehoge
+ * @plugindesc TWLD向けの戦闘システムの勝利画面カスタマイズ
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Twld_BattleSystem
