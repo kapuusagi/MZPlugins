@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_ElementCore
  * @orderAfter Kapu_ElementCore
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitCode
  * @text 特性コード
@@ -140,7 +141,7 @@
      * @param {number} dataId データID
      * @returns {string} 属性吸収特性を表すテキスト
      */
-    TextManager.traitElementAbsorb = function(dataId) {
+     TextManager.traitElementAbsorb = function(dataId) {
         const fmt = textTraitElementAbsorb;
         const elementName = $dataSystem.elements[dataId];
         if (fmt) {
@@ -149,6 +150,11 @@
             return "";
         }
     };
+    if (TextManager._traitConverters && Game_BattlerBase.TRAIT_ELEMENT_ABSORB) {
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_ELEMENT_ABSORB] = {
+            name:TextManager.traitElementAbsorb, value:TextManager.traitValueMax, str:TextManager.traitValueStrRate, baseValue:0
+        };
+    }
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
