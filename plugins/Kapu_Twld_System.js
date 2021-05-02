@@ -11,6 +11,7 @@
  * @orderAfter Kapu_Twld_BasicParams
  * @base Kapu_UniqueTraits
  * @base Kapu_Twld_LukSystem
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param passiveSkillType
  * @text パッシブスキルタイプ
@@ -64,7 +65,12 @@
     Game_BattlerBase.PASSIVE_SKILL_TYPE = Number(parameters["passiveSkillType"]) || 0;
 
 
-
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._traitConverters) {
+        // パラメータ特性バフを乗算から加算に変更しているので修正する。
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_PARAM].value = TextManager.traitValueSum;
+    }
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
