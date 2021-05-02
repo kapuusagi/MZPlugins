@@ -785,9 +785,9 @@
         return ((fmt && etypeName) ? fmt.format(etypeName) : "");
     };
 
-    TestManager._slotTypes = [];
+    TextManager._slotTypes = [];
     TextManager._slotTypes[0] = parameters["textSlotType0"];
-    Textmanager._slotTypes[1] = parameters["textSlotType1"];
+    TextManager._slotTypes[1] = parameters["textSlotType1"];
 
     /**
      * スロットタイプ名
@@ -1105,7 +1105,7 @@
     TextManager.traitName = function(code, dataId, value) {
         const converter = this._traitConverters[code];
         if (converter) {
-            return converter.name(code, dataId, value);
+            return converter.name.call(this, dataId, value);
         } else {
             return "";
         }
@@ -1122,7 +1122,7 @@
     TextManager.traitValueStr = function(code, dataId, value) {
         const converter = this._traitConverters[code];
         if (converter) {
-            return converter.str(dataId, value);
+            return converter.str.call(this, dataId, value);
         } else {
             return "";
         }
@@ -1145,11 +1145,12 @@
 
     /**
      * 特性値を得る。
+     * 異なる特性値が混在する場合、先頭の特性値に一致するものだけを対象とする。
      * 
      * @param {Array<Trait>} traits 特性配列
      * @returns {number} 値を得る。
      */
-    TextManager.traitsValue = function(traits) {
+    TextManager.traitValue = function(traits) {
         if (traits.length === 0) {
             return 0;
         } else {
@@ -1157,7 +1158,7 @@
             const dataId = traits[0].dataId;
             const converter = this._traitConverters[code];
             if (converter) {
-                return converter.value(traits.filter(t => (t.code === code) && (t.dataId === dataId)));
+                return converter.value.call(this, traits.filter(t => (t.code === code) && (t.dataId === dataId)));
             } else {
                 return 0;
             }
