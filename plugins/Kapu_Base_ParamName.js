@@ -342,6 +342,21 @@
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
+ * TextManagerにメソッドを追加しています。
+ * TextManager.traitsValue(traits:Array<Trait>) : number
+ *     Trait配列から特性値を得る。
+ * TextManager.traitName(code:number, dataId:number, value:number) : string
+ *     特性名を得る。
+ * TextManager.traitValueStr(code:number, dataId:number, value:number) : string
+ *     特性値を文字列に変換する。
+ * 
+ * Traitを実装した場合、以下のエントリに追加すれば上記インタフェースが使用できます。
+ * TextManager._traitConverters[code] = {
+ *     name: {function(dataId:number, value:number) : string} 特性名を取得する関数
+ *     value: {function(traits:Array<trait>) : number} 特性値を取得する関数
+ *     str: {function(dataId:number, value:number) : string} 特性値を文字列化する関数
+ *     baseValue : {number} 特性を持っていない場合の基準値(増減量を計算するためのもの)
+ * };
  * 
  * ============================================
  * プラグインコマンド
@@ -1085,6 +1100,61 @@
             return "";
         }
     };
+
+    /**
+     * 特性値文字列を得る。
+     * 
+     * @param {number} code 特性コード
+     * @param {number} dataId 特性データID
+     * @param {number} value 特性値
+     * @returns {string} 特性値文字列
+     */
+    TextManager.traitValueStr = function(code, dataId, value) {
+        const converter = this._traitConverters[code];
+        if (converter) {
+            return converter.str(dataId, value);
+        } else {
+            return "";
+        }
+    };
+
+    /**
+     * ベース値を得る。
+     * 
+     * @param {number} code コード
+     * @returns {number} ベース値
+     */
+    TextManager.traitBaseValue = function(code) {
+        const converter = this._traitConverters[code];
+        if (converter) {
+            return converter.baseValue;
+        } else {
+            return 0;
+        }
+    };
+
+    /**
+     * 特性値を得る。
+     * 
+     * @param {Array<Trait>} traits 特性配列
+     * @returns {number} 値を得る。
+     */
+    TextManager.traitsValue = function(traits) {
+        if (traits.length === 0) {
+            return 0;
+        } else {
+            const code = traits[0].code;
+            const dataId = traits[0].dataId;
+            const converter = this._traitConverters[code];
+            if (converter) {
+                return converter.value(traits.filter(t => (t.code === code) && (t.dataId === dataId)));
+            } else {
+                return 0;
+            }
+        }
+    };
+
+
 
 
 
