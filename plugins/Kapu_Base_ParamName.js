@@ -898,6 +898,16 @@
     };
 
     /**
+     * 値の最大値を得る。
+     * 
+     * @param {Array<traits>} traits 特性配列
+     * @returns {number} 値
+     */
+    TextManager.traitValueMax = function(traits) {
+        return traits.reduce((prev, t) => Math.max(prev, t.value), 0);
+    };
+
+    /**
      * スペシャルフラグの値を得る。
      * 
      * @param {Array<traits>} traits 特性配列
