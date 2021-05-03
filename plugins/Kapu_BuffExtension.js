@@ -7,6 +7,7 @@
  * @orderAfter Kapu_Utility
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param fixedBuffEffectCode
  * @text 固定バフエフェクトコード
@@ -63,6 +64,31 @@
  * @type number
  * @min 5
  * @default 112
+ * 
+ * 
+ * @param textTraitSpecialFlagBufTurnAdd
+ * @text バフターン延長特性名
+ * @desc バフターン延長特性名
+ * @type string
+ * @default 付与バフターン数延長
+ * 
+ * @param textTraitSpecialFlagDebufTurnAdd
+ * @text デバフターン延長特性名
+ * @desc デバフターン延長特性名
+ * @type string
+ * @default 付与デバフターン数延長
+ * 
+ * @param textTraitSpecialFlagAcptBufTurnUp
+ * @text 受付バフターン延長特性名
+ * @desc 受付バフターン延長特性名
+ * @type string
+ * @default 受けたバフターン数延長
+ * 
+ * @param textTraitSpecialFlagDebuffTurnDown
+ * @text 受付デバフターン数減少特性名
+ * @desc 受付デバフターン数減少特性名
+ * @type string
+ * @default 受けたデバフターン数短縮
  * 
  * @help 
  * バフの拡張をするプラグイン。
@@ -186,6 +212,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 固定量バフ計算が誤っていた不具合を修正
+ *               Kapu_Base_ParamNameに対応。
  * Version.0.1.0 新規作成。
  */
 
@@ -411,6 +439,32 @@ function Game_Buff() {
     DataManager.addNotetagParserArmors(_processTraitNoteTag);
     DataManager.addNotetagParserEnemies(_processTraitNoteTag);
 
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (Game_BattlerBase.TRAIT_STATE_RATEBUFF && TextManager._traitConverters) {
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_STATE_RATEBUFF] = {
+            name:TextManager.traitParam, value:TextManager.traitValueSum, str:TextManager.traitValueStrRateAbs, baseValue:0
+        };
+    }
+    if (Game_BattlerBase.TRAIT_STATE_FIXEDBUFF && TextManager._traitConverters) {
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_STATE_FIXEDBUFF] = {
+            name:TextManager.traitParam, value:TextManager.traitValueSum, str:TextManager.traitValueStrInt, baseValue:0
+        };
+    }
+    if (TextManager._specialFlags) {
+        if (Game_BattlerBase.FLAG_ID_BUFFTURN_ADD) {
+            TextManager._specialFlags[Game_BattlerBase.FLAG_ID_BUFFTURN_ADD] = parameters["textTraitSpecialFlagBufTurnAdd"] || "";
+        }
+        if (Game_BattlerBase.FLAG_ID_DEBUFFTURN_ADD) {
+            TextManager._specialFlags[Game_BattlerBase.FLAG_ID_DEBUFFTURN_ADD] = parameters["textTraitSpecialFlagDebufTurnAdd"] || "";
+        }
+        if (Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP) {
+            TextManager._specialFlags[Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP] = parameters["textTraitSpecialFlagAcptBufTurnUp"] || "";
+        }
+        if (Game_BattlerBase.FLAG_ID_ACPT_DEBUFFTURN_DOWN) {
+            TextManager._specialFlags[Game_BattlerBase.FLAG_ID_ACPT_DEBUFFTURN_DOWN] = parameters["textTraitSpecialFlagDebuffTurnDown"] || "";
+        }
+    }
 
     //------------------------------------------------------------------------------
     // Game_Buff
@@ -597,7 +651,7 @@ function Game_Buff() {
      */
     Game_BattlerBase.prototype.stateBuff = function(paramId, baseValue) {
         const rate = this.traitsSum(Game_BattlerBase.TRAIT_STATE_RATEBUFF, paramId);
-        const fixedValue = this.traitsSum(Game_BattlerBase.TRAIT_STATE_FIXEDBUFF);
+        const fixedValue = this.traitsSum(Game_BattlerBase.TRAIT_STATE_FIXEDBUFF, paramId);
         return Math.round(baseValue * rate) + fixedValue;
     };
 
