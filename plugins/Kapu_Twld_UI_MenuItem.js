@@ -956,14 +956,15 @@ function Window_ItemInfo() {
             this.drawText(hideText, rect.x, rect.y, rect.width);
         } else {
             const equipEffects = this.displayEquipEffects(item);
+            const padding = this.itemPadding();
+            const lineHeight = this.lineHeight();
             const xoffs = 40;
+            const columnWidth = (width - xoffs - padding * 2) / 3;
             const effectX = x + xoffs;
             const xLimit = x + width;
             const effectWidth = width - xoffs;
             let dispX = effectX;
             let dispY = y;
-            let lineHeight = this.lineHeight();
-            const padding = this.itemPadding();
             for (const equipEffect of equipEffects) {
                 const textEffectName = equipEffect.name;
                 const textEffectValue = (equipEffect.value) ? ("(" + equipEffect.value + ")") : "";
@@ -992,7 +993,7 @@ function Window_ItemInfo() {
                     this.changeTextColor(c);
                     this.drawText(textEffectValue, dispX + labelWidth, dispY, valueWidth);
                 }
-                dispX += textWidth + padding;
+                dispX += Math.ceil(textWidth / columnWidth) * (columnWidth + padding);
             }
         }
     };
