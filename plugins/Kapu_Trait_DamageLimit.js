@@ -7,6 +7,7 @@
  * @orderAfter Kapu_Utility
  * @base Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Base_DamageCalculation
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param defaultMaxDamage
  * @text デフォルト最大ダメージ
@@ -20,6 +21,12 @@
  * @type number
  * @default 103
  * @min 65
+ * 
+ * @param textTraitDamageLimit
+ * @text ダメージリミット特性
+ * @desc ダメージリミット特性。
+ * @type text
+ * @default 最大ダメージ制限上昇
  * 
  * @help 
  * 発生するダメージに制限を付け、特性により変更できるようにするプラグインです。
@@ -87,6 +94,26 @@
     DataManager.addNotetagParserArmors(_processNoteTag);
     DataManager.addNotetagParserStates(_processNoteTag);
     DataManager.addNotetagParserEnemies(_processNoteTag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    const textTraitDamageLimit = parameters["textTraitDamageLimit"] || "";
+
+    /**
+     * ダメージリミット特性
+     * 
+     * @param {number} dataId データID
+     * @returns {string} 文字列
+     */
+    // eslint-disable-next-line no-unused-vars
+    TextManager.traitDamageLimit = function(dataId) {
+        return textTraitDamageLimit;
+    };
+
+    if (TextManager._traitConverters) {
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_DAMAGE_LIMIT] = {
+            name:TextManager.textTraitDamageLimit, value:TextManager.traitValueMax, str:TextManager.traitValueStrInt, baseValue:0
+        };
+    }
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
