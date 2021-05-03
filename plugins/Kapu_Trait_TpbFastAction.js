@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param specialFlagId
  * @text ファストアタックフラグID
@@ -12,6 +13,13 @@
  * @type number
  * @default 102
  * @min 6
+ * 
+ * @param textTraitFirstAction
+ * @text 先制行動特性名
+ * @desc 先制行動特性名
+ * @type string
+ * @default 戦闘時先制行動
+ * 
  * 
  * @help 
  * 戦闘開始時、初回のTPGがたまった状態にする特性を追加します。
@@ -34,6 +42,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_ParamName に対応
  * Version.0.1.1 FLAG_ID_FAST_ACTION無効時、動作しないように変更した。
  * Version.0.1.0 新規作成。
  */
@@ -75,8 +84,13 @@
     DataManager.addNotetagParserStates(_processNotetag);
     DataManager.addNotetagParserEnemies(_processNotetag);
     //------------------------------------------------------------------------------
-    // Game_Battler
+    // TextManager
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_FAST_ACTION) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_FAST_ACTION] = parameters["textTraitFirstAction"] || "";
+    }
 
+    //------------------------------------------------------------------------------
+    // Game_Battler
     const _Game_Battler_initTpbChargeTime = Game_Battler.prototype.initTpbChargeTime;
     /**
      * TPB値を初期化する。
