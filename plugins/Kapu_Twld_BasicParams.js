@@ -490,7 +490,7 @@
 
     if (TextManager._traitConverters && Game_BattlerBase.TRAIT_BASIC_PARAM) {
         TextManager._traitConverters[Game_BattlerBase.TRAIT_BASIC_PARAM] = {
-            name:TextManager.traitBasicParam, value:TextManager.traitValueSum, str:TextManager.traitValueStrRateAbs, baseValue:0
+            name:TextManager.traitBasicParam, value:TextManager.traitValueSum, str:TextManager.traitValueStrInt, baseValue:0
         };
     }
     if (TextManager._traitConverters && Game_BattlerBase.TRAIT_BASIC_PARAM_RATE) {
