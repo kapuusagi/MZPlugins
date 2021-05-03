@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @command enableTrait
  * @text レートを有効にする
@@ -50,6 +51,19 @@
  * @type number
  * @min 6
  * @default 103
+ * 
+ * @param textTraitBuyingPriceRate
+ * @text 購入金額レート特性名
+ * @desc 購入金額レート特性名
+ * @type string
+ * @default 購入金額
+ * 
+ * @param textTraitSellingPriceRate
+ * @text 売却金額レート特性名
+ * @desc 売却金額レート特性名
+ * @type string
+ * @default 売却金額
+ * 
  * 
  * @help 
  * ベーシックシステム店頭での購入・売却レートに影響する特性を追加するプラグイン。
@@ -105,6 +119,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_ParamNameに対応
  * Version.0.1.0 新規作成。
  */
 (() => {
@@ -197,6 +212,22 @@
     DataManager.addNotetagParserWeapons(_processNoteTag);
     DataManager.addNotetagParserArmors(_processNoteTag);
     DataManager.addNotetagParserStates(_processNoteTag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._partyAbilities && Game_Party.ABILITY_BUYING_PRICE_RATE) {
+        TextManager._partyAbilities[Game_Party.ABILITY_BUYING_PRICE_RATE] = {
+            name:parameters["textTraitBuyingPriceRate"] || "",
+            value:TextManager.traitValueSum,
+            str:TextManager.traitValueStrRate
+        };
+    }
+    if (TextManager._partyAbilities && Game_Party.ABILITY_SELLING_PRICE_RATE) {
+        TextManager._partyAbilities[Game_Party.ABILITY_SELLING_PRICE_RATE] = {
+            name:parameters["textTraitSellingPriceRate"] || "",
+            value:TextManager.traitValueSum,
+            str:TextManager.traitValueStrRate
+        };
+    }
     //------------------------------------------------------------------------------
     // Game_Temp
     const _Game_Temp_initialize = Game_Temp.prototype.initialize;
