@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @command gainBasicParam
  * @text 基本パラメータ増減
@@ -149,7 +150,33 @@
  * @desc ステータス画面などに使用するLUK表示名
  * @type string
  * @default LUK
- *
+ * 
+ * 
+ * @param textTraitBasicParamUp
+ * @text 基本パラメータ加算特性(増加)
+ * @desc 基本パラメータ加算特性(増加)。%1に基本パラメータ名
+ * @type string
+ * @default %1増加
+ * 
+ * @param textTraitBasicParamDown
+ * @text 基本パラメータ加算特性(減少)
+ * @desc 基本パラメータ加算特性(減少)。%1に基本パラメータ名
+ * @type string
+ * @default %1減少
+ * 
+ * @param textTraitBasicParamRateUp
+ * @text 基本パラメータ割合特性(増加)
+ * @desc 基本パラメータ割合特性(増加)。%1に基本パラメータ名
+ * @type string
+ * @default %1増加
+ * 
+ * @param textTraitBasicParamRateDown
+ * @text 基本パラメータ割合特性(減少)
+ * @desc 基本パラメータ割合特性(減少)。%1に基本パラメータ名
+ * @type string
+ * @default %1減少
+ * 
+ * 
  * @help 
  * TWLD向けに作成した、基本パラメータ(STR/DEX/VIT/INT/MEN/AGI/LUK)を
  * 追加するプラグイン。
@@ -231,7 +258,8 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 追加した。
+ * Version.0.2.0 Kapu_Base_ParamNameに対応
+ * Version.0.1.0 新規作成
  */
 (() => {
     const pluginName = "Kapu_Twld_BasicParams";
@@ -247,6 +275,11 @@
             ? false : (parameters["overwriteAGI"] === "true");
     const overwriteLUK = (typeof parameters["overwriteLUK"] === "undefined")
             ? false : (parameters["overwriteLUK"] === "true");
+
+    const textTraitBasicParamUp = parameters["textTraitBasicParamUp"] || "";
+    const textTraitBasicParamDown = parameters["textTraitBasicParamDown"] || "";
+    const textTraitBasicParamRateUp = parameters["textTraitBasicParamRateUp"] || "";
+    const textTraitBasicParamRateDown = parameters["textTraitBasicParamRateDown"] || "";
 
     const paramLabels = [
         String(parameters["paramLabel0"]) || "STR",
@@ -430,6 +463,41 @@
         return paramLabels[paramId] || "";
     };
 
+    /**
+     * 基本パラメータ加算特性名。
+     * 
+     * @param {number} dataId データID 
+     * @param {number} value 値
+     * @return {string} 文字列
+     */
+    TextManager.traitBasicParam = function(dataId, value) {
+        const fmt = (value >= 0) ? textTraitBasicParamUp : textTraitBasicParamDown;
+        const paramName = this.basicParam(dataId);
+        return ((fmt && paramName) ? fmt.format(paramName) : "");
+    };
+    /**
+     * 基本パラメータ割合特性名。
+     * 
+     * @param {number} dataId データID
+     * @param {number} value 値
+     * @returns {string} 文字列
+     */
+    TextManager.traitBasicParamRate = function(dataId, value) {
+        const fmt = (value >= 0) ? textTraitBasicParamRateUp : textTraitBasicParamRateDown;
+        const paramName = this.basicParam(dataId);
+        return ((fmt && paramName) ? fmt.format(paramName) : "");
+    };
+
+    if (TextManager._traitConverters && Game_BattlerBase.TRAIT_BASIC_PARAM) {
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_BASIC_PARAM] = {
+            name:TextManager.traitBasicParam, value:TextManager.traitValueSum, str:TextManager.traitValueStrRateAbs, baseValue:0
+        };
+    }
+    if (TextManager._traitConverters && Game_BattlerBase.TRAIT_BASIC_PARAM_RATE) {
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_BASIC_PARAM_RATE] = {
+            name:TextManager.traitBasicParamRate, value:TextManager.traitValueSum, str:TextManager.traitValueStrRateAbs, baseValue:0
+        };
+    }
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
