@@ -1,20 +1,27 @@
 /*:ja
  * @target MZ 
- * @plugindesc TPB速度/キャストタイム/チャージタイムの特性を追加するプラグイン。
+ * @plugindesc TPB速度倍率補正の特性を追加するプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * @orderAfter Kapu_Base_Tpb
  * @orderAfter Kapu_Base_Twld
  * 
  * @param traitXParamDid
  * @text TPB速度倍率-特性ID
  * @desc TPB速度倍率の特性として割り当てるID番号。(10以上で他のプラグインとぶつからないやつ)
- * @default 11
+ * @default 210
  * @type number
  * @max 999
  * @min 10
+ * 
+ * @param textTraitTpbSpeed
+ * @text TPB速度倍率特性名
+ * @desc TPB速度倍率特性名
+ * @type string
+ * @default 行動速度
  * 
  * @help 
  * TPB速度増減の特性を追加します。非TPBでは意味がありません。
@@ -48,6 +55,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_ParamName に対応
  * Version.0.1.2 ID未指定時に機能を無効化するように変更した。
  * Version.0.1.1 プラグインコメントをorderAfterに変更した。
  * Version.0.1.0 新規作成。
@@ -95,6 +103,11 @@
     DataManager.addNotetagParserArmors(_processNotetag);
     DataManager.addNotetagParserStates(_processNotetag);
     DataManager.addNotetagParserEnemies(_processNotetag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._xparam && Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED) {
+        TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED] = parameters["textTraitTpbSpeed"] || "";
+    }
 
     //------------------------------------------------------------------------------
     // Game_Battler
