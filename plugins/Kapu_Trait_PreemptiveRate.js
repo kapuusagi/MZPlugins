@@ -5,14 +5,21 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitPartyAbilityId
  * @text パーティー特性DID
  * @desc 特性として割り当てるID番号。(6以上で他のプラグインとぶつからないやつ)
- * @default 8
+ * @default 104
  * @type number
- * @max 999
+ * @max 9999
  * @min 6
+ * 
+ * @param textTraitPreemptiveRate
+ * @text 先制攻撃率特性名
+ * @desc 先制攻撃率特性名
+ * @type string
+ * @default 先制攻撃率
  * 
  * @help 
  * Traitに先制攻撃率加算を追加します。
@@ -61,8 +68,8 @@
     const parameters = PluginManager.parameters(pluginName);
 
     Game_Party.ABILITY_PREEMPTIVE_RATE = Number(parameters["traitPartyAbilityId"]) || 0;
-    if (Game_Party.ABILITY_PREEMPTIVE_RATE === 0) {
-        console.error(pluginName + ":ABILITY_PREEMPTIVE_RATE is 0.");
+    if (!Game_Party.ABILITY_PREEMPTIVE_RATE) {
+        console.error(pluginName + ":ABILITY_PREEMPTIVE_RATE is not valid.");
         return;
     }
 
@@ -98,7 +105,16 @@
     DataManager.addNotetagParserArmors(_processNoteTag);
     DataManager.addNotetagParserStates(_processNoteTag);
 
-
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._partyAbilities && Game_Party.ABILITY_PREEMPTIVE_RATE) {
+        TextManager._partyAbilities[Game_Party.ABILITY_PREEMPTIVE_RATE] = {
+            name: parameters["textTraitPreemptiveRate"] || "",
+            value: TextManager.traitValueSum,
+            str: TextManager.traitValueStrRate
+        };
+    }
+    
     //------------------------------------------------------------------------------
     // Game_Party
     /**
