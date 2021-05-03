@@ -14,6 +14,12 @@
  * @max 999
  * @min 6
  * 
+ * @param textTraitDropItemRate
+ * @text ドロップアイテムレート名
+ * @desc ドロップアイテムレート名
+ * @type string
+ * @default ドロップ率
+ * 
  * @help 
  * Traitにドロップレート特性を追加します。
  * ドロップレートの倍率計算が次のようになります。
@@ -92,6 +98,17 @@
     DataManager.addNotetagParserWeapons(_processDropItemRateTrait);
     DataManager.addNotetagParserArmors(_processDropItemRateTrait);
     DataManager.addNotetagParserStates(_processDropItemRateTrait);
+
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._partyAbilities && Game_Party.ABILITY_DROP_ITEM_RATE) {
+        TextManager._partyAbilities[Game_Party.ABILITY_DROP_ITEM_RATE] = {
+            name:parameters["textTraitDropItemRate"] || "",
+            value:TextManager.traitValueSum,
+            str:TextManager.traitValueStrRate
+        };
+    }
+
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     /**
