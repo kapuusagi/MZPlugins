@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitXParamDid
  * @text 特性DID
@@ -13,6 +14,12 @@
  * @type number
  * @max 999
  * @min 10
+ * 
+ * @param textTraitAutoGuardRate
+ * @text 自動防御特性名
+ * @desc 自動防御特性名
+ * @type string
+ * @default 自動防御率
  * 
  * @help 
  * 敵対者のアクションが行われたとき、指定した確率で自動ガード処理される特性を追加します。
@@ -43,6 +50,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_ParamNameに対応
  * Version.0.1.1 TRAIT_XPARAM_DID_AUTOGUARD_RATE未指定時は
  *               ログに出力して動作しないように変更した。
  * Version.0.1.0 ソースを調査していて思いついたので追加した。
@@ -90,6 +98,12 @@
     DataManager.addNotetagParserStates(_processAutoGuardRateNoteTag);
     DataManager.addNotetagParserEnemies(_processAutoGuardRateNoteTag);
 
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._xparam) {
+        TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE] = parameters["textTraitAutoGuardRate"] || "";
+    }
+    
     //------------------------------------------------------------------------------
     // Game_BattlerBase
 
