@@ -7,6 +7,7 @@
  * @orderAfter Kapu_Utility
  * @base Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Base_DamageCalculation
+ * @orderAfter Kapu_Base_ParamName
  *
  * @param traitXParamDidDEFPR
  * @text DEFPR特性DID
@@ -45,6 +46,30 @@
  * @desc プロパティ定義をするかどうか。
  * @type boolean
  * @default false
+ * 
+ * @param textTraitDEFPenetration
+ * @text DEF貫通率特性
+ * @desc DEF貫通率特性
+ * @type string
+ * @default P.PEN
+ * 
+ * @param textTraitMDFPenetration
+ * @text MDF貫通率特性
+ * @desc MDF貫通率特性
+ * @type string
+ * @default M.PEN
+ * 
+ * @param textTraitPDRPenetration
+ * @text PDR減衰率特性
+ * @desc PDR減衰率特性
+ * @type string
+ * @default P.ATN
+ * 
+ * @param textTraitMDRPenetration
+ * @text MDR減衰率特性
+ * @desc MDR減衰率特性
+ * @type string
+ * @default M.ATN
  * 
  * @help 
  * 防御貫通特性を追加するプラグイン。
@@ -102,6 +127,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 Kapu_Base_ParamName に対応。
  * Version.0.2.0 プロパティ定義をする機能を追加した。
  *               DID未指定時に該当機能を無効かするように修正した。
  * Version.0.1.0 TWLD_Coreから移植して作成。
@@ -171,6 +197,22 @@
     DataManager.addNotetagParserArmors(_processPenetrateRateNoteTag);
     DataManager.addNotetagParserStates(_processPenetrateRateNoteTag);
     DataManager.addNotetagParserEnemies(_processPenetrateRateNoteTag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._xparam) {
+        if (Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR) {
+            TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR] = parameters["textTraitDEFPenetration"] || "";
+        }
+        if (Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR) {
+            TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR] = parameters["textTraitPDRPenetration"] || "";
+        }
+        if (Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR) {
+            TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR] = parameters["textTraitMDFPenetration"] || "";
+        }
+        if (Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR) {
+            TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR] = parameters["textTraitMDRPenetration"] || "";
+        }
+    }
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     if (Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR) {
