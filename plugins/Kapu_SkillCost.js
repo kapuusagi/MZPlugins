@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param hpCostRateTraitSParamDid
  * @text HPコストレートデータID
@@ -35,6 +36,18 @@
  * @desc (UI表示する場合のみ)コスト表示欄の幅。使用するシステムフォントのサイズに合わせて、うまいこと調整してください。
  * @type number
  * @default 150
+ * 
+ * @param traitHpCostRate
+ * @text HPコストレート特性名
+ * @desc HPコストレート特性名
+ * @type string
+ * @default HPコストレート
+ * 
+ * @param traitTpCostRate
+ * @text TPコストレート特性名
+ * @desc TPコストレート特性名
+ * @type string
+ * @default TPコストレート
  * 
  * @help 
  * ベーシックシステムでのスキルコストは
@@ -105,6 +118,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 Kapu_Base_ParamName に対応した。
  * Version.0.2.0 スキルコスト表示の変更機能を追加した。
  * Version.0.1.1 現在HP/MP/TPを元にしたコスト算出で、
  *               現在HP/MP/TPがゼロの場合、コストもゼロになる不具合を修正した。
@@ -218,7 +232,15 @@
 
     DataManager.addNotetagParserSkills(_processSkillNotetag);
 
-
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._sparam && Game_BattlerBase.TRAIT_SPARAM_DID_HPCOST_RATE) {
+        TextManager._sparam[Game_BattlerBase.TRAIT_SPARAM_DID_HPCOST_RATE] = parameters["traitHpCostRate"] || "";
+    }
+    if (TextManager._sparam && Game_BattlerBase.TRAIT_SPARAM_DID_TPCOST_RATE) {
+        TextManager._sparam[Game_BattlerBase.TRAIT_SPARAM_DID_TPCOST_RATE] = parameters["traitTpCostRate"] || "";
+    }
+    
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     /**
