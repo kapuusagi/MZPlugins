@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitXParamDid
  * @text TPチャージ特性特性ID
@@ -13,6 +14,13 @@
  * @type number
  * @max 999
  * @min 10
+ * 
+ * @param textTraitInitTpRate
+ * @text 戦闘開始時TPチャージレート特性名
+ * @desc 戦闘開始時TPチャージレート特性名
+ * @type string
+ * @default 戦闘開始時TP率
+ * 
  * @help 
  * 戦闘開始時に所定の割合だけTPがチャージされた状態にするプラグイン。
  * チャージされる量は、ステートなどに設定した値の合計になります。
@@ -85,6 +93,11 @@
     DataManager.addNotetagParserArmors(_processNotetag);
     DataManager.addNotetagParserStates(_processNotetag);
     DataManager.addNotetagParserEnemies(_processNotetag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._xparam) {
+        TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_INITTP_RATE] = parameters["textTraitInitTpRate"] || "";
+    }
     //------------------------------------------------------------------------------
     // Game_Battler
 
