@@ -115,8 +115,14 @@
     DataManager.addNotetagParserEnemies(_processNotetag);
     //------------------------------------------------------------------------------
     // TextManager
+    /**
+     * 回復不能ターゲット名を得る。
+     * 
+     * @param {number} dataId データID
+     * @returns {string} ターゲット名
+     */
     TextManager.unrecoverTarget = function(dataId) {
-        switch (targetName) {
+        switch (dataId) {
             case 1:
                 return TextManager.hpA;
             case 2:
