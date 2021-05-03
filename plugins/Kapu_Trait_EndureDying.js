@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param specialFlagId
  * @text フラグID
@@ -12,6 +13,12 @@
  * @type number
  * @default 113
  * @min 6
+ * 
+ * @param textTraitEndureDying
+ * @text 瀕死攻撃を受けたときHP1で1回耐える特性名
+ * @desc 瀕死攻撃を受けたときHP1で1回耐える特性名
+ * @type string
+ * @default 瀕死攻撃時HP1で耐える
  * 
  * @help 
  * ダメージを受けたとき、瀕死で耐える特性を追加します。
@@ -38,6 +45,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_ParamNameに対応
  * Version.0.1.0 新規作成。
  */
 (() => {
@@ -74,6 +82,12 @@
     DataManager.addNotetagParserStates(_processNotetag);
     DataManager.addNotetagParserEnemies(_processNotetag);
 
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_ENDURE_DYING) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_ENDURE_DYING] = parameters["textTraitEndureDying"] || "";
+    }
+    
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     /**
