@@ -7,6 +7,7 @@
  * @orderAfter Kapu_Utility
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitSParamDid
  * @text 最大TPレート特性DiD
@@ -15,6 +16,12 @@
  * @type number
  * @max 999
  * @min 10
+ * 
+ * @param textTraitMaxTpRate
+ * @text 最大TPレート特性名
+ * @desc 最大TPレート特性名
+ * @type string
+ * @default MaxTP
  *  
  * @help 
  * 最大TPレート特性を追加するプラグイン。
@@ -90,6 +97,13 @@
     DataManager.addNotetagParserArmors(_processNotetag);
     DataManager.addNotetagParserStates(_processNotetag);
     DataManager.addNotetagParserEnemies(_processNotetag);
+
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._sparam) {
+        TextManager._sparam[Game_BattlerBase.TRAIT_SPARAM_DID_MAXTP_RATE] = parameters["textTraitMaxTpRate"] || "";
+    }
+    
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     const _Game_BattlerBase_maxTpRate = Game_BattlerBase.prototype.maxTpRate;
