@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_ElementCore
  * @orderAfter Kapu_ElementCore
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitCode
  * @text 特性コード
@@ -13,6 +14,18 @@
  * @type number
  * @max 999
  * @min 65
+ * 
+ * @param textTraitElementAttackRateUp
+ * @text 攻撃時属性ダメージレート増加特性(増加)
+ * @desc 攻撃時属性ダメージレート増加特性(増加)。%1に属性名が入る。
+ * @type string
+ * @default %1属性効果上昇
+ * 
+ * @param textTraitElementAttackRateDown
+ * @text 攻撃時属性ダメージレート増加特性(減少)
+ * @desc 攻撃時属性ダメージレート増加特性(減少)。%1に属性名が入る。
+ * @type string
+ * @default %1属性効果減少
  * 
  * @help 
  * 属性攻撃時のダメージ量を割合で増加させる特性を追加する。
@@ -53,6 +66,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_ParamName に対応。
  * Version.0.1.1 TRAIT_ELEMENT_ATTACK_RATE未指定時は
  *               ログに出力して動作しないように変更した。
  * Version.0.1.0 思いついたので追加した。
@@ -66,6 +80,9 @@
         console.error(pluginName + ":TRAIT_ELEMENT_ATTACK_RATE is not valid.");
         return;
     }
+
+    const textTraitElementAttackRateUp = parameters["textTraitElementAttackRateUp"] || "";
+    const textTraitElementAttackRateDown = parameters["textTraitElementAttackRateDown"] || "";
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -116,6 +133,18 @@
     DataManager.addNotetagParserArmors(_processNoteTag);
     DataManager.addNotetagParserStates(_processNoteTag);
     DataManager.addNotetagParserEnemies(_processNoteTag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    TextManager.traitElementAttackRate = function(dataId, value) {
+        const fmt = (value >= 0) ? textTraitElementAttackRateUp : textTraitElementAttackRateDown;
+        const elementName = this.elementName(dataId);
+        return ((fmt && elementName) ? fmt.format(elementName) : "");
+    };
+    if (TextManager._traitConverters) {
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE] = {
+            name:TextManager.traitElementAttackRate, value:TextManager.traitValuePi, str:TextManager.traitValueStrRateAbs, baseValue:1
+        };
+    }
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
