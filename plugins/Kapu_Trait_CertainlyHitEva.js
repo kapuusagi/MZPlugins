@@ -36,6 +36,30 @@
  * @default 106
  * @min 6
  * 
+ * @param textTraitCertainlyHitPhy
+ * @text 物理スキル確定命中特性
+ * @desc 物理スキル確定命中特性
+ * @type string
+ * @default 物理必中
+ * 
+ * @param textTraitCertainlyHitMag
+ * @text 魔法スキル確定命中特性
+ * @desc 魔法スキル確定命中特性
+ * @type string
+ * @default 魔法必中
+ * 
+ * @param textTraitCertainlyEvaPhy
+ * @text 物理完全回避特性
+ * @desc 物理完全回避特性
+ * @type string
+ * @default 物理完全回避
+ * 
+ * @param textTraitCertainlyEvaMag
+ * @text 魔法完全回避特性
+ * @desc 魔法完全回避特性
+ * @type string
+ * @default 魔法完全回避
+ * 
  * @help 
  * 攻撃・スキル使用時に必ず命中/回避する特性を追加します。
  * HPダメージを与えるもの、MPダメージを与えるアイテム/スキル/武器攻撃が対象になります。
@@ -142,6 +166,20 @@
     DataManager.addNotetagParserArmors(_processNotetag);
     DataManager.addNotetagParserStates(_processNotetag);
     DataManager.addNotetagParserEnemies(_processNotetag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY] = parameters["textTraitCertainlyHitPhy"] || "";
+    }
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG] = parameters["textTraitCertainlyHitMag"] || "";
+    }
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY] = parameters["textTraitCertainlyEvaPhy"] || "";
+    }
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG] = parameters["textTraitCertainlyEvaMag"] || "";
+    }
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
