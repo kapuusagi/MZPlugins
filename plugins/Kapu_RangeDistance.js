@@ -3,6 +3,7 @@
  * @plugindesc 射程距離システムプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @orderAfter Kapu_Base_ParamName
  *
  * @command setEnemyBattlePosition
  * @text エネミー戦闘位置設定
@@ -75,6 +76,18 @@
  * @desc 後ろに移動する先頭コマンドに割り当てるスキルID。0で未割当。
  * @default 0
  * @type skill
+ * 
+ * @param textTraitBlockMovePosition
+ * @text 戦闘位置移動効果防止特性名
+ * @desc 戦闘位置移動効果防止特性名
+ * @type string
+ * @default 隊列移動防御
+ * 
+ * @param textTraitIgnoreRangeDistance
+ * @text 戦闘距離射程無視特性名
+ * @desc 戦闘距離射程無視特性名
+ * @type string
+ * @default 射程無視
  * 
  * @help
  * 戦闘時の射程距離(S/M/L)を追加します。
@@ -174,6 +187,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.5.0 Kapu_Base_ParamNameに対応
  * Version.0.4.0 エネミーグループのターン0イベントにコメントを記述することで、戦闘位置を設定できるようにした。
  * Version.0.3.0 ステータス表示用に、Game_BattlerBaseに通常攻撃射程を得るインタフェースを追加した。
  * Version.0.2.0 射程2のスキル使用時はカウンターを受けないようにした。
@@ -437,7 +451,15 @@
             _addEffectMoveBattlePosition(skill, 1, 1.0);
         }
     };
-
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION] = parameters["textTraitBlockMovePosition"] || "";
+    }
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE] = parameters["textTraitIgnoreRangeDistance"] || "";
+    }
+    
     //------------------------------------------------------------------------------
     // Game_Action
 
