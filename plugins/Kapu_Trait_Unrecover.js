@@ -7,6 +7,7 @@
  * @orderAfter Kapu_Utility
  * @base Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Base_DamageCalculation
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param unrecoveryTraitCode
  * @text フラグID
@@ -14,6 +15,12 @@
  * @type number
  * @min 65
  * @default 106
+ * 
+ * @param textTraitUnrecover
+ * @text 回復不能特性名
+ * @desc 回復不能特性名。%1に回復不可能対象名
+ * @type string
+ * @default %1回復不能
  * 
  * @help 
  * 回復不可能効果を及ぼす特性を追加するプラグイン。
@@ -52,6 +59,7 @@
 (() => {
     const pluginName = "Kapu_Trait_Unrecover";
     const parameters = PluginManager.parameters(pluginName);
+    const textTraitUnrecover = parameters["textTraitUnrecover"] || "";
 
     Game_BattlerBase.TRAIT_UNRECOVER = Number(parameters["unrecoveryTraitCode"]) || 0;
     if (!Game_BattlerBase.TRAIT_UNRECOVER) {
@@ -105,7 +113,29 @@
     DataManager.addNotetagParserArmors(_processNotetag);
     DataManager.addNotetagParserStates(_processNotetag);
     DataManager.addNotetagParserEnemies(_processNotetag);
-
+    //------------------------------------------------------------------------------
+    // TextManager
+    TextManager.unrecoverTarget = function(dataId) {
+        switch (targetName) {
+            case 1:
+                return TextManager.hpA;
+            case 2:
+                return TextManager.mpA;
+            default:
+                return "";
+        }
+    }
+    TextManager.traitUnrecover = function(dataId) {
+        const fmt = textTraitUnrecover || "";
+        let targetName = this.unrecoverTarget(dataId);
+        return ((fmt && targetName) ? (fmt.format(targetName)) : "");
+    };
+    if (TextManager._traitConverters && Game_BattlerBase.TRAIT_UNRECOVER) {
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_UNRECOVER] = {
+            name:TextManager.traitUnrecover, value:TextManager.traitValueNone, str:TextManager.traitValueStrNone, baseValue:0
+        };
+    }
+    
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     /**
