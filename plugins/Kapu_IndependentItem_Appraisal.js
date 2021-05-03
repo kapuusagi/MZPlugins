@@ -1,6 +1,6 @@
 /*:ja
  * @target MZ 
- * @plugindesc hogehoge
+ * @plugindesc 個別アイテム鑑定プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_IndependentItem
