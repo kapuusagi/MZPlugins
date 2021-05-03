@@ -7,6 +7,7 @@
  * @orderAfter Kapu_Utility
  * @base Kapu_Base_Tpb
  * @orderAfter Kapu_Base_Tpb
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitXParamDid
  * @text キャストタイム倍率-特性ID
@@ -23,6 +24,18 @@
  * @type number
  * @max 999
  * @min 10
+ * 
+ * @param textTraitCastTime
+ * @text キャストタイム特性
+ * @desc キャストタイム特性
+ * @type string
+ * @default キャストタイム
+ * 
+ * @param textTraitMagicCastTime
+ * @text 魔法キャストタイム特性
+ * @desc 魔法キャストタイム特性
+ * @type string
+ * @default 魔法キャストタイム
  * 
  * @help 
  * キャストタイムの特性を追加します。
@@ -69,6 +82,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 Kapu_Base_ParamNameに対応
  * Version.0.2.0 魔法キャストタイムレートと、
  *               魔法以外のキャストタイムレートを
  *               設定できるように変更した。
@@ -143,6 +157,9 @@
     // Game_BattlerBase
 
     if (Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE) {
+        if (TextManager._xparam) {
+            TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE] = parameters["textTraitCastTime"] || "";
+        }
         /**
          * キャストタイム時間レートを得る。
          * 
@@ -163,6 +180,9 @@
     }
 
     if (Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE) {
+        if (TextManager._xparam) {
+            TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE] = parameters["textTraitMagicCastTime"] || "";
+        }
         /**
          * 魔法キャストタイム時間レートを得る。
          * 
