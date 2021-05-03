@@ -37,6 +37,7 @@ __Game_BattlerBase.TRAIT_XPARAM__(値=22)で定義される。
 |207|__TRAIT_XPARAM_DID_MDRPR__|魔法ダメージレート貫通。指定した割合だけMDRを減衰させる。|
 |208|__TRAIT_XPARAM_DID_INITTP_RATE__|戦闘開始時のTPチャージ量を指定する。|
 |209|__TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE__|スキル発動時間率(魔法)。|
+|210|__TRAIT_XPARAM_DID_TPB_SPEED__|TPB速度倍率。TPBチャージ速度がこの倍率だけ加減される。|
 |||
 
 ### SPARAM
@@ -91,6 +92,7 @@ Game_Party.ABILITY_～で定義される。
 |101|__ABILITY_DROP_GOLD_RATE__|取得ゴールド倍率。|
 |102|__ABILITY_BUYING_PRICE_RATE__|売却価格レート倍率。|
 |103|__ABILITY_SELLING_PRICE_RATE__|購入価格レート倍率。|
+|104|__ABILITY_PREEMPTIVE_RATE__|先制攻撃率特性。|
 ||||
 
 
