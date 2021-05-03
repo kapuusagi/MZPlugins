@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter kapu_Name_ParamName
  * 
  * @param traitSParamDid
  * @text 特性コード値
@@ -17,6 +18,12 @@
  * @desc trueにすると、プロパティ値としてvarirateが追加されます。
  * @type boolean
  * @default false
+ * 
+ * @param textTraitVarianceRate
+ * @text ダメージ分散率
+ * @desc ダメージ分散率
+ * @type string
+ * @default ダメージばらつき
  * 
  * @help 
  * ばらつき制約特性を提供するプラグイン。
@@ -56,6 +63,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_ParamName に対応
  * Version.0.1.0 追加した。
  */
 (() => {
@@ -102,7 +110,12 @@
     DataManager.addNotetagParserArmors(_processNotetag);
     DataManager.addNotetagParserStates(_processNotetag);
     DataManager.addNotetagParserEnemies(_processNotetag);
-
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._sparam && Game_BattlerBase.TRAIT_SPARAM_DID_VARIANCE_RATE) {
+        TextManager._sparam[Game_BattlerBase.TRAIT_SPARAM_DID_VARIANCE_RATE] = parameters["textTraitVarianceRate"] || "";
+    }
+    
     //------------------------------------------------------------------------------
     // Game_BattlerBase
 
