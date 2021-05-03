@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter kapu_Base_ParamName
  * 
  * @param traitXParamDid
  * @text 特性DID
@@ -27,6 +28,12 @@
  * @desc プロパティとして定義するかどうか
  * @type boolean
  * @default false
+ * 
+ * @param textCriticalDamageRate
+ * @text クリティカルダメージレート特性
+ * @desc クリティカルダメージレート特性
+ * @type string
+ * @default CDR
  * 
  * @help 
  * クリティカルダメージ倍率増減の特性を追加します。
@@ -74,6 +81,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.5.0 Kapu_Base_ParamNameに対応。
  * Version.0.4.0 Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE を定義するようにした。
  * Version.0.3.0 Game_BattlerBaseにプロパティ pcdr, mcdrを追加できるようにした。
  *               TRAIT_XPARAM_DID_CDR 指定エラー時にログ出力するように変更した。
@@ -99,6 +107,9 @@
     // DataManager
 
     if (Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {
+        if (TextManager._xparam) {
+            TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_CDR] = parameters["textCriticalDamageRate"] || "";
+        }
         /**
          * ノートタグを処理する。
          * 
