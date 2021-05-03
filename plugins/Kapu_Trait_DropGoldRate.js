@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitPartyAbilityId
  * @text パーティー特性DID
@@ -13,6 +14,14 @@
  * @type number
  * @max 999
  * @min 6
+ * 
+ * @param textTraitDropGoldRate
+ * @text ゴールドドロップ量増加特性
+ * @desc ゴールドドロップ量増加特性
+ * @type string
+ * @default ゴールド取得率
+ * 
+ * 
  * 
  * @help 
  * Traitにドロップレート特性を追加します。
@@ -43,6 +52,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 Kapu_Base_ParamName に対応
  * Version.0.2.0 特性値を取得するインタフェースを追加。
  * Version.0.1.2 ABILITY_DROP_GOLD_RATE未指定時は動作しないように変更した。
  * Version.0.1.1 IDデフォルト値を101に変更した。
@@ -89,6 +99,15 @@
     DataManager.addNotetagParserWeapons(_processNoteTag);
     DataManager.addNotetagParserArmors(_processNoteTag);
     DataManager.addNotetagParserStates(_processNoteTag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._partyAbilities && Game_Party.ABILITY_DROP_GOLD_RATE) {
+        TextManager._partyAbilities[Game_Party.ABILITY_DROP_GOLD_RATE] = {
+            name:parameters["textTraitDropGoldRate"] || "",
+            value:TextManager.traitValueSum,
+            str:TextManager.traitValueStrRate
+        };
+    }
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     /**
