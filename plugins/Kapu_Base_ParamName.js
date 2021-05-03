@@ -120,168 +120,197 @@
  * @type boolean
  * @default false
  * 
+ * @param traitNames
+ * @text 特性
  * 
  * @param textTraitElementRateUp
- * @text 属性耐性向上
- * @desc 属性耐性向上テキスト。%1に属性名が入る。
- * @type string
- * @default %1耐性向上
- * 
- * @param textTraitElementRateDown
- * @text 属性耐性低下
- * @desc 属性耐性低下テキスト。%1に属性名が入る。
+ * @text 属性被ダメ率増加
+ * @desc 属性被ダメ率増加テキスト。%1に属性名が入る。
  * @type string
  * @default %1耐性低下
+ * @parent traitNames
+ * 
+ * @param textTraitElementRateDown
+ * @text 属性被ダメ率低下
+ * @desc 属性被ダメ率低下テキスト。%1に属性名が入る。
+ * @type string
+ * @default %1耐性向上
+ * @parent traitNames
  * 
  * @param textTraitDebuffRate
  * @text パラメータデバフ受付率
  * @desc デバフ受付率特性テキスト。%1にパラメータ名が入る。
  * @type string
  * @default %1減少率
+ * @parent traitNames
  * 
  * @param textTraitStateRateUp
- * @text ステート受付率(耐性強化)
- * @desc ステート受付率(耐性強化)テキスト
+ * @text ステート受付率(授与率上昇))
+ * @desc ステート受付率(授与率上昇)テキスト
  * @type string
- * @default %1耐性強化
+ * @default %1耐性低下
+ * @parent traitNames
  * 
  * @param textTraitStateRateDown
- * @text ステート受付率(耐性弱化)
- * @desc ステート受付率(耐性弱化)テキスト
+ * @text ステート受付率(授与率低下)
+ * @desc ステート受付率(授与率低下)テキスト
  * @type string
- * @default %1耐性悪化
+ * @default %1耐性強化
+ * @parent traitNames
  * 
  * @param textTraitStateResist
  * @text ステート防止
  * @desc ステート防止特性テキスト。%1にパラメータ名が入る
  * @type string
  * @default %1防止
+ * @parent traitNames
  * 
  * @param textTraitParamUp
  * @text パラメータレート特性(増加)
  * @desc パラメータレート特性。%1にパラメータ名が入る。
  * @type string
  * @default %1上昇
+ * @parent traitNames
  * 
  * @param textTraitParamDown
  * @text パラメータレート特性(減少) 
  * @desc パラメータレート特性。%1にパラメータ名が入る。
  * @type string
  * @default %1減少
+ * @parent traitNames
  * 
  * @param textTraitAttackElement
  * @text 攻撃属性付与特性
  * @desc 攻撃属性付与特性。%1に属性名が入る。
  * @type string
  * @default 攻撃属性%1付与
+ * @parent traitNames
  * 
  * @param textTraitAttackState
  * @text 攻撃時ステート付与特性文字列
  * @desc 攻撃時ステート付与特性文字列。%1にステート名が入る。
  * @type string
  * @default 攻撃時%1付与
+ * @parent traitNames
  * 
  * @param textTraitAttackSpeed
  * @text 攻撃速度補正テキスト。
  * @desc 攻撃速度補正テキスト。
  * @type string
  * @default 攻撃速度補正
+ * @parent traitNames
  * 
  * @param textTraitAttackTimes
  * @text 攻撃回数テキスト
  * @desc 攻撃回数テキスト
  * @type string
- * @default 攻撃回数補正テキスト
+ * @default 攻撃回数
+ * @parent traitNames
  * 
  * @param textTraitAttackSkill
  * @text 攻撃スキルテキスト
  * @desc 攻撃スキルテキスト。%1にスキル名
  * @type string
  * @default 通常攻撃を%1に変更
+ * @parent traitNames
  * 
  * @param textTraitStypeAdd
  * @text スキルタイプ追加
  * @desc スキルタイプ追加特性。%1にスキルタイプ名
  * @type string
  * @default %1追加
+ * @parent traitNames
  * 
  * @param textTraitStypeSeal
  * @text スキルタイプ封印
  * @desc スキルタイプ封印特性。%1にスキルタイプ名。
  * @type string
  * @default %1使用不可
+ * @parent traitNames
  * 
  * @param textTraitSkillAdd
  * @text スキル追加
  * @desc スキル追加特性。%1にスキル名
  * @type string
  * @default %1使用可
+ * @parent traitNames
  * 
  * @param textTraitSkillSeal
  * @text スキル封印特性
  * @desc スキル封印特性。%1にスキルタイプ名
  * @type string
  * @default %1使用不可
+ * @parent traitNames
  * 
  * @param textTraitEquipWtype
  * @text 装備武器タイプ追加特性
  * @desc 装備武器タイプ追加特性。%1に武器タイプ名
  * @type string 
  * @default %1装備可
+ * @parent traitNames
  * 
  * @param textTraitEquipAtype
  * @text 装備防具タイプ追加特性
  * @desc 装備防具タイプ追加特性。%1に武器タイプ名
  * @type string 
  * @default %1装備可
+ * @parent traitNames
  * 
  * @param textTraitEquipLock
  * @text 装備変更不可特性
  * @desc 装備変更不可特性。%1に装備箇所名
  * @type string 
  * @default %1装備変更不可
+ * @parent traitNames
  * 
  * @param textTraitEquipSeal
  * @text 装備不可特性
  * @desc 装備不可特性。%1に装備可署名
  * @type string 
  * @default %1装備不可
+ * @parent traitNames
  * 
  * @param textTraitSlotType
  * @text 装備タイプ変更特性
  * @desc 装備タイプ変更特性。%1に変更先装備タイプ名
  * @type string
  * @default %1に変更
+ * @parent traitNames
  * 
  * @param textSlotType0
  * @text スロットタイプ0
  * @desc スロットタイプ0の文字列
  * @type string
  * @default
+ * @parent traitNames
  * 
  * @param textSlotType1
  * @text スロットタイプ1
  * @desc スロットタイプ1の文字列
  * @type string
  * @default 二刀流
+ * @parent traitNames
  * 
  * @param textTraitActionPlus
  * @text 行動回数追加特性
  * @desc 行動回数追加特性
  * @type string
  * @default 行動回数追加
+ * @parent traitNames
  * 
  * @param textSpecialFlag0
  * @text スペシャルフラグ0
  * @desc スペシャルフラグ0テキスト。(自動戦闘)
  * @type string
  * @default 自動戦闘
+ * @parent traitNames
  * 
  * @param textSpecialFlag1
  * @text スペシャルフラグ1
  * @desc スペシャルフラグ1テキスト。(防御)
  * @type string
  * @default 防御
+ * @parent traitNames
  * 
  * 
  * @param textSpecialFlag2
@@ -289,48 +318,56 @@
  * @desc スペシャルフラグ2テキスト。(身代わり)
  * @type string
  * @default 身代わり
+ * @parent traitNames
  * 
  * @param textCollapseType
  * @text 崩壊タイプ
  * @desc 崩壊タイプテキスト
  * @type string
  * @default 崩壊タイプ変更
+ * @parent traitNames
  * 
  * @param textPartyAbility0
  * @text パーティーアビリティ0
  * @desc パーティーアビリティ0(ランダムエンカウント率半減)
  * @type string
  * @default ランダムエンカウント率半減
+ * @parent traitNames
  * 
  * @param textPartyAbility1
  * @text パーティーアビリティ1
  * @desc パーティーアビリティ1(ランダムエンカウント無し)
  * @type string
  * @default ランダムエンカウントなし
+ * @parent traitNames
  * 
  * @param textPartyAbility2
  * @text パーティーアビリティ2
  * @desc パーティーアビリティ2(不意打ち防止)
  * @type string
  * @default 不意打ち防止
+ * @parent traitNames
  * 
  * @param textPartyAbility3
  * @text パーティーアビリティ3
  * @desc パーティーアビリティ3(先制攻撃率上昇)
  * @type string
  * @default 先制攻撃率上昇
+ * @parent traitNames
  * 
  * @param textPartyAbility4
  * @text パーティーアビリティ4
  * @desc パーティーアビリティ4(取得金額2倍)
  * @type string
  * @default 取得金額アップ
+ * @parent traitNames
  * 
  * @param textPartyAbility5
  * @text パーティーアビリティ5
  * @desc パーティーアビリティ5(ドロップ率2倍)
  * @type string
  * @default ドロップ率アップ
+ * @parent traitNames
  * 
  * @help 
  * CEVなどのパラメータをUIに表示しようとしたとき、
@@ -343,8 +380,9 @@
  * 
  * ■ プラグイン開発者向け
  * TextManagerにメソッドを追加しています。
- * TextManager.traitsValue(traits:Array<Trait>) : number
+ * TextManager.traitValue(traits:Array<Trait>) : number
  *     Trait配列から特性値を得る。
+ *     異なる特性が混在して配置された場合、先頭の特性とcode, dataIdが一致するものに対して処理する。
  * TextManager.traitName(code:number, dataId:number, value:number) : string
  *     特性名を得る。
  * TextManager.traitValueStr(code:number, dataId:number, value:number) : string
@@ -357,6 +395,9 @@
  *     str: {function(dataId:number, value:number) : string} 特性値を文字列化する関数
  *     baseValue : {number} 特性を持っていない場合の基準値(増減量を計算するためのもの)
  * };
+ * 
+ * ベーシックシステムで定義済みの特性は TextManage._traitConverters に追加済み。
+ * 他のプラグインで動作を変えた場合には、上記エントリのメンバを書き換えればそのように動作します。
  * 
  * ============================================
  * プラグインコマンド
@@ -850,13 +891,14 @@
         return textCollapseType;
     };
 
-    TextManager._partyAbilityName = [];
-    TextManager._partyAbilityName[0] = parameters["textPartyAbility0"] || "";
-    TextManager._partyAbilityName[1] = parameters["textPartyAbility1"] || "";
-    TextManager._partyAbilityName[2] = parameters["textPartyAbility2"] || "";
-    TextManager._partyAbilityName[3] = parameters["textPartyAbility3"] || "";
-    TextManager._partyAbilityName[4] = parameters["textPartyAbility4"] || "";
-    TextManager._partyAbilityName[5] = parameters["textPartyAbility5"] || "";
+    TextManager._partyAbilities = [];
+
+    TextManager._partyAbilities[Game_Party.ABILITY_ENCOUNTER_HALF] = { name:parameters["textPartyAbility0"] || "" };
+    TextManager._partyAbilities[Game_Party.ABILITY_ENCOUNTER_NONE] = { name:parameters["textPartyAbility1"] || "" };
+    TextManager._partyAbilities[Game_Party.ABILITY_CANCEL_SURPRISE] = { name:parameters["textPartyAbility2"] || "" };
+    TextManager._partyAbilities[Game_Party.ABILITY_RAISE_PREEMPTIVE] = { name:parameters["textPartyAbility3"] || "" };
+    TextManager._partyAbilities[Game_Party.ABILITY_GOLD_DOUBLE] = { name:parameters["textPartyAbility4"] || "" };
+    TextManager._partyAbilities[Game_Party.ABILITY_DROP_ITEM_DOUBLE] = { name:parameters["textPartyAbility5"] || "" };
 
     /**
      * パーティーアビリティ特性
@@ -865,7 +907,8 @@
      * @return {string} パーティーアビリティ名
      */
     TextManager.traitPartyAbility = function(dataId) {
-        return this._partyAbilityName[dataId] || "";
+        const entry = this._partyAbilities[dataId];
+        return (entry && entry.name) ? entry.name : "";
     };
 
     /**
@@ -926,16 +969,8 @@
      */
     TextManager.traitValuePartyAbility = function(traits) {
         const dataId = traits[0].dataId;
-        switch (dataId) {
-            case Game_Party.ABILITY_ENCOUNTER_HALF:
-            case Game_Party.ABILITY_ENCOUNTER_NONE:
-            case Game_Party.ABILITY_CANCEL_SURPRISE:
-            case Game_Party.ABILITY_RAISE_PREEMPTIVE:
-            case Game_Party.ABILITY_GOLD_DOUBLE:
-            case Game_Party.ABILITY_DROP_ITEM_DOUBLE:
-            default:
-                return 0;
-        }
+        const entry = this._partyAbilities[dataId];
+        return (entry && entry.value) ? entry.value.call(this, traits) : 0;
     };
 
     /**
@@ -957,7 +992,7 @@
      */
     // eslint-disable-next-line no-unused-vars
     TextManager.traitValueStrInt = function(dataId, value) {
-        return (value >= 0) ? ("+" + value) : (String(value));
+        return String(Math.floor(value));
     };
 
     /**
@@ -969,9 +1004,22 @@
      */
     // eslint-disable-next-line no-unused-vars
     TextManager.traitValueStrRate = function(dataId, value) {
-        const rate = Math.floor(value * 1000) / 100;
-        return ((rate >= 0) ? ("+" + rate + "%") : (rate + "%"));
+        const rate = Math.round(value * 1000) / 10;
+        return (rate + "%");
     };
+
+    /**
+     * 割合(絶対値)文字列を得る。
+     * 
+     * @param {number} dataId データID
+     * @param {number} value 値
+     * @returns {string} 値文字列
+     */
+    TextManager.traitValueStrRateAbs = function(dataId, value) {
+        const rate = Math.round(Math.abs(value) * 1000) / 10;
+        return (rate + "%");
+    };
+
 
     /**
      * スペシャルフラグ値を得る。
@@ -994,16 +1042,8 @@
      */
     // eslint-disable-next-line no-unused-vars
     TextManager.traitValueStrPartyAbility = function(dataId, value) {
-        switch (dataId) {
-            case Game_Party.ABILITY_ENCOUNTER_HALF:
-            case Game_Party.ABILITY_ENCOUNTER_NONE:
-            case Game_Party.ABILITY_CANCEL_SURPRISE:
-            case Game_Party.ABILITY_RAISE_PREEMPTIVE:
-            case Game_Party.ABILITY_GOLD_DOUBLE:
-            case Game_Party.ABILITY_DROP_ITEM_DOUBLE:
-            default:
-                return "";
-        }
+        const entry = this._partyAbilities[dataId];
+        return (entry && entry.str) ? entry.str.call(this, dataId, value) : "";
     };
     /**
      * 空文字列を返す。
@@ -1020,19 +1060,19 @@
 
     TextManager._traitConverters = [];
     TextManager._traitConverters[Game_BattlerBase.TRAIT_ELEMENT_RATE] = {
-        name: TextManager.traitElementRate, value: TextManager.traitValuePi, str: TextManager.traitValueStrRate, baseValue: 1
+        name: TextManager.traitElementRate, value: TextManager.traitValuePi, str: TextManager.traitValueStrRateAbs, baseValue: 1
     };
     TextManager._traitConverters[Game_BattlerBase.TRAIT_DEBUFF_RATE] = {
         name: TextManager.traitDebuffRate, value: TextManager.traitValuePi, str: TextManager.traitValueStrRate, baseValue: 1
     };
     TextManager._traitConverters[Game_BattlerBase.TRAIT_STATE_RATE] = {
-        name:TextManager.traitStateRate, value:TextManager.traitValuePi, str:TextManager.traitValueStrRate, baseValue:1
+        name:TextManager.traitStateRate, value:TextManager.traitValuePi, str:TextManager.traitValueStrRateAbs, baseValue:1
     };
     TextManager._traitConverters[Game_BattlerBase.TRAIT_STATE_RESIST] = {
         name:TextManager.traitStateResist, value:TextManager.traitValueNone, str:TextManager.traitValueStrNone, baseValue:0
     };
     TextManager._traitConverters[Game_BattlerBase.TRAIT_PARAM] = {
-        name:TextManager.traitParam, value:TextManager.traitValuePi, str:TextManager.traitValueStrRate, baseValue:0
+        name:TextManager.traitParam, value:TextManager.traitValuePi, str:TextManager.traitValueStrRateAbs, baseValue:0
     };
     TextManager._traitConverters[Game_BattlerBase.TRAIT_XPARAM] = {
         name:TextManager.xparam, value:TextManager.traitValueSum, str:TextManager.traitValueStrRate, baseValue:0
