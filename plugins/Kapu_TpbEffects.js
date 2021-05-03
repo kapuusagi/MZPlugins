@@ -5,6 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param chargeTimeGainEffectCode
  * @text チャージタイム加減算効果コード
@@ -31,7 +32,7 @@
  * @default 107
  * 
  * @param blockTpbLoseFlagId
- * @text TPBゲージの減少帽子特性フラグID
+ * @text TPBゲージの減少防止特性フラグID
  * @desc TPBゲージの減少を防ぐ特性に割り当てるフラグID
  * @type number
  * @default 108
@@ -44,6 +45,18 @@
  * @decimals 2
  * @min 0
  * @max 1
+ * 
+ * @param textTraitBlockTpbCastBreak
+ * @text TPBブレーク防止特性名
+ * @desc TPBブレーク防止特性名
+ * @type string
+ * @default ブレーク防止
+ * 
+ * @param textTraitBlockTpbLose
+ * @text TPB減少効果防止
+ * @desc TPB減少効果防止
+ * @type string
+ * @default 行動遅延防止
  * 
  * 
  * @help 
@@ -105,6 +118,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 Kapu_Base_ParamName に対応
  * Version.0.2.0 行動終了時のTPB減少量を指定できるようにした。
  * Version.0.1.0 作成した。
  */
@@ -226,6 +240,17 @@
     };
     DataManager.addNotetagParserSkills(_processEffectNotetag);
     DataManager.addNotetagParserItems(_processEffectNotetag);
+
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_BLOCK_TPB_CAST_BREAK) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_BLOCK_TPB_CAST_BREAK] = parameters["textTraitBlockTpbCastBreak"] || "";
+    }
+    if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_BLOCK_TPB_LOSE) {
+        TextManager._specialFlags[Game_BattlerBase.FLAG_ID_BLOCK_TPB_LOSE] = parameters["textTraitBlockTpbLose"] || "";
+    }
+    
+    
     //------------------------------------------------------------------------------
     // Game_BattlerBase
 
