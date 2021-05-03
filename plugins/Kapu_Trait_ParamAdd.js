@@ -12,6 +12,18 @@
  * @type number
  * @default 107
  * 
+ * @param textTraitParamAddUp
+ * @text 単純加算特性名
+ * @desc 単純加算特性名(加算)。%1にパラメータ名。
+ * @type string
+ * @default %1増加
+ * 
+ * @param textTraitParamAddDown
+ * @text 単純加算特性名
+ * @desc 単純加算特性名(減少)。%1にパラメータ名。
+ * @type string
+ * @default %1減少
+ * 
  * @help 
  * ベーシックシステムでは、パラメータを単純加算できるのは装備品だけである。
  * 本プラグインではアクターやクラス、ステートにパラメータを単純加算する特性を追加する。
@@ -59,6 +71,9 @@
         return;
     }
 
+    const textTraitParamAddUp = parameters["textTraitParamAddUp"] || "";
+    const textTraitParamAddDown = parameters["textTraitParamAddDown"] || "";
+
     //------------------------------------------------------------------------------
     // DataManager
 
@@ -99,6 +114,18 @@
     DataManager.addNotetagParserActors(_processNotetag);
     DataManager.addNotetagParserClasses(_processNotetag);
     DataManager.addNotetagParserStates(_processNotetag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    TextManager.traitParamAdd = function(dataId, value) {
+        const fmt = (value >= 0) ? textTraitParamAddUp : textTraitParamAddDown;
+        const paramName = TextManager.param(dataId);
+        return ((fmt && paramName) ? fmt.format(paramName) : "");
+    };
+    if (TextManager._traitConverters) {
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_PARAM_ADD] = {
+            name:TextManager.traitParamAdd, value:TextManager.traitValueSum, str:TextManager.traitValueStrInt, baseValue:0
+        };
+    }
     //------------------------------------------------------------------------------
     // Game_BattlerBase
     const _Game_BattlerBase_paramPlus = Game_BattlerBase.prototype.paramPlus;
