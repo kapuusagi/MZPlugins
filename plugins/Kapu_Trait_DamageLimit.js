@@ -99,7 +99,7 @@
     const textTraitDamageLimit = parameters["textTraitDamageLimit"] || "";
 
     /**
-     * ダメージリミット特性
+     * ダメージリミット特性名
      * 
      * @param {number} dataId データID
      * @returns {string} 文字列
@@ -111,7 +111,7 @@
 
     if (TextManager._traitConverters) {
         TextManager._traitConverters[Game_BattlerBase.TRAIT_DAMAGE_LIMIT] = {
-            name:TextManager.textTraitDamageLimit, value:TextManager.traitValueMax, str:TextManager.traitValueStrInt, baseValue:0
+            name:TextManager.traitDamageLimit, value:TextManager.traitValueMax, str:TextManager.traitValueStrInt, baseValue:0
         };
     }
 
