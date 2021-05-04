@@ -488,4 +488,5 @@ function MapFilterManager() {
         MapFilterManager.updateTime(this.isActive());
         _Scene_Map_update.call(this);
     };
+
 })();

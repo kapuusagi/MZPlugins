@@ -61,6 +61,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 Mapのノートタグ解析タイミングが正しくない不具合を修正した。
  * Version.0.2.0 $gameParty.partyTraitsSumMin()を追加した。
  *               $gameParty.partyTraitsSumMax()が上手く動作していない不具合を修正。
  * Version.0.1.1 コメント誤りを修正した。
@@ -79,14 +80,15 @@
     };
     //------------------------------------------------------------------------------
     // Scene_Map
-    const _Scene_Map_start = Scene_Map.prototype.start;
+    const _Scene_Map_onTransferEnd = Scene_Map.prototype.onTransferEnd;
     /**
-     * Scene_Mapを開始する。
+     * 転送完了時の処理を行う。
      */
-    Scene_Map.prototype.start = function() {
-        DataManager.processMapNotegag();
-        _Scene_Map_start.call(this);
+    Scene_Map.prototype.onTransferEnd = function() {
+        _Scene_Map_onTransferEnd.call(this);
+        DataManager.processMapNotetag();
     };
+
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -248,7 +250,7 @@
     /**
      * マップのノートタグを処理する。
      */
-    DataManager.processMapNotegag = function() {
+    DataManager.processMapNotetag = function() {
         const methods = this._noteTagParserMaps;
         if (methods.length === 0) {
             return;
