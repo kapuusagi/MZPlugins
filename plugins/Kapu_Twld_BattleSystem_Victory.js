@@ -1109,7 +1109,8 @@ function Window_BattleRewards() {
         const spacing = 8;
         const labelWidth = rewardWindowLabelWidth;
         const gainGold = this._targetGold - this._currentGold;
-        const displayRewardGold = Math.floor(gainGold * (this._duration / this._animationFrameCount));
+        const displayRewardGold = (this._animationFrameCount > 0)
+                ? Math.floor(gainGold * (this._duration / this._animationFrameCount)) : 0;
         const displayGold = this._targetGold - displayRewardGold;
 
         // 所持金ラベル表示
