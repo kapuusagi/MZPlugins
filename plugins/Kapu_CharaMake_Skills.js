@@ -144,7 +144,6 @@ function Game_CharaMakeItem_Skills() {
             }
             charaMakeSkillSetGroups.push(group);
         }
-        console.log("");
     }
     catch (e) {
         console.log(e);
