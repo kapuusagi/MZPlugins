@@ -454,7 +454,8 @@ function Scene_PartyChange() {
     Game_Party.prototype.changeableMembers = function() {
         const members = [];
         for (const id of this._changeableMembers) {
-            if (!members.includes(id) && (id > 0) && (id < $dataActors.length)) {
+            const actor = $gameActors.actor(id);
+            if (!members.includes(id) && actor) {
                 members.push(id);
             }
         }
