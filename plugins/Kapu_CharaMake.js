@@ -1644,6 +1644,7 @@ function Scene_UnregisterActor() {
                     window.refresh();
                 }
             }
+            this._tempActor.recoverAll();
         }
         this._statusWindow.show();
         this._statusWindow.refresh();
