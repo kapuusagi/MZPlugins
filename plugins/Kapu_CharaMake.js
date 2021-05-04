@@ -82,9 +82,14 @@
  * @default 0
  * 
  * 
+ * @command setCharaMakeItemNameEnabled
+ * @text 名前変更を有効にする
+ * @desc 次のキャラメイクで名前編集を有効にする。
  * 
- * 
- * 
+ * @arg isEnabled
+ * @text 有効にする
+ * @type boolean
+ * @default true
  * 
  * 
  * @param registableIds
@@ -195,6 +200,12 @@
  *   objectはnameメンバ/プロパティを持つ必要がある。
  *   nameの値が選択可能な値として表示される。
  * 
+ * $gameTemp.setCharaMakeItemEnabled(name:string, isEnabled:boolean) : void
+ *   キャラメイク項目が有効かどうかを設定する。
+ *   プラグインコマンドによる有効/無効設定用
+ * $gameTemp.isCharaMakeItemEnabled(name:string) : boolean
+ *   キャラメイク項目が有効かどうかを得る。
+ *   プラグインコマンドによる有効/無効設定用
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -230,7 +241,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 
 /**
@@ -298,6 +309,8 @@ function Scene_UnregisterActor() {
 (() => {
     const pluginName = "Kapu_CharaMake";
     const parameters = PluginManager.parameters(pluginName);
+
+    const CHARAMAKEITEM_NAME = "name";
 
     /**
      * 登録ID列を解析する。
@@ -445,10 +458,14 @@ function Scene_UnregisterActor() {
         }
     });
 
+    PluginManager.registerCommand(pluginName, "setCharaMakeItemNameEnabled", args => {
+        const isEnabled = (typeof args.isEnabled === "undefined")
+                ? true : (args.isEnabled === "true");
+        $gameTemp.setCharaMakeItemEnabled(CHARAMAKEITEM_NAME, isEnabled);
+    });
+
     //------------------------------------------------------------------------------
     // DataManager
-
-    DataManager._charaMakeItems = null;
 
     /**
      * キャラクターメイキングアイテムを取得する。
@@ -458,13 +475,18 @@ function Scene_UnregisterActor() {
      * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
     DataManager.charaMakeItems = function(itemNames) {
-        if (this._charaMakeItems == null) {
-            this._charaMakeItems = this.createCharaMakeItems();
-        }
+        const charaMakeItems = this.createCharaMakeItems();
         if (itemNames && (itemNames.length > 0)) {
-            return this._charaMakeItems.filter(item => itemNames.includes(item.name()));
+            const items = [];
+            for (const itemName of itemNames) {
+                const entry = charaMakeItems.find(item => item.name() === itemName);
+                if (entry && !items.includes(entry)) {
+                    items.push(entry);
+                }
+            }
+            return items;
         } else {
-            return this._charaMakeItems.concat();
+            return charaMakeItems;
         }
     };
 
@@ -476,9 +498,9 @@ function Scene_UnregisterActor() {
      */
     DataManager.createCharaMakeItems = function() {
         const items = [];
-        items.push(new Game_CharaMakeItem_Name());
-        /* TODO : Impliments. */
-
+        if ($gameTemp.isCharaMakeItemEnabled(CHARAMAKEITEM_NAME)) {
+            items.push(new Game_CharaMakeItem_Name());
+        }
         return items;
     };
 
@@ -706,7 +728,7 @@ function Scene_UnregisterActor() {
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Name.prototype.canApply = function(actor, isModify) {
-        return !isModify || isSelectableAtFirst;
+        return (!isModify || isSelectableAtFirst);
     };
     /**
      * 編集中のテキストを得る。
@@ -810,8 +832,28 @@ function Scene_UnregisterActor() {
     Game_Temp.prototype.initialize = function() {
         _Game_Temp_initialize.call(this, ...arguments);
         this._selectedActorId = 0;
+        this._charaMakeItemEnabled = {};
     };
 
+    /**
+     * キャラメイク項目が有効かどうかを設定する。
+     * 
+     * @param {string} name 項目名
+     * @param {boolean} isEnabled 項目が有効な場合にはtrue, それ以外はfalse
+     */
+    Game_Temp.prototype.setCharaMakeItemEnabled = function(name, isEnabled) {
+        this._charaMakeItemEnabled[name] = isEnabled;
+    };
+    
+    /**
+     * キャラメイク項目が有効かどうかを得る。
+     * 
+     * @param {string} name 項目名
+     * @returns {boolean} 項目が有効な場合にはtrue, それ以外はfalse
+     */
+    Game_Temp.prototype.isCharaMakeItemEnabled = function(name) {
+        return this._charaMakeItemEnabled[name] || true;
+    };
     /**
      * 選択されたアクターIDを設定する。
      * 

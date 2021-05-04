@@ -8,6 +8,19 @@
  * @base Kapu_MultiLineInput
  * @orderAfter Kapu_MultiLineInput
  * 
+ * @command setCharaMakeItemProfileEnabled
+ * @text キャラメイク項目プロフィールを有効にする。
+ * @desc キャラメイク項目プロフィールを有効にする。
+ * @type boolean
+ * @default true
+ * 
+ * @arg isEnabled
+ * @text 有効にする
+ * @type boolean
+ * @default true
+ * 
+ * 
+ * 
  * @param textItemNameProfile
  * @text プロフィール編集項目テキスト
  * @description キャラクターメイキング項目一覧で、プロフィール編集に相当する選択項目として表示されるテキスト
@@ -39,7 +52,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 
 /**
@@ -54,12 +67,13 @@ function Game_CharaMakeItem_Profile() {
     const textItemNameProfile = parameters["textItemNameProfile"] || "Edit Profile";
     const textItemDescriptionProfile = parameters["textItemDescriptionProfile"] || "Edit profile.";
 
+    const CHARAMAKEITEM_PROFILE = "profile";
 
-
-    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-    //     // TODO : コマンドの処理。
-    //     // パラメータメンバは @argで指定した名前でアクセスできる。
-    // });
+    PluginManager.registerCommand(pluginName, "setCharaMakeItemProfileEnabled", args => {
+        const isEnabled = (typeof args.isEnabled === "undefined")
+                ? true : (args.isEnabled === "true");
+        $gameTemp.setCharaMakeItemEnabled(CHARAMAKEITEM_PROFILE, isEnabled);
+    });
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -72,7 +86,9 @@ function Game_CharaMakeItem_Profile() {
      */
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
-        items.push(new Game_CharaMakeItem_Profile());
+        if ($gameTemp.isCharaMakeItemEnabled(CHARAMAKEITEM_PROFILE)) {
+            items.push(new Game_CharaMakeItem_Profile());
+        }
         return items;
     };
     //------------------------------------------------------------------------------

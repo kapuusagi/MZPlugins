@@ -6,6 +6,24 @@
  * @base Kapu_CharaMake
  * @orderAfter Kapu_CharaMake
  * 
+ * @command setCharaMakeItemSkillsEnabled
+ * @text キャラメイク項目スキルを有効にする。
+ * @desc キャラメイク項目スキルを有効にする。
+ * @type boolean
+ * @default true
+ * 
+ * @arg groupNo
+ * @text グループ番号
+ * @desc グループ番号
+ * @type number
+ * @default 0
+ * 
+ * @arg isEnabled
+ * @text 有効にする
+ * @type boolean
+ * @default true
+ * 
+ * 
  * @param itemLists
  * @text 選択項目セット
  * @description 1セットあたり、1つの選択項目になる。
@@ -34,6 +52,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.1.1.0 プラグインコマンドで項目を有効/無効設定できるようにした。
  * Version.1.0.0 動作確認。
  */
 /*~struct~CharaMakeSkillSetGroup:
@@ -95,6 +114,15 @@ function Game_CharaMakeItem_Skills() {
     const pluginName = "Kapu_CharaMake_Skills";
     const parameters = PluginManager.parameters(pluginName);
 
+    const CHARAMAKEITEM_SKILLS = "skills";
+
+    PluginManager.registerCommand(pluginName, "setCharaMakeItemSkillsEnabled", args => {
+        const isEnabled = (typeof args.isEnabled === "undefined")
+                ? true : (args.isEnabled === "true");
+        const groupNo = Number(args.groupNo);
+        $gameTemp.setCharaMakeItemEnabled(CHARAMAKEITEM_SKILLS + groupNo, isEnabled);
+    });
+
     const charaMakeSkillSetGroups = [];
     try {
         const groups = JSON.parse(parameters["itemLists"]).map(str => JSON.parse(str));
@@ -134,7 +162,10 @@ function Game_CharaMakeItem_Skills() {
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
         for (let groupNo = 0; groupNo < charaMakeSkillSetGroups.length; groupNo++) {
-            items.push(new Game_CharaMakeItem_Skills(groupNo));
+            const name = CHARAMAKEITEM_SKILLS + groupNo;
+            if ($gameTemp.isCharaMakeItemEnabled(name)) {
+                items.push(new Game_CharaMakeItem_Skills(groupNo));
+            }
         }
         return items;
     };

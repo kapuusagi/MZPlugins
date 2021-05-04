@@ -6,6 +6,19 @@
  * @base Kapu_CharaMake
  * @orderAfter Kapu_CharaMake
  * 
+ * @command setCharaMakeItemClassesEnabled
+ * @text キャラメイク項目クラスを有効にする。
+ * @desc キャラメイク項目クラスを有効にする。
+ * @type boolean
+ * @default true
+ * 
+ * @arg isEnabled
+ * @text 有効にする
+ * @type boolean
+ * @default true
+ * 
+ * 
+ * 
  * @param isSelectableAtFirst
  * @text 初期時のみ選択可能とする
  * @desc 初回作成時のみ選択可能にする場合にはtrueにします。
@@ -56,6 +69,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.1.1.0 プラグインコマンドで項目を有効/無効設定できるようにした。
  * Version.1.0.0 初版作成。
  */
 
@@ -73,6 +87,16 @@ function Game_CharaMakeItem_Class() {
     const textItemDescriptionClass = parameters["textItemDescriptionClass"] || "Select classs.";
     const isSelectableAtFirst = (typeof parameters["isSelectableAtFirst"] === "undefined")
             ? true : (parameters["isSelectableAtFirst"] === "true");
+
+    const CHARAMAKEITEM_CLASSES = "classes";
+
+    PluginManager.registerCommand(pluginName, "setCharaMakeItemClassesEnabled", args => {
+        const isEnabled = (typeof args.isEnabled === "undefined")
+                ? true : (args.isEnabled === "true");
+        $gameTemp.setCharaMakeItemEnabled(CHARAMAKEITEM_CLASSES, isEnabled);
+    });
+
+
     //------------------------------------------------------------------------------
     // DataManager
     const _DataManager_createCharaMakeItems = DataManager.createCharaMakeItems;
@@ -84,7 +108,9 @@ function Game_CharaMakeItem_Class() {
      */
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
-        items.push(new Game_CharaMakeItem_Class());
+        if ($gameTemp.isCharaMakeItemEnabled(CHARAMAKEITEM_CLASSES)) {
+            items.push(new Game_CharaMakeItem_Class());
+        }
         return items;
     };
     //------------------------------------------------------------------------------

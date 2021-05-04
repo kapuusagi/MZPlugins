@@ -8,6 +8,18 @@
  * @base Kapu_GrowupSystem
  * @orderAfter Kapu_GrowupSystem
  * 
+ * @command setCharaMakeItemGrowupEnabled
+ * @text キャラメイク項目成長ポイントを有効にする。
+ * @desc キャラメイク項目成長ポイントを有効にする。
+ * @type boolean
+ * @default true
+ * 
+ * @arg isEnabled
+ * @text 有効にする
+ * @type boolean
+ * @default true
+ * 
+ * 
  * @param minimum
  * @text 最小値
  * @desc 初期値として付与する成長ポイントの最小値
@@ -74,6 +86,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.1.1.0 プラグインコマンドで項目を有効/無効設定できるようにした。
  * Version.1.0.0 初版作成。
  */
 /**
@@ -103,14 +116,17 @@ function Window_CharaMakeItem_GrowPoint() {
     const textItemNameGrowPoint = parameters["textItemNameGrowPoint"] || "GP";
     const textItemDescriptionGrowPoint = parameters["textItemDescriptionGrowPoint"] = "Update GP";
 
+    const CHARAMEKEITEM_GROWUP = "growup";
+
     if ((growPointMin > growPointMax) || (growPointMin < 0) || (growPointMax < 0)) {
         throw "minimum or maximum is incorrect.";
     }
 
-    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-    //     // TODO : コマンドの処理。
-    //     // パラメータメンバは @argで指定した名前でアクセスできる。
-    // });
+    PluginManager.registerCommand(pluginName, "setCharaMakeItemGrowupEnabled", args => {
+        const isEnabled = (typeof args.isEnabled === "undefined")
+                ? true : (args.isEnabled === "true");
+        $gameTemp.setCharaMakeItemEnabled(CHARAMEKEITEM_GROWUP, isEnabled);
+    });
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -124,7 +140,9 @@ function Window_CharaMakeItem_GrowPoint() {
          */
         DataManager.createCharaMakeItems = function() {
             const items = _DataManager_createCharaMakeItems.call(this);
-            items.push(new Game_CharaMakeItem_GrowPoint());
+            if ($gameTemp.isCharaMakeItemEnabled(CHARAMEKEITEM_GROWUP)) {
+                items.push(new Game_CharaMakeItem_GrowPoint());
+            }
             return items;
         };
     }
