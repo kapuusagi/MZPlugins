@@ -93,6 +93,8 @@ Game_Party.ABILITY_～で定義される。
 |102|__ABILITY_BUYING_PRICE_RATE__|売却価格レート倍率。|
 |103|__ABILITY_SELLING_PRICE_RATE__|購入価格レート倍率。|
 |104|__ABILITY_PREEMPTIVE_RATE__|先制攻撃率特性。|
+|105|__ABILITY_TARGET_SEARCH__|ターゲットサーチ特性。|
+|106|__ABILITY_LIGHT_BRIGHTNESS__|暗闇中の光源特性。|
 ||||
 
 
