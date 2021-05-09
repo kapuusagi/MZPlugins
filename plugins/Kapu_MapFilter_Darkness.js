@@ -76,6 +76,8 @@
  * イベント
  *   <lightSource:brightness#>
  *     暗闇フィルタ上で、このイベントをbrightnessの輝度で光らせる。
+ *   <lightSource:variable(id#)>
+ *     暗闇フィルタ上で、このイベントをid#の変数値の輝度で光らせる。
  *   <searchLevel:level#>
  *     暗闇フィルタ有効時、発見されるかどうかのレベル。
  *     パーティーのサーチレベル以下のものだけ、ピックアップされる。
@@ -344,8 +346,14 @@
         _Game_Event_initialize.call(this, mapId, eventId);
         const event = this.event();
         if (event.meta.lightSource) {
-            const brightness = Number(event.meta.lightSource);
-            this.setLightBrightness(brightness);
+            if (event.meta.lightSource.match(/variable\((\d+)\)/)) {
+                const variableId = Number(RegExp.$1);
+                const brightness = $gameVariables.value(variableId);
+                this.setLightBrightness(brightness);
+            } else {
+                const brightness = Number(event.meta.lightSource);
+                this.setLightBrightness(brightness);
+            }
         }
         if (event.meta.searchLevel) {
             this._searchLevel = Math.floor(Number(event.meta.searchTarget) || 9999);
