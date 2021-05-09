@@ -513,5 +513,18 @@ function Sprite_CharaMake_Picture() {
         return graphicItems;
     };
 
+    /**
+     * 有効な選択状態かどうかを判定する。
+     * 
+     * @param {Window} windowEntry ウィンドウエントリ
+     * @param {Game_Actor} actor アクター
+     * @return {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_CharaMakeItem_Visual.prototype.isValidSelection = function(windowEntry, actor) {
+        // 対象のグラフィックが設定されていればOK
+        return (actor.characterName().length > 0);
+    };    
+
 
 })();

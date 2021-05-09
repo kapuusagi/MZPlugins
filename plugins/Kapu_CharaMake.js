@@ -194,6 +194,10 @@
  *   既定の実装では selectWindow を非アクティブ＆非表示、
  *   windows及びspritesは非表示状態に設定する。
  *   windowsの内、特定のウィンドウだけ表示したままにしたり、特定のspriteだけ表示させたい場合にはオーバーライドする。
+ * Game_CharaMakeItem.isValidSelection(windowEntry:object, actor:Game_Actor) : boolean
+ *   現在の選択状態が有効かどうかを判定する。
+ *   キャラメイク完了操作を許可しない場合にオーバーライドする。
+ *   例えば名前が設定されていない状態など。
  * Game_CharaMakeItem.items() : Array<object>
  *   選択項目リストを取得する。
  *   単純な選択項目だけならば、ここで選択可能な項目を返すだけで良い。
@@ -669,6 +673,19 @@ function Scene_UnregisterActor() {
     };
 
     /**
+     * 有効な選択状態かどうかを判定する。
+     * 
+     * @param {Window} windowEntry ウィンドウエントリ
+     * @param {Game_Actor} actor アクター
+     * @return {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_CharaMakeItem.prototype.isValidSelection = function(windowEntry, actor) {
+        return true;
+    };
+
+
+    /**
      * アイテム一覧を得る。
      * 
      * TODO: 選択可能な項目を得る。
@@ -820,6 +837,18 @@ function Scene_UnregisterActor() {
         const windowNameEdit = windowEntry.windows[0];
         actor.setName(windowNameEdit.name());
     };
+
+    /**
+     * 有効な選択状態かどうかを判定する。
+     * 
+     * @param {Window} windowEntry ウィンドウエントリ
+     * @param {Game_Actor} actor アクター
+     * @return {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_CharaMakeItem_Name.prototype.isValidSelection = function(windowEntry, actor) {
+        return (actor.name().length > 0);
+    };    
 
     //------------------------------------------------------------------------------
     // Game_Temp
@@ -1691,7 +1720,7 @@ function Scene_UnregisterActor() {
                 this._itemWindow.activate();
             }
         } else {
-            if (this._tempActor.name().length == 0) {
+            if (!this.isCharaMakeOkCondition()) {
                 SoundManager.playBuzzer();
                 this._itemWindow.activate();
             } else {
@@ -1700,6 +1729,22 @@ function Scene_UnregisterActor() {
                 this.popScene();
             }
         }
+    };
+
+    /**
+     * 完了可能な状態な場合にはtrue, それ以外はfalse.
+     * 
+     * @returns {boolean} 完了可能な状態の場合にはtrue, それ以外はfalse.
+     */
+    Scene_CharaMake.prototype.isCharaMakeOkCondition = function() {
+        for (const item of this._items) {
+            const windowEntry = this._windowEntries.find(entry => entry.item === item);
+            if (!item.isValidSelection(windowEntry, this._tempActor)) {
+                return false;
+            }
+        }
+
+        return true;
     };
 
     /**
