@@ -184,6 +184,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.5.0 武器/防具のソートメソッドを変更し、IDの前に種別でソートするようにした。
  * Version.0.4.5 アイテム一覧で、個別アイテムを複数持っていた場合の表示がおかしい不具合を修正した。
  * Version.0.4.4 各カテゴリの既定の個別アイテム設定でtrueを設定しても効果がない不具合を修正した。
  * Version.0.4.3 個別アイテム/非個別アイテムの指定が全くできていなかった不具合を修正した。
@@ -1058,7 +1059,7 @@
      */
     Game_Party.prototype.weapons = function() {
         var results = _Game_Party_weapons.call(this);
-        results.sort(this.independentItemSort);
+        results.sort(this.independentWeaponSort);
         return results;
     };
     
@@ -1072,7 +1073,7 @@
      */
     Game_Party.prototype.armors = function() {
         var results = _Game_Party_armors.call(this);
-        results.sort(this.independentItemSort);
+        results.sort(this.independentArmorSort);
         return results;
     };
     
@@ -1094,6 +1095,58 @@
             return 1;
         } else {
             return 0;
+        }
+    };
+    /**
+     * アイテムを返す際のソートメソッド。
+     * 
+     * 必要に応じてオーバーライドすること。
+     * 
+     * @param {Object} item1 アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {Object} item2 アイテム(DataItem/DataWeapon/DataArmor)
+     * @return {Number} item1がitem2より前の場合には負数、item1がitem2より後の場合には正数、同値なら0。
+     */
+    Game_Party.prototype.independentWeaponSort = function(item1, item2) {
+        const wtypeId1 = item1.wtypeId;
+        const wtypeId2 = item2.wtypeId;
+        if (wtypeId !== wtypeId2) {
+            return (wtypeId1 > wtypeId2) ? 1 : -1;
+        } else {
+            const id1 = (item1.baseItemId) ? item1.baseItemId : item1.id;
+            const id2 = (item2.baseItemId) ? item2.baseItemId : item2.id;
+            if (id1 < id2) {
+                return -1;
+            } else if (id1 > id2) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    };
+    /**
+     * アイテムを返す際のソートメソッド。
+     * 
+     * 必要に応じてオーバーライドすること。
+     * 
+     * @param {Object} item1 アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {Object} item2 アイテム(DataItem/DataWeapon/DataArmor)
+     * @return {Number} item1がitem2より前の場合には負数、item1がitem2より後の場合には正数、同値なら0。
+     */
+    Game_Party.prototype.independentArmorSort = function(item1, item2) {
+        const atypeId1 = item1.atypeId;
+        const atypeId2 = item2.atypeId;
+        if (atypeId1 !== atypeId2) {
+            return (atypeId1 > atypeId2) ? 1 : -1;
+        } else {
+            const id1 = (item1.baseItemId) ? item1.baseItemId : item1.id;
+            const id2 = (item2.baseItemId) ? item2.baseItemId : item2.id;
+            if (id1 < id2) {
+                return -1;
+            } else if (id1 > id2) {
+                return 1;
+            } else {
+                return 0;
+            }
         }
     };
     
