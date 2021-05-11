@@ -87,7 +87,7 @@ function Scene_RouletteChoice() {
 
     //------------------------------------------------------------------------------
     // Scene_RouletteChoice
-    Scene_RouletteChoice.prototype = Object.create(Scene_Base.prototype);
+    Scene_RouletteChoice.prototype = Object.create(Scene_MenuBase.prototype);
     Scene_RouletteChoice.prototype.constructor = Scene_RouletteChoice;
 
     /**
@@ -169,7 +169,7 @@ function Scene_RouletteChoice() {
         if (this._isSelecting && (Input.isRepeated("ok") || TouchInput.isClicked())) {
             SoundManager.playOk();
             this._isSelecting = false;
-        } else if (this._canCancel && (Input.isCancelled("cancel") || TouchInput.isCancelled())) {
+        } else if (this._canCancel && (Input.isRepeated("cancel") || TouchInput.isCancelled())) {
             SoundManager.playCancel();
             this.popScene();
         }
