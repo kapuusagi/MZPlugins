@@ -70,7 +70,7 @@
 }
 
 (() => {
-    const pluginName = "Kapu_CharaMake_Gender";
+    const pluginName = "Kapu_CharaMake_BattlerGender";
     const parameters = PluginManager.parameters(pluginName);
     const textItemNameGender = parameters["textItemNameGender"] || "Class";
     const textItemDescriptionGender = parameters["textItemDescriptionGender"] || "Select classs.";
@@ -111,7 +111,7 @@
      * Game_CharaMakeItem_Genderを初期化する。
      */
     Game_CharaMakeItem_Gender.prototype.initialize = function() {
-        Game_CharaMakeItem_Gender.prototype.initialize.call(this, ...arguments);
+        Game_CharaMakeItem.prototype.initialize.call(this, ...arguments);
     };
 
     /**
@@ -158,7 +158,7 @@
         const items = selectWindow.items();
         let index = 0;
         while (index < items.length) {
-            if (items[index] === gender) {
+            if (items[index].name === gender) {
                 break;
             }
             index++;
@@ -177,8 +177,8 @@
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Gender.prototype.apply = function(windowEntry, actor) {
         const selectWindow = windowEntry.selectWindow;
-        const gender = selectWindow.item();
-        actor.changeGender(gender);
+        const item = selectWindow.item();
+        actor.changeGender(item.name);
     };
     /**
      * アイテム一覧を得る。
@@ -187,9 +187,9 @@
      */
     Game_CharaMakeItem_Gender.prototype.items = function() {
         return [
-            TextManager.genderMale,
-            TextManager.genderFemale,
-            TextManager.genderOther
+            { name:TextManager.genderMale, },
+            { name:TextManager.genderFemale, },
+            { name:TextManager.genderOther }
         ];
     };
 
