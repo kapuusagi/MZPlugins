@@ -192,15 +192,21 @@
     // $dataSystem.terms.XXXX[id]
     Object.defineProperties(TextManager, {
         /** 性別 */
-        gender: function() { return textGender; },
+        gender: { 
+            get:function() { return textGender; }, 
+        },
         /** 性別（男） */
-        genderMail: TextManager.genderText(Game_BattlerBase.GENDER_MALE),
+        genderMail: {
+            get:function() { return TextManager.genderText(Game_BattlerBase.GENDER_MALE); },
+        },
         /** 性別（女） */
-        genderFemail: TextManager.genderText(Game_BattlerBase.GENDER_FEMALE),
+        genderFemail: {
+            get:function() { return TextManager.genderText(Game_BattlerBase.GENDER_FEMALE); },
+        },
         /** 性別（不明） */
-        genderOther: TextManager.genderText(Game_BattlerBase.GENDER_OTHER),
-        /** 種族 */
-        species: function() { return textSpecies; }
+        genderOther: {
+            get:function() { return TextManager.genderText(Game_BattlerBase.GENDER_OTHER); },
+        },
     });
 
     //------------------------------------------------------------------------------
