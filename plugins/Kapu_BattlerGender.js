@@ -173,19 +173,6 @@
                 return textGenderOther;
         }
     };
-    /**
-     * 種族名を得る。
-     * 
-     * @param {number} species 種族番号
-     * @returns {string} 種族名
-     */
-    TextManager.speciesText = function(species) {
-        if ((species > 0) && (species < speciesList.length)) {
-            return speciesList[species];
-        } else {
-            speciesList[0];
-        }
-    };
 
     // TextManagerプロパティ定義。
     // ちょっとわかりにくいが、getter(XXXX, id)は
@@ -196,11 +183,11 @@
             get:function() { return textGender; }, 
         },
         /** 性別（男） */
-        genderMail: {
+        genderMale: {
             get:function() { return TextManager.genderText(Game_BattlerBase.GENDER_MALE); },
         },
         /** 性別（女） */
-        genderFemail: {
+        genderFemale: {
             get:function() { return TextManager.genderText(Game_BattlerBase.GENDER_FEMALE); },
         },
         /** 性別（不明） */
