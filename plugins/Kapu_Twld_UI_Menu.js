@@ -26,6 +26,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_BattlerGenderに対応
  * Version.0.1.0 TWLD向けに作成した。
  */
 
@@ -282,15 +283,16 @@
      */
     Window_MenuStatus.prototype.drawActorClassAndNickName = function(actor, x, y, width) {
         this.resetFontSettings();
+        const displayClassName = actor.currentClass().name + ((actor.gender) ? ("\u30fb" + actor.gender) : "");
         if (actor.nickname()) {
             // ニックネーム指定がある。
             this.contents.fontSize = $gameSystem.mainFontSize() - 12;
             this.drawText(actor.nickname(), x, y, width);
-            this.drawText(actor.currentClass().name, x, y + 20, width);
+            this.drawText(displayClassName, x, y + 20, width);
         } else {
             // ニックネーム指定がない。
             this.contents.fontSize = $gameSystem.mainFontSize() - 8;
-            this.drawText(actor.currentClass().name, x, y + 10, width);
+            this.drawText(displayClassName, x, y + 10, width);
         }
     };
 

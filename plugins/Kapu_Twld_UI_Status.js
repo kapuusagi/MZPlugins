@@ -253,6 +253,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_BattlerGenderに対応
  * Version.0.1.1 装備が無いときの文字色が正しくない不具合を修正した。
  * Version.0.1.0 TWLD向けに作成したものをベースに作成。
  */
@@ -1107,6 +1108,7 @@ function Window_StatusProfile() {
      * @param {Number} width 幅
      */
     Window_Status.prototype.drawActorClass = function(actor, x, y, width) {
+        const displayClassName = actor.currentClass().name + ((actor.gender) ? ("\u30fb" + actor.gender) : "");
         if (textClassName && statusLabelWidth) {
             // ニックネームラベル描画あり
             const spacing = 8;
@@ -1114,10 +1116,10 @@ function Window_StatusProfile() {
             this.changeTextColor(ColorManager.systemColor());
             this.drawText(textClassName, x, y, statusLabelWidth);
             this.resetTextColor();
-            this.drawText(actor.currentClass().name, x + statusLabelWidth + spacing, y, nameWidth, "left");
+            this.drawText(displayClassName, x + statusLabelWidth + spacing, y, nameWidth, "left");
         } else {
             // ニックネーム描画なし。
-            this.drawText(actor.currentClass().name, x, y, textWidth, "left");
+            this.drawText(displayClassName, x, y, width, "left");
         }
     };
 
