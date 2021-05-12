@@ -84,7 +84,6 @@
         this._centerSprite = new Sprite();
         this._centerSprite.x = Graphics.boxWidth / 2;
         this._centerSprite.y = Graphics.boxHeight / 2 + height / 2;
-        this._centerSprite.bitmap = new Bitmap(width, height);
         this._centerSprite.setFrame(0, 0, width, height);
         this._baseSprite.addChild(this._centerSprite);
     };

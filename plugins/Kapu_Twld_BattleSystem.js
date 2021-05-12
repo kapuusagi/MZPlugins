@@ -1026,8 +1026,10 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_HudStateIcons.prototype.destroy = function() {
         Sprite.prototype.destroy.call(this);
-        if (this._iconBitmap) {
-            this._iconBitmap.destroy();
+        // bitmapはnewで構築しているので解放が必要。
+        // iconBitmapはImageManager経由なのでそちらで上手いこと管理してくれる。
+        if (this.bitmap) {
+            this.bitmap.destroy();
         }
     };
 
@@ -1892,9 +1894,6 @@ function Sprite_BattleHudPicture() {
         if (this._pictureName) {
             try {
                 return ImageManager.loadPicture(this._pictureName);
-                // const bitmap = new Bitmap(640, 800);
-                // bitmap.fillAll("black");
-                // return bitmap;
             }
             catch (e) {
                 console.error(e);

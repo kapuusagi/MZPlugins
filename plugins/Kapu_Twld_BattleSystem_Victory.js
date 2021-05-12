@@ -226,6 +226,18 @@ function Window_BattleRewards() {
         this.bitmap.drawText(textLevelUp, 0, 0, w, h, "center");
     };
     /**
+     * Sprite_BattleHudLevelupを破棄する。
+     * 
+     * @param {object} options オプション
+     */
+    Sprite_BattleHudLevelup.prototype.destroy = function(options) {
+        // bitmapはnewで確保しているため、destroy()をコールする必要がある。
+        if (this.bitmap) {
+            this.bitmap.destroy();
+        }
+        Sprite.prototype.destroy.call(this, options);
+    };
+    /**
      * フォントフェースを得る。
      * 
      * @returns {string} フォントフェース
@@ -315,7 +327,9 @@ function Window_BattleRewards() {
      * @param {object} optins オプション
      */
     Sprite_BattleHudExpGauge.prototype.destroy = function(options) {
-        this.bitmap.destroy();
+        if (this.bitmap) {
+            this.bitmap.destroy();
+        }
         Sprite.prototype.destroy.call(this, options);
     };
 
