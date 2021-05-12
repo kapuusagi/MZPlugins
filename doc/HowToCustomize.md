@@ -1415,3 +1415,14 @@ TPクリア -> clearTp -> setTp -> refresh
 GitHubにある。
 
 https://github.com/pixijs
+
+### スナップショットを撮るには
+
+SceneManager.snap()を呼ぶ。Bitmapオブジェクトが返る。
+返ってきたBitmapオブジェクトは使い終わったらdestroy()をコールして破棄する事。
+
+### 画像リソースの管理とかは？
+
+ImageManagerのインタフェースで呼び出す分には、destroy()をコールしなくて良いみたい。
+呼び出したシーンとセットで管理されていて、シーン完了時に不要リソースの破棄がうまいこと行われる。
+それ以外は自分でdestroy()をコールしないといけない。
