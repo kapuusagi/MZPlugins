@@ -136,6 +136,8 @@ function Scene_RouletteChoice() {
     const cursorIconIndex = Number(parameters["cursorIconIndex"]) || 0;
     const radius = Math.max(60, Math.floor(Number(parameters["radius"]) || 0));
 
+    const minMoveAngle = 3 * Math.PI / 180;
+
     // Note: 匿名関数だと this に Game_Interpreter が渡らないことに注意。必ずfunctionオブジェクトを構築する。
     // eslint-disable-next-line no-unused-vars
     PluginManager.registerCommand(pluginName, "clearChoice", args => {
@@ -327,7 +329,7 @@ function Scene_RouletteChoice() {
      */
     Scene_RouletteChoice.prototype.prepare = function(variableId, centerX, centerY, speed, canCancel) {
         this._variableId = variableId;
-        this._choiceItems = choiceItems;
+        this._choiceItems = $gameTemp.choiceRouletteItems();
         this._rotationSpeed = speed;
         this._canCancel = canCancel;
         this._centerX = centerX;
@@ -364,8 +366,8 @@ function Scene_RouletteChoice() {
         this._centerSprite = new Sprite();
         this._centerSprite.anchor.x = 0.5;
         this._centerSprite.anchor.y = 0.5;
-        this._centerSprite.x = Graphics.boxWidth;
-        this._centerSprite.y = Graphics.boxHeight;
+        this._centerSprite.x = this._centerX;
+        this._centerSprite.y = this._centerY;
         this._iconLayer.addChild(this._centerSprite);
     };
 
@@ -422,10 +424,11 @@ function Scene_RouletteChoice() {
      * 更新する。
      */
     Scene_RouletteChoice.prototype.update = function() {
+        Scene_MenuBase.prototype.update.call(this);
         this.updateRotation();
         this.updateInput();
         this.updateSpeed();
-        if (!this.isRotationStopped()) {
+        if (this.isRotationStopped()) {
             this.popScene();
         }
     };
@@ -446,7 +449,7 @@ function Scene_RouletteChoice() {
     Scene_RouletteChoice.prototype.updateInput = function() {
         if (this._isSelecting) {
             if (Input.isRepeated("ok") || TouchInput.isClicked()) {
-                this._choice = choicedIndex();
+                this._choice = this.choicedIndex();
                 SoundManager.playOk();
                 this._isSelecting = false;
             } else if (this._canCancel && (Input.isRepeated("cancel") || TouchInput.isCancelled())) {
@@ -484,7 +487,12 @@ function Scene_RouletteChoice() {
         // Note: 1フレームあたりの移動角度 = 回転速度[°/s] * ((2 * Math.PI) / 360) / 60[frame]
         //                               = 回転速度[°/s] * Math.PI / 180 / 60
         //                               = 回転速度[°/s] * Math.PI / 10800
-        this._centerSprite.angle += (this._rotationSpeed * Math.PI / 10800);
+
+        // Note : センタースプライトのアングル調整ではダメだった。
+        const moveAngle = Math.max(minMoveAngle, (this._rotationSpeed * Math.PI / 10800));
+
+        this._centerSprite.angle += moveAngle;
+
     };
 
     /**
@@ -494,10 +502,12 @@ function Scene_RouletteChoice() {
         if (!this._isSelecting) {
             // 選択が終わったら徐々に速度を落とす。
             if (this._rotationSpeed > 0) {
-                if ((this._rotationSpeed === 1) && (this._choice === this.choicedIndex())) {
-                    this._rotationSpeed = 0;
+                if (this._rotationSpeed > 1) {
+                    this._rotationSpeed--;
                 } else {
-                    rotationSpeed--;
+                    if (this._choice === this.choicedIndex()) {
+                        this._rotationSpeed = 0;
+                    }
                 }
             }
         }
