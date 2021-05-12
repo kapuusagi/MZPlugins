@@ -1109,7 +1109,7 @@
     Game_Party.prototype.independentWeaponSort = function(item1, item2) {
         const wtypeId1 = item1.wtypeId;
         const wtypeId2 = item2.wtypeId;
-        if (wtypeId !== wtypeId2) {
+        if (wtypeId1 !== wtypeId2) {
             return (wtypeId1 > wtypeId2) ? 1 : -1;
         } else {
             const id1 = (item1.baseItemId) ? item1.baseItemId : item1.id;
