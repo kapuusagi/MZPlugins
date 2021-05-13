@@ -12,35 +12,11 @@
  * @text ルーレットアイテム追加
  * @desc ルーレット選択候補アイテムを追加します。
  * 
- * @arg iconIndex
- * @text アイコンインデックス
- * @desc アイコンインデックス
- * @type number
- * @default 0
+ * @arg item
+ * @text 項目
+ * @desc 追加する項目
+ * @type struct<itemEntry>
  * 
- * @arg itemId
- * @text 道具指定
- * @desc 道具指定（道具のアイコンが入ります）
- * @type item
- * @default 0
- * 
- * @arg weaponId
- * @text 武器指定
- * @desc 武器指定（武器のアイコンが入ります)
- * @type weapon
- * @default 0
- * 
- * @arg armorId
- * @text 防具指定
- * @desc 防具指定（防具のアイコンが入ります）
- * @type armor
- * @default 0
- * 
- * @arg skillId
- * @text スキル指定
- * @desc スキル指定（スキルのアイコンが入ります）
- * @type skill
- * @default 0
  * 
  * @command choice
  * @text ルーレットで選択する
@@ -95,26 +71,80 @@
  * 
  * 
  * @help 
+ * ルーレットを表示させ、任意のタイミングで停止、決定させる機能を提供するプラグイン。
  * これって他にありそう。既製品があるならそっちを使おう。
+ * 選択項目はアイテムオブジェクトでは管理していないので、
+ * 呼び出し元のスクリプトで、1番目は～、2番目は～、と認識して処理させること。
  * 
  * ■ 使用時の注意
+ * シーンの切り替えが入るので、戦闘中とかに呼び出すとおかしくなるかも。
  * 
  * ■ プラグイン開発者向け
+ * Scene_RouletteChoiceを個別に呼び出すには
+ *   const iconIds = [ ルーレットに表示するアイコン ];
+ *   const centerX = Graphics.boxWidth / 2;
+ *   const centerY = Graphics.boxHeight / 2;
+ *   SceneManager.push(Scene_RouletteChoice);
+ *   SceneManager.prepareNextScene(0, iconIds, centerx, centerY, speed, canCancel);
+ * とする。シーンが完了したとき、
+ *   $gameTemp.choiceRouletteSelected()
+ * で値を取得出来る。もちろん変数を経由して取得しても良い。
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
+ * ルーレットアイテムクリア
+ *    ルーレットで選択するアイテムを全てクリアする。
  * 
+ * ルーレットアイテム追加
+ *    1つの選択項目を追加する。必要な選択肢の数だけ呼び出す
+ * 
+ * ルーレットで選択する
+ *    シーンを切り替えてルーレット選択させる。
+ *    指定した変数に結果が格納される。
+ *    未選択時、変数には-1が格納される。
  * 
  * ============================================
  * ノートタグ
  * ============================================
- * 
+ * ノートタグはありません。
  * 
  * ============================================
  * 変更履歴
  * ============================================
  * Version.0.1.0 動作未確認。
+ */
+/*~struct~itemEntry:
+
+ * @arg iconIndex
+ * @text アイコンインデックス
+ * @desc アイコンインデックス
+ * @type number
+ * @default 0
+ * 
+ * @arg itemId
+ * @text 道具指定
+ * @desc 道具指定（道具のアイコンが入ります）
+ * @type item
+ * @default 0
+ * 
+ * @arg weaponId
+ * @text 武器指定
+ * @desc 武器指定（武器のアイコンが入ります)
+ * @type weapon
+ * @default 0
+ * 
+ * @arg armorId
+ * @text 防具指定
+ * @desc 防具指定（防具のアイコンが入ります）
+ * @type armor
+ * @default 0
+ * 
+ * @arg skillId
+ * @text スキル指定
+ * @desc スキル指定（スキルのアイコンが入ります）
+ * @type skill
+ * @default 0
  */
 /**
  * 選択項目アイコンスプライト
@@ -136,7 +166,9 @@ function Scene_RouletteChoice() {
     const cursorIconIndex = Number(parameters["cursorIconIndex"]) || 0;
     const radius = Math.max(60, Math.floor(Number(parameters["radius"]) || 0));
 
-    const minMoveAngle = 3 * Math.PI / 180;
+    const radian360 = 2 * Math.PI;
+    const minMoveAnglePerFrame = 1; // 1フレームあたりの最小回転数[°]
+    const minMoveRadian = minMoveAnglePerFrame * Math.PI / 180; // 1フレームあたりの最小回転数[rad]
 
     // Note: 匿名関数だと this に Game_Interpreter が渡らないことに注意。必ずfunctionオブジェクトを構築する。
     // eslint-disable-next-line no-unused-vars
@@ -145,32 +177,38 @@ function Scene_RouletteChoice() {
     });
 
     PluginManager.registerCommand(pluginName, "addChoice", args => {
-        const itemId = Number(args.item);
-        if ((itemId > 0) && (itemId < $dataItems.length)) {
-            const item = $dataItems[itemId];
-            $gameTemp.addChoiceRouletteItem(item.iconIndex);
-            return ;
+        try {
+            const addItem = JSON.parse(args.item || "{}");
+            const itemId = Number(addItem.item);
+            if ((itemId > 0) && (itemId < $dataItems.length)) {
+                const item = $dataItems[itemId];
+                $gameTemp.addChoiceRouletteItem(item.iconIndex);
+                return ;
+            }
+            const weaponId = Number(addItem.weaponId);
+            if ((weaponId > 0) && (weaponId < $dataWeapons.length)) {
+                const weapon = $dataWeapons[weaponId];
+                $gameTemp.addChoiceRouletteItem(weapon.iconIndex);
+                return ;
+            }
+            const armorId = Number(addItem.armorId);
+            if ((armorId > 0) && (armorId < $dataArmors.length)) {
+                const armor = $dataArmors[armorId];
+                $gameTemp.addChoiceRouletteItem(armor.iconIndex);
+                return ;
+            }
+            const skillId = Number(addItem.skillId);
+            if ((skillId > 0) && (skillId < $dataSkills.length)) {
+                const skill = $dataSkills[skillId];
+                $gameTemp.addChoiceRouletteItem(skill.iconIndex);
+                return ;
+            }
+            const iconIndex = Number(addItem.iconIndex) || 0;
+            $gameTemp.addChoiceRouletteItem(iconIndex);
         }
-        const weaponId = Number(args.weaponId);
-        if ((weaponId > 0) && (weaponId < $dataWeapons.length)) {
-            const weapon = $dataWeapons[weaponId];
-            $gameTemp.addChoiceRouletteItem(weapon.iconIndex);
-            return ;
+        catch (e) {
+            console.log(e);
         }
-        const armorId = Number(args.armorId);
-        if ((armorId > 0) && (armorId < $dataArmors.length)) {
-            const armor = $dataArmors[armorId];
-            $gameTemp.addChoiceRouletteItem(armor.iconIndex);
-            return ;
-        }
-        const skillId = Number(args.skillId);
-        if ((skillId > 0) && (skillId < $dataSkills.length)) {
-            const skill = $dataSkills[skillId];
-            $gameTemp.addChoiceRouletteItem(skill.iconIndex);
-            return ;
-        }
-        const iconIndex = Number(args.iconIndex) || 0;
-        $gameTemp.addChoiceRouletteItem(iconIndex);
     });
 
 
@@ -202,7 +240,7 @@ function Scene_RouletteChoice() {
 
         if ((variableId > 0) && (choiceItems.length > 0)) {
             SceneManager.push(Scene_RouletteChoice);
-            SceneManager.prepareNextScene(variableId, centerX, centerY, speed, canCancel);
+            SceneManager.prepareNextScene(variableId, choiceItems, centerX, centerY, speed, canCancel);
         }
     });
     //------------------------------------------------------------------------------
@@ -214,6 +252,7 @@ function Scene_RouletteChoice() {
     Game_Temp.prototype.initialize = function() {
         _Game_Temp_initialize.call(this);
         this._choiceRouletteItems = [];
+        this._choiceRouletteSelected = -1;
     };
 
     /**
@@ -223,6 +262,7 @@ function Scene_RouletteChoice() {
      */
     Game_Temp.prototype.choiceRouletteItems = function() {
         return this._choiceRouletteItems;
+        
     };
 
     /**
@@ -238,6 +278,24 @@ function Scene_RouletteChoice() {
      */
     Game_Temp.prototype.addChoiceRouletteItem = function(id) {
         this._choiceRouletteItems.push(id);
+    };
+
+    /**
+     * ルーレットでの選択番号を設定する。
+     * 
+     * @param {number} no 番号
+     */
+    Game_Temp.prototype.setChoiceRouletteSelected = function(no) {
+        this._choiceRouletteSelected = no;
+    };
+
+    /**
+     * ルーレットで選択された番号を得る。
+     * 
+     * @returns {number} 番号
+     */
+    Game_Temp.prototype.choiceRouletteSelected = function() {
+        return this._choiceRouletteSelected;
     };
 
     //------------------------------------------------------------------------------
@@ -277,10 +335,10 @@ function Scene_RouletteChoice() {
      * @param {number} iconIndex アイコンインデックス
      */
     Sprite_ChoiceIcon.prototype.setup = function(iconIndex) {
-        if (this._iconIndex !== iconIndex) {
-            this._iconIndex = iconIndex;
-        }
+        this._iconIndex = iconIndex;
     };
+
+
     /**
      * スプライトを更新する。
      */
@@ -288,6 +346,7 @@ function Scene_RouletteChoice() {
         Sprite.prototype.update.call(this);
         this.updateFrame();
     };
+
     /**
      * スプライトに表示するbitmapの領域（フレーム）を更新する。
      */
@@ -300,6 +359,11 @@ function Scene_RouletteChoice() {
     };
     //------------------------------------------------------------------------------
     // Scene_RouletteChoice
+    //
+    // _centerSprite : 回転の中央位置と、現在の回転角度をangleに持たせる。
+    //                 最良は_centerSpriteのangleを調整すると、相対的に子スプライトの位置も更新されることだが、
+    //                 そのようには動作しなかったので計算するようにした。
+    // updateRotationの中で子スプライトの位置と、カーソルの選択対象を更新している。
     Scene_RouletteChoice.prototype = Object.create(Scene_MenuBase.prototype);
     Scene_RouletteChoice.prototype.constructor = Scene_RouletteChoice;
 
@@ -314,22 +378,27 @@ function Scene_RouletteChoice() {
         this._choiceItems = [];
         this._canCancel = true;
         this._choice = -1;
+        this._currentIndex = -1; // 現在のカーソル位置にあるインデックス。
+        this._cursorAngleMin = 0;
+        this._cursorAngleMax = radian360;
         this._centerX = Graphics.boxWidth / 2;
         this._centerY = Graphics.boxHeight / 2;
+        this._itemAngle = radian360;
     };
 
     /**
      * シーンの準備をする。
      * 
      * @param {number} variableId 変数ID
+     * @param {Array<number>} choiceItems 選択対象アイテムアイコンID配列
      * @param {number} centerX 中央X
      * @param {number} centerY 中央Y
      * @param {number} speed 回転速度
      * @param {boolean} canCancel キャンセル可能な場合にはtrue, それ以外はfalse
      */
-    Scene_RouletteChoice.prototype.prepare = function(variableId, centerX, centerY, speed, canCancel) {
+    Scene_RouletteChoice.prototype.prepare = function(variableId, choiceItems, centerX, centerY, speed, canCancel) {
         this._variableId = variableId;
-        this._choiceItems = $gameTemp.choiceRouletteItems();
+        this._choiceItems = choiceItems.concat();
         this._rotationSpeed = speed;
         this._canCancel = canCancel;
         this._centerX = centerX;
@@ -342,6 +411,9 @@ function Scene_RouletteChoice() {
     Scene_RouletteChoice.prototype.create = function() {
         Scene_MenuBase.prototype.create.call(this, ...arguments);
         this._items = $gameTemp.choiceRouletteItems().concat();
+        this._itemAngle = radian360 / this._items.length;
+        this._cursorAngleMin = (Math.PI / 2) - this._itemAngle / 2;
+        this._cursorAngleMax = this._cursorAngleMin + this._itemAngle;
         this.createIconLayer();
         this.createCenterSprite();
         this.createChoiceSprite();
@@ -368,6 +440,7 @@ function Scene_RouletteChoice() {
         this._centerSprite.anchor.y = 0.5;
         this._centerSprite.x = this._centerX;
         this._centerSprite.y = this._centerY;
+        this._centerSprite.angle = radian360 * Math.PI;
         this._iconLayer.addChild(this._centerSprite);
     };
 
@@ -375,14 +448,23 @@ function Scene_RouletteChoice() {
      * 選択項目のスプライトを作成する。
      */
     Scene_RouletteChoice.prototype.createChoiceSprite = function() {
+        const offset = this._centerSprite.angle;
+        this._itemSprites = [];
         for (let i = 0; i < this._items.length; i++) {
             const iconIndex = this._items[i];
-            const angle = (2 * Math.PI) * i / this._items.length;
+            const radian = (this._itemAngle * i + offset) % radian360;
             const sprite = new Sprite_ChoiceIcon();
             sprite.setup(iconIndex);
-            sprite.x = Math.round(radius * Math.sin(angle));
-            sprite.y = Math.round(radius * Math.cos(angle));
+            sprite.x = radius * Math.sin(radian);
+            sprite.y = - radius * Math.cos(radian);
+
             this._centerSprite.addChild(sprite);
+            this._itemSprites.push(sprite);
+
+            if ((radian >= this._cursorAngleMin) && (radian < this._cursorAngleMax)) {
+                // これが現在カーソル選択中のアイテム
+                this._currentIndex = i;
+            }
         }
     };
 
@@ -390,11 +472,12 @@ function Scene_RouletteChoice() {
      * カーソルスプライトを作成する。
      */
     Scene_RouletteChoice.prototype.createCursorSprite = function() {
-        const sprite = new Sprite_ChoiceIcon(cursorIconIndex);
-        sprite.x = Graphics.box
-        sprite.y = -radius;
+        const sprite = new Sprite_ChoiceIcon();
+        sprite.setup(cursorIconIndex, radius, Math.PI / 2);
         sprite.scale.x = 1.5;
         sprite.scale.y = 1.5;
+        sprite.y = -radius;
+        sprite.x = 0;
         this._iconLayer.addChild(sprite);
     };
 
@@ -418,6 +501,7 @@ function Scene_RouletteChoice() {
         if (this._variableId > 0) {
             $gameVariables.setValue(this._variableid, -1);
         }
+        $gameTemp.setChoiceRouletteSelected(-1);
     };
 
     /**
@@ -427,7 +511,6 @@ function Scene_RouletteChoice() {
         Scene_MenuBase.prototype.update.call(this);
         this.updateRotation();
         this.updateInput();
-        this.updateSpeed();
         if (this.isRotationStopped()) {
             this.popScene();
         }
@@ -466,48 +549,51 @@ function Scene_RouletteChoice() {
      * @returns {number} 選択番号
      */
     Scene_RouletteChoice.prototype.choicedIndex = function() {
-        // angle = 360 / (2 * PI) = 180 / PI.
-        const curAngle = this._centerSprite.rotation / Math.PI;
-        const itemAngle = 360 / this._items.length;
-        // カーソルは90°ずれた位置にある。また角度を中央よりにするためitemAngle/2を加算。
-        const judgeAngle = curAngle + 90 + itemAngle / 2; 
-        if (judgeAngle <= 360) {
-            return judgeAngle / itemAngle;
-        } else {
-            return (judgeAngle - 360) / itemAngle;
-        }
+        return this._currentIndex;
     };
 
     /**
      * 回転制御する。
+     * 
+     * _centerSpriteの回転角度と、子スプライトの位置、
+     * カーソルで選択されている項目の位置を更新している。
      */
     Scene_RouletteChoice.prototype.updateRotation = function() {
-        // 多分中央を回転させれば、周りも動くと期待。
-        // だめだったら演算する。
+        if (this._rotationSpeed > 0) {
+            return ; // 回転停止中
+        }
+
         // Note: 1フレームあたりの移動角度 = 回転速度[°/s] * ((2 * Math.PI) / 360) / 60[frame]
         //                               = 回転速度[°/s] * Math.PI / 180 / 60
         //                               = 回転速度[°/s] * Math.PI / 10800
-
-        // Note : センタースプライトのアングル調整ではダメだった。
-        const moveAngle = Math.max(minMoveAngle, (this._rotationSpeed * Math.PI / 10800));
-
-        this._centerSprite.angle += moveAngle;
-
-    };
-
-    /**
-     * 回転速度を更新する。
-     */
-    Scene_RouletteChoice.prototype.updateSpeed = function() {
+        let moveAngle = Math.max(minMoveRadian, (this._rotationSpeed * Math.PI / 10800));
         if (!this._isSelecting) {
-            // 選択が終わったら徐々に速度を落とす。
-            if (this._rotationSpeed > 0) {
+            const targetAngle = this._choice * this._itemAngle + this._centerSprite.angle;
+            const cursorAngle = math.PI / 2;
+            if ((moveAngle <= minMoveRadian) && ((targetAngle + moveAngle) >= cursorAngle)) {
+                // 停止条件を満たしたので、最後の移動をして止める。
+                moveAngle = cursorAngle - targetAngle;
+                this._rotationSpeed = 0; // 停止
+            } else {
+                // 選択中でないならば減速処理する。
                 if (this._rotationSpeed > 1) {
                     this._rotationSpeed--;
-                } else {
-                    if (this._choice === this.choicedIndex()) {
-                        this._rotationSpeed = 0;
-                    }
+                }
+            }
+        }
+        this._centerSprite.angle = (this._centerSprite.angle + moveAngle) % radian360;
+        const offset = this._centerSprite.angle;
+        for (let i = 0; i < this._itemSprites.length; i++) {
+            const sprite = this._itemSprites[i];
+            const radian = (this._itemAngle * i + offset) % radian360;
+            sprite.setup(iconIndex);
+            sprite.x = radius * Math.sin(radian);
+            sprite.y = - radius * Math.cos(radian);
+            if ((radian >= this._cursorAngleMin) && (radian < this._cursorAngleMax)) {
+                // これが現在カーソル選択中のアイテム
+                if(this._currentIndex !== i) {
+                    this._currentIndex = i;
+                    SoundManager.playCursor();
                 }
             }
         }
@@ -521,6 +607,7 @@ function Scene_RouletteChoice() {
         if (this._variableId > 0) {
             $gameVariables.setValue(this._variableId, this._choice);
         }
+        $gameTemp.setChoiceRouletteSelected(this._choice);
     };
 
 })();
