@@ -96,6 +96,7 @@ Game_Party.ABILITY_～で定義される。
 |105|__ABILITY_TARGET_SEARCH__|ターゲットサーチ特性。|
 |106|__ABILITY_LIGHT_BRIGHTNESS__|暗闇中の光源特性。|
 |107|__ABILITY_SURPRISE_RATE__|不利率特性。|
+|108|__ABILITY_RANDOMENCOUNT_RATE__|ランダムエンカウント率特性。|
 ||||
 
 
