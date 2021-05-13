@@ -349,10 +349,10 @@
      */
     Game_Character.prototype.updateLightSource = function() {
         const targetBrightness = this.lightSourceTargetBrightness();
-        if (this._lightSourceCurrentBrightness < targetBrightness) {
-            this._lightSourceCurrentBrightness++;
-        } else if (this._lightSourceCurrentBrightness > targetBrightness) {
-            this._lightSourceCurrentBrightness--;
+        if (this._lightSourceBrightness < targetBrightness) {
+            this._lightSourceBrightness++;
+        } else if (this._lightSourceBrightness > targetBrightness) {
+            this._lightSourceBrightness--;
         }
     };
 
