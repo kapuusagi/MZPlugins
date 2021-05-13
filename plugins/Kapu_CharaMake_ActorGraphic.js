@@ -17,7 +17,14 @@
  * @type boolean
  * @default true
  * 
+ * @command changeGraphicSet
+ * @text 画像セット変更
+ * @desc キャラメイク項目のグラフィックセットを切り替えます。キャラクターメイキング実行直前に呼び出すことを想定します。
  * 
+ * @arg no
+ * @text 番号
+ * @type number
+ * @default 0
  * 
  * @param isSelectableAtFirst
  * @text 初期時のみ選択可能とする
@@ -43,12 +50,10 @@
  * @type string
  * @default デフォルト
  * 
- * @param charaMakeItems
+ * @param graphicSelectionSets
  * @text キャラクタメイキング選択項目
  * @description キャラクタメイキング選択項目として使用されるコレクション。
- * @type struct<GraphicEntry>[]
- * 
- * 
+ * @type struct<GraphicSelectionSet>[]
  * 
  * 
  * @help 
@@ -92,6 +97,14 @@
  * ============================================
  * Version.1.1.0 プラグインコマンドで項目を有効/無効設定できるようにした。
  * Version.1.0.0 初版作成。
+ */
+/*~struct~GraphicSelectionSet:
+ *
+ * @param items
+ * @text キャラクタメイキング選択項目
+ * @description キャラクタメイキング選択項目として使用されるコレクション。
+ * @type struct<GraphicEntry>[]
+ * 
  */
 /*~struct~GraphicEntry:
  *
@@ -176,22 +189,30 @@ function Sprite_CharaMake_Picture() {
     const textItemNameDefault = parameters["textItemNameDefault"] || "default";
     const isSelectableAtFirst = (typeof parameters["isSelectableAtFirst"] === "undefined")
             ? true : (parameters["isSelectableAtFirst"] === "true");
-    const graphicItems = [];
+
+    const graphicSelectionSets = [];
     try {
-        const entries = JSON.parse(parameters["charaMakeItems"]).map(str => JSON.parse(str));
-        for (entry of entries) {
-            // noteフィールドを展開する。
-            if (entry.note) {
-                DataManager.extractMetadata(entry);
-            } else {
-                entry.note = "";
-                entry.meta = {};
+        const gssets = JSON.parse(parameters["graphicSelectionSets"]).map(str => JSON.parse(str));
+        for (gset of gssets) {
+            const items = [];
+            const entries = JSON.parse(gset.items).map(str => JSON.parse(str));
+            for (entry of entries) {
+                // noteフィールドを展開する。
+                if (entry.note) {
+                    DataManager.extractMetadata(entry);
+                } else {
+                    entry.note = "";
+                    entry.meta = {};
+                }
+                items.push(entry);
             }
-            graphicItems.push(entry);
+            graphicSelectionSets.push({
+                items: items
+            });
         }
     }
     catch (e) {
-        console.log(e);
+        console.error(e);
     }
 
     const CHARAMAKEITEM_ACTORGRAPHIC = "actorGraphic";
@@ -199,6 +220,11 @@ function Sprite_CharaMake_Picture() {
         const isEnabled = (typeof args.isEnabled === "undefined")
                 ? true : (args.isEnabled === "true");
         $gameTemp.setCharaMakeItemEnabled(CHARAMAKEITEM_ACTORGRAPHIC, isEnabled);
+    });
+
+    PluginManager.registerCommand(pluginName, "changeGraphicSet", args => {
+        const setNo = Number(args.no);
+        $gameTemp.setCharaMakeActorGraphicSet(setNo);
     });
 
     //------------------------------------------------------------------------------
@@ -213,11 +239,37 @@ function Sprite_CharaMake_Picture() {
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
         if ($gameTemp.isCharaMakeItemEnabled(CHARAMAKEITEM_ACTORGRAPHIC)) {
-            items.push(new Game_CharaMakeItem_Visual());
+            items.push(new Game_CharaMakeItem_Visual($gaemTemp.charaMakeActorGraphicSet));
         }
         return items;
     };
 
+    //------------------------------------------------------------------------------
+    // Game_Temp
+    const _Game_Temp_initialize = Game_Temp.prototype.initialize;
+    /**
+     * 初期化する。
+     */
+    Game_Temp.prototype.initialize = function() {
+        _Game_Temp_initialize.call(this);
+        this._charaMakeActorGraphicSet = 0;
+    };
+    /**
+     * キャラクターメイキングセットの値を得る。
+     * 
+     * @returns {number} キャラクターメイキングセットの値
+     */
+    Game_Temp.prototype.charaMakeActorGraphicSet = function() {
+        return this._charaMakeActorGraphicSet;
+    };
+    /**
+     * キャラクターメイキングセットの値を設定する。
+     * 
+     * @param {number} no キャラクターメイキングセットの値
+     */
+    Game_Temp.prototype.setCharaMakeActorGraphicSet = function(no) {
+        this._charaMakeActorGraphicSet = no.clamp(0, graphicSelectionSets.length - 1);
+    };
     //------------------------------------------------------------------------------
     // Sprite_CharaMake_Picture
     Sprite_CharaMake_Picture.prototype = Object.create(Sprite_Clickable.prototype);
@@ -389,9 +441,12 @@ function Sprite_CharaMake_Picture() {
 
     /**
      * Game_CharaMakeItem_Visualを初期化する。
+     * 
+     * @param {number} no 番号
      */
-    Game_CharaMakeItem_Visual.prototype.initialize = function() {
+    Game_CharaMakeItem_Visual.prototype.initialize = function(no) {
         Game_CharaMakeItem.prototype.initialize.call(this, ...arguments);
+        this._items = graphicSelectionSets[no];
     };
 
     /**
@@ -516,7 +571,7 @@ function Sprite_CharaMake_Picture() {
      * @return {Array<object>} アイテム一覧
      */
     Game_CharaMakeItem_Visual.prototype.items = function() {
-        return graphicItems;
+        return this._items;
     };
 
     /**
