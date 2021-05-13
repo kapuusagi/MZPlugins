@@ -95,6 +95,7 @@ Game_Party.ABILITY_～で定義される。
 |104|__ABILITY_PREEMPTIVE_RATE__|先制攻撃率特性。|
 |105|__ABILITY_TARGET_SEARCH__|ターゲットサーチ特性。|
 |106|__ABILITY_LIGHT_BRIGHTNESS__|暗闇中の光源特性。|
+|107|__ABILITY_SURPRISE_RATE__|不利率特性。|
 ||||
 
 
