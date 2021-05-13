@@ -419,6 +419,14 @@ function Scene_RouletteChoice() {
         this.createChoiceSprite();
         this.createCursorSprite();
     };
+    /**
+     * キャンセルボタンが必要かどうかを取得する。
+     * 
+     * @return {Boolean} 必要な場合にはtrue, それ以外はfalse
+     */
+    Scene_RouletteChoice.prototype.needsCancelButton = function() {
+        return this._canCancel;
+    };
 
     /**
      * アイコンレイヤーを作成する。
