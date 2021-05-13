@@ -171,24 +171,27 @@
     Sprite_Picture.prototype.updateBitmap = function() {
         _Sprite_Picture_updateBitmap.call(this, ...arguments);
         const picture = this.picture();
-        const captureRequiredId = picture.captureRequiredId();
-        if (this._captureRequiredId !== captureRequiredId) {
+        if (picture) {
+            const captureRequiredId = picture.captureRequiredId();
+            if (this._captureRequiredId !== captureRequiredId) {
+                if (this._screenCaptureBitmap) {
+                    this._screenCaptureBitmap.destroy();
+                    this._screenCaptureBitmap = null;
+                }
+                if (captureRequiredId > 0) {
+                    // 要求がでているときはスナップする。
+                    this._screenCaptureBitmap = SceneManager.snap();
+                    this.bitmap = this._screenCaptureBitmap;
+                }
+                this._captureRequiredId = captureRequiredId;
+            }
+        }
+        if (this.bitmap !== this._screenCaptureBitmap) {
+            // 表示ビットマップが異なるのでリソースを開放する。
             if (this._screenCaptureBitmap) {
                 this._screenCaptureBitmap.destroy();
                 this._screenCaptureBitmap = null;
             }
-            if (captureRequiredId > 0) {
-                // 要求がでているときはスナップする。
-                this._screenCaptureBitmap = SceneManager.snap();
-                this.bitmap = this._screenCaptureBitmap;
-            }
-            this._captureRequiredId = captureRequiredId;
-        } else {
-            if (this.bitmap !== this._screenCaptureBitmap) {
-                // 表示ビットマップが異なるのでリソースを開放する。
-                this._screenCaptureBitmap.destroy();
-                this._screenCaptureBitmap = null;
-            }
         }
-    };
+};
 })();
