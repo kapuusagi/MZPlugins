@@ -82,11 +82,12 @@
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
+     * @param {Game_Actor} actor アクター
      * @returns {object} ウィンドウ類
      */
     // eslint-disable-next-line no-unused-vars
-    Game_CharaMakeItem_Visual.prototype.createSelectWindows = function(rect, helpWindow) {
-        const windowEntry = _Game_CharaMakeItem_Visual_createSelectWindows.call(this, rect, helpWindow);
+    Game_CharaMakeItem_Visual.prototype.createSelectWindows = function(rect, helpWindow, actor) {
+        const windowEntry = _Game_CharaMakeItem_Visual_createSelectWindows.call(this, rect, helpWindow, actor);
         const battlePictureSprite = new Sprite_CharaMake_Picture();
         battlePictureSprite.anchor.x = 0.5;
         battlePictureSprite.anchor.y = 1.0;

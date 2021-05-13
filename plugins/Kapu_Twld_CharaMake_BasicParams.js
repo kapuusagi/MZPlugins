@@ -602,13 +602,13 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 選択・編集用のウィンドウを作成する。
      * 
-     * @param {Scene_Base} s
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
+     * @param {Game_Actor} actor アクター
      * @returns {object} 追加するウィンドウ
      */
     // eslint-disable-next-line no-unused-vars
-    Game_CharaMakeItem_BasicParams.prototype.createSelectWindows = function(rect, helpWindow) {
+    Game_CharaMakeItem_BasicParams.prototype.createSelectWindows = function(rect, helpWindow, actor) {
         const wx = rect.x;
         const wy = rect.y;
         const ww = 480;

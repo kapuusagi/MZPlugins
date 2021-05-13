@@ -116,13 +116,13 @@
  * 
  * @param characterName
  * @text 歩行グラフィックファイル
- * @description 歩行グラフィックのファイル
+ * @desc 歩行グラフィックのファイル
  * @type file
  * @dir img/characters/
  * 
  * @param characterIndex
  * @text 歩行グラフィックインデックス
- * @description 歩行グラフィックファイル中のキャラクタインデックス
+ * @desc 歩行グラフィックファイル中のキャラクタインデックス
  * @type number
  * @default 0
  * @min 0
@@ -130,9 +130,14 @@
  *
  * @param battlerName
  * @text サイドビューバトラーファイル
- * @description サイドビューバトルグラフィックファイル名
+ * @desc サイドビューバトルグラフィックファイル名
  * @type file
  * @dir img/sv_actors/
+ * 
+ * @param condition
+ * @text 選択可能条件
+ * @desc 選択可能条件。アクターデータをaとして判定に使用出来る。
+ * @default
  * 
  * @param note
  * @text ノートタグ
@@ -421,10 +426,11 @@ function Sprite_CharaMake_Picture() {
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
+     * @param {Game_Actor} actor アクター
      * @returns {object} ウィンドウエントリ
      */
     // eslint-disable-next-line no-unused-vars
-    Game_CharaMakeItem_Visual.prototype.createSelectWindows = function(rect, helpWindow) {
+    Game_CharaMakeItem_Visual.prototype.createSelectWindows = function(rect, helpWindow, actor) {
         const ww = rect.width > 800 ? 800 : rect.width;
         const windowRect = new Rectangle(rect.x, rect.y, ww, rect.height);
         const window = new Window_CharaMakeVisualSelection(windowRect);

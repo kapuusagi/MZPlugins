@@ -148,10 +148,11 @@
  * 2. DataManager.createCharaMakeItemsをフックし、
  *    1で作成したオブジェクトを追加して返すようにする。
  * 
- * Game_CharaMakeItem.createSelectWindows(rect:Rectangle, helpWindow:Window_Help) : object
+ * Game_CharaMakeItem.createSelectWindows(rect:Rectangle, helpWindow:Window_Help, actor:Game_Actor) : object
  *   項目選択のUIを構築する。rectには選択項目を表示可能なウィンドウ領域が渡される。
  *   rectは使用してもいいし、使用しなくても良い。
  *   helpWindowはヘルプメッセージを表示させる場合に使用する。
+ *   actorは使用してもいいし、使用しなくても良い。作成用の一時アクター。本番のデータではない。
  *   objectは少なくとも以下のメンバーを持つ。
  *      selectWindow : {Window_Selectable} 項目選択ウィンドウとして使用するウィンドウ。
  *                                         選択確定時に"ok"ハンドラを呼ぶこと。
@@ -200,10 +201,14 @@
  *   例えば名前が設定されていない状態など。
  * Game_CharaMakeItem.items() : Array<object>
  *   選択項目リストを取得する。
- *   単純な選択項目だけならば、ここで選択可能な項目を返すだけで良い。
+ *   既定の選択ウィンドウを使用する場合に、選択可能な項目を返すために実装する。
+ *   カスタムの選択値選択ウィンドウを用意するなら実装不要。
  *   objectはnameメンバ/プロパティを持つ必要がある。
  *   nameの値が選択可能な値として表示される。
- * 
+ *       name : {stirng} 選択値として表示される名前。
+ * Game_CharaMakeItem.isItemEnabled(item:object, actor:Game_Actor) : boolean
+ *   items()で返した項目が選択可能かどうかを判定する。
+ *   項目の適用可否判定をしないならば実装不要。
  * $gameTemp.setCharaMakeItemEnabled(name:string, isEnabled:boolean) : void
  *   キャラメイク項目が有効かどうかを設定する。
  *   プラグインコマンドによる有効/無効設定用
@@ -549,9 +554,9 @@ function Scene_UnregisterActor() {
     /**
      * 選択・編集用のウィンドウを作成する。
      * 
-     * @param {Scene_Base} s
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
+     * @param {Game_Actor} actor アクターデータ
      * @returns {object} 追加するウィンドウ
      *                   {
      *                       selectWindow : {Window_Selectable} 選択ウィンドウ。このウィンドウに対して"ok"ハンドラが登録される。
@@ -560,11 +565,13 @@ function Scene_UnregisterActor() {
      *                       sprites : {Array<Sprite>} スプライト
      *                   }
      */
-    Game_CharaMakeItem.prototype.createSelectWindows = function(rect, helpWindow) {
+    Game_CharaMakeItem.prototype.createSelectWindows = function(rect, helpWindow, actor) {
         const ww = (rect.width < 240) ? rect.width : 240;
         const windowRect = new Rectangle(rect.x, rect.y, ww, rect.height);
         const window = new Window_CharaMakeItemSelection(windowRect);
+        window.setItemEnabled(this.isItemEnabled.bind(this));
         window.setItems(this.items())
+        window.setActor(actor);
         window.setHelpWindow(helpWindow);
         return {
             selectWindow: window,
@@ -688,12 +695,39 @@ function Scene_UnregisterActor() {
     /**
      * アイテム一覧を得る。
      * 
-     * TODO: 選択可能な項目を得る。
+     * Note: Window_CharaMakeItemSelection を使用している場合に、選択可能な項目を返すために実装する。
+     *       Window_CharaMakeItemSelection を使用しない場合には実装不要。
      * 
      * @return {Array<object>} アイテム一覧
      */
     Game_CharaMakeItem.prototype.items = function() {
         return [];
+    };
+
+    /**
+     * アイテムが選択可能かどうかを得る。
+     * 
+     * Note: Window_CharaMakeItemSelection を使用している場合で、
+     *       選択可能かどうかを判定させたい場合には実装する。
+     *       既定の実装では、conditionメンバーがある場合には、eval(item.condition)で判定し、
+     *       その結果を返す。conditionメンバーが無い場合にはtrueを返す。
+     * @param {object} item itemsで返した項目の1つ。
+     * @param {Game_Actor} actor アクターデータ
+     * @returns {boolean} 項目が選択可能な場合にはtrue, それ以外はfalse.
+     */
+    Game_CharaMakeItem.prototype.isItemEnabled = function(item, actor) {
+        if (item.condition) {
+            try {
+                const a = actor; // eslint-disable-line no-unused-vars
+                return eval(item.condition);
+            }
+            catch (e) {
+                console.log(e);
+                return false;
+            }
+        } else {
+            return true;
+        }
     };
 
     /**
@@ -763,10 +797,11 @@ function Scene_UnregisterActor() {
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
+     * @param {Game_Actor} actor アクター
      * @returns {object} ウィンドウ類
      */
     // eslint-disable-next-line no-unused-vars
-    Game_CharaMakeItem_Name.prototype.createSelectWindows = function(rect, helpWindow) {
+    Game_CharaMakeItem_Name.prototype.createSelectWindows = function(rect, helpWindow, actor) {
         const editWindowRect = this.editWindowRect();
         const editWindow = new Window_NameEdit(editWindowRect);
         editWindow.hide();
@@ -1081,7 +1116,29 @@ function Scene_UnregisterActor() {
      */
     Window_CharaMakeItemSelection.prototype.initialize = function(rect) {
         this._items = [];
+        this._actor = null;
+        this._isItemEnabled = null;
         Window_Selectable.prototype.initialize.call(this, rect);
+    };
+
+    /**
+     * 項目が選択可能かどうかを判定するためのメソッドを設定する。
+     * 
+     * @param {function} func 判定メソッド
+     */
+    Window_CharaMakeItemSelection.prototype.setItemEnabled = function(func) {
+        this._isItemEnabled = func;
+        this.refresh();
+    };
+
+    /**
+     * アクターを設定する。
+     * 
+     * @param {Game_Actor} actor アクター
+     */
+    Window_CharaMakeItemSelection.prototype.setActor = function(actor) {
+        this._actor = actor; // 項目選択可否判定に渡すために保持する。
+        this.refresh();
     };
 
     /**
@@ -1120,11 +1177,25 @@ function Scene_UnregisterActor() {
      * @return {Boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
     Window_CharaMakeItemSelection.prototype.isCurrentItemEnabled = function() {
-        const item = this.item();
-        if (typeof item.enabled === "undefined") {
-            return true;
+        return this.isEnabled(this.index());
+    };
+
+    /**
+     * indexで指定される選択項目が選択可能かどうかを得る。
+     * 
+     * @param {number} index インデックス番号
+     * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse.
+     */
+    Window_CharaMakeItemSelection.prototype.isEnabled = function(index) {
+        if ((index >= 0) && (index < this._items.length)) {
+            const item = this._items[index];
+            if (this._isItemEnabled) {
+                return this._isItemEnabled(item, this._actor);
+            } else {
+                return true;
+            }
         } else {
-            return Boolean(item.enabled);
+            return false;
         }
     };
 
@@ -1147,7 +1218,9 @@ function Scene_UnregisterActor() {
     Window_CharaMakeItemSelection.prototype.drawItem = function(index) {
         const rect = this.itemLineRect(index);
         const item = this._items[index];
+        this.changePaintOpacity(this.isEnabled(index));
         this.drawText(item.name, rect.x, rect.y, rect.width);
+        this.changePaintOpacity(true);
     };
     /**
      * 選択項目の説明を更新する。
@@ -1485,7 +1558,7 @@ function Scene_UnregisterActor() {
         const rect = this.selectWindowRect();
         this._windowEntries = [];
         for (const item of this._items) {
-            const windowEntry = item.createSelectWindows(rect, this._helpWindow);
+            const windowEntry = item.createSelectWindows(rect, this._helpWindow, this._tempActor);
             windowEntry.item = item;
             // 初期化
             item.setCurrent(windowEntry, this._tempActor);

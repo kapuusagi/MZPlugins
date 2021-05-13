@@ -17,8 +17,6 @@
  * @type boolean
  * @default true
  * 
- * 
- * 
  * @param isSelectableAtFirst
  * @text 初期時のみ選択可能とする
  * @desc 初回作成時のみ選択可能にする場合にはtrueにします。
@@ -207,15 +205,8 @@ function Game_CharaMakeItem_Class() {
             const dataClass = $dataClasses[i];
             if (dataClass !== null) {
                 if (dataClass.meta.charaMakeSelectable) {
-                    try {
-                        if (eval(dataClass.meta.charaMakeSelectable)) {
-                            const classEntry = this.generateClassEntry(dataClass);
-                            items.push(classEntry);
-                        }
-                    }
-                    catch (e) {
-                        console.log(e);
-                    }
+                    const classEntry = this.generateClassEntry(dataClass);
+                    items.push(classEntry);
                 }
             }
         }
@@ -232,7 +223,9 @@ function Game_CharaMakeItem_Class() {
         return {
             id: dataClass.id,
             name: dataClass.name,
-            description: dataClass.meta.charaMakeDescription || ""
+            description: dataClass.meta.charaMakeDescription || "",
+            conditoin: dataClass.meta.charaMakeSelectable || ""
         };
     };
+
 })();

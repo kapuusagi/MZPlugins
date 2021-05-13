@@ -350,13 +350,13 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * 選択・編集用のウィンドウを作成する。
      * 
-     * @param {Scene_Base} s
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
+     * @param {Game_Actor} actor アクター
      * @returns {object} 追加するウィンドウ
      */
     // eslint-disable-next-line no-unused-vars
-    Game_CharaMakeItem_GrowPoint.prototype.createSelectWindows = function(rect, helpWindow) {
+    Game_CharaMakeItem_GrowPoint.prototype.createSelectWindows = function(rect, helpWindow, actor) {
         const ww = (rect.width < 200) ? rect.width : 200;
         const wh = 80;
         const wx = (Graphics.boxWidth - ww) / 2;

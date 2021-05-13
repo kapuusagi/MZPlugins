@@ -101,6 +101,13 @@
  * @description このスキルセットを選択した際に習得可能なスキルの配列。
  * @type skill[]
  * @default []
+ * 
+ * @param condition
+ * @text 適用条件
+ * @description このスキルセットを適用できるかを判定する条件。アクターデータをaとして判定に使用出来る。
+ * @type string
+ * @default 
+ * 
  */
 
 /**

@@ -174,10 +174,11 @@ function Game_CharaMakeItem_Profile() {
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
+     * @param {Game_Actor} actor アクター
      * @returns {object} ウィンドウ類
      */
     // eslint-disable-next-line no-unused-vars
-    Game_CharaMakeItem_Profile.prototype.createSelectWindows = function(rect, helpWindow) {
+    Game_CharaMakeItem_Profile.prototype.createSelectWindows = function(rect, helpWindow, actor) {
         const textInput = new MultiLine_TextInput();
         textInput.setup(null, "", 128, 2, 0, 0, 0);
         textInput.create();
