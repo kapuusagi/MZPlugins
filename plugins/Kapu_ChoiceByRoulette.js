@@ -26,6 +26,7 @@
  * @text ルーレットの中心
  * @desc ルーレットの中心をどこにするか。
  * @type select
+ * @default 0
  * @option 画面中央
  * @value 0
  * @option アクター
@@ -112,7 +113,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.1.0.0 新規作成。
  */
 /*~struct~ItemEntry:
  *
@@ -172,14 +173,14 @@ function Scene_RouletteChoice() {
 
     // Note: 匿名関数だと this に Game_Interpreter が渡らないことに注意。必ずfunctionオブジェクトを構築する。
     // eslint-disable-next-line no-unused-vars
-    PluginManager.registerCommand(pluginName, "clearChoice", args => {
+    PluginManager.registerCommand(pluginName, "clearChoices", args => {
         $gameTemp.clearChoiceRouletteItems();
     });
 
     PluginManager.registerCommand(pluginName, "addChoice", args => {
         try {
             const addItem = JSON.parse(args.item || "{}");
-            const itemId = Number(addItem.item);
+            const itemId = Number(addItem.itemId);
             if ((itemId > 0) && (itemId < $dataItems.length)) {
                 const item = $dataItems[itemId];
                 $gameTemp.addChoiceRouletteItem(item.iconIndex);
@@ -338,7 +339,6 @@ function Scene_RouletteChoice() {
         this._iconIndex = iconIndex;
     };
 
-
     /**
      * スプライトを更新する。
      */
@@ -384,6 +384,8 @@ function Scene_RouletteChoice() {
         this._centerX = Graphics.boxWidth / 2;
         this._centerY = Graphics.boxHeight / 2;
         this._itemAngle = radian360;
+        this._waitCount = 0;
+        this._rotationAngle = Math.random() * radian360;
     };
 
     /**
@@ -448,7 +450,6 @@ function Scene_RouletteChoice() {
         this._centerSprite.anchor.y = 0.5;
         this._centerSprite.x = this._centerX;
         this._centerSprite.y = this._centerY;
-        this._centerSprite.angle = radian360 * Math.PI;
         this._iconLayer.addChild(this._centerSprite);
     };
 
@@ -456,15 +457,15 @@ function Scene_RouletteChoice() {
      * 選択項目のスプライトを作成する。
      */
     Scene_RouletteChoice.prototype.createChoiceSprite = function() {
-        const offset = this._centerSprite.angle;
+        const offset = this._rotationAngle;
         this._itemSprites = [];
         for (let i = 0; i < this._items.length; i++) {
             const iconIndex = this._items[i];
             const radian = (this._itemAngle * i + offset) % radian360;
             const sprite = new Sprite_ChoiceIcon();
             sprite.setup(iconIndex);
-            sprite.x = radius * Math.sin(radian);
-            sprite.y = - radius * Math.cos(radian);
+            sprite.x = radius * Math.cos(radian);
+            sprite.y = -radius * Math.sin(radian);
 
             this._centerSprite.addChild(sprite);
             this._itemSprites.push(sprite);
@@ -481,11 +482,11 @@ function Scene_RouletteChoice() {
      */
     Scene_RouletteChoice.prototype.createCursorSprite = function() {
         const sprite = new Sprite_ChoiceIcon();
-        sprite.setup(cursorIconIndex, radius, Math.PI / 2);
-        sprite.scale.x = 1.5;
-        sprite.scale.y = 1.5;
-        sprite.y = -radius;
-        sprite.x = 0;
+        sprite.setup(cursorIconIndex);
+        sprite.scale.x = 1.0;
+        sprite.scale.y = 1.0;
+        sprite.x = this._centerX;
+        sprite.y = this._centerY - radius + 32;
         this._iconLayer.addChild(sprite);
     };
 
@@ -510,6 +511,7 @@ function Scene_RouletteChoice() {
             $gameVariables.setValue(this._variableid, -1);
         }
         $gameTemp.setChoiceRouletteSelected(-1);
+        this._canDetectInput = false;
     };
 
     /**
@@ -520,7 +522,12 @@ function Scene_RouletteChoice() {
         this.updateRotation();
         this.updateInput();
         if (this.isRotationStopped()) {
-            this.popScene();
+            this._waitCount++;
+            if (this._waitCount > 120) {
+                this.popScene();
+            }
+        } else {
+            this._waitCount = 0;
         }
     };
 
@@ -538,7 +545,10 @@ function Scene_RouletteChoice() {
      * 入力を更新する。
      */
     Scene_RouletteChoice.prototype.updateInput = function() {
-        if (this._isSelecting) {
+        if (!Input.isRepeated("ok") && !TouchInput.isClicked()) {
+            // 一度離されているのを検出しないといけない。
+            this._canDetectInput = true;
+        } else if (this._isSelecting && this._canDetectInput) {
             if (Input.isRepeated("ok") || TouchInput.isClicked()) {
                 this._choice = this.choicedIndex();
                 SoundManager.playOk();
@@ -567,7 +577,7 @@ function Scene_RouletteChoice() {
      * カーソルで選択されている項目の位置を更新している。
      */
     Scene_RouletteChoice.prototype.updateRotation = function() {
-        if (this._rotationSpeed > 0) {
+        if (this._rotationSpeed === 0) {
             return ; // 回転停止中
         }
 
@@ -576,12 +586,14 @@ function Scene_RouletteChoice() {
         //                               = 回転速度[°/s] * Math.PI / 10800
         let moveAngle = Math.max(minMoveRadian, (this._rotationSpeed * Math.PI / 10800));
         if (!this._isSelecting) {
-            const targetAngle = this._choice * this._itemAngle + this._centerSprite.angle;
-            const cursorAngle = math.PI / 2;
-            if ((moveAngle <= minMoveRadian) && ((targetAngle + moveAngle) >= cursorAngle)) {
+            const targetAngle = (this._itemAngle * this._choice + this._rotationAngle) % radian360;
+            const cursorAngle = Math.PI / 2;
+            if ((moveAngle <= minMoveRadian) 
+                    && ((targetAngle + moveAngle) >= cursorAngle) && (targetAngle < cursorAngle)) {
                 // 停止条件を満たしたので、最後の移動をして止める。
                 moveAngle = cursorAngle - targetAngle;
                 this._rotationSpeed = 0; // 停止
+
             } else {
                 // 選択中でないならば減速処理する。
                 if (this._rotationSpeed > 1) {
@@ -589,14 +601,13 @@ function Scene_RouletteChoice() {
                 }
             }
         }
-        this._centerSprite.angle = (this._centerSprite.angle + moveAngle) % radian360;
-        const offset = this._centerSprite.angle;
+        this._rotationAngle = (this._rotationAngle + moveAngle) % radian360;
+        const offset = this._rotationAngle;
         for (let i = 0; i < this._itemSprites.length; i++) {
             const sprite = this._itemSprites[i];
             const radian = (this._itemAngle * i + offset) % radian360;
-            sprite.setup(iconIndex);
-            sprite.x = radius * Math.sin(radian);
-            sprite.y = - radius * Math.cos(radian);
+            sprite.x = radius * Math.cos(radian);
+            sprite.y = -radius * Math.sin(radian);
             if ((radian >= this._cursorAngleMin) && (radian < this._cursorAngleMax)) {
                 // これが現在カーソル選択中のアイテム
                 if(this._currentIndex !== i) {
