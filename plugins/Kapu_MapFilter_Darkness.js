@@ -52,6 +52,8 @@
  * @default 照明
  * 
  * @help 
+ * プレイヤーと指定したイベントの周囲だけ見えるようにするプラグインです。
+ * 光が届かない場所で、プレイヤーの視界を制限するような仕組みを実現するためのものです。
  * 
  * ■ 使用時の注意
  * なし。
@@ -76,7 +78,7 @@
  * イベント
  *   <lightSource:brightness#>
  *     暗闇フィルタ上で、このイベントをbrightnessの輝度で光らせる。
- *   <lightSource:variable(id#)>
+ *   <lightSource:\v[id#]>
  *     暗闇フィルタ上で、このイベントをid#の変数値の輝度で光らせる。
  *   <searchLevel:level#>
  *     暗闇フィルタ有効時、発見されるかどうかのレベル。
@@ -333,8 +335,47 @@
         return this._lightSourceBrightness;
     };
 
+    const _Game_Character_update = Game_Character.prototype.update;
+    /**
+     * 更新する。
+     */
+    Game_Character.prototype.update = function() {
+        _Game_Character_update.call(this);
+        this.updateLightSource();
+    };
+
+    /**
+     * 強さを更新する。
+     */
+    Game_Character.prototype.updateLightSource = function() {
+        const targetBrightness = this.lightSourceTargetBrightness();
+        if (this._lightSourceCurrentBrightness < targetBrightness) {
+            this._lightSourceCurrentBrightness++;
+        } else if (this._lightSourceCurrentBrightness > targetBrightness) {
+            this._lightSourceCurrentBrightness--;
+        }
+    };
+
+    /**
+     * 光源の強さを得る。
+     * 
+     * @returns {number} 光源の強さ
+     */
+    Game_Character.prototype.lightSourceTargetBrightness = function() {
+        return this._lightSourceBrightness;
+    };
+
     //------------------------------------------------------------------------------
     // Game_Event
+    const _Game_Event_initMembers = Game_Event.prototype.initMembers;
+    /**
+     * Game_Eventオブジェクトのメンバを初期化する。
+     */
+    Game_Event.prototype.initMembers = function() {
+        _Game_Event_initMembers.call(this);
+        this._searchLevel = 9999;
+    };
+
     const _Game_Event_initialize = Game_Event.prototype.initialize;
     /**
      * Game_Eventオブジェクトを初期化する
@@ -346,37 +387,39 @@
         _Game_Event_initialize.call(this, mapId, eventId);
         const event = this.event();
         if (event.meta.lightSource) {
-            if (event.meta.lightSource.match(/variable\((\d+)\)/)) {
+            if (event.meta.lightSource.match(/\\v\[(\d+)\]/)) {
                 const variableId = Number(RegExp.$1);
+                this._lightSourceVariableId = RegExp.$1;
                 const brightness = $gameVariables.value(variableId);
-                this.setLightBrightness(brightness);
+                this.setLightBrightness(brightness, true);
+                this._lightSourceFixedBrightness = 0;
             } else {
                 const brightness = Number(event.meta.lightSource);
-                this.setLightBrightness(brightness);
+                this._lightSourceVariableId = 0;
+                this.setLightBrightness(brightness, true);
+                this._lightSourceFixedBrightness = brightness;
             }
+        } else {
+            this._lightSourceVariableId = 0;
+            this._lightSourceFixedBrightness = 0;
         }
         if (event.meta.searchLevel) {
-            this._searchLevel = Math.floor(Number(event.meta.searchTarget) || 9999);
+            this._searchLevel = Math.floor(Number(event.meta.searchLevel) || 9999);
         }
         this.refresh();
     };
 
-    const _Game_Event_initMembers = Game_Event.prototype.initMembers;
-    /**
-     * Game_Eventオブジェクトのメンバを初期化する。
-     */
-    Game_Event.prototype.initMembers = function() {
-        _Game_Event_initMembers.call(this);
-        this._searchLevel = 9999;
-    }
+
     /**
      * 光源の強さを得る。
      * 
      * @returns {number} 光源の強さ
      */
-    Game_Event.prototype.lightSourceBrightness = function() {
-        const minBrightness = (this._searchLevel <= $gameParty.eventSearchLevel()) ? defaultBrightness : 0;
-        return Math.max(this._lightSourceBrightness, minBrightness);
+    Game_Event.prototype.lightSourceTargetBrightness = function() {
+        const variableBrightness = (this._lightSourceVariableId > 0) ? $gameVariables.value(this._lightSourceVariableId) : 0;
+        const searchBrightness = (this._searchLevel <= $gameParty.eventSearchLevel()) ? defaultBrightness : 0;
+        const fixedBrightness = this._lightSourceFixedBrightness;
+        return Math.max(variableBrightness, searchBrightness, fixedBrightness);
     };
 
     //------------------------------------------------------------------------------
@@ -386,7 +429,7 @@
      * 
      * @returns {number} 光源の強さ
      */
-    Game_Player.prototype.lightSourceBrightness = function() {
+    Game_Player.prototype.lightSourceTargetBrightness = function() {
         return $gameParty.lightBrightness();
     };
     //------------------------------------------------------------------------------
