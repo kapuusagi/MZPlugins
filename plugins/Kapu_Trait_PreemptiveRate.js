@@ -15,6 +15,24 @@
  * @max 9999
  * @min 6
  * 
+ * @param preemptiveRateFast
+ * @text 先制攻撃率（早）
+ * @desc エネミーよりパーティーの速度が速い場合の先制攻撃率
+ * @type number
+ * @decimals 2
+ * @default 0.05
+ * @min 0.00
+ * @max 1.00
+ * 
+ * @param preemptiveRateLate
+ * @text 先制攻撃率（遅）
+ * @desc エネミーよりパーティーの速度が遅い場合の先制攻撃率
+ * @type number
+ * @decimals 2
+ * @default 0.03
+ * @min 0.00
+ * @max 1.00
+ * 
  * @param textTraitPreemptiveRate
  * @text 先制攻撃率特性名
  * @desc 先制攻撃率特性名
@@ -29,7 +47,6 @@
  * ランダムエンカウント時のみ有効。
  * ベーシックシステムでは、イベントで戦闘を行う場合、
  * 「ランダム戦闘と同じ」となっていても先制攻撃判定されない。
- * シンボルエンカウントは見えてるんだから当然か。
  * 
  * 複数メンバー、複数特性を持つ場合には加算合計になります。
  * 
@@ -53,10 +70,15 @@
  * ノートタグ
  * ============================================
  * アクター/クラス/ステート/武器/防具
- *     <preemptiveRate:rate>
- *        rate: Gold倍率の値。1.0で100％増加。0.3で30%増加。
- *     <preemptiveRate:rateStr%>
- *        rateStr: Gold倍率の値。100で100%増加。
+ *   <preemptiveRate:rate>
+ *     rate: 先制攻撃倍率の値。1.0で100％増加。0.3で30%増加。
+ *   <preemptiveRate:rateStr%>
+ *     rateStr: 先制攻撃倍率の値。100で100%増加。
+ * マップ
+ *   <preemptiveRate:rate>
+ *     rate: マップの先制攻撃倍率の値。1.0で100%
+ *   <preemptiveRate:rateStr%>
+ *     rateStr: マップの先制攻撃倍率の値。100で100%。
  * 
  * ============================================
  * 変更履歴
@@ -67,43 +89,48 @@
     const pluginName = "Kapu_Trait_PreemptiveRate";
     const parameters = PluginManager.parameters(pluginName);
 
+    const preemptiveRateFast = Math.min(1, Math.max(0, (Number(parameters["preemptiveRateFast"]) || 0.05)));
+    const preemptiveRateLate = Math.min(preemptiveRateFast, Math.max(0, (Number(parameters["preemptiveRateLate"]) || 0.03)));
+
     Game_Party.ABILITY_PREEMPTIVE_RATE = Number(parameters["traitPartyAbilityId"]) || 0;
     if (!Game_Party.ABILITY_PREEMPTIVE_RATE) {
         console.error(pluginName + ":ABILITY_PREEMPTIVE_RATE is not valid.");
-        return;
     }
 
     //------------------------------------------------------------------------------
     // DataManager
-
-    /**
-     * ドノートタグを処理する。
-     * 
-     * @param {Object} obj データ
-     */
-    const _processNoteTag = function(obj) {
-        if (!obj.meta.preemptiveRate) {
-            return;
-        }
-        const valueStr = obj.meta.preemptiveRate;
-        let rate;
+    const _parseRate = function(valueStr) {
         if (valueStr.slice(-1) === "%") {
-            rate = Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
+            return Number(valueStr.slice(0, valueStr.length - 1)) / 100.0;
         } else {
-            rate = Number(valueStr);
+            return Number(valueStr);
         }
-        obj.traits.push({ 
-            code:Game_BattlerBase.TRAIT_PARTY_ABILITY, 
-            dataId:Game_Party.ABILITY_PREEMPTIVE_RATE, 
-            value:rate
-        });
     };
 
-    DataManager.addNotetagParserActors(_processNoteTag);
-    DataManager.addNotetagParserClasses(_processNoteTag);
-    DataManager.addNotetagParserWeapons(_processNoteTag);
-    DataManager.addNotetagParserArmors(_processNoteTag);
-    DataManager.addNotetagParserStates(_processNoteTag);
+    if (Game_Party.ABILITY_PREEMPTIVE_RATE) {
+        /**
+         * ノートタグを処理する。
+         * 
+         * @param {Object} obj データ
+         */
+        const _processNoteTag = function(obj) {
+            if (!obj.meta.preemptiveRate) {
+                return;
+            }
+            const rate = _parseRate(obj.meta.preemptiveRate);
+            obj.traits.push({ 
+                code:Game_BattlerBase.TRAIT_PARTY_ABILITY, 
+                dataId:Game_Party.ABILITY_PREEMPTIVE_RATE, 
+                value:rate
+            });
+        };
+
+        DataManager.addNotetagParserActors(_processNoteTag);
+        DataManager.addNotetagParserClasses(_processNoteTag);
+        DataManager.addNotetagParserWeapons(_processNoteTag);
+        DataManager.addNotetagParserArmors(_processNoteTag);
+        DataManager.addNotetagParserStates(_processNoteTag);
+    }
 
     //------------------------------------------------------------------------------
     // TextManager
@@ -114,7 +141,41 @@
             str: TextManager.traitValueStrRate
         };
     }
-    
+    //------------------------------------------------------------------------------
+    // Game_Map
+    const _Game_Map_setup = Game_Map.prototype.setup;
+    /**
+     * マップをセットアップする。
+     * 
+     * @param {number} mapId マップID
+     */
+    Game_Map.prototype.setup = function(mapId) {
+        _Game_Map_setup.call(this, mapId);
+        if ($dataMap.meta.preemptiveRate) {
+            this._ratePreemptive = _parseRate($dataMap.meta.preemptiveRate);
+        } else {
+            this._ratePreemptive = 0.0;
+        }
+    };
+
+    /**
+     * マップの基本先制率を得る。
+     * 
+     * @param {number} rate 先制率
+     */
+    Game_Map.prototype.setRatePreemptive = function(rate) {
+        this._ratePreemptive = rate;
+    };
+
+    /**
+     * マップの基本先制率を得る。
+     * 
+     * @return {number} 先制率
+     */
+    Game_Map.prototype.ratePreemptive = function() {
+        return this._ratePreemptive;
+    };
+
     //------------------------------------------------------------------------------
     // Game_Party
     /**
@@ -125,8 +186,11 @@
      * !!!overwrite!!!
      */
     Game_Party.prototype.ratePreemptive = function(troopAgi) {
-        let rate = this.agility() >= troopAgi ? 0.05 : 0.03;
-        rate += this.partyTraitsSum(Game_Party.ABILITY_PREEMPTIVE_RATE);
+        let rate = this.agility() >= troopAgi ? preemptiveRateFast : preemptiveRateLate;
+        rate += $gameMap.ratePreemptive();
+        if (Game_Party.ABILITY_PREEMPTIVE_RATE) {
+            rate += this.partyTraitsSum(Game_Party.ABILITY_PREEMPTIVE_RATE);
+        }
         if (this.hasRaisePreemptive()) {
             rate *= 4;
         }
