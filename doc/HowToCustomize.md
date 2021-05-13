@@ -1426,3 +1426,11 @@ SceneManager.snap()を呼ぶ。Bitmapオブジェクトが返る。
 ImageManagerのインタフェースで呼び出す分には、destroy()をコールしなくて良いみたい。
 呼び出したシーンとセットで管理されていて、シーン完了時に不要リソースの破棄がうまいこと行われる。
 それ以外は自分でdestroy()をコールしないといけない。
+
+
+### エンカウントの処理は？
+
+ランダムエンカウントはScene_Mapから __Game_Player.executeEncounter__ で準備されたあと、 __SceneManager.push(Scene_Battle)__ でシーンが切り替わる。
+__Game_Player.executeEncounter__ 内で、 __BattleManager.setup()__ 及び 
+__BattleManager.onEncounter()__ が実行され、 Preemptive(有利開始) と Surprise(不利開始） が設定される。
+スクリプトからのイベント戦闘は __Game_Interpreter.command301__ から __BattleManager.setup()__ 及び __BattleManager.setEventCallback(__ が呼ばれた後、__SceneManager.push(Scene_Battle)__ でシーンが切り替わる。
