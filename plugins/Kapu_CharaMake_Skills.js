@@ -26,7 +26,7 @@
  * 
  * @param itemLists
  * @text 選択項目セット
- * @description 1セットあたり、1つの選択項目になる。
+ * @desc 1セットあたり、1つの選択項目になる。
  * @type struct<CharaMakeSkillSetGroup>[]
  * 
  * @help 
@@ -59,13 +59,13 @@
  *
  * @param name
  * @text 選択項目名
- * @description 選択項目名として使用されるテキスト
+ * @desc 選択項目名として使用されるテキスト
  * @type string
  * @default 選択項目
  * 
  * @param description
  * @text 選択項目の説明
- * @description 選択項目の説明として使用されるテキスト
+ * @desc 選択項目の説明として使用されるテキスト
  * @type string
  * @default スキルセットを選択します。
  *
@@ -77,7 +77,7 @@
  * 
  * @param skillSets
  * @text 選択可能な項目
- * @description この選択項目で選択可能なスキルセット
+ * @desc この選択項目で選択可能なスキルセット
  * @type struct<CharaMakeSkillSet>[]
  * @default []
  * 
@@ -86,25 +86,25 @@
  * 
  * @param name
  * @text 名前
- * @description
+ * @desc
  * @type string
  * @default 選択肢 
  * 
  * @param description
  * @text 説明
- * @description 項目の説明
+ * @desc 項目の説明
  * @type string
  * @default 選択肢の説明
  * 
  * @param skills
  * @text スキル
- * @description このスキルセットを選択した際に習得可能なスキルの配列。
+ * @desc このスキルセットを選択した際に習得可能なスキルの配列。
  * @type skill[]
  * @default []
  * 
  * @param condition
  * @text 適用条件
- * @description このスキルセットを適用できるかを判定する条件。アクターデータをaとして判定に使用出来る。
+ * @desc このスキルセットを適用できるかを判定する条件。アクターデータをaとして判定に使用出来る。
  * @type string
  * @default 
  * 

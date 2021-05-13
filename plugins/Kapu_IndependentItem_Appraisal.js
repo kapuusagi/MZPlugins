@@ -54,8 +54,8 @@
  * @type number
  * @default 0
  * @arg clerkFileName
- * @text 定員ファイル名
- * @description 定員画像として使用する画像ファイル
+ * @text 店員ファイル名
+ * @desc 店員画像として使用する画像ファイル
  * @type string
  * 
  * 

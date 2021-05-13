@@ -15,7 +15,7 @@
  * @arg item
  * @text 項目
  * @desc 追加する項目
- * @type struct<itemEntry>
+ * @type struct<ItemEntry>
  * 
  * 
  * @command choice
@@ -114,33 +114,33 @@
  * ============================================
  * Version.0.1.0 動作未確認。
  */
-/*~struct~itemEntry:
-
- * @arg iconIndex
+/*~struct~ItemEntry:
+ *
+ * @param iconIndex
  * @text アイコンインデックス
  * @desc アイコンインデックス
  * @type number
  * @default 0
  * 
- * @arg itemId
+ * @param itemId
  * @text 道具指定
  * @desc 道具指定（道具のアイコンが入ります）
  * @type item
  * @default 0
  * 
- * @arg weaponId
+ * @param weaponId
  * @text 武器指定
  * @desc 武器指定（武器のアイコンが入ります)
  * @type weapon
  * @default 0
  * 
- * @arg armorId
+ * @param armorId
  * @text 防具指定
  * @desc 防具指定（防具のアイコンが入ります）
  * @type armor
  * @default 0
  * 
- * @arg skillId
+ * @param skillId
  * @text スキル指定
  * @desc スキル指定（スキルのアイコンが入ります）
  * @type skill

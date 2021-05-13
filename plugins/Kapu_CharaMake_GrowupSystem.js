@@ -46,13 +46,13 @@
  * 
  * @param textItemNameGrowPoint
  * @text 成長ポイント項目テキスト
- * @description キャラクターメイキング項目一覧で、成長ポイントに相当する選択項目として表示されるテキスト
+ * @desc キャラクターメイキング項目一覧で、成長ポイントに相当する選択項目として表示されるテキスト
  * @type string
  * @default GP
  * 
  * @param textItemDescriptionGrowPoint
  * @text 成長ポイント項目説明
- * @description 本項目がセレクト状態になったときに表示する説明テキスト
+ * @desc 本項目がセレクト状態になったときに表示する説明テキスト
  * @type string
  * @default GP初期値を取得し直します。
  * 

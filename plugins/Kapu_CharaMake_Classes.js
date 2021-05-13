@@ -25,13 +25,13 @@
  * 
  * @param textItemNameClass
  * @text クラス名選択項目テキスト
- * @description キャラクターメイキング項目一覧で、クラスに相当する選択項目として表示されるテキスト
+ * @desc キャラクターメイキング項目一覧で、クラスに相当する選択項目として表示されるテキスト
  * @type string
  * @default クラス
  * 
  * @param textItemDescriptionClass
  * @text クラス名選択項目説明
- * @description 本項目がセレクト状態になったときに表示する説明テキスト
+ * @desc 本項目がセレクト状態になったときに表示する説明テキスト
  * @type string
  * @default クラスを変更します。
  * 

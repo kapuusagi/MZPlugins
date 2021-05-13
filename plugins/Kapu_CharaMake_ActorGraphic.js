@@ -34,25 +34,25 @@
  * 
  * @param textItemNameGraphic
  * @text グラフィック名選択項目テキスト
- * @description キャラクターメイキング項目一覧で、グラフィックに相当する選択項目として表示されるテキスト
+ * @desc キャラクターメイキング項目一覧で、グラフィックに相当する選択項目として表示されるテキスト
  * @type string
  * @default ビジュアル
  * 
  * @param textItemDescriptionGraphic
  * @text グラフィック名選択項目説明
- * @description 本項目がセレクト状態になったときに表示する説明テキスト
+ * @desc 本項目がセレクト状態になったときに表示する説明テキスト
  * @type string
  * @default ビジュアルを変更します。
  * 
  * @param textItemNameDefault
  * @text デフォルト選択項目冥
- * @description リストに無い場合に表示する項目名として使用されるテキスト
+ * @desc リストに無い場合に表示する項目名として使用されるテキスト
  * @type string
  * @default デフォルト
  * 
  * @param graphicSelectionSets
  * @text キャラクタメイキング選択項目
- * @description キャラクタメイキング選択項目として使用されるコレクション。
+ * @desc キャラクタメイキング選択項目として使用されるコレクション。
  * @type struct<GraphicSelectionSet>[]
  * 
  * 
@@ -102,7 +102,7 @@
  *
  * @param items
  * @text キャラクタメイキング選択項目
- * @description キャラクタメイキング選択項目として使用されるコレクション。
+ * @desc キャラクタメイキング選択項目として使用されるコレクション。
  * @type struct<GraphicEntry>[]
  * 
  */
@@ -110,13 +110,13 @@
  *
  * @param name
  * @text エントリ名
- * @description 項目の選択値名として使用される文字列
+ * @desc 項目の選択値名として使用される文字列
  * @type string
  * @default グラフィック
  * 
  * @param faceName
  * @text 顔グラフィックファイル名
- * @description 顔グラフィックのファイル名
+ * @desc 顔グラフィックのファイル名
  * @type file
  * @dir img/faces/
  * 
@@ -154,7 +154,7 @@
  * 
  * @param note
  * @text ノートタグ
- * @description ノートタグとして使用するテキスト
+ * @desc ノートタグとして使用するテキスト
  * @type string
  * @default
  */
