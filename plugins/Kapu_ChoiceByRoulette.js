@@ -57,12 +57,6 @@
  * @default true
  * 
  * 
- * @param cursorIconIndex
- * @text カーソルアイコン番号
- * @desc カーソルとして使用するアイコン番号
- * @type number
- * @default 0
- *
  * @param radius
  * @text 回転半径
  * @desc 回転半径(ピクセル) 
@@ -147,6 +141,14 @@
  * @type skill
  * @default 0
  */
+
+/**
+ * ウィンドウルーレットチョイス
+ * カーソルと入力受け付け用。
+ */
+function Window_RouletteChoice() {
+    this.initialize(...arguments);
+}
 /**
  * 選択項目アイコンスプライト
  */
@@ -164,7 +166,6 @@ function Scene_RouletteChoice() {
     const pluginName = "Kapu_ChoiceByRoulette";
     const parameters = PluginManager.parameters(pluginName);
 
-    const cursorIconIndex = Number(parameters["cursorIconIndex"]) || 0;
     const radius = Math.max(60, Math.floor(Number(parameters["radius"]) || 0));
 
     const radian360 = 2 * Math.PI;
@@ -298,6 +299,73 @@ function Scene_RouletteChoice() {
     Game_Temp.prototype.choiceRouletteSelected = function() {
         return this._choiceRouletteSelected;
     };
+    //------------------------------------------------------------------------------
+    // Window_RouletteChoice
+
+    Window_RouletteChoice.prototype = Object.create(Window_Selectable.prototype);
+    Window_RouletteChoice.prototype.constructor = Window_RouletteChoice;
+
+    /**
+     * 初期化する。
+     * 
+     * @param {Rectangle}} rect ウィンドウ矩形領域
+     */
+    Window_RouletteChoice.prototype.initialize = function(rect) {
+        Window_Selectable.prototype.initialize.call(this, rect);
+    };
+    /**
+     * キャンセル操作を許可するかどうかを設定する。
+     * 
+     * @param {boolean} canCancel キャンセル可能な場合にはtrue ,それ以外はfalse
+     */
+    Window_RouletteChoice.prototype.setCancelEnable = function(canCancel) {
+        this._canCancel = canCancel;
+    };
+    /**
+     * キャンセル可能かどうかを得る。
+     * 
+     * @returns {boolean} キャンセル可能な場合にはtrue, それ以外はfalse
+     */
+    Window_RouletteChoice.prototype.isCancelEnabled = function() {
+        return this._canCancel
+                && Window_Selectable.prototype.isCancelEnabled.call(this);
+    };
+
+    /**
+     * タッチされたときの処理を行う。
+     */
+    Window_RouletteChoice.prototype.onTouchOk = function() {
+        // 画面中央領域がタッチされたらOKをコールする。
+        const touchAreaWidth = Math.round(Graphics.boxWidth * 0.75);
+        const left = Math.round((Graphics.boxWidth - touchAreaWidth) / 2);
+        const right = left + touchAreaWidth;
+        const touchAreaHeight = Math.round(Graphics.boxHeight * 0.75);
+        const top = Math.round((Graphics.boxHeight - touchAreaHeight) / 2);
+        const bottom = top + touchAreaHeight;
+
+        const x = TouchInput.x;
+        const y = TouchInput.y;
+
+        if ((x >= left) && (x <= right) && (y >= top) && (y <= bottom)) {
+            this.processOk();
+        }
+    };
+
+    /**
+     * コンテンツを描画する。
+     */
+    Window_RouletteChoice.prototype.paint = function() {
+        if (this.contents) {
+            this.contents.clear();
+        }
+    };
+
+    /**
+     * カーソルを更新する。
+     */
+    Window_RouletteChoice.prototype.refreshCursor = function() {
+        // 何も描画しない
+    };
 
     //------------------------------------------------------------------------------
     // Sprite_ChoiceIcon
@@ -379,6 +447,8 @@ function Scene_RouletteChoice() {
         this._canCancel = true;
         this._choice = -1;
         this._currentIndex = -1; // 現在のカーソル位置にあるインデックス。
+        this._prevIndex = -1;
+        this._radius = 0;
         this._cursorAngleMin = 0;
         this._cursorAngleMax = radian360;
         this._centerX = Graphics.boxWidth / 2;
@@ -419,7 +489,7 @@ function Scene_RouletteChoice() {
         this.createIconLayer();
         this.createCenterSprite();
         this.createChoiceSprite();
-        this.createCursorSprite();
+        this.createCursorWindow();
     };
     /**
      * キャンセルボタンが必要かどうかを取得する。
@@ -457,37 +527,45 @@ function Scene_RouletteChoice() {
      * 選択項目のスプライトを作成する。
      */
     Scene_RouletteChoice.prototype.createChoiceSprite = function() {
-        const offset = this._rotationAngle;
         this._itemSprites = [];
         for (let i = 0; i < this._items.length; i++) {
             const iconIndex = this._items[i];
-            const radian = (this._itemAngle * i + offset) % radian360;
             const sprite = new Sprite_ChoiceIcon();
+            sprite.scale.x = 2.0;
+            sprite.scale.y = 2.0;
             sprite.setup(iconIndex);
-            sprite.x = radius * Math.cos(radian);
-            sprite.y = -radius * Math.sin(radian);
-
             this._centerSprite.addChild(sprite);
             this._itemSprites.push(sprite);
-
-            if ((radian >= this._cursorAngleMin) && (radian < this._cursorAngleMax)) {
-                // これが現在カーソル選択中のアイテム
-                this._currentIndex = i;
-            }
         }
+        this.updateIconSpritePosition();
     };
 
     /**
      * カーソルスプライトを作成する。
      */
-    Scene_RouletteChoice.prototype.createCursorSprite = function() {
-        const sprite = new Sprite_ChoiceIcon();
-        sprite.setup(cursorIconIndex);
-        sprite.scale.x = 1.0;
-        sprite.scale.y = 1.0;
-        sprite.x = this._centerX;
-        sprite.y = this._centerY - radius + 32;
-        this._iconLayer.addChild(sprite);
+    Scene_RouletteChoice.prototype.createCursorWindow = function() {
+        const rect = this.cursorWindowRect();
+        this._cursorWindow = new Window_RouletteChoice(rect);
+        this._cursorWindow.setCancelEnable(this._canCancel);
+        this._cursorWindow.opacity = 220;
+        this._cursorWindow.setHandler("ok", this.onCursorOk.bind(this));
+        if (this._canCancel) {
+            this._cursorWindow.setHandler("cancel", this.onCursorCancel.bind(this));
+        }
+        this.addWindow(this._cursorWindow);
+    };
+
+    /**
+     * カーソルウィンドウのウィンドウ矩形領域を得る。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_RouletteChoice.prototype.cursorWindowRect = function() {
+        const ww = ImageManager.iconWidth + 64;
+        const wh = ImageManager.iconHeight + 64;
+        const wx = this._centerX - ww / 2;
+        const wy = this._centerY - radius - wh / 2;
+        return new Rectangle(wx, wy, ww, wh);
     };
 
     /**
@@ -511,7 +589,6 @@ function Scene_RouletteChoice() {
             $gameVariables.setValue(this._variableid, -1);
         }
         $gameTemp.setChoiceRouletteSelected(-1);
-        this._canDetectInput = false;
     };
 
     /**
@@ -519,8 +596,10 @@ function Scene_RouletteChoice() {
      */
     Scene_RouletteChoice.prototype.update = function() {
         Scene_MenuBase.prototype.update.call(this);
+        this.updateRadius();
         this.updateRotation();
-        this.updateInput();
+        this.updateIconSpritePosition();
+        this.updateCursorSound();
         if (this.isRotationStopped()) {
             this._waitCount++;
             if (this._waitCount > 120) {
@@ -528,6 +607,19 @@ function Scene_RouletteChoice() {
             }
         } else {
             this._waitCount = 0;
+        }
+    };
+
+    /**
+     * 半径を更新する
+     */
+    Scene_RouletteChoice.prototype.updateRadius = function() {
+        if (this._radius < radius) {
+            this._radius++;
+        } else {
+            if (this._isSelecting) {
+                this._cursorWindow.activate();
+            }
         }
     };
 
@@ -542,22 +634,33 @@ function Scene_RouletteChoice() {
     };
 
     /**
-     * 入力を更新する。
+     * OK操作を受けたときの処理を行う。
      */
-    Scene_RouletteChoice.prototype.updateInput = function() {
-        if (!Input.isRepeated("ok") && !TouchInput.isClicked()) {
-            // 一度離されているのを検出しないといけない。
-            this._canDetectInput = true;
-        } else if (this._isSelecting && this._canDetectInput) {
-            if (Input.isRepeated("ok") || TouchInput.isClicked()) {
-                this._choice = this.choicedIndex();
-                SoundManager.playOk();
-                this._isSelecting = false;
-            } else if (this._canCancel && (Input.isRepeated("cancel") || TouchInput.isCancelled())) {
-                SoundManager.playCancel();
-                this._isSelecting = false;
-                this.popScene();
-            }
+    Scene_RouletteChoice.prototype.onCursorOk = function() {
+        if (this._isSelecting) {
+            this._choice = this.choicedIndex();
+            SoundManager.playOk();
+            this._isSelecting = false;
+            this._cursorWindow.setCancelEnable(false);
+            this._cursorWindow.activate();
+        } else {
+            // 完了状態に持って行く。
+            const targetAngle = (this._itemAngle * this._choice + this._rotationAngle) % radian360;
+            const cursorAngle = Math.PI / 2;
+            this._rotationSpeed = 0; // 停止
+            this._rotationAngle = (this._rotationAngle + cursorAngle - targetAngle) % radian360;
+            this.updateIconSpritePosition();
+        }
+    };
+
+    /**
+     * キャンセル操作を受けたときの処理を行う。
+     */
+    Scene_RouletteChoice.prototype.onCursorCancel = function() {
+        if (this._isSelecting) {
+            SoundManager.playCancel();
+            this._isSelecting = false;
+            this.popScene();
         }
     };
 
@@ -593,7 +696,6 @@ function Scene_RouletteChoice() {
                 // 停止条件を満たしたので、最後の移動をして止める。
                 moveAngle = cursorAngle - targetAngle;
                 this._rotationSpeed = 0; // 停止
-
             } else {
                 // 選択中でないならば減速処理する。
                 if (this._rotationSpeed > 1) {
@@ -602,19 +704,32 @@ function Scene_RouletteChoice() {
             }
         }
         this._rotationAngle = (this._rotationAngle + moveAngle) % radian360;
-        const offset = this._rotationAngle;
-        for (let i = 0; i < this._itemSprites.length; i++) {
+    };
+
+    /**
+     * アイコンスプライトの位置を更新する。
+     */
+    Scene_RouletteChoice.prototype.updateIconSpritePosition = function() {
+        for (let i = 0; i < this._items.length; i++) {
+            const radian = (this._itemAngle * i + this._rotationAngle) % radian360;
             const sprite = this._itemSprites[i];
-            const radian = (this._itemAngle * i + offset) % radian360;
-            sprite.x = radius * Math.cos(radian);
-            sprite.y = -radius * Math.sin(radian);
+            sprite.x = this._radius * Math.cos(radian);
+            sprite.y = -this._radius * Math.sin(radian);
+
             if ((radian >= this._cursorAngleMin) && (radian < this._cursorAngleMax)) {
                 // これが現在カーソル選択中のアイテム
-                if(this._currentIndex !== i) {
-                    this._currentIndex = i;
-                    SoundManager.playCursor();
-                }
+                this._currentIndex = i;
             }
+        }
+    };
+
+    /**
+     * カーソル音を更新する。
+     */
+    Scene_RouletteChoice.prototype.updateCursorSound = function() {
+        if (this._prevIndex !== this._currentIndex) {
+            SoundManager.playCursor();
+            this._prevIndex = this._currentIndex;
         }
     };
 
