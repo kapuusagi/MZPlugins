@@ -231,8 +231,11 @@
      */
     Game_Temp.prototype.captureImage = function(no) {
         const entry = this._captureImages[no];
-        if (entry && entry.bitmap) {
-            return entry.bitmap;
+        if (entry) {
+            if ((entry.bitmap === null) && (entry.data !== null)) {
+                entry.bitmap = Bitmap.load(entry.data);
+            }
+            return (entry.bitmap) ? entry.bitmap : null;
         } else {
             return null;
         }
@@ -343,11 +346,9 @@
         _DataManager_extractSaveContents.call(this, contents);
         $gameTemp.clearAllCaptureImages();
         if (contents.captureScreens) {
-            
             for (const entry of contents.captureScreens) {
                 const id = entry.id;
-                const bitmap = Bitmap.load(entry.imageData);
-                $gameTemp.setCaptureImage(id, bitmap, entry.imageData);
+                $gameTemp.setCaptureImage(id, null, entry.imageData);
             }
         }
     };
