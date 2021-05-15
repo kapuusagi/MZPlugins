@@ -22,6 +22,12 @@
  * @min 0
  * @max 100
  * 
+ * @arg isSave
+ * @text 保存する
+ * @desc セーブデータに保存します。
+ * @type boolean
+ * @default false
+ * 
  * @arg format
  * @text 画像形式
  * @type select
@@ -30,6 +36,7 @@
  * @value image/png
  * @option JPEG
  * @value image/jpeg
+ * @parent isSave
  * 
  * @command releaseCapture
  * @text キャプチャデータを解放する。
@@ -147,16 +154,20 @@
         const no = Number(args.captureId) || 0;
         const scale = (Number(args.scale) || 100).clamp(0, 100);
         const format = args.format || "image/png";
+        const isSave = (typeof args.isSave === "undefined") ? false : (args.isSave === "true");
         if (no > 0) {
+            let bitmap = null;
             const snapBitmap = SceneManager.snap();
             if (scale !== 100) {
-                const bitmap = new Bitmap(snapBitmap.width * scale / 100, snapBitmap.height * scale / 100);
-                bitmap.blt(snapBitmap, 0, 0, snapBitmap.width, snapBitmap.height, 0 ,0, bitmap.width, bitmap.height);
-                $gameTemp.setCaptureImage(no, bitmap, bitmap._canvas.toDataURL(format));
+                const resizedBitmap = new Bitmap(snapBitmap.width * scale / 100, snapBitmap.height * scale / 100);
+                resizedBitmap.blt(snapBitmap, 0, 0, snapBitmap.width, snapBitmap.height, 0 ,0, resizedBitmap.width, resizedBitmap.height);
                 snapBitmap.destroy();
+                bitmap = resizedBitmap;
             } else {
-                $gameTemp.setCaptureImage(no, snapBitmap, snapBitmap._canvas.toDataURL(format));
+                bitmap = snapBitmap;
             }
+            const data = (isSave) ? bitmap._canvas.toDataURL(format) : null;
+            $gameTemp.setCaptureImage(no, bitmap, data);
         }
     });
 
@@ -312,10 +323,13 @@
         contents.captureScreens = [];
         const imageEntries = $gameTemp.allCaptureImages();
         for (const imageEntry of imageEntries) {
-            contents.captureScreens.push({
-                id : imageEntry.id,
-                imageData : imageEntry.data
-            });
+            if (imageEntry.data !== null) {
+                // 保存対象のデータのみ保存する。
+                contents.captureScreens.push({
+                    id : imageEntry.id,
+                    imageData : imageEntry.data
+                });
+            }
         }
         return contents;
     };
