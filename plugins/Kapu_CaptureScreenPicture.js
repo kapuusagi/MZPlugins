@@ -22,6 +22,14 @@
  * @min 0
  * @max 100
  * 
+ * @arg format
+ * @text 画像形式
+ * @type select
+ * @default image/png
+ * @option PNG
+ * @value image/png
+ * @option JPEG
+ * @value image/jpeg
  * 
  * @command releaseCapture
  * @text キャプチャデータを解放する。
@@ -128,7 +136,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.1.0.0 新規作成
  */
 (() => {
     const pluginName = "Kapu_CaptureScreenPicture";
@@ -138,15 +146,16 @@
     PluginManager.registerCommand(pluginName, "saveScreen", args => {
         const no = Number(args.captureId) || 0;
         const scale = (Number(args.scale) || 100).clamp(0, 100);
+        const format = args.format || "image/png";
         if (no > 0) {
             const snapBitmap = SceneManager.snap();
             if (scale !== 100) {
                 const bitmap = new Bitmap(snapBitmap.width * scale / 100, snapBitmap.height * scale / 100);
                 bitmap.blt(snapBitmap, 0, 0, snapBitmap.width, snapBitmap.height, 0 ,0, bitmap.width, bitmap.height);
-                $gameTemp.setCaptureImage(no, bitmap);
+                $gameTemp.setCaptureImage(no, bitmap, bitmap._canvas.toDataURL(format));
                 snapBitmap.destroy();
             } else {
-                $gameTemp.setCaptureImage(no, snapBitmap);
+                $gameTemp.setCaptureImage(no, snapBitmap, snapBitmap._canvas.toDataURL(format));
             }
         }
     });
@@ -154,7 +163,7 @@
     PluginManager.registerCommand(pluginName, "releaseCapture", args => {
         const no = Number(args.captureId) || 0;
         if (no > 0) {
-            $gameTemp.setCaptureImage(no, null);
+            $gameTemp.setCaptureImage(no, null, null);
         }
     });
 
@@ -191,12 +200,16 @@
      * 
      * @param {number} no 番号
      * @param {Bitmap} bitmap ビットマップ
+     * @param {object} data 保存データ
      */
-    Game_Temp.prototype.setCaptureImage = function(no, bitmap) {
+    Game_Temp.prototype.setCaptureImage = function(no, bitmap, data) {
         if (this._captureImages[no]) {
-            this._captureImages[no].destroy();
+            const entry = this._captureImages[no];
+            if (entry.bitmap) {
+                entry.bitmap.destroy();
+            }
         }
-        this._captureImages[no] = bitmap;
+        this._captureImages[no] = { bitmap:bitmap, data:data }
     };
 
     /**
@@ -206,16 +219,21 @@
      * @returns {Bitmap} ビットマップ
      */
     Game_Temp.prototype.captureImage = function(no) {
-        return this._captureImages[no];
+        const entry = this._captureImages[no];
+        if (entry && entry.bitmap) {
+            return entry.bitmap;
+        } else {
+            return null;
+        }
     };
 
     /**
      * キャプチャ画像を全てクリアする。
      */
     Game_Temp.prototype.clearAllCaptureImages = function() {
-        for (const image of this._captureImages) {
-            if (image) {
-                image.destroy();
+        for (const entry of this._captureImages) {
+            if (entry && entry.bitmap) {
+                entry.bitmap.destroy();
             }
         }
         this._captureImages = [];
@@ -227,12 +245,32 @@
     Game_Temp.prototype.allCaptureImages = function() {
         const images = [];
         for (let i = 0; i < this._captureImages.length; i++) {
-            const image = this._captureImages[i];
-            if (image) {
-                images.push({ id:i, image:image });
+            const entry = this._captureImages[i];
+            if (entry) {
+                images.push({ id:i, image:entry.bitmap, data:entry.data });
             }
         }
         return images;
+    };
+    //------------------------------------------------------------------------------
+    // Sprite_Picture
+    const _Sprite_Picture_updateBitmap = Sprite_Picture.prototype.updateBitmap;
+    /**
+     * 表示するビットマップを更新する。
+     * 
+     * Note: キャプチャ画像が更新されたとき、表示されなくなるため、フックして処理する。
+     */
+    Sprite_Picture.prototype.updateBitmap = function() {
+        _Sprite_Picture_updateBitmap.call(this);
+        const picture = this.picture();
+        if (picture) {
+            const pictureName = picture.name();
+            if (pictureName.startsWith("capture/") && (this.bitmap._canvas === null)) {
+                // キャプチャ画像が更新された
+                this.loadBitmap();
+                this.visible = true;
+            }
+        }
     };
     //------------------------------------------------------------------------------
     // ImageManager
@@ -276,7 +314,7 @@
         for (const imageEntry of imageEntries) {
             contents.captureScreens.push({
                 id : imageEntry.id,
-                bitmap : imageEntry.image._canvas.toDataURL("image/png")
+                imageData : imageEntry.data
             });
         }
         return contents;
@@ -294,8 +332,8 @@
             
             for (const entry of contents.captureScreens) {
                 const id = entry.id;
-                const bitmap = Bitmap.load(entry.bitmap);
-                $gameTemp.setCaptureImage(id, bitmap);
+                const bitmap = Bitmap.load(entry.imageData);
+                $gameTemp.setCaptureImage(id, bitmap, entry.imageData);
             }
         }
     };
