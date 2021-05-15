@@ -239,7 +239,7 @@ function Sprite_CharaMake_Picture() {
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
         if ($gameTemp.isCharaMakeItemEnabled(CHARAMAKEITEM_ACTORGRAPHIC)) {
-            items.push(new Game_CharaMakeItem_Visual($gaemTemp.charaMakeActorGraphicSet));
+            items.push(new Game_CharaMakeItem_Visual($gameTemp.charaMakeActorGraphicSet()));
         }
         return items;
     };
@@ -446,7 +446,7 @@ function Sprite_CharaMake_Picture() {
      */
     Game_CharaMakeItem_Visual.prototype.initialize = function(no) {
         Game_CharaMakeItem.prototype.initialize.call(this, ...arguments);
-        this._items = graphicSelectionSets[no];
+        this._items = graphicSelectionSets[no].items;
     };
 
     /**
