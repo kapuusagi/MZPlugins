@@ -6,6 +6,14 @@
  * @base Kapu_Twld_BattleSystem
  * @orderAfter Kapu_Twld_BattleSystem
  * 
+ * @param picutreYOffs
+ * @text 画像Yオフセット
+ * @desc メニュー画面に表示するアクター画像（立ち絵）のオフセット。
+ * @type number
+ * @default 0
+ * @min -500
+ * @max 500
+ * 
  * @help 
  * メニュー表示をするためのプラグイン。
  * 
@@ -32,10 +40,11 @@
 
 
 (() => {
-    //const pluginName = "Kapu_Twld_UI_Menu";
-    //const parameters = PluginManager.parameters(pluginName);
+    const pluginName = "Kapu_Twld_UI_Menu";
+    const parameters = PluginManager.parameters(pluginName);
 
     const statusY = 260;
+    const picutreYOffs = Number(parameters["picutreYOffs"]) || 0;
 
     //------------------------------------------------------------------------------
     // Window_MenuStatus
@@ -115,7 +124,7 @@
             this.setPaintFilter("none");
         }
         this.changePaintOpacity(actor.isBattleMember())
-        this.drawPicture(pictureName, rect.x + 2, rect.y, rect.width - 4, rect.height);
+        this.drawPicture(pictureName, rect.x + 2, rect.y + picutreYOffs, rect.width - 4, rect.height);
         this.resetPaintFilter();
     };
 

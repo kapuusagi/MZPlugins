@@ -51,6 +51,14 @@
  * @desc 他のプラグイン等で、Game_Actorから画像ファイル名を取得できる場合に指定する。未指定時は顔グラフィック。
  * @type string
  * 
+ * @param actorPictureYOffset
+ * @text 画像Yオフセット
+ * @desc メニュー画面に表示するアクター画像（立ち絵）のオフセット。
+ * @type number
+ * @default 0
+ * @min -500
+ * @max 500
+ * 
  * @param growupOnDead
  * @text Dead中の育成可否
  * @desc Dead状態の時、育成を行うかどうか。trueにすると、Dead中でも育成できる。
@@ -128,6 +136,7 @@ function Scene_Growup() {
     const menuCommandText = String(parameters["menuCommandText"]) || "";
     const confirmMessageText = String(parameters["confirmMessageText"]) || "%1(%2-%3)";
     const actorPicture = String(parameters["actorPicture"]) || "";
+    const actorPictureYOffset = Number(parameters["actorPictureYOffset"]) || 0;
     const growupOnDead = (typeof parameters["growupOnDead"] === "undefined")
             ? false : (parameters["growupOnDead"] === "true");
 
@@ -264,7 +273,7 @@ function Scene_Growup() {
             return;
         }
         const rect = this.baseTextRect()
-        this.drawPicture(pictureName, rect.x + 2, rect.y, rect.width - 4, rect.height);
+        this.drawPicture(pictureName, rect.x + 2, rect.y + actorPictureYOffset, rect.width - 4, rect.height);
     };
 
     /**
