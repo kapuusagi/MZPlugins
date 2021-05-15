@@ -1,28 +1,111 @@
 /*:ja
  * @target MZ 
- * @plugindesc hogehoge
+ * @plugindesc スクリーンキャプチャしてピクチャとして扱うようにする機能
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
- * @command captureScreen
- * @text キャプチャ設定する
- * @desc スクリーンのキャプチャ要求をセットします。一度「ピクチャの表示」をするとクリアされます。
+ * @command saveScreen
+ * @text キャプチャする
+ * @desc 現在のスクリーンをキャプチャします。キャプチャしたデータは解放するまで保存されます。
+ * 
+ * @arg captureId
+ * @text キャプチャID
+ * @desc キャプチャした画像を管理する番号。(1以上の値にすること)
+ * @type number
+ * @default 0
+ * @min 0
+ * 
+ * @arg scale
+ * @text 倍率(1～100)
+ * @type number
+ * @default 100
+ * @min 0
+ * @max 100
+ * 
+ * 
+ * @command releaseCapture
+ * @text キャプチャデータを解放する。
+ * @desc 指定した番号のキャプチャデータを解放します。
+ * 
+ * @arg captureId
+ * @text キャプチャID
+ * @desc キャプチャした画像を管理する番号。(1以上の値にすること)
+ * @type number
+ * @default 0
+ * @min 0
  *
- * @command captureScreenOff
- * @text キャプチャ設定解除
- * @desc スクリーンのキャプチャ要求をクリアします。
+ * 
+ * @command displayCaptureImage
+ * @text キャプチャ画像表示
+ * @desc 指定したピクチャ番号、設定でキャプチャ画像を表示する。左上起点で位置は(0,0)になる。
+ * 
+ * @arg captureId
+ * @text キャプチャID
+ * @desc キャプチャした画像を管理する番号。(1以上の値にすること)
+ * @type number
+ * @default 0
+ * @min 0
+ * 
+ * @arg pictureId
+ * @text ピクチャ番号
+ * @desc ピクチャー番号
+ * @type number
+ * @default 1
+ * 
+ * @arg origin
+ * @text 画像の原点(座標の基準位置)
+ * @type select
+ * @default 0
+ * @option 左上
+ * @value 0
+ * @option 中央
+ * @value 1
+ * 
+ * @arg x
+ * @text 表示位置x
+ * @type number
+ * @default 0
+ * 
+ * @arg y
+ * @text 表示位置y
+ * @type number
+ * @default 0
+ * 
+ * @arg scaleH
+ * @text 拡大率(幅)
+ * @type number
+ * @default 100
+ * 
+ * @arg scaleV
+ * @text 拡大率(高さ)
+ * @type number
+ * @default 100
+ * 
+ * @arg opacity
+ * @text 不透明度
+ * @type number
+ * @default 255
+ * @min 0
+ * @max 255
+ * 
+ * @arg blendMode
+ * @type select
+ * @default 0
+ * @option 通常
+ * @value 0
+ * @option 加算
+ * @value 1
+ * @option 乗算
+ * @value 2
+ * @option スクリーン
+ * @value 3
  * 
  * @help 
- * Yoji Ojima氏の TextPicture.js を参考にして作成。
- * 画面をキャプチャして、指定ピクチャIDのピクチャを構築します。
- * 次の手順で使用します。
- *   1. プラグインコマンド「キャプチャ設定する」を呼び出します。
- *   2. 画像を指定せずに「ピクチャの表示」を実行します。
+ * 画面のキャプチャ機能と、表示機能を提供します。
+ * 表示時に指定したピクチャ番号は、そのまま「画像の移動」などで使用することができます。
  * 
  * ■ 使用時の注意
- * 他のピクチャを使ったプラグインと併用する場合には、「ピクチャの表示」をする前に
- * キャプチャ要求をクリアしておく必要があります。
- * これをやらない場合、リソースが正しく開放されなくなります。
+ * セーブデータが重くなります！！
  * 
  * ■ プラグイン開発者向け
  * 
@@ -52,146 +135,168 @@
     // const parameters = PluginManager.parameters(pluginName);
 
     // eslint-disable-next-line no-unused-vars
-    PluginManager.registerCommand(pluginName, "captureScreen", args => {
-        $gameTemp.setCaptureRequired();
+    PluginManager.registerCommand(pluginName, "saveScreen", args => {
+        const no = Number(args.captureId) || 0;
+        const scale = (Number(args.scale) || 100).clamp(0, 100);
+        if (no > 0) {
+            const snapBitmap = SceneManager.snap();
+            if (scale !== 100) {
+                const bitmap = new Bitmap(snapBitmap.width * scale / 100, snapBitmap.height * scale / 100);
+                bitmap.blt(snapBitmap, 0, 0, snapBitmap.width, snapBitmap.height, 0 ,0, bitmap.width, bitmap.height);
+                $gameTemp.setCaptureImage(no, bitmap);
+                snapBitmap.destroy();
+            } else {
+                $gameTemp.setCaptureImage(no, snapBitmap);
+            }
+        }
     });
-    // eslint-disable-next-line no-unused-vars
-    PluginManager.registerCommand(pluginName, "captureScreenOff", args => {
-        $gameTemp.clearCaptureRequired();
+
+    PluginManager.registerCommand(pluginName, "releaseCapture", args => {
+        const no = Number(args.captureId) || 0;
+        if (no > 0) {
+            $gameTemp.setCaptureImage(no, null);
+        }
     });
+
+    PluginManager.registerCommand(pluginName, "displayCaptureImage", function(args) {
+        const captureId = Number(args.captureId) || 0;
+        const pictureId = Number(args.pictureId) || 0;
+        const origin = Number(args.origin) || 0;
+        const x = Number(args.x) || 0;
+        const y = Number(args.y) || 0;
+        const scaleH = Math.max(0, Number(args.scaleH) || 100);
+        const scaleV = Math.max(0, Number(args.scaleV) || 100);
+        const opacity = (Number(args.opacity) || 255).clamp(0, 255);
+        const blendMode = (Number(args.blendMode) || 0);
+
+        if ((captureId > 0) && (pictureId > 0)) {
+            $gameScreen.showPicture(pictureId, "capture/" + captureId, origin, x, y, scaleH, scaleV, opacity, blendMode);
+        }
+    });
+
     //------------------------------------------------------------------------------
     // Game_Temp
     const _Game_Temp_initialize = Game_Temp.prototype.initialize;
     /**
-     * Game_Temp を初期化する。
+     * Game_Tempを初期化する。
      */
     Game_Temp.prototype.initialize = function() {
         _Game_Temp_initialize.call(this);
-        this._captureId = 1;
-        this._captureRequiredId = 0;
+        this._captureImages = [];
     };
+
     /**
-     * キャプチャ要求が出ているかどうかを得る。
+     * キャプチャ画像を保存する。
+     * bitmapにnullを渡すと解放する。
      * 
-     * @returns {number} キャプチャ要求が出ている場合には1以上のID番号。それ以外は0
+     * @param {number} no 番号
+     * @param {Bitmap} bitmap ビットマップ
      */
-    Game_Temp.prototype.captureRequiredId = function() {
-        return this._captureRequiredId;
-    };
-    /**
-     * キャプチャ要求をクリアする。
-     */
-    Game_Temp.prototype.clearCaptureRequired = function() {
-        this._captureRequiredId = 0;
-    };
-    /**
-     * キャプチャ要求をセットする。
-     */
-    Game_Temp.prototype.setCaptureRequired = function() {
-        this._captureRequiredId = this._captureId;
-        this._captureId++;
-        if (this._captureId >= 1000) {
-            this._captureId = 1;
+    Game_Temp.prototype.setCaptureImage = function(no, bitmap) {
+        if (this._captureImages[no]) {
+            this._captureImages[no].destroy();
         }
+        this._captureImages[no] = bitmap;
     };
 
-    //------------------------------------------------------------------------------
-    // Game_Picture
-    const _Game_Picture_initBasic = Game_Picture.prototype.initBasic;
     /**
-     * Game_Pictureの基本情報を初期化する。
-     */
-    Game_Picture.prototype.initBasic = function() {
-        _Game_Picture_initBasic.call(this);
-        this._captureRequiredId = 0;
-    };
-
-    const _Game_Picture_show = Game_Picture.prototype.show;
-    /**
-     * ピクチャを表示する。
+     * キャプチャ画像を取得する。
      * 
-     * @param {string} name "img/pictures/"下のファイル名
-     * @param {number} origin 画像上の基準位置(0:左上, 1:画像中央)
-     * @param {number} x x位置
-     * @param {number} y y位置
-     * @param {number} scaleX 水平方向拡大倍率
-     * @param {number} scaleY 垂直方向拡大倍率
-     * @param {number} opacity 輝度
-     * @param {number} blendMode ブレンドモード
+     * @param {number} no 番号
+     * @returns {Bitmap} ビットマップ
      */
-    // prettier-ignore
-    Game_Picture.prototype.show = function(name, origin, x, y, scaleX, scaleY, opacity, blendMode) {
-        _Game_Picture_show.call(this, name, origin, x, y, scaleX, scaleY, opacity, blendMode);
-        const captureRequiredId = $gameTemp.captureRequiredId();
-        if ((this._name === "") && (captureRequiredId > 0)) {
-            this._captureRequiredId = captureRequiredId;
-            $gameTemp.clearCaptureRequired();
-        }
+    Game_Temp.prototype.captureImage = function(no) {
+        return this._captureImages[no];
     };
 
     /**
-     * キャプチャ要求IDを得る。
-     * 
-     * @returns {number} キャプチャ要求ID
+     * キャプチャ画像を全てクリアする。
      */
-    Game_Picture.prototype.captureRequiredId = function() {
-        return this._captureRequiredId;
-    };
-
-    //------------------------------------------------------------------------------
-    // Sprite_Picture
-    const _Sprite_Picture_initialize = Sprite_Picture.prototype.initialize;
-    /**
-     * Sprite_Pictureを初期化する。
-     * 
-     * @param {number} pictureId ピクチャID
-     */
-    Sprite_Picture.prototype.initialize = function(pictureId) {
-        _Sprite_Picture_initialize.call(this, pictureId);
-        this._captureRequiredId = 0;
-        this._screenCaptureBitmap = null;
-    };
-
-    const _Sprite_Picture_destroy = Sprite_Picture.prototype.destroy;
-    /**
-     * Sprite_Pictureを破棄する。
-     */
-    Sprite_Picture.prototype.destroy = function() {
-        if (this._screenCaptureBitmap) {
-            this._screenCaptureBitmap.destroy();
-            this._screenCaptureBitmap = null;
-        }
-        _Sprite_Picture_destroy.apply(this, arguments);
-    };
-
-    const _Sprite_Picture_updateBitmap = Sprite_Picture.prototype.updateBitmap;
-    /**
-     * 表示するBitmapを更新する。
-     */
-    Sprite_Picture.prototype.updateBitmap = function() {
-        _Sprite_Picture_updateBitmap.call(this, ...arguments);
-        const picture = this.picture();
-        if (picture) {
-            const captureRequiredId = picture.captureRequiredId();
-            if (this._captureRequiredId !== captureRequiredId) {
-                if (this._screenCaptureBitmap) {
-                    this._screenCaptureBitmap.destroy();
-                    this._screenCaptureBitmap = null;
-                }
-                if (captureRequiredId > 0) {
-                    // 要求がでているときはスナップする。
-                    this._screenCaptureBitmap = SceneManager.snap();
-                    this.bitmap = this._screenCaptureBitmap;
-                }
-                this._captureRequiredId = captureRequiredId;
+    Game_Temp.prototype.clearAllCaptureImages = function() {
+        for (const image of this._captureImages) {
+            if (image) {
+                image.destroy();
             }
         }
-        if (this.bitmap !== this._screenCaptureBitmap) {
-            // 表示ビットマップが異なるのでリソースを開放する。
-            if (this._screenCaptureBitmap) {
-                this._screenCaptureBitmap.destroy();
-                this._screenCaptureBitmap = null;
+        this._captureImages = [];
+    };
+
+    /**
+     * キャプチャ画像一覧を取得する。
+     */
+    Game_Temp.prototype.allCaptureImages = function() {
+        const images = [];
+        for (let i = 0; i < this._captureImages.length; i++) {
+            const image = this._captureImages[i];
+            if (image) {
+                images.push({ id:i, image:image });
             }
         }
-};
+        return images;
+    };
+    //------------------------------------------------------------------------------
+    // ImageManager
+    const _ImageManager_loadPicture = ImageManager.loadPicture;
+    /**
+     * img/pictures以下のファイルをロードする。
+     * 
+     * @param {String} filename 画像ファイル名
+     * @return {Bitmap} ビットマップオブジェクト
+     */
+    ImageManager.loadPicture = function(filename) {
+        if (filename.startsWith("capture/")) {
+            const id = filename.substr(8);
+            return $gameTemp.captureImage(id);
+        } else {
+            return _ImageManager_loadPicture.call(this, filename);
+        }
+    };
+    //------------------------------------------------------------------------------
+    // Scene_Title
+    const _Scene_Title_start = Scene_Title.prototype.start;
+    /**
+     * Scene_Titleを開始する。
+     */
+    Scene_Title.prototype.start = function() {
+        _Scene_Title_start.call(this);
+        // タイトルに戻ったとき、キャプチャ画像は全てクリアする。
+        $gameTemp.clearAllCaptureImages();
+    };
+    //------------------------------------------------------------------------------
+    // DataManager
+    const _DataManager_makeSaveContents = DataManager.makeSaveContents;
+    /**
+     * 保存するデータを作成する。
+     * @return {Object} 保存するデータ
+     */
+    DataManager.makeSaveContents = function() {
+        const contents = _DataManager_makeSaveContents.call(this);
+        contents.captureScreens = [];
+        const imageEntries = $gameTemp.allCaptureImages();
+        for (const imageEntry of imageEntries) {
+            contents.captureScreens.push({
+                id : imageEntry.id,
+                bitmap : imageEntry.image._canvas.toDataURL("image/png")
+            });
+        }
+        return contents;
+    };
+
+    const _DataManager_extractSaveContents = DataManager.extractSaveContents;
+    /**
+     * 保存されたデータを展開し、メモリ上に読み出す。
+     * @param {Object} contents 保存データ
+     */
+    DataManager.extractSaveContents = function(contents) {
+        _DataManager_extractSaveContents.call(this, contents);
+        $gameTemp.clearAllCaptureImages();
+        if (contents.captureScreens) {
+            
+            for (const entry of contents.captureScreens) {
+                const id = entry.id;
+                const bitmap = Bitmap.load(entry.bitmap);
+                $gameTemp.setCaptureImage(id, bitmap);
+            }
+        }
+    };
 })();
