@@ -212,6 +212,11 @@
  */
 
 /**
+ * Shopデータ
+ * Shops.jsonが格納される。
+ */
+$dataShops = null;
+/**
  * Shopデータ。
  * Game_Shopsが格納される。
  */
