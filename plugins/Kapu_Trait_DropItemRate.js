@@ -127,7 +127,7 @@
      * @return {Number} ドロップレート補正倍率
      */
     Game_Party.prototype.dropItemRate = function() {
-        var rate = this.hasDropItemDouble() ? 2 : 1;
+        const rate = this.hasDropItemDouble() ? 2 : 1;
         return rate + this.partyTraitsSum(Game_Party.ABILITY_DROP_ITEM_RATE);
     };
     //------------------------------------------------------------------------------

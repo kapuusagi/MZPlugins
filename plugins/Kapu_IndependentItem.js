@@ -977,7 +977,7 @@
      * @param {DataItem} independentItem 個別アイテム(DataItem/DataWeapon/DataArmor)
      */
     Game_Party.prototype.removeIndependentItemFromInventory = function(independentItem) {
-        var container = this.itemContainer(independentItem);
+        const container = this.itemContainer(independentItem);
         container[independentItem.id]--;
         if (container[independentItem.id] <= 0) {
             delete container[independentItem.id];
@@ -1058,7 +1058,7 @@
      * @return {Array<DataWeapon>} 武器のコレクション
      */
     Game_Party.prototype.weapons = function() {
-        var results = _Game_Party_weapons.call(this);
+        const results = _Game_Party_weapons.call(this);
         results.sort(this.independentWeaponSort);
         return results;
     };
@@ -1072,7 +1072,7 @@
      * @return {Array<DataArmor>} 防具のコレクション
      */
     Game_Party.prototype.armors = function() {
-        var results = _Game_Party_armors.call(this);
+        const results = _Game_Party_armors.call(this);
         results.sort(this.independentArmorSort);
         return results;
     };
@@ -1251,7 +1251,7 @@
             // 個別アイテムのベースアイテムが指定されたときは、
             // 一致する個別アイテムがあるかを調べる。
             const baseItem = DataManager.getBaseItem(item);
-            var independentItem = this.getMatchingIndependentItem(baseItem, includeEquip);
+            const independentItem = this.getMatchingIndependentItem(baseItem, includeEquip);
             return (independentItem !== null);
         } else {
             return _Game_Party_hasItem.call(this, ...arguments);
@@ -1430,7 +1430,7 @@
     Window_ItemList.prototype.drawItemNumber = function(item, x, y, width) {
         if (this.needsNumber()) {
             this.drawText(":", x, y, width - this.textWidth("00"), "right");
-            var num = DataManager.isIndependent(item) ? 1 : $gameParty.numItems(item);
+            const  num = DataManager.isIndependent(item) ? 1 : $gameParty.numItems(item);
             this.drawText(num, x, y, width, "right");
         }
     };

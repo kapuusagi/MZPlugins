@@ -129,7 +129,7 @@
      * @return {Number} 取得金額倍率
      */
     Game_Party.prototype.dropGoldRate = function() {
-        var rate = this.hasGoldDouble() ? 2 : 1;
+        const rate = this.hasGoldDouble() ? 2 : 1;
         return rate + this.partyTraitsSum(Game_Party.ABILITY_DROP_GOLD_RATE);
     };
 

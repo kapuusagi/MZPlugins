@@ -260,8 +260,8 @@
      * このアクターが習得可能なスキルを更新する。
      */
     Game_Actor.prototype.updateGpLearnableSkills = function() {
-        for (var skillId = 1; skillId < $dataSkills.length; skillId++) {
-            var skill = $dataSkills[skillId];
+        for (let skillId = 1; skillId < $dataSkills.length; skillId++) {
+            const skill = $dataSkills[skillId];
             if (skill.name.length == 0) {
                 continue; // 名前なしスキルは無視。
             }

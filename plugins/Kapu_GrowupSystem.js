@@ -336,7 +336,7 @@
         _Game_Actor_levelUp.call(this);
 
         // 成長ボーナス加算
-        var gpPlus = this.growPointAtLevelUp(this._level);
+        const gpPlus = this.growPointAtLevelUp(this._level);
         this.gainGrowPoint(gpPlus);
     };
 

@@ -344,8 +344,8 @@ function Scene_Growup() {
 
         // const statusNames = TWLD.Core.StatusNames;
         // for (let i = 0; i < 6; i++) {
-        //     var paramValue =  actor.getBasicParam(i);
-        //     var correct = paramValue - actor.getBasicParamBase(i); // 装備による補正値
+        //     const paramValue =  actor.getBasicParam(i);
+        //     const correct = paramValue - actor.getBasicParamBase(i); // 装備による補正値
         //     this.drawBasicParam(statusNames[i], paramValue, correct, statusX, statusY, statusWidth);
         //     statusY += this.lineHeight();
         // }
@@ -516,7 +516,7 @@ function Scene_Growup() {
      * @param index インデックス
      */
     Window_GrowupSelect.prototype.drawItem = function (index) {
-        var item = this.itemAt(index); // GrowupItem
+        const item = this.itemAt(index); // GrowupItem
         if (!item) {
             return;
         }
@@ -620,9 +620,9 @@ function Scene_Growup() {
      * @return {Number} コンテンツの幅
      */
     Window_ConfirmApply.prototype.maxItemWidth = function() {
-        var maxTextWidth = 0;
-        for (var n = 0; n < this._items.length; n++) {
-            var width = this.textWidth(this._items[n]);
+        const maxTextWidth = 0;
+        for (let n = 0; n < this._items.length; n++) {
+            const width = this.textWidth(this._items[n]);
             if (width > maxTextWidth) {
                 maxTextWidth = width;
             }
@@ -645,7 +645,7 @@ function Scene_Growup() {
      * @param {Number} index 描画する項目のインデックス番号
      */
     Window_ConfirmApply.prototype.drawItem = function (index) {
-        var rect = this.itemRect(index);
+        const rect = this.itemRect(index);
         this.resetTextColor();
         this.drawText(this._items[index], rect.x, rect.y, rect.width, "left");
         this.resetTextColor();
@@ -836,8 +836,8 @@ function Scene_Growup() {
     Scene_Growup.prototype.onConfirmOK = function() {
         if (this._confirmApplyWindow.index() === 0) {
             // 変更を適用する。
-            var item = this._selectWindow.item();
-            var actor = this.actor();
+            const item = this._selectWindow.item();
+            const actor = this.actor();
             actor.growup(item);
             this._actorStatusWindow.refresh();
             this._selectWindow.refresh();

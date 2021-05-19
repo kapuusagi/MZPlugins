@@ -65,11 +65,11 @@
      * @return {Array<DataSkill>} スキル配列。
      */
     Game_Actor.prototype.skillsWithOrder = function() {
-        var skills = this.skills();
+        const skills = this.skills();
         // ソートして返す。
         skills.sort(function(a, b) {
-            var ai = this.getSkillOrder(a.id);
-            var bi = this.getSkillOrder(b.id);
+            const ai = this.getSkillOrder(a.id);
+            const bi = this.getSkillOrder(b.id);
             return ai - bi;
         }.bind(this));
         return skills;
@@ -83,7 +83,7 @@
      * @return {Number} スキル並び順が返る。
      */
     Game_Actor.prototype.getSkillOrder = function(id) {
-        var index = this._skillOrder.indexOf(id);
+        let index = this._skillOrder.indexOf(id);
         if (index >= 0) {
             return index;
         } else {
@@ -98,8 +98,8 @@
      * @param {Number} skillId2 スキルID2
      */
     Game_Actor.prototype.swapSkillOrder = function(skillId1, skillId2) {
-        var ai = this.getSkillOrder(skillId1);
-        var bi = this.getSkillOrder(skillId2);
+        const ai = this.getSkillOrder(skillId1);
+        const bi = this.getSkillOrder(skillId2);
         this._skillOrder[bi] = skillId1;
         this._skillOrder[ai] = skillId2;
     };
@@ -203,8 +203,8 @@
     Window_SkillList.prototype.drawItem = function(index) {
         if ((this._orderEditEnable) && (index == this._pendingIndex)) {
             // 並び替え用の項目は背景色をペンディングカラーに設定
-            var rect = this.itemRect(index);
-            var color = ColorManager.pendingColor();
+            const rect = this.itemRect(index);
+            const color = ColorManager.pendingColor();
             this.changePaintOpacity(false);
             this.contents.fillRect(rect.x, rect.y, rect.width, rect.height, color);
             this.changePaintOpacity(true);

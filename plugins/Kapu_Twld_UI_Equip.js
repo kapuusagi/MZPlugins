@@ -427,7 +427,7 @@ function Window_EquipItemName() {
      */
     Window_EquipSlot.prototype.maxItems = function() {
         if (this._actor) {
-            var count = this._actor.equipSlots().length;
+            const count = this._actor.equipSlots().length;
             // 戦闘中は「全て外す」を無効化する。
             return $gameParty.inBattle() ? count : count + 1;
         }
@@ -498,7 +498,7 @@ function Window_EquipItemName() {
         if (this._actor === null) {
             return false;
         }
-        var equipSlots = this._actor.equipSlots();
+        const equipSlots = this._actor.equipSlots();
         if (index >= equipSlots.length) {
             // 戦闘中以外は全て外すとか有効。
             return $gameParty.inBattle() ? false : true;

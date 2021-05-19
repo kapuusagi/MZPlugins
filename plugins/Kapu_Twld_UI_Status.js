@@ -2368,7 +2368,7 @@ function Window_StatusProfile() {
      *     ステータス画面レイアウト変更のため、オーバーライドする。
      */
     Scene_Status.prototype.refreshActor = function() {
-        var actor = this.actor();
+        const actor = this.actor();
         this._statusWindow.setActor(actor);
         this._statusParamsWindow.setActor(actor);
         this._statusEquipWindow.setActor(actor);

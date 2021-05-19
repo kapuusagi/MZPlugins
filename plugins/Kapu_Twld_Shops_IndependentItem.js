@@ -70,7 +70,7 @@
      * @return {ItemEntry} 在庫品エントリ
      */
     Game_Shop.prototype.getStokEntry = function(item) {
-        var kind = 0;
+        let kind = 0;
         if (DataManager.isItem(item)) {
             kind = 1;
         } else if (DataManager.isWeapon(item)) {
@@ -78,7 +78,7 @@
         } else if (DataManager.isArmor(item)) {
             kind = 3;
         }
-        var id = item.baseItemId || item.id;
+        const id = item.baseItemId || item.id;
         return this._itemList.find(function(ie) {
             return (ie.kind === kind) && (ie.id === id);
         });
