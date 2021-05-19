@@ -84,7 +84,7 @@
      * 武器が装備可能かどうかを取得する。
      * 
      * @param {Object} item DataWeaponオブジェクト
-     * @return {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
+     * @returns {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
      */
     Game_BattlerBase.prototype.canEquipWeapon = function(item) {
         return _Game_BattlerBase_canEquipWeapon.call(this, item)
@@ -96,7 +96,7 @@
      * 防具が装備可能かどうかを取得する。
      * 
      * @param {Object} item DataArmorオブジェクト
-     * @return {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
+     * @returns {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
      */
     Game_BattlerBase.prototype.canEquipArmor = function(item) {
         return _Game_BattlerBase_canEquipArmor.call(this, item)
@@ -107,7 +107,7 @@
      * itemが装備可能かどうかを取得する。
      * 
      * @param {Object} item アイテム
-     * @return {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
+     * @returns {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
      */
     Game_BattlerBase.prototype.meetsEquipCondition = function(item) {
         if (item.equipConditions && (item.equipConditions.length > 0)) {
@@ -121,10 +121,10 @@
      * 装備可能条件をテストする。
      * 
      * @param {Object} item WeaponまたはArmor
-     * @return {Boolean} 装備可能条件を1つでも満たす場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 装備可能条件を1つでも満たす場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.testEquipCondition = function(item) {
-        const a = this;
+        const a = this; // eslint-disable-line no-unused-vars
         for (const cond of item.equipConditions) {
             try {
                 if (eval(cond)) {

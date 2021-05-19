@@ -84,7 +84,7 @@
          * クリティカルヒットしたかどうかを取得する。
          * 
          * @param {Game_Battler} target 対象
-         * @return {Boolean} クリティカルヒットする場合にはtrue, それ以外はfalse
+         * @returns {Boolean} クリティカルヒットする場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testCritical = function(target) {
             if (this.item().damage.type > 0) {
@@ -100,7 +100,7 @@
          * クリティカルヒットしたかどうかを取得する。
          * 
          * @param {Game_Battler} target 対象
-         * @return {Boolean} クリティカルヒットする場合にはtrue, それ以外はfalse
+         * @returns {Boolean} クリティカルヒットする場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testCritical = function(target) {
             if (this.item().damage.type > 0) {
@@ -114,7 +114,7 @@
      * 確実にヒットできるかどうかを取得する。
      * 
      * @param {Game_Battler} target 対象
-     * @return {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 確実にヒットする場合にはtrue, それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.isCertainlyHit = function(target) {
@@ -125,7 +125,7 @@
      * 確実に回避できるかどうかを取得する。
      * 
      * @param {Game_Battler} target 対象
-     * @return {Boolean} 確実に回避する場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 確実に回避する場合にはtrue, それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.isCertainlyEvad = function(target) {
@@ -136,7 +136,7 @@
      * 命中できたかどうかを評価する。
      * 
      * @param {Game_Battler} target 対象
-     * @return {Boolean} 命中できた場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 命中できた場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testHit = function(target) {
         const result = target.result();
@@ -163,7 +163,7 @@
          * ミスしたかどうかを評価する。
          * 
          * @param {Game_Battler} target 対象
-         * @return {Boolean} ミスした場合にtrue, それ以外はfalse
+         * @returns {Boolean} ミスした場合にtrue, それ以外はfalse
          */
         Game_Action.prototype.testMissed = function(target) {
             const missRate = 1 - this.itemHit(target);
@@ -175,7 +175,7 @@
          * ミスしたかどうかを評価する。
          * 
          * @param {Game_Battler} target 対象
-         * @return {Boolean} ミスした場合にtrue, それ以外はfalse
+         * @returns {Boolean} ミスした場合にtrue, それ以外はfalse
          */
         Game_Action.prototype.testMissed = function(target) {
             const missRate = 1 - this.itemHit(target);
@@ -188,7 +188,7 @@
          * 回避したかどうかを評価する。
          * 
          * @param {Game_Battler} target ターゲット
-         * @return {Boolean} 回避できた場合にはtrue, それ以外はfalse
+         * @returns {Boolean} 回避できた場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testEvaded = function(target) {
             const rate = this.itemEva(target);
@@ -200,7 +200,7 @@
          * 回避したかどうかを評価する。
          * 
          * @param {Game_Battler} target ターゲット
-         * @return {Boolean} 回避できた場合にはtrue, それ以外はfalse
+         * @returns {Boolean} 回避できた場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testEvaded = function(target) {
             return Math.random() < this.itemEva(target);

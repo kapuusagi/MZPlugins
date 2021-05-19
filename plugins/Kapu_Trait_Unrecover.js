@@ -158,7 +158,7 @@
     /**
      * HPが回復可能かどうかを得る。
      * 
-     * @return {Boolean} 回復できる場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 回復できる場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isUnrecoverHp = function() {
         return this.isUnrecover(Game_BattlerBase.UNRECOVER_HP);
@@ -167,7 +167,7 @@
     /**
      * MPが回復可能かどうかを得る。
      * 
-     * @return {Boolean} 回復できる場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 回復できる場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isUnrecoverMp = function() {
         return this.isUnrecover(Game_BattlerBase.UNRECOVER_MP);

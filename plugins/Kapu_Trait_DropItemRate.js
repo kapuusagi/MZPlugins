@@ -114,7 +114,7 @@
     /**
      * ドロップアイテム率(加算値)を得る。
      * 
-     * @return {Number} ドロップアイテム率(加算値)
+     * @returns {Number} ドロップアイテム率(加算値)
      */
     Game_BattlerBase.prototype.dropItemRate = function() {
         return this.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, Game_Party.ABILITY_DROP_ITEM_RATE);
@@ -124,7 +124,7 @@
     // Game_Enemy
     /**
      * ドロップレート補正倍率を得る。
-     * @return {Number} ドロップレート補正倍率
+     * @returns {Number} ドロップレート補正倍率
      */
     Game_Party.prototype.dropItemRate = function() {
         const rate = this.hasDropItemDouble() ? 2 : 1;
@@ -136,7 +136,7 @@
     /**
      * アイテムドロップ率補正倍率を得る。
      * 
-     * @return {Number} 補正倍率
+     * @returns {Number} 補正倍率
      * !!!overwrite!!! Game_Enmy.dropItemRate
      */
     Game_Enemy.prototype.dropItemRate = function() {

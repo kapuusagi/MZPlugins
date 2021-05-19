@@ -219,7 +219,7 @@
         /**
          * DEF貫通率を得る。
          * 
-         * @return {Number} DEF貫通率(0～1.0)
+         * @returns {Number} DEF貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetrateDEF = function() {
             return this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR).clamp(0, 1);
@@ -236,7 +236,7 @@
         /**
          * DEF貫通率を得る。
          * 
-         * @return {Number} DEF貫通率(0～1.0)
+         * @returns {Number} DEF貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetrateDEF = function() {
             return 0;
@@ -247,7 +247,7 @@
         /**
          * PDR貫通率を得る。
          * 
-         * @return {Number} DEF貫通率(0～1.0)
+         * @returns {Number} DEF貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetratePDR = function() {
             return this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR).clamp(0, 1);
@@ -264,7 +264,7 @@
         /**
          * PDR貫通率を得る。
          * 
-         * @return {Number} DEF貫通率(0～1.0)
+         * @returns {Number} DEF貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetratePDR = function() {
             return 0;
@@ -276,7 +276,7 @@
         /**
          * MDF貫通率を得る。
          * 
-         * @return {Number} MDF貫通率(0～1.0)
+         * @returns {Number} MDF貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetrateMDF = function() {
             return this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR).clamp(0, 1);
@@ -293,7 +293,7 @@
         /**
          * MDF貫通率を得る。
          * 
-         * @return {Number} MDF貫通率(0～1.0)
+         * @returns {Number} MDF貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetrateMDF = function() {
             return 0;
@@ -304,7 +304,7 @@
         /**
          * MDR貫通率を得る。
          * 
-         * @return {Number} MDR貫通率(0～1.0)
+         * @returns {Number} MDR貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetrateMDR = function() {
             return this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR).clamp(0, 1);
@@ -321,7 +321,7 @@
         /**
          * MDR貫通率を得る。
          * 
-         * @return {Number} MDR貫通率(0～1.0)
+         * @returns {Number} MDR貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetrateMDR = function() {
             return 0;
@@ -369,7 +369,7 @@
      * 
      * @param {Game_Battler} target ターゲット
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} 物理ダメージレート
+     * @returns {Number} 物理ダメージレート
      */
     Game_Action.prototype.itemPdr = function(target, critical) {
         let pdr = _Game_Action_itemPdr(target, critical);
@@ -387,7 +387,7 @@
      * 
      * @param {Game_Battler} target ターゲット
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} 魔法ダメージレート。(0.0～、等倍は1.0)
+     * @returns {Number} 魔法ダメージレート。(0.0～、等倍は1.0)
      */
     Game_Action.prototype.itemMdr = function(target, critical) {
         let mdr = _Game_Action_itemMdr(target, critical);

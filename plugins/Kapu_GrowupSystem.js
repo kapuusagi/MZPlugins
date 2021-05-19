@@ -215,7 +215,7 @@
      * アクターIDを得る。
      * 
      * @param {Object} args プラグインコマンド引数
-     * @return {Number} アクターID
+     * @returns {Number} アクターID
      */
     const _getActorId = function(args) {
         const actorId = Number(args.actorId) || 0;
@@ -323,7 +323,7 @@
      * Note: Lvアップ毎にランダムで増減する拡張もあり得るため、
      *       setup()時の初期値を計算する時だけ使用する。
      * 
-     * @return {Number} 育成ポイント合計
+     * @returns {Number} 育成ポイント合計
      */
     Game_Actor.prototype.growPointOfLevel = function() {
         let value = initialGrowPoint;
@@ -361,7 +361,7 @@
      * レベルアップ時に加算するGrowPointを得る。
      * 
      * @param {Number} level レベル
-     * @return {Number} 加算するGrowPoint
+     * @returns {Number} 加算するGrowPoint
      */
     // eslint-disable-next-line no-unused-vars
     Game_Actor.prototype.growPointAtLevelUp = function(level) {
@@ -372,7 +372,7 @@
      * 現在の成長ボーナス値を得る。
      * つまり、残っているポイントね。
      * 
-     * @return {Number} 現在の成長ボーナス値。
+     * @returns {Number} 現在の成長ボーナス値。
      */
     Game_Actor.prototype.growPoint = function() {
         return this._growPoint.current;
@@ -382,7 +382,7 @@
      * 使用済みGrowPointを得る。
      * setup()時に、使用済みGrowPointを計算するために使用される。
      * 
-     * @return {Number} 使用済み育成ポイント。
+     * @returns {Number} 使用済み育成ポイント。
      */
     Game_Actor.prototype.usedGrowupPoint = function() {
         return 0;
@@ -392,7 +392,7 @@
      * 最大成長ボーナス値を得る。
      * つまり、使用済み＋残っているポイント。
      * 
-     * @return {Number} 成長ボーナス値合計。
+     * @returns {Number} 成長ボーナス値合計。
      */
     Game_Actor.prototype.maxGrowPoint = function() {
         return this._growPoint.max;
@@ -428,7 +428,7 @@
     /**
      * 育成項目を返す。
      * 
-     * @return {Array<GrowupItem>} 育成項目
+     * @returns {Array<GrowupItem>} 育成項目
      */
     Game_Actor.prototype.growupItems = function() {
         return [];
@@ -460,7 +460,7 @@
      * 育成項目を適用する。
      * 
      * @param {GrowupItem} growupItem 育成項目
-     * @return {Boolean} 適用できたかどうか。
+     * @returns {Boolean} 適用できたかどうか。
      */
     // eslint-disable-next-line no-unused-vars
     Game_Actor.prototype.applyGrowup = function(growupItem) {
@@ -473,7 +473,7 @@
          * @constant {Number}
          */
         Object.defineProperty(Game_Actor.prototype, "gp", {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() {
                 return this._growPoint.current;
             },
@@ -484,7 +484,7 @@
          * @constant {Number}
          */
         Object.defineProperty(Game_Actor.prototype, "maxgp", {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() {
                 return this._growPoint.max;
             },
@@ -502,7 +502,7 @@
      * 
      * @param {Game_BattlerBase} target 対象
      * @param {DataEffect} effect エフェクトデータ
-     * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testItemEffect = function(target, effect) {
         if (Game_Action.EFFECT_GAIN_GROWPOINT

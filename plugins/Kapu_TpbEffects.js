@@ -183,7 +183,7 @@
      * strを解析し、レートを得る。
      * 
      * @param {String} str 文字列
-     * @return レートを得る。
+     * @returns レートを得る。
      */
     const _getRate = function(str) {
         if (str.slice(-1) === "%") {
@@ -258,7 +258,7 @@
      * スキルのTPBコストを得る。
      * 
      * @param {DataSkill} skill スキル
-     * @return {Number} TPBコスト
+     * @returns {Number} TPBコスト
      */
     Game_BattlerBase.prototype.skillTpbCost = function(skill) {
         if (skill.meta.tpbCost) {
@@ -271,7 +271,7 @@
      * TPBコストを得る。
      * 
      * @param {Object} item 
-     * @return {Number} TPBコスト(0～1)を得る。
+     * @returns {Number} TPBコスト(0～1)を得る。
      */
     Game_BattlerBase.prototype.tpbCost = function(item) {
         if (DataManager.isSkill(item)) {
@@ -290,7 +290,7 @@
     /**
      * デフォルトのTPBコストを得る。
      * 
-     * @return {Number} デフォルトのTPBコスト
+     * @returns {Number} デフォルトのTPBコスト
      */
     Game_BattlerBase.prototype.defaultTpbCost = function() {
         return defaultTpbCost;
@@ -301,7 +301,7 @@
         /**
          * TPB減少効果を防ぐかどうかを取得する。
          * 
-         * @return {Boolean} TPB減少効果を防ぐ場合にはtrue, それ以外はfalse
+         * @returns {Boolean} TPB減少効果を防ぐ場合にはtrue, それ以外はfalse
          */
         Game_Battler.prototype.blockTpbLose = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_BLOCK_TPB_LOSE);
@@ -310,7 +310,7 @@
         /**
          * TPB減少効果を防ぐかどうかを取得する。
          * 
-         * @return {Boolean} TPB減少効果を防ぐ場合にはtrue, それ以外はfalse
+         * @returns {Boolean} TPB減少効果を防ぐ場合にはtrue, それ以外はfalse
          */
         Game_Battler.prototype.blockTpbLose = function() {
             return false;
@@ -320,7 +320,7 @@
         /**
          * TPBキャストブレークを防ぐかどうかを取得する。
          * 
-         * @return {Boolean} キャストブレークを防ぐ場合にはtrue, それ以外はfalse
+         * @returns {Boolean} キャストブレークを防ぐ場合にはtrue, それ以外はfalse
          */
         Game_Battler.prototype.blockTpbCastBreak = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_BLOCK_TPB_CAST_BREAK);
@@ -329,7 +329,7 @@
         /**
          * TPBキャストブレークを防ぐかどうかを取得する。
          * 
-         * @return {Boolean} キャストブレークを防ぐ場合にはtrue, それ以外はfalse
+         * @returns {Boolean} キャストブレークを防ぐ場合にはtrue, それ以外はfalse
          */
         Game_Battler.prototype.blockTpbCastBreak = function() {
             return false;
@@ -417,7 +417,7 @@
      * 
      * @param {Game_BattlerBase} target 対象
      * @param {DataEffect} effect エフェクトデータ
-     * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testItemEffect = function(target, effect) {
         if ((Game_Action.EFFECT_GAIN_TPB_CHARGE_TIME && (effect.code === Game_Action.EFFECT_GAIN_TPB_CHARGE_TIME))

@@ -43,7 +43,7 @@
      * クリティカル発生率を返す。
      * 
      * @param {Game_Battler} target
-     * @return {Number} クリティカル率(0.0～1.0、1.0で100％発生)が返る。
+     * @returns {Number} クリティカル率(0.0～1.0、1.0で100％発生)が返る。
      */
     Game_Action.prototype.itemCri = function(target) {
         const rate = _Game_Action_itemCri.call(this, target);
@@ -55,7 +55,7 @@
      * 命中率を得る。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @return {Number} 命中率。
+     * @returns {Number} 命中率。
      */
     Game_Action.prototype.itemHit = function(target) {
         const rate = _Game_Action_itemHit.call(this, target)

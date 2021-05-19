@@ -169,7 +169,7 @@
     /**
      * 使用済みGrowPointを得る。
      * 
-     * @return {Number} 使用済み育成ポイント。
+     * @returns {Number} 使用済み育成ポイント。
      */
     Game_Actor.prototype.usedGrowupPoint = function() {
         let usedPoint = _Game_Actor_usedGrowupPoint.call(this);
@@ -188,7 +188,7 @@
      * 基本パラメータベース値を得る。
      * 
      * @param paramId {Number} パラメータID
-     * @return {Number} パラメータ値
+     * @returns {Number} パラメータ値
      */
     Game_Actor.prototype.paramBase = function(paramId) {
         return _Game_Actor_paramBase.call(this, paramId) + this.gpParam(paramId);
@@ -198,7 +198,7 @@
      * GPによるパラメータ加算値を得る。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} GP加算パラメータ値
+     * @returns {Number} GP加算パラメータ値
      */
     Game_Actor.prototype.gpParam = function(paramId) {
         return Math.floor(this._gpParams[paramId] * growupItemEntries[paramId].growRate);
@@ -221,7 +221,7 @@
     /**
      * 育成項目を返す。
      * 
-     * @return {Array<GrowupItem>} 育成項目
+     * @returns {Array<GrowupItem>} 育成項目
      */
     Game_Actor.prototype.growupItems = function() {
         const items = _Game_Actor_growupItems.call(this);
@@ -255,7 +255,7 @@
      * パラメータ育成に必要なコストを得る。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} コスト
+     * @returns {Number} コスト
      */
     Game_Actor.prototype.gpParamCost = function(paramId) {
         return this.calcGrowupParamCost(this._gpParams[paramId], growupItemEntries[paramId].costRate);
@@ -266,7 +266,7 @@
      * 
      * @param {Number} currentValue 現在値
      * @param {Number} rate コスト上昇レート
-     * @return {Number} コスト
+     * @returns {Number} コスト
      */
     Game_Actor.prototype.calcGrowupParamCost = function(currentValue, rate) {
         return 1 + Math.floor(currentValue * rate);
@@ -278,7 +278,7 @@
      * 育成項目を適用する。
      * 
      * @param {GrowupItem} growupItem 育成項目
-     * @return {Boolean} 適用できたかどうか。
+     * @returns {Boolean} 適用できたかどうか。
      */
     Game_Actor.prototype.applyGrowup = function(growupItem) {
         if (growupItem.type === "param") {

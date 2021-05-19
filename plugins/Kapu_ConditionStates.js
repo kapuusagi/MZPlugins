@@ -47,7 +47,7 @@
      * 条件付きパッシブステートを解析し、オブジェクトを生成する。
      * 
      * @param {String} str 解析対象の文字列
-     * @return {ConditionState} 条件付きパッシブステートオブジェクト。解析エラーの場合にはnull.
+     * @returns {ConditionState} 条件付きパッシブステートオブジェクト。解析エラーの場合にはnull.
      */
     const _parseCondition = function(str) {
         const index = str.indexOf(":");
@@ -119,7 +119,7 @@
     /**
      * このGame_Battlerのステートを返す。
      * 
-     * @return {Array<DataState>} ステート
+     * @returns {Array<DataState>} ステート
      */
     Game_BattlerBase.prototype.states = function() {
         let states = _Game_BattlerBase_states.call(this);
@@ -134,7 +134,7 @@
     /**
      * 条件付きステートを得る。
      * 
-     * @return {Array<DataState>} 条件付きステート
+     * @returns {Array<DataState>} 条件付きステート
      */
     Game_BattlerBase.prototype.conditionStates = function() {
         return this._conditionStateIds.map(id => $dataStates[id]);
@@ -145,7 +145,7 @@
      * stateIdで指定されるステートを持っているかどうかを取得する。
      * 
      * @param {Number} stateId ステートID
-     * @return {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
+     * @returns {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isStateAffected = function(stateId) {
         if (this.isConditionStateAffected(stateId)) {
@@ -159,7 +159,7 @@
      * stateIdで指定されるステートを持っているかどうかを取得する。
      * 
      * @param {Number} stateId ステートID
-     * @return {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
+     * @returns {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isConditionStateAffected = function(stateId) {
         return this._conditionStateIds.includes(stateId);
@@ -173,7 +173,7 @@
         for (const obj of this.conditionStateObjects()) {
             for (const conditionState of obj.conditionStates) {
                 try {
-                    const a = this;
+                    const a = this; // eslint-disable-line no-unused-vars
                     if (eval(conditionState.condition)) {
                         for (const stateId of conditionState.states) {
                             if (!stateIds.includes(stateId)) {
@@ -194,7 +194,7 @@
      * 条件付きステートを持ったオブジェクトを返す。
      * Game_Actor/Game_Enemyにて、本メソッドを実装してオブジェクトを返すようにする。
      * 
-     * @return {Array<Object>} 条件付きステートデータを持ったオブジェクト
+     * @returns {Array<Object>} 条件付きステートデータを持ったオブジェクト
      */
     Game_BattlerBase.prototype.conditionStateObjects = function() {
         return [];
@@ -238,7 +238,7 @@
     /**
      * 条件付きステートデータを持ったオブジェクトを返す。
      * 
-     * @return {Array<Object>} 条件付きステートデータを持ったオブジェクト
+     * @returns {Array<Object>} 条件付きステートデータを持ったオブジェクト
      */
     Game_Actor.prototype.conditionStateObjects = function() {
         const psObjs = [];
@@ -289,7 +289,7 @@
     /**
      * パッシブステートデータを持ったオブジェクトを返す。
      * 
-     * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
+     * @returns {Array<Object>} パッシブステートデータを持ったオブジェクト
      */
     Game_Enemy.prototype.conditionStateObjects = function() {
         const psObjs = [];

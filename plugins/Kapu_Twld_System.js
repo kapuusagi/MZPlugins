@@ -77,7 +77,7 @@
     /**
      * MaxHP/MaxMP/ATK/DEF/MATK/MDEFパラメータの増幅率を得る。
      * 
-     * @return {Number} 増幅率
+     * @returns {Number} 増幅率
      * !!!overwrite!!! Game_BattlerBase.paramRate()
      *     基本パラメータの割合増加を加算合成に変更するため、オーバーライドする。
      */
@@ -96,7 +96,7 @@
     /**
      * パッシブスキルを持っているかどうかを判定する。
      * 
-     * @return {Boolean} パッシブスキルを持っている場合にはtrue, それ以外はfalse
+     * @returns {Boolean} パッシブスキルを持っている場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.hasPassiveSkill = function() {
         return this.skills().some(function(skill) {

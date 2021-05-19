@@ -108,7 +108,7 @@
      * 真偽値を得る。
      * 
      * @param {Object} valueStr 値文字列
-     * @return {Boolean} 真偽値
+     * @returns {Boolean} 真偽値
      */
     const _parseBoolean = function(valueStr) {
         if (typeof valueStr === "undefined") {
@@ -189,7 +189,7 @@
     /**
      * バーテックスシェーダーソースを得る。
      * 
-     * @return {String} バーテックスシェーダーソース
+     * @returns {String} バーテックスシェーダーソース
      */
     TiltShiftAxisFilter.prototype._vertexSrc = function() {
         const src = null;
@@ -199,7 +199,7 @@
     /**
      * フラグメントシェーダーソースを得る。
      * 
-     * @return {String} フラグメントシェーダーソース
+     * @returns {String} フラグメントシェーダーソース
      */
     TiltShiftAxisFilter.prototype._fragmentSrc = function() {
         const src =
@@ -493,7 +493,7 @@
         /**
          * プレイヤーに追従させるかどうか。
          * 
-         * @return {Boolean}
+         * @returns {Boolean}
          */
         playerCenter: {
             get: function() { 

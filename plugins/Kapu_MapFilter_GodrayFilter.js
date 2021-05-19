@@ -126,7 +126,7 @@
      * 真偽値を得る。
      * 
      * @param {Object} valueStr 値文字列
-     * @return {Boolean} 真偽値
+     * @returns {Boolean} 真偽値
      */
     const _parseBoolean = function(valueStr) {
         if (typeof valueStr === "undefined") {
@@ -267,7 +267,7 @@
     /**
      * バーテックスシェーダーソースを得る。
      * 
-     * @return {String} バーテックスシェーダーソース
+     * @returns {String} バーテックスシェーダーソース
      */
     GodrayFilter.prototype._vertexSrc = function() {
         return null;
@@ -275,7 +275,7 @@
     /**
      * フラグメントシェーダーソースを得る。
      * 
-     * @return {String} フラグメントシェーダーソース
+     * @returns {String} フラグメントシェーダーソース
      */
     GodrayFilter.prototype._fragmentSrc = function() {
         const src = 

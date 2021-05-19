@@ -113,7 +113,7 @@
     /**
      * 取得金額倍率を得る。
      * 
-     * @return {Number} 取得金額倍率。
+     * @returns {Number} 取得金額倍率。
      */
     Game_BattlerBase.prototype.dropGoldRate = function() {
         return this.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, Game_Party.ABILITY_DROP_GOLD_RATE);
@@ -126,7 +126,7 @@
     /**
      * 取得金額倍率を得る。
      *  
-     * @return {Number} 取得金額倍率
+     * @returns {Number} 取得金額倍率
      */
     Game_Party.prototype.dropGoldRate = function() {
         const rate = this.hasGoldDouble() ? 2 : 1;
@@ -139,7 +139,7 @@
     /**
      * ゴールドレートを得る。
      * 
-     * @return {Number} ゴールドレート。
+     * @returns {Number} ゴールドレート。
      * !!!overwrite!!! Game_Troop.goldRate
      */
     Game_Troop.prototype.goldRate = function() {

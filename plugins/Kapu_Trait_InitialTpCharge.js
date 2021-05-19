@@ -118,7 +118,7 @@
     /**
      * 戦闘開始時初期TP値を得る。
      * 
-     * @return {Number} 初期TP値。
+     * @returns {Number} 初期TP値。
      */
     Game_Battler.prototype.initialTp = function() {
         const rate = this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_INITTP_RATE).clamp(0, 1);

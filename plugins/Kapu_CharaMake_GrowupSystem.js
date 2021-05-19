@@ -136,7 +136,7 @@ function Window_CharaMakeItem_GrowPoint() {
          * キャラクターメイキング項目を取得する。
          * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
          * 
-         * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+         * @returns {Array<Game_CharaMakeItem>} キャラクターメイキング項目
          */
         DataManager.createCharaMakeItems = function() {
             const items = _DataManager_createCharaMakeItems.call(this);
@@ -311,7 +311,7 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * この項目の識別名を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_GrowPoint.prototype.name = function() {
         return textItemNameGrowPoint || "";
@@ -320,7 +320,7 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * この項目の説明を取得する。
      * 
-     * @return {string} 説明
+     * @returns {string} 説明
      */
     Game_CharaMakeItem_GrowPoint.prototype.description = function() {
         return textItemDescriptionGrowPoint || "";
@@ -341,7 +341,7 @@ function Window_CharaMakeItem_GrowPoint() {
      * 編集中のテキストを得る。
      * 
      * @param {object} windowEntry createSelectWindow()で返したウィンドウ
-     * @return {string} 編集項目の選択値(テキスト)
+     * @returns {string} 編集項目の選択値(テキスト)
      */
     Game_CharaMakeItem_GrowPoint.prototype.editingText = function(windowEntry) {
         const selectWindow = windowEntry.selectWindow;

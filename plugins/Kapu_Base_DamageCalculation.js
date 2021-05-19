@@ -106,7 +106,7 @@
     /**
      * このGame_BattlerBaseの全ての特性(Trait)を取得する。
      * 
-     * @return {Array<Trait>} 特性配列
+     * @returns {Array<Trait>} 特性配列
      */
     Game_Battler.prototype.allTraits = function() {
         const traits = _Game_Battler_allTraits.call(this);
@@ -145,7 +145,7 @@
     /**
      * ダメージ計算時、相手に一時的に付与する特性を得る。
      * 
-     * @return {Array<Trait>} 一時的に付与する特性の配列
+     * @returns {Array<Trait>} 一時的に付与する特性の配列
      */
     Game_Battler.prototype.additionalTargetTraits = function() {
         return [];
@@ -159,7 +159,7 @@
          * 
          * @param {Game_BattlerBase} target 対象
          * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
-         * @return {Number} ダメージ値
+         * @returns {Number} ダメージ値
          * !!!overwrite!!! Game_Action.makeDamageValue
          */
         Game_Action.prototype.makeDamageValue = function(target, critical) {
@@ -205,7 +205,7 @@
          * 
          * @param {Game_BattlerBase} target 対象
          * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
-         * @return {Number} ダメージ値
+         * @returns {Number} ダメージ値
          * !!!overwrite!!! Game_Action.makeDamageValue
          */
         Game_Action.prototype.makeDamageValue = function(target, critical) {
@@ -247,7 +247,7 @@
      * 最大ダメージを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @return {Number} 最大ダメージ
+     * @returns {Number} 最大ダメージ
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.maxDamage = function(target) {
@@ -281,7 +281,7 @@
      * @param {Number} value 基本ダメージ値
      * @param {Game_Battler} target ターゲット。
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} 乗算ボーナス適用後の値
+     * @returns {Number} 乗算ボーナス適用後の値
      */
     Game_Action.prototype.applyDamageRate = function(value, target, critical) {
         if (this.isPhysical()) {
@@ -299,7 +299,7 @@
      * @param {Number} value 基本ダメージ値
      * @param {Game_Battler} target ターゲット。
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} MDR適用後の値
+     * @returns {Number} MDR適用後の値
      */
     Game_Action.prototype.applyPhysicalDamageRate = function(value, target, critical) {
         return value * Math.max(0, this.itemPdr(target, critical));
@@ -311,7 +311,7 @@
      * @param {Number} value 基本ダメージ値
      * @param {Game_Battler} target ターゲット。
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} MDR適用後の値
+     * @returns {Number} MDR適用後の値
      */
     Game_Action.prototype.applyMagicalDamageRate = function(value, target, critical) {
         return value * Math.max(0, this.itemMdr(target, critical));
@@ -323,7 +323,7 @@
      * 
      * @param {Game_Battler} target ターゲット。
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} 乗算ボーナスレート
+     * @returns {Number} 乗算ボーナスレート
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.multiplyDamageRate = function(target, critical) {
@@ -335,7 +335,7 @@
      * 
      * @param {Number} value 基本ダメージ値
      * @param {Game_Battler} target ターゲット。
-     * @return {Number} 乗算ボーナス適用後の値。
+     * @returns {Number} 乗算ボーナス適用後の値。
      */
     Game_Action.prototype.applyRecoveryRate = function(value, target) {
         if (value < 0) {
@@ -350,7 +350,7 @@
      * 
      * @param {Game_Battler} target ターゲット
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} 物理ダメージレート
+     * @returns {Number} 物理ダメージレート
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.itemPdr = function(target, critical) {
@@ -362,7 +362,7 @@
      * 
      * @param {Game_Battler} target ターゲット
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} 魔法ダメージレート。(0.0～、等倍は1.0)
+     * @returns {Number} 魔法ダメージレート。(0.0～、等倍は1.0)
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.itemMdr = function(target, critical) {
@@ -373,7 +373,7 @@
      * 回復レートを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @return {Number} 回復レート(0.0～、等倍は1.0)
+     * @returns {Number} 回復レート(0.0～、等倍は1.0)
      */
     Game_Action.prototype.itemRec = function(target) {
         return target.rec;

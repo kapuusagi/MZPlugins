@@ -78,7 +78,7 @@
      * 以下の計算で算出される。
      *     (maxTpBase + maxTpPlus) * maxTpRate + maxTpAdd
      * 
-     * @return {Number} TP最大値
+     * @returns {Number} TP最大値
      * !!!overwrite!!! Game_BattlerBase.maxTp()
      *     最大TPを拡張しやすくするため、オーバーライドする。
      */
@@ -91,7 +91,7 @@
     /**
      * 最大TP値デフォルトを得る。
      * 
-     * @return {Number} 最大TP値デフォルト値。
+     * @returns {Number} 最大TP値デフォルト値。
      */
     Game_BattlerBase.prototype.maxTpBase = function() {
         return defaultMaxTp;
@@ -100,7 +100,7 @@
     /**
      * 最大TP加算値。
      * 
-     * @return {Number} 最大TP加算値。
+     * @returns {Number} 最大TP加算値。
      */
     Game_BattlerBase.prototype.maxTpPlus = function() {
         return 0;
@@ -109,7 +109,7 @@
     /**
      * 最大TPレートを得る。
      * 
-     * @return {Number} 最大TPレート。
+     * @returns {Number} 最大TPレート。
      */
     Game_BattlerBase.prototype.maxTpRate = function() {
         return 1;
@@ -118,7 +118,7 @@
     /**
      * 最大TP加算値を得る。
      * 
-     * @return {Number} 最大TP加算値。
+     * @returns {Number} 最大TP加算値。
      */
     Game_BattlerBase.prototype.maxTpAdd = function() {
         return 0;
@@ -144,7 +144,7 @@
      * パラメータのバフ/デバフ適用前のベース値を得る。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} バフ/デバフ適用前のベース値
+     * @returns {Number} バフ/デバフ適用前のベース値
      */
     Game_BattlerBase.prototype.paramWithoutBuff = function(paramId) {
         return this.paramBasePlus(paramId) * this.paramRate(paramId);
@@ -155,7 +155,7 @@
      * 
      * @param {Number} paramId パラメータID
      * @param {Number} baseValue バフの適用元のベース値
-     * @return {Number} バフを適用した後の値。
+     * @returns {Number} バフを適用した後の値。
      */
     Game_BattlerBase.prototype.applyBuff = function(paramId, baseValue) {
         return baseValue * this.paramBuffRate(paramId);
@@ -192,7 +192,7 @@
      * クラスのベース値を除いた、種による加算値と装備品による加算値の合計を返す。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} 加算値
+     * @returns {Number} 加算値
      * !!!overwrite!!!
      *     装備品の加算量合計をメソッドとして分離するため、オーバーライドする。
      */
@@ -205,7 +205,7 @@
      * 装備品のパラメータ値合計を得る。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} 全装備品のパラメータ値合計
+     * @returns {Number} 全装備品のパラメータ値合計
      */
     Game_Actor.prototype.paramEquip = function(paramId) {
         return this.equips().reduce((r, equipItem) => {
@@ -218,7 +218,7 @@
      * 
      * @param {Object} equipItem 装備品
      * @param {Number} paramId パラメータID
-     * @return {Number} 装備品のパラメータ値
+     * @returns {Number} 装備品のパラメータ値
      */
     Game_Actor.prototype.paramEquipValue = function(equipItem, paramId) {
         return equipItem.params[paramId];

@@ -177,7 +177,7 @@
     /**
      * アイコンインデックスを得る。
      * 
-     * @return {Number} アイコンインデックス。
+     * @returns {Number} アイコンインデックス。
      */
     Sprite_PositionIcon.prototype.iconIndex = function() {
         if (this._battler) {
@@ -231,7 +231,7 @@
     /**
      * 影の割合を取得する。
      * 
-     * @return {Number} 影の割合(0～255。255で影最大)
+     * @returns {Number} 影の割合(0～255。255で影最大)
      */
     EnemyBattlePositionColorFilter.prototype.shadowRate = function() {
         return this.uniforms.shadowRate;
@@ -239,7 +239,7 @@
     /**
      * GLSLソースを得る。
      * 
-     * @return {String} GLSLソース。
+     * @returns {String} GLSLソース。
      */
     EnemyBattlePositionColorFilter.prototype._fragmentSrc = function() {
         const src =
@@ -355,7 +355,7 @@
     /**
      * メインスプライトの位置を得る。
      * 
-     * @return {Point} スプライトの位置
+     * @returns {Point} スプライトの位置
      */
     Sprite_BattleHudActor.prototype.mainSpritePosition = function() {
         let pos = _Sprite_BattleHudActor_mainSpritePosition.call(this);

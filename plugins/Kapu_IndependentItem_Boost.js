@@ -177,7 +177,7 @@
      * @param {string} str 成功率文字列
      * @param {number} min 最小値
      * @param {number} max 最大値
-     * @return {number} 率(min～max)
+     * @returns {number} 率(min～max)
      */
     const _parseRate = function(str, min, max) {
         let rate = 0.0;
@@ -216,7 +216,7 @@
      * 最大ブーストカウントをパースする
      * 
      * @param {string} str 最大ブースト可能数
-     * @return {number} 最大ブーストカウント[最小：最大]
+     * @returns {number} 最大ブーストカウント[最小：最大]
      */
     const _getMaxBoostCount = function(str) {
         const index = str.indexOf("-");
@@ -273,7 +273,7 @@
      *     (強化項目1),(強化項目2),...,(強化項目N)
      * 
      * @param {string} str 文字列
-     * @return {Array<object>} 強化効果配列
+     * @returns {Array<object>} 強化効果配列
      */
     const _parseBoostEffect = function(str) {
         const effects = [];
@@ -428,7 +428,7 @@
      * @param {number} userLevel 強化実行レベル
      * @param {object} catalystItem 素材アイテム。DataItem
      * @param {number} catalystItemCount 使用する素材アイテム数
-     * @return {number} 強化成功率(minSuccessRate ～ 1.0)
+     * @returns {number} 強化成功率(minSuccessRate ～ 1.0)
      */
     DataManager.getBoostSuccessRate = function(item, userLevel, catalystItem, catalystItemCount) {
         const boostCount = item.boostCount || 0;
@@ -586,7 +586,7 @@
      *     min#:max#
      * 
      * @param {string} valueStr 
-     * @return {Number} ブースト値
+     * @returns {Number} ブースト値
      */
     DataManager.getBoostValueInt = function(valueStr) {
         return Math.round(DataManager.getBoostValueReal(valueStr));
@@ -602,7 +602,7 @@
      * 小数点以下2桁で丸めるように処理する。
      * 
      * @param {string} valueStr 
-     * @return {Number} ブースト値
+     * @returns {Number} ブースト値
      */
      DataManager.getBoostValueReal = function(valueStr) {
         const tokens = valueStr.split(":");
@@ -673,7 +673,7 @@
      * 強化費用を得る。
      * 
      * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
-     * @return {number} 打ち直し費用
+     * @returns {number} 打ち直し費用
      */
     DataManager.getBoostPrice = function(item) {
         const nextBoostCount = (item.boostCount || 0) + 1;
@@ -690,7 +690,7 @@
      * 強化リセット費用を得る。
      * 
      * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
-     * @return {number} 打ち直し費用
+     * @returns {number} 打ち直し費用
      */
     DataManager.getResetBoostPrice = function(item) {
         return Math.floor(item.boostPrice / 2).clamp(minBoostPrice, $gameParty.maxGold());
@@ -700,7 +700,7 @@
      * 打ち直し費用を得る。
      * 
      * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
-     * @return {number} 打ち直し費用
+     * @returns {number} 打ち直し費用
      */
     DataManager.getResetPrice = function(item) {
         const price = Math.floor(item.boostPrice * (1.0 + item.boostCount * 0.1));

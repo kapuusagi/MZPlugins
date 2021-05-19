@@ -134,7 +134,8 @@
 
     /**
      * ビジーかどうかを判定する。
-     * @return {Boolean} ビジーの場合にはtrue, それ以外はfalse.
+     * 
+     * @returns {Boolean} ビジーの場合にはtrue, それ以外はfalse.
      */
     Scene_RunAnimation2.prototype.isBusy = function () {
         if (this._animationSprite) {

@@ -152,7 +152,7 @@
      * 攻撃時補正値を得る。
      * 
      * @param {Number} elementId 属性ID
-     * @return {Number} 属性レート
+     * @returns {Number} 属性レート
      */
     Game_BattlerBase.prototype.elementAttackRate = function(elementId) {
         return this.traitsPi(Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE, elementId);
@@ -167,7 +167,7 @@
      * 
      * @param {Game_BattlerBase} target 
      * @param {Number} elementId 属性ID
-     * @return {Number} 属性倍率
+     * @returns {Number} 属性倍率
      */
     Game_Action.prototype.singleElementRate = function(target, elementId) {
         let rate = _Game_Action_singleElementRate.call(this, ...arguments);

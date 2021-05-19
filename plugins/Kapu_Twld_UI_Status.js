@@ -383,7 +383,7 @@ function Window_StatusProfile() {
      * ステータスに表示するカスタムパラメータを得る。
      * 
      * @param {String} value 値文字列
-     * @return {Array<StatusParamEntry>} カスタムパラメータエントリ
+     * @returns {Array<StatusParamEntry>} カスタムパラメータエントリ
      */
     const _parseStatusParamEntries = function(value) {
         const list = [];
@@ -407,7 +407,7 @@ function Window_StatusProfile() {
      * 整数値配列を得る。
      * 
      * @param {String} value 値文字列
-     * @return {Array<Number>} 値配列
+     * @returns {Array<Number>} 値配列
      */
     const _parseIntegerArray = function(value) {
         const array = [];
@@ -445,7 +445,7 @@ function Window_StatusProfile() {
 
     /**
      * ウィンドウのカラム数を取得する。
-     * @return {Number} カラム数
+     * @returns {Number} カラム数
      */
     Window_StatusCategory.prototype.maxCols = function() {
         return 1;
@@ -453,7 +453,7 @@ function Window_StatusProfile() {
 
     /**
      * ウィンドウの表示行数を取得する。
-     * @return {Number} 表示行数
+     * @returns {Number} 表示行数
      */
     Window_StatusCategory.prototype.numVisibleRows = function() {
         return 4;
@@ -512,7 +512,7 @@ function Window_StatusProfile() {
     /**
      * ヘッダの矩形領域を得る。
      * 
-     * @return {Rectangle} ヘッダ矩形領域。
+     * @returns {Rectangle} ヘッダ矩形領域。
      */
     Window_Status.prototype.headerRect = function() {
         const x = 0;
@@ -563,7 +563,7 @@ function Window_StatusProfile() {
     /**
      * 装備の描画領域を得る。
      * 
-     * @return {Rectangle} プロフィール描画領域。
+     * @returns {Rectangle} プロフィール描画領域。
      */
     Window_Status.prototype.block1Rect = function() {
         const x = 0;
@@ -812,7 +812,7 @@ function Window_StatusProfile() {
     /**
      * ブロック2の描画領域を得る。
      * 
-     * @return {Rectangle} 描画領域。
+     * @returns {Rectangle} 描画領域。
      */
     Window_Status.prototype.block2Rect = function() {
         const block1Rect = this.block1Rect();
@@ -841,7 +841,7 @@ function Window_StatusProfile() {
      * ブロック3の描画領域を得る。
      * Block3はプロフィール
      * 
-     * @return {Rectangle} 描画領域。
+     * @returns {Rectangle} 描画領域。
      */
     Window_Status.prototype.block3Rect = function() {
         const w = this.innerWidth;
@@ -1185,7 +1185,7 @@ function Window_StatusProfile() {
     /**
      * ステータスラベルの幅を得る。
      * 
-     * @return {Number} ステータスラベルの幅
+     * @returns {Number} ステータスラベルの幅
      */
     Window_Status.prototype.statusLabelWidth = function() {
         return statusLabelWidth;
@@ -1215,7 +1215,7 @@ function Window_StatusProfile() {
     /**
      * ヘッダの矩形領域を得る。
      * 
-     * @return {Rectangle} ヘッダ矩形領域。
+     * @returns {Rectangle} ヘッダ矩形領域。
      */
     Window_StatusParams.prototype.headerRect = function() {
         const x = 0;
@@ -1310,7 +1310,7 @@ function Window_StatusProfile() {
     /**
      * ブロック1の描画領域を得る。
      * 
-     * @return {Rectangle} プロフィール描画領域。
+     * @returns {Rectangle} プロフィール描画領域。
      */
     Window_StatusParams.prototype.block1Rect = function() {
         const x = 0;
@@ -1353,7 +1353,7 @@ function Window_StatusProfile() {
      * アクターのパラメータ一覧を得る。
      * 
      * @param {Game_Actor} actor アクター
-     * @return {Array<Object>} パラメータ一覧
+     * @returns {Array<Object>} パラメータ一覧
      */
     Window_StatusParams.prototype.actorParams = function(actor) {
         //     MRF/CNT/HRG/MRG/TRG/TGR/GRD/REC/PHA (0以外なら表示)
@@ -1403,7 +1403,7 @@ function Window_StatusProfile() {
     /**
      * ブロック2の描画領域を得る。
      * 
-     * @return {Rectangle} 描画領域。
+     * @returns {Rectangle} 描画領域。
      */
     Window_StatusParams.prototype.block2Rect = function() {
         const rect = this.block1Rect();
@@ -1453,7 +1453,7 @@ function Window_StatusProfile() {
     /**
      * ヘッダの矩形領域を得る。
      * 
-     * @return {Rectangle} ヘッダ矩形領域。
+     * @returns {Rectangle} ヘッダ矩形領域。
      */
     Window_StatusEquip.prototype.headerRect = function() {
         const x = 0;
@@ -1522,7 +1522,7 @@ function Window_StatusProfile() {
     /**
      * 装備の描画領域を得る。
      * 
-     * @return {Rectangle} プロフィール描画領域。
+     * @returns {Rectangle} プロフィール描画領域。
      */
     Window_StatusEquip.prototype.equipRect = function() {
         const x = 0;
@@ -1621,7 +1621,7 @@ function Window_StatusProfile() {
      * 標示するウェポンマスタリーを得る。
      * 
      * @param {Game_Actor} actor 
-     * @return {Array<Object>} 標示するウェポンマスタリデータの配列。
+     * @returns {Array<Object>} 標示するウェポンマスタリデータの配列。
      */
     Window_StatusEquip.prototype.displayWeaponMasteries = function(actor) {
         const wms = [];
@@ -1648,7 +1648,7 @@ function Window_StatusProfile() {
     /**
      * ウェポンマスタリの描画領域を得る。
      * 
-     * @return {Rectangle} 描画領域。
+     * @returns {Rectangle} 描画領域。
      */
     Window_StatusEquip.prototype.weaponMasteryRect = function() {
         const rect = this.equipRect();
@@ -1799,7 +1799,7 @@ function Window_StatusProfile() {
     /**
      * ヘッダの矩形領域を得る。
      * 
-     * @return {Rectangle} ヘッダ矩形領域。
+     * @returns {Rectangle} ヘッダ矩形領域。
      */
     Window_StatusProfile.prototype.headerRect = function() {
         const x = 0;
@@ -1822,7 +1822,7 @@ function Window_StatusProfile() {
     /**
      * プロフィールの描画領域を得る。
      * 
-     * @return {Rectangle} プロフィール描画領域。
+     * @returns {Rectangle} プロフィール描画領域。
      */
     Window_StatusProfile.prototype.profileRect = function() {
         const x = 0;
@@ -1903,7 +1903,7 @@ function Window_StatusProfile() {
     /**
      * アクターの画像ファイル名を得る。
      * 
-     * @return {String} 画像ファイル名。未設定または設定されていない場合には空文字列。
+     * @returns {String} 画像ファイル名。未設定または設定されていない場合には空文字列。
      */
     Sprite_StatusBackgroundPicture.prototype.pictureName = function() {
         const actor = this._actor;
@@ -2011,7 +2011,7 @@ function Window_StatusProfile() {
     /**
      * ヘルプウィンドウの高さを得る。
      * 
-     * @return {Number} ヘルプウィンドウの高さ
+     * @returns {Number} ヘルプウィンドウの高さ
      * !!!overwrite!!! Scene_Status.helpAreaHeight()
      *     ヘルプウィンドウを使用するのでオーバーライドする。
      */
@@ -2036,7 +2036,7 @@ function Window_StatusProfile() {
     /**
      * ステータスカテゴリウィンドウの表示領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Status.prototype.statusCategoryWindowRect = function() {
         let lineCount = 4;
@@ -2052,7 +2052,7 @@ function Window_StatusProfile() {
     /**
      * コマンドウィンドウ幅を得る。
      * 
-     * @return {Number} コマンドウィンドウ幅。
+     * @returns {Number} コマンドウィンドウ幅。
      */
     Scene_Status.prototype.commandWindowWidth = function() {
         return commandWindowWidth;
@@ -2076,7 +2076,7 @@ function Window_StatusProfile() {
     /**
      * ステータスウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!! Scene_Status.statusWindowRect()
      *     ステータス画面のレイアウト変更のため、オーバーライドする。
      */
@@ -2092,7 +2092,7 @@ function Window_StatusProfile() {
     /**
      * パラメータ表示ウィンドウの表示領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!! Scene_Status.statusParamsWindowRect()
      *     ステータス画面のレイアウト変更のため、オーバーライドする。
      */
@@ -2108,7 +2108,7 @@ function Window_StatusProfile() {
     /**
      * ステータス装備ウィンドウの表示領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      * !!!overwrite!!! Scene_Status.statusParamsWindowRect()
      *     ステータス画面のレイアウト変更のため、オーバーライドする。
      */
@@ -2140,7 +2140,7 @@ function Window_StatusProfile() {
     /**
      * スキルタイプウィンドウの表示領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Status.prototype.statusSkillTypeWindowRect = function() {
         const rect = this.statusCategoryWindowRect();
@@ -2172,7 +2172,7 @@ function Window_StatusProfile() {
     /**
      * スキル一覧のウィンドウ表示領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ表示領域。
+     * @returns {Rectangle} ウィンドウ表示領域。
      */
     Scene_Status.prototype.skillListWindowRect = function() {
         const rect = this.statusCategoryWindowRect();
@@ -2288,7 +2288,7 @@ function Window_StatusProfile() {
     /**
      * プロフィールウィンドウの表示領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      * !!!overwrite!!! Scene_Status.profileWindowRect()
      *     ステータス画面変更のため、オーバーライドする。
      */
@@ -2314,7 +2314,7 @@ function Window_StatusProfile() {
     /**
      * 背景画像の表示エリアを得る。
      * 
-     * @return {Rectangle} 表示領域。
+     * @returns {Rectangle} 表示領域。
      */
     Scene_Status.prototype.backgroundDisplayArea = function() {
         const rect = this.statusCategoryWindowRect();

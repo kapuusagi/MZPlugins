@@ -126,7 +126,7 @@
     /**
      * 最大TP加算値を得る。
      * 
-     * @return {Number} 最大TP加算値
+     * @returns {Number} 最大TP加算値
      */
     Game_BattlerBase.prototype.maxTpAdd = function() {
         const maxTpAdd = _Game_BattlerBase_maxTpAdd.call(this);

@@ -100,7 +100,7 @@
      * TPダメージレートを取得する。
      * 
      * @param {Game_Battler} ターゲット
-     * @return {Number} TPダメージレート
+     * @returns {Number} TPダメージレート
      */
     Game_Action.prototype.tpDamageRate = function(target) {
         return 1 + Math.max(0, ((this._subjectTp - target.tp) * 0.01));
@@ -112,7 +112,7 @@
      * 
      * @param {Game_Battler} target ターゲット。
      * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} 乗算ボーナスレート
+     * @returns {Number} 乗算ボーナスレート
      */
     Game_Action.prototype.multiplyDamageRate = function(target, critical) {
         const tpDamageRate = this.tpDamageRate(target);
@@ -124,7 +124,7 @@
      * 命中率を得る。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @return {Number 命中率。
+     * @returns {Number 命中率。
      */
     Game_Action.prototype.itemHit = function(target) {
         const tpHitRate = ((this._subjectTp - target.tp) * 0.005).clamp(0, 0.5);
@@ -136,7 +136,7 @@
      * 回避率を得る。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @return {Number} 回避率。
+     * @returns {Number} 回避率。
      */
     Game_Action.prototype.itemEva = function(target) {
         const tpEvaRate = ((target.tp - this._subjectTp) * 0.005).clamp(0, 0.5);
@@ -149,7 +149,7 @@
      * このアクションのクリティカル率を得る。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @return {Number} クリティカル率(0.0～1.0）
+     * @returns {Number} クリティカル率(0.0～1.0）
      */
     Game_Action.prototype.itemCri = function(target) {
         const tpCriRate = ((this._subjectTp - target.tp) * 0.0025).clamp(0, 0.25);

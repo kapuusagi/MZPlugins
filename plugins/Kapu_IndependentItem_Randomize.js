@@ -100,7 +100,7 @@
     /**
      * 個別アイテムの性能ランダム化が有効かどうかを取得する。
      * 
-     * @return {Boolean} 有効にする場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 有効にする場合にはtrue, それ以外はfalse
      */
     Game_Temp.prototype.independentItemRandomize = function() {
         return this._isIndependentItemRandomize || false;
@@ -198,7 +198,7 @@
      * varianceEffectを解析する。
      * 
      * @param {String} varianceStr varianceEffectノートタグの値
-     * @return {object} 効果変動量オブジェクト
+     * @returns {object} 効果変動量オブジェクト
      */
     const _parseVarianceEffect = function(varianceStr) {
         const tokens = varianceStr.split(",");
@@ -218,7 +218,7 @@
      * 
      * @param {Number} baseValue ベース値
      * @param {Number} variance 変動量
-     * @return {Number} 効果量。
+     * @returns {Number} 効果量。
      */
     const _calcEffectValue = function(baseValue, variance) {
         if ((baseValue === 0) || (variance === 0)) {
@@ -257,7 +257,7 @@
      * varianceParamのタグ値を解析する。
      * 
      * @param {String} varianceStr 
-     * @return {Array<Number>} 配列データ
+     * @returns {Array<Number>} 配列データ
      */
     const _parseVarianceParam = function(varianceStr) {
         const varianceParam = [ 0, 0, 0, 0, 0, 0, 0 , 0];
@@ -287,7 +287,7 @@
      * 
      * @param {Number} baseValue ベース値
      * @param {Number} variance 変動量
-     * @return {Number} 効果量。
+     * @returns {Number} 効果量。
      */
     const _calcParamValue = function(baseValue, variance) {
         if (variance === 0) {

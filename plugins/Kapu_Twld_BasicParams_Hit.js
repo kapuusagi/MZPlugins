@@ -43,7 +43,7 @@
      * ミスしたかどうかを評価する。
      * 
      * @param {Game_Battler} target 対象
-     * @return {Boolean} ミスした場合にtrue, それ以外はfalse
+     * @returns {Boolean} ミスした場合にtrue, それ以外はfalse
      */
     Game_Action.prototype.testMissed = function(target) {
         return false;
@@ -52,7 +52,7 @@
      * 回避したかどうかを評価する。
      * 
      * @param {Game_Battler} target ターゲット
-     * @return {Boolean} 回避できた場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 回避できた場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testEvaded = function(target) {
         if (this.isPhysical()) {
@@ -67,7 +67,7 @@
     /**
      * このスキルがロングレンジかどうかを得る。
      * 
-     * @return {Boolean} ロングレンジの場合にはtrue, それ以外はfalse
+     * @returns {Boolean} ロングレンジの場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.isLongRangeItem = function() {
         return this.item().meta.longRange;
@@ -78,7 +78,7 @@
      * 物理攻撃時の回避判定を行う。
      * 
      * @param {Game_Battler} target 対象
-     * @return {Boolean} 命中した場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 命中した場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testEvaPhysical = function(target) {
         const subject = this.subject();
@@ -98,7 +98,7 @@
      * 魔法攻撃時の回避判定を行う。
      * 
      * @param {Game_Battler} target 対象
-     * @return {Boolean} 命中した場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 命中した場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testEvaMagical = function(target) {
         const subject = this.subject();
@@ -114,7 +114,7 @@
      * クリティカル発生率を返す。
      * 
      * @param {Game_Battler} target
-     * @return {Number} クリティカル率(0.0～1.0、1.0で100％発生)が返る。
+     * @returns {Number} クリティカル率(0.0～1.0、1.0で100％発生)が返る。
      */
     Game_Action.prototype.itemCri = function(target) {
         const rate = _Game_Action_itemCri.call(this, target);
@@ -149,7 +149,7 @@
      * 
      * @param {Number} targetVal ターゲットの値
      * @param {Number} subjectVal 使用者の値
-     * @return {Number} 相対補正値
+     * @returns {Number} 相対補正値
      */
 
     Game_Action.prototype.relativeDiffRate = function(targetVal, subjectVal) {

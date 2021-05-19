@@ -60,7 +60,7 @@
      * 戦闘不能時クリアするステートかどうかを判定する。
      * 
      * @param {Number} stateId ステートID
-     * @return {Boolean} 戦闘不能時クリアステートの場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 戦闘不能時クリアステートの場合にはtrue, それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.isClearStateByDie = function(stateId) {

@@ -112,7 +112,7 @@
     /**
      * 防御かどうかを得る。
      * 
-     * @return {Boolean} 防御している場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 防御している場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isGuard = function() {
         const guard = _Game_BattlerBase_isGuard.call(this);

@@ -275,7 +275,7 @@
      * @param {TraitObject} traitObj traitsをメンバに持つオブジェクト
      * @param {Number} code Game_BattlerBase.TRAIT_～を指定する。
      * @param {Number} dataId パラメータID
-     * @return valueの合計値が返る。
+     * @returns valueの合計値が返る。
      */
     DataManager.traitsSum = function(traitObj, code, dataId) {
         const traits = traitObj.traits;
@@ -293,7 +293,7 @@
      * @param {TraitObject} traitObj traitsをメンバに持つオブジェクト
      * @param {Number} code Game_BattlerBase.TRAIT_～を指定する。
      * @param {Number} dataId パラメータID
-     * @return valueの乗算合計値が返る。
+     * @returns valueの乗算合計値が返る。
      */
     DataManager.traitsPi = function(traitObj, code, dataId) {
         const traits = traitObj.traits;
@@ -329,7 +329,7 @@
      * 増加効果の最大値を得たい場合に使用する。
      * 
      * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
-     * @return {Number} 最大値
+     * @returns {Number} 最大値
      */
     Game_Party.prototype.partyTraitsSumMax = function(abilityId) {
         return this.members().reduce(
@@ -340,7 +340,7 @@
      * 減算効果の最大を得たい場合に使用する。
      * 
      * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
-     * @return {Number} 最大値
+     * @returns {Number} 最大値
      */
     Game_Party.prototype.partyTraitsSumMin = function(abilityId) {
         return this.members().reduce(

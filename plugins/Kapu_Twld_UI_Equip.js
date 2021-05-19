@@ -268,7 +268,7 @@ function Window_EquipItemName() {
      * 属性エントリ配列を得る。
      * 
      * @param {String} value 値
-     * @return {Array<Object>} 属性エントリ配列
+     * @returns {Array<Object>} 属性エントリ配列
      */
     const _parseElementEntries = function(value) {
         const list = [];
@@ -297,7 +297,7 @@ function Window_EquipItemName() {
      * ステータスに表示するカスタムパラメータを得る。
      * 
      * @param {String} value 値文字列
-     * @return {Array<StatusParamEntry>} カスタムパラメータエントリ
+     * @returns {Array<StatusParamEntry>} カスタムパラメータエントリ
      */
     const _parseStatusParamEntries = function(value) {
         const list = [];
@@ -423,7 +423,7 @@ function Window_EquipItemName() {
     /**
      * スロットウィンドウの選択項目数を得る。
      * 
-     * @return {Number} 選択項目数
+     * @returns {Number} 選択項目数
      */
     Window_EquipSlot.prototype.maxItems = function() {
         if (this._actor) {
@@ -463,7 +463,7 @@ function Window_EquipItemName() {
     /**
      * スロット名の幅を得る。
      * 
-     * @return {Number} スロット名の幅
+     * @returns {Number} スロット名の幅
      */
     Window_EquipSlot.prototype.slotNameWidth = function() {
         return slotNameWidth;
@@ -492,7 +492,7 @@ function Window_EquipItemName() {
      * 項目が選択可能かどうかを得る。
      * 
      * @param {Number} index インデックス番号
-     * @return {Boolan} 選択可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolan} 選択可能な場合にはtrue, それ以外はfalse
      */
     Window_EquipSlot.prototype.isEnabled = function(index) {
         if (this._actor === null) {
@@ -517,7 +517,7 @@ function Window_EquipItemName() {
      * indexで指定されたスロットに装備されているアイテムを得る。
      * 
      * @param {Number} index インデックス番号
-     * @return {Object} アイテムオブジェクト。未装備の場合にはnull
+     * @returns {Object} アイテムオブジェクト。未装備の場合にはnull
      */
     Window_EquipSlot.prototype.itemAt = function(index) {
         if (this._actor && (index < this._actor.equips().length)) {
@@ -705,7 +705,7 @@ function Window_EquipItemName() {
     /**
      * ブロック1の描画領域を得る。
      * 
-     * @return {Rectangle} 描画領域。
+     * @returns {Rectangle} 描画領域。
      */
      Window_EquipStatus.prototype.block1Rect = function() {
         const x = 0;
@@ -836,7 +836,7 @@ function Window_EquipItemName() {
     /**
      * 相違があるパラメータを抽出して返す。
      * 
-     * @return {Array<Object>} 相違パラメータの配列
+     * @returns {Array<Object>} 相違パラメータの配列
      */
     Window_EquipStatus.prototype.diffParams = function() {
         let paramItems = [];
@@ -848,7 +848,7 @@ function Window_EquipItemName() {
     /**
      * 属性レートの変化パラメータを得る。
      * 
-     * @return {Array<Object>} 相違パラメータの配列
+     * @returns {Array<Object>} 相違パラメータの配列
      */
     Window_EquipStatus.prototype.diffParamsOfElements = function() {
         let elementIds = [];
@@ -878,7 +878,7 @@ function Window_EquipItemName() {
      * 属性レートを文字列に変換する。
      * 
      * @param {Number} rate 割合
-     * @return {String} 割合を表す文字列
+     * @returns {String} 割合を表す文字列
      */
     Window_EquipStatus.prototype.elementRateStr = function(rate) {
         return (rate >= 0)
@@ -889,7 +889,7 @@ function Window_EquipItemName() {
     /**
      * カスタム相違パラメータを得る。
      * 
-     * @return {Array<Object>} 相違パラメータの配列
+     * @returns {Array<Object>} 相違パラメータの配列
      */
     Window_EquipStatus.prototype.diffParamsOfCustom = function() {
         const paramItems = [];
@@ -927,7 +927,7 @@ function Window_EquipItemName() {
      * 
      * @param {Object} paramEntry パラメータエントリ
      * @param {Game_Actor} actor アクター
-     * @return {Number} 値
+     * @returns {Number} 値
      */
     Window_EquipStatus.prototype.getCustomParam = function(paramEntry, actor) {
         try {
@@ -967,7 +967,7 @@ function Window_EquipItemName() {
      /**
       * ブロック2の描画領域を得る。
       * 
-      * @return {Rectangle} 描画領域
+      * @returns {Rectangle} 描画領域
       */
      Window_EquipStatus.prototype.block2Rect = function() {
         const rect = this.block1Rect();
@@ -1107,7 +1107,7 @@ function Window_EquipItemName() {
     /**
      * 装備コマンドウィンドウ矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_Equip.prototype.commandWindowRect = function() {
         return new Rectangle(0, 0, 0, 0);
@@ -1124,7 +1124,7 @@ function Window_EquipItemName() {
     /**
      * コマンドウィンドウ幅を得る。
      * 
-     * @return {Number} コマンドウィンドウ幅
+     * @returns {Number} コマンドウィンドウ幅
      */
     Scene_Equip.prototype.commandWindowWidth = function() {
         return commandWindowWidth;
@@ -1133,7 +1133,7 @@ function Window_EquipItemName() {
     /**
      * アクターウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Equip.prototype.equipActorWindowRect = function() {
         const ww = this.commandWindowWidth();
@@ -1146,7 +1146,7 @@ function Window_EquipItemName() {
     /**
      * ステータスウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      * !!!overwrite!!! Scene_Equip.statusWindowRect()
      *     装備画面のレイアウト変更のため、オーバーライドする。
      */
@@ -1172,7 +1172,7 @@ function Window_EquipItemName() {
     /**
      * 装備スロットウィンドウの表示領域を得る。
      * 
-     * @return {Rectangle} 表示領域
+     * @returns {Rectangle} 表示領域
      * !!!overwrite!!! Scene_Equip_slotWindowRect
      *     装備画面レイアウト変更のため、オーバーライドする。
      */
@@ -1199,7 +1199,7 @@ function Window_EquipItemName() {
     /**
      * 装備品名表示ウィンドウの表示領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ表示領域
+     * @returns {Rectangle} ウィンドウ表示領域
      */
     Scene_Equip.prototype.equipItemNameWindowRect = function() {
         const wh = this.calcWindowHeight(1, false);
@@ -1211,7 +1211,7 @@ function Window_EquipItemName() {
     /**
      * 装備可能アイテムウィンドウの表示領域を得る。
      * 
-     * @return {Rectangle} アイテムウィンドウ表示領域
+     * @returns {Rectangle} アイテムウィンドウ表示領域
      * !!!overwrite!!! Scene_Equip.itemWindowRect()
      *     装備画面のレイアウトを変更するため、オーバーライドする。
      */
@@ -1389,7 +1389,7 @@ function Window_EquipItemName() {
         /**
          * 装備スロットウィンドウの矩形領域を得る。
          * 
-         * @return {Rectangle} ウィンドウ矩形領域
+         * @returns {Rectangle} ウィンドウ矩形領域
          */
         Scene_Battle.prototype.equipSlotWindowRect = function() {
             const rect = this.actorCommandWindowRect();
@@ -1412,7 +1412,7 @@ function Window_EquipItemName() {
         /**
          * 装備品名表示ウィンドウの表示領域を得る。
          * 
-         * @return {Rectangle} ウィンドウ表示領域
+         * @returns {Rectangle} ウィンドウ表示領域
          */
         Scene_Battle.prototype.equipItemNameWindowRect = function() {
             const rect = this.equipSlotWindowRect();
@@ -1437,7 +1437,7 @@ function Window_EquipItemName() {
         /**
          * 装備ステータスウィンドウの矩形領域を得る。
          * 
-         * @return {Rectangle} ウィンドウ矩形領域
+         * @returns {Rectangle} ウィンドウ矩形領域
          */
         Scene_Battle.prototype.equipStatusWindowRect = function() {
             const itemWindowRect = this.itemWindowRect();
@@ -1473,7 +1473,7 @@ function Window_EquipItemName() {
         /**
          * 装備候補選択ウィンドウの表示領域を得る。
          * 
-         * @return {Rectangle} ウィンドウ矩形領域
+         * @returns {Rectangle} ウィンドウ矩形領域
          */
         Scene_Battle.prototype.equipItemWindowRect = function() {
             const rect = this.equipItemNameWindowRect();
@@ -1579,7 +1579,7 @@ function Window_EquipItemName() {
         /**
          * いずれかの入力ウィンドウがアクティブ（選択中）かどうかを判定する。
          * 
-         * @return {Boolean} いずれかの入力ウィンドウがアクティブな場合にはtrue, それ以外はfalse
+         * @returns {Boolean} いずれかの入力ウィンドウがアクティブな場合にはtrue, それ以外はfalse
          */
         Scene_Battle.prototype.isAnyInputWindowActive = function() {
             return _Scene_Battle_isAnyInputWindowActive.call(this)

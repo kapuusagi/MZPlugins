@@ -68,7 +68,7 @@
          * !!!overwrite!!! Game_BattlerBase.pdr
          */
         pdr : {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() { return this.physicalDamageRate(); },
             configurable:true
         },
@@ -79,7 +79,7 @@
          * !!!overwrite!!! Game_BattlerBase.mdr
          */
         mdr : {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() { return this.magicalDamegeRate(); },
             configurable:true
         },
@@ -90,7 +90,7 @@
          * @constant {Numbr}
          */  
         atkcoef: {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() { return this.getPhysicalAttackRate(); },
             configurable:true 
         },
@@ -101,7 +101,7 @@
          * @constant {Number}
          */
         defcoef: {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() { return this.getPhysicalDefenceRate(); },
             configurable:true
         },
@@ -112,7 +112,7 @@
          * @constant {Number}
          */
         matcoef: {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() { return this.getMagicalAttackRate(); },
             configurable:true 
         },
@@ -123,7 +123,7 @@
          * @constant {Number}
          */
         mdfcoef: {
-            /** @return {Number} */
+            /** @returns {Number} */
             get : function() { return this.getMagicalDefenceRate(); },
             configurable:true
         }        
@@ -134,7 +134,7 @@
         /**
          * PDR貫通率を得る。
          * 
-         * @return {Number} DEF貫通率(0～1.0)
+         * @returns {Number} DEF貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetratePDR = function() {
             // STRが30より高いと、1高い毎に0.5％貫通する。(最大25%)
@@ -146,7 +146,7 @@
         /**
          * MDR貫通率を得る。
          * 
-         * @return {Number} MDR貫通率(0～1.0)
+         * @returns {Number} MDR貫通率(0～1.0)
          */
         Game_BattlerBase.prototype.penetrateMDR = function() {
             // INTが30より高いと、1高い毎に0.5％貫通する。(最大25%)
@@ -156,7 +156,7 @@
 
     /**
      * 物理攻撃力補正値を得る。
-     * @return {Number} 物理攻撃力補正値(倍率)
+     * @returns {Number} 物理攻撃力補正値(倍率)
      */
     Game_BattlerBase.prototype.getPhysicalAttackRate = function() {
         // 物理攻撃補正
@@ -178,7 +178,7 @@
 
     /**
      * 物理防御力補正値を得る。
-     * @return {Number} 物理防御力補正値(倍率)
+     * @returns {Number} 物理防御力補正値(倍率)
      */
     Game_BattlerBase.prototype.getPhysicalDefenceRate = function() {
         // 物理防御補正
@@ -189,7 +189,7 @@
     /**
      * 魔法攻撃力補正値を得る。
      * 
-     * @return {Number} 補正値(倍率)
+     * @returns {Number} 補正値(倍率)
      */
     Game_BattlerBase.prototype.getMagicalAttackRate = function() {
         // 魔法攻撃補正
@@ -214,7 +214,7 @@
 
     /**
      * 魔法防御力補正値値を得る。 
-     * @return {Number} 魔法防御力補正値(倍率)
+     * @returns {Number} 魔法防御力補正値(倍率)
      */
     Game_BattlerBase.prototype.getMagicalDefenceRate = function() {
         // 魔法防御補正
@@ -228,7 +228,7 @@
     /**
      * PDR値(物理被ダメージレート)を得る。
      * 
-     * @return {Number} PDR値(1.0で等倍)
+     * @returns {Number} PDR値(1.0で等倍)
      */
     Game_BattlerBase.prototype.physicalDamageRate = function() {
         let rate = this.sparam(6);
@@ -240,7 +240,7 @@
     /**
      * MDR値(魔法被ダメージレート)を得る。
      * 
-     * @return {Number} MDR値(1.0で等倍)
+     * @returns {Number} MDR値(1.0で等倍)
      */
     Game_BattlerBase.prototype.magicalDamegeRate = function() {
         let rate = this.sparam(7); // ベーシックシステムのMDR
@@ -255,7 +255,7 @@
         /**
          * 物理攻撃のクリティカル倍率を取得する。
          * 
-         * @return {Number} クリティカル倍率。
+         * @returns {Number} クリティカル倍率。
          */
         Game_BattlerBase.prototype.criticalDamageRatePhysical = function () {
             const pcdr = _Game_BattlerBase_criticalDamageRatePhysical.call(this);
@@ -268,7 +268,7 @@
         /**
          * 魔法攻撃のクリティカル倍率を取得する。
          * 
-         * @return {Number} クリティカル倍率。
+         * @returns {Number} クリティカル倍率。
          */
         Game_BattlerBase.prototype.criticalDamageRateMagical = function() {
             const mcdr = _Game_BattlerBase_criticalDamageRateMagical.call(this);
@@ -283,7 +283,7 @@
      * 回復レートを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @return {Number} 回復レート(0.0～、等倍は1.0)
+     * @returns {Number} 回復レート(0.0～、等倍は1.0)
      * !!!overwrite!!! Game_Action.itemRec()
      */
     Game_Action.prototype.itemRec = function(target) {

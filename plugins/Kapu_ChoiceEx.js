@@ -308,7 +308,7 @@
     /**
      * 選択肢値を格納する変数IDを得る。
      * 
-     * @return {Number} 変数ID
+     * @returns {Number} 変数ID
      */
     Game_Message.prototype.choiceVariableId = function() {
         return this._choiceVariableId;
@@ -326,7 +326,7 @@
     /**
      * 有効フラグ配列を取得する。
      * 
-     * @return {Array<Boolean>} 有効フラグ配列。
+     * @returns {Array<Boolean>} 有効フラグ配列。
      */
     Game_Message.prototype.choiceEnables = function() {
         return this._choiceEnables;
@@ -353,7 +353,7 @@
     /**
      * 選択肢毎のスクリプト上のインデックス位置を得る。
      * 
-     * @return {Array<Number>} インデックス位置配列
+     * @returns {Array<Number>} インデックス位置配列
      */
     Game_Message.prototype.choiceIndices = function() {
         return this._choiceIndices;
@@ -362,7 +362,7 @@
     /**
      * 選択結果配列を得る。
      * 
-     * @return {Array<Number>} 選択結果配列
+     * @returns {Array<Number>} 選択結果配列
      */
     Game_Message.prototype.choiceResults = function() {
         return this._choiceResults;
@@ -381,7 +381,7 @@
      * ヘルプテキスト文字列を得る。
      * 
      * @param {Number} index インデックス番号
-     * @return {Array<String>} ヘルプテキスト配列
+     * @returns {Array<String>} ヘルプテキスト配列
      */
     Game_Message.prototype.choiceHelpText = function(index) {
         const texts = this._choiceHelpTexts[index];
@@ -401,7 +401,7 @@
     /**
      * ヘルプかどうかを得る。
      * 
-     * @return {Boolean} ヘルプの場合にはtrue, それ以外はfalse
+     * @returns {Boolean} ヘルプの場合にはtrue, それ以外はfalse
      */
     Game_Message.prototype.isHelp = function() {
         return this._choiceHelpText.length > 0;
@@ -440,7 +440,7 @@
     /**
      * 選択肢ウィンドウのx位置を得る。
      * 
-     * @return {Number} x位置
+     * @returns {Number} x位置
      */
     Game_Message.prototype.choiceX = function() {
         return this._choiceX;
@@ -449,7 +449,7 @@
     /**
      * 選択肢ウィンドウのy位置を得る。
      * 
-     * @return {Number} y位置
+     * @returns {Number} y位置
      */
     Game_Message.prototype.choiceY = function() {
         return this._choiceY;
@@ -458,7 +458,7 @@
     /**
      * 選択肢ウィンドウの幅を得る。
      * 
-     * @return {Number} 選択肢ウィンドウの幅
+     * @returns {Number} 選択肢ウィンドウの幅
      */
     Game_Message.prototype.choiceWidth = function() {
         return this._choiceWidth;
@@ -467,7 +467,7 @@
     /**
      * 選択肢ウィンドウの高さを得る。
      * 
-     * @return {Number} 選択肢ウィンドウの幅
+     * @returns {Number} 選択肢ウィンドウの幅
      */
     Game_Message.prototype.choiceHeight = function() {
         return this._choiceHeight;
@@ -476,7 +476,7 @@
     /**
      * 最大行数を得る。
      * 
-     * @return {Number} 最大行数
+     * @returns {Number} 最大行数
      */
     Game_Message.prototype.choiceMaxRow = function() {
         return this._choiceMaxRow;
@@ -513,7 +513,7 @@
     /**
      * 選択肢選択中に、画像の操作を行うかどうかを取得する。
      * 
-     * @return {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Game_Message.prototype.choiceControlPicture = function() {
         return this._choiceControlPicture;
@@ -531,7 +531,7 @@
     /**
      * ヘルプ操作が有効かどうかを得る。
      * 
-     * @return {Boolean} ヘルプ操作が有効な場合にはtrue、それ以外はfalse
+     * @returns {Boolean} ヘルプ操作が有効な場合にはtrue、それ以外はfalse
      */
     Game_Message.prototype.choiceControlHelp = function() {
         return this._choiceControlHelp;
@@ -752,7 +752,7 @@
      * 選択肢のヘルプテキストを得る。
      * 
      * @param {Number} scriptIndex 分岐エントリのスクリプトインデックス
-     * @return {String} ヘルプテキスト
+     * @returns {String} ヘルプテキスト
      */
     Game_Interpreter.prototype.getHelpText = function(scriptIndex) {
         const texts = [];
@@ -770,7 +770,7 @@
      * 選択肢を評価する。
      * 
      * @param {String} formula 
-     * @return {Boolean} 選択肢が有効な場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 選択肢が有効な場合にはtrue, それ以外はfalse.
      */
     Game_Interpreter.prototype.evalChoice = function(formula) {
         try {
@@ -824,7 +824,7 @@
     /**
      * 選択肢ウィンドウのX位置を得る。
      * 
-     * @return {Number} x位置
+     * @returns {Number} x位置
      */
     Window_ChoiceList.prototype.windowX = function() {
         let x = $gameMessage.choiceX();
@@ -838,7 +838,7 @@
     /**
      * 選択ウィンドウのY位置を得る。
      * 
-     * @return {Number} y位置
+     * @returns {Number} y位置
      */
     Window_ChoiceList.prototype.windowY = function() {
         let y = $gameMessage.choiceY();
@@ -853,7 +853,7 @@
     /**
      * ウィンドウ幅を得る。
      * 
-     * @return {Number} ウィンドウ幅
+     * @returns {Number} ウィンドウ幅
      */
     Window_ChoiceList.prototype.windowWidth = function() {
         const width = $gameMessage.choiceWidth();
@@ -868,7 +868,7 @@
     /**
      * ウィンドウ高さを得る。
      * 
-     * @return {Number} ウィンドウ高さ
+     * @returns {Number} ウィンドウ高さ
      */
     Window_ChoiceList.prototype.windowHeight = function() {
         const height = $gameMessage.choiceHeight();
@@ -882,7 +882,7 @@
     /**
      * ウィンドウの行数を得る。
      * 
-     * @return {Number} ウィンドウ行数
+     * @returns {Number} ウィンドウ行数
      * !!!overwrite!!! Window_ChoiceList.numVisibleRows()
      *     返す有効行数を変更するため、オーバーライドする。
      */

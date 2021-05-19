@@ -117,7 +117,7 @@
      * アクションに設定された計算式が不正な場合、結果は0になる。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @return {Number} ダメージ値。
+     * @returns {Number} ダメージ値。
      */
     Game_Action.prototype.evalDamageFormula = function(target) {
         const subject = this.subject();

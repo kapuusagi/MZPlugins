@@ -247,7 +247,7 @@
      * スキルのHPコストを得る。
      * 
      * @param {DataSkill} skill スキル
-     * @return {Number] HPコスト
+     * @returns {Number] HPコスト
      */
     Game_BattlerBase.prototype.skillHpCost = function(skill) {
         const cost = skill.hpCost
@@ -298,7 +298,7 @@
      * スキルの使用コストが支払える状態かどうかを得る。
      * 
      * @param {DataSkill} skill 
-     * @return {Boolean} スキルコストが支払える場合にはtrue, それ以外はfalse
+     * @returns {Boolean} スキルコストが支払える場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.canPaySkillCost = function(skill) {
         return _Game_BattlerBas_canPaySkillCost.call(this, skill)
@@ -321,7 +321,7 @@
         /**
          * HPコストレートを得る。
          * 
-         * @return {Number} HPコストレート
+         * @returns {Number} HPコストレート
          */
         Game_BattlerBase.prototype.hpCostRate = function() {
             return Math.max(0, this.sparam(Game_BattlerBase.TRAIT_SPARAM_DID_HPCOST_RATE));
@@ -330,7 +330,7 @@
         /**
          * HPコストレートを得る。
          * 
-         * @return {Number} HPコストレート
+         * @returns {Number} HPコストレート
          */
         Game_BattlerBase.prototype.hpCostRate = function() {
             return 1;
@@ -340,7 +340,7 @@
         /**
          * TPコストレートを得る。
          * 
-         * @return {Number} HPコストレート
+         * @returns {Number} HPコストレート
          */
         Game_BattlerBase.prototype.tpCostRate = function() {
             return Math.max(0, this.sparam(Game_BattlerBase.TRAIT_SPARAM_DID_TPCOST_RATE));
@@ -349,7 +349,7 @@
         /**
          * TPコストレートを得る。
          * 
-         * @return {Number} HPコストレート
+         * @returns {Number} HPコストレート
          */
         Game_BattlerBase.prototype.tpCostRate = function() {
             return 1;
@@ -362,7 +362,7 @@
          * @constant {Number}
          */
         Object.defineProperty(Game_BattlerBase.prototype, "hpcr", {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() { return this.hpCostRate(); },
             configurable:true
         });
@@ -372,7 +372,7 @@
          * @constant {Number}
          */
         Object.defineProperty(Game_BattlerBase.prototype, "tpcr", {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() { return this.tpCostRate(); },
             configurable:true
         });
@@ -387,7 +387,7 @@
             /**
              * HPコストカラーを得る。
              * 
-             * @return {String} HPコストカラー
+             * @returns {String} HPコストカラー
              */
             ColorManager.hpCostColor = function() {
                 return this.normalColor();
@@ -397,7 +397,7 @@
         /**
          * コスト描画幅を得る。
          * 
-         * @return {Number} コスト描画幅
+         * @returns {Number} コスト描画幅
          * !!!overwrite!!! Window_SkillList.drawSkillCost
          *     スキルコストの表示を変更するためにオーバーライドする。
          */

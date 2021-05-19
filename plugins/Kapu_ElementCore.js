@@ -96,7 +96,7 @@
      * 属性による効果倍率を得る。
      * 
      * @param {Game_BattlerBase} target ターゲット
-     * @return {Number} 効果倍率
+     * @returns {Number} 効果倍率
      * !!!overwrite!!! Game_Action.calcElementRate
      */
     Game_Action.prototype.calcElementRate = function(target) {
@@ -118,7 +118,7 @@
      * 既定の実装では単純に最大値のレートを返す。
      * 
      * @param {Game_BattlerBase} target ターゲット
-     * @return {Number} 効果倍率
+     * @returns {Number} 効果倍率
      * !!!overwrite!!! Game_Action.elementsMaxRate
      */
     Game_Action.prototype.elementsMaxRate = function(target, elements) {
@@ -144,7 +144,7 @@
      * 
      * @param {Game_BattlerBase} target 
      * @param {Number} elementId 属性ID
-     * @return {Number} 属性倍率
+     * @returns {Number} 属性倍率
      */
     Game_Action.prototype.singleElementRate = function(target, elementId) {
         return target.elementRate(elementId);

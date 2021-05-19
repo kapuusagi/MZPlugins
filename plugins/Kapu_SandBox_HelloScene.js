@@ -36,7 +36,7 @@
     PluginManager.registerCommand(pluginName, "Message", args => {
         const msg = args.msg || "Hello world";
         SceneManager.push(Scene_HelloWorld);
-        SceneManager.prepareNextScene(args.msg);
+        SceneManager.prepareNextScene(msg);
     });
 
 
@@ -149,7 +149,7 @@
 
     /**
      * メッセージウィンドウがクローズ処理中かどうかを取得する。
-     * @return {Boolean} クローズ処理中の場合にはtrue, それ以外はfalse
+     * @returns {Boolean} クローズ処理中の場合にはtrue, それ以外はfalse
      */
     Scene_HelloWorld.prototype.isMessageWindowClosing = function () {
         return this._messageWindow.isClosing();

@@ -234,7 +234,7 @@ function Sprite_CharaMake_Picture() {
      * キャラクターメイキング項目を取得する。
      * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
      * 
-     * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+     * @returns {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
@@ -353,7 +353,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * 最大カラム数を得る。
      * 
-     * @return {Number} カラム数
+     * @returns {Number} カラム数
      */
     Window_CharaMakeVisualSelection.prototype.maxCols = function() {
         return Math.floor(this.innerWidth / 160);
@@ -361,7 +361,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * 項目の描画高を得る。
      * 
-     * @return {Number} 項目の描画高さ。
+     * @returns {Number} 項目の描画高さ。
      */
     Window_CharaMakeVisualSelection.prototype.itemHeight = function() {
         return 160;
@@ -452,7 +452,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * この項目の識別名を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Visual.prototype.name = function() {
         return textItemNameGraphic;
@@ -460,7 +460,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * この項目の説明を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Visual.prototype.description = function() {
         return textItemDescriptionGraphic;
@@ -568,7 +568,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * アイテム一覧を得る。
      * 
-     * @return {Array<object>} アイテム一覧
+     * @returns {Array<object>} アイテム一覧
      */
     Game_CharaMakeItem_Visual.prototype.items = function() {
         return this._items;
@@ -579,7 +579,7 @@ function Sprite_CharaMake_Picture() {
      * 
      * @param {Window} windowEntry ウィンドウエントリ
      * @param {Game_Actor} actor アクター
-     * @return {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Visual.prototype.isValidSelection = function(windowEntry, actor) {

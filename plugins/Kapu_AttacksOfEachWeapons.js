@@ -85,7 +85,7 @@
      * このアクターが装備している装備品のコレクションを得る。
      * 未装備スロットのところにはnullが入るので注意。
      * 
-     * @return {Array<Object>} 装備品(DataWeapon/DataArmor)の配列。
+     * @returns {Array<Object>} 装備品(DataWeapon/DataArmor)の配列。
      */
     Game_Actor.prototype.equips = function() {
         const equips = _Game_Actor_equips.call(this);
@@ -120,7 +120,7 @@
      * 通常攻撃武器によるアクションを作成する。
      * 
      * @param {Game_Action} action 設定されている通常攻撃アクション
-     * @return {Array<Game_Action>} アクション
+     * @returns {Array<Game_Action>} アクション
      */
     Game_Actor.prototype.makeWeaponAttackActions = function(action) {
         const weaponActions = [];
@@ -301,7 +301,7 @@
     /**
      * このアクションが通常攻撃かどうかを得る。
      * 
-     * @return {Boolean} 通常攻撃の場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 通常攻撃の場合にはtrue, それ以外はfalse.
      */
     Game_Action.prototype.isAttack = function() {
         return this._isAttack && _Game_Action_isAttack.call(this);
@@ -322,7 +322,7 @@
      * 
      * @param {Game_BattlerBase} target 対象
      * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @return {Number} ダメージ値
+     * @returns {Number} ダメージ値
      * !!!overwrite!!! Game_Action.makeDamageValue
      */
     Game_Action.prototype.makeDamageValue = function(target, critical) {

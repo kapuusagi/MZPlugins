@@ -226,7 +226,7 @@
     /**
      * 両手装備かどうかを判定する。
      * 
-     * @return {Boolean} 両手装備
+     * @returns {Boolean} 両手装備
      */
     Game_Actor.prototype.isBothHands = function() {
         const weapon = this.weapons()[0];
@@ -236,7 +236,7 @@
     /**
      * メインウェポンを得る。
      * 
-     * @return {DataWeapon} メインウェポン。無い場合にはnull
+     * @returns {DataWeapon} メインウェポン。無い場合にはnull
      */
     Game_Actor.prototype.mainWeapon = function() {
         return this.weapons()[0]
@@ -245,7 +245,7 @@
     /**
      * サブウエポンが必要かどうかを判定する。
      * 
-     * @return {Boolean} サブウェポンの場合にはtrue, それ以外はfalse
+     * @returns {Boolean} サブウェポンの場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isNeedsSubWeapon = function() {
         const weapon = this.mainWeapon();
@@ -255,7 +255,7 @@
     /**
      * サブウェポンタイプを得る。
      * 
-     * @return {Array<Number>} サブウエポンタイプ。サブウェポンが無い場合にはnull.
+     * @returns {Array<Number>} サブウエポンタイプ。サブウェポンが無い場合にはnull.
      */
     Game_Actor.prototype.subWeaponTypes = function() {
         const weapon = this.mainWeapon();
@@ -265,7 +265,7 @@
     /**
      * 2番目のスロットが武器かどうかを得る。
      * 
-     * @return {Boolean} 2番目のスロットが武器の場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 2番目のスロットが武器の場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.is2ndSlotIsWeapon = function() {
         return this.isDualWield() || this.isNeedsSubWeapon();
@@ -274,7 +274,7 @@
     /**
      * 装備スロット配列を得る。
      * 
-     * @return {Array<Number>} 装備スロット配列。装備タイプが格納された配列が返る。
+     * @returns {Array<Number>} 装備スロット配列。装備タイプが格納された配列が返る。
      */
     Game_Actor.prototype.equipSlots = function() {
         const slots = this.currentClass().equipSlots.slice();
@@ -295,7 +295,7 @@
      * このアクターが装備している装備品のコレクションを得る。
      * クラスを変更した場合など、スロット数が変動している場合にエンプティなデータを返さないためにフックする。
      * 
-     * @return {Array<Object>} 装備品(DataWeapon/DataArmor)の配列。
+     * @returns {Array<Object>} 装備品(DataWeapon/DataArmor)の配列。
      */
     Game_Actor.prototype.equips = function() {
         for (let i = 0; i < this.currentClass().equipSlots.length; i++) {
@@ -375,7 +375,7 @@
      * 
      * @param {Number} slotNo スロット番号
      * @param {Object} item DataWeaponまたはDataArmor
-     * @return {Boolean} 装備可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 装備可能な場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.canEquipAtSlot = function(slotNo, item) {
         const slots = this.equipSlots();
@@ -401,7 +401,7 @@
      * 装備可能な武器タイプかどうかを判定する。
      * 
      * @param {Number} wtypeId 武器タイプID
-     * @return {Boolean} 装備可能な武器タイプの場合にはtrue, それ以外はfalseが返る。
+     * @returns {Boolean} 装備可能な武器タイプの場合にはtrue, それ以外はfalseが返る。
      */
     Game_Actor.prototype.isEquipWtypeOk = function(wtypeId) {
         return _Game_Actor_isEquipWtypeOk.call(this, wtypeId)

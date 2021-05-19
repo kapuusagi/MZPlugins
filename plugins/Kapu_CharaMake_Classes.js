@@ -102,7 +102,7 @@ function Game_CharaMakeItem_Class() {
      * キャラクターメイキング項目を取得する。
      * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
      * 
-     * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+     * @returns {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
@@ -126,7 +126,7 @@ function Game_CharaMakeItem_Class() {
     /**
      * この項目の識別名を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Class.prototype.name = function() {
         return textItemNameClass;
@@ -134,7 +134,7 @@ function Game_CharaMakeItem_Class() {
     /**
      * この項目の説明を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Class.prototype.description = function() {
         return textItemDescriptionClass;
@@ -197,7 +197,7 @@ function Game_CharaMakeItem_Class() {
     /**
      * アイテム一覧を得る。
      * 
-     * @return {Array<object>} アイテム一覧
+     * @returns {Array<object>} アイテム一覧
      */
     Game_CharaMakeItem_Class.prototype.items = function() {
         const items = [];

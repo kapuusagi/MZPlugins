@@ -93,7 +93,7 @@
     /**
      * 瀕死で耐えるかどうかを得る。
      * 
-     * @return {Boolean} 瀕死で耐える場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 瀕死で耐える場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isEndureDying = function() {
         return this.specialFlag(Game_BattlerBase.FLAG_ID_ENDURE_DYING);

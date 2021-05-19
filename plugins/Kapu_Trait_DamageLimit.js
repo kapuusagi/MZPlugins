@@ -120,7 +120,7 @@
     /**
      * ダメージリミットを得る。
      * 
-     * @return {Number} ダメージリミット
+     * @returns {Number} ダメージリミット
      * !!!overwrite!!! Game_BattlerBase.maxDamage()
      */
     Game_BattlerBase.prototype.maxDamage = function() {
@@ -134,7 +134,7 @@
      * 最大ダメージを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @return {Number} 最大ダメージ
+     * @returns {Number} 最大ダメージ
      * !!!overwrite!!!
      */
     // eslint-disable-next-line no-unused-vars

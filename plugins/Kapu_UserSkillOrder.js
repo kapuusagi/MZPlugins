@@ -62,7 +62,7 @@
     /**
      * 並び替えしたスキル一覧を返す。
      * 
-     * @return {Array<DataSkill>} スキル配列。
+     * @returns {Array<DataSkill>} スキル配列。
      */
     Game_Actor.prototype.skillsWithOrder = function() {
         const skills = this.skills();
@@ -80,7 +80,7 @@
      * 並び順リストにidの登録がなければ、末尾についかして並び順を返す。
      * 
      * @param {Number} id スキルID番号
-     * @return {Number} スキル並び順が返る。
+     * @returns {Number} スキル並び順が返る。
      */
     Game_Actor.prototype.getSkillOrder = function(id) {
         let index = this._skillOrder.indexOf(id);
@@ -156,7 +156,7 @@
 
     /**
      * ペンディングインデックスを取得する。
-     * @return {Number} ペンディングインデックス
+     * @returns {Number} ペンディングインデックス
      */
     Window_SkillList.prototype.getPendingIndex = function() {
         return this._pendingIndex;
@@ -181,7 +181,7 @@
     /**
      * 現在の選択項目が有効かどうかを判定する。
      * 
-     * @return {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Window_SkillList.prototype.isCurrentItemEnabled = function() {
         if (this._orderEditEnable

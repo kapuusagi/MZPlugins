@@ -202,7 +202,7 @@
      * @constant {Number}
      */
     Object.defineProperty(Game_BattlerBase.prototype, "luk", {
-        /** @return {Number} */
+        /** @returns {Number} */
         get: function() { return this.getLuk(); },
         configurable:true,
     });
@@ -240,7 +240,7 @@
     /**
      * LUK値を得る。
      * 
-     * @return {Number} LUK値
+     * @returns {Number} LUK値
      */
     Game_BattlerBase.prototype.getLuk = function() {
         const baseValue = this._luk.base + this._luk.variance + this.getLukPlus();
@@ -252,7 +252,7 @@
     /**
      * LUKの加算値を得る。
      * 
-     * @return {Number} 加算値
+     * @returns {Number} 加算値
      */
     Game_BattlerBase.prototype.getLukPlus = function() {
         return 0;
@@ -307,7 +307,7 @@
     /**
      * LUKの加算値を得る。
      * 
-     * @return {Number} 加算値
+     * @returns {Number} 加算値
      */
     Game_Actor.prototype.getLukPlus = function() {
         const equips = this.equips();
@@ -339,7 +339,7 @@
     /**
      * LUK値を得る。
      * 
-     * @return {Number} LUK値
+     * @returns {Number} LUK値
      */
     Game_Enemy.prototype.getLuk = function() {
         return this._luk;
@@ -351,7 +351,7 @@
      * LUK値は0～100なので、1ポイント差分による影響度を上げ、対象より1多い毎に0.5%差が出る。。
      * 
      * @param {Game_Battler} target 対象
-     * @return {Number} 確率上昇効果
+     * @returns {Number} 確率上昇効果
      * !!!overwrite!!!
      */
     Game_Action.prototype.lukEffectRate = function(target) {

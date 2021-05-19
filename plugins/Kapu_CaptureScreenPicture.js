@@ -293,7 +293,7 @@
      * img/pictures以下のファイルをロードする。
      * 
      * @param {String} filename 画像ファイル名
-     * @return {Bitmap} ビットマップオブジェクト
+     * @returns {Bitmap} ビットマップオブジェクト
      */
     ImageManager.loadPicture = function(filename) {
         if (filename.startsWith("capture/")) {
@@ -319,7 +319,7 @@
     const _DataManager_makeSaveContents = DataManager.makeSaveContents;
     /**
      * 保存するデータを作成する。
-     * @return {Object} 保存するデータ
+     * @returns {Object} 保存するデータ
      */
     DataManager.makeSaveContents = function() {
         const contents = _DataManager_makeSaveContents.call(this);

@@ -346,7 +346,7 @@ function Window_BattleRewards() {
     /**
      * Bitmapの幅を得る。
      * 
-     * @return {number} Bitmapの幅。
+     * @returns {number} Bitmapの幅。
      */
     Sprite_BattleHudExpGauge.prototype.bitmapWidth = function() {
         return 144;
@@ -355,7 +355,7 @@ function Window_BattleRewards() {
     /**
      * Bitmapの高さを得る。
      * 
-     * @return {number} Bitmapの高さ。
+     * @returns {number} Bitmapの高さ。
      */
     Sprite_BattleHudExpGauge.prototype.bitmapHeight = function() {
         return 34;
@@ -363,7 +363,7 @@ function Window_BattleRewards() {
     /**
      * ゲージの高さを得る。
      * 
-     * @return {number} ゲージの高さ。
+     * @returns {number} ゲージの高さ。
      */
     Sprite_BattleHudExpGauge.prototype.gaugeHeight = function() {
         return 24;
@@ -371,7 +371,7 @@ function Window_BattleRewards() {
     /**
      * ゲージ描画のX位置を取得する。
      * 
-     * @return {number} X位置
+     * @returns {number} X位置
      */
     Sprite_BattleHudExpGauge.prototype.gaugeX = function() {
         return 0;
@@ -379,7 +379,7 @@ function Window_BattleRewards() {
     /**
      * ゲージ描画のY位置を取得する。
      * 
-     * @return {number} Y位置
+     * @returns {number} Y位置
      */
     Sprite_BattleHudExpGauge.prototype.gaugeY = function() {
         return this.bitmapHeight() - this.gaugeHeight();
@@ -404,7 +404,7 @@ function Window_BattleRewards() {
     /**
      * ラベルのフォントサイズを得る。
      * 
-     * @return {Number} フォントサイズ
+     * @returns {Number} フォントサイズ
      */
     Sprite_BattleHudExpGauge.prototype.labelFontSize = function() {
         return $gameSystem.mainFontSize() - 2;
@@ -421,7 +421,7 @@ function Window_BattleRewards() {
     /**
      * 値のフォントサイズを得る。
      * 
-     * @return {Number} 値のフォントサイズ。
+     * @returns {Number} 値のフォントサイズ。
      */
     Sprite_BattleHudExpGauge.prototype.valueFontSize = function() {
         return $gameSystem.mainFontSize() - 6;
@@ -563,7 +563,7 @@ function Window_BattleRewards() {
     /**
      * 現在値を取得する。
      * 
-     * @return {number} 現在値
+     * @returns {number} 現在値
      */
     Sprite_BattleHudExpGauge.prototype.currentValue = function() {
         if (this._battler) {
@@ -580,7 +580,7 @@ function Window_BattleRewards() {
     /**
      * ゲージの最大値を得る。
      * 
-     * @return {number} 最大値
+     * @returns {number} 最大値
      */
     Sprite_BattleHudExpGauge.prototype.currentMaxValue = function() {
         if (this._battler) {
@@ -598,7 +598,7 @@ function Window_BattleRewards() {
     /**
      * 描画するラベルを取得する。
      * 
-     * @return {String} ラベル文字列。
+     * @returns {String} ラベル文字列。
      */
     Sprite_BattleHudExpGauge.prototype.label = function() {
         return TextManager.expA;

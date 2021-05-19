@@ -100,7 +100,7 @@
      * 引数からアクターIDを得る。
      * 
      * @param {Object} arg 引数
-     * @return {Number} アクターID
+     * @returns {Number} アクターID
      */
     const _getActorId = function(arg) {
         const id = Number(arg.actorId) || 0;
@@ -195,7 +195,7 @@
      * 固有特性配列を得る。
      * 
      * @note このメソッドの返値を変更しても、Game_BattlerBaseのもつ固有特性は変化しない。
-     * @return {Array<Trait>} 特性配列。
+     * @returns {Array<Trait>} 特性配列。
      */
     Game_BattlerBase.prototype.uniqueTraitObjects = function() {
         return this._uniqueTraitObjects.slice(0);
@@ -205,7 +205,7 @@
     /**
      * このGame_BattlerBaseの、全ての特性値を持つオブジェクトを取得する。
      * 
-     * @return {Array<TraitObject>} 特性(Trait)を持つオブジェクトの配列
+     * @returns {Array<TraitObject>} 特性(Trait)を持つオブジェクトの配列
      */
     Game_BattlerBase.prototype.traitObjects = function() {
         return _Game_BattlerBase_traitObjects.call(this).concat(this.uniqueTraitObjects());

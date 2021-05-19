@@ -77,7 +77,7 @@
      * スキルかどうかを判定する。
      * 
      * @param {Object} item 判定対象のオブジェクト。
-     * @return {Boolean} スキルの場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} スキルの場合にはtrue, それ以外はfalse.
      */
     DataManager.isSkill = function(item) {
         if (item && item.itemKind) {
@@ -92,7 +92,7 @@
      * itemがアイテムかどうかを判定する。
      * 
      * @param {Object} item アイテム
-     * @return {Boolean} アイテムの場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} アイテムの場合にはtrue, それ以外はfalse.
      */
     DataManager.isItem = function(item) {
         // itemKind が設定済みの場合、itemKindで識別する。
@@ -108,7 +108,7 @@
      * itemが武器かどうかを判定する。
      * 
      * @param {Object} item アイテム
-     * @return {Boolean} 武器の場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 武器の場合にはtrue, それ以外はfalse
      */
     DataManager.isWeapon = function(item) {
         if (item && item.itemKind) {
@@ -123,7 +123,7 @@
      * itemが防具かどうかを判定する。
      * 
      * @param {Object} item アイテム
-     * @return {Boolean} 防具の場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 防具の場合にはtrue, それ以外はfalse
      */
     DataManager.isArmor = function(item) {
         if (item && item.itemKind) {
@@ -139,7 +139,7 @@
     /**
      * itemで指定されるアイテムを装備しているかどうかを判定する。
      * @param {Object} item アイテム(DataWeapon/DataArmor)
-     * @return {Boolean} 装備している場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 装備している場合にはtrue, それ以外はfalse
      */
     Game_Party.prototype.isAnyMemberEquipped = function(item) {
         return this.members().some(actor => actor.isEquipped(item));
@@ -150,7 +150,7 @@
      * アイテムの所持最大数を得る。
      * 
      * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
-     * @return {Number} 最大所持数
+     * @returns {Number} 最大所持数
      * !!!overwrite!!! Game_Party.maxItems()
      *     maxItemsノートタグ指定を可能にするため、オーバーライドする。
      */

@@ -104,7 +104,7 @@
     /**
      * このGame_Battlerのステートを返す。
      * 
-     * @return {Array<DataState>} ステート
+     * @returns {Array<DataState>} ステート
      */
     Game_BattlerBase.prototype.states = function() {
         let states = _Game_BattlerBase_states.call(this);
@@ -121,7 +121,7 @@
      * stateIdで指定されるステートを持っているかどうかを取得する。
      * 
      * @param {Number} stateId ステートID
-     * @return {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
+     * @returns {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isStateAffected = function(stateId) {
         if (this.isPassiveStateAffected(stateId)) {
@@ -134,7 +134,7 @@
     /**
      * パッシブステートを得る。
      * 
-     * @return {Array<DataState>} パッシブステート配列。
+     * @returns {Array<DataState>} パッシブステート配列。
      */
     Game_BattlerBase.prototype.passiveStates = function() {
         return this._passiveStateIds.map(id => $dataStates[id])
@@ -145,7 +145,7 @@
      * パッシブステートとして持っているかどうかを取得する。
      * 
      * @param {Number} stateId ステートID
-     * @return {Boolean} 保持しているパッシブステートに含まれる場合にはtrue,それ以外はfalse
+     * @returns {Boolean} 保持しているパッシブステートに含まれる場合にはtrue,それ以外はfalse
      */
     Game_BattlerBase.prototype.isPassiveStateAffected = function(stateId) {
         return this._passiveStateIds.includes(stateId);
@@ -170,7 +170,7 @@
      * パッシブステートデータを持ったオブジェクトを返す。
      * Game_Actor/Game_Enemyにて、本メソッドを実装してオブジェクトを返すようにする。
      * 
-     * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
+     * @returns {Array<Object>} パッシブステートデータを持ったオブジェクト
      */
     Game_BattlerBase.prototype.passiveStateObjects = function() {
         return [];
@@ -193,7 +193,7 @@
      * ステートを付与可能かどうか判定する。
      * 
      * @param {Number} stateId ステートID
-     * @return {Boolean} ステートを付与可能な場合にはtrue,それ以外はfalse
+     * @returns {Boolean} ステートを付与可能な場合にはtrue,それ以外はfalse
      */
     Game_Battler.prototype.isStateAddable = function(stateId) {
         if (this.isPassiveStateAffected(stateId)) {
@@ -236,7 +236,7 @@
     /**
      * パッシブステートデータを持ったオブジェクトを返す。
      * 
-     * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
+     * @returns {Array<Object>} パッシブステートデータを持ったオブジェクト
      */
     Game_Actor.prototype.passiveStateObjects = function() {
         if (this._callPassiveStateObjects) {
@@ -297,7 +297,7 @@
     /**
      * パッシブステートデータを持ったオブジェクトを返す。
      * 
-     * @return {Array<Object>} パッシブステートデータを持ったオブジェクト
+     * @returns {Array<Object>} パッシブステートデータを持ったオブジェクト
      */
     Game_Enemy.prototype.passiveStateObjects = function() {
         const psObjs = [];

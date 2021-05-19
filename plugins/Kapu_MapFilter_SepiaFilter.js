@@ -53,7 +53,7 @@
      * 真偽値を得る。
      * 
      * @param {Object} valueStr 値文字列
-     * @return {Boolean} 真偽値
+     * @returns {Boolean} 真偽値
      */
     const _parseBoolean = function(valueStr) {
         if (typeof valueStr === "undefined") {
@@ -100,7 +100,7 @@
     /**
      * バーテックスシェーダーのソースを得る。
      * 
-     * @return {String} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
+     * @returns {String} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
      */
     SepiaFilter.prototype._vertexSrc = function() {
         const src = null;
@@ -109,7 +109,7 @@
     /**
      * フラグメントシェーダのソースを得る。
      * 
-     * @return {String} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
+     * @returns {String} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
      */
     SepiaFilter.prototype._fragmentSrc = function() {
         const src = 

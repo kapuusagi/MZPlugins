@@ -160,7 +160,7 @@
     /**
      * アイテム一覧を得る。
      * 
-     * @return {Array<object>} アイテム一覧
+     * @returns {Array<object>} アイテム一覧
      */
     Game_CharaMakeItem_Visual.prototype.items = function() {
         const items = _Game_CharaMakeItem_Visual_items.call(this);

@@ -54,7 +54,7 @@
      */
     function Spriteset_RunAnimation() {
         this.initialize(...arguments);
-    };
+    }
 
     Spriteset_RunAnimation.prototype = Object.create(Spriteset_Base.prototype);
     Spriteset_RunAnimation.prototype.constructor = Spriteset_RunAnimation;
@@ -98,7 +98,7 @@
 
     /**
      * アニメーションさせる対象のスプライトを得る。
-     * @return {Sprite} アニメーション対象のスプライト
+     * @returns {Sprite} アニメーション対象のスプライト
      */
     Spriteset_RunAnimation.prototype.findTargetSprite = function ( /* target */) {
         return this._centerSprite;

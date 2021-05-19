@@ -163,7 +163,7 @@ function Game_CharaMakeItem_Skills() {
      * キャラクターメイキング項目を取得する。
      * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
      * 
-     * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+     * @returns {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
@@ -238,7 +238,7 @@ function Game_CharaMakeItem_Skills() {
      * skillIのスキルdが習得済みスキルかどうかを判定する。
      * 
      * @param {Number} skillId スキルID
-     * @return {Boolean} 習得済みの場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 習得済みの場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isLearnedSkill = function(skillId) {
         if (_Game_Actor_isLearnedSkill.call(this, skillId)) {
@@ -260,7 +260,7 @@ function Game_CharaMakeItem_Skills() {
      * アクターが使用可能なスキル一覧を得る。
      * Traitによって追加されているスキルも含まれる。
      * 
-     * @return {Array<DataSkill>} スキル一覧
+     * @returns {Array<DataSkill>} スキル一覧
      */
     Game_Actor.prototype.skills = function() {
         const skills = _Game_Actor_skills.call(this);
@@ -294,7 +294,7 @@ function Game_CharaMakeItem_Skills() {
     /**
      * この項目の識別名を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Skills.prototype.name = function() {
         const group =  this.skillSetGroup();
@@ -303,7 +303,7 @@ function Game_CharaMakeItem_Skills() {
     /**
      * この項目の説明を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Skills.prototype.description = function() {
         const group =  this.skillSetGroup();
@@ -358,7 +358,7 @@ function Game_CharaMakeItem_Skills() {
     /**
      * 項目一覧を得る。
      * 
-     * @return {Array<object>} 項目一覧
+     * @returns {Array<object>} 項目一覧
      */
     Game_CharaMakeItem_Skills.prototype.items = function() {
         const group =  this.skillSetGroup();

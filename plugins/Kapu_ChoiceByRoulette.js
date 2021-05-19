@@ -494,7 +494,7 @@ function Scene_RouletteChoice() {
     /**
      * キャンセルボタンが必要かどうかを取得する。
      * 
-     * @return {Boolean} 必要な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 必要な場合にはtrue, それ以外はfalse
      */
     Scene_RouletteChoice.prototype.needsCancelButton = function() {
         return this._canCancel;

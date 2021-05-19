@@ -456,7 +456,7 @@
      * XParamタイプパラメータのラベルを得る。
      * 
      * @param {Number} id XParam DID
-     * @return {String} テキスト
+     * @returns {String} テキスト
      */
     TextManager.xparam = function(id) {
         // HITとEVAはparamで定義したやつが使用できるのでそちらを使う。
@@ -475,7 +475,7 @@
      * SParamタイプパラメータのラベルを得る。
      * 
      * @param {Number} id SParam DID
-     * @return {String} テキスト
+     * @returns {String} テキスト
      */
     TextManager.sparam = function(id) {
         return this._sparam[id];
@@ -904,7 +904,7 @@
      * パーティーアビリティ特性
      * 
      * @param {number} dataId データID
-     * @return {string} パーティーアビリティ名
+     * @returns {string} パーティーアビリティ名
      */
     TextManager.traitPartyAbility = function(dataId) {
         const entry = this._partyAbilities[dataId];

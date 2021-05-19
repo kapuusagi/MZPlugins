@@ -44,7 +44,7 @@
     /**
      * 最大TP加算値。
      * 
-     * @return {Number} 最大TP加算値。
+     * @returns {Number} 最大TP加算値。
      */
     Game_BattlerBase.prototype.maxTpPlus = function() {
         const maxTp = _Game_BattlerBase_maxTpPlus.call(this);
@@ -56,7 +56,7 @@
     /**
      * TPB基準速度の計算に使用するパラメータ値を得る。
      * 
-     * @return {Number} TPB基準速度の計算に使用するパラメータ。
+     * @returns {Number} TPB基準速度の計算に使用するパラメータ。
      * !!!overwrite!!! Game_Battler.tpbMagicCastSpeedParam
      *     TPB魔法発動時のキャスト処理にDEXを使用するため、オーバーライドする。
      */
@@ -69,7 +69,7 @@
      * 行動によるTP上昇量を得る。
      * 
      * @param {Object} item DataItem/DataSKill
-     * @return {Number} TP上昇量
+     * @returns {Number} TP上昇量
      */
     Game_Battler.prototype.actionTpValue = function(item) {
         const gainValue = _Game_Battler_actionTpValue.call(this, item);
@@ -85,7 +85,7 @@
      * 基本パラメータベース値を得る。
      * 
      * @param paramId {Number} パラメータID
-     * @return {Number} パラメータ値
+     * @returns {Number} パラメータ値
      */
     Game_Actor.prototype.paramPlus = function(paramId) {
         const value = _Game_Actor_paramPlus.call(this, paramId);

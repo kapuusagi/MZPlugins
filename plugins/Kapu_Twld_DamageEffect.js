@@ -86,7 +86,7 @@
      * X方向移動量を得る。
      * 
      * @param {Game_Battler} target ポップアップ対象
-     * @return {Number} X方向移動量。
+     * @returns {Number} X方向移動量。
      */
     Sprite_Damage.prototype.damageXMove = function(target) {
         const result = target.result();
@@ -164,7 +164,7 @@
     /**
      * 表示文字サイズを取得する。
      * 
-     * @return {Number} 文字サイズ
+     * @returns {Number} 文字サイズ
      * !!!overwrite!!! Sprite_Damage.fontSize()
      */
     Sprite_Damage.prototype.fontSize = function () {

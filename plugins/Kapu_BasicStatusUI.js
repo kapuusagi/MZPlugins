@@ -174,7 +174,7 @@
      * strを解析し、statusEntryオブジェクトを生成する。
      * 
      * @param {String} str 文字列
-     * @return {Object} statusEntryオブジェクト
+     * @returns {Object} statusEntryオブジェクト
      */
     const _parseDisplayItemEntry = function(str) {
         try {
@@ -280,7 +280,7 @@
     /**
      * ステータス画面に表示する画像ファイル名を得る。
      * 
-     * @return {String} 画像ファイル名。未定義の場合には空文字列。
+     * @returns {String} 画像ファイル名。未定義の場合には空文字列。
      */
     Window_Status.prototype.statusPictureName = function() {
         const actor = this._actor;
@@ -751,7 +751,7 @@
      * カスタムパラメータが有効かどうかを取得する。
      * 
      * @param {Object} item カスタムパラメータオブジェクト
-     * @return {Boolean} カスタムパラメータが有効な場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} カスタムパラメータが有効な場合にはtrue, それ以外はfalse.
      */
     Window_StatusParams.prototype.isCustomParamEnabled = function(item) {
         return item.enabled && item.name && (item.propertyName in Game_Actor.prototype);
@@ -770,7 +770,7 @@
     /**
      * ページ数を得る。
      * 
-     * @return {Number} ページ数
+     * @returns {Number} ページ数
      */
     Window_StatusParams.prototype.pageCount = function() {
         return this._pages.length;
@@ -791,7 +791,7 @@
     /**
      * ページ番号を得る。
      * 
-     * @return {Number} ページ番号
+     * @returns {Number} ページ番号
      */
     Window_StatusParams.prototype.page = function() {
         return this._pageNumber;
@@ -1024,7 +1024,7 @@
     /**
      * パラメータ表示領域の幅を得る。
      * 
-     * @return {Number} パラメータ表示領域の幅
+     * @returns {Number} パラメータ表示領域の幅
      */
     Scene_Status.prototype.statusParamsWidth = function() {
         return 720;

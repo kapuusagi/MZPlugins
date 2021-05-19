@@ -272,7 +272,7 @@
      * レンジ文字列からレンジ値を得る。
      * 
      * @param {String} rangeStr レンジ文字列
-     * @return {Number} レンジ 
+     * @returns {Number} レンジ 
      */
     const _getRange = function(rangeStr) {
         const num = Number(rangeStr);
@@ -471,7 +471,7 @@
          * 
          * @param {Game_BattlerBase} target 対象
          * @param {DataEffect} effect エフェクトデータ
-         * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testItemEffect = function(target, effect) {
             if (effect.code === Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
@@ -522,7 +522,7 @@
     /**
      * 列を対象にしたアクションかどうかを取得する。
      * 
-     * @return {Boolean} 列を対象にしたアクションの場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 列を対象にしたアクションの場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.isForRow = function() {
         const item = this.item();
@@ -532,7 +532,7 @@
     /**
      * このアクションの射程距離を得る。
      * 
-     * @return {Number} 射程距離
+     * @returns {Number} 射程距離
      */
     Game_Action.prototype.itemRangeDistance = function() {
         const item = this.item();
@@ -547,7 +547,7 @@
      * 指定したユニットに適用する射程距離を得る。
      * 
      * @param {Game_Unit} unit ユニット
-     * @return {Number} 射程距離
+     * @returns {Number} 射程距離
      */
     Game_Action.prototype.rangeDistanceForUnit = function(unit) {
         const subject = this.subject();
@@ -564,7 +564,7 @@
      * Note: Game_Unit.randomTarget()をコールする代わりに、
      *       Game_Action.randomTargets(unit)等をコールするように変更するため、
      *       オーバーライドする。
-     * @return {Array<Game_Battler} アクション対象オブジェクトの配列
+     * @returns {Array<Game_Battler} アクション対象オブジェクトの配列
      * !!!overwrite!!! Game_Action.confusionTarget
      */
     Game_Action.prototype.confusionTarget = function() {
@@ -586,7 +586,7 @@
     /**
      * 味方に対するアクション対象を得る。
      * 
-     * @return {Array<Game_Battler} アクション対象オブジェクトの配列
+     * @returns {Array<Game_Battler} アクション対象オブジェクトの配列
      */
     Game_Action.prototype.targetsForFriends = function() {
         if (this.isForUser() && this.isForRow()) {
@@ -628,7 +628,7 @@
      * グループからランダムな対象を得る。
      * 
      * @param {Game_Unit} unit 対象のグループ
-     * @return {Array<Game_Battler>} 対象
+     * @returns {Array<Game_Battler>} 対象
      * !!!overwrite!!! Game_Action.randomTargets
      */
     Game_Action.prototype.randomTargets = function(unit) {
@@ -644,7 +644,7 @@
      * グループから死亡対象を得る。
      * 
      * @param {Game_Unit} unit 対象のグループ
-     * @return {Array<Game_Battler>} 対象
+     * @returns {Array<Game_Battler>} 対象
      * !!!overwrite!!! Game_Action.targetsForDead
      */
     Game_Action.prototype.targetsForDead = function(unit) {
@@ -670,7 +670,7 @@
      * グループから生存している対象を得る。
      * 
      * @param {Game_Unit} unit 対象のグループ
-     * @return {Array<Game_Battler>} 対象
+     * @returns {Array<Game_Battler>} 対象
      * !!!overwrite!!! Game_Action.targetsForAlive
      */
     Game_Action.prototype.targetsForAlive = function(unit) {
@@ -703,7 +703,7 @@
      * グループから生存または死亡している対象を得る。
      * 
      * @param {Game_Unit} unit 対象のグループ
-     * @return {Array<Game_Battler>} 対象
+     * @returns {Array<Game_Battler>} 対象
      * !!!overwrite!!! Game_Action.targetsForDeadAndAlive
      */
     Game_Action.prototype.targetsForDeadAndAlive = function(unit) {
@@ -741,7 +741,7 @@
     /**
      * 戦闘位置がサポートされているかどうかを返す。
      * 
-     * @return {Boolean} 戦闘位置
+     * @returns {Boolean} 戦闘位置
      */
     Game_System.prototype.isBattlePositionSupported = function() {
         return true;
@@ -771,7 +771,7 @@
     /**
      * 戦闘位置を取得する。
      * 
-     * @return {Number} 戦闘位置
+     * @returns {Number} 戦闘位置
      */
     Game_BattlerBase.prototype.battlePosition = function() {
         return this._battlePosition;
@@ -796,7 +796,7 @@
     /**
      * このGame_Battlerが射程距離を無視するかどうかを取得する。
      * 
-     * @return {Boolean} 射程距離を無視する場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 射程距離を無視する場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.isIgnoreRangeDistance = function() {
         if (Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE) {
@@ -819,7 +819,7 @@
     /**
      * 通常攻撃射程を得る
      * 
-     * @return {Number} 通常攻撃射程
+     * @returns {Number} 通常攻撃射程
      */
     Game_BattlerBase.prototype.attackRangeDistance = function() {
         const attackSkillId = this.attackSkillId();
@@ -830,7 +830,7 @@
     /**
      * 戦闘位置移動がブロックできるかどうかを取得する。
      * 
-     * @return {Boolean} 戦闘位置移動がブロックできる場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 戦闘位置移動がブロックできる場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.canBlockMoveBattlePosition = function() {
         if (Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION) {
@@ -958,7 +958,7 @@
      * 前に移動可能かどうかを取得する。
      * 
      * @param {Number} index メンバーのインデックス番号
-     * @return {Boolean} 前に移動可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 前に移動可能な場合にはtrue, それ以外はfalse
      */
     Game_Unit.prototype.canMoveToFront = function(index) {
         // aliveメンバーが全員前衛。
@@ -1002,7 +1002,7 @@
      * 後衛に移動可能かどうかを判定する。
      * 
      * @param {Number} index メンバーのインデックス番号
-     * @return {Boolean} 後ろに移動可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 後ろに移動可能な場合にはtrue, それ以外はfalse
      */
     Game_Unit.prototype.canMoveToRear = function(index) {
         const member = this.members()[index];
@@ -1042,7 +1042,7 @@
     /**
      * 前衛のメンバーを得る。
      * 
-     * @return {Array<Game_Battler>} 前衛メンバー。
+     * @returns {Array<Game_Battler>} 前衛メンバー。
      */
     Game_Unit.prototype.frontMembers = function() {
         return this.members().filter(member => member.battlePosition() === 0);
@@ -1051,7 +1051,7 @@
     /**
      * 前衛の生存メンバーを得る。
      * 
-     * @return {Array<Game_Battler>} 前衛メンバー。
+     * @returns {Array<Game_Battler>} 前衛メンバー。
      */
     Game_Unit.prototype.frontAliveMembers = function() {
         return this.aliveMembers().filter(member => member.battlePosition() === 0);
@@ -1060,7 +1060,7 @@
     /**
      * 前衛の死亡メンバーを得る。
      * 
-     * @return {Array<Game_Battler>} 前衛メンバー
+     * @returns {Array<Game_Battler>} 前衛メンバー
      */
     Game_Unit.prototype.frontDeadMembers = function() {
         return this.deadMembers().filter(member => member.battlePosition() === 0);
@@ -1069,7 +1069,7 @@
     /**
      * 後衛のメンバーを得る。
      * 
-     * @return {Array<Game_Battler>} 後衛メンバー。
+     * @returns {Array<Game_Battler>} 後衛メンバー。
      */
     Game_Unit.prototype.rearMembers = function() {
         return this.members().filter(member => member.battlePosition() !== 0);
@@ -1078,7 +1078,7 @@
     /**
      * 後衛の生存メンバーを得る。
      * 
-     * @return {Array<Game_Battler>} 後衛メンバー。
+     * @returns {Array<Game_Battler>} 後衛メンバー。
      */
     Game_Unit.prototype.rearAliveMembers = function() {
         return this.aliveMembers().filter(member => member.battlePosition() !== 0);
@@ -1086,7 +1086,7 @@
     /**
      * 後衛の死亡メンバーを得る。
      * 
-     * @return {Array<Game_Battler>} 後衛メンバー。
+     * @returns {Array<Game_Battler>} 後衛メンバー。
      */
     Game_Unit.prototype.rearDeadMembers = function() {
         return this.deadMembers().filter(member => member.battlePosition() !== 0);
@@ -1096,7 +1096,7 @@
      * 射程距離内のメンバーを得る。
      * 
      * @param {Number} range 射程距離
-     * @return {Array<Game_Battler>} メンバーの配列
+     * @returns {Array<Game_Battler>} メンバーの配列
      */
     Game_Unit.prototype.membersWithRange = function(range) {
         return this.members().filter(member => member.battlePosition() <= range);
@@ -1106,7 +1106,7 @@
      * 射程距離内の生存メンバーを得る。
      * 
      * @param {Number} range 射程距離。
-     * @return {Array<Game_Battler>} メンバーの配列
+     * @returns {Array<Game_Battler>} メンバーの配列
      */
     Game_Unit.prototype.aliveMembersWithRange = function(range) {
         return this.aliveMembers().filter(member => member.battlePosition() <= range);
@@ -1116,7 +1116,7 @@
      * 射程距離内の死亡メンバーを得る。
      * 
      * @param {Number} range 射程距離。
-     * @return {Array<Game_Battler>} メンバーの配列
+     * @returns {Array<Game_Battler>} メンバーの配列
      */
     Game_Unit.prototype.deadMembersWithRange = function(range) {
         return this.deadMembers().filter(member => member.battlePosition() <= range);
@@ -1124,7 +1124,7 @@
     /**
      * 射程距離内メンバーの、ターゲット率の合計を得る。
      * 
-     * @return {Number} ターゲット率合計
+     * @returns {Number} ターゲット率合計
      */
     Game_Unit.prototype.tgrSumWithRange = function(range) {
         return this.aliveMembersWithRange(range).reduce((r, member) => r + member.tgr, 0);
@@ -1134,7 +1134,7 @@
      * 射程距離を加味した、ランダムなターゲットを得る。
      * 
      * @param {Number} range 射程距離
-     * @return {Game_Battler} ランダムなターゲット
+     * @returns {Game_Battler} ランダムなターゲット
      */
     Game_Unit.prototype.randomTargetWithRange = function(range) {
         let tgrRand = Math.random() * this.tgrSumWithRange(range);
@@ -1152,7 +1152,7 @@
      * 射程距離を加味したランダムな死亡ターゲットを得る。
      * 
      * @param {Number} range 射程距離
-     * @return {Game_Battler} ランダムな死亡ターゲット
+     * @returns {Game_Battler} ランダムな死亡ターゲット
      */
     Game_Unit.prototype.randomDeadTargetWithRange = function(range) {
         const members = this.deadMembersWithRange(range);
@@ -1166,7 +1166,7 @@
      * 
      * @param {Number} index インデックス番号
      * @param {Number} range 射程距離
-     * @return {Game_Battler} indexで指定したメンバーが生存していれば、そのメンバーが返る。
+     * @returns {Game_Battler} indexで指定したメンバーが生存していれば、そのメンバーが返る。
      *                        生存していなければ、生存メンバーの先頭が返る。
      */
     Game_Unit.prototype.smoothTargetWithRange = function(index, range) {
@@ -1179,7 +1179,7 @@
      * 
      * @param {Number} インデックス番号
      * @param {Number} 射程距離
-     * @return {Game_Battler} Game_Battlerオブジェクト。
+     * @returns {Game_Battler} Game_Battlerオブジェクト。
      *         indexで指定した対象が死亡していない場合、deadMembers()の先頭が返る。
      */
     Game_Unit.prototype.smoothDeadTargetWithRange = function(index, range) {
@@ -1192,7 +1192,7 @@
      * 
      * @param {Number} インデックス番号
      * @param {Number} 射程距離
-     * @return {Game_Battler} Game_Battlerオブジェクト。
+     * @returns {Game_Battler} Game_Battlerオブジェクト。
      *         indexで指定した対象が射程距離外の場合、射程距離内の先頭メンバーを得る。
      */
     Game_Unit.prototype.smoothDeadAndAliveTarget = function(index, range) {
@@ -1344,7 +1344,7 @@
     /**
      * 現在の選択が選択可能かどうかを取得する。
      * 
-     * @return {Boolean} 選択可能な場合にtrue, それ以外はfalse
+     * @returns {Boolean} 選択可能な場合にtrue, それ以外はfalse
      * !!!overwrite!!! Window_BattleEnemy_isCurrentItemEnabled
      */
     Window_BattleEnemy.prototype.isCurrentItemEnabled = function() {

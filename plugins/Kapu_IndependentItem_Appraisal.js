@@ -222,7 +222,7 @@ function Scene_Appraise() {
      * 鑑定価格レートを得る。
      * 
      * @param {String} arg パラメータとして渡された鑑定価格レート文字列
-     * @return {Number} 鑑定価格レート
+     * @returns {Number} 鑑定価格レート
      */
     const _getApprisePriceRate = function(arg) {
         const rate = Number(arg);
@@ -234,7 +234,7 @@ function Scene_Appraise() {
      * 最小鑑定価格を得る。
      * 
      * @param {String} arg パラメータとして渡された最小鑑定価格文字列
-     * @return {Number} 最小鑑定価格
+     * @returns {Number} 最小鑑定価格
      */
     const _getMinAppraisePrice = function(arg) {
         const price = Number(arg);
@@ -305,7 +305,7 @@ function Scene_Appraise() {
      * 鑑定アイテムを得る。
      * 
      * @param {String} itemStr アイテム文字列
-     * @return {Data_Item} 該当するアイテムオブジェクト
+     * @returns {Data_Item} 該当するアイテムオブジェクト
      */
     const _getAppraisedItem = function(itemStr) {
         const args = itemStr.split(":");
@@ -365,7 +365,7 @@ function Scene_Appraise() {
      * アイテムの鑑定レベルを取得する。
      * 
      * @param {Object} item アイテム/武器/防具
-     * @return {number} 鑑定レベルが返る。
+     * @returns {number} 鑑定レベルが返る。
      */
     DataManager.getItemAppraiseLevel = function(item) {
         let level = 0;
@@ -383,7 +383,7 @@ function Scene_Appraise() {
      * itemの鑑定価格を取得する。
      * 
      * @param {Data_Item} item アイテム(Item/Weapon/Armor)
-     * @return {number} 鑑定価格が返る。
+     * @returns {number} 鑑定価格が返る。
      */
     DataManager.getItemAppraisePrice = function(item) {
         let price = Number(item.meta.appraisePrice);
@@ -402,7 +402,7 @@ function Scene_Appraise() {
      * itemを表すIDを文字列化したものを得る。
      * 
      * @param {Data_Item} アイテム
-     * @return {String} 文字列化したものを返す。
+     * @returns {String} 文字列化したものを返す。
      */
     DataManager.getItemStr = function(item) {
         if (DataManager.isItem(item)) {
@@ -422,7 +422,7 @@ function Scene_Appraise() {
      * unusedItemで未所持アイテムがクリアされてしまう。
      * 
      * @param {Object} baseItem DataItem/DataWeapon/DataArmor のいずれか
-     * @return {Object} 登録したアイテム。登録に失敗した場合にはnull.
+     * @returns {Object} 登録したアイテム。登録に失敗した場合にはnull.
      */
     DataManager.registerNewIndependentReward = function(baseItem) {
         const newItem = DataManager.registerNewIndependentData(baseItem);
@@ -448,7 +448,7 @@ function Scene_Appraise() {
      * 他の場所(倉庫機能実装とか)に保管される場合には、本メソッドに使用判定を追加すること。
      * 
      * @param {Object} independentItem 個別アイテムオブジェクト(DataItem/DataWeapon/DataArmor)
-     * @return {Boolean} 使用されている場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 使用されている場合にはtrue, それ以外はfalse
      */
     DataManager.isIndependentItemUsed = function(independentItem) {
         return _DataManager_isIndependentItemUsed.call(this, independentItem)
@@ -492,7 +492,7 @@ function Scene_Appraise() {
      * 
      * @param {Number} kind アイテム種類(1:道具,2:武器,3:防具)
      * @param {Number} dataId データID
-     * @return {Object} アイテムデータ(DataItem/DataWeapon/DataArmor)。
+     * @returns {Object} アイテムデータ(DataItem/DataWeapon/DataArmor)。
      *                 kind,dataIdに相当するデータが無い場合にはnullが返る。
      */
     Game_Enemy.prototype.itemObject = function(kind, dataId) {
@@ -562,7 +562,7 @@ function Scene_Appraise() {
      * 
      * @param {Data_Item} a アイテムA
      * @param {Data_Item} b アイテムB
-     * @return {Number} アイテムAがアイテムBより前にある場合には負数。
+     * @returns {Number} アイテムAがアイテムBより前にある場合には負数。
      * アイテムAがアイテムBより後にある場合には正数。
      * それ以外は0が返る。
      */
@@ -729,7 +729,7 @@ function Scene_Appraise() {
     /**
      * アイテムの最大数を取得する。
      * 
-     * @return {Number} アイテムの最大数
+     * @returns {Number} アイテムの最大数
      */
     Window_AppraiseItemList.prototype.maxItems = function() {
         return this._items.length;
@@ -748,7 +748,7 @@ function Scene_Appraise() {
     /**
      * 選択されているアイテムを得る。
      * 
-     * @return {Data_Item} アイテム(Item/Weapon/Armor)
+     * @returns {Data_Item} アイテム(Item/Weapon/Armor)
      */
     Window_AppraiseItemList.prototype.item = function() {
         return this._items[this.index()];
@@ -776,7 +776,7 @@ function Scene_Appraise() {
     /**
      * 現在の選択項目が有効かどうかを判定する。
      * 
-     * @return {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Window_AppraiseItemList.prototype.isCurrentItemEnabled = function() {
         return this.isEnabled(this._items[this.index()]);
@@ -801,7 +801,7 @@ function Scene_Appraise() {
      * itemの鑑定価格を取得する。
      * 
      * @param {Data_Item} item アイテム(Item/Weapon/Armor)
-     * @return {Number} 鑑定価格
+     * @returns {Number} 鑑定価格
      */
     Window_AppraiseItemList.prototype.itemAppraisePrice = function(item) {
         return DataManager.getItemAppraisePrice(item);
@@ -810,7 +810,7 @@ function Scene_Appraise() {
     /**
      * アイテムの鑑定レベルを得る。
      * 
-     * @return {Number} 鑑定レベルが返る。未設定時は0が返る。
+     * @returns {Number} 鑑定レベルが返る。未設定時は0が返る。
      */
     Window_AppraiseItemList.prototype.itemAppraiseLevel = function(item) {
         return DataManager.getItemAppraiseLevel(item);
@@ -964,7 +964,7 @@ function Scene_Appraise() {
     /**
      * アイテム/スキルの鑑定レベルを取得する。
      * 
-     * @return {Number} 鑑定レベル。
+     * @returns {Number} 鑑定レベル。
      */
     Scene_Appraise.prototype.itemAppraiseLevel = function() {
         // 複数の鑑定レベルを持っているならば、そのうち最も高いものを返す。
@@ -994,7 +994,7 @@ function Scene_Appraise() {
     /**
      * アイテムウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_Appraise.prototype.itemCountWindowRect = function() {
         const ww = 480;
@@ -1022,7 +1022,7 @@ function Scene_Appraise() {
     /**
      * アイテムリストウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域を表すRectangleオブジェクト。
+     * @returns {Rectangle} ウィンドウ矩形領域を表すRectangleオブジェクト。
      */
     Scene_Appraise.prototype.itemListWindowRect = function() {
         const rect = this.itemCountWindowRect();
@@ -1048,7 +1048,7 @@ function Scene_Appraise() {
     /**
      * 結果ウィンドウをを配置するウィンドウ矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域を表すRectangleオブジェクト
+     * @returns {Rectangle} ウィンドウ矩形領域を表すRectangleオブジェクト
      */
     Scene_Appraise.prototype.resultWindowRect = function() {
         const ww = 640;
@@ -1113,7 +1113,7 @@ function Scene_Appraise() {
     /**
      * 継続可能かどうかを判定する。
      * 
-     * @return {Boolean} 継続可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 継続可能な場合にはtrue, それ以外はfalse
      */
     Scene_Appraise.prototype.isContinuous = function() {
         if (DataManager.isItem(this._item)) {
@@ -1166,7 +1166,7 @@ function Scene_Appraise() {
          * 
          * @param {Game_BattlerBase} target 対象
          * @param {DataEffect} effect エフェクトデータ
-         * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testItemEffect = function(target, effect) {
             if (Game_Action.EFFECT_APPRAISE
@@ -1250,7 +1250,7 @@ function Scene_Appraise() {
     /**
      * 所持金ウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_AppraiseShop.prototype.goldWindowRect = function() {
         const ww = this.mainCommandWidth();
@@ -1274,7 +1274,7 @@ function Scene_Appraise() {
     /**
      * コマンドウィンドウの矩形領域を取得する。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_AppraiseShop.prototype.commandWindowRect = function() {
         const ww = this.mainCommandWidth();
@@ -1303,7 +1303,7 @@ function Scene_Appraise() {
     /**
      * アイテムウィンドウ矩形領域を取得する。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_AppraiseShop.prototype.itemWindowRect = function() {
         const wx = 0;
@@ -1328,7 +1328,7 @@ function Scene_Appraise() {
     /**
      * 結果ウィンドウのウィンドウ矩形領域を取得する。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_AppraiseShop.prototype.resultWindowRect = function() {
         return this.itemWindowRect();

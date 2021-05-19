@@ -45,7 +45,7 @@
      * アイテムエントリを得る。
      * 
      * @param {Object} item アイテム
-     * @return {ItemEntry} アイテムエントリ
+     * @returns {ItemEntry} アイテムエントリ
      * !!!overwrite!!! Game_Shop.getItemEntryByItem
      */
     Game_Shop.prototype.getItemEntryByItem = function(item) {
@@ -67,7 +67,7 @@
      * 在庫品エントリを得る。
      * 
      * @param {Data_Item} item アイテム
-     * @return {ItemEntry} 在庫品エントリ
+     * @returns {ItemEntry} 在庫品エントリ
      */
     Game_Shop.prototype.getStokEntry = function(item) {
         let kind = 0;
@@ -107,7 +107,7 @@
     /**
      * 最大売却数を取得する。
      * 
-     * @return {Number} 最大売却数
+     * @returns {Number} 最大売却数
      * !!!overwrite!!! Scene_TwldShop.maxSell
      */
     Scene_TwldShop.prototype.maxSell = function() {

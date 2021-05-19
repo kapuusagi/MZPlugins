@@ -82,7 +82,7 @@ function Game_CharaMakeItem_Profile() {
      * キャラクターメイキング項目を取得する。
      * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
      * 
-     * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+     * @returns {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
@@ -144,7 +144,7 @@ function Game_CharaMakeItem_Profile() {
     /**
      * この項目の識別名を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Profile.prototype.name = function() {
         return textItemNameProfile;
@@ -152,7 +152,7 @@ function Game_CharaMakeItem_Profile() {
     /**
      * この項目の説明を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Profile.prototype.description = function() {
         return textItemDescriptionProfile;
@@ -162,7 +162,7 @@ function Game_CharaMakeItem_Profile() {
      * 編集中のテキストを得る。
      * 
      * @param {object} windowEntry createSelectWindow()で返したウィンドウ
-     * @return {string} 編集項目の選択値(テキスト)
+     * @returns {string} 編集項目の選択値(テキスト)
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Profile.prototype.editingText = function(windowEntry) {

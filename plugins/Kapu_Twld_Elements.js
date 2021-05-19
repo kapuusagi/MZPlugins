@@ -149,7 +149,7 @@
      * elementIdで指定される属性が、物理属性かどうかを取得する。
      * 
      * @param {Number} elementId 属性ID
-     * @return {Boolean} 物理属性の場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 物理属性の場合にはtrue, それ以外はfalse
      */
     DataManager.isPhysicalElement = function(elementId) {
         return physicalElementIds.includes(elementId);
@@ -159,7 +159,7 @@
      * elementIdで指定される属性が、魔法属性かどうかを取得する。
      * 
      * @param {Number} elementId 属性ID
-     * @return {Boolean} 魔法属性の場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 魔法属性の場合にはtrue, それ以外はfalse
      */
     DataManager.isMagicalElement = function(elementId) {
         return magicalElementIds.includes(elementId);

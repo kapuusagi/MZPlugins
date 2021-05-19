@@ -322,7 +322,7 @@
      * 値を得る。
      * 
      * @param {Object} args 引数
-     * @return {Number} 値
+     * @returns {Number} 値
      */
     const _getValue = function(args) {
         const variableId = Number(valueVariable) || 0;
@@ -468,7 +468,7 @@
      * 
      * @param {number} dataId データID 
      * @param {number} value 値
-     * @return {string} 文字列
+     * @returns {string} 文字列
      */
     TextManager.traitBasicParam = function(dataId, value) {
         const fmt = (value >= 0) ? textTraitBasicParamUp : textTraitBasicParamDown;
@@ -536,7 +536,7 @@
          * 
          * Note: AGI, LUKについて置き換えるためフックする。
          * @param {Number} paramId パラメータID
-         * @return {Number} パラメータ値
+         * @returns {Number} パラメータ値
          */
         Game_BattlerBase.prototype.param = function(paramId) {
             if (overwriteAGI && (paramId === 6)) {
@@ -554,7 +554,7 @@
          * 
          * Note: 一部のメソッドで直接呼び出されるため、フックして置き換える必要がある。
          * @param {Number} paramId パラメータID
-         * @return {Number} パラメータ値
+         * @returns {Number} パラメータ値
          */
         Game_BattlerBase.prototype.paramBasePlus = function(paramId) {
             if (overwriteAGI && (paramId === 6)) {
@@ -571,7 +571,7 @@
      * 基本パラメータを得る。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} パラメータの値
+     * @returns {Number} パラメータの値
      */
     Game_BattlerBase.prototype.basicParam = function(paramId) {
         const baseValue = this.basicParamBase(paramId);
@@ -585,7 +585,7 @@
      * 基本パラメータのベース値を得る。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} パラメータの値
+     * @returns {Number} パラメータの値
      */
     Game_BattlerBase.prototype.basicParamBase = function(paramId) {
         return this._basicParams[paramId] + this._basicParamsAdd[paramId];
@@ -597,7 +597,7 @@
          * 基本パラメータの装備などによる加算値の合計を得る。
          * 
          * @param {Number} paramId パラメータID
-         * @return {Number} パラメータの値
+         * @returns {Number} パラメータの値
          */
         Game_BattlerBase.prototype.basicParamPlus = function(paramId) {
             return this.traitsSum(Game_BattlerBase.TRAIT_BASIC_PARAM, paramId);
@@ -607,7 +607,7 @@
          * 基本パラメータの装備などによる加算値の合計を得る。
          * 
          * @param {Number} paramId パラメータID
-         * @return {Number} パラメータの値
+         * @returns {Number} パラメータの値
          */
         // eslint-disable-next-line no-unused-vars
         Game_BattlerBase.prototype.basicParamPlus = function(paramId) {
@@ -620,7 +620,7 @@
          * 基本パラメータ乗算レートを得る。
          * 
          * @param {Number} paramId パラメータID
-         * @return {Number} 基本パラメータレート
+         * @returns {Number} 基本パラメータレート
          */
         Game_BattlerBase.prototype.basicParamRate = function(paramId) {
             return Math.max(0, 1.0 + this.traitsSum(Game_BattlerBase.TRAIT_BASIC_PARAM_RATE, paramId));
@@ -630,7 +630,7 @@
          * 基本パラメータ乗算レートを得る。
          * 
          * @param {Number} paramId パラメータID
-         * @return {Number} 基本パラメータレート
+         * @returns {Number} 基本パラメータレート
          */
         // eslint-disable-next-line no-unused-vars
         Game_BattlerBase.prototype.basicParamRate = function(paramId) {
@@ -642,7 +642,7 @@
      * 基本パラメータの最小値を得る。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} パラメータ最大値
+     * @returns {Number} パラメータ最大値
      */
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.basicParamMin = function(paramId) {
@@ -652,7 +652,7 @@
      * 基本パラメータの最大値を得る。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} パラメータ最大値
+     * @returns {Number} パラメータ最大値
      */
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.basicParamMax = function(paramId) {
@@ -702,7 +702,7 @@
      * 基本パラメータ生値を取得する。
      * 
      * @param {Number} paramId パラメータID
-     * @return {Number} パラメータ値
+     * @returns {Number} パラメータ値
      */
     Game_Actor.prototype.basicParamRaw = function(paramId) {
         return this._basicParams[paramId];
@@ -757,7 +757,7 @@
          * 
          * @param {Game_BattlerBase} target 対象
          * @param {DataEffect} effect エフェクトデータ
-         * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testItemEffect = function(target, effect) {
             if (effect.code === Game_Action.EFFECT_GAIN_BASIC_PARAM) {

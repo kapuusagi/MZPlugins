@@ -92,7 +92,7 @@
      * スキルの使用コストが支払える状態かどうかを得る。
      * 
      * @param {DataSkill} skill 
-     * @return {Boolean} スキルコストが支払える場合にはtrue, それ以外はfalse
+     * @returns {Boolean} スキルコストが支払える場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.canPaySkillCost = function(skill) {
         return _Game_BattlerBase_canPaySkillCost.call(this, skill)
@@ -103,7 +103,7 @@
      * スキルの触媒アイテムコストが払えるかどうかを得る。
      * 
      * @param {DataSkill} skill スキル
-     * @return {Boolean} 触媒アイテムがある場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 触媒アイテムがある場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.canPaySkillItemCost = function(skill) {
         if (this.isActor() && skill.itemCost) {
@@ -147,7 +147,7 @@
      * スキル使用時に消費するアイテムを得る。
      * 
      * @param {DataSkill} skill スキル
-     * @return {Object} アイテム
+     * @returns {Object} アイテム
      */    
     Game_BattlerBase.prototype.skillConsumeItem = function(skill) {
         if (skill.itemCost.kind === 1) {

@@ -481,7 +481,7 @@ function Scene_UnregisterActor() {
      * 
      * @param {Array<string>} 項目冥配列
      * @param {Game_Actor} キャラメイク対象のアクター
-     * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+     * @returns {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
     DataManager.charaMakeItems = function(itemNames) {
         const charaMakeItems = this.createCharaMakeItems();
@@ -503,7 +503,7 @@ function Scene_UnregisterActor() {
      * キャラクターメイキング項目を取得する。
      * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
      * 
-     * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+     * @returns {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
     DataManager.createCharaMakeItems = function() {
         const items = [];
@@ -524,7 +524,7 @@ function Scene_UnregisterActor() {
     /**
      * この項目の識別名を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem.prototype.name = function() {
         return "";
@@ -533,7 +533,7 @@ function Scene_UnregisterActor() {
     /**
      * この項目の説明を取得する。
      * 
-     * @return {string} 説明
+     * @returns {string} 説明
      */
     Game_CharaMakeItem.prototype.description = function() {
         return "";
@@ -597,7 +597,7 @@ function Scene_UnregisterActor() {
      * 編集中のテキストを得る。
      * 
      * @param {object} windowEntry createSelectWindow()で返したウィンドウ
-     * @return {string} 編集項目の選択値(テキスト)
+     * @returns {string} 編集項目の選択値(テキスト)
      */
     Game_CharaMakeItem.prototype.editingText = function(windowEntry) {
         const window = windowEntry.selectWindow;
@@ -684,7 +684,7 @@ function Scene_UnregisterActor() {
      * 
      * @param {Window} windowEntry ウィンドウエントリ
      * @param {Game_Actor} actor アクター
-     * @return {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem.prototype.isValidSelection = function(windowEntry, actor) {
@@ -698,7 +698,7 @@ function Scene_UnregisterActor() {
      * Note: Window_CharaMakeItemSelection を使用している場合に、選択可能な項目を返すために実装する。
      *       Window_CharaMakeItemSelection を使用しない場合には実装不要。
      * 
-     * @return {Array<object>} アイテム一覧
+     * @returns {Array<object>} アイテム一覧
      */
     Game_CharaMakeItem.prototype.items = function() {
         return [];
@@ -755,7 +755,7 @@ function Scene_UnregisterActor() {
     /**
      * この項目の識別名を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Name.prototype.name = function() {
         return textItemNameName;
@@ -764,7 +764,7 @@ function Scene_UnregisterActor() {
     /**
      * この項目の説明を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_Name.prototype.description = function() {
         return textItemDescriptionName;
@@ -785,7 +785,7 @@ function Scene_UnregisterActor() {
      * 編集中のテキストを得る。
      * 
      * @param {object} windowEntry createSelectWindow()で返したウィンドウ
-     * @return {string} 編集項目の選択値(テキスト)
+     * @returns {string} 編集項目の選択値(テキスト)
      */
     Game_CharaMakeItem_Name.prototype.editingText = function(windowEntry) {
         const windowNameEdit = windowEntry.windows[0];
@@ -878,7 +878,7 @@ function Scene_UnregisterActor() {
      * 
      * @param {Window} windowEntry ウィンドウエントリ
      * @param {Game_Actor} actor アクター
-     * @return {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Name.prototype.isValidSelection = function(windowEntry, actor) {
@@ -954,7 +954,7 @@ function Scene_UnregisterActor() {
      * actorId に対応するGame_Actorオブジェクトを取得する。
      * 
      * @param {Number} actorId アクターID
-     * @return {Game_Actor} Game_Actorオブジェクト。該当するIDのアクターが存在しない場合にはnull。
+     * @returns {Game_Actor} Game_Actorオブジェクト。該当するIDのアクターが存在しない場合にはnull。
      * !!!overwrite!!! Game_Actors.actor()
      *      未登録データのアクターIDが要求されたとき、nullを返すためにオーバーライドする。
      */
@@ -971,7 +971,7 @@ function Scene_UnregisterActor() {
     /**
      * 登録可能ID配列を得る。
      * 
-     * @return {Array<number>} ID配列
+     * @returns {Array<number>} ID配列
      */
     Game_Actors.prototype.registableIds = function() {
         return this._registableIds.concat();
@@ -1015,7 +1015,7 @@ function Scene_UnregisterActor() {
      * アクターデータが存在するかどうかを取得する。
      * 
      * @param {Number} actorId アクターID
-     * @return {Boolean} アクターデータが存在する場合にはtrue, 存在しない場合にはfalse
+     * @returns {Boolean} アクターデータが存在する場合にはtrue, 存在しない場合にはfalse
      */
     Game_Actors.prototype.isActorDataExists = function(actorId) {
         return this._data[actorId] ? true : false;
@@ -1039,7 +1039,7 @@ function Scene_UnregisterActor() {
     /**
      * 登録可能なアクターIDを得る。
      * 
-     * @return {number} アクターID。登録可能なアクターIDが無い場合には0が返る。
+     * @returns {number} アクターID。登録可能なアクターIDが無い場合には0が返る。
      */
     Game_Actors.prototype.registableActorId = function() {
         for (const actorId of this.registableIds()) {
@@ -1174,7 +1174,7 @@ function Scene_UnregisterActor() {
     /**
      * 現在の選択が選択可能かどうかを取得する。
      * 
-     * @return {Boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
+     * @returns {Boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
     Window_CharaMakeItemSelection.prototype.isCurrentItemEnabled = function() {
         return this.isEnabled(this.index());
@@ -1203,7 +1203,7 @@ function Scene_UnregisterActor() {
     /**
      * 項目数を得る。
      * 
-     * @return {Number} 項目数。
+     * @returns {Number} 項目数。
      * Note: 派生クラスでは選択項目数を与えるために実装する。
      */
     Window_CharaMakeItemSelection.prototype.maxItems = function() {
@@ -1299,7 +1299,7 @@ function Scene_UnregisterActor() {
     /**
      * 項目数を得る。
      * 
-     * @return {Number} 項目数。
+     * @returns {Number} 項目数。
      * Note: 派生クラスでは選択項目数を与えるために実装する。
      */
     Window_CharaMakeItemList.prototype.maxItems = function() {
@@ -1308,7 +1308,7 @@ function Scene_UnregisterActor() {
     /**
      * 選択項目を得る。
      * 
-     * @return {Game_CharaMakeItem} 項目
+     * @returns {Game_CharaMakeItem} 項目
      */
     Window_CharaMakeItemList.prototype.item = function() {
         const index = this.index();
@@ -1366,7 +1366,7 @@ function Scene_UnregisterActor() {
     /**
      * 現在の選択が選択可能かどうかを取得する。
      * 
-     * @return {Boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
+     * @returns {Boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
     Window_CharaMakeItemList.prototype.isCurrentItemEnabled = function() {
         const index = this.index();
@@ -1441,7 +1441,7 @@ function Scene_UnregisterActor() {
     /**
      * 選択されているアクターIDを得る。
      * 
-     * @return {number} 選択されているアクターのIDを得る。未選択の場合には0が返る。
+     * @returns {number} 選択されているアクターのIDを得る。未選択の場合には0が返る。
      */
     Window_RegisteredActorList.prototype.actorId = function() {
         const index = this.index();
@@ -1456,7 +1456,7 @@ function Scene_UnregisterActor() {
     /**
      * 項目数を得る。
      * 
-     * @return {Number} 項目数。
+     * @returns {Number} 項目数。
      */
     Window_RegisteredActorList.prototype.maxItems = function() {
         return this._registeredActorIds.length;
@@ -1645,7 +1645,7 @@ function Scene_UnregisterActor() {
     /**
      * 選択ウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} 選択ウィンドウの矩形領域
+     * @returns {Rectangle} 選択ウィンドウの矩形領域
      */
     Scene_CharaMake.prototype.selectWindowRect = function() {
         const rect = this.charaMakeItemListWindowRect();
@@ -1691,7 +1691,7 @@ function Scene_UnregisterActor() {
     /**
      * キャラクターメイキング項目選択ウィンドウの矩形領域を取得する。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_CharaMake.prototype.charaMakeItemListWindowRect = function() {
         const wx = 0;
@@ -1704,7 +1704,7 @@ function Scene_UnregisterActor() {
     /**
      * コマンドウィンドウ幅を取得する。
      * 
-     * @return {Number} コマンドウィンドウ幅
+     * @returns {Number} コマンドウィンドウ幅
      */
     Scene_CharaMake.prototype.mainCommandWidth = function() {
         return 320;
@@ -1923,7 +1923,7 @@ function Scene_UnregisterActor() {
     /**
      * ステータスウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_SelectRegisteredActor.prototype.statusWindowRect = function() {
         const wx = this.mainCommandWidth();
@@ -1953,7 +1953,7 @@ function Scene_UnregisterActor() {
     /**
      * アクターリストウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_SelectRegisteredActor.prototype.actorListWindowRect = function() {
         const wx = 0;

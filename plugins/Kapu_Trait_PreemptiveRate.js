@@ -170,7 +170,7 @@
     /**
      * マップの基本先制率を得る。
      * 
-     * @return {number} 先制率
+     * @returns {number} 先制率
      */
     Game_Map.prototype.ratePreemptive = function() {
         return this._ratePreemptive;
@@ -182,7 +182,7 @@
      * このパーティーの先制攻撃率を得る。
      * 
      * @param {Number} troopAgi 的グループのAGI
-     * @return {Number} 先制攻撃率
+     * @returns {Number} 先制攻撃率
      * !!!overwrite!!!
      */
     Game_Party.prototype.ratePreemptive = function(troopAgi) {

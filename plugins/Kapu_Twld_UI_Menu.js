@@ -67,7 +67,7 @@
     /**
      * 最大カラム数を得る。
      * 
-     * @return {Number} カラム数
+     * @returns {Number} カラム数
      * !!!overwrite!!! Window_MenuStatus.maxCols()
      *     メニューのカラム数を動的に設定するためにオーバーライドする。
      */
@@ -77,7 +77,7 @@
     /**
      * 有効な行数を得る。
      * 
-     * @return {Number} 行数
+     * @returns {Number} 行数
      * !!!overwrite!!! Window_MenuStatus.numVisibleRows 
      *     メニューのレイアウト変更のため、オーバーライドする。
      */
@@ -205,7 +205,7 @@
      * ステータス矩形領域を得る。
      * 
      * @param {Number} index インデックス番号
-     * @return {Rectangle} ステータス領域の矩形領域
+     * @returns {Rectangle} ステータス領域の矩形領域
      */
     Window_MenuStatus.prototype.statusRect = function(index) {
         const itemRect = this.itemRect(index);

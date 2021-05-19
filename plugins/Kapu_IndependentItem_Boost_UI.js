@@ -580,7 +580,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * アイテム数を得る。
      * 
-     * @return {number} アイテム数
+     * @returns {number} アイテム数
      */
     Window_BlacksmithItemList.prototype.maxItems = function() {
         return this._items ? this._items.length : 1;
@@ -589,7 +589,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 選択されているアイテムを得る。
      * 
-     * @return {object} アイテム
+     * @returns {object} アイテム
      */
     Window_BlacksmithItemList.prototype.item = function() {
         return this._items[this.index()];
@@ -608,7 +608,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 現在選択している項目が選択可能かどうかを判定して返す。
      * 
-     * @return {Boolean} 選択可能な場合にはtrue, 選択できない場合にはfalse
+     * @returns {Boolean} 選択可能な場合にはtrue, 選択できない場合にはfalse
      */
     Window_BlacksmithItemList.prototype.isCurrentItemEnabled = function() {
         return this.isEnabled(this._items[this.index()]);
@@ -618,7 +618,7 @@ function Window_BlacksmithNameEdit() {
      * itemで指定される項目が有効かどうかを判定して返す。
      * 
      * @param {object} アイテム
-     * @return {boolean} 有効な場合にはtrue, 無効な場合にはfalse
+     * @returns {boolean} 有効な場合にはtrue, 無効な場合にはfalse
      */
     Window_BlacksmithItemList.prototype.isEnabled = function(item) {
         if (item) {
@@ -637,7 +637,7 @@ function Window_BlacksmithNameEdit() {
      * itemで指定されるアイテムの価格を得る。
      * 
      * @param {Data_Item} item アイテム
-     * @return {Number} 価格が返る。
+     * @returns {Number} 価格が返る。
      */
     Window_BlacksmithItemList.prototype.price = function(item) {
         switch (this._mode) {
@@ -797,7 +797,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 最大カラム数を取得する。
      * 
-     * @return {Number} カラム数
+     * @returns {Number} カラム数
      */
     Window_BlacksmithCatalystList.prototype.maxCols = function() {
         return 1;
@@ -806,7 +806,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 最大項目数を取得する。
      * 
-     * @return {Number} 最大項目数
+     * @returns {Number} 最大項目数
      */
     Window_BlacksmithCatalystList.prototype.maxItems = function() {
         return this._data ? this._data.length : 1;
@@ -815,7 +815,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 現在選択されているアイテムを取得する。
      * 
-     * @return {Data_Item} 触媒アイテム。
+     * @returns {Data_Item} 触媒アイテム。
      */
     Window_BlacksmithCatalystList.prototype.item = function() {
         const index = this.index();
@@ -825,7 +825,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 現在選択している項目が選択可能かどうかを判定する。
      * 
-     * @return {boolean} 現在選択している項目が選択可能な場合にはtrue。
+     * @returns {boolean} 現在選択している項目が選択可能な場合にはtrue。
      */
     Window_BlacksmithCatalystList.prototype.isCurrentItemEnabled = function() {
         return this.isEnabled(this.item());
@@ -835,7 +835,7 @@ function Window_BlacksmithNameEdit() {
      * itemで指定される項目が適用可能かどうかを判定する。
      * 
      * @param {object} item 対象のアイテム
-     * @return {boolean} 適用可能な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 適用可能な場合にはtrue, それ以外はfalse
      */
     Window_BlacksmithCatalystList.prototype.isEnabled = function(item) {
         if (!item) {
@@ -1035,7 +1035,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 最大桁数を得る。
      * 
-     * @return {number} 最大桁数
+     * @returns {number} 最大桁数
      */
     Window_BlacksmithNumberInput.prototype.maxDigits = function() {
         let digit = 1;
@@ -1244,7 +1244,7 @@ function Window_BlacksmithNameEdit() {
 
     /**
      * 最大項目数を取得する。
-     * @return {Number} 最大項目数
+     * @returns {Number} 最大項目数
      */
     Window_BlacksmithConfirm.prototype.maxItems = function() {
         return this._items.length;
@@ -1534,7 +1534,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 確認ウィンドウの矩形領域を作成する。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_BlacksmithShop.prototype.createConfirmWindow = function() {
         const rect = this.confirmWindowRect();
@@ -1745,7 +1745,7 @@ function Window_BlacksmithNameEdit() {
 
     /**
      * 所持金を取得する。
-     * @return {Number} 所持金
+     * @returns {Number} 所持金
      */
     Scene_BlacksmithShop.prototype.money = function() {
         return $gameParty.gold();
@@ -1976,7 +1976,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * シーンがビジーかどうかを判定して返す。
      * 
-     * @return {Boolean} ビジーの場合にはtrue,それ以外はfalse
+     * @returns {Boolean} ビジーの場合にはtrue,それ以外はfalse
      */
     Scene_BlacksmithShop.prototype.isBusy = function() {
         if (this._animationSprite && this._animationTargetSprite.isAnimationPlaying()) {

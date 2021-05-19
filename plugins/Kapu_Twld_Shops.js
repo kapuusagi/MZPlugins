@@ -404,7 +404,7 @@ function Scene_TwldShop() {
     /**
      * 取引があったかどうかを判定して取得する。
      * 
-     * @return {Boolean} 取引があった場合にはtrue, 取引が無かった場合にはfalse
+     * @returns {Boolean} 取引があった場合にはtrue, 取引が無かった場合にはfalse
      */
     Game_Temp.prototype.isShopTransacted = function() {
         return this.isBoughtAny() || this.isSoldAny();
@@ -414,7 +414,7 @@ function Scene_TwldShop() {
     /**
      * 店からの購入があったかどうかを判定して取得する。
      * 
-     * @return {Boolean} 購入があった場合にはtrue, 購入が無かった場合にはfalse.
+     * @returns {Boolean} 購入があった場合にはtrue, 購入が無かった場合にはfalse.
      */
     Game_Temp.prototype.isShopBoughtAny = function() {
         return this._isBoughtAny;
@@ -430,7 +430,7 @@ function Scene_TwldShop() {
     /**
      * 店への売却があったかどうかを判定して取得する。
      * 
-     * @return {Boolean} 売却があった場合にはtrue, 売却がなかった場合にはfalse
+     * @returns {Boolean} 売却があった場合にはtrue, 売却がなかった場合にはfalse
      */
     Game_Temp.prototype.isShopSoldAny = function() {
         return this._isSoldAny;
@@ -488,7 +488,7 @@ function Scene_TwldShop() {
     /**
      * セーブデータに入れるデータを構築する。
      * 
-     * @return {Dictionary} 保存するコンテンツ
+     * @returns {Dictionary} 保存するコンテンツ
      */
     DataManager.makeSaveContents = function() {
         const contents = _DataManager_makeSaveContents.call(this);
@@ -550,7 +550,7 @@ function Scene_TwldShop() {
     /**
      * この店の情報を提供するデータを取得する。
      * 
-     * @return {Data_Shop} 店データ
+     * @returns {Data_Shop} 店データ
      */
     Game_Shop.prototype.shop = function() {
         return $dataShops[this._id];
@@ -559,7 +559,7 @@ function Scene_TwldShop() {
     /**
      * ショップレベルを返す。
      * 
-     * @return {Number} ショップレベル。
+     * @returns {Number} ショップレベル。
      */
     Game_Shop.prototype.level = function() {
         return this._level;
@@ -577,7 +577,7 @@ function Scene_TwldShop() {
     /**
      * 総取引金額を得る。
      * 
-     * @return {Number} 総取引金額
+     * @returns {Number} 総取引金額
      */
     Game_Shop.prototype.transactionAmount = function() {
         return this._transactionAmount;
@@ -621,7 +621,7 @@ function Scene_TwldShop() {
      * アイテム追加条件をテストする。
      * 
      * @param {ItemEntry} itemEntry アイテム
-     * @return {Boolean} 有効な場合にはtrue, 無効な場合にはfalse
+     * @returns {Boolean} 有効な場合にはtrue, 無効な場合にはfalse
      */
     Game_Shop.prototype.testItemCondition = function(itemEntry) {
         if (itemEntry) {
@@ -662,7 +662,7 @@ function Scene_TwldShop() {
     /**
      * 販売品の種類数を取得する。
      * 
-     * @return {Number} 販売品の項目数
+     * @returns {Number} 販売品の項目数
      */
     Game_Shop.prototype.itemCount = function() {
         return this._itemList.length;
@@ -672,7 +672,7 @@ function Scene_TwldShop() {
      * indexで指定されるアイテムを得る。
      * 
      * @param {Number} index インデックス番号
-     * @return {Data_Item} アイテム。該当する項目がない場合にはnull
+     * @returns {Data_Item} アイテム。該当する項目がない場合にはnull
      */
     Game_Shop.prototype.itemAt = function(index) {
         const itemEntry = this._itemList[index];
@@ -694,7 +694,7 @@ function Scene_TwldShop() {
      * この店からの購入価格を得る。
      * 
      * @param {Data_Item} item アイテム
-     * @return {Number} 価格
+     * @returns {Number} 価格
      */
     Game_Shop.prototype.buyingPrice = function(item) {
         const itemEntry = this.getItemEntryByItem(item);
@@ -710,7 +710,7 @@ function Scene_TwldShop() {
     /**
      * この店からの購入価格レートを取得する。
      * 
-     * @return {Number} 販売価格レート(1.0で等倍)
+     * @returns {Number} 販売価格レート(1.0で等倍)
      */
     Game_Shop.prototype.buyingPriceRate = function() {
         return this.shop().buyingPriceRate || 1;
@@ -720,7 +720,7 @@ function Scene_TwldShop() {
      * この店への売却価格を得る。
      * 
      * @param {Data_Item} item アイテム
-     * @return {Number} 売却価格
+     * @returns {Number} 売却価格
      */
     Game_Shop.prototype.sellingPrice = function(item) {
         const itemEntry = this.getItemEntryByItem(item);
@@ -746,7 +746,7 @@ function Scene_TwldShop() {
      * アイテムエントリを得る。
      * 
      * @param {Object} item アイテム
-     * @return {ItemEntry} アイテムエントリ
+     * @returns {ItemEntry} アイテムエントリ
      */
     Game_Shop.prototype.getItemEntryByItem = function(item) {
         const dataShop = this.shop();
@@ -768,7 +768,7 @@ function Scene_TwldShop() {
      * 在庫品エントリを得る。
      * 
      * @param {Data_Item} item アイテム
-     * @return {ItemEntry} 在庫品エントリ
+     * @returns {ItemEntry} 在庫品エントリ
      */
     Game_Shop.prototype.getStokEntry = function(item) {
         let kind = 0;
@@ -851,7 +851,7 @@ function Scene_TwldShop() {
      * アイテムの在庫数を得る。
      * 
      * @param {Data_Item} item アイテム
-     * @return {Number} アイテムの在庫数
+     * @returns {Number} アイテムの在庫数
      */
     Game_Shop.prototype.stok = function(item) {
         const itemEntry = this.getStokEntry(item);
@@ -923,7 +923,7 @@ function Scene_TwldShop() {
      * 店のレベルを取得する。
      * 
      * @param {Number} id 店ID
-     * @return {Number} 店レベル
+     * @returns {Number} 店レベル
      */
     Game_Shops.prototype.shopLevel = function(id) {
         const shop = this.shop(id);
@@ -934,7 +934,7 @@ function Scene_TwldShop() {
      * 店の品数を得る。
      * 
      * @param {Number} id 店ID
-     * @return {Number} 品数
+     * @returns {Number} 品数
      */
     Game_Shops.prototype.shopItemCount = function(id) {
         const shop = this.shop(id);
@@ -972,7 +972,7 @@ function Scene_TwldShop() {
     /**
      * 最大項目数を得る。
      * 
-     * @return {Number} 最大項目数
+     * @returns {Number} 最大項目数
      */
     Window_TwldShopBuy.prototype.maxItems = function() {
         return this._shop.itemCount();
@@ -981,7 +981,7 @@ function Scene_TwldShop() {
     /**
      * 選択されているアイテムを得る。
      * 
-     * @return {Game_Item} アイテム。未選択時はnull。
+     * @returns {Game_Item} アイテム。未選択時はnull。
      */
     Window_TwldShopBuy.prototype.item = function() {
         return this._shop.itemAt(this.index());
@@ -1001,7 +1001,7 @@ function Scene_TwldShop() {
      * 在庫数を得る。
      * 
      * @param {Data_Item} item アイテム
-     * @return {Number} 在庫数
+     * @returns {Number} 在庫数
      */
     Window_TwldShopBuy.prototype.stok = function(item) {
         return this._shop.stok(item);
@@ -1011,7 +1011,7 @@ function Scene_TwldShop() {
      * 価格を取得する。
      * 
      * @param {Data_Item}} item アイテム
-     * @return {Number} 価格
+     * @returns {Number} 価格
      */
     Window_TwldShopBuy.prototype.price = function(item) {
         return this._shop.buyingPrice(item);
@@ -1021,7 +1021,7 @@ function Scene_TwldShop() {
      * itemが選択可能かどうかを判定する。
      * 
      * @param {Data_Item}} item アイテム
-     * @return {Boolean} 選択可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 選択可能な場合にはtrue, それ以外はfalse
      */
     Window_TwldShopBuy.prototype.isEnabled = function(item) {
         return (item && (this.price(item) <= this._money)
@@ -1125,7 +1125,7 @@ function Scene_TwldShop() {
     /**
      * 最大カラム数を得る。
      * 
-     * @return {Number} カラムス
+     * @returns {Number} カラムス
      */
     Window_TwldShopCommand.prototype.maxCols = function() {
         return 1;
@@ -1207,7 +1207,7 @@ function Scene_TwldShop() {
     /**
      * 最大カラム数を得る。
      * 
-     * @return {Number} カラムス
+     * @returns {Number} カラムス
      */
     Window_TwldShopItemCategory.prototype.maxCols = function() {
         return 1;
@@ -1239,7 +1239,7 @@ function Scene_TwldShop() {
     /**
      * アイテム名表示位置Yを得る。
      * 
-     * @return {Number} アイテム名表示位置Y
+     * @returns {Number} アイテム名表示位置Y
      */
     Window_TwldShopNumber.prototype.itemNameY = function() {
         return this.baseTextRect().y + this.itemPadding();
@@ -1248,7 +1248,7 @@ function Scene_TwldShop() {
     /**
      * 合計金額表示位置Yを得る。
      * 
-     * @return {Number} 合計金額表示位置Y
+     * @returns {Number} 合計金額表示位置Y
      */
     Window_TwldShopNumber.prototype.totalPriceY = function() {
         return Math.floor(this.itemNameY() + this.lineHeight() * 2);
@@ -1257,7 +1257,7 @@ function Scene_TwldShop() {
     /**
      * ボタンのY位置を得る。
      * 
-     * @return {Number} ボタンのY位置
+     * @returns {Number} ボタンのY位置
      */
     Window_TwldShopNumber.prototype.buttonY = function() {
         return Math.floor(this.totalPriceY() + this.lineHeight() + 10);
@@ -1377,7 +1377,7 @@ function Scene_TwldShop() {
     /**
      * 購入可能かどうかを取得する。
      * 
-     * @return {Boolean} 購入可能な場合にはtrue, 購入できない場合にはfalse
+     * @returns {Boolean} 購入可能な場合にはtrue, 購入できない場合にはfalse
      */
     Scene_TwldShop.prototype.buyable = function() {
         if (this._shop.itemCount() === 0) {
@@ -1391,7 +1391,7 @@ function Scene_TwldShop() {
     /**
      * コマンドウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_TwldShop.prototype.commandWindowRect = function() {
         const ww = this.mainCommandWidth();
@@ -1417,7 +1417,7 @@ function Scene_TwldShop() {
     /**
      * Window_TwldShopBuyWindowの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_TwldShop.prototype.twldShopBuyWindowRect = function() {
         const goldWindowRect = this.goldWindowRect();
@@ -1444,7 +1444,7 @@ function Scene_TwldShop() {
     /**
      * 売却ウィンドウの位置を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_TwldShop.prototype.sellWindowRect = function() {
         const goldWindowRect = this.goldWindowRect();
@@ -1472,7 +1472,7 @@ function Scene_TwldShop() {
     /**
      * アイテムカテゴリウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_TwldShop.prototype.twldShopItemCategoryWindowRect = function() {
         const commandWindowRect = this.commandWindowRect();
@@ -1575,7 +1575,7 @@ function Scene_TwldShop() {
     /**
      * 最大売却数を取得する。
      * 
-     * @return {Number} 最大売却数
+     * @returns {Number} 最大売却数
      */
     Scene_TwldShop.prototype.maxSell = function() {
         return $gameParty.numItems(this._item);
@@ -1584,7 +1584,7 @@ function Scene_TwldShop() {
     /**
      * 所持金を得る。
      * 
-     * @return {Number} 所持金
+     * @returns {Number} 所持金
      */
     Scene_TwldShop.prototype.money = function() {
         return this._goldWindow.value();
@@ -1594,7 +1594,7 @@ function Scene_TwldShop() {
     /**
      * 所持金単位を得る。
      * 
-     * @return {String} 所持金の単位。
+     * @returns {String} 所持金の単位。
      */
     Scene_TwldShop.prototype.currencyUnit = function() {
         return this._goldWindow.currencyUnit();
@@ -1603,7 +1603,7 @@ function Scene_TwldShop() {
     /**
      * 購入金額を得る。
      * 
-     * @return {Number} 購入金額
+     * @returns {Number} 購入金額
      */
     Scene_TwldShop.prototype.buyingPrice = function() {
         return this._buyWindow.price(this._item);
@@ -1612,7 +1612,7 @@ function Scene_TwldShop() {
     /**
      * 売却金額を得る。
      * 
-     * @return {Number} 売却金額
+     * @returns {Number} 売却金額
      */
     Scene_TwldShop.prototype.sellingPrice = function() {
         return this._shop.sellingPrice(this._item);

@@ -219,7 +219,7 @@ function Scene_Growup() {
     /**
      * ステータス表示領域の矩形領域を得る。
      * 
-     * @return {Rectangle} 矩形領域。
+     * @returns {Rectangle} 矩形領域。
      */
     Window_GrowupActorStatus.prototype.statusAreaRect = function() {
         const rect = this.baseTextRect();
@@ -253,7 +253,7 @@ function Scene_Growup() {
     /**
      * アクター画像を描画するときのフィルターを得る。
      * 
-     * @return {String} 描画フィルター文字列
+     * @returns {String} 描画フィルター文字列
      */
     Window_GrowupActorStatus.prototype.actorImagePaintFilter = function() {
         if (!growupOnDead) {
@@ -440,7 +440,7 @@ function Scene_Growup() {
     /**
      * 選択されている項目を得る。
      * 
-     * @return {GrowupItem} 選択されている項目。 
+     * @returns {GrowupItem} 選択されている項目。 
      */
     Window_GrowupSelect.prototype.item = function() {
         return this.itemAt(this.index());
@@ -450,7 +450,7 @@ function Scene_Growup() {
      * 指定インデックスの項目を得る。
      * 
      * @param {Number} index 
-     * @return {GrowupItem} 選択されている項目。 
+     * @returns {GrowupItem} 選択されている項目。 
      */
     Window_GrowupSelect.prototype.itemAt = function(index) {
         if ((index >= 0) && (index < this._items.length)) {
@@ -496,7 +496,7 @@ function Scene_Growup() {
 
     /**
      * 項目数を得る。
-     * @return {Number} 項目数
+     * @returns {Number} 項目数
      */
     Window_GrowupSelect.prototype.maxItems = function () {
         return this._items.length;
@@ -504,7 +504,7 @@ function Scene_Growup() {
 
     /**
      * 現在の選択項目が有効かどうかを判定する。
-     * @return 有効な場合にはtrue, それ以外はfalse
+     * @returns 有効な場合にはtrue, それ以外はfalse
      */
     Window_GrowupSelect.prototype.isCurrentItemEnabled = function() {
         return this.isEnabled(this.item());
@@ -558,7 +558,7 @@ function Scene_Growup() {
     /**
      * 選択項目が有効かどうかを得る。
      * @param {GrowupItem} item 項目
-     * @return {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Window_GrowupSelect.prototype.isEnabled = function(item) {
         if (item) {
@@ -617,10 +617,10 @@ function Scene_Growup() {
     /**
      * コンテンツの幅を取得する。
      * 
-     * @return {Number} コンテンツの幅
+     * @returns {Number} コンテンツの幅
      */
     Window_ConfirmApply.prototype.maxItemWidth = function() {
-        const maxTextWidth = 0;
+        let maxTextWidth = 0;
         for (let n = 0; n < this._items.length; n++) {
             const width = this.textWidth(this._items[n]);
             if (width > maxTextWidth) {
@@ -633,7 +633,7 @@ function Scene_Growup() {
     /**
      * 最大項目数を取得する。
      * 
-     * @return {Number} 最大項目数
+     * @returns {Number} 最大項目数
      */
     Window_ConfirmApply.prototype.maxItems = function () {
         return this._items.length;
@@ -703,7 +703,7 @@ function Scene_Growup() {
     /**
      * アクターステータスのウィンドウ領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Growup.prototype.actorStatusWindowRect = function() {
         const ww = this.statusWidth();
@@ -716,7 +716,7 @@ function Scene_Growup() {
     /**
      * ステータス領域の幅を得る。
      * 
-     * @return {Number} ステータス領域の幅。
+     * @returns {Number} ステータス領域の幅。
      */
     Scene_Growup.prototype.statusWidth = function() {
         return 320;
@@ -753,7 +753,7 @@ function Scene_Growup() {
     /**
      * 選択画面のウィンドウ矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Growup.prototype.selectWindowRect = function() {
         const statusWindowRect = this.actorStatusWindowRect();
@@ -778,7 +778,7 @@ function Scene_Growup() {
     /**
      * 確認ウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域。
+     * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Growup.prototype.confirmApplyWindowRect = function() {
         const ww = 480;
@@ -878,7 +878,7 @@ function Scene_Growup() {
     /**
      * ページボタンを作成する必要があるかどうかを取得する。
      * 
-     * @return {Boolean} ページボタンが必要な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} ページボタンが必要な場合にはtrue, それ以外はfalse
      */
     Scene_Growup.prototype.needsPageButtons = function() {
         return this._isAllowActorChange;

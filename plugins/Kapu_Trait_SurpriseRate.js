@@ -169,7 +169,7 @@
     /**
      * マップの基本不意打ち率を得る。
      * 
-     * @return {number} 不意打ち率
+     * @returns {number} 不意打ち率
      */
     Game_Map.prototype.rateSurprise = function() {
         return this._rateSurprise;

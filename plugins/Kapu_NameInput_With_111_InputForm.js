@@ -196,7 +196,7 @@ function Simple_TextInput() {
     /**
      * 最大文字数を得る。
      * 
-     * @return {number} 最大文字数
+     * @returns {number} 最大文字数
      */
     Simple_TextInput.prototype.maxLength = function() {
         return this._maxLength;

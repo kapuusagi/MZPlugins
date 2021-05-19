@@ -191,7 +191,7 @@ function MapFilterManager() {
      * filterNameに一致するフィルタエントリを得る。
      * 
      * @param {String} filterName フィルタ名
-     * @return {Object} フィルタエントリ。該当するエントリが無い場合にはnull.
+     * @returns {Object} フィルタエントリ。該当するエントリが無い場合にはnull.
      */
     MapFilterManager.findFilterEntry = function(filterName) {
         return this._filters.find(entry => entry.name === filterName) || null;
@@ -201,7 +201,7 @@ function MapFilterManager() {
      * filterNameに対応するフィルタのインスタンスを得る。
      * 
      * @param {String} filterName フィルタ名
-     * @return {Object} フィルタのインスタンス。
+     * @returns {Object} フィルタのインスタンス。
      */
     MapFilterManager.filter = function(filterName) {
         const entry = this.findFilterEntry(filterName);
@@ -227,7 +227,7 @@ function MapFilterManager() {
     /**
      * フィルタ全体に対する有効/無効を取得する。
      * 
-     * @return {Boolean} フィルタ全体に対して有効な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} フィルタ全体に対して有効な場合にはtrue, それ以外はfalse
      */
     MapFilterManager.isGlobalActive = function() {
         return this._globalEnable;
@@ -275,7 +275,7 @@ function MapFilterManager() {
      * fileNameで指定したフィルタが有効かどうかを判定する。
      * 
      * @param {String} filterName 
-     * @return {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
      */
     MapFilterManager.isActive = function(filterName) {
         const entry = this.findFilterEntry(filterName);
@@ -439,7 +439,7 @@ function MapFilterManager() {
     /**
      * セーブデータに入れるデータを構築する。
      * 
-     * @return {Dictionary} 保存するコンテンツ
+     * @returns {Dictionary} 保存するコンテンツ
      */
     DataManager.makeSaveContents = function() {
         const contents = _DataManager_makeSaveContents.call(this);

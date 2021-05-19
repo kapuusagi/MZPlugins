@@ -151,7 +151,7 @@
              * @const {Number}
              */
             pcdr: {
-                /** @return {Number} */
+                /** @returns {Number} */
                 get: function() {
                     return this.criticalDamageRatePhysical();
                 },
@@ -162,7 +162,7 @@
              * @const {Number} 
              */
             mcdr: {
-                /** @return {Number} */
+                /** @returns {Number} */
                 get: function() {
                     return this.criticalDamageRateMagical();
                 },
@@ -173,7 +173,7 @@
     /**
      * 物理攻撃のクリティカル倍率を取得する。
      * 
-     * @return {Number} クリティカル倍率。
+     * @returns {Number} クリティカル倍率。
      */
     Game_BattlerBase.prototype.criticalDamageRatePhysical = function () {
         return this.criticalDamageRate();
@@ -182,7 +182,7 @@
     /**
      * 魔法攻撃のクリティカル倍率を取得する。
      * 
-     * @return {Number} クリティカル倍率。
+     * @returns {Number} クリティカル倍率。
      */
     Game_BattlerBase.prototype.criticalDamageRateMagical = function() {
         return this.criticalDamageRate();
@@ -192,7 +192,7 @@
         /**
          * クリティカルダメージレートを得る。
          * 
-         * @return {Number} クリティカルダメージレート
+         * @returns {Number} クリティカルダメージレート
          */
         Game_BattlerBase.prototype.criticalDamageRate = function() {
             return Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CDR);
@@ -201,7 +201,7 @@
         /**
          * クリティカルダメージレートを得る。
          * 
-         * @return {Number} クリティカルダメージレート
+         * @returns {Number} クリティカルダメージレート
          */
         Game_BattlerBase.prototype.criticalDamageRate = function() {
             return Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE;
@@ -215,7 +215,7 @@
          * @const {Number}
          */
         pcdr: {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() {
                 return this.criticalDamageRatePhysical();
             },
@@ -226,7 +226,7 @@
          * @const {Number}
          */
         mcdr: {
-            /** @return {Number} */
+            /** @returns {Number} */
             get: function() {
                 return this.criticalDamageRateMagical();
             },
@@ -242,7 +242,7 @@
      * Note: クリティカル時のダメージ倍率計算式を変更するため、オーバーライドする。
      * 
      * @param {Number} damage ダメージ
-     * @return {Number} クリティカル適用後のダメージ
+     * @returns {Number} クリティカル適用後のダメージ
      * !!!overwrite!!! Game_Action.applyCritical
      */
     Game_Action.prototype.applyCritical = function(damage) {

@@ -110,7 +110,7 @@
     /**
      * 最大TPレートを得る。
      * 
-     * @return {Number} 最大TPレート。
+     * @returns {Number} 最大TPレート。
      */
     Game_BattlerBase.prototype.maxTpRate = function() {
         const maxTp = _Game_BattlerBase_maxTpRate.call(this);

@@ -241,7 +241,7 @@ function Window_ItemInfo() {
     /**
      * 最大カラム数を取得する。
      * 
-     * @return {Number} カラム数
+     * @returns {Number} カラム数
      */
     Window_ItemCategoryVertical.prototype.maxCols = function() {
         return 1;
@@ -250,7 +250,7 @@ function Window_ItemInfo() {
     /**
      * 表示する行数を取得する。
      * 
-     * @return {Number} 行数
+     * @returns {Number} 行数
      */
     Window_ItemCategoryVertical.prototype.numVisibleRows = function() {
         return 4;
@@ -288,7 +288,7 @@ function Window_ItemInfo() {
      * コマンド選択対象として必要かどうかを得る。
      * 
      * @param {String} name 種類名
-     * @return {Boolean} 選択対象として必要な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 選択対象として必要な場合にはtrue, それ以外はfalse
      */
     Window_ItemCategoryVertical.prototype.needsCommand = function(name) {
         const table = ["item", "weapon", "armor", "keyItem"];
@@ -311,7 +311,7 @@ function Window_ItemInfo() {
     /**
      * 選択が必要かどうかを得る。
      * 
-     * @return {Boolean} 選択が必要な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 選択が必要な場合にはtrue, それ以外はfalse
      */
     Window_ItemCategoryVertical.prototype.needsSelection = function() {
         return this.maxItems() >= 2;
@@ -412,7 +412,7 @@ function Window_ItemInfo() {
      * itemに対してOKが選択できるかを取得する。
      * アイテムリストは常に有効。
      * 
-     * @return {Boolean} OKが選択できる場合にはtrue, それ以外はfalse。
+     * @returns {Boolean} OKが選択できる場合にはtrue, それ以外はfalse。
      * !!!overwrite!!! Window_ItemList.isEnabled()
      *     使うかどうかの選択を別ウィンドウで行うため、オーバーライドする。
      */
@@ -439,7 +439,7 @@ function Window_ItemInfo() {
     /**
      * アイテムを得る。
      * 
-     * @return {Object} item アイテム
+     * @returns {Object} item アイテム
      */
     Window_ItemCommand.prototype.item = function() {
         return this._item;
@@ -762,7 +762,7 @@ function Window_ItemInfo() {
      * 武器の属性を得る。
      * 
      * @param {DataWeapon} item 武器
-     * @return {Array<number>} 属性配列
+     * @returns {Array<number>} 属性配列
      */
     Window_ItemInfo.prototype.weaponElementIds = function(item) {
         const weaponSkillId = this.weaponSkillId(item);
@@ -1196,7 +1196,7 @@ function Window_ItemInfo() {
     /**
      * カテゴリウィンドウのウィンドウ矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      * !!!overwrite!!! Scene_Item.categoryWindowRect
      *     カテゴリウィンドウのレイアウト変更のため、オーバーライドする。
      */
@@ -1224,7 +1224,7 @@ function Window_ItemInfo() {
     /**
      * アイテム情報ウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_Item.prototype.itemInfoWindowRect = function() {
         const ww = itemInfoWindowWidth;
@@ -1237,7 +1237,7 @@ function Window_ItemInfo() {
     /**
      * コマンドウィンドウ幅を得る。
      * 
-     * @return {Number} コマンドウィンドウ幅
+     * @returns {Number} コマンドウィンドウ幅
      */
     Scene_Item.prototype.commandWindowWidth = function() {
         return 340;
@@ -1247,7 +1247,7 @@ function Window_ItemInfo() {
     /**
      * アイテム一覧ウィンドウの矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      * !!!overwrite!!! Scene_Item.itemWindowRect()
      *     ウィンドウレイアウト変更のため、オーバーライドする。
      */
@@ -1274,7 +1274,7 @@ function Window_ItemInfo() {
     /**
      * アイテムコマンドウィンドウのウィンドウ矩形領域を得る。
      * 
-     * @return {Rectangle} ウィンドウ矩形領域
+     * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_Item.prototype.itemCommandWindowRect = function() {
         const ww = this.commandWindowWidth();

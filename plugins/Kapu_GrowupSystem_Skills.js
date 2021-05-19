@@ -100,7 +100,7 @@
      * アクターIDを得る。
      * 
      * @param {Object} args プラグインコマンド引数
-     * @return {Number} アクターID
+     * @returns {Number} アクターID
      */
     const _getActorId = function(args) {
         const actorId = Number(args.actorId) || 0;
@@ -236,7 +236,7 @@
     /**
      * 使用済みGrowPointを得る。
      * 
-     * @return {Number} 使用済み育成ポイント。
+     * @returns {Number} 使用済み育成ポイント。
      */
     Game_Actor.prototype.usedGrowupPoint = function() {
         let usedPoint = _Game_Actor_usedGrowupPoint.call(this);
@@ -282,7 +282,7 @@
      * skillが習得可能かどうかを判定する。
      * 
      * @param {Game_Skill} スキル
-     * @return 習得可能な場合にはtrue, それ以外はfalse
+     * @returns 習得可能な場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.testGpLearnable = function(skill) {
         if (skill.name.length === 0) {
@@ -313,7 +313,7 @@
      * 習得済みスキルかどうかを判定する。
      * 
      * @param {Number} skillId スキルID
-     * @return {Boolean} GPにて習得済みのスキルである場合にはtrue, それ以外はfalse
+     * @returns {Boolean} GPにて習得済みのスキルである場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isGpLearnedSkill = function (skillId) {
         return this._gpLearnedSkills.includes(skillId);
@@ -323,7 +323,7 @@
      * GP消費で習得可能スキルかどうかを判定する。
      * 
      * @param {Number} skillId スキルID
-     * @return {Boolean} GP消費で習得可能なスキルの場合にはtrue, それ以外はfalse
+     * @returns {Boolean} GP消費で習得可能なスキルの場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isGpLearnableSkill = function (skillId) {
         return this._gpLearnableSkills.contains(skillId);
@@ -333,7 +333,7 @@
      * 習得可能スキルを追加する。
      * 
      * @param {Number} skillId スキルID
-     * @return {Boolean} 追加された場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 追加された場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.addGpLearnableSkill = function(skillId) {
         if (!this.isGpLearnedSkill(skillId) && !this.isGpLearnableSkill(skillId)) {
@@ -393,7 +393,7 @@
     /**
      * 育成項目を返す。
      * 
-     * @return {Array<GrowupItem>} 育成項目
+     * @returns {Array<GrowupItem>} 育成項目
      */
     Game_Actor.prototype.growupItems = function() {
         // 処理重いかも。
@@ -419,7 +419,7 @@
      * 育成項目を適用する。
      * 
      * @param {GrowupItem} growupItem 育成項目
-     * @return {Boolean} 適用できたかどうか。
+     * @returns {Boolean} 適用できたかどうか。
      */
     Game_Actor.prototype.applyGrowup = function(growupItem) {
         if (growupItem.type === "skill") {
@@ -451,7 +451,7 @@
          * 
          * @param {Game_BattlerBase} target 対象
          * @param {DataEffect} effect エフェクトデータ
-         * @return {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testItemEffect = function(target, effect) {
             if (effect.code == Game_Action.EFFECT_ADD_GPLEARN_SKILL) {

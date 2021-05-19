@@ -185,7 +185,7 @@ function Game_CharaMakeItem_BasicParams() {
      * キャラクターメイキング項目を取得する。
      * キャラメイク項目を拡張する場合、このメソッドをフックして値を配列に加えて返す。
      * 
-     * @return {Array<Game_CharaMakeItem>} キャラクターメイキング項目
+     * @returns {Array<Game_CharaMakeItem>} キャラクターメイキング項目
      */
     DataManager.createCharaMakeItems = function() {
         const items = _DataManager_createCharaMakeItems.call(this);
@@ -296,7 +296,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 項目数を得る。
      * 
-     * @return {Number} 項目数。
+     * @returns {Number} 項目数。
      */
     Window_CharaMakeItem_BasicParams.prototype.maxItems = function() {
         return this.paramCount() * 2 + 1; // パラメータ毎にUP/DOWN と 確定ボタン  
@@ -315,7 +315,7 @@ function Game_CharaMakeItem_BasicParams() {
      * 指定項目の描画領域を得る
      * 
      * @param {number} index インデックス番号
-     * @return {Rectangle} 矩形領域
+     * @returns {Rectangle} 矩形領域
      */
     Window_CharaMakeItem_BasicParams.prototype.itemRect = function(index) {
         const inset = this.inset();
@@ -361,7 +361,7 @@ function Game_CharaMakeItem_BasicParams() {
      * 項目が有効かどうかを得る。
      * 
      * @param {number} index インデックス番号
-     * @return {boolean} 項目が有効な場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 項目が有効な場合にはtrue, それ以外はfalse.
      */
     Window_CharaMakeItem_BasicParams.prototype.isItemEnabled = function(index) {
         if (index < 0) {
@@ -458,7 +458,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 行間のスペースを得る。
      * 
-     * @return {Number} 行間スペース
+     * @returns {Number} 行間スペース
      */
     Window_CharaMakeItem_BasicParams.prototype.rowSpacing = function() {
         return 12;
@@ -467,7 +467,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 最大カラム数を得る。
      * 
-     * @return {Number} カラム数
+     * @returns {Number} カラム数
      */
     Window_CharaMakeItem_BasicParams.prototype.maxCols = function() {
         return 2;
@@ -476,7 +476,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * コンテンツの高さを得る。
      * 
-     * @return {Number} コンテンツの高さ。
+     * @returns {Number} コンテンツの高さ。
      */
     Window_CharaMakeItem_BasicParams.prototype.contentsHeight = function() {
         return this.innerHeight;
@@ -575,7 +575,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * この項目の識別名を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_BasicParams.prototype.name = function() {
         return itemName;
@@ -583,7 +583,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * この項目の説明を取得する。
      * 
-     * @return {string} キャラクターメイキングの項目名として使用される。
+     * @returns {string} キャラクターメイキングの項目名として使用される。
      */
     Game_CharaMakeItem_BasicParams.prototype.description = function() {
         return itemDescription;
@@ -627,7 +627,7 @@ function Game_CharaMakeItem_BasicParams() {
      * 編集中のテキストを得る。
      * 
      * @param {object} windowEntry createSelectWindow()で返したウィンドウ
-     * @return {string} 編集項目の選択値(テキスト)
+     * @returns {string} 編集項目の選択値(テキスト)
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_BasicParams.prototype.editingText = function(windowEntry) {

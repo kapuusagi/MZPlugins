@@ -39,7 +39,7 @@
      * スキルのキャスト時間を得る。
      * 
      * @param {Object} item スキル/アイテム
-     * @return {Number} キャスト時間
+     * @returns {Number} キャスト時間
      */
     Game_BattlerBase.prototype.tpbSkillCastTime = function(item) {
         return Math.max(0, -item.speed);
@@ -52,7 +52,7 @@
      * 速度からTPB速度を得る。
      * 
      * @param {Number} value 値
-     * @return {Number} TPB速度。
+     * @returns {Number} TPB速度。
      */
     Game_Battler.prototype.calcTpbSpeed = function(value) {
         return Math.sqrt(value) + 1;
@@ -62,7 +62,7 @@
      * アクションの発動に必要な時間を得る。
      * 
      * @param {Number} delay ディレイ
-     * @return {Number} 必要な時間
+     * @returns {Number} 必要な時間
      */
     Game_Battler.prototype.calcCastTime = function(delay) {
         return this.calcTpbSpeed(delay) / this.tpbSpeed();
@@ -70,7 +70,7 @@
     /**
      * TPB速度計算に使用する基準値を得る。
      * 
-     * @return {Number} 基準値
+     * @returns {Number} 基準値
      */
     Game_Battler.prototype.tpbSpeedParam = function() {
         return this.agi;
@@ -78,7 +78,7 @@
     /**
      * TPB基準速度の計算に使用するパラメータ値を得る。
      * 
-     * @return {Number} TPB基準速度の計算に使用するパラメータ。
+     * @returns {Number} TPB基準速度の計算に使用するパラメータ。
      */
     Game_Battler.prototype.tpbBaseSpeedParam = function() {
         return this.paramBasePlus(6);
@@ -87,7 +87,7 @@
     /**
      * このGame_BattlerのTPB速度を得る。
      * 
-     * @return {Number} TPB速度。
+     * @returns {Number} TPB速度。
      * !!!overwrite!!! Game_Battler.tpbSpeed()
      *     calcTpbSpeedを使用して計算するためにオーバーライドする。
      */
@@ -101,7 +101,7 @@
      * このGame_BattlerのTPB詠唱速度を得る。
      * 
      * 魔法速度の計算だけ変更したい場合にはオーバーライドする。
-     * @return {Number} TPB詠唱速度
+     * @returns {Number} TPB詠唱速度
      */
     Game_Battler.prototype.tpbCastSpeed = function() {
         return this.tpbSpeed();
@@ -110,7 +110,7 @@
     /**
      * このGame_BattlerのTPB基本速度を得る。
      * 
-     * @return {Number} TPB速度。
+     * @returns {Number} TPB速度。
      * !!!overwrite!!! Game_Battler.tpbBasePlus()
      *     calcTpbSpeedを使用して計算するためにオーバーライドする。
      */
@@ -126,7 +126,7 @@
      *    (このとき、加算する方向のspeedは無視される)
      * 2. Sqrt(1の結果) / TPB速度を算出して返す。
      * 
-     * @return {Number} キャスト時間。
+     * @returns {Number} キャスト時間。
      * !!!overwrite!!! Game_Battler.tpbRequiredCastTime()
      *     calcTpbSpeedを使用して計算するためにオーバーライドする。
      */
@@ -158,7 +158,7 @@
     /**
      * 詠唱時のTPB加算量を得る。
      * 
-     * @return {Number} TPB加算量。
+     * @returns {Number} TPB加算量。
      */
     Game_Battler.prototype.tpbCastAcceleration = function() {
         const speed = this.tpbRelativeCastSpeed();
@@ -168,7 +168,7 @@
     /**
      * TPB相対速度を得る。
      * 
-     * @return {Number} TPB相対速度。
+     * @returns {Number} TPB相対速度。
      */
     Game_Battler.prototype.tpbRelativeCastSpeed = function() {
         return this.tpbCastSpeed() / $gameParty.tpbBaseSpeed();
