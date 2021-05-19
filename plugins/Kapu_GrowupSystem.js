@@ -90,6 +90,12 @@
  * @desc trueにすると、actorにプロパティgpを追加する。
  * @type boolean
  * @default false
+ * 
+ * @param gainGpAtEachLevelup
+ * @text レベルが上がったときは必ず成長ポイント増加
+ * @desc レベルアップしたとき、成長ポイントが加算されます。falseにすると、アクターの最大レベルが更新されたときだけ加算されます。
+ * @type boolean
+ * @default false
  *  
  * @help 
  * GP(GrowPoint)成長システムの枠を提供するプラグイン。
@@ -173,6 +179,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.5.0 クラスチェンジでレベルが下がったとき、
+ *               再度レベルアップでの成長ポイントを加算させるかを設定できるようにした。
  * Version.0.4.0 Lv1時のGrowPointをプラグインパラメータで用意できるようにした。
  * Version.0.3.0 使用済みGrowPointを計算するインタフェースを追加。
  *               セットアップの煩わしさを軽減する。
@@ -191,6 +199,8 @@
     const enableProperty = (typeof parameters["enableProperty"] === "undefined")
             ? false : (parameters["enableProperty"] === "true");
     const initialGrowPoint = Number(parameters["initialGrowPoint"]) || 10;
+    const gainGpAtEachLevelup = (parameters["gainGpAtEachLevelup"] === undefined)
+            ? false : (parameters["gainGpAtEachLevelup"] === "true");
 
     Object.defineProperty(TextManager, "growPoint", { get: () => growPointText, configurable:true});
 
@@ -284,6 +294,7 @@
     Game_Actor.prototype.initMembers = function() {
         _Game_Actor_initMembers.call(this);
         this._growPoint = { current : 0, max : 0 };
+        this._gotGpLevel = this._level;
     };
 
     const _Game_Actor_setup = Game_Actor.prototype.setup;
@@ -303,6 +314,7 @@
         const calcGrowPoint = this.growPointOfLevel();
         this._growPoint.max = Math.max(usedGrowPoint + growPoint, calcGrowPoint).clamp(0, Game_Actor.MAX_GROW_POINT);
         this._growPoint.current = Math.max(0, this._growPoint.max - usedGrowPoint);
+        this._gotGpLevel = this._level;
     };
 
     /**
@@ -335,9 +347,14 @@
     Game_Actor.prototype.levelUp = function() {
         _Game_Actor_levelUp.call(this);
 
+        if (gainGpAtEachLevelup || (this._level > this._gotGpLevel)) {
+            const gpPlus = this.growPointAtLevelUp(this._level);
+            this.gainGrowPoint(gpPlus);
+            this._gotGpLevel = this._level;
+        }
+
         // 成長ボーナス加算
-        const gpPlus = this.growPointAtLevelUp(this._level);
-        this.gainGrowPoint(gpPlus);
+
     };
 
     /**
