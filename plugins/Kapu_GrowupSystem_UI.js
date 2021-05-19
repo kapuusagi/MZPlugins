@@ -671,7 +671,7 @@ function Scene_Growup() {
     /**
      * 
      * @param {Game_Actor} actor アクター
-     * @param {boolean} isAllowActorChange ユーザー操作によりアクターの変更を行う場合にはtrue、禁止する場合にはfalse
+     * @param {Boolean} isAllowActorChange ユーザー操作によりアクターの変更を行う場合にはtrue、禁止する場合にはfalse
      */
     Scene_Growup.prototype.prepare = function(actor, isAllowActorChange) {
         this._actor = actor;

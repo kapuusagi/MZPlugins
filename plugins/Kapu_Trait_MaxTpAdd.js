@@ -106,8 +106,8 @@
     /**
      * 最大TP加算特性名
      * 
-     * @param {number} dataId データID
-     * @param {number} value 値
+     * @param {Number} dataId データID
+     * @param {Number} value 値
      * @returns {string} 文字列
      */
     // eslint-disable-next-line no-unused-vars

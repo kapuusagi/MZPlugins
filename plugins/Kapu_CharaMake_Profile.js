@@ -161,7 +161,7 @@ function Game_CharaMakeItem_Profile() {
     /**
      * 編集中のテキストを得る。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      * @returns {string} 編集項目の選択値(テキスト)
      */
     // eslint-disable-next-line no-unused-vars
@@ -175,7 +175,7 @@ function Game_CharaMakeItem_Profile() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
      * @param {Game_Actor} actor アクター
-     * @returns {object} ウィンドウ類
+     * @returns {Object} ウィンドウ類
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Profile.prototype.createSelectWindows = function(rect, helpWindow, actor) {
@@ -201,7 +201,7 @@ function Game_CharaMakeItem_Profile() {
      * 
      * Note: キャラメイク操作で初期値を設定するために呼び出される。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     Game_CharaMakeItem_Profile.prototype.setCurrent = function(windowEntry, actor) {
@@ -214,7 +214,7 @@ function Game_CharaMakeItem_Profile() {
      * 
      * Note: キャラメイク操作で確定操作されたときに呼び出される。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     Game_CharaMakeItem_Profile.prototype.apply = function(windowEntry, actor) {
@@ -225,7 +225,7 @@ function Game_CharaMakeItem_Profile() {
     /**
      * 選択開始時の処理を行う。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      */
     Game_CharaMakeItem_Profile.prototype.startSelection = function(windowEntry) {
         windowEntry.selectWindow.hide();
@@ -236,7 +236,7 @@ function Game_CharaMakeItem_Profile() {
     /**
      * 選択終了時の処理を行う。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Profile.prototype.endSelection = function(windowEntry) {
@@ -246,7 +246,7 @@ function Game_CharaMakeItem_Profile() {
     /**
      * リソースの破棄処理を行う。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      */
     Game_CharaMakeItem_Profile.prototype.terminateSelection = function(windowEntry) {
         const textInput = windowEntry.textInput;

@@ -146,7 +146,7 @@
     /**
      * マップをセットアップする。
      * 
-     * @param {number} mapId マップID
+     * @param {Number} mapId マップID
      */
     Game_Map.prototype.setup = function(mapId) {
         _Game_Map_setup.call(this, mapId);
@@ -160,7 +160,7 @@
     /**
      * マップの基本不意打ち率を得る。
      * 
-     * @param {number} rate 不意打ち率
+     * @param {Number} rate 不意打ち率
      */
     Game_Map.prototype.setRateSurprise = function(rate) {
         this._rateSurprise = rate;
@@ -169,7 +169,7 @@
     /**
      * マップの基本不意打ち率を得る。
      * 
-     * @returns {number} 不意打ち率
+     * @returns {Number} 不意打ち率
      */
     Game_Map.prototype.rateSurprise = function() {
         return this._rateSurprise;
@@ -180,8 +180,8 @@
     /**
      * このパーティーの不意打ち率を得る。
      * 
-     * @param {number} troopAgi 不意打ち率
-     * @returns {number} 不意打ち率
+     * @param {Number} troopAgi 不意打ち率
+     * @returns {Number} 不意打ち率
      * !!!overwrite!!! Game_Party.rateSurprise
      */
     Game_Party.prototype.rateSurprise = function(troopAgi) {

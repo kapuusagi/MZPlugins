@@ -466,8 +466,8 @@
     /**
      * 基本パラメータ加算特性名。
      * 
-     * @param {number} dataId データID 
-     * @param {number} value 値
+     * @param {Number} dataId データID 
+     * @param {Number} value 値
      * @returns {string} 文字列
      */
     TextManager.traitBasicParam = function(dataId, value) {
@@ -478,8 +478,8 @@
     /**
      * 基本パラメータ割合特性名。
      * 
-     * @param {number} dataId データID
-     * @param {number} value 値
+     * @param {Number} dataId データID
+     * @param {Number} value 値
      * @returns {string} 文字列
      */
     TextManager.traitBasicParamRate = function(dataId, value) {

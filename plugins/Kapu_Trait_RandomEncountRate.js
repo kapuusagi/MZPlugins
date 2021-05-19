@@ -123,7 +123,7 @@
     /**
      * エンカウント率を得る。
      * 
-     * @returns {number} エンカウント率
+     * @returns {Number} エンカウント率
      */
     Game_Party.prototype.randomEncountRate = function() {
         return Math.max(minimumRandomEncountRate, 1.0 + this.partyTraitsSum(Game_Party.ABILITY_RANDOMENCOUNT_RATE));

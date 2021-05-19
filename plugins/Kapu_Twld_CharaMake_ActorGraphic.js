@@ -50,7 +50,7 @@
     /**
      * 戦闘ピクチャを設定する。
      * 
-     * @param {number} index インデックス番号
+     * @param {Number} index インデックス番号
      */
     Window_CharaMakeVisualSelection.prototype.setBattlePictureSprite = function(sprite) {
         this._battlePictureSprite = sprite;
@@ -62,7 +62,7 @@
     /**
      * 項目を選択する。
      * 
-     * @param {number} index インデックス番号
+     * @param {Number} index インデックス番号
      */
     Window_CharaMakeVisualSelection.prototype.select = function(index) {
         _Window_CharaMakeVisualSelection_select.call(this, index);
@@ -83,7 +83,7 @@
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
      * @param {Game_Actor} actor アクター
-     * @returns {object} ウィンドウ類
+     * @returns {Object} ウィンドウ類
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Visual.prototype.createSelectWindows = function(rect, helpWindow, actor) {
@@ -119,7 +119,7 @@
      * 
      * Note: キャラメイク操作で初期値を設定するために呼び出される。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars
@@ -131,7 +131,7 @@
     /**
      * 編集中の設定を反映させる。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars
@@ -148,7 +148,7 @@
      * デフォルトのグラフィックエントリを作成する。
      * 
      * @param {Game_Actor} actor アクター
-     * @returns {object} 画像エントリ
+     * @returns {Object} 画像エントリ
      */
     Game_CharaMakeItem_Visual.prototype.createDefaultEntry = function(actor) {
         const entry = _Game_CharaMakeItem_Visual_createDefaultEntry.call(this, actor);
@@ -175,7 +175,7 @@
     /**
      * 選択開始時の処理を行う。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      */
     Game_CharaMakeItem_Visual.prototype.startSelection = function(windowEntry) {
         _Game_CharaMakeItem_Visual_startSelectin.call(this, windowEntry);
@@ -187,7 +187,7 @@
     /**
      * 選択終了時の処理を行う。
      * 
-     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
      */
     Game_CharaMakeItem_Visual.prototype.endSelection = function(windowEntry) {
         _Game_CharaMakeItem_Visual_endSelection.call(this, windowEntry);

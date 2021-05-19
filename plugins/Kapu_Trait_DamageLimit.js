@@ -101,7 +101,7 @@
     /**
      * ダメージリミット特性名
      * 
-     * @param {number} dataId データID
+     * @param {Number} dataId データID
      * @returns {string} 文字列
      */
     // eslint-disable-next-line no-unused-vars

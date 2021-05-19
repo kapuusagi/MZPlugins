@@ -365,7 +365,7 @@ function Scene_Appraise() {
      * アイテムの鑑定レベルを取得する。
      * 
      * @param {Object} item アイテム/武器/防具
-     * @returns {number} 鑑定レベルが返る。
+     * @returns {Number} 鑑定レベルが返る。
      */
     DataManager.getItemAppraiseLevel = function(item) {
         let level = 0;
@@ -383,7 +383,7 @@ function Scene_Appraise() {
      * itemの鑑定価格を取得する。
      * 
      * @param {Data_Item} item アイテム(Item/Weapon/Armor)
-     * @returns {number} 鑑定価格が返る。
+     * @returns {Number} 鑑定価格が返る。
      */
     DataManager.getItemAppraisePrice = function(item) {
         let price = Number(item.meta.appraisePrice);

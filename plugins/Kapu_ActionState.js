@@ -181,7 +181,7 @@ function Game_SubAction() {
      * このGame_BattlerBaseからstateIdで指定されるステートを取り除く。
      * _statesと_stateTurnsに対する操作を行う。
      * 
-     * @param {number} stateId ステートID
+     * @param {Number} stateId ステートID
      */
     Game_BattlerBase.prototype.eraseState = function(stateId) {
         _Game_BattlerBase_eraseState.call(this, stateId);
@@ -192,7 +192,7 @@ function Game_SubAction() {
     /**
      * 指定したステートのカウンタをリセットする。
      * 
-     * @param {number} stateId ステートID
+     * @param {Number} stateId ステートID
      */
     Game_BattlerBase.prototype.resetStateCounts = function(stateId) {
         _Game_BattlerBase_resetStateCounts.call(this, stateId);
@@ -203,7 +203,7 @@ function Game_SubAction() {
     /**
      * ステートアクションの残りカウントがなくなったかどうかを取得する。
      * 
-     * @param {number} stateId ステートID
+     * @param {Number} stateId ステートID
      * @returns {Boolean} ステートアクションの残りカウントが無い場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.isStateActionNoLeft = function(stateId) {
@@ -213,7 +213,7 @@ function Game_SubAction() {
     /**
      * ステートアクションのカウントを減算する。
      * 
-     * @param {number} stateId ステートID
+     * @param {Number} stateId ステートID
      */
     Game_BattlerBase.prototype.decreaseStateActionCount = function(stateId) {
         this._stateRaiseCounts[stateId]--;
@@ -232,7 +232,7 @@ function Game_SubAction() {
     /**
      * 戦闘不能時クリアするステートかどうかを判定する。
      * 
-     * @param {number} stateId ステートID
+     * @param {Number} stateId ステートID
      * @returns {Boolean} 戦闘不能時クリアステートの場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isClearStateByDie = function(stateId) {
@@ -309,7 +309,7 @@ function Game_SubAction() {
     /**
      * StateActionの実行カウントを更新する。
      * 
-     * @param {number} stateId ステートID
+     * @param {Number} stateId ステートID
      */
     Game_Battler.prototype.updateStateActionCount = function(stateId) {
         const stateAction = $dataStates[stateId];
@@ -356,7 +356,7 @@ function Game_SubAction() {
      * ステートが含まれるかどうかを判定する。
      * 
      * @param {Array<Number>} ids 一致対象のステート
-     * @param {number} stateIds ステートIDの配列
+     * @param {Number} stateIds ステートIDの配列
      * @returns {Boolean} ステートが含まれる場合にはtrue, それ以外はfalse
      */
     const _stateIncludes = function(ids, stateIds) {
@@ -444,7 +444,7 @@ function Game_SubAction() {
     /**
      * ステートアクションIDを設定する。
      * 
-     * @param {number} id ID
+     * @param {Number} id ID
      */
     Game_SubAction.prototype.setStateActionId = function(id) {
         this._stateActionId = id;
@@ -453,7 +453,7 @@ function Game_SubAction() {
     /**
      * ステートアクションIDを得る。
      * 
-     * @returns {number} ステートアクションID
+     * @returns {Number} ステートアクションID
      */
     Game_SubAction.prototype.stateActionId = function() {
         return this._stateActionId;

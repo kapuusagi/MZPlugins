@@ -118,7 +118,7 @@
     /**
      * 回復不能ターゲット名を得る。
      * 
-     * @param {number} dataId データID
+     * @param {Number} dataId データID
      * @returns {string} ターゲット名
      */
     TextManager.unrecoverTarget = function(dataId) {

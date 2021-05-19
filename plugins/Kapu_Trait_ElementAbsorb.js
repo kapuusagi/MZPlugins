@@ -138,7 +138,7 @@
     /**
      * 属性吸収特性のテキストを得る。
      * 
-     * @param {number} dataId データID
+     * @param {Number} dataId データID
      * @returns {string} 属性吸収特性を表すテキスト
      */
      TextManager.traitElementAbsorb = function(dataId) {

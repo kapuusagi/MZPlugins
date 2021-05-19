@@ -276,7 +276,7 @@ function Scene_RouletteChoice() {
     /**
      * 選択項目アイテムを追加する。
      * 
-     * @param {number} id 選択項目アイコンインデックス
+     * @param {Number} id 選択項目アイコンインデックス
      */
     Game_Temp.prototype.addChoiceRouletteItem = function(id) {
         this._choiceRouletteItems.push(id);
@@ -285,7 +285,7 @@ function Scene_RouletteChoice() {
     /**
      * ルーレットでの選択番号を設定する。
      * 
-     * @param {number} no 番号
+     * @param {Number} no 番号
      */
     Game_Temp.prototype.setChoiceRouletteSelected = function(no) {
         this._choiceRouletteSelected = no;
@@ -294,7 +294,7 @@ function Scene_RouletteChoice() {
     /**
      * ルーレットで選択された番号を得る。
      * 
-     * @returns {number} 番号
+     * @returns {Number} 番号
      */
     Game_Temp.prototype.choiceRouletteSelected = function() {
         return this._choiceRouletteSelected;
@@ -316,7 +316,7 @@ function Scene_RouletteChoice() {
     /**
      * キャンセル操作を許可するかどうかを設定する。
      * 
-     * @param {boolean} canCancel キャンセル可能な場合にはtrue ,それ以外はfalse
+     * @param {Boolean} canCancel キャンセル可能な場合にはtrue ,それ以外はfalse
      */
     Window_RouletteChoice.prototype.setCancelEnable = function(canCancel) {
         this._canCancel = canCancel;
@@ -324,7 +324,7 @@ function Scene_RouletteChoice() {
     /**
      * キャンセル可能かどうかを得る。
      * 
-     * @returns {boolean} キャンセル可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} キャンセル可能な場合にはtrue, それ以外はfalse
      */
     Window_RouletteChoice.prototype.isCancelEnabled = function() {
         return this._canCancel
@@ -401,7 +401,7 @@ function Scene_RouletteChoice() {
     /**
      * スプライトをセットアップする。
      * 
-     * @param {number} iconIndex アイコンインデックス
+     * @param {Number} iconIndex アイコンインデックス
      */
     Sprite_ChoiceIcon.prototype.setup = function(iconIndex) {
         this._iconIndex = iconIndex;
@@ -461,12 +461,12 @@ function Scene_RouletteChoice() {
     /**
      * シーンの準備をする。
      * 
-     * @param {number} variableId 変数ID
+     * @param {Number} variableId 変数ID
      * @param {Array<number>} choiceItems 選択対象アイテムアイコンID配列
-     * @param {number} centerX 中央X
-     * @param {number} centerY 中央Y
-     * @param {number} speed 回転速度
-     * @param {boolean} canCancel キャンセル可能な場合にはtrue, それ以外はfalse
+     * @param {Number} centerX 中央X
+     * @param {Number} centerY 中央Y
+     * @param {Number} speed 回転速度
+     * @param {Boolean} canCancel キャンセル可能な場合にはtrue, それ以外はfalse
      */
     Scene_RouletteChoice.prototype.prepare = function(variableId, choiceItems, centerX, centerY, speed, canCancel) {
         this._variableId = variableId;
@@ -627,7 +627,7 @@ function Scene_RouletteChoice() {
     /**
      * 回転が停止しているかどうかを得る。
      * 
-     * @returns {boolean} 回転が停止している場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 回転が停止している場合にはtrue, それ以外はfalse
      */
     Scene_RouletteChoice.prototype.isRotationStopped = function() {
         return (this._rotationSpeed === 0);
@@ -667,7 +667,7 @@ function Scene_RouletteChoice() {
     /**
      * カーソル位置に該当する選択番号を得る。
      * 
-     * @returns {number} 選択番号
+     * @returns {Number} 選択番号
      */
     Scene_RouletteChoice.prototype.choicedIndex = function() {
         return this._currentIndex;

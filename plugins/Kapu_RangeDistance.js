@@ -1210,7 +1210,7 @@
     /**
      * エネミーグループをセットアップする。
      * 
-     * @param {number} troopId エネミーグループID
+     * @param {Number} troopId エネミーグループID
      */
     Game_Troop.prototype.setup = function(troopId) {
         _Game_Troop_setup.call(this, troopId);
@@ -1233,7 +1233,7 @@
     /**
      * ターン先頭のイベントページを得る。
      * 
-     * @returns {object} ページデータ。該当ページが無い場合にはnull.
+     * @returns {Object} ページデータ。該当ページが無い場合にはnull.
      */
     Game_Troop.prototype.getFirstTurnEventPage = function() {
         const troop = this.troop();

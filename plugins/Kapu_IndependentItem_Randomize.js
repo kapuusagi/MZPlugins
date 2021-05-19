@@ -178,7 +178,7 @@
     /**
      * itemで指定される個別アイテムの性能を、ベースアイテムのデータを元にばらつきを与える。
      * 
-     * @param {object} item 個別アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {Object} item 個別アイテム(DataItem/DataWeapon/DataArmor)
      */
     DataManager.randomizeIndependenetItem = function(item) {
         if (DataManager.isIndependentItem(item)) {
@@ -198,7 +198,7 @@
      * varianceEffectを解析する。
      * 
      * @param {String} varianceStr varianceEffectノートタグの値
-     * @returns {object} 効果変動量オブジェクト
+     * @returns {Object} 効果変動量オブジェクト
      */
     const _parseVarianceEffect = function(varianceStr) {
         const tokens = varianceStr.split(",");
@@ -301,8 +301,8 @@
      * 武器性能をランダムに変動させる。
      * 変動効果が適用されるのはparamのパラメータのみ。traitsは影響させない。
      * 
-     * @param {object} item アイテム
-     * @param {object} baseItem ベースアイテム
+     * @param {Object} item アイテム
+     * @param {Object} baseItem ベースアイテム
      */
     DataManager.randomizeEquipPerformance = function(item, baseItem) {
         if (!baseItem.meta.varianceParam) {

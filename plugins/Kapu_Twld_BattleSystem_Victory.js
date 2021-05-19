@@ -228,7 +228,7 @@ function Window_BattleRewards() {
     /**
      * Sprite_BattleHudLevelupを破棄する。
      * 
-     * @param {object} options オプション
+     * @param {Object} options オプション
      */
     Sprite_BattleHudLevelup.prototype.destroy = function(options) {
         // bitmapはnewで確保しているため、destroy()をコールする必要がある。
@@ -248,7 +248,7 @@ function Window_BattleRewards() {
     /**
      * フォントサイズを得る。
      * 
-     * @returns {number} フォントサイズ
+     * @returns {Number} フォントサイズ
      */
     Sprite_BattleHudLevelup.prototype.fontSize = function() {
         return $gameSystem.mainFontSize() + 12;
@@ -257,7 +257,7 @@ function Window_BattleRewards() {
     /**
      * アウトライン幅を得る。
      * 
-     * @returns {number} アウトライン幅
+     * @returns {Number} アウトライン幅
      */
     Sprite_BattleHudLevelup.prototype.outlineWidth = function() {
         return 8;
@@ -324,7 +324,7 @@ function Window_BattleRewards() {
     /**
      * Sprite_BattleHudExpGauge を破棄する。
      * 
-     * @param {object} optins オプション
+     * @param {Object} optins オプション
      */
     Sprite_BattleHudExpGauge.prototype.destroy = function(options) {
         if (this.bitmap) {
@@ -346,7 +346,7 @@ function Window_BattleRewards() {
     /**
      * Bitmapの幅を得る。
      * 
-     * @returns {number} Bitmapの幅。
+     * @returns {Number} Bitmapの幅。
      */
     Sprite_BattleHudExpGauge.prototype.bitmapWidth = function() {
         return 144;
@@ -355,7 +355,7 @@ function Window_BattleRewards() {
     /**
      * Bitmapの高さを得る。
      * 
-     * @returns {number} Bitmapの高さ。
+     * @returns {Number} Bitmapの高さ。
      */
     Sprite_BattleHudExpGauge.prototype.bitmapHeight = function() {
         return 34;
@@ -363,7 +363,7 @@ function Window_BattleRewards() {
     /**
      * ゲージの高さを得る。
      * 
-     * @returns {number} ゲージの高さ。
+     * @returns {Number} ゲージの高さ。
      */
     Sprite_BattleHudExpGauge.prototype.gaugeHeight = function() {
         return 24;
@@ -371,7 +371,7 @@ function Window_BattleRewards() {
     /**
      * ゲージ描画のX位置を取得する。
      * 
-     * @returns {number} X位置
+     * @returns {Number} X位置
      */
     Sprite_BattleHudExpGauge.prototype.gaugeX = function() {
         return 0;
@@ -379,7 +379,7 @@ function Window_BattleRewards() {
     /**
      * ゲージ描画のY位置を取得する。
      * 
-     * @returns {number} Y位置
+     * @returns {Number} Y位置
      */
     Sprite_BattleHudExpGauge.prototype.gaugeY = function() {
         return this.bitmapHeight() - this.gaugeHeight();
@@ -388,7 +388,7 @@ function Window_BattleRewards() {
     /**
      * ゲージ描画のY位置を取得する。
      * 
-     * @returns {number} Y位置
+     * @returns {Number} Y位置
      */
     Sprite_BattleHudExpGauge.prototype.labelY = function() {
         return 3;
@@ -554,7 +554,7 @@ function Window_BattleRewards() {
     /**
      * このスプライトが有効かどうかを得る。
      * 
-     * @returns {boolean} スプライトが有効な場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} スプライトが有効な場合にはtrue, それ以外はfalse.
      */
     Sprite_BattleHudExpGauge.prototype.isValid = function() {
          return true;
@@ -563,7 +563,7 @@ function Window_BattleRewards() {
     /**
      * 現在値を取得する。
      * 
-     * @returns {number} 現在値
+     * @returns {Number} 現在値
      */
     Sprite_BattleHudExpGauge.prototype.currentValue = function() {
         if (this._battler) {
@@ -580,7 +580,7 @@ function Window_BattleRewards() {
     /**
      * ゲージの最大値を得る。
      * 
-     * @returns {number} 最大値
+     * @returns {Number} 最大値
      */
     Sprite_BattleHudExpGauge.prototype.currentMaxValue = function() {
         if (this._battler) {
@@ -650,7 +650,7 @@ function Window_BattleRewards() {
     /**
      * アウトラインの幅を得る。
      * 
-     * @returns {number} アウトラインの幅。
+     * @returns {Number} アウトラインの幅。
      */
     Sprite_BattleHudExpGauge.prototype.labelOutlineWidth = function() {
         return 3;
@@ -677,7 +677,7 @@ function Window_BattleRewards() {
     /**
      * 値のアウトライン幅を得る。
      * 
-     * @returns {number} アウトライン幅
+     * @returns {Number} アウトライン幅
      */
     Sprite_BattleHudExpGauge.prototype.valueOutlineWidth = function() {
         return 2;
@@ -712,10 +712,10 @@ function Window_BattleRewards() {
     /**
      * ゲージの矩形領域を描画する。
      * 
-     * @param {number} x x位置
-     * @param {number} y y位置
-     * @param {number} width 幅
-     * @param {number} height 高さ
+     * @param {Number} x x位置
+     * @param {Number} y y位置
+     * @param {Number} width 幅
+     * @param {Number} height 高さ
      */
     Sprite_BattleHudExpGauge.prototype.drawGaugeRect = function(x, y, width, height) {
         const rate = this.gaugeRate();
@@ -731,7 +731,7 @@ function Window_BattleRewards() {
     /**
      * ゲージの割合を得る。
      * 
-     * @returns {number} ゲージの割合。
+     * @returns {Number} ゲージの割合。
      */
     Sprite_BattleHudExpGauge.prototype.gaugeRate = function() {
         if (this.isValid()) {
@@ -772,7 +772,7 @@ function Window_BattleRewards() {
     /**
      * ラベルの透過度を得る。
      * 
-     * @returns {number} 透過度
+     * @returns {Number} 透過度
      */
     Sprite_BattleHudExpGauge.prototype.labelOpacity = function() {
         return this.isValid() ? 255 : 160;
@@ -865,7 +865,7 @@ function Window_BattleRewards() {
     /**
      * 経験値バーポップアップをするかどうかを取得する。
      * 
-     * @returns {boolean} 経験値バーをポップアップする場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 経験値バーをポップアップする場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isExpPopup = function() {
         return this._isExpPopupRequired;
@@ -879,7 +879,7 @@ function Window_BattleRewards() {
     /**
      * 経験値ポップアップを即座に終了させるかどうかを取得する。
      * 
-     * @returns {boolean} 経験値ポップアップを即座に終了させる場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 経験値ポップアップを即座に終了させる場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isExpPopupEndImmidiately = function() {
         return this._isExpPopupEndImmidiately;
@@ -888,7 +888,7 @@ function Window_BattleRewards() {
     /**
      * EXPポップアップが動作中かどうかを取得する。
      * 
-     * @param {boolean} isRuning 動作中の場合にはtrue, それ以外はfalse.
+     * @param {Boolean} isRuning 動作中の場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.setExpPopupRuning = function(isRuning) {
         this._isExpPopupRuning = isRuning;
@@ -916,7 +916,7 @@ function Window_BattleRewards() {
     /**
      * レベルアップメッセージを表示するかどうかを取得する。
      * 
-     * @returns {boolean} レベルアップメッセージを表示する場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} レベルアップメッセージを表示する場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.shouldDisplayLevelUp = function() {
         return _Game_Actor_shouldDisplayLevelUp.call(this) && !$gameParty.inBattle();
@@ -996,7 +996,7 @@ function Window_BattleRewards() {
     /**
      * ウィンドウがビジーかどうかを取得する。
      * 
-     * @returns {boolean} ビジーの場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} ビジーの場合にはtrue, それ以外はfalse.
      */
     Window_BattleRewards.prototype.isBusy = function() {
         return (this._duration > 0);
@@ -1004,7 +1004,7 @@ function Window_BattleRewards() {
     /**
      * 現在の所持金（報酬加算前の所持金）を設定する。
      * 
-     * @param {number} gold 現在の所持金
+     * @param {Number} gold 現在の所持金
      */
     Window_BattleRewards.prototype.setCurrentGold = function(gold) {
         this._currentGold = gold;
@@ -1012,7 +1012,7 @@ function Window_BattleRewards() {
     /**
      * 報酬をセットアップする。
      * 
-     * @param {object} rewards 報酬。BattleManagerのmakeRewardsで構築されたオブジェクト。
+     * @param {Object} rewards 報酬。BattleManagerのmakeRewardsで構築されたオブジェクト。
      */
     Window_BattleRewards.prototype.setup = function(rewards) {
         this._targetGold = $gameParty.gold();
@@ -1114,9 +1114,9 @@ function Window_BattleRewards() {
     /**
      * 所持金を描画する。
      * 
-     * @param {number} x x位置
-     * @param {number} y y位置
-     * @param {number} width 幅
+     * @param {Number} x x位置
+     * @param {Number} y y位置
+     * @param {Number} width 幅
      */
     Window_BattleRewards.prototype.drawRewardGold = function(x, y, width) {
         // 所持金ラベル 所持金 単位 加算値
@@ -1156,9 +1156,9 @@ function Window_BattleRewards() {
     /**
      * 報酬EXPを描画する。
      * 
-     * @param {number} x x位置
-     * @param {number} y y位置
-     * @param {number} width 幅
+     * @param {Number} x x位置
+     * @param {Number} y y位置
+     * @param {Number} width 幅
      */
     Window_BattleRewards.prototype.drawRewardExp = function(x, y, width) {
         const exp = (this._rewards) ? (this._rewards.exp || 0) : 0;
@@ -1175,9 +1175,9 @@ function Window_BattleRewards() {
     /**
      * 報酬ラベルを描画する。
      * 
-     * @param {number} x 描画位置x
-     * @param {number} y 描画位置y
-     * @param {number} width 描画幅
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
      */
     Window_BattleRewards.prototype.drawTreasureLabel = function(x, y, width) {
         this.changeTextColor(ColorManager.systemColor());
@@ -1187,10 +1187,10 @@ function Window_BattleRewards() {
     /**
      * 報酬アイテムを描画する。
      * 
-     * @param {number} x 描画位置x
-     * @param {number} y 描画位置y
-     * @param {number} width 描画幅
-     * @param {object} rewardItem アイテム
+     * @param {Number} x 描画位置x
+     * @param {Number} y 描画位置y
+     * @param {Number} width 描画幅
+     * @param {Object} rewardItem アイテム
      */
     Window_BattleRewards.prototype.drawRewardItem = function(x, y, width, rewardItem) {
         this.resetTextColor();
@@ -1202,9 +1202,9 @@ function Window_BattleRewards() {
     /**
      * 水平ラインを描画する。
      * 
-     * @param {number} x x位置
-     * @param {number} y y位置
-     * @param {number} width 幅
+     * @param {Number} x x位置
+     * @param {Number} y y位置
+     * @param {Number} width 幅
      */
     Window_BattleRewards.prototype.drawHorzLine = function(x, y, width) {
         this.drawRect(x, y, width, 5);
@@ -1264,7 +1264,7 @@ function Window_BattleRewards() {
     /**
      * 報酬ウィンドウ表示中かどうかを取得する。
      * 
-     * @returns {boolean} 表示中の場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 表示中の場合にはtrue, それ以外はfalse.
      */
     Scene_Battle.prototype.isRewardsPopupBusy = function() {
         if (this._battleRewardsWindow.isBusy()) {

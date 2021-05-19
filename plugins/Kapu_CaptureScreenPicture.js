@@ -209,9 +209,9 @@
      * キャプチャ画像を保存する。
      * bitmapにnullを渡すと解放する。
      * 
-     * @param {number} no 番号
+     * @param {Number} no 番号
      * @param {Bitmap} bitmap ビットマップ
-     * @param {object} data 保存データ
+     * @param {Object} data 保存データ
      */
     Game_Temp.prototype.setCaptureImage = function(no, bitmap, data) {
         if (this._captureImages[no]) {
@@ -226,7 +226,7 @@
     /**
      * キャプチャ画像を取得する。
      * 
-     * @param {number} no 番号
+     * @param {Number} no 番号
      * @returns {Bitmap} ビットマップ
      */
     Game_Temp.prototype.captureImage = function(no) {

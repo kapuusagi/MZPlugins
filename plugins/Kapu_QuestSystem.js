@@ -207,7 +207,7 @@ $gameQuests = null;
 /**
  * 新しいGame_Questデータを構築する。
  * 
- * @param {number} id クエストID
+ * @param {Number} id クエストID
  */
 function Game_Quest() {
     this.initialize(...arguments);
@@ -256,8 +256,8 @@ function Game_Quest() {
     /**
      * クエストIDを得る。
      * 
-     * @param {object} args コマンド引数
-     * @returns {number} ID
+     * @param {Object} args コマンド引数
+     * @returns {Number} ID
      */
     const _getQuestId = function(args) {
         const variableId = Number(args.variableId) || 0;
@@ -353,7 +353,7 @@ function Game_Quest() {
     /**
      * ギルドランク情報を得る。
      * 
-     * @param {number} no インデックス番号
+     * @param {Number} no インデックス番号
      * @returns {GuildRankInfo} ギルドランク情報。noが範囲外の場合にはnull.
      */
     DataManager.guildRank = function(no) {
@@ -366,7 +366,7 @@ function Game_Quest() {
     /**
      * expに対応したギルドランク情報を得る。
      * 
-     * @param {number} exp 経験値
+     * @param {Number} exp 経験値
      * @returns {GuildRankInfo} ギルドランク情報。該当エントリが無い場合には一番低いランクが返る。
      */
     DataManager.guildRankByExp = function(exp) {
@@ -410,7 +410,7 @@ function Game_Quest() {
     /**
      * このアクターを初期化する。
      * 
-     * @param {number} actorId アクターID
+     * @param {Number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
@@ -426,7 +426,7 @@ function Game_Quest() {
     /**
      * アクターのギルドEXPを得る。
      * 
-     * @returns {number} ギルドEXP
+     * @returns {Number} ギルドEXP
      */
      Game_Actor.prototype.guildExp = function() {
         return this._guildExp;
@@ -438,7 +438,7 @@ function Game_Quest() {
      * Note: このメソッドは単純加算するのみ。適正ランク/不適正ランクなどによる、
      *       倍率調整は呼び出し元で実施することを想定する。。
      * 
-     * @param {number} gainExp 加算する量
+     * @param {Number} gainExp 加算する量
      */
     Game_Actor.prototype.gainGuildExp = function(gainExp) {
         gainExp = Math.max(0, gainExp || 0);
@@ -448,7 +448,7 @@ function Game_Quest() {
     /**
      * アクターのギルドランクを得る。
      * 
-     * @returns {number} 
+     * @returns {Number} 
      */
     Game_Actor.prototype.guildRank = function() {
         const rankInfo = DataManager.guildRankByExp(this._guildExp);
@@ -476,7 +476,7 @@ function Game_Quest() {
     /**
      * 初期化する。
      * 
-     * @param {number} id クエストID
+     * @param {Number} id クエストID
      */
      Game_Quest.prototype.initialize = function(id) {
         this._id = id;
@@ -516,8 +516,8 @@ function Game_Quest() {
      * itemで指定されたアイテムの数を数える。
      * YEP_ItemCoreで採取対象が個別アイテムの場合、正しくカウントできない問題があったため用意した。
      * 
-     * @param {object} item アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {number} アイテムの数
+     * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {Number} アイテムの数
      */
     Game_Quest.prototype.countPartyItem = function(baseItem) {
         return $gameParty.numItems(baseItem);
@@ -531,7 +531,7 @@ function Game_Quest() {
      * ・採取クエストの場合：総採取数
      * ・上記以外：0
      * 
-     * @returns {number} トータルカウント
+     * @returns {Number} トータルカウント
      */
     Game_Quest.prototype.getTotal = function() {
         const questData = this.questData();
@@ -561,7 +561,7 @@ function Game_Quest() {
     /**
      * このクエストの適正ギルドランクを得る。
      * 
-     * @returns {number} ギルドランク
+     * @returns {Number} ギルドランク
      */
     Game_Quest.prototype.guildRank = function() {
         const questData = this.questData();
@@ -571,7 +571,7 @@ function Game_Quest() {
     /**
      * このクエストのギルドEXPを得る。
      * 
-     * @returns {number} ギルドEXP
+     * @returns {Number} ギルドEXP
      */
     Game_Quest.prototype.guildExp = function() {
         const questData = this.questData();
@@ -581,7 +581,7 @@ function Game_Quest() {
     /**
      * クエストの状態を取得する。
      * 
-     * @returns {number} 状態(Game_Quest.STATUS_xxxx が返る。)
+     * @returns {Number} 状態(Game_Quest.STATUS_xxxx が返る。)
      */
     Game_Quest.prototype.status = function() {
         return this._status;
@@ -590,8 +590,8 @@ function Game_Quest() {
     /**
      * 討伐対象かどうかを判定する。
      * 
-     * @param {number} enemyId エネミーID
-     * @returns {boolean} 討伐対象の場合にはtrue, それ以外はfalse
+     * @param {Number} enemyId エネミーID
+     * @returns {Boolean} 討伐対象の場合にはtrue, それ以外はfalse
      */
     Game_Quest.prototype.isSubjugationTarget = function(enemyId) {
         const questData = this.questData();
@@ -739,7 +739,7 @@ function Game_Quest() {
      * 報酬アイテムを得る。
      * 
      * @param {RewardItem}} entry 報酬アイテムエントリ
-     * @returns {object} アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {Object} アイテム(DataItem/DataWeapon/DataArmor)
      */
      Game_Quest.prototype.getRewardItem = function(entry) {
         if (entry.kind === 1) {
@@ -879,7 +879,7 @@ function Game_Quest() {
     /**
      * 報酬金額を得る。
      * 
-     * @returns {number} 報酬金額
+     * @returns {Number} 報酬金額
      */
     Game_Quest.prototype.rewardGold = function() {
         const questData = this.questData();
@@ -889,7 +889,7 @@ function Game_Quest() {
     /**
      * キャンセル時のペナルティ金額を得る。
      * 
-     * @returns {number} ペナルティ金額
+     * @returns {Number} ペナルティ金額
      */
     Game_Quest.prototype.penaltyGold = function() {
         const questData = this.questData();
@@ -909,7 +909,7 @@ function Game_Quest() {
     /**
      * ペナルティー金額レートを得る。
      * 
-     * @returns {number} ペナルティ金額レート
+     * @returns {Number} ペナルティ金額レート
      */
     Game_Quest.prototype.penaltyGoldRate = function() {
         return 0.3;
@@ -931,7 +931,7 @@ function Game_Quest() {
      * クエストが受託可能かどうかを判定する。
      * 
      * @param {Game_Quest} quest クエスト
-     * @returns {boolean} 受託可能な場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 受託可能な場合にはtrue, それ以外はfalse.
      */
     Game_Party.prototype.canAcceptQuest = function(quest) {
         const condition = quest.entrustCondition();
@@ -953,7 +953,7 @@ function Game_Quest() {
     /**
      * このパーティーのギルドランクを得る。
      * 
-     * @returns {number} ギルドランク
+     * @returns {Number} ギルドランク
      */
     Game_Party.prototype.guildRank = function() {
         const members = this.allMembers();
@@ -976,7 +976,7 @@ function Game_Quest() {
     /**
      * クエストを削除する。
      * 
-     * @param {number} id クエストID
+     * @param {Number} id クエストID
      */
     Game_Party.prototype.removeQuest = function(id) {
         for (let i = 0; i < this._quests.length; i++) {
@@ -990,7 +990,7 @@ function Game_Quest() {
     /**
      * idで指定されるクエストの採取アイテムを減らす
      * 
-     * @param {number} id クエストID
+     * @param {Number} id クエストID
      */
     Game_Party.prototype.loseQuestCollectItems = function(id) {
         const quest = this._quests.find(q => q.id === id);
@@ -1009,7 +1009,7 @@ function Game_Quest() {
     /**
      * クエスト報酬を得る。
      * 
-     * @param {number} id クエストID
+     * @param {Number} id クエストID
      */
     Game_Party.prototype.gainQuestRewards = function(id) {
         const quest = this._quests.find(q => q.id === id);
@@ -1047,9 +1047,9 @@ function Game_Quest() {
      * 
      * Note: 完了状態かどうかは判定されていないしない。
      * 
-     * @param {number} id クエストID
-     * @param {number} loseCollectItems 収集アイテムを減らす場合にはtrue
-     * @param {boolean} getRewards 報酬を加算する場合にはtrue, 加算しない場合にはfalse
+     * @param {Number} id クエストID
+     * @param {Number} loseCollectItems 収集アイテムを減らす場合にはtrue
+     * @param {Boolean} getRewards 報酬を加算する場合にはtrue, 加算しない場合にはfalse
      */
     Game_Party.prototype.reportQuest = function(id, loseCollectItems, getRewards) {
         if (this.isTryingQuest(id)) {
@@ -1067,7 +1067,7 @@ function Game_Quest() {
     /**
      * クエストペナルティを支払う
      * 
-     * @param {number} id クエストID
+     * @param {Number} id クエストID
      */
     Game_Party.prototype.payQuestPenalty = function(id) {
         const quest = this._quests.find(q => q.id === id);
@@ -1082,8 +1082,8 @@ function Game_Quest() {
     /**
      * idで指定されるクエストをギブアップする。
      * 
-     * @param {number} id クエストID
-     * @param {boolean} payPenalty ペナルティを払うかどうか
+     * @param {Number} id クエストID
+     * @param {Boolean} payPenalty ペナルティを払うかどうか
      */
     Game_Party.prototype.giveupQuest = function(id, payPenalty) {
         if (this.isTryingQuest(id)) {
@@ -1128,8 +1128,8 @@ function Game_Quest() {
     /**
      * idで指定されるクエストを受領中かどうかを判定して返す。
      * 
-     * @param {number} id クエストID
-     * @returns {boolean} 請負中の場合にはtrue, それ以外はfalse
+     * @param {Number} id クエストID
+     * @returns {Boolean} 請負中の場合にはtrue, それ以外はfalse
      */
     Game_Party.prototype.isTryingQuest = function(id) {
         for (let i = 0; i < this._quests.length; i++) {

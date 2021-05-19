@@ -152,11 +152,11 @@ function Simple_TextInput() {
      * 
      * @param {Game_Interpreter} interpreter インタプリタオブジェクト
      * @param {string} text デフォルトのテキスト
-     * @param {number} maxLength 最大長
-     * @param {number} width 幅
-     * @param {number} buttonWidth ボタンの幅
-     * @param {number} lineHeight 行の高さ
-     * @param {boolean} isCancelEnabled キャンセル操作可能かどうか
+     * @param {Number} maxLength 最大長
+     * @param {Number} width 幅
+     * @param {Number} buttonWidth ボタンの幅
+     * @param {Number} lineHeight 行の高さ
+     * @param {Boolean} isCancelEnabled キャンセル操作可能かどうか
      */
     Simple_TextInput.prototype.setup = function(interpreter, text, maxLength, width, buttonWidth, lineHeight, isCancelEnabled) {
         this._interpreter = interpreter;
@@ -196,7 +196,7 @@ function Simple_TextInput() {
     /**
      * 最大文字数を得る。
      * 
-     * @returns {number} 最大文字数
+     * @returns {Number} 最大文字数
      */
     Simple_TextInput.prototype.maxLength = function() {
         return this._maxLength;
@@ -205,7 +205,7 @@ function Simple_TextInput() {
     /**
      * 最大文字数
      * 
-     * @param {number} maxLength 
+     * @param {Number} maxLength 
      */
     Simple_TextInput.prototype.setMaxLength = function(maxLength) {
         this._maxLength = maxLength;
@@ -217,7 +217,7 @@ function Simple_TextInput() {
     /**
      * キャンセル可能かどうかを取得する。
      * 
-     * @returns {boolean} キャンセル可能な場合にはtrue, それ以外はfalse
+     * @returns {Boolean} キャンセル可能な場合にはtrue, それ以外はfalse
      */
     Simple_TextInput.prototype.isCancelEnabled = function() {
         return this._isCancelEnabled;
@@ -226,7 +226,7 @@ function Simple_TextInput() {
     /**
      * キャンセル可能かどうかを設定する。
      * 
-     * @param {boolean} isEnabled キャンセル可能な場合にはtrue, それ以外はfalse
+     * @param {Boolean} isEnabled キャンセル可能な場合にはtrue, それ以外はfalse
      */
     Simple_TextInput.prototype.setCancelEnabled = function(isEnabled) {
         this._isCancelEnabled = isEnabled;
@@ -388,13 +388,13 @@ function Simple_TextInput() {
      * 位置を設定する。
      * 
      * @param {HTMLElement} element HTML要素
-     * @param {number} screenX スクリーン位置x
-     * @param {number} screenY スクリーン位置y
-     * @param {number} x 要素を配置するx位置
-     * @param {number} y 要素を配置するy位置
-     * @param {number} width 要素の幅
-     * @param {number} height 要素の高さ
-     * @param {number} fontSize フォントサイズ
+     * @param {Number} screenX スクリーン位置x
+     * @param {Number} screenY スクリーン位置y
+     * @param {Number} x 要素を配置するx位置
+     * @param {Number} y 要素を配置するy位置
+     * @param {Number} width 要素の幅
+     * @param {Number} height 要素の高さ
+     * @param {Number} fontSize フォントサイズ
      */
     Simple_TextInput.prototype.setPosition = function(element, screenX, screenY, x, y, width, height, fontSize) {
         element.style.position = "absolute";
@@ -417,7 +417,7 @@ function Simple_TextInput() {
     /**
      * イベント処理を中止するためのコールバック
      * 
-     * @param {object} event イベントオブジェクト
+     * @param {Object} event イベントオブジェクト
      */
     Simple_TextInput.prototype.stopPropagation = function(event) {
         event.stopPropagation();
@@ -426,7 +426,7 @@ function Simple_TextInput() {
     /**
      * 確定ボタンがクリックされたときの処理を行う。
      * 
-     * @returns {boolean} 
+     * @returns {Boolean} 
      */
     Simple_TextInput.prototype.onOkClick = function() {
         this._inputText = this._textBox.value;
@@ -443,7 +443,7 @@ function Simple_TextInput() {
     /**
      * キャンセルボタンがクリックされたときの処理を行う。
      * 
-     * @returns {boolean} 
+     * @returns {Boolean} 
      */
     Simple_TextInput.prototype.onCancelClick = function() {
         this._inputText = "";
@@ -631,7 +631,7 @@ function Simple_TextInput() {
     /**
      * 最大入力文字数を得る。
      * 
-     * @returns {number} 最大入力文字数
+     * @returns {Number} 最大入力文字数
      */
     Window_NameEdit.prototype.maxLength = function() {
         return this._maxLength || 0;

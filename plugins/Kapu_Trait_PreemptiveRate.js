@@ -147,7 +147,7 @@
     /**
      * マップをセットアップする。
      * 
-     * @param {number} mapId マップID
+     * @param {Number} mapId マップID
      */
     Game_Map.prototype.setup = function(mapId) {
         _Game_Map_setup.call(this, mapId);
@@ -161,7 +161,7 @@
     /**
      * マップの基本先制率を得る。
      * 
-     * @param {number} rate 先制率
+     * @param {Number} rate 先制率
      */
     Game_Map.prototype.setRatePreemptive = function(rate) {
         this._ratePreemptive = rate;
@@ -170,7 +170,7 @@
     /**
      * マップの基本先制率を得る。
      * 
-     * @returns {number} 先制率
+     * @returns {Number} 先制率
      */
     Game_Map.prototype.ratePreemptive = function() {
         return this._ratePreemptive;

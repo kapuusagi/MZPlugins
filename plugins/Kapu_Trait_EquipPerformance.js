@@ -169,7 +169,7 @@
         /**
          * 武器性能強化特性文字列を得る。
          * 
-         * @param {number} dataId データID
+         * @param {Number} dataId データID
          * @returns {string} 文字列
          */
         TextManager.traitWeaponPerformance = function(dataId) {
@@ -193,7 +193,7 @@
         /**
          * 防具特性強化文字列を得る。
          * 
-         * @param {number} dataId データID
+         * @param {Number} dataId データID
          * @returns {string} 文字列
          */
         TextManager.traitArmorPerformance = function(dataId) {

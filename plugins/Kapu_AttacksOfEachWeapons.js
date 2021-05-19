@@ -186,8 +186,8 @@
     /**
      * 装備スロットの武器に設定されたスキルIDを得る。
      * 
-     * @param {number} slotNo スロット番号
-     * @returns {number} スキルID
+     * @param {Number} slotNo スロット番号
+     * @returns {Number} スキルID
      */
     Game_Actor.prototype.equipWeaponSkillId = function(slotNo) {
         const equips = this.equips();
@@ -210,7 +210,7 @@
     /**
      * 有効な武器スロットを設定する。
      * 
-     * @param {number} validSlotNo 武器スロット番号
+     * @param {Number} validSlotNo 武器スロット番号
      */
     Game_Actor.prototype.setValidWeaponSlot = function(validSlotNo) {
         const equipSlots = this.equipSlots();
@@ -241,7 +241,7 @@
     /**
      * ターゲットのインデックス番号を得る。
      * 
-     * @returns {number} ターゲットのインデックス番号
+     * @returns {Number} ターゲットのインデックス番号
      */
     Game_Action.prototype.targetIndex = function() {
         return this._targetIndex;
@@ -290,7 +290,7 @@
     /**
      * このアクションにアイテム使用を設定する。
      * 
-     * @param {number} itemId アイテムID
+     * @param {Number} itemId アイテムID
      */
     Game_Action.prototype.setItem = function(itemId) {
         _Game_Action_setItem.call(this, itemId);
@@ -310,7 +310,7 @@
     /**
      * 武器スロット番号を設定する。
      * 
-     * @param {number} slotNo スロット番号
+     * @param {Number} slotNo スロット番号
      */
     Game_Action.prototype.setWeaponSlot = function(slotNo) {
         this._weaponSlot = slotNo;

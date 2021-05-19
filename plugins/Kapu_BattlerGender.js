@@ -120,7 +120,7 @@
      * 性別文字列をパースして性別値を得る。
      * 
      * @param {string} str 文字列
-     * @returns {number} 性別を表す定数値
+     * @returns {Number} 性別を表す定数値
      */
     const _parseGender = function(str) {
         if ((str === "male") || (str === textGenderMale)) {
@@ -160,7 +160,7 @@
     /**
      * 性別名を得る。
      * 
-     * @param {number} genderNo 性別番号
+     * @param {Number} genderNo 性別番号
      * @returns {string} 性別名
      */
     TextManager.genderText = function(genderNo) {
@@ -219,7 +219,7 @@
     /**
      * 男性かどうかを判定する。
      * 
-     * @returns {boolean} 男性の場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 男性の場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isMale = function() {
         return this._gender === Game_BattlerBase.GENDER_MALE;
@@ -228,7 +228,7 @@
     /**
      * 女性かどうかを判定する。
      * 
-     * @returns {boolean} 男性の場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 男性の場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.isFemale = function() {
         return this._gender === Game_BattlerBase.GENDER_FEMALE;
@@ -254,7 +254,7 @@
     /**
      * 性別を変更する。
      * 
-     * @param {object} gender 性別文字列or性別番号
+     * @param {Object} gender 性別文字列or性別番号
      */
     Game_Actor.prototype.changeGender = function(gender) {
         this._gender = _parseGender(gender);
@@ -283,7 +283,7 @@
     /**
      * 全員男性かどうかを判定する。
      * 
-     * @returns {boolean} 全員男性の場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} 全員男性の場合にはtrue, それ以外はfalse.
      */
     Game_Unit.prototype.isMaleOnly = function() {
         return this.allMembers().every(member => member.isMale());
@@ -292,7 +292,7 @@
     /**
      * 全員女性かどうかを判定する。
      * 
-     * @returns {boolean} 全員女性の場合にはtrue, それ以外はfalse
+     * @returns {Boolean} 全員女性の場合にはtrue, それ以外はfalse
      */
     Game_Unit.prototype.isFemaleOnly = function() {
         return this.allMembers().every(member => member.isFemale());

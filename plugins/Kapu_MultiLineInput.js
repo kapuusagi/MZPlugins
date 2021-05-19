@@ -251,11 +251,11 @@ function Scene_TextInput() {
      * 
      * @param {Game_Interpreter} interpreter インタプリタオブジェクト
      * @param {string} text デフォルトのテキスト
-     * @param {number} maxLength 最大長
-     * @param {number} lineCount 行数
-     * @param {number} width 幅
-     * @param {number} buttonWidth ボタンの幅
-     * @param {number} lineHeight 行の高さ
+     * @param {Number} maxLength 最大長
+     * @param {Number} lineCount 行数
+     * @param {Number} width 幅
+     * @param {Number} buttonWidth ボタンの幅
+     * @param {Number} lineHeight 行の高さ
      */
     MultiLine_TextInput.prototype.setup = function(interpreter, text, maxLength, lineCount, width, buttonWidth, lineHeight) {
         this._interpreter = interpreter;
@@ -275,7 +275,7 @@ function Scene_TextInput() {
     /**
      * テキスト長の最大値を設定する。
      * 
-     * @param {number} maxLength テキスト長
+     * @param {Number} maxLength テキスト長
      */
     MultiLine_TextInput.prototype.setMaxLength = function(maxLength) {
         this._maxLength = maxLength;
@@ -287,7 +287,7 @@ function Scene_TextInput() {
     /**
      * テキスト長の最大を得る。
      * 
-     * @returns {number} テキスト長
+     * @returns {Number} テキスト長
      */
     MultiLine_TextInput.prototype.maxLength = function() {
         return this._maxLength;
@@ -468,13 +468,13 @@ function Scene_TextInput() {
      * 位置を設定する。
      * 
      * @param {HTMLElement} element HTML要素
-     * @param {number} screenX スクリーン位置x
-     * @param {number} screenY スクリーン位置y
-     * @param {number} x 要素を配置するx位置
-     * @param {number} y 要素を配置するy位置
-     * @param {number} width 要素の幅
-     * @param {number} height 要素の高さ
-     * @param {number} fontSize フォントサイズ
+     * @param {Number} screenX スクリーン位置x
+     * @param {Number} screenY スクリーン位置y
+     * @param {Number} x 要素を配置するx位置
+     * @param {Number} y 要素を配置するy位置
+     * @param {Number} width 要素の幅
+     * @param {Number} height 要素の高さ
+     * @param {Number} fontSize フォントサイズ
      */
     MultiLine_TextInput.prototype.setPosition = function(element, screenX, screenY, x, y, width, height, fontSize) {
         element.style.position = "absolute";
@@ -497,7 +497,7 @@ function Scene_TextInput() {
     /**
      * イベント処理を中止するためのコールバック
      * 
-     * @param {object} event イベントオブジェクト
+     * @param {Object} event イベントオブジェクト
      */
      MultiLine_TextInput.prototype.stopPropagation = function(event) {
         event.stopPropagation();
@@ -506,7 +506,7 @@ function Scene_TextInput() {
     /**
      * 確定ボタンがクリックされたときの処理を行う。
      * 
-     * @returns {boolean} 
+     * @returns {Boolean} 
      */
     MultiLine_TextInput.prototype.onOkClick = function() {
         this._inputText = this._textArea.value;
@@ -523,7 +523,7 @@ function Scene_TextInput() {
     /**
      * キャンセルボタンがクリックされたときの処理を行う。
      * 
-     * @returns {boolean} 
+     * @returns {Boolean} 
      */
     MultiLine_TextInput.prototype.onCancelClick = function() {
         this._inputText = "";
@@ -579,10 +579,10 @@ function Scene_TextInput() {
      * 
      * @param {Game_Interpreter} interpreter インタプリタオブジェクト
      * @param {string} text テキスト
-     * @param {number} lineCount 入力行数
-     * @param {number} width 幅
-     * @param {number} buttonWidth ボタン幅
-     * @param {number} lineHeight ボタン高さ
+     * @param {Number} lineCount 入力行数
+     * @param {Number} width 幅
+     * @param {Number} buttonWidth ボタン幅
+     * @param {Number} lineHeight ボタン高さ
      */
     Scene_TextInput.prototype.prepare = function(interpreter, text, maxLength, lineCount, width, buttonWidth, lineHeight) {
         this._multiLine_TextInput.setup(interpreter, text, maxLength, lineCount, width, buttonWidth, lineHeight);

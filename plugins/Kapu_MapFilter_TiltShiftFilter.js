@@ -249,7 +249,7 @@
         /**
          * Blurフィルタの強さ
          *
-         * @member {number}
+         * @member {Number}
          */
         blur: {
             get: function () {
@@ -263,7 +263,7 @@
         /**
          * Blurフィルタの勾配の強さ。
          *
-         * @member {number}
+         * @member {Number}
          */
         gradientBlur: {
             get: function ()
@@ -460,7 +460,7 @@
         /**
          * Blurの強さ
          *
-         * @member {number}
+         * @member {Number}
          */
         blur: {
             get: function ()
@@ -477,7 +477,7 @@
         /**
          * Blurをかける勾配の強さ
          *
-         * @member {number}
+         * @member {Number}
          */
         gradientBlur: {
             get: function ()

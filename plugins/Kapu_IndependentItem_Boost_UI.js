@@ -465,7 +465,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 再初期化を有効にするかどうかを設定する。
      * 
-     * @param {boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     * @param {Boolean} enabled 有効にする場合にはtrue, それ以外はfalse
      */
     Window_BlacksmithShopCommand.prototype.setReinitializeEnable = function(enabled) {
         this._enableReinitialize = enabled;
@@ -474,7 +474,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 強化リセットを有効にするかどうかを設定する。
      * 
-     * @param {boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     * @param {Boolean} enabled 有効にする場合にはtrue, それ以外はfalse
      */
     Window_BlacksmithShopCommand.prototype.setResetBoostEnable = function(enabled) {
         this._enableResetBoost = enabled;
@@ -484,7 +484,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * リネームを有効にするかどうかを設定する。
      * 
-     * @param {boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     * @param {Boolean} enabled 有効にする場合にはtrue, それ以外はfalse
      */
     Window_BlacksmithShopCommand.prototype.setRenameEnable = function(enabled) {
         this._enableRename = enabled;
@@ -548,7 +548,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 鍛冶屋レベルを設定する。
      * 
-     * @param {number} level レベル
+     * @param {Number} level レベル
      */
     Window_BlacksmithItemList.prototype.setSmithLevel = function(level) {
         this._smithLevel = level;
@@ -558,7 +558,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 最大強化回数を設定する。
      * 
-     * @param {number} maxBoostCount 最大強化回数
+     * @param {Number} maxBoostCount 最大強化回数
      */
     Window_BlacksmithItemList.prototype.setMaxBoostCount = function(maxBoostCount) {
         this._maxBoostCount = maxBoostCount;
@@ -568,7 +568,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * ショップモードを設定する。
      * 
-     * @param {number} mode ショップモード(Scene_Shop.SHOP_MODE_～)
+     * @param {Number} mode ショップモード(Scene_Shop.SHOP_MODE_～)
      */
     Window_BlacksmithItemList.prototype.setShopMode = function(mode) {
         if (this._mode !== mode) {
@@ -580,7 +580,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * アイテム数を得る。
      * 
-     * @returns {number} アイテム数
+     * @returns {Number} アイテム数
      */
     Window_BlacksmithItemList.prototype.maxItems = function() {
         return this._items ? this._items.length : 1;
@@ -589,7 +589,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 選択されているアイテムを得る。
      * 
-     * @returns {object} アイテム
+     * @returns {Object} アイテム
      */
     Window_BlacksmithItemList.prototype.item = function() {
         return this._items[this.index()];
@@ -598,7 +598,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 所持金を設定する。
      * 
-     * @param {number} money 所持金
+     * @param {Number} money 所持金
      */
     Window_BlacksmithItemList.prototype.setMoney = function(money) {
         this._money = money;
@@ -617,8 +617,8 @@ function Window_BlacksmithNameEdit() {
     /**
      * itemで指定される項目が有効かどうかを判定して返す。
      * 
-     * @param {object} アイテム
-     * @returns {boolean} 有効な場合にはtrue, 無効な場合にはfalse
+     * @param {Object} アイテム
+     * @returns {Boolean} 有効な場合にはtrue, 無効な場合にはfalse
      */
     Window_BlacksmithItemList.prototype.isEnabled = function(item) {
         if (item) {
@@ -708,10 +708,10 @@ function Window_BlacksmithNameEdit() {
      * 強化回数を描画する。
      * 現在強化回数/最大強化回数で表示する。
      * 
-     * @param {object} item 強化対象アイテム(DataArmor/DataWeapon)
-     * @param {number} x 描画x位置
-     * @param {number} y 描画y位置
-     * @param {number} width 幅
+     * @param {Object} item 強化対象アイテム(DataArmor/DataWeapon)
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 幅
      */
      Window_BlacksmithItemList.prototype.drawBoostCount = function(item, x, y, width) {
         const labelWidth = 64;
@@ -735,10 +735,10 @@ function Window_BlacksmithNameEdit() {
      * 成功率「成功率:xx%」を描画する。
      * 
      * @param {string} label ラベル文字列
-     * @param {number} rate 成功率(0～1.0)
-     * @param {number} x x位置
-     * @param {number} y y位置
-     * @param {number} width 幅
+     * @param {Number} rate 成功率(0～1.0)
+     * @param {Number} x x位置
+     * @param {Number} y y位置
+     * @param {Number} width 幅
      */
      Window_BlacksmithItemList.prototype.drawSuccessRate = function(label, rate, x, y, width) {
         const valueWidth = 56;
@@ -825,7 +825,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 現在選択している項目が選択可能かどうかを判定する。
      * 
-     * @returns {boolean} 現在選択している項目が選択可能な場合にはtrue。
+     * @returns {Boolean} 現在選択している項目が選択可能な場合にはtrue。
      */
     Window_BlacksmithCatalystList.prototype.isCurrentItemEnabled = function() {
         return this.isEnabled(this.item());
@@ -834,8 +834,8 @@ function Window_BlacksmithNameEdit() {
     /**
      * itemで指定される項目が適用可能かどうかを判定する。
      * 
-     * @param {object} item 対象のアイテム
-     * @returns {boolean} 適用可能な場合にはtrue, それ以外はfalse
+     * @param {Object} item 対象のアイテム
+     * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
      */
     Window_BlacksmithCatalystList.prototype.isEnabled = function(item) {
         if (!item) {
@@ -864,7 +864,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * アイテムを描画する。
      * 
-     * @param {number} index 項目インデックス
+     * @param {Number} index 項目インデックス
      */
     Window_BlacksmithCatalystList.prototype.drawItem = function(index) {
         const item = this._data[index];
@@ -894,10 +894,10 @@ function Window_BlacksmithNameEdit() {
     /**
      * 成功率「成功率:xx%」を描画する。
      * 
-     * @param {number} rate 成功率(0～1.0)
-     * @param {number} x x位置
-     * @param {number} y y位置
-     * @param {number} width 幅
+     * @param {Number} rate 成功率(0～1.0)
+     * @param {Number} x x位置
+     * @param {Number} y y位置
+     * @param {Number} width 幅
      */
     Window_BlacksmithCatalystList.prototype.drawSuccessRate = function(rate, x, y, width) {
         const valueWidth = 56;
@@ -917,10 +917,10 @@ function Window_BlacksmithNameEdit() {
     /**
      * アイテムの数量を描画する。
      * 
-     * @param {object} item アイテム
-     * @param {number} x 描画x位置
-     * @param {number} y 描画y位置
-     * @param {number} width 描画幅
+     * @param {Object} item アイテム
+     * @param {Number} x 描画x位置
+     * @param {Number} y 描画y位置
+     * @param {Number} width 描画幅
      */
     Window_BlacksmithCatalystList.prototype.drawItemNumber = function(item, x, y, width) {
         const itemCount = $gameParty.numItems(item);
@@ -974,7 +974,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 入力値の最大値を設定する。
      * 
-     * @param {number} max 最大値
+     * @param {Number} max 最大値
      */
     Window_BlacksmithNumberInput.prototype.setMaximum = function(max) {
         this._max = max;
@@ -985,7 +985,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 値をセットする。
      * 
-     * @param {number} number 数値
+     * @param {Number} number 数値
      */
     Window_BlacksmithNumberInput.prototype.setNumber = function(number) {
         this._number = number.clamp(0, this._max);
@@ -998,7 +998,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 値を取得する
      * 
-     * @returns {number} 値
+     * @returns {Number} 値
      */
     Window_BlacksmithNumberInput.prototype.number = function() {
         return this._number;
@@ -1035,7 +1035,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 最大桁数を得る。
      * 
-     * @returns {number} 最大桁数
+     * @returns {Number} 最大桁数
      */
     Window_BlacksmithNumberInput.prototype.maxDigits = function() {
         let digit = 1;
@@ -1051,7 +1051,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * キャンセル操作が有効かどうかを取得する。
      * 
-     * @returns {boolean} キャンセル操作が有効な場合にはtrue, それ以外はfalse.
+     * @returns {Boolean} キャンセル操作が有効な場合にはtrue, それ以外はfalse.
      * !!!overwrite!!! Window_NumberInput.isCancelEnabled
      *     キャンセル操作を有効にするため、オーバーライドする。
      */
@@ -1062,7 +1062,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 値を変更する。
      * 
-     * @param {boolean} up 上げる場合にはtrue, 下げる場合にはfalse
+     * @param {Boolean} up 上げる場合にはtrue, 下げる場合にはfalse
      */
     Window_BlacksmithNumberInput.prototype.changeDigit = function(up) {
         if (up && (this._number === this._max)) {
@@ -1158,8 +1158,8 @@ function Window_BlacksmithNameEdit() {
     /**
      * 触媒アイテムと数量を設定する。
      * 
-     * @param {object} item 触媒アイテム
-     * @param {number} count 数量
+     * @param {Object} item 触媒アイテム
+     * @param {Number} count 数量
      */
      Window_BlacksmithCatalystItem.prototype.setCatalystItem = function(item, count) {
         this._catalystItem = item;
@@ -1170,7 +1170,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 触媒アイテムの数量を設定する。
      * 
-     * @param {number} count 触媒アイテムの数量
+     * @param {Number} count 触媒アイテムの数量
      */
     Window_BlacksmithCatalystItem.prototype.setCatalystItemCount = function(count) {
         this._catalystItemCount = count;
@@ -1299,7 +1299,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 名前入力ウィンドウを初期化する。
      * 
-     * @param {object} item リネーム対象の名前。DataWeapon/DataArmor
+     * @param {Object} item リネーム対象の名前。DataWeapon/DataArmor
      * @param {Number} maxLength 最大長
      */
     Window_BlacksmithNameEdit.prototype.setup = function(item, maxLength) {
@@ -1343,14 +1343,14 @@ function Window_BlacksmithNameEdit() {
     /**
      * 作成前の準備をする。
      * 
-     * @param {number} maxBoost この鍛冶屋が対応できる最大ブースト数
-     * @param {number} smithLevel この鍛冶屋の技能レベル。高いほど成功しやすい。
+     * @param {Number} maxBoost この鍛冶屋が対応できる最大ブースト数
+     * @param {Number} smithLevel この鍛冶屋の技能レベル。高いほど成功しやすい。
      * @param {string} clerkFileName  店員の画像として使うファイル名
-     * @param {number} clerkOffsetX 店員画像表示オフセットX
-     * @param {number} clerkOffsetY 店員画像表示オフセットY
-     * @param {object} msgs メッセージディクショナリ
+     * @param {Number} clerkOffsetX 店員画像表示オフセットX
+     * @param {Number} clerkOffsetY 店員画像表示オフセットY
+     * @param {Object} msgs メッセージディクショナリ
      * 
-     * @param {object} sceneShopArgs シーンのパラメータ
+     * @param {Object} sceneShopArgs シーンのパラメータ
      *                               maxBoost : boolean この鍛冶屋で強化可能な最大レベル。
      *                               smithLevel : number
      */
@@ -2050,7 +2050,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 強化リセット時に表示するアニメーションIDを取得する。
      * 
-     * @returns {number} アニメーションID
+     * @returns {Number} アニメーションID
      */
     Scene_BlacksmithShop.prototype.resetBoostAnimationId = function() {
         return resetBoostAnimationId;
@@ -2059,7 +2059,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 打ち直し時に表示するアニメーションIDを取得する。
      * 
-     * @returns {number} アニメーションID
+     * @returns {Number} アニメーションID
      */
     Scene_BlacksmithShop.prototype.reinitializeAnimationId = function() {
         return reinitializeAnimationId;
@@ -2068,7 +2068,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 強化成功時のアニメーションIDを取得する。
      * 
-     * @returns {number} アニメーションID
+     * @returns {Number} アニメーションID
      */
     Scene_BlacksmithShop.prototype.boostSuccessAnimationId = function() {
         return boostSuccessAnimationId;
@@ -2077,7 +2077,7 @@ function Window_BlacksmithNameEdit() {
     /**
      * 強化失敗時のアニメーションIDを取得する
      * 
-     * @returns {number} アニメーションID
+     * @returns {Number} アニメーションID
      */
     Scene_BlacksmithShop.prototype.boostFailureAnimationId = function() {
         return boostFailureAnimationId;
