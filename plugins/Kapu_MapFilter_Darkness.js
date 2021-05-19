@@ -83,17 +83,15 @@
  *   <searchLevel:level#>
  *     暗闇フィルタ有効時、発見されるかどうかのレベル。
  *     パーティーのサーチレベル以下のものだけ、ピックアップされる。
+ *   <lightSourceColor:r#,g#,b#>
+ *     光源の色。r,g,bともに0～255の範囲。
  * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 光源色を設定できるようにした。動作未確認。
  * Version.0.1.0 新規作成
  */
-
-// Note : GLSLで以下を試す。
-//        gl_FragColorを設定しないシェーダーが組めるのか。
-//        その場合、何が表示されるか。
-
 (() => {
     const pluginName = "Kapu_MapFilter_Darkness";
     const parameters = PluginManager.parameters(pluginName);
@@ -210,6 +208,7 @@
         PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
         this.uniforms.sourcePoint = [0.5, 0.5];
         this.uniforms.brightness = 0.1;
+        this.uniforms.lightColor = [255,255,255,255];
         this.uniforms.boxWidth = 100;
         this.uniforms.boxHeight = 100;
         this.uniforms.minBrightness = 0.0;
@@ -232,9 +231,10 @@
      * @param {Number} x 光源X
      * @param {Number} y 光源Y
      * @param {Number} brightness 輝度
+     * @param {Array<Number>} 光源の色
      */
-    MapDarknessFilter.prototype.addLightSource = function(x, y, brightness) {
-        this._lightSources.push({ point:[x, y], brightness:brightness });
+    MapDarknessFilter.prototype.addLightSource = function(x, y, brightness, color) {
+        this._lightSources.push({ point:[x, y], brightness:brightness, color:color });
     };
 
     /**
@@ -259,6 +259,7 @@
                 "varying vec2 vTextureCoord;" +
                 "uniform vec2 sourcePoint;" +
                 "uniform float brightness;" +
+                "uniform vec4 lightcolor;" +
                 "uniform float boxWidth;" +
                 "uniform float boxHeight;" +
                 "uniform float time;" +
@@ -270,8 +271,8 @@
                 "    vec2 sourcePos = vec2(sourcePoint.x, sourcePoint.y);" +
                 "    float distance = distance(sourcePos, texturePos);" +
                 "    float rate = 0.95 + 0.1 * sin(" + Math.PI + " * time);" +
-                "    float a = clamp((1.0 - distance * rate / brightness), minBrightness, 1.0);" +
-                "    vec4 rgba = smpColor * a;" +
+                "    float a = clamp((1.0 - distance * rate / brightness), 0, 1.0) * (1.0 - minBrightness);" +
+                "    vec4 rgba = smpColor * minBrightness + smpColor * a * lightColor / 255.0;" +
                 "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, a);" +
                 "}";
         return src;
@@ -291,6 +292,7 @@
         for (const lightSource of this._lightSources) {
             this.uniforms.sourcePoint = lightSource.point;
             this.uniforms.brightness = lightSource.brightness;
+            this.uniforms.lightColor = lightSource.color;
             PIXI.Filter.prototype.apply.call(this, filterManager, input, output);
         }
     };
@@ -315,6 +317,7 @@
     Game_Character.prototype.initMembers = function() {
         _Game_Character_initMembers.call(this);
         this._lightSourceBrightness = 0;
+        this._lightSourceColor = [255, 255, 255, 0];
     };
 
     /**
@@ -365,6 +368,15 @@
         return this._lightSourceBrightness;
     };
 
+    /**
+     * 光源の色を得る。
+     * 
+     * @returns {Array<Number>} 光源の色
+     */
+    Game_Character.prototype.lightSourceColor = function() {
+        return this._lightSourceColor;
+    };
+
     //------------------------------------------------------------------------------
     // Game_Event
     const _Game_Event_initMembers = Game_Event.prototype.initMembers;
@@ -405,6 +417,13 @@
         }
         if (event.meta.searchLevel) {
             this._searchLevel = Math.floor(Number(event.meta.searchLevel) || 9999);
+        }
+        if (event.meta.lightSourceColor) {
+            const array = lightSourceColor.split(',').map(str => Number(str));
+            const r = Number(array[0] || 255).clamp(0, 255);
+            const g = Number(array[1] || 255).clamp(0, 255);
+            const b = Number(array[2] || 255).clamp(0, 255);
+            this._lightSourceColor = [r, g, b, 255];
         }
         this.refresh();
     };
@@ -482,25 +501,29 @@
             if (filter) {
                 filter.clearLightSources();
                 if (!$gamePlayer.isTransparent()) {
-                    filter.addLightSource($gamePlayer.screenX(), $gamePlayer.screenY() - 16, $gamePlayer.lightSourceBrightness());
+                    filter.addLightSource($gamePlayer.screenX(), $gamePlayer.screenY() - 16, 
+                            $gamePlayer.lightSourceBrightness(), $gamePlayer.lightSourceColor());
                 }
                 // 光源追加
                 const events = $gameMap.events();
                 for (const event of events) {
                     if (!event.isTransparent() && event.lightSourceBrightness() > 0) {
-                        filter.addLightSource(event.screenX(), event.screenY() - 24, event.lightSourceBrightness());
+                        filter.addLightSource(event.screenX(), event.screenY() - 24, 
+                                event.lightSourceBrightness(), event.lightSourceColor());
                     }
                 }
                 const vehicles = $gameMap.vehicles();
                 for (const vahicle of vehicles) {
                     if (!vahicle.isTransparent()) {
                         // 乗り物が表示されていたら光源セット。
-                        filter.addLightSource(vahicle.screenX(), vahicle.screenY() - 24, vahicle.lightSourceBrightness());
+                        filter.addLightSource(vahicle.screenX(), vahicle.screenY() - 24,
+                                vahicle.lightSourceBrightness(), vahicle.lightSourceColor());
                     }
                 }
             }
         }
-    };    
+    };
+
     //------------------------------------------------------------------------------
     // MapFilterManager
     MapFilterManager.registerFilter(MapFilterManager.FILTER_DARKNESS, MapDarknessFilter,
