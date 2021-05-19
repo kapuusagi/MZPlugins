@@ -97,6 +97,8 @@ Game_Party.ABILITY_～で定義される。
 |106|__ABILITY_LIGHT_BRIGHTNESS__|暗闇中の光源特性。|
 |107|__ABILITY_SURPRISE_RATE__|不利率特性。|
 |108|__ABILITY_RANDOMENCOUNT_RATE__|ランダムエンカウント率特性。|
+|109|__ABILITY_DOUBLE_DROP__|2倍ドロップ特性|
+|110|__ABILITY_TRIPLE_DROP__|3倍ドロップ特性|
 ||||
 
 
