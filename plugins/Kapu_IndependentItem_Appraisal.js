@@ -4,7 +4,9 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_IndependentItem
- * @orderAfter 
+ * @orderAfter Kapu_IndependentItem
+ * @base Kapu_Base_Drop
+ * @orderAfter Kapu_Base_Drop
  * 
  * @command addItem
  * @text 未鑑定アイテム入手
@@ -155,6 +157,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_Dropを使用するように変更した。
  * Version.0.1.0 移植して実装。
  */
 
@@ -336,7 +339,6 @@ function Scene_Appraise() {
     }
     //------------------------------------------------------------------------------
     // DataManager
-    DataManager._rewardItems = [];
 
     if (Game_Action.EFFECT_APPRAISE) {
         /**
@@ -416,28 +418,6 @@ function Scene_Appraise() {
         }
     };
 
-    /**
-     * 新しい個別報酬アイテムを登録する。
-     * これをやらないと、registerNewIndependentData を実行したときに
-     * unusedItemで未所持アイテムがクリアされてしまう。
-     * 
-     * @param {Object} baseItem DataItem/DataWeapon/DataArmor のいずれか
-     * @returns {Object} 登録したアイテム。登録に失敗した場合にはnull.
-     */
-    DataManager.registerNewIndependentReward = function(baseItem) {
-        const newItem = DataManager.registerNewIndependentData(baseItem);
-        if (newItem) {
-            this._rewardItems.push(newItem);
-        }
-        return newItem;
-    };
-
-    /**
-     * 個別報酬アイテムをクリアする。
-     */
-    DataManager.clearIndependentRewards = function() {
-        this._rewardItems = [];
-    };
 
     const _DataManager_isIndependentItemUsed = DataManager.isIndependentItemUsed;
     /**
@@ -452,35 +432,7 @@ function Scene_Appraise() {
      */
     DataManager.isIndependentItemUsed = function(independentItem) {
         return _DataManager_isIndependentItemUsed.call(this, independentItem)
-                || this._rewardItems.includes(independentItem);
-    };
-
-    //------------------------------------------------------------------------------
-    // BattleManager
-    const _BattleManager_setup = BattleManager.setup;
-    /**
-     * 戦闘シーンを開始するための準備を行う。
-     * Note: 個別報酬アイテムをクリアするためフックする。
-     * 
-     * @param {Number} troopId エネミーグループID
-     * @param {Boolean} canEscape 逃走可能な場合にtrue 
-     * @param {Boolean} canLose 敗北できる場合にtrue
-     */
-    BattleManager.setup = function(troopId, canEscape, canLose) {
-        _BattleManager_setup.call(this, troopId, canEscape, canLose);
-        DataManager.clearIndependentRewards();
-    };
-
-    const _BattleManager_endBattle = BattleManager.endBattle;
-    /**
-     * 戦闘を終了させる。
-     * Note: 個別報酬アイテムをクリアするためフックする。
-     * 
-     * @param {Number} result 戦闘結果(0:勝利 , 1:中断(逃走を含む), 2:敗北)
-     */
-    BattleManager.endBattle = function(result) {
-        DataManager.clearIndependentRewards();
-        _BattleManager_endBattle.call(this, result);
+                || $gameTemp.dropItems().includes(independentItem);
     };
 
     //------------------------------------------------------------------------------
@@ -509,7 +461,7 @@ function Scene_Appraise() {
                 return item; // 未鑑定アイテムは存在しない。
             }
             // 未鑑定時のアイテムが指定されてる。
-            const newItem = DataManager.registerNewIndependentReward(appraiseItem);
+            const newItem = DataManager.registerNewIndependentData(appraiseItem);
             if (newItem) {
                 newItem.appraiseLevel = DataManager.getItemAppraiseLevel(item);
                 newItem.appraisePrice = DataManager.getItemAppraisePrice(item);
