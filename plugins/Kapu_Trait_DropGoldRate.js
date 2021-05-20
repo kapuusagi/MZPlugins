@@ -6,6 +6,8 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * @orderAfter Kapu_Base_ParamName
+ * @base Kapu_Base_Drop
+ * @orderAfter Kapu_Base_Drop
  * 
  * @param traitPartyAbilityId
  * @text パーティー特性DID
@@ -52,6 +54,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 Kapu_Base_Dropを使用するように変更。
  * Version.0.3.0 Kapu_Base_ParamName に対応
  * Version.0.2.0 特性値を取得するインタフェースを追加。
  * Version.0.1.2 ABILITY_DROP_GOLD_RATE未指定時は動作しないように変更した。
@@ -122,27 +125,17 @@
 
     //------------------------------------------------------------------------------
     // Game_Party
-    
+    const _Game_Party_dropGoldRate = Game_Party.prototype.dropGoldRate;
     /**
      * 取得金額倍率を得る。
      *  
      * @returns {Number} 取得金額倍率
      */
     Game_Party.prototype.dropGoldRate = function() {
-        const rate = this.hasGoldDouble() ? 2 : 1;
+        const rate = _Game_Party_dropGoldRate.call(this);
         return rate + this.partyTraitsSum(Game_Party.ABILITY_DROP_GOLD_RATE);
     };
 
-    //------------------------------------------------------------------------------
-    // Game_Troop
 
-    /**
-     * ゴールドレートを得る。
-     * 
-     * @returns {Number} ゴールドレート。
-     * !!!overwrite!!! Game_Troop.goldRate
-     */
-    Game_Troop.prototype.goldRate = function() {
-        return $gameParty.dropGoldRate();
-    };
+
 })();

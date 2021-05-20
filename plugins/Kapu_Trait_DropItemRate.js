@@ -5,6 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @base Kapu_Base_Drop
+ * @orderAfter Kapu_Base_Drop
  * 
  * @param traitPartyAbilityId
  * @text 特性ID
@@ -53,6 +55,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_Dropを使うように変更した。
  * Version.0.1.2 ABILITY_DROP_ITEM_RATE未指定時は動作しないように変更した。
  * Version.0.1.1 IDデフォルト値を100に変更した。
  *               プラグインコメントにorderAfterを追加した。
@@ -121,25 +124,16 @@
     };
 
     //------------------------------------------------------------------------------
-    // Game_Enemy
+    // Game_Party
+    const _Game_Party_dropItemRate = Game_Party.prototype.dropItemRate;
     /**
      * ドロップレート補正倍率を得る。
      * @returns {Number} ドロップレート補正倍率
      */
     Game_Party.prototype.dropItemRate = function() {
-        const rate = this.hasDropItemDouble() ? 2 : 1;
+        const rate = _Game_Party_dropItemRate.call(this);
         return rate + this.partyTraitsSum(Game_Party.ABILITY_DROP_ITEM_RATE);
-    };
-    //------------------------------------------------------------------------------
-    // Game_Enemy
+    };  
 
-    /**
-     * アイテムドロップ率補正倍率を得る。
-     * 
-     * @returns {Number} 補正倍率
-     * !!!overwrite!!! Game_Enmy.dropItemRate
-     */
-    Game_Enemy.prototype.dropItemRate = function() {
-        return $gameParty.dropItemRate();
-    };
+
 })();
