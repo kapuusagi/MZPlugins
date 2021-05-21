@@ -53,6 +53,38 @@
  * @type number
  * @default 0
  * 
+ * @command addRewards
+ * @text 戦闘報酬追加
+ * @desc 次（現在の）戦闘報酬を追加する。
+ * @arg additionalRewardItems
+ * @text 追加の報酬
+ * @desc 戦闘勝利時に得られるアイテムとして加算するもの
+ * @type struct<ItemEntry>[]
+ * @default []
+ * 
+ * @arg additionalRewardGoldMin
+ * @text 追加のゴールド最小値
+ * @desc 戦闘勝利時に得られるゴールドに加算する値の最小値
+ * @type number
+ * @default 0
+ * 
+ * @arg additionalRewardGoldMax
+ * @text 追加のゴールド最大値
+ * @desc 戦闘勝利時に得られるゴールドに加算する値の最大値
+ * @type number
+ * @default 0
+ * 
+ * @arg additionalRewardExpMin
+ * @text 追加のEXP最小値
+ * @desc 戦闘勝利時に得られるEXPに加算する値の最小値
+ * @type number
+ * @default 0
+ * 
+ * @arg additionalRewardExpMax
+ * @text 追加のEXP最大値
+ * @desc 戦闘勝利時に得られるEXPに加算する値の最大値
+ * @type number
+ * @default 0
  * 
  * @help 
  * もっといいプラグインはいっぱいあるのでそちらを使おう！
@@ -109,10 +141,12 @@
     const pluginName = "Kapu_BattleSystem_Utils";
     // const parameters = PluginManager.parameters(pluginName);
 
-    PluginManager.registerCommand(pluginName, "setupNextBattle", args => {
-        const preemptiveMode = (args.preemptiveMode || "none");
-        $gameTemp.setNextBattlePreemptiveMode(preemptiveMode);
-
+    /**
+     * argsのフィールドを解析し、報酬を追加する。
+     * 
+     * @param {Object} args パラメータオブジェクト
+     */
+    const _addRewardItems = function(args) {
         const goldMin = Math.max(0, Math.round(Number(args.additionalRewardGoldMin) || 0));
         const goldMax = Math.max(goldMin, Math.round(Number(args.additionalRewardGoldMax) || 0));
         const gold = Math.randomInt(goldMax - goldMin + 1) + goldMin;
@@ -154,7 +188,17 @@
         catch (e) {
             console.log(e);
         }
+    };
 
+
+    PluginManager.registerCommand(pluginName, "setupNextBattle", args => {
+        const preemptiveMode = (args.preemptiveMode || "none");
+        $gameTemp.setNextBattlePreemptiveMode(preemptiveMode);
+
+        _addRewardItems(args);
+    });
+    PluginManager.registerCommand(pluginName, "addRewards", args => {
+        _addRewardItems(args);
     });
 
     //------------------------------------------------------------------------------
