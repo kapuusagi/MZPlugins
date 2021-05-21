@@ -3,6 +3,8 @@
  * @plugindesc ファストトラベル機能用プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * 
  * @command registerTravelPosition
  * @text 地点登録
@@ -140,6 +142,13 @@
  * @type common_event
  * @default 0
  * 
+ * @param effectCode
+ * @text ファストトラベルエフェクトコード
+ * @desc ファストトラベル効果を割り当てるエフェクトコード。
+ * @type number
+ * @default 110
+ * @min 4
+ * 
  * @help 
  * ファストトラベルに必要な、「地点登録」と「地点選択」を行う機能を追加します。
  * 実際の移動処理はカスタマイズしたいので、地点選択はマップID/座標を変数に格納し、
@@ -173,7 +182,9 @@
  * ============================================
  * ノートタグ
  * ============================================
- * 
+ * アイテム/スキル
+ *   <effectFastTravel>
+ *      アイテム使用時の効果として、ファストトラベル効果を与える。
  * 
  * ============================================
  * 変更履歴
@@ -201,6 +212,11 @@ function Scene_SelectFastTravelPosition() {
     const xVariableId = Math.round(Number(parameters["xVariableId"]) || 0);
     const yVariableId = Math.round(Number(parameters["yVariableId"]) || 0);
     const commonEventId = Math.round(Number(parameters["commonEventId"]) || 0);
+
+    Game_Action.EFFECT_FASTTRAVEL = Math.round(Number(parameters["effectCode"]) || 0);
+    if (!Game_Action.EFFECT_FASTTRAVEL) {
+        console.error(pluginName + ":EFFECT_FASTTRAVEL is not valid.");
+    }
 
     if (mapVariableId <= 0) {
         console.error(pluginName + ":mapVariableId is incorrect. id=" + mapVariableId);
@@ -304,8 +320,33 @@ function Scene_SelectFastTravelPosition() {
     // eslint-disable-next-line no-unused-vars
     PluginManager.registerCommand(pluginName, "selectFastTravelPosition", args => {
         SceneManager.push(Scene_SelectFastTravelPosition);
-        SceneManager.prepareNextScene($gameParty.allMembers(), mapVariableId, xVariableId, yVariableId, commonEventId);
+        SceneManager.prepareNextScene($gameParty.allMembers(), mapVariableId, xVariableId, yVariableId, commonEventId, null);
     });
+
+
+
+    //-------------------------------------------------------------------------
+    // DataManager
+    if (Game_Action.EFFECT_FASTTRAVEL) {
+        /**
+         * ノートタグを処理する。
+         * 
+         * @param {Object} obj データ
+         */
+         const _processNoteTag = function(obj) {
+            if (obj.meta.effectFastTravel) {
+                return;
+            }
+            obj.effects.push({
+                code: Game_Action.EFFECT_FASTTRAVEL,
+                dataId: 0,
+                value1: 0,
+                value2: 0
+            });
+        };
+        DataManager.addNotetagParserItems(_processNoteTag);
+        DataManager.addNotetagParserSkills(_processNoteTag);
+    }
 
     //------------------------------------------------------------------------------
     // Game_Actor
@@ -549,6 +590,7 @@ function Scene_SelectFastTravelPosition() {
         this._xVariableId = 0;
         this._yVariableId = 0;
         this._commonEventId = 0;
+        this._item = null;
     };
 
     /**
@@ -559,13 +601,15 @@ function Scene_SelectFastTravelPosition() {
      * @param {Number} xVariableId x格納変数ID
      * @param {Number} yVariableId y格納変数ID
      * @param {Number} commonEventId コモンイベントID
+     * @param {Object} item DataItem または DataSkill. 該当なしの場合にはnull
      */
-    Scene_SelectFastTravelPosition.prototype.prepare = function(actors, mapVariableId, xVariableId, yVariableId, commonEventId) {
+    Scene_SelectFastTravelPosition.prototype.prepare = function(actors, mapVariableId, xVariableId, yVariableId, commonEventId, item) {
         this._actors = actors;
         this._mapVariableId = mapVariableId;
         this._xVariableId = xVariableId;
         this._yVariableId = yVariableId;
         this._commonEventId = commonEventId;
+        this._item = item;
     };
     /**
      * 背景を作成する。
@@ -692,6 +736,13 @@ function Scene_SelectFastTravelPosition() {
             if (this._commonEventId) {
                 $gameTemp.reserveCommonEvent(this._commonEventId);
             }
+
+            if (this._item && (this._actors.length > 0)) {
+                // 使用可能なユーザーがジャンプする。
+                const actor = this._actors.find(a => a.canFastTravelCondition(fastTravelPosition.id));
+                // スキルまたはアイテムを使う。
+                actor.useItem(this._item);
+            }
         }
 
         this.popScene();
@@ -704,7 +755,51 @@ function Scene_SelectFastTravelPosition() {
 
         this.popScene();
     };
-
+    //------------------------------------------------------------------------------
+    // Game_Action
+    // 
+    if (Game_Action.EFFECT_FASTTRAVEL) {
+        const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
+        /**
+         * 効果を適用可能かどうかを判定する。
+         * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
+         * 
+         * @param {Game_BattlerBase} target 対象
+         * @param {DataEffect} effect エフェクトデータ
+         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testItemEffect = function(target, effect) {
+            if (effect.code === Game_Action.EFFECT_FASTTRAVEL) {
+                // 戦闘中以外は使用可能
+                return !$gameParty.inBattle();
+            } else {
+                return _Game_Action_testItemEffect.call(this, target, effect);
+            }
+        };
+    }
+    //------------------------------------------------------------------------------
+    // Scene_ItemBase
+    // 
+    if (Game_Action.EFFECT_FASTTRAVEL) {
+        const _Scene_ItemBase_determineItem = Scene_ItemBase.prototype.determineItem;
+        /**
+         * アイテム選択で決定操作されたときの処理を行う。
+         */
+        Scene_ItemBase.prototype.determineItem = function() {
+            const item = this.item();
+            if (item.effects.some((effect) => effect.code === Game_Action.EFFECT_FASTTRAVEL)) {
+                // シーン呼び出しする。
+                SceneManager.push(Scene_SelectFastTravelPosition);
+                if (DataManager.isSkill(item)) {
+                    SceneManager.prepareNextScene([this.user()], mapVariableId, xVariableId, yVariableId, commonEventId, item);
+                } else {
+                    SceneManager.prepareNextScene($gameParty.allMembers(), mapVariableId, xVariableId, yVariableId, commonEventId, item);
+                }
+            } else {
+                _Scene_ItemBase_determineItem.call(this);
+            }
+        };
+    }
     //------------------------------------------------------------------------------
     // TODO : メソッドフック・拡張
 
