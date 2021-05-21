@@ -236,7 +236,7 @@
     Game_Troop.prototype.goldTotal = function() {
         const members = this.deadMembers();
         const gold = members.reduce((r, enemy) => r + enemy.gold(), 0) * this.goldRate()
-                + $gameParty.additionalRewardGold();
+                + $gameTemp.additionalRewardGold();
 
         if (gold < 0) {
             return Math.max(-$gameParty.gold(), gold);
