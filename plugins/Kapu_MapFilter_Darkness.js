@@ -259,7 +259,7 @@
                 "varying vec2 vTextureCoord;" +
                 "uniform vec2 sourcePoint;" +
                 "uniform float brightness;" +
-                "uniform vec4 lightcolor;" +
+                "uniform vec4 lightColor;" +
                 "uniform float boxWidth;" +
                 "uniform float boxHeight;" +
                 "uniform float time;" +
@@ -271,7 +271,7 @@
                 "    vec2 sourcePos = vec2(sourcePoint.x, sourcePoint.y);" +
                 "    float distance = distance(sourcePos, texturePos);" +
                 "    float rate = 0.95 + 0.1 * sin(" + Math.PI + " * time);" +
-                "    float a = clamp((1.0 - distance * rate / brightness), 0, 1.0) * (1.0 - minBrightness);" +
+                "    float a = clamp((1.0 - distance * rate / brightness), 0.0, 1.0) * (1.0 - minBrightness);" +
                 "    vec4 rgba = smpColor * minBrightness + smpColor * a * lightColor / 255.0;" +
                 "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, a);" +
                 "}";
@@ -419,7 +419,7 @@
             this._searchLevel = Math.floor(Number(event.meta.searchLevel) || 9999);
         }
         if (event.meta.lightSourceColor) {
-            const array = lightSourceColor.split(',').map(str => Number(str));
+            const array = event.meta.lightSourceColor.split(',').map(str => Number(str));
             const r = Number(array[0] || 255).clamp(0, 255);
             const g = Number(array[1] || 255).clamp(0, 255);
             const b = Number(array[2] || 255).clamp(0, 255);
@@ -435,10 +435,14 @@
      * @returns {Number} 光源の強さ
      */
     Game_Event.prototype.lightSourceTargetBrightness = function() {
-        const variableBrightness = (this._lightSourceVariableId > 0) ? $gameVariables.value(this._lightSourceVariableId) : 0;
-        const searchBrightness = (this._searchLevel <= $gameParty.eventSearchLevel()) ? defaultBrightness : 0;
-        const fixedBrightness = this._lightSourceFixedBrightness;
-        return Math.max(variableBrightness, searchBrightness, fixedBrightness);
+        if (this._erased) {
+            return 0;
+        } else {
+            const variableBrightness = (this._lightSourceVariableId > 0) ? $gameVariables.value(this._lightSourceVariableId) : 0;
+            const searchBrightness = (this._searchLevel <= $gameParty.eventSearchLevel()) ? defaultBrightness : 0;
+            const fixedBrightness = this._lightSourceFixedBrightness;
+            return Math.max(variableBrightness, searchBrightness, fixedBrightness);
+        }
     };
 
     //------------------------------------------------------------------------------
