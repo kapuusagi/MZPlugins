@@ -103,7 +103,12 @@
      * 転生させたときに減算するGrowPointを得る。
      */
     Game_Actor.prototype.updateGrowPointOfReincarnation = function() {
-        this._growPoint.max -= 484; // Lv2~Lv99まであげたときのボーナス合計値-10。10はボーナスとして残す。
+        let gp = 0;
+        for (let lv = 2; lv <= this.maxLevel(); lv++) {
+            gp += this.growPointAtLevelUp(lv);
+        }
+
+        this._growPoint.max -= Math.max(0, gp - 10); // Lv2~最大レベルまであげたときのボーナス合計値-10。
     };
 
     /**
@@ -162,6 +167,10 @@
         this._gotGpLevel = this._level;
         this.changeLevel(1, false);
         this._reincarnationCount++;
+
+        // 経験値全リセット
+        this._exp = {};
+        this.initExp()
 
         // 育成リセット
         this.resetGrows();
