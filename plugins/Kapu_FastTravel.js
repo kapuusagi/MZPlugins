@@ -335,14 +335,13 @@ function Scene_SelectFastTravelPosition() {
          */
          const _processNoteTag = function(obj) {
             if (obj.meta.effectFastTravel) {
-                return;
+                obj.effects.push({
+                    code: Game_Action.EFFECT_FASTTRAVEL,
+                    dataId: 0,
+                    value1: 0,
+                    value2: 0
+                });
             }
-            obj.effects.push({
-                code: Game_Action.EFFECT_FASTTRAVEL,
-                dataId: 0,
-                value1: 0,
-                value2: 0
-            });
         };
         DataManager.addNotetagParserItems(_processNoteTag);
         DataManager.addNotetagParserSkills(_processNoteTag);
@@ -669,6 +668,9 @@ function Scene_SelectFastTravelPosition() {
         }
     };
 
+    /**
+     * リストウィンドウを構築する
+     */
     Scene_SelectFastTravelPosition.prototype.createListWindow = function() {
         const rect = this.listWindowRect();
         this._listWindow = new Window_FastTravelList(rect);
@@ -703,13 +705,13 @@ function Scene_SelectFastTravelPosition() {
 
         // 変数設定
         if (this._mapVariableId) {
-            $gameVariable.setValue(this._mapVariableId, 0);
+            $gameVariables.setValue(this._mapVariableId, 0);
         }
         if (this._xVariableId) {
-            $gameVariable.setValue(this._xVariableId, 0);
+            $gameVariables.setValue(this._xVariableId, 0);
         }
         if (this._yVariableId) {
-            $gameVariable.setValue(this._yVariableId, 0);
+            $gameVariables.setValue(this._yVariableId, 0);
         }
 
         this._listWindow.show();
@@ -725,13 +727,13 @@ function Scene_SelectFastTravelPosition() {
         if (fastTravelPosition) {
             // 変数設定
             if (this._mapVariableId) {
-                $gameVariable.setValue(this._mapVariableId, fastTravelPosition.mapId);
+                $gameVariables.setValue(this._mapVariableId, fastTravelPosition.mapId);
             }
             if (this._xVariableId) {
-                $gameVariable.setValue(this._xVariableId, fastTravelPosition.x);
+                $gameVariables.setValue(this._xVariableId, fastTravelPosition.x);
             }
             if (this._yVariableId) {
-                $gameVariable.setValue(this._yVariableId, fastTravelPosition.y);
+                $gameVariables.setValue(this._yVariableId, fastTravelPosition.y);
             }
             if (this._commonEventId) {
                 $gameTemp.reserveCommonEvent(this._commonEventId);
