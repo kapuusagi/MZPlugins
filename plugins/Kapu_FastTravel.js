@@ -118,6 +118,12 @@
  * @text ファストトラベル位置選択
  * @desc ファストトラベル位置を選択する。選択された位置は、プラグインパラメータで与えた変数に格納される。
  * 
+ * @arg callCommonEvent
+ * @text コモンイベントを呼び出す
+ * @desc 選択完了時にコモンイベントを呼び出す。
+ * @type boolean
+ * @default false
+ * 
  * 
  * @param mapVariableId
  * @text マップID格納変数
@@ -333,10 +339,13 @@ function Scene_SelectFastTravelPosition() {
 
     });
 
-    // eslint-disable-next-line no-unused-vars
     PluginManager.registerCommand(pluginName, "selectFastTravelPosition", args => {
+        const callCommonEvent = (args.callCommonEvent === undefined)
+            ? false : (args.callCommonEvent === "true");
+        const eventId = (callCommonEvent) ? commonEventId : 0;
+
         SceneManager.push(Scene_SelectFastTravelPosition);
-        SceneManager.prepareNextScene($gameParty.allMembers(), mapVariableId, xVariableId, yVariableId, commonEventId, null);
+        SceneManager.prepareNextScene($gameParty.allMembers(), mapVariableId, xVariableId, yVariableId, eventId, null);
     });
 
 
