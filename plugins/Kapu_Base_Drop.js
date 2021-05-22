@@ -257,13 +257,14 @@
     Game_Troop.prototype.makeDropItems = function() {
         const items = _Game_Troop_makeDropItems.call(this);
         const itemEntries = $gameTemp.additionalRewardItems();
+        const tryCount = $gameParty.dropItemLotteryCount();
         if (itemEntries.length > 0) {
             const rate = $gameParty.dropItemRate();
             for (const dropItemEntry of itemEntries) {
                 if (this.isDropCondition(dropItemEntry)) {
                     for (let i = 0; i < tryCount; i++) {
                         if (this.lotteryDropItem(dropItemEntry, rate)) {
-                            const dropItem = this.itemObject(dropItemEntry);
+                            const dropItem = this.itemObject(dropItemEntry.kind, dropItemEntry.dataId);
                             $gameTemp.addDropItem(dropItem);
                             items.push(dropItem);
                         }
@@ -291,7 +292,7 @@
      * @param {Number} rate ドロップアイテムレート
      * @returns {Boolean} ドロップした場合にはtrue, それ以外はfalse.
      */
-    Game_Troop.lotteryDropItem = function(dropItemEntry, rate) {
+    Game_Troop.prototype.lotteryDropItem = function(dropItemEntry, rate) {
         return Math.random() * dropItemEntry.denominator < rate;
     };    
     /**
@@ -337,13 +338,13 @@
     Game_Enemy.prototype.makeDropItems = function() {
         const items = [];
         const rate = this.dropItemRate();
-        const tryCount = $gameParty.dropTimeLotteryCount();
+        const tryCount = $gameParty.dropItemLotteryCount();
         const dropItemEntries = this.dropItemEntries();
         for (const dropItemEntry of dropItemEntries) {
             if (this.isDropCondition(dropItemEntry)) {
                 for (let i = 0; i < tryCount; i++) {
                     if (this.lotteryDropItem(dropItemEntry, rate)) {
-                        const dropItem = this.itemObject(dropItemEntry);
+                        const dropItem = this.itemObject(dropItemEntry.kind, dropItemEntry.dataId);
                         if (dropItem != null) {
                             $gameTemp.addDropItem(dropItem);
                             items.push(dropItem);
@@ -385,7 +386,7 @@
      * @param {Number} rate ドロップアイテムレート
      * @returns {Boolean} ドロップした場合にはtrue, それ以外はfalse.
      */
-    Game_Enemy.lotteryDropItem = function(dropItemEntry, rate) {
+    Game_Enemy.prototype.lotteryDropItem = function(dropItemEntry, rate) {
         return Math.random() * dropItemEntry.denominator < rate;
     };
     /**
