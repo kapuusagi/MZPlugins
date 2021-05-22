@@ -94,6 +94,13 @@
  * 
  * 
  * @help 
+ * 戦闘勝利時の勝利画面をTWLD向けに変更します。
+ * ベーシックシステムではメッセージで取得ゴールドやEXP,ドロップアイテムが表示されますが、
+ * これをウィンドウで表示するようにします。
+ * 
+ * また、報酬取得処理を戦闘終了時のステートクリアより先に行うことにより、
+ * この戦闘時のみドロップ倍率変更などの効果が実現できるようにしてあります。
+ * (ベーシックシステムでは報酬算出前にステートがクリアされる)
  * 
  * ■ 使用時の注意
  * 
@@ -895,7 +902,9 @@ function Window_BattleRewards() {
     };
 
     /**
+     * ExPポップアップ中かどうかを判定する。
      * 
+     * @return {Boolean} ポップアップ中の場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isExpPopupRuning = function() {
         return this._isExpPopupRuning;
@@ -932,11 +941,13 @@ function Window_BattleRewards() {
      */
     BattleManager.processVictory = function() {
         $gameParty.allMembers().forEach(actor => actor.enableExpPopup())
+        // Note : 報酬算出時にドロップレートなどが適用されるように、
+        //        removeBattleStates()前にコールする。
+        this.makeRewards();
         $gameParty.removeBattleStates();
         $gameParty.performVictory();
         this.playVictoryMe();
         this.replayBgmAndBgs();
-        this.makeRewards();
         this.gainRewards();
         this._rewardsWindow.show();
         this._rewardsWindow.activate();
