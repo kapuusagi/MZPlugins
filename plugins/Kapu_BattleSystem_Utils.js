@@ -153,7 +153,7 @@
         $gameTemp.addAdditionalRewardGold(gold);
 
         const expMin = Math.max(0, Math.round(Number(args.additionalRewardExpMin) || 0))
-        const expMax = Matn.max(expMin, Math.round(Number(args.additionalRewardExpMax) || 0));
+        const expMax = Math.max(expMin, Math.round(Number(args.additionalRewardExpMax) || 0));
         const exp = Math.randomInt(expMax - expMin + 1) + expMin;
         $gameTemp.addAdditionalRewardExp(exp);
 
