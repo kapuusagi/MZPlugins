@@ -41,13 +41,12 @@
  * 処理としては、通常1回だけドロップ判定するところを、2回(または3回)ドロップ判定して
  * それぞれでドロップさせるというものです。
  * 
- * 
  * 特定のアクターが討伐したとき、とかいう判定は入らないです。
  * 
  * ■ 使用時の注意
  * ドロップ周りを変更する他のプラグインと競合するかもしれません。
- * ユニークアイテムでも複数個ドロップしてしまうので、
- * 対象のアイテム(または武器、防具)に<isUnique>を付けて倍ドロップ禁止としてください。
+ * ユニークアイテムでも複数個ドロップしてしまいます。
+ * 
  *  
  * ■ プラグイン開発者向け
  * 
@@ -65,10 +64,6 @@
  *     <tripleDrop>
  *        3倍ドロップ特性を付与する。
  * 
- * アイテム/武器/防具
- *     <isUnique>
- *        ユニークアイテム判定。
- *        既に所持、または持っている場合にはドロップさせない。
  *  
  * ============================================
  * 変更履歴
@@ -100,14 +95,14 @@
             obj.traits.push({ 
                 code:Game_BattlerBase.TRAIT_PARTY_ABILITY, 
                 dataId:Game_Party.ABILITY_DOUBLE_DROP, 
-                value:dropRate
+                value:0
             });
         }
         if (Game_Party.ABILITY_TRIPLE_DROP && obj.meta.tripleDrop) {
             obj.traits.push({ 
                 code:Game_BattlerBase.TRAIT_PARTY_ABILITY, 
                 dataId:Game_Party.ABILITY_TRIPLE_DROP, 
-                value:dropRate
+                value:0
             });
         }
     };
