@@ -1434,3 +1434,31 @@ ImageManagerのインタフェースで呼び出す分には、destroy()をコ�
 __Game_Player.executeEncounter__ 内で、 __BattleManager.setup()__ 及び 
 __BattleManager.onEncounter()__ が実行され、 Preemptive(有利開始) と Surprise(不利開始） が設定される。
 スクリプトからのイベント戦闘は __Game_Interpreter.command301__ から __BattleManager.setup()__ 及び __BattleManager.setEventCallback(__ が呼ばれた後、__SceneManager.push(Scene_Battle)__ でシーンが切り替わる。
+
+
+### インタプリタの実行周り
+
+※インタプリタを実行するには、少なくともSecene_Messageで定義されるようなメンバのウィンドウを用意する必要がある。
+データの流れについては後で記載する。
+
+一番簡単な実装例は __Game_CommonEvent__ の実装を見ると良い。
+__Game_CommonEvent.refresh__ で　__Game_Interpreter__ のインスタンスを生成する。
+生成したインスタンスに __Game_Interpreter.setup()__ を実行し、コモンイベントのリストを渡す。
+その後 __Game_CommonEvent.update()__ によって __Game_Interpreter.update()__ が呼び出され、
+スクリプトが実行更新される。
+
+データの流れ： これは結構複雑。
+
+メッセージ表示の場合
+
+    1. Game_Interpreter → $gameMessage
+    2. Window_Message.update() にて $gameMessageからデータを取り出す。
+    3. Window_Messageで表示される。
+
+選択肢の場合
+
+    1. Game_Interpreter -> $gameMessage (__Game_Interpreter.setupChoices__ で $gameMessageのチョイスパラメータが設定される)
+    2. ウェイトモードが"message"になり、選択肢が選択されるとウェイトが解除される。
+    3. ウェイトが解除されるとインタプリタが次のコマンドを実行する。
+
+Scene_MessageとGame_Message、Game_Interpreterを使えば独自シーンでコモンイベントを処理することも出来そう。
