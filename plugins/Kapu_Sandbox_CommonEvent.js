@@ -55,7 +55,7 @@ function Scene_MyCommonEvent() {
     //------------------------------------------------------------------------------
     // Scene_MyCommonEvent
 
-    Scene_MyCommonEvent.prototype = Object.create(Scene_Message);
+    Scene_MyCommonEvent.prototype = Object.create(Scene_Message.prototype);
     Scene_MyCommonEvent.prototype.constructor = Scene_MyCommonEvent;
 
     Scene_MyCommonEvent.prototype.initialize = function() {
@@ -80,6 +80,8 @@ function Scene_MyCommonEvent() {
     Scene_MyCommonEvent.prototype.create = function() {
         this.createBackground();
         Scene_Message.prototype.create.call();
+        this.createWindowLayer();
+        this.createAllWindows();
     };
 
     /**
@@ -89,12 +91,11 @@ function Scene_MyCommonEvent() {
      * 多分これを使わないといけない。
      */
     Scene_MyCommonEvent.prototype.createBackground = function() {
-        this._backgroundFilter = new PIXI.filters.BlurFilter();
         this._backgroundSprite = new Sprite();
         this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
-        this._backgroundSprite.filters = [this._backgroundFilter];
+        this._backgroundSprite.filters = [];
         this.addChild(this._backgroundSprite);
-        this.setBackgroundOpacity(192);
+        //this.setBackgroundOpacity(192);
     };
 
     /**
