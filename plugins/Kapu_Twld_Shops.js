@@ -32,8 +32,8 @@
  * @arg clerkFileName
  * @text 店員画像
  * @desc 店員として表示する画像ファイル名。既定ではコマンドウィンドウ下の方に表示される。
- * @dir img/pictures/
  * @type file
+ * @dir img/pictures/
  * 
  * @arg clerkOffsetX
  * @text 店員画像表示位置X
