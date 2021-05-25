@@ -50,16 +50,32 @@
  * 
  * @command openShop
  * @text 鑑定ショップを開く
+ * 
  * @arg appraiseLevel
  * @text 鑑定レベル
  * @desc ショップで鑑定可能なレベル。
  * @type number
  * @default 0
+ * 
  * @arg clerkFileName
  * @text 店員ファイル名
  * @desc 店員画像として使用する画像ファイル
- * @type string
+ * @type file
+ * @dir img/pictures/
  * 
+ * @arg clerkOffsetX
+ * @text 店員画像表示位置X
+ * @desc 店員画像を表示する位置を移動させる。10を設定すると右に10移動する。
+ * @type number
+ * @default 0
+ * @min -10000
+ * 
+ * @arg clerkOffsetY
+ * @text 店員画像表示位置Y
+ * @desc 店員画像を表示する位置を移動させる。10を設定すると下に10移動する。
+ * @type number
+ * @default 0
+ * @min -10000
  * 
  * @param effectCode
  * @text 鑑定エフェクトコード
@@ -300,8 +316,10 @@ function Scene_Appraise() {
     PluginManager.registerCommand(pluginName, "openShop", args => {
         const alevel = Number(args.appraiseLevel) || 0;
         const clerkFileName = args.clerkFileName || "";
+        const clerkOffsetX = Number(args.clerkOffsetX) || 0;
+        const clerkOffsetY = Number(args.clerkOffsetY) || 0;
         SceneManager.push(Scene_AppraiseShop);
-        SceneManager.prepareNextScene(alevel, clerkFileName);
+        SceneManager.prepareNextScene(alevel, clerkFileName, clerkOffsetX, clerkOffsetY);
     });
 
     /**
@@ -1170,10 +1188,14 @@ function Scene_Appraise() {
      * シーンの作成準備をする。
      * 
      * @param {Number} alevel 鑑定レベル。
+     * @param {Number} clerkOffsetX 店員画像表示オフセットX
+     * @param {Number} clerkOffsetY 店員画像表示オフセットY
      */
-    Scene_AppraiseShop.prototype.prepare = function(alevel, filename) {
+    Scene_AppraiseShop.prototype.prepare = function(alevel, filename, clerkOffsetX, clerkOffsetY) {
         this._appraiseLevel = alevel;
         this._clerkFileName = filename || "";
+        this._clerkOffsetX = clerkOffsetX || 0;
+        this._clerkOffsetY = clerkOffsetY || 0;
     };
 
     /**
@@ -1188,7 +1210,21 @@ function Scene_Appraise() {
         this.createResultWindow();
         this.loadClerkPicture();
     };
+    /**
+     * ウィンドウレイヤーを構築する。
+     */
+    Scene_AppraiseShop.prototype.createWindowLayer = function() {
+        this.createClerkLayer();
+        Scene_MenuBase.prototype.createWindowLayer.call(this);
+    };
 
+    /**
+     * 店員画像描画用レイヤーを追加する。
+     */
+    Scene_AppraiseShop.prototype.createClerkLayer = function() {
+        this._clerkLayer = new Sprite();
+        this.addChild(this._clerkLayer);
+    };
     /**
      * 所持金ウィンドウを作成する。
      */
@@ -1306,12 +1342,15 @@ function Scene_Appraise() {
      * 店員画像を追加する。
      */
     Scene_AppraiseShop.prototype.addClerkSprite = function() {
-        console.log("clerk bitmap loaded.");
         this._clerkSprite = new Sprite();
         this._clerkSprite.bitmap = this._clerkBitmap;
-        this._clerkSprite.x = Graphics.boxWidth - this._clerkBitmap.width;
-        this._clerkSprite.y = Graphics.boxHeight - this._clerkBitmap.height;
-        this._backgroundSprite.addChild(this._clerkSprite);
+        this._clerkSprite.anchor.x = 0.5;
+        this._clerkSprite.anchor.y = 1.0;
+        const baseX = Graphics.boxWidth - (this.mainCommandWidth() / 2);
+        const baseY = this.isBottomHelpMode() ? this.helpAreaTop() : Graphics.boxHeight;
+        this._clerkSprite.x = baseX + this._clerkOffsetX;
+        this._clerkSprite.y = baseY + this._clerkOffsetY;
+        this._clerkLayer.addChild(this._clerkSprite);
     };
 
     /**
