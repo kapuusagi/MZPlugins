@@ -30,6 +30,20 @@
  * @type file
  * @dir img/pictures/
  * 
+ * @arg clerkOffsetX
+ * @text 店員画像表示位置X
+ * @desc 店員画像を表示する位置を移動させる。10を設定すると右に10移動する。
+ * @type number
+ * @default 0
+ * @min -10000
+ * 
+ * @arg clerkOffsetY
+ * @text 店員画像表示位置Y
+ * @desc 店員画像を表示する位置を移動させる。10を設定すると下に10移動する。
+ * @type number
+ * @default 0
+ * @min -10000
+ * 
  * @arg enableResetBoost
  * @text 強化リセット有効
  * @type boolean
@@ -333,15 +347,7 @@ function Window_BlacksmithNameEdit() {
             return ;
         }
 
-        let clerkFileName = String(args.clerkFileName) || "";
-        if (clerkFileName.includes("/")) {
-            if (clerkFileName.startsWith("pictures/")) {
-                clerkFileName = clerkFileName.substr(9);
-            } else {
-                clerkFileName = "";
-            }
-        }
-
+        const clerkFileName = String(args.clerkFileName) || "";
         const enableResetBoost = (typeof args.enableResetBoost === "undefined")
                 ? false : (args.enableResetBoost === "true");
         const enableReinitialize = (typeof args.enableReinitialize === "undefined")
