@@ -110,7 +110,7 @@
  * ノートタグ
  * ============================================
  * アイテム/スキル
- *   <dungeonEscape>
+ *   <effectDungeonEscape>
  *     ダンジョンエスケープ効果を付与する。
  * 
  * 
@@ -172,7 +172,7 @@
         }
     });
 
-        //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     // DataManager
     if (Game_Action.EFFECT_DUNGEONESCAPE) {
         /**
@@ -181,7 +181,7 @@
          * @param {Object} obj データ
          */
          const _processNoteTag = function(obj) {
-            if (obj.meta.dungeonEscape) {
+            if (obj.meta.effectDungeonEscape) {
                 obj.effects.push({
                     code: Game_Action.EFFECT_DUNGEONESCAPE,
                     dataId: 0,
