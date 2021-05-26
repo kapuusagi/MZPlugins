@@ -80,7 +80,7 @@
  * @default 111
  * @min 4
  * 
- * @param escapeCondition
+ * @param dungeonEscapeCondition
  * @text エスケープ条件
  * @desc エスケープ可能かどうかを判定する条件式。evalで評価される。$gameSwitches.value(no)などを指定する。
  * @type string
@@ -112,11 +112,15 @@
  * アイテム/スキル
  *   <effectDungeonEscape>
  *     ダンジョンエスケープ効果を付与する。
- * 
+ *     選択時にプラグインパラメータで指定したコモンイベントを呼び出す。
+ *   <effectDungeonEscape:id#>
+ *     ダンジョンエスケープ効果を付与する。
+ *     選択時にid#で指定したコモンイベントを呼び出す。
  * 
  * マップ
  *   <canUseDungeonEscape>
- *     エスケープ効果のアイテム/スキルを使用可能とする。
+ *     ダンジョンエスケープ効果のアイテム/スキルを使用可能とする。
+ *     別途プラグインパラメータのdungeonEscapeConditionが評価される。
  * 
  * ============================================
  * 変更履歴
@@ -130,7 +134,7 @@
     const xVariableId = Math.round(Number(parameters["xVariableId"]) || 0);
     const yVariableId = Math.round(Number(parameters["yVariableId"]) || 0);
     const commonEventId = Math.round(Number(parameters["commonEventId"]) || 0);
-    const escapeCondition = parameters["escapeCondition"] || "";
+    const dungeonEscapeCondition = parameters["dungeonEscapeCondition"] || "";
 
     Game_Action.EFFECT_DUNGEONESCAPE = Math.round(Number(parameters["effectCode"]) || 0);
     if (!Game_Action.EFFECT_DUNGEONESCAPE) {
@@ -146,7 +150,7 @@
         console.error(pluginName + ":yVariableId is incorrect. id=" + yVariableId);
     }
     if (commonEventId <= 0) {
-        console.error(pluginName + ":commonEventId is incorrect. id=" + commonEventId);
+        console.log(pluginName + ":commonEventId is incorrect. id=" + commonEventId);
     }
 
 
@@ -182,9 +186,10 @@
          */
          const _processNoteTag = function(obj) {
             if (obj.meta.effectDungeonEscape) {
+                const eventId = Number(obj.meta.effectDungeonEscape) || commonEventId;
                 obj.effects.push({
                     code: Game_Action.EFFECT_DUNGEONESCAPE,
-                    dataId: 0,
+                    dataId: eventId,
                     value1: 0,
                     value2: 0
                 });
@@ -294,9 +299,9 @@
      * @returns {Boolean} エスケープ条件
      */
     Game_Map.prototype.testDungeonEscapeCondition = function() {
-        if (escapeCondition) {
+        if (dungeonEscapeCondition) {
             try {
-                return eval(escapeCondition);
+                return eval(dungeonEscapeCondition);
             }
             catch (e) {
                 console.log(e);
@@ -341,11 +346,14 @@
          * ダンジョンエスケープ効果のあるアイテムを使用する。
          */
         Scene_ItemBase.prototype.useDungeonEscapeItem = function() {
+            const item = this.item();
+            const dungeonEscapeEffect = item.effects.find(effect => effect && effect.code === Game_Action.EFFECT_DUNGEONESCAPE);
+            const eventId = dungeonEscapeEffect.dataId;
             this.playSeForItem();
-            this.user().useItem(this.item());
+            this.user().useItem(item);
             $gameParty.restoreDungeonEscapePosition();
             if (commonEventId) {
-                $gameTemp.reserveCommonEvent(commonEventId);
+                $gameTemp.reserveCommonEvent(eventId);
             }
             this.checkCommonEvent();
         };

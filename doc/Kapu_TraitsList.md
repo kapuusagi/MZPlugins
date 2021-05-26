@@ -122,8 +122,8 @@ Game_Party.ABILITY_～で定義される。
 |107|__EFFECT_ADD_BUFF_FIXED__|パラメータID|ターン数|値|固定量加算する効果。|
 |108|__EFFECT_ADD_DEBUFF_FIXED__|パラメータID|ターン数|値|固定量減算する効果。|
 |109|__EFFECT_APPRAISE__|-|鑑定レベル|-|鑑定効果。|
-|110|__EFFECT_FASTTRAVEL__|-|-|-|ファストトラベル効果。|
-|111|__EFFECT_DUNGEONESCAPE__|-|-|-|エスケープ効果。|
+|110|__EFFECT_FASTTRAVEL__|コモンイベントID|-|-|ファストトラベル効果。|
+|111|__EFFECT_DUNGEONESCAPE__|コモンイベントID|-|-|エスケープ効果。|
 |||||||
 |1001|__EFFECT_BASIC_PARAM_ADD__|パラメータID|増減させる値|-|基本パラメータを指定した値だけ増減させる|
 |1002|__EFFECT_UPDATE_LUK__|0|-|-|LUKを既定値でランダム変動させる。|

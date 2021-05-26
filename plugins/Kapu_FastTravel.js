@@ -201,10 +201,14 @@
  * アイテム/スキル
  *   <effectFastTravel>
  *      アイテム使用時の効果として、ファストトラベル効果を与える。
+ *      ファストトラベル先選択時、プラグインパラメータで指定したコモンイベントが呼び出される。
+ *   <effectFastTravel:id#>
+ *      アイテム使用時の効果として、ファストトラベル効果を与える。
+ *      ファストトラベル先選択時、id#で指定したコモンイベントが呼び出される。
  * 
  * マップ
  *   <canUseFastTravel>
- *      ファストトラベル使用可能マップかつ
+ *      ファストトラベル使用可能マップ。別途プラグインパラメータのfastTravelConditionが評価される。
  * 
  * ============================================
  * 変更履歴
@@ -249,7 +253,7 @@ function Scene_SelectFastTravelPosition() {
         console.error(pluginName + ":yVariableId is incorrect. id=" + yVariableId);
     }
     if (commonEventId <= 0) {
-        console.error(pluginName + ":commonEventId is incorrect. id=" + commonEventId);
+        console.log(pluginName + ":commonEventId is incorrect. id=" + commonEventId);
     }
 
     PluginManager.registerCommand(pluginName, "registerTravelPosition", args => {
@@ -360,9 +364,10 @@ function Scene_SelectFastTravelPosition() {
          */
          const _processNoteTag = function(obj) {
             if (obj.meta.effectFastTravel) {
+                const eventId = Number(obj.meta.effectFastTravel) || commonEventId;
                 obj.effects.push({
                     code: Game_Action.EFFECT_FASTTRAVEL,
-                    dataId: 0,
+                    dataId: eventId,
                     value1: 0,
                     value2: 0
                 });
@@ -863,10 +868,12 @@ function Scene_SelectFastTravelPosition() {
             if (this.testFastTravel(item)) {
                 // 使用可能な状態 -> シーン呼び出しする。
                 SceneManager.push(Scene_SelectFastTravelPosition);
+                const fastTravelEffect = item.effects.find(effect => effect && effect.code === Game_Action.EFFECT_FASTTRAVEL);
+                const eventId = fastTravelEffect.dataId;
                 if (DataManager.isSkill(item)) {
-                    SceneManager.prepareNextScene([this.user()], mapVariableId, xVariableId, yVariableId, commonEventId, item);
+                    SceneManager.prepareNextScene([this.user()], mapVariableId, xVariableId, yVariableId, eventId, item);
                 } else {
-                    SceneManager.prepareNextScene($gameParty.allMembers(), mapVariableId, xVariableId, yVariableId, commonEventId, item);
+                    SceneManager.prepareNextScene($gameParty.allMembers(), mapVariableId, xVariableId, yVariableId, eventId, item);
                 }
             } else {
                 _Scene_ItemBase_determineItem.call(this);

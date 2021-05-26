@@ -545,7 +545,7 @@ Traitの持ってるメンバ
 |EFFECT_SPECIAL|41|||||
 |EFFECT_GROW|42|||||
 |EFFECT_LEARN_SKILL|43|||||
-|EFFECT_COMMON_EVENT|44|||||
+|EFFECT_COMMON_EVENT|44|コモンイベントID|-|-|指定したコモンイベントを実行欄に積む。|
 
 独自の効果を追加するなら、以下はフックする必要があるかもしれない。
 但し、下記はアクター/エネミーを対象にした場合のみコールされる。
