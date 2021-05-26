@@ -10,12 +10,6 @@
  * @text 地点登録
  * @desc エスケープ位置を登録する。既に登録済みの場合には上書きする。
  * 
- * @arg id
- * @text 登録地点ID
- * @desc 登録地点を表すユニークな番号。（1以上の値を指定する)
- * @type number
- * @default 0
- * 
  * @arg mapId
  * @text マップID.未指定時(0)は現在のマップID
  * @type number
@@ -186,7 +180,8 @@
          */
          const _processNoteTag = function(obj) {
             if (obj.meta.effectDungeonEscape) {
-                const eventId = Number(obj.meta.effectDungeonEscape) || commonEventId;
+                const eventId = (typeof obj.meta.effectDungeonEscape === "boolean") 
+                        ? commonEventId : Number(obj.meta.effectDungeonEscape);
                 obj.effects.push({
                     code: Game_Action.EFFECT_DUNGEONESCAPE,
                     dataId: eventId,
@@ -211,7 +206,8 @@
          * @returns {boolean} 使用可能な場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.meetsUsableItemConditions = function(item) {
-            if (this.testDungeonEscape(item) && ($gameParty.inBattle() || !$gameMap.canUseDungeonEscape())) {
+            if (this.testDungeonEscape(item)
+                    && ($gameParty.inBattle() || !$gameParty.hasDungeonEscapePosition() || !$gameMap.canUseDungeonEscape())) {
                 // ダンジョンエスケープ効果があって、戦闘中かダンジョンエスケープ出来ないマップにいる。
                 return false;
             }
@@ -253,6 +249,18 @@
         this._escapePosition[0] = mapId;
         this._escapePosition[1] = x;
         this._escapePosition[2] = y;
+    };
+
+    /**
+     * 有効なエスケープ位置を持っているかどうかを得る。
+     * 
+     * Note: エスケープ位置が未登録の状態でエスケープ処理を呼び出すと、
+     *       存在しないマップにジャンプしてバグの元になる。
+     * 
+     * @returns {boolean} 有効なエスケープ位置を持っている場合にはtrue, 無い場合にはfalse.
+     */
+    Game_Party.prototype.hasDungeonEscapePosition = function() {
+        return this._escapePosition.length === 3;
     };
 
     /**
