@@ -67,7 +67,7 @@
     /**
      * 最大カラム数を得る。
      * 
-     * @returns {Number} カラム数
+     * @returns {number} カラム数
      * !!!overwrite!!! Window_MenuStatus.maxCols()
      *     メニューのカラム数を動的に設定するためにオーバーライドする。
      */
@@ -77,7 +77,7 @@
     /**
      * 有効な行数を得る。
      * 
-     * @returns {Number} 行数
+     * @returns {number} 行数
      * !!!overwrite!!! Window_MenuStatus.numVisibleRows 
      *     メニューのレイアウト変更のため、オーバーライドする。
      */
@@ -88,7 +88,7 @@
     /**
      * 項目の画像を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_MenuStatus.prototype.drawItemImage = function(index) {
         const actor = this.actor(index);
@@ -107,7 +107,7 @@
     /**
      * 画像を描画する。
      * 
-     * @param {Number} 項目のインデックス番号
+     * @param {number} 項目のインデックス番号
      */
     Window_MenuStatus.prototype.drawItemImageBattlePicture = function(index) {
         const actor = this.actor(index);
@@ -132,10 +132,10 @@
      * 画像を描画する。
      * 
      * @param {String} name 画像ファイル名
-     * @param {Number} x 描画領域左上 x位置
-     * @param {Number} y 描画領域左上 y位置
-     * @param {Number} width 描画領域幅
-     * @param {Number} height 描画領域高さ
+     * @param {number} x 描画領域左上 x位置
+     * @param {number} y 描画領域左上 y位置
+     * @param {number} width 描画領域幅
+     * @param {number} height 描画領域高さ
      */
     Window_MenuStatus.prototype.drawPicture = function(name, x, y, width, height) {
         const bitmap = ImageManager.loadPicture(name);
@@ -155,7 +155,7 @@
     /**
      * 画像を描画する
      * 
-     * @param {Number} index 項目のインデックス番号
+     * @param {number} index 項目のインデックス番号
      */
     Window_MenuStatus.prototype.drawItemImageFace = function(index) {
         const actor = this.actor(index);
@@ -169,10 +169,10 @@
      * アクターの顔グラフィックを描画する。
      * 
      * @param {Game_Battler} actor アクター
-     * @param {Number} x 描画領域左上X
-     * @param {Number} y 描画領域左上Y
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {number} x 描画領域左上X
+     * @param {number} y 描画領域左上Y
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Window_MenuStatus.prototype.drawActorFace = function(actor, x, y, width, height) {
         if (actor.isDead()) {
@@ -204,7 +204,7 @@
     /**
      * ステータス矩形領域を得る。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * @returns {Rectangle} ステータス領域の矩形領域
      */
     Window_MenuStatus.prototype.statusRect = function(index) {
@@ -218,7 +218,7 @@
     /**
      * 項目のステータスを描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * !!!overwrite!!! Window_MenuStatus.drawItemStatus()
      *     表示内容を変更するためオーバーライドする。
      */
@@ -286,9 +286,9 @@
      * クラス名と通り名を描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画左上位置X
-     * @param {Number} y 描画左上位置Y
-     * @param {Number} width 幅
+     * @param {number} x 描画左上位置X
+     * @param {number} y 描画左上位置Y
+     * @param {number} width 幅
      */
     Window_MenuStatus.prototype.drawActorClassAndNickName = function(actor, x, y, width) {
         this.resetFontSettings();
@@ -309,9 +309,9 @@
      * レベルを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_MenuStatus.prototype.drawActorLevel = function(actor, x, y, width) {
@@ -328,12 +328,12 @@
      * ゲージを描画する。
      * 
      * @param {String} type ゲージタイプ。("hp" または "mp")
-     * @param {Number} current 現在値
-     * @param {Number} max 最大値
-     * @param {Number} x ゲージ左上位置x
-     * @param {Number} y ゲージ左上位置y
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {number} current 現在値
+     * @param {number} max 最大値
+     * @param {number} x ゲージ左上位置x
+     * @param {number} y ゲージ左上位置y
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Window_MenuStatus.prototype.drawGauge = function(type, current, max, x, y, width, height) {
         switch (type) {
@@ -366,11 +366,11 @@
     /**
      * ゲージを描画する。
      * 
-     * @param {Object} gaugeData ゲージデータ。rate, backColor, color1, color2メンバを持つ。
-     * @param {Number} x ゲージ左上位置x
-     * @param {Number} y ゲージ左上位置y
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {object} gaugeData ゲージデータ。rate, backColor, color1, color2メンバを持つ。
+     * @param {number} x ゲージ左上位置x
+     * @param {number} y ゲージ左上位置y
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Window_MenuStatus.prototype.drawGaugeRect = function(gaugeData, x, y, width, height) {
         const rate = gaugeData.rate;
@@ -386,10 +386,10 @@
     /**
      * ゲージのテキストを描画する。
      * 
-     * @param {Object} data データ
-     * @param {Number} x ラベル左上位置 x
-     * @param {Number} y ラベル左上位置 y
-     * @param {Number} width 幅
+     * @param {object} data データ
+     * @param {number} x ラベル左上位置 x
+     * @param {number} y ラベル左上位置 y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_MenuStatus.prototype.drawGaugeText = function(data, x, y, width) {
@@ -416,9 +416,9 @@
      * ステータスアイコンを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_MenuStatus.prototype.drawStateIcons = function(actor, x, y, width) {
         const icons = actor.allIcons();

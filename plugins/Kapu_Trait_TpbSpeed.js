@@ -117,7 +117,7 @@
      * このGame_BattlerのTPB速度を得る。
      * ベースパラメータからのTPB速度計算式を変更したいならば、本メソッドをオーバーライドする。
      * 
-     * @returns {Number} TPB速度。
+     * @returns {number} TPB速度。
      */
     Game_Battler.prototype.tpbSpeed = function() {
         const speed = _Game_Battler_tpbSpeed.call(this);
@@ -128,7 +128,7 @@
     /**
      * TPB速度レートを得る。
      * 
-     * @returns {Number} TPB速度レート
+     * @returns {number} TPB速度レート
      */
     Game_Battler.prototype.tpbSpeedRate = function() {
         return Math.max(0, 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_TPB_SPEED));
@@ -140,7 +140,7 @@
          * このGame_BattlerのTPB詠唱速度を得る。
          * 
          * 魔法速度の計算だけ変更したい場合にはオーバーライドする。
-         * @returns {Number} TPB詠唱速度
+         * @returns {number} TPB詠唱速度
          */
         Game_Battler.prototype.tpbCastSpeed = function() {
             const speed = _Game_Battler_tpbCastSpeed.call(this);

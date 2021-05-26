@@ -112,7 +112,7 @@
      * 文字列を解析してレートを得る。
      * 
      * @param {String} valueStr 文字列
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     const _getRate = function(valueStr) {
         if (valueStr.slice(-1) === "%") {
@@ -163,7 +163,7 @@
         /**
          * キャストタイム時間レートを得る。
          * 
-         * @returns {Number} キャストタイム時間レート
+         * @returns {number} キャストタイム時間レート
          */
         Game_BattlerBase.prototype.castTimeRate = function() {
             return Math.max(0, 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE));
@@ -172,7 +172,7 @@
         /**
          * キャストタイム時間レートを得る。
          * 
-         * @returns {Number} キャストタイム時間レート
+         * @returns {number} キャストタイム時間レート
          */
         Game_BattlerBase.prototype.castTimeRate = function() {
             return 1;
@@ -186,7 +186,7 @@
         /**
          * 魔法キャストタイム時間レートを得る。
          * 
-         * @returns {Number} 魔法キャストタイム時間レート
+         * @returns {number} 魔法キャストタイム時間レート
          */
         Game_BattlerBase.prototype.magicCastTimeRate = function() {
             return Math.max(0, 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE));
@@ -195,7 +195,7 @@
         /**
          * 魔法キャストタイム時間レートを得る。
          * 
-         * @returns {Number} 魔法キャストタイム時間レート
+         * @returns {number} 魔法キャストタイム時間レート
          */
         Game_BattlerBase.prototype.magicCastTimeRate = function() {
             return 1;
@@ -206,8 +206,8 @@
     /**
      * スキルのキャスト時間を得る。
      * 
-     * @param {Object} item スキル/アイテム
-     * @returns {Number} キャスト時間
+     * @param {object} item スキル/アイテム
+     * @returns {number} キャスト時間
      */
     Game_BattlerBase.prototype.tpbSkillCastTime = function(item) {
         const castTime = _Game_BattlerBase_tpbSkillCastTime.call(this, item);
@@ -225,7 +225,7 @@
     /**
      * このアクションの速度を得る。
      * 
-     * @returns {Number} アクションの速度
+     * @returns {number} アクションの速度
      */
     Game_Action.prototype.speed = function() {
         let speed = _Game_Action_speed.call(this);

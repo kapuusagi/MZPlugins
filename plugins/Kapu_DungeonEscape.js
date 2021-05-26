@@ -182,7 +182,7 @@
         /**
          * ノートタグを処理する。
          * 
-         * @param {Object} obj データ
+         * @param {object} obj データ
          */
          const _processNoteTag = function(obj) {
             if (obj.meta.effectDungeonEscape) {
@@ -207,8 +207,8 @@
         /**
          * 使用可能な条件かどうかを判定する。
          * 
-         * @param {Object} item DataItem/DataSkill
-         * @returns {Boolean} 使用可能な場合にはtrue, それ以外はfalse.
+         * @param {object} item DataItem/DataSkill
+         * @returns {boolean} 使用可能な場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.meetsUsableItemConditions = function(item) {
             if (this.testDungeonEscape(item) && ($gameParty.inBattle() || !$gameMap.canUseDungeonEscape())) {
@@ -221,8 +221,8 @@
         /**
          * itemで指定されるアイテムまたはスキルがダンジョンエスケープ効果を持つかどうかを得る。
          * 
-         * @param {Object} item DataItem/DataSkill
-         * @returns {Boolean} ダンジョンエスケープ効果がある場合にはtrue, それ以外はfalse.
+         * @param {object} item DataItem/DataSkill
+         * @returns {boolean} ダンジョンエスケープ効果がある場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.testDungeonEscape = function(item) {
             return item.effects.some(
@@ -245,9 +245,9 @@
     /**
      * エスケープ位置を設定する。
      * 
-     * @param {Number} mapId マップID
-     * @param {Number} x x位置
-     * @param {Number} y ｙ位置
+     * @param {number} mapId マップID
+     * @param {number} x x位置
+     * @param {number} y ｙ位置
      */
     Game_Party.prototype.setDungeonEscapePosition = function(mapId, x, y) {
         this._escapePosition[0] = mapId;
@@ -284,7 +284,7 @@
     /**
      * エスケープ可能かどうかを得る。
      * 
-     * @returns {Boolean} エスケープ可能な場合にはtrue, それ以外はfalse.
+     * @returns {boolean} エスケープ可能な場合にはtrue, それ以外はfalse.
      */
      Game_Map.prototype.canUseDungeonEscape = function() {
         if ($dataMap.meta.canUseDungeonEscape) {
@@ -296,7 +296,7 @@
     /**
      * エスケープ条件をテストする。
      * 
-     * @returns {Boolean} エスケープ条件
+     * @returns {boolean} エスケープ条件
      */
     Game_Map.prototype.testDungeonEscapeCondition = function() {
         if (dungeonEscapeCondition) {
@@ -333,8 +333,8 @@
         /**
          * itemで指定されるアイテムまたはスキルがダンジョンエスケープ効果を持つかどうかを取得する。
          * 
-         * @param {Object} item DataItem/DataSkill
-         * @returns {Boolean} ダンジョンエスケープ効果を持つ場合にはtrue, それ以外はfalse.
+         * @param {object} item DataItem/DataSkill
+         * @returns {boolean} ダンジョンエスケープ効果を持つ場合にはtrue, それ以外はfalse.
          */
         Scene_ItemBase.prototype.testDungeonEscape = function(item) {
             return item.effects.some(

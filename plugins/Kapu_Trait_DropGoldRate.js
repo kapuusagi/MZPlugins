@@ -82,7 +82,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データ
+     * @param {object} obj データ
      */
     const _processNoteTag = function(obj) {
         if (!obj.meta.dropGoldRate) {
@@ -120,7 +120,7 @@
     /**
      * 取得金額倍率を得る。
      * 
-     * @returns {Number} 取得金額倍率。
+     * @returns {number} 取得金額倍率。
      */
     Game_BattlerBase.prototype.dropGoldRate = function() {
         return this.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, Game_Party.ABILITY_DROP_GOLD_RATE);
@@ -133,7 +133,7 @@
     /**
      * 取得金額倍率を得る。
      *  
-     * @returns {Number} 取得金額倍率
+     * @returns {number} 取得金額倍率
      */
     Game_Party.prototype.dropGoldRate = function() {
         const rate = _Game_Party_dropGoldRate.call(this);

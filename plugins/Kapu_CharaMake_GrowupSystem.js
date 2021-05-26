@@ -152,7 +152,7 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
@@ -189,8 +189,8 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * セットアップする。
      * 
-     * @param {Number} minimum 最小値
-     * @param {Number} maximum 最大値
+     * @param {number} minimum 最小値
+     * @param {number} maximum 最大値
      */
     Window_CharaMakeItem_GrowPoint.prototype.setup = function(minimum, maximum) {
         this._minimum = minimum;
@@ -248,7 +248,7 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * 育成ポイントを設定する。
      * 
-     * @param {Number} growPoint 成長ポイント
+     * @param {number} growPoint 成長ポイント
      */
     Window_CharaMakeItem_GrowPoint.prototype.setGrowPoint = function(growPoint) {
         this._growPoint = growPoint.clamp(this._minimum, this._maximum);
@@ -258,7 +258,7 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * 育成ポイントを得る。
      * 
-     * @returns {Number} 育成ポイント
+     * @returns {number} 育成ポイント
      */
     Window_CharaMakeItem_GrowPoint.prototype.growPoint = function() {
         return this._growPoint;
@@ -330,7 +330,7 @@ function Window_CharaMakeItem_GrowPoint() {
      * 成長ポイントは、初回のみ編集可能とする。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Boolean} 既存データの変更の場合にはtrue、それ以外はfalse
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
      * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
@@ -340,7 +340,7 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * 編集中のテキストを得る。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @returns {string} 編集項目の選択値(テキスト)
      */
     Game_CharaMakeItem_GrowPoint.prototype.editingText = function(windowEntry) {
@@ -353,7 +353,7 @@ function Window_CharaMakeItem_GrowPoint() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
      * @param {Game_Actor} actor アクター
-     * @returns {Object} 追加するウィンドウ
+     * @returns {object} 追加するウィンドウ
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_GrowPoint.prototype.createSelectWindows = function(rect, helpWindow, actor) {
@@ -375,7 +375,7 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * 現在のアクターの情報を反映させる
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars
@@ -392,7 +392,7 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * 編集中の設定を反映させる。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars
@@ -406,7 +406,7 @@ function Window_CharaMakeItem_GrowPoint() {
     /**
      * 選択開始時の処理を行う。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      */
     Game_CharaMakeItem_GrowPoint.prototype.startSelection = function(windowEntry) {
         Game_CharaMakeItem.prototype.startSelection.call(this, windowEntry);

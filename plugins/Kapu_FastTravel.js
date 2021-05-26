@@ -181,11 +181,11 @@
  * ■ プラグイン開発者向け
  * ファストトラベル位置オブジェクト
  * {
- *    id : {Number} 1以上の管理インデックスです。
+ *    id : {number} 1以上の管理インデックスです。
  *    name : {String} 識別名(選択対象として表示されます。)
- *    mapId : {Number} マップID
- *    x : {Number} x位置
- *    y : {Number} y位置
+ *    mapId : {number} マップID
+ *    x : {number} x位置
+ *    y : {number} y位置
  *    condition : {String} 移動可能条件(eval()で評価されます)
  * }
  * 
@@ -360,7 +360,7 @@ function Scene_SelectFastTravelPosition() {
         /**
          * ノートタグを処理する。
          * 
-         * @param {Object} obj データ
+         * @param {object} obj データ
          */
          const _processNoteTag = function(obj) {
             if (obj.meta.effectFastTravel) {
@@ -391,8 +391,8 @@ function Scene_SelectFastTravelPosition() {
     /**
      * 移動可能位置の移動可否を設定する。
      * 
-     * @param {Number} travelPositionId 移動位置番号
-     * @param {Boolean} enabled 移動可能な場合にはtrue
+     * @param {number} travelPositionId 移動位置番号
+     * @param {boolean} enabled 移動可能な場合にはtrue
      */
     Game_Actor.prototype.setFastTravelPositionEnable = function(travelPositionId, enabled) {
         this._fastTravelPositions[travelPositionId] = enabled;
@@ -401,8 +401,8 @@ function Scene_SelectFastTravelPosition() {
     /**
      * ファストトラベル位置への移動可否を設定する。
      * 
-     * @param {Number} travelPositionId 移動位置番号
-     * @returns {Boolean} 移動
+     * @param {number} travelPositionId 移動位置番号
+     * @returns {boolean} 移動
      */
     Game_Actor.prototype.canFastTravel = function(travelPositionId) {
         return this._fastTravelPositions[travelPositionId] || false;
@@ -413,8 +413,8 @@ function Scene_SelectFastTravelPosition() {
         /**
          * 使用可能な条件かどうかを判定する。
          * 
-         * @param {Object} item DataItem/DataSkill
-         * @returns {Boolean} 使用可能な場合にはtrue, それ以外はfalse.
+         * @param {object} item DataItem/DataSkill
+         * @returns {boolean} 使用可能な場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.meetsUsableItemConditions = function(item) {
             if (this.testFastTravel(item) && ($gameParty.inBattle() || !$gameMap.canUseFastTravel())) {
@@ -427,8 +427,8 @@ function Scene_SelectFastTravelPosition() {
         /**
          * itemで指定されるアイテムまたはスキルがファストトラベル効果を持つかどうかを得る。
          * 
-         * @param {Object} item DataItem/DataSkill
-         * @returns {Boolean} ファストトラベル効果がある場合にはtrue, それ以外はfalse.
+         * @param {object} item DataItem/DataSkill
+         * @returns {boolean} ファストトラベル効果がある場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.testFastTravel = function(item) {
             return item.effects.some(
@@ -450,7 +450,7 @@ function Scene_SelectFastTravelPosition() {
     /**
      * ファストトラベル位置を登録する。
      * 
-     * @param {Object} travelPosition ファストトラベル位置情報
+     * @param {object} travelPosition ファストトラベル位置情報
      */
     Game_Party.prototype.registerFastTravelPosition = function(travelPosition) {
         if (travelPosition.id > 0) {
@@ -461,8 +461,8 @@ function Scene_SelectFastTravelPosition() {
     /**
      * パーティーメンバーのファストトラベル位置への移動可否を設定する。
      * 
-     * @param {Number} travelPosition ファストトラベル位置No
-     * @param {Boolean} enabled ファストトラベル可能かどうか
+     * @param {number} travelPosition ファストトラベル位置No
+     * @param {boolean} enabled ファストトラベル可能かどうか
      */
     Game_Party.prototype.setFastTravelPositionEnable = function(travelPosition, enabled) {
         this.allMembers().forEach(member => member.setFastTravelPositionEnable(travelPosition, enabled));
@@ -471,7 +471,7 @@ function Scene_SelectFastTravelPosition() {
     /**
      * ファストトラベル位置を削除する。
      * 
-     * @param {Object} travelPositionId ファストトラベル位置No
+     * @param {object} travelPositionId ファストトラベル位置No
      */
     Game_Party.prototype.unregisterFastTravelPosition = function(travelPositionId) {
         if (travelPositionId > 0) {
@@ -482,8 +482,8 @@ function Scene_SelectFastTravelPosition() {
     /**
      * 指定ＩＤのファストトラベル位置が登録済みかどうかを得る。
      * 
-     * @param {Number} travelPositionId ファストトラベル位置No
-     * @returns {Boolean} 登録済みの場合にはtrue, それ以外はfalse
+     * @param {number} travelPositionId ファストトラベル位置No
+     * @returns {boolean} 登録済みの場合にはtrue, それ以外はfalse
      */
     Game_Party.prototype.isFastTravelPositionRegistered = function(travelPositionId) {
         return ((travelPositionId > 0) && this._fastTravelPositions[travelPositionId]) ? true : false;
@@ -508,7 +508,7 @@ function Scene_SelectFastTravelPosition() {
     /**
      * ファストトラベル位置への移動が可能かどうかを判定する。
      * 
-     * @param {Number} travelPositionId ファストトラベル位置No
+     * @param {number} travelPositionId ファストトラベル位置No
      */
     Game_Party.prototype.canFastTravel = function(travelPositionId) {
         return this._allMembers().some(member => member.canFastTravel(travelPositionId));
@@ -519,8 +519,8 @@ function Scene_SelectFastTravelPosition() {
     /**
      * 既存メンバーのファストトラベル位置への移動可否を設定する。
      * 
-     * @param {Number} travelPosition ファストトラベル位置No
-     * @param {Boolean} enabled ファストトラベル可能かどうか
+     * @param {number} travelPosition ファストトラベル位置No
+     * @param {boolean} enabled ファストトラベル可能かどうか
      */
     Game_Actors.prototype.setFastTravelPositionEnable = function(travelPosition, enabled) {
         for (const actor of this._data) {
@@ -535,7 +535,7 @@ function Scene_SelectFastTravelPosition() {
     /**
      * ファストトラベル可能かどうかを得る。
      * 
-     * @returns {Boolean} ファストトラベル可能な場合にはtrue, それ以外はfalse.
+     * @returns {boolean} ファストトラベル可能な場合にはtrue, それ以外はfalse.
      */
     Game_Map.prototype.canUseFastTravel = function() {
         if ($dataMap.meta.canUseFastTravel) {
@@ -547,7 +547,7 @@ function Scene_SelectFastTravelPosition() {
     /**
      * ファストトラベル条件をテストする。
      * 
-     * @returns {Boolean} ファストトラベル条件
+     * @returns {boolean} ファストトラベル条件
      */
     Game_Map.prototype.testFastTravelCondition = function() {
         if (fastTravelCondition) {
@@ -603,7 +603,7 @@ function Scene_SelectFastTravelPosition() {
     /**
      * 選択されているアイテムを得る。
      * 
-     * @returns {Object} 選択されているアイテム。
+     * @returns {object} 選択されているアイテム。
      */
     Window_FastTravelList.prototype.item = function() {
         const index = this.index();
@@ -617,7 +617,7 @@ function Scene_SelectFastTravelPosition() {
     /**
      * 項目数を得る。
      * 
-     * @returns {Number} 項目数。
+     * @returns {number} 項目数。
      */
     Window_FastTravelList.prototype.maxItems = function() {
         return this._fastTravelPositions.length;
@@ -625,7 +625,7 @@ function Scene_SelectFastTravelPosition() {
     /**
      * 現在の選択が選択可能かどうかを取得する。
      * 
-     * @returns {Boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
+     * @returns {boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
     Window_FastTravelList.prototype.isCurrentItemEnabled = function() {
         return this.isEnabled(this.index());
@@ -634,8 +634,8 @@ function Scene_SelectFastTravelPosition() {
     /**
      * indexで指定される項目が有効かどうかを判定する。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @param {number} index インデックス番号
+     * @returns {boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Window_FastTravelList.prototype.isEnabled = function(index) {
         if ((index >= 0) && (index < this._fastTravelPositions.length)) {
@@ -653,7 +653,7 @@ function Scene_SelectFastTravelPosition() {
     /**
      * 項目を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_FastTravelList.prototype.drawItem = function(index) {
         const rect = this.itemLineRect(index);
@@ -689,11 +689,11 @@ function Scene_SelectFastTravelPosition() {
      * シーンの準備をする。
      * 
      * @param {Array<Game_Actor>} 対象アクター
-     * @param {Number} mapVariableId マップ格納変数ID
-     * @param {Number} xVariableId x格納変数ID
-     * @param {Number} yVariableId y格納変数ID
-     * @param {Number} commonEventId コモンイベントID
-     * @param {Object} item DataItem または DataSkill. 該当なしの場合にはnull
+     * @param {number} mapVariableId マップ格納変数ID
+     * @param {number} xVariableId x格納変数ID
+     * @param {number} yVariableId y格納変数ID
+     * @param {number} commonEventId コモンイベントID
+     * @param {object} item DataItem または DataSkill. 該当なしの場合にはnull
      */
     Scene_SelectFastTravelPosition.prototype.prepare = function(actors, mapVariableId, xVariableId, yVariableId, commonEventId, item) {
         this._actors = actors;
@@ -740,8 +740,8 @@ function Scene_SelectFastTravelPosition() {
     /**
      * ファストトラベル位置が、選択可能条件を満たしているかどうかを判定する。
      * 
-     * @param {Object} fastTravelPosition ファストトラベル位置エントリ
-     * @returns {Boolean} 条件を満たしている場合にはtrue, それ以外はfalse
+     * @param {object} fastTravelPosition ファストトラベル位置エントリ
+     * @returns {boolean} 条件を満たしている場合にはtrue, それ以外はfalse
      */
     Scene_SelectFastTravelPosition.prototype.canFastTravelCondition = function(fastTravelPosition) {
         if (fastTravelPosition.condition) {
@@ -882,8 +882,8 @@ function Scene_SelectFastTravelPosition() {
         /**
          * itemにファストトラベル効果があるかを判定する。
          * 
-         * @param {Object} item DataItem/DataSkill
-         * @returns {Boolean} ファストトラベル効果がある場合にはtrue, それ以外はfalse.
+         * @param {object} item DataItem/DataSkill
+         * @returns {boolean} ファストトラベル効果がある場合にはtrue, それ以外はfalse.
          */
         Scene_ItemBase.prototype.testFastTravel = function(item) {
             return item.effects.some(

@@ -117,8 +117,8 @@
  * 最大GrowPoint値を保持する Game_Actor.MAX_GROW_POINT を追加します。
  * GrowPointは Game_Actor に以下のオブジェクトとして格納しています。
  * _growPoint {
- *     current: {Number} 現在値。振り分け格納な値。
- *     max: {Number} 最大値。リセット時はcurrentがこの値になる。
+ *     current: {number} 現在値。振り分け格納な値。
+ *     max: {number} 最大値。リセット時はcurrentがこの値になる。
  * };
  * 
  * 成長ポイント表示名は TextManager.growPoint で取得できる。
@@ -146,11 +146,11 @@
  * 
  * 育成項目は Game_Actor.growupItems にて配列を返す。
  * GrowupItem = {
- *     iconIndex : {Number} アイコンインデックス
+ *     iconIndex : {number} アイコンインデックス
  *     name : {String} 項目名
  *     type : {String} 育成タイプ。(プラグインで識別に使用する文字列)
- *     id : {Number} 成長処理側で使用する識別ID
- *     cost : {Number} growPointのコスト
+ *     id : {number} 成長処理側で使用する識別ID
+ *     cost : {number} growPointのコスト
  *     description : {String} 説明用文字列。
  * }
  * 実際の育成処理は
@@ -214,8 +214,8 @@
     /**
      * アクターIDを得る。
      * 
-     * @param {Object} args プラグインコマンド引数
-     * @returns {Number} アクターID
+     * @param {object} args プラグインコマンド引数
+     * @returns {number} アクターID
      */
     const _getActorId = function(args) {
         const actorId = Number(args.actorId) || 0;
@@ -257,7 +257,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
+     * @param {object} obj データオブジェクト。(DataItem/DataSkill)
      */
     const _processNotetag = function(obj) {
         if (Game_Action.EFFECT_GAIN_GROWPOINT && obj.meta.growPoint) {
@@ -301,7 +301,7 @@
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
@@ -323,7 +323,7 @@
      * Note: Lvアップ毎にランダムで増減する拡張もあり得るため、
      *       setup()時の初期値を計算する時だけ使用する。
      * 
-     * @returns {Number} 育成ポイント合計
+     * @returns {number} 育成ポイント合計
      */
     Game_Actor.prototype.growPointOfLevel = function() {
         let value = initialGrowPoint;
@@ -360,8 +360,8 @@
     /**
      * レベルアップ時に加算するGrowPointを得る。
      * 
-     * @param {Number} level レベル
-     * @returns {Number} 加算するGrowPoint
+     * @param {number} level レベル
+     * @returns {number} 加算するGrowPoint
      */
     // eslint-disable-next-line no-unused-vars
     Game_Actor.prototype.growPointAtLevelUp = function(level) {
@@ -372,7 +372,7 @@
      * 現在の成長ボーナス値を得る。
      * つまり、残っているポイントね。
      * 
-     * @returns {Number} 現在の成長ボーナス値。
+     * @returns {number} 現在の成長ボーナス値。
      */
     Game_Actor.prototype.growPoint = function() {
         return this._growPoint.current;
@@ -382,7 +382,7 @@
      * 使用済みGrowPointを得る。
      * setup()時に、使用済みGrowPointを計算するために使用される。
      * 
-     * @returns {Number} 使用済み育成ポイント。
+     * @returns {number} 使用済み育成ポイント。
      */
     Game_Actor.prototype.usedGrowupPoint = function() {
         return 0;
@@ -392,7 +392,7 @@
      * 最大成長ボーナス値を得る。
      * つまり、使用済み＋残っているポイント。
      * 
-     * @returns {Number} 成長ボーナス値合計。
+     * @returns {number} 成長ボーナス値合計。
      */
     Game_Actor.prototype.maxGrowPoint = function() {
         return this._growPoint.max;
@@ -402,7 +402,7 @@
      * 成長ポイントにvalueを加算する。
      * プラグインパラメータで指定された、最大成長ポイントは超えない。
      * 
-     * @param {Number} value 加算値
+     * @param {number} value 加算値
      */
     Game_Actor.prototype.gainGrowPoint = function(value) {
         const gainValue = Math.min(Game_Actor.MAX_GROW_POINT - this._growPoint.max, value);
@@ -460,7 +460,7 @@
      * 育成項目を適用する。
      * 
      * @param {GrowupItem} growupItem 育成項目
-     * @returns {Boolean} 適用できたかどうか。
+     * @returns {boolean} 適用できたかどうか。
      */
     // eslint-disable-next-line no-unused-vars
     Game_Actor.prototype.applyGrowup = function(growupItem) {
@@ -470,10 +470,10 @@
     if (enableProperty) {
         /**
          * 残りGPを表すプロパティ名
-         * @constant {Number}
+         * @constant {number}
          */
         Object.defineProperty(Game_Actor.prototype, "gp", {
-            /** @returns {Number} */
+            /** @returns {number} */
             get: function() {
                 return this._growPoint.current;
             },
@@ -481,10 +481,10 @@
         });
         /**
          * 最大GPを表すプロパティ名
-         * @constant {Number}
+         * @constant {number}
          */
         Object.defineProperty(Game_Actor.prototype, "maxgp", {
-            /** @returns {Number} */
+            /** @returns {number} */
             get: function() {
                 return this._growPoint.max;
             },
@@ -502,7 +502,7 @@
      * 
      * @param {Game_BattlerBase} target 対象
      * @param {DataEffect} effect エフェクトデータ
-     * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 適用可能な場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testItemEffect = function(target, effect) {
         if (Game_Action.EFFECT_GAIN_GROWPOINT

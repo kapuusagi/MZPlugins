@@ -196,8 +196,8 @@
     /**
      * 速度からTPB速度を得る。
      * 
-     * @param {Number} value 値
-     * @returns {Number} TPB速度。
+     * @param {number} value 値
+     * @returns {number} TPB速度。
      * !!!overwrite!!! Game_Battler.calcTpbSpeed()
      *     TPB速度の計算式を変更する。
      */
@@ -208,8 +208,8 @@
     /**
      * アクションの発動に必要な時間を得る。
      * 
-     * @param {Number} delay ディレイ
-     * @returns {Number} 必要な時間
+     * @param {number} delay ディレイ
+     * @returns {number} 必要な時間
      * !!!overwrite!!! Game_Battler.calcCastTime()
      *     キャスト時間の計算を単純にするため、オーバーライドする。
      */
@@ -220,7 +220,7 @@
     /**
      * TPB基準速度の計算に使用するパラメータ値を得る。
      * 
-     * @returns {Number} TPB基準速度の計算に使用するパラメータ。
+     * @returns {number} TPB基準速度の計算に使用するパラメータ。
      * !!!overwrite!!!! Game_Battler.tpbBaseSpeedParam()
      *     バフ適用外のパラメータを元に計算するため、オーバーライドする。
      */
@@ -230,7 +230,7 @@
     /**
      * このGame_BattlerのTPB詠唱速度を得る。
      *
-     * @returns {Number} TPB詠唱速度
+     * @returns {number} TPB詠唱速度
      * !!!overwrite!!! Game_Battler.tpbCastSpeed()
      *     魔法速度の計算だけ変更するためオーバーライドする。
      */
@@ -248,7 +248,7 @@
     /**
      * このGame_BattlerのTPB魔法詠唱速度を得る。
      * 
-     * @returns {Number} TPB魔法詠唱速度
+     * @returns {number} TPB魔法詠唱速度
      */
     Game_Battler.prototype.tpbMagicCastSpeed = function() {
         const paramValue = this.tpbMagicCastSpeedParam();
@@ -258,7 +258,7 @@
     /**
      * このGame_BattlerのTPB詠唱速度を得る。
      * 
-     * @returns {Number} TPB詠唱速度
+     * @returns {number} TPB詠唱速度
      */
     Game_Battler.prototype.tpbOtherCastSpeed = function() {
         const paramValue = this.tpbSpeedParam();
@@ -267,7 +267,7 @@
     /**
      * TPB基準速度の計算に使用するパラメータ値を得る。
      * 
-     * @returns {Number} TPB基準速度の計算に使用するパラメータ。
+     * @returns {number} TPB基準速度の計算に使用するパラメータ。
      */
     Game_Battler.prototype.tpbMagicCastSpeedParam = function() {
         return this.agi;
@@ -275,8 +275,8 @@
     /**
      * 行動によるTP上昇量を得る。
      * 
-     * @param {Object} item DataItem/DataSKill
-     * @returns {Number} TP上昇量
+     * @param {object} item DataItem/DataSKill
+     * @returns {number} TP上昇量
      */
     Game_Battler.prototype.actionTpValue = function(item) {
         return item.tpGain;
@@ -286,7 +286,7 @@
     /**
      * スキルまたはアイテムを使用する。
      * 
-     * @param {Object} item DataItemまたはDataSkill
+     * @param {object} item DataItemまたはDataSkill
      */
     Game_Battler.prototype.useItem = function(item) {
         _Game_Battler_useItem.call(this, item);
@@ -299,8 +299,8 @@
     /**
      * パラメータのバフ/デバフ適用前のベース値を得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} バフ/デバフ適用前のベース値
+     * @param {number} paramId パラメータID
+     * @returns {number} バフ/デバフ適用前のベース値
      * !!!overwrite!!! Game_BattlerBase.paramWithoutBuff()
      *     装備品増加分にはTraitによるレートボーナスを適用外とするため、オーバーライドする。
      */
@@ -314,8 +314,8 @@
      * Note: 装備品増加分には特性によるレートボーナスを適用外とするため、
      *       オーバーライドする。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} 加算値
+     * @param {number} paramId パラメータID
+     * @returns {number} 加算値
      * !!!overwrite!!! Game_Actor.paramPlus()
      *     装備品増加分を増加レート特性から除外するため、オーバーライドする。
      */
@@ -326,7 +326,7 @@
     /**
      * パラメータの最大値を得る。
      * 
-     * @returns {Number} パラメータ最大値。
+     * @returns {number} パラメータ最大値。
      * !!!overwrite!!! Game_Actor.paramMax()
      *     パラメータ最大値を返すためにオーバーライドする。
      */
@@ -339,7 +339,7 @@
     /**
      * パラメータの最大値を得る。
      * 
-     * @returns {Number} パラメータ最大値。
+     * @returns {number} パラメータ最大値。
      * !!!overwrite!!! Game_Enemy.paramMax()
      *     パラメータ最大値を返すためにオーバーライドする。
      */
@@ -389,7 +389,7 @@
      * 命中できたかどうかを評価する。
      * 
      * @param {Game_Battler} target 対象
-     * @returns {Boolean} 命中できた場合にはtrue, それ以外はfalse
+     * @returns {boolean} 命中できた場合にはtrue, それ以外はfalse
      * !!!overwrite!!! Game_Action.testHit
      *     クリティカル判定時、命中するように変更したためオーバーライドする。
      */
@@ -425,7 +425,7 @@
      * 回復レートを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @returns {Number} 回復レート(0.0～、等倍は1.0)
+     * @returns {number} 回復レート(0.0～、等倍は1.0)
      * !!!overwrite!!! Game_Action.itemRec()
      *     回復レートにスキル使用者のレートと平均を取るため、オーバーライドする。
      */

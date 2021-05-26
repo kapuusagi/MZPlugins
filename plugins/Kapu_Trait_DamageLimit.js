@@ -73,7 +73,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processNoteTag = function(obj) {
         if (obj.meta.damageLimit) {
@@ -101,7 +101,7 @@
     /**
      * ダメージリミット特性名
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     // eslint-disable-next-line no-unused-vars
@@ -120,7 +120,7 @@
     /**
      * ダメージリミットを得る。
      * 
-     * @returns {Number} ダメージリミット
+     * @returns {number} ダメージリミット
      * !!!overwrite!!! Game_BattlerBase.maxDamage()
      */
     Game_BattlerBase.prototype.maxDamage = function() {
@@ -134,7 +134,7 @@
      * 最大ダメージを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @returns {Number} 最大ダメージ
+     * @returns {number} 最大ダメージ
      * !!!overwrite!!!
      */
     // eslint-disable-next-line no-unused-vars

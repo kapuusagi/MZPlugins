@@ -256,7 +256,7 @@
      * 個別アイテムノートタグを処理する。
      * 
      * @param {Array<Object>} dataArray データ配列
-     * @param {Boolean} independent 個別アイテムかどうかのデフォルト値。
+     * @param {boolean} independent 個別アイテムかどうかのデフォルト値。
      */
     DataManager.processIndependentNotetag = function(dataArray, independent) {
         for (let item of dataArray) {
@@ -296,8 +296,8 @@
      * 保存データ配列を作成する。
      * 
      * @param {Array<DataObject>} dataArray データコレクション
-     * @param {Number} startIndex 個別データ開始インデックス。
-     * @param {Number} maxCount 個別データ数
+     * @param {number} startIndex 個別データ開始インデックス。
+     * @param {number} maxCount 個別データ数
      * @returns {Array<DataObject>} 保存データ配列。
      */
     DataManager.makeSaveDataArray = function(dataArray, startIndex, maxCount) {
@@ -318,7 +318,7 @@
     /**
      * セーブデータを展開する。
      * 
-     * @param {Object} contents 保存コンテンツ
+     * @param {object} contents 保存コンテンツ
      */
     DataManager.extractSaveContents = function(contents) {
         _DataManager_extractSaveContents.call(this, ...arguments);
@@ -335,8 +335,8 @@
      * 
      * @param {Array<DataObject>} saveDataContents データコレクション
      * @param {Array<DataObject>} dataArray 保存データ配列。
-     * @param {Number} startIndex 個別データ数
-     * @param {Number} maxCount 保存データ配列。
+     * @param {number} startIndex 個別データ数
+     * @param {number} maxCount 保存データ配列。
      */
     DataManager.extractSaveDataArray = function(saveDataContents, dataArray, startIndex, maxCount) {
         if (!saveDataContents || (startIndex == 0) || (maxCount == 0)) {
@@ -354,8 +354,8 @@
     /**
      * アイテムが個別アイテムとして扱うものかどうかを取得する。
      * 
-     * @param {Object} item ベースまたは個別アイテム。(DataItem/DataWeapon/DataArmor)
-     * @returns {Boolean} 個別アイテムの場合にはtrue, それ以外はfalse.
+     * @param {object} item ベースまたは個別アイテム。(DataItem/DataWeapon/DataArmor)
+     * @returns {boolean} 個別アイテムの場合にはtrue, それ以外はfalse.
      */
     DataManager.isIndependent = function(item) {
         if (!item) {
@@ -374,8 +374,8 @@
     /**
      * itemが個別アイテムかどうかを判定する。
      * 
-     * @param {Object} item ベースアイテムまたは個別アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Boolean} 個別アイテムの場合にはtrue, それ以外はfalse
+     * @param {object} item ベースアイテムまたは個別アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {boolean} 個別アイテムの場合にはtrue, それ以外はfalse
      */
     DataManager.isIndependentItem = function(item) {
         return (item && item.baseItemId);
@@ -384,8 +384,8 @@
     /**
      * itemが個別アイテムのベースアイテムかどうかを判定する。
      * 
-     * @param {Object} item ベースアイテムまたは個別アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Boolean} 個別アイテムのベースアイテムの場合にはtrue,
+     * @param {object} item ベースアイテムまたは個別アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {boolean} 個別アイテムのベースアイテムの場合にはtrue,
      *                   個別アイテム、もしくは非個別アイテムの場合にはfalse
      */
     DataManager.isIndependentBaseItem = function(item) {
@@ -396,8 +396,8 @@
      * 新しい個別アイテム(DataItem/DataWeapon/DataArmor)を登録する。
      * baseItemで指定されたアイテムに合わせ、適切なデータコレクションに登録するように処理を行う。
      * 
-     * @param {Object} baseItem ベースとするアイテムオブジェクト(DataItem/DataWeapon/DataArmor)
-     * @returns {Object} 登録された新しいアイテム。登録できなかった場合にはnull.
+     * @param {object} baseItem ベースとするアイテムオブジェクト(DataItem/DataWeapon/DataArmor)
+     * @returns {object} 登録された新しいアイテム。登録できなかった場合にはnull.
      */
     DataManager.registerNewIndependentData = function(baseItem) {
         if (DataManager.isItem(baseItem)) {
@@ -446,7 +446,7 @@
     /**
      * newItemIdを割り当てた新しい個別アイテムを作成する。データベースへは登録しない。
      * 
-     * @param {Number} newItemId 新しい個別アイテムに割り当てるID。
+     * @param {number} newItemId 新しい個別アイテムに割り当てるID。
      * @param {DataItem} baseItem ベースアイテム(DataItem)
      * @returns {DataItem} 作成した個別アイテムオブジェクト。
      */
@@ -495,7 +495,7 @@
      * newItemIdを割り当てた新しい個別武器を作成する。
      * データベースへは登録しない。
      * 
-     * @param {Number} newItemId 新しい個別アイテムに割り当てるID。
+     * @param {number} newItemId 新しい個別アイテムに割り当てるID。
      * @param {DataWeapon} baseItem ベースアイテム
      * @returns {DataWeapon} 作成した個別武器オブジェクト。
      */
@@ -543,7 +543,7 @@
     /**
      * newItemIdを割り当てた新しい個別防具を作成する。データベースへは登録しない。
      * 
-     * @param {Number} newItemId 新しい個別アイテムに割り当てるID。
+     * @param {number} newItemId 新しい個別アイテムに割り当てるID。
      * @param {DataArmor} baseItem ベースアイテム
      * @returns {DataArmor} 作成した個別防具オブジェクト。
      */
@@ -572,9 +572,9 @@
      * 指定したデータコレクションの空きIDを得る。
      * 
      * @param {Array<Object>} dataArray データコレクション
-     * @param {Number} startIndex 開始インデックス
-     * @param {Number} maxCount 最大数
-     * @returns {Number} インデックス番号。空きがない場合には-1
+     * @param {number} startIndex 開始インデックス
+     * @param {number} maxCount 最大数
+     * @returns {number} インデックス番号。空きがない場合には-1
      */
     DataManager.getUnusedId = function(dataArray, startIndex, maxCount) {
         if (startIndex > 0) {
@@ -593,7 +593,7 @@
     /**
      * itemで指定したオブジェクトを格納するコレクションを取得する。
      * 
-     * @param {Object} item ベースアイテム/個別アイテム
+     * @param {object} item ベースアイテム/個別アイテム
      * @returns {Array<Object>} データオブジェクトを格納するコレクションを得る。
      * 該当するコレクションが無い場合にはnull
      */
@@ -613,8 +613,8 @@
      * ベースアイテムを取得する。
      * itemが個別アイテムでない場合にはitemが返る。
      * 
-     * @param {Object} item ベースアイテム/個別アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Object} ベースアイテムオブジェクト(DataItem/DataWeapon/DataArmor)。
+     * @param {object} item ベースアイテム/個別アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {object} ベースアイテムオブジェクト(DataItem/DataWeapon/DataArmor)。
      */
     DataManager.getBaseItem = function(item) {
         if (item && item.baseItemId) {
@@ -632,8 +632,8 @@
      * いずれかに存在している場合にtrueを返す。
      * 他の場所(倉庫機能実装とか)に保管される場合には、本メソッドに使用判定を追加すること。
      * 
-     * @param {Object} independentItem 個別アイテムオブジェクト(DataItem/DataWeapon/DataArmor)
-     * @returns {Boolean} 使用されている場合にはtrue, それ以外はfalse
+     * @param {object} independentItem 個別アイテムオブジェクト(DataItem/DataWeapon/DataArmor)
+     * @returns {boolean} 使用されている場合にはtrue, それ以外はfalse
      */
     DataManager.isIndependentItemUsed = function(independentItem) {
         if (!DataManager.isIndependentItem(independentItem)) {
@@ -661,7 +661,7 @@
      * baseItemに一致する個別アイテムのインスタンスを得る。
      * 
      * @param {DataItem} baseItem ベースアイテム(DataItem/DataWeapon/DataArmor)
-     * @param {Boolean} includeEquip 装備品を対象にするかどうか
+     * @param {boolean} includeEquip 装備品を対象にするかどうか
      * @returns {DataItem} 個別アイテム(DataItem/DataWeapon/DataArmor)
      */
     DataManager.getMatchingIndependentItem = function(baseItem, includeEquip = false) {
@@ -692,8 +692,8 @@
      * newItemのデータをbaseItemのデータで上書きする。
      * 上書きされるのはid以外のbaseItemで持っているメンバー全て。traitも含めて再設定される。
      * 
-     * @param {Object} 新しいアイテム
-     * @param {Object} ベースアイテム
+     * @param {object} 新しいアイテム
+     * @param {object} ベースアイテム
      */
     const _resetIndependentItemData = function(item, baseItem) {
         for (const key of Object.keys(baseItem)) {
@@ -712,7 +712,7 @@
      * 個別アイテムの性能を再初期化する。
      * id以外のベースアイテムが持つパラメータは全て再初期化される。
      * 
-     * @param {Object} item アイテム (DataItem/DataWeapon/DataArmor)
+     * @param {object} item アイテム (DataItem/DataWeapon/DataArmor)
      */
     DataManager.reinitializeIndependentItem = function(item) {
         if (!DataManager.isIndependentItem(item)) {
@@ -733,10 +733,10 @@
     /**
      * ベースアイテムが一致してるかどうかを取得する。
      * 
-     * @param {Object} item1 アイテム
-     * @param {Object} item2 アイテム
+     * @param {object} item1 アイテム
+     * @param {object} item2 アイテム
      * 
-     * @returns {Boolean} 一致している場合にはtrue, それ以外はfalse
+     * @returns {boolean} 一致している場合にはtrue, それ以外はfalse
      */
     DataManager.isBaseItemMatch = function(item1, item2) {
         if ((DataManager.isItem(item1) !== DataManager.isItem(item2))
@@ -762,7 +762,7 @@
     /**
      * インタプリタからの要求でアイテムの加算に成功したかどうかを設定する。
      * 
-     * @param {Boolean} isFailure 加算に失敗した場合にはtrue, それ以外はfalse
+     * @param {boolean} isFailure 加算に失敗した場合にはtrue, それ以外はfalse
      */
     Game_Temp.prototype.setItemGainFailure = function(isFailure) {
         this._gailItemFailure = isFailure;
@@ -775,7 +775,7 @@
     /**
      * インタプリタからの要求でアイテムの加算に成功したかどうかを取得する。
      * 
-     * @returns {Boolean} 加算に失敗した場合にはtrue, それ以外はfalse
+     * @returns {boolean} 加算に失敗した場合にはtrue, それ以外はfalse
      */
     Game_Temp.prototype.isItemGainFailure = function() {
         return this._gailItemFailure;
@@ -788,8 +788,8 @@
     /**
      * アクターが指定された装備を装備中かどうかを判定する。
      * 
-     * @param {Object} item 装備品(DataWeapon/DataArmor)
-     * @returns {Boolean} 装備中の場合にはtrue, それ以外はfalse.
+     * @param {object} item 装備品(DataWeapon/DataArmor)
+     * @returns {boolean} 装備中の場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isEquipped = function(item) {
         if (DataManager.isIndependentBaseItem(item)) {
@@ -807,7 +807,7 @@
     /**
      * アクターの装備品を捨てる。
      * 
-     * @param {Object} item 装備品(DataWeapon/DataArmor)
+     * @param {object} item 装備品(DataWeapon/DataArmor)
      */
     Game_Actor.prototype.discardEquip = function(item) {
         if (DataManager.isIndependent(item) && !item.baseItemid) {
@@ -825,8 +825,8 @@
     /**
      * baseItemを装備しているスロット番号を得る。
      * 
-     * @param {Object} baseItem ベースアイテム(DataWeapon/DataArmor)
-     * @returns {Number} 装備中スロット番号。該当するものが無い場合には-1。
+     * @param {object} baseItem ベースアイテム(DataWeapon/DataArmor)
+     * @returns {number} 装備中スロット番号。該当するものが無い場合には-1。
      */
     Game_Actor.prototype.findEquippedSlot = function(baseItem) {
         const equips = this.equips();
@@ -848,8 +848,8 @@
      * 装備を変更する。
      * パーティーの所持品にitemIdで指定するアイテムが無い場合には変更できない。
      * 
-     * @param {Number} etypeId 装備タイプID
-     * @param {Number} itemId アイテムID
+     * @param {number} etypeId 装備タイプID
+     * @param {number} itemId アイテムID
      */
     Game_Actor.prototype.changeEquipById = function(etypeId, itemId) {
         const slotId = etypeId - 1;
@@ -876,8 +876,8 @@
     /**
      * itemIdで指定される装備品をセットする。
      * 
-     * @param {Boolean} isWeapon 武器かどうか
-     * @param {Number} itemId アイテムID(装備なしは0) 
+     * @param {boolean} isWeapon 武器かどうか
+     * @param {number} itemId アイテムID(装備なしは0) 
      */
     Game_Item.prototype.setEquip = function(isWeapon, itemId) {
         if (itemId === 0) {
@@ -904,8 +904,8 @@
     /**
      * アクターデータが存在するかどうかを取得する。
      * 
-     * @param {Number} actorId アクターID
-     * @returns {Boolean} アクターデータが存在する場合にはtrue, 存在しない場合にはfalse
+     * @param {number} actorId アクターID
+     * @returns {boolean} アクターデータが存在する場合にはtrue, 存在しない場合にはfalse
      */
     Game_Actors.prototype.isActorDataExists = function(actorId) {
         return this._data[actorId] ? true : false;
@@ -920,9 +920,9 @@
      * 指定されたアイテムを増減させる。
      * 個別アイテムは登録可能数を超えて追加することはできない。
      * 
-     * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
-     * @param {Number} amount 増減する量。
-     * @param {Boolean} includeEquip 装備品も対象にするかどうか。
+     * @param {object} item アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {number} amount 増減する量。
+     * @param {boolean} includeEquip 装備品も対象にするかどうか。
      */
     Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
         if (DataManager.isIndependent(item)) {
@@ -936,9 +936,9 @@
      * 指定されたアイテムを増減させる。
      * 個別アイテムは登録可能数を超えて追加することはできない。
      * 
-     * @param {Object} item  ベースアイテム/個別アイテム(DataItem/DataWeapon/DataArmor)
-     * @param {Number} amount 増減する量。
-     * @param {Boolean} includeEquip 装備品も対象にするかどうか。
+     * @param {object} item  ベースアイテム/個別アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {number} amount 増減する量。
+     * @param {boolean} includeEquip 装備品も対象にするかどうか。
      */
     Game_Party.prototype.gainIndependentItem = function(item, amount, includeEquip = false) {
         if (amount > 0) {
@@ -992,7 +992,7 @@
      * DataManager.getMatchingIndependentItemを使用すること。
      * 
      * @param {DataItem} baseItem ベースアイテム(DataItem/DataWeapon/DataArmor)
-     * @param {Boolean} includeEquip 装備品を対象にするかどうか
+     * @param {boolean} includeEquip 装備品を対象にするかどうか
      * @returns {DataItem} 個別アイテム(DataItem/DataWeapon/DataArmor)
      */
     Game_Party.prototype.getMatchingIndependentItem = function(baseItem, includeEquip = false) {
@@ -1021,7 +1021,7 @@
      * itemと同じ種類のアイテムについて、パーティーが所持しているコレクションを得る。
      * itemが武器なら、weapons()が返る。
      * 
-     * @param {Object} item ベース/個別アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {object} item ベース/個別アイテム(DataItem/DataWeapon/DataArmor)
      * @returns {Array<Object>}
      */
     Game_Party.prototype.itemCollections = function(item) {
@@ -1082,9 +1082,9 @@
      * 
      * 必要に応じてオーバーライドすること。
      * 
-     * @param {Object} item1 アイテム(DataItem/DataWeapon/DataArmor)
-     * @param {Object} item2 アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Number} item1がitem2より前の場合には負数、item1がitem2より後の場合には正数、同値なら0。
+     * @param {object} item1 アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {object} item2 アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {number} item1がitem2より前の場合には負数、item1がitem2より後の場合には正数、同値なら0。
      */
     Game_Party.prototype.independentItemSort = function(item1, item2) {
         const id1 = (item1.baseItemId) ? item1.baseItemId : item1.id;
@@ -1102,9 +1102,9 @@
      * 
      * 必要に応じてオーバーライドすること。
      * 
-     * @param {Object} item1 アイテム(DataItem/DataWeapon/DataArmor)
-     * @param {Object} item2 アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Number} item1がitem2より前の場合には負数、item1がitem2より後の場合には正数、同値なら0。
+     * @param {object} item1 アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {object} item2 アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {number} item1がitem2より前の場合には負数、item1がitem2より後の場合には正数、同値なら0。
      */
     Game_Party.prototype.independentWeaponSort = function(item1, item2) {
         const wtypeId1 = item1.wtypeId;
@@ -1128,9 +1128,9 @@
      * 
      * 必要に応じてオーバーライドすること。
      * 
-     * @param {Object} item1 アイテム(DataItem/DataWeapon/DataArmor)
-     * @param {Object} item2 アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Number} item1がitem2より前の場合には負数、item1がitem2より後の場合には正数、同値なら0。
+     * @param {object} item1 アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {object} item2 アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {number} item1がitem2より前の場合には負数、item1がitem2より後の場合には正数、同値なら0。
      */
     Game_Party.prototype.independentArmorSort = function(item1, item2) {
         const atypeId1 = item1.atypeId;
@@ -1155,8 +1155,8 @@
     /**
      * パーティーが所持可能なitemの数を得る。
      *
-     * @param {Object} item アイテム
-     * @returns {Number} 所持可能な最大数。
+     * @param {object} item アイテム
+     * @returns {number} 所持可能な最大数。
      */
     Game_Party.prototype.maxItems = function(item) {
         if (DataManager.isIndependent(item)) {
@@ -1179,8 +1179,8 @@
      * イベントや判定で、～のアイテムをxx個持っているか？の判定でうまく処理出来るようにするため、
      * このような実装とした。
      * 
-     * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Number} アイテムの所持数
+     * @param {object} item アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {number} アイテムの所持数
      */
     Game_Party.prototype.numItems = function(item) {
         if (DataManager.isIndependent(item) && !item.baseItemId) {
@@ -1196,8 +1196,8 @@
      * baseItemに一致するアイテム数を得る。
      * アクターの装備品は含まない。
      * 
-     * @param {Object} baseItem ベースアイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Number} 個別アイテムの数
+     * @param {object} baseItem ベースアイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {number} 個別アイテムの数
      */
     Game_Party.prototype.getMathingItemCount = function(baseItem) {
         const items = this.itemCollections(baseItem);
@@ -1218,8 +1218,8 @@
     /**
      * 最大アイテム数を得る。
      * 
-     * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Number} 最大アイテム数
+     * @param {object} item アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {number} 最大アイテム数
      */
     Game_Party.prototype.getMaxIndependentItemCount = function(item) {
         const specifiedMaxCount = _Game_Party_maxItems.call(this, item); // データベース上で指定されている最大数
@@ -1242,9 +1242,9 @@
     /**
      * itemで指定されるアイテムを持っているかどうか判定する。
      * 
-     * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
-     * @param {Boolean} includeEquip 装備品も含めて検索する場合にはtrue, それ以外はfalse
-     * @returns {Boolean} アイテムを持っている場合にはtrue, それ以外はfalse.
+     * @param {object} item アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {boolean} includeEquip 装備品も含めて検索する場合にはtrue, それ以外はfalse
+     * @returns {boolean} アイテムを持っている場合にはtrue, それ以外はfalse.
      */
     Game_Party.prototype.hasItem = function (item, includeEquip) {
         if (DataManager.isIndependentBaseItem(item)) {
@@ -1263,8 +1263,8 @@
      * itemで指定されるアイテムを装備しているかどうかを判定する。
      * ベーススクリプトにて、オブジェクトの一致判定がベタ書きされていたのでフックする。
      * 
-     * @param {Object} item アイテム(DataWeapon/DataArmor)
-     * @returns {Boolean} 装備している場合にはtrue, それ以外はfalse
+     * @param {object} item アイテム(DataWeapon/DataArmor)
+     * @returns {boolean} 装備している場合にはtrue, それ以外はfalse
      */
     Game_Party.prototype.isAnyMemberEquipped = function(item) {
         if (DataManager.isIndependent(item)) {
@@ -1306,7 +1306,7 @@
     /**
      * 使用可能な個別アイテムのイベントリ数を得る。
      * 
-     * @returns {Number} イベントリ数
+     * @returns {number} イベントリ数
      */
 
     Game_Party.prototype.useableItemInventoryCount = function() {
@@ -1316,7 +1316,7 @@
     /**
      * 使用可能な個別アイテムの最大数を得る。
      * 
-     * @returns {Number} イベントリ数
+     * @returns {number} イベントリ数
      */
     Game_Party.prototype.maxItemInventoryCount = function() {
         return independentItemStockCount;
@@ -1325,7 +1325,7 @@
     /**
      * 所持可能な個別武器のイベントリ数を得る。
      * 
-     * @returns {Number} イベントリ数
+     * @returns {number} イベントリ数
      */
 
     Game_Party.prototype.useableWeaponInventoryCount = function() {
@@ -1335,7 +1335,7 @@
     /**
      * 所持可能な個別武器の最大数を得る。
      * 
-     * @returns {Number} イベントリ数
+     * @returns {number} イベントリ数
      */
     Game_Party.prototype.maxWeaponInventoryCount = function() {
         return independentWeaponStockCount;
@@ -1344,7 +1344,7 @@
     /**
      * 所持可能な個別防具のイベントリ数を得る。
      * 
-     * @returns {Number} イベントリ数
+     * @returns {number} イベントリ数
      */
     Game_Party.prototype.useableArmorInventoryCount = function() {
         return independentArmorStockCount - this.independentArmors().length;
@@ -1353,7 +1353,7 @@
     /**
      * 個別防具の所持可能最大数を得る。
      * 
-     * @returns {Number} イベントリ数
+     * @returns {number} イベントリ数
      */
     Game_Party.prototype.maxArmorInventoryCount = function() {
         return independentArmorStockCount;
@@ -1363,7 +1363,7 @@
     /**
      * アイテムの増減コマンドを処理する。
      * 
-     * @param {Object} params パラメータ
+     * @param {object} params パラメータ
      * !!!overwrite!!! Game_Interpreter.command126 // アイテムの増減
      */
     Game_Interpreter.prototype.command126 = function(params) {
@@ -1375,7 +1375,7 @@
     /**
      * 武器の増減コマンドを処理する。
      * 
-     * @param {Object} params パラメータ
+     * @param {object} params パラメータ
      * !!!overwrite!!! Game_Interpreter.command127 // 武器の増減
      */
     Game_Interpreter.prototype.command127 = function(params) {
@@ -1387,7 +1387,7 @@
     /**
      * 防具の増減コマンドを処理する。
      * 
-     * @param {Object} params パラメータ
+     * @param {object} params パラメータ
      * !!!overwrite!!! Game_Interpreter.command128 // 防具の増減
      */
     Game_Interpreter.prototype.command128 = function(params) {
@@ -1400,9 +1400,9 @@
     /**
      * アイテム増減コマンドを処理する。
      * 
-     * @param {Object} item アイテムデータ(DataItem/DataWeapon/DataArmor)
-     * @param {Number} value 増減する値
-     * @param {Boolean} includesEquip 装備を品を含めるかどうか。
+     * @param {object} item アイテムデータ(DataItem/DataWeapon/DataArmor)
+     * @param {number} value 増減する値
+     * @param {boolean} includesEquip 装備を品を含めるかどうか。
      */
     Game_Interpreter.prototype.commandGainItem = function(item, value, includesEquip) {
         const maxAppendCount = $gameParty.maxItems(item) - $gameParty.numItems(item);
@@ -1421,9 +1421,9 @@
      * アイテム個数を描画する。
      * 
      * @param {Data_Item} アイテム。(Weapon/Armor/Item)
-     * @param {Number} x x描画位置
-     * @param {Number} y y描画位置
-     * @param {Number} width 幅
+     * @param {number} x x描画位置
+     * @param {number} y y描画位置
+     * @param {number} width 幅
      * !!!overwrite!!! Window_ItemList.drawItemNumber()
      *     個別アイテム時には、個数1を表示するためオーバーライドする。
      */
@@ -1441,7 +1441,7 @@
     
     /**
      * 最大売却可能数を取得する。
-     * @returns {Number} 最大売却可能数
+     * @returns {number} 最大売却可能数
      */
     Scene_Shop.prototype.maxSell = function() {
         const item = this._item;

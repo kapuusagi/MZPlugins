@@ -87,7 +87,7 @@
         /**
          * ノートタグを処理する。
          * 
-         * @param {Object} obj データ
+         * @param {object} obj データ
          */
         const _processNoteTag = function(obj) {
             if (!obj.meta.rencountRate) {
@@ -123,7 +123,7 @@
     /**
      * エンカウント率を得る。
      * 
-     * @returns {Number} エンカウント率
+     * @returns {number} エンカウント率
      */
     Game_Party.prototype.randomEncountRate = function() {
         return Math.max(minimumRandomEncountRate, 1.0 + this.partyTraitsSum(Game_Party.ABILITY_RANDOMENCOUNT_RATE));

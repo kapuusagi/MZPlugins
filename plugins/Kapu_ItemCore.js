@@ -62,7 +62,7 @@
      * データコレクションに itemKindフィールドを追加する。
      * 
      * @param {Array<Object>} dataArray データアレー
-     * @param {Number} kind 設定する値。
+     * @param {number} kind 設定する値。
      */
     DataManager.setItemKind = function(dataArray, kind) {
         for (let item of dataArray) {
@@ -76,8 +76,8 @@
     /**
      * スキルかどうかを判定する。
      * 
-     * @param {Object} item 判定対象のオブジェクト。
-     * @returns {Boolean} スキルの場合にはtrue, それ以外はfalse.
+     * @param {object} item 判定対象のオブジェクト。
+     * @returns {boolean} スキルの場合にはtrue, それ以外はfalse.
      */
     DataManager.isSkill = function(item) {
         if (item && item.itemKind) {
@@ -91,8 +91,8 @@
     /**
      * itemがアイテムかどうかを判定する。
      * 
-     * @param {Object} item アイテム
-     * @returns {Boolean} アイテムの場合にはtrue, それ以外はfalse.
+     * @param {object} item アイテム
+     * @returns {boolean} アイテムの場合にはtrue, それ以外はfalse.
      */
     DataManager.isItem = function(item) {
         // itemKind が設定済みの場合、itemKindで識別する。
@@ -107,8 +107,8 @@
     /**
      * itemが武器かどうかを判定する。
      * 
-     * @param {Object} item アイテム
-     * @returns {Boolean} 武器の場合にはtrue, それ以外はfalse
+     * @param {object} item アイテム
+     * @returns {boolean} 武器の場合にはtrue, それ以外はfalse
      */
     DataManager.isWeapon = function(item) {
         if (item && item.itemKind) {
@@ -122,8 +122,8 @@
     /**
      * itemが防具かどうかを判定する。
      * 
-     * @param {Object} item アイテム
-     * @returns {Boolean} 防具の場合にはtrue, それ以外はfalse
+     * @param {object} item アイテム
+     * @returns {boolean} 防具の場合にはtrue, それ以外はfalse
      */
     DataManager.isArmor = function(item) {
         if (item && item.itemKind) {
@@ -138,8 +138,8 @@
 
     /**
      * itemで指定されるアイテムを装備しているかどうかを判定する。
-     * @param {Object} item アイテム(DataWeapon/DataArmor)
-     * @returns {Boolean} 装備している場合にはtrue, それ以外はfalse
+     * @param {object} item アイテム(DataWeapon/DataArmor)
+     * @returns {boolean} 装備している場合にはtrue, それ以外はfalse
      */
     Game_Party.prototype.isAnyMemberEquipped = function(item) {
         return this.members().some(actor => actor.isEquipped(item));
@@ -149,8 +149,8 @@
     /**
      * アイテムの所持最大数を得る。
      * 
-     * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Number} 最大所持数
+     * @param {object} item アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {number} 最大所持数
      * !!!overwrite!!! Game_Party.maxItems()
      *     maxItemsノートタグ指定を可能にするため、オーバーライドする。
      */

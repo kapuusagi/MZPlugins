@@ -98,8 +98,8 @@
     /**
      * itemが装備可能かどうかを取得する。
      * 
-     * @param {Object} item アイテム
-     * @return {Boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
+     * @param {object} item アイテム
+     * @return {boolean} 装備可能な場合にはtrue, それ以外はfalseが返る。
      */
     Game_BattlerBase.prototype.canEquip = function(item) {
         if (item && DataManager.isSkill(item)) {
@@ -113,7 +113,7 @@
      * スキルが装備可能かどうかを判定する。
      * 
      * @param {DataSkill} skill スキル
-     * @returns {Boolean} 装備可能な場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 装備可能な場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.canEquipSkill = function(skill) {
         if (skill.meta.equipSkill) {
@@ -139,7 +139,7 @@
     /**
      * スキルを習得する。
      * 
-     * @param {Number} skillId スキルID
+     * @param {number} skillId スキルID
      */
     Game_Actor.prototype.learnSkill = function(skillId) {
         if (!this.isLearnedSkill(skillId)) {
@@ -158,7 +158,7 @@
     /**
      * スキルを忘れる。
      * 
-     * @param {Number} skillId スキルID
+     * @param {number} skillId スキルID
      */
     Game_Actor.prototype.forgetSkill = function(skillId) {
         _Game_Actor_forgetSkill.call(this, skillId);
@@ -174,8 +174,8 @@
      * 
      * Note: 習得済みかどうかを判定する。Traitにより追加されたスキルは含まれない。
      * 
-     * @param {Number} skillId スキルID
-     * @return {Boolean} 習得済みの場合にはtrue, それ以外はfalse.
+     * @param {number} skillId スキルID
+     * @return {boolean} 習得済みの場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isLearnedSkill = function(skillId) {
         return this._equipableSkills.includes(skillid) || _Game_Actor_isLearnedSkill.call(tis, skillId);
@@ -221,7 +221,7 @@
      * 装備を変更する。
      * パーティーの所持品にitemが無い場合には変更できない。
      * 
-     * @param {Number} slotId スロットID
+     * @param {number} slotId スロットID
      * @param {DataItem} item 装備品(DataWeapon/DataArmor)
      */
     Game_Actor.prototype.changeEquip = function(slotId, item) {
@@ -244,9 +244,9 @@
      * Note: releaseUnequippableItems()対策。
      *       ベーシックシステムでは上記メソッドをオーバーライドする必要がでてきて競合しやすい
      * 
-     * @param {Number} slotNo スロット番号
-     * @param {Object} item DataWeaponまたはDataArmor
-     * @returns {Boolean} 装備可能な場合にはtrue, それ以外はfalse
+     * @param {number} slotNo スロット番号
+     * @param {object} item DataWeaponまたはDataArmor
+     * @returns {boolean} 装備可能な場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.canEquipAtSlot = function(slotNo, item) {
         const etypeId = this.equipSlots()[slotNo];
@@ -287,7 +287,7 @@
     /**
      * スキル装備スロットかどうかを得る。ｓ
      * 
-     * @returns {Boolean} スキル装備スロットの場合にはtrue, それ以外はfalse.
+     * @returns {boolean} スキル装備スロットの場合にはtrue, それ以外はfalse.
      */
     Window_EquipItem.prototype.isEquipSkillSlot = function() {
         return skillSlotTypes[this.etypeid()] ? true : false;
@@ -306,8 +306,8 @@
     /**
      * itemがこのリストに含まれるべきかどうかを判定する。
      * 
-     * @param {Object} item アイテム
-     * @returns {Boolean} 含まれる場合にはtrue, それ以外はfalse.
+     * @param {object} item アイテム
+     * @returns {boolean} 含まれる場合にはtrue, それ以外はfalse.
      */
     Window_EquipItem.prototype.includes = function(item) {
         if (DataManager.isSkill(item)) {
@@ -320,8 +320,8 @@
     /**
      * 装備しているスキルかどうかを得る。
      * 
-     * @param {Object} skill スキル
-     * @returns {Boolean} 装備している場合にはtrue, それ以外はfalse
+     * @param {object} skill スキル
+     * @returns {boolean} 装備している場合にはtrue, それ以外はfalse
      */
     Window_EquipItem.prototype.isEquippedSkill = function(skill) {
         if (this._actor) {

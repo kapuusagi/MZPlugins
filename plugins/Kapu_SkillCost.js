@@ -160,7 +160,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processNoteTag = function(obj) {
         if (Game_BattlerBase.TRAIT_SPARAM_DID_HPCOST_RATE &&  obj.meta.hpCostRate) {
@@ -196,7 +196,7 @@
     /**
      * アイテムのノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processSkillNotetag = function(obj) {
         obj.hpCost = 0;
@@ -247,7 +247,7 @@
      * スキルのHPコストを得る。
      * 
      * @param {DataSkill} skill スキル
-     * @returns {Number] HPコスト
+     * @returns {number} HPコスト
      */
     Game_BattlerBase.prototype.skillHpCost = function(skill) {
         const cost = skill.hpCost
@@ -298,7 +298,7 @@
      * スキルの使用コストが支払える状態かどうかを得る。
      * 
      * @param {DataSkill} skill 
-     * @returns {Boolean} スキルコストが支払える場合にはtrue, それ以外はfalse
+     * @returns {boolean} スキルコストが支払える場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.canPaySkillCost = function(skill) {
         return _Game_BattlerBas_canPaySkillCost.call(this, skill)
@@ -321,7 +321,7 @@
         /**
          * HPコストレートを得る。
          * 
-         * @returns {Number} HPコストレート
+         * @returns {number} HPコストレート
          */
         Game_BattlerBase.prototype.hpCostRate = function() {
             return Math.max(0, this.sparam(Game_BattlerBase.TRAIT_SPARAM_DID_HPCOST_RATE));
@@ -330,7 +330,7 @@
         /**
          * HPコストレートを得る。
          * 
-         * @returns {Number} HPコストレート
+         * @returns {number} HPコストレート
          */
         Game_BattlerBase.prototype.hpCostRate = function() {
             return 1;
@@ -340,7 +340,7 @@
         /**
          * TPコストレートを得る。
          * 
-         * @returns {Number} HPコストレート
+         * @returns {number} HPコストレート
          */
         Game_BattlerBase.prototype.tpCostRate = function() {
             return Math.max(0, this.sparam(Game_BattlerBase.TRAIT_SPARAM_DID_TPCOST_RATE));
@@ -349,7 +349,7 @@
         /**
          * TPコストレートを得る。
          * 
-         * @returns {Number} HPコストレート
+         * @returns {number} HPコストレート
          */
         Game_BattlerBase.prototype.tpCostRate = function() {
             return 1;
@@ -359,20 +359,20 @@
         /**
          * HPコストレート
          * 
-         * @constant {Number}
+         * @constant {number}
          */
         Object.defineProperty(Game_BattlerBase.prototype, "hpcr", {
-            /** @returns {Number} */
+            /** @returns {number} */
             get: function() { return this.hpCostRate(); },
             configurable:true
         });
         /**
          * TPコストレート
          * 
-         * @constant {Number}
+         * @constant {number}
          */
         Object.defineProperty(Game_BattlerBase.prototype, "tpcr", {
-            /** @returns {Number} */
+            /** @returns {number} */
             get: function() { return this.tpCostRate(); },
             configurable:true
         });
@@ -397,7 +397,7 @@
         /**
          * コスト描画幅を得る。
          * 
-         * @returns {Number} コスト描画幅
+         * @returns {number} コスト描画幅
          * !!!overwrite!!! Window_SkillList.drawSkillCost
          *     スキルコストの表示を変更するためにオーバーライドする。
          */
@@ -408,9 +408,9 @@
          * スキルコストを描画する。
          * 
          * @param {DataSkill} skill スキル
-         * @param {Number} x 描画位置x(名前を含めた領域の左端が渡る)
-         * @param {Number} y 描画位置y
-         * @param {Number} width 幅(名前を含めた領域の幅が渡る)
+         * @param {number} x 描画位置x(名前を含めた領域の左端が渡る)
+         * @param {number} y 描画位置y
+         * @param {number} width 幅(名前を含めた領域の幅が渡る)
          * !!!overwrite!!! Window_SkillList.drawSkillCost
          *     スキルコストの表示を変更するためにオーバーライドする。
          */

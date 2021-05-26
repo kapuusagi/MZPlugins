@@ -71,7 +71,7 @@
     /**
      * autoGuardRate ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processAutoGuardRateNoteTag = function(obj) {
         if (!obj.meta.autoGuardRate) {
@@ -112,7 +112,7 @@
     /**
      * 防御かどうかを得る。
      * 
-     * @returns {Boolean} 防御している場合にはtrue, それ以外はfalse
+     * @returns {boolean} 防御している場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isGuard = function() {
         const guard = _Game_BattlerBase_isGuard.call(this);

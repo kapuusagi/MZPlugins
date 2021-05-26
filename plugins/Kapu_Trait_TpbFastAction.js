@@ -95,7 +95,7 @@
     /**
      * TPB値を初期化する。
      * 
-     * @param {Boolean} advantageous 有利な状態かどうか
+     * @param {boolean} advantageous 有利な状態かどうか
      */
     Game_Battler.prototype.initTpbChargeTime = function(advantageous) {
         _Game_Battler_initTpbChargeTime.call(this, advantageous);

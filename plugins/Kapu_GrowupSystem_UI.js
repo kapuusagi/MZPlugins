@@ -280,10 +280,10 @@ function Scene_Growup() {
      * 画像を描画する。
      * 
      * @param {String} name 画像ファイル名
-     * @param {Number} x 描画領域左上 x位置
-     * @param {Number} y 描画領域左上 y位置
-     * @param {Number} width 描画領域幅
-     * @param {Number} height 描画領域高さ
+     * @param {number} x 描画領域左上 x位置
+     * @param {number} y 描画領域左上 y位置
+     * @param {number} width 描画領域幅
+     * @param {number} height 描画領域高さ
      */
     Window_GrowupActorStatus.prototype.drawPicture = function(name, x, y, width, height) {
         const bitmap = ImageManager.loadPicture(name);
@@ -355,9 +355,9 @@ function Scene_Growup() {
      * アクター名を描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画位置左上x
-     * @param {Number} y 描画位置左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画位置左上x
+     * @param {number} y 描画位置左上y
+     * @param {number} width 幅
      */
     Window_GrowupActorStatus.prototype.drawActorName = function(actor, x, y, width) {
         this.resetFontSettings();
@@ -369,9 +369,9 @@ function Scene_Growup() {
      * レベルを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_GrowupActorStatus.prototype.drawActorLevel = function(actor, x, y, width) {
@@ -386,9 +386,9 @@ function Scene_Growup() {
      * 成長ポイントを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_GrowupActorStatus.prototype.drawActorGrowPoint = function(actor, x, y, width) {
         this.resetFontSettings();
@@ -449,7 +449,7 @@ function Scene_Growup() {
     /**
      * 指定インデックスの項目を得る。
      * 
-     * @param {Number} index 
+     * @param {number} index 
      * @returns {GrowupItem} 選択されている項目。 
      */
     Window_GrowupSelect.prototype.itemAt = function(index) {
@@ -496,7 +496,7 @@ function Scene_Growup() {
 
     /**
      * 項目数を得る。
-     * @returns {Number} 項目数
+     * @returns {number} 項目数
      */
     Window_GrowupSelect.prototype.maxItems = function () {
         return this._items.length;
@@ -558,7 +558,7 @@ function Scene_Growup() {
     /**
      * 選択項目が有効かどうかを得る。
      * @param {GrowupItem} item 項目
-     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Window_GrowupSelect.prototype.isEnabled = function(item) {
         if (item) {
@@ -617,7 +617,7 @@ function Scene_Growup() {
     /**
      * コンテンツの幅を取得する。
      * 
-     * @returns {Number} コンテンツの幅
+     * @returns {number} コンテンツの幅
      */
     Window_ConfirmApply.prototype.maxItemWidth = function() {
         let maxTextWidth = 0;
@@ -633,7 +633,7 @@ function Scene_Growup() {
     /**
      * 最大項目数を取得する。
      * 
-     * @returns {Number} 最大項目数
+     * @returns {number} 最大項目数
      */
     Window_ConfirmApply.prototype.maxItems = function () {
         return this._items.length;
@@ -642,7 +642,7 @@ function Scene_Growup() {
     /**
      * 項目を描画する。
      * 
-     * @param {Number} index 描画する項目のインデックス番号
+     * @param {number} index 描画する項目のインデックス番号
      */
     Window_ConfirmApply.prototype.drawItem = function (index) {
         const rect = this.itemRect(index);
@@ -671,7 +671,7 @@ function Scene_Growup() {
     /**
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Boolean} isAllowActorChange ユーザー操作によりアクターの変更を行う場合にはtrue、禁止する場合にはfalse
+     * @param {boolean} isAllowActorChange ユーザー操作によりアクターの変更を行う場合にはtrue、禁止する場合にはfalse
      */
     Scene_Growup.prototype.prepare = function(actor, isAllowActorChange) {
         this._actor = actor;
@@ -716,7 +716,7 @@ function Scene_Growup() {
     /**
      * ステータス領域の幅を得る。
      * 
-     * @returns {Number} ステータス領域の幅。
+     * @returns {number} ステータス領域の幅。
      */
     Scene_Growup.prototype.statusWidth = function() {
         return 320;
@@ -878,7 +878,7 @@ function Scene_Growup() {
     /**
      * ページボタンを作成する必要があるかどうかを取得する。
      * 
-     * @returns {Boolean} ページボタンが必要な場合にはtrue, それ以外はfalse
+     * @returns {boolean} ページボタンが必要な場合にはtrue, それ以外はfalse
      */
     Scene_Growup.prototype.needsPageButtons = function() {
         return this._isAllowActorChange;

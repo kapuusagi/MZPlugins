@@ -49,7 +49,7 @@
 
     /**
      * 表示文字サイズを取得する。
-     * @returns {Number} 文字サイズ
+     * @returns {number} 文字サイズ
      */
     Sprite_Damage.prototype.fontSize = function () {
         // クリティカル時はフォントサイズを大きくする。

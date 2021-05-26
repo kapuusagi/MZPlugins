@@ -56,7 +56,7 @@
     /**
      * 直前のHPを設定する。
      * 
-     * @param {Number} hp HP
+     * @param {number} hp HP
      */
     Game_Battler.prototype.setJustHp = function(hp) {
         this._justHp = hp;
@@ -65,7 +65,7 @@
     /**
      * 直前のMPを設定する。
      * 
-     * @param {Number} mp MP
+     * @param {number} mp MP
      */
     Game_Battler.prototype.setJustMp = function(mp) {
         this._justMp = mp;
@@ -73,7 +73,7 @@
     /**
      * 直前のTPを設定する。
      * 
-     * @param {Number} tp TP
+     * @param {number} tp TP
      */
     Game_Battler.prototype.setJustTp = function(tp) {
         this._justTp = tp;
@@ -117,7 +117,7 @@
      * アクションに設定された計算式が不正な場合、結果は0になる。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @returns {Number} ダメージ値。
+     * @returns {number} ダメージ値。
      */
     Game_Action.prototype.evalDamageFormula = function(target) {
         const subject = this.subject();

@@ -169,7 +169,7 @@
     /**
      * 使用済みGrowPointを得る。
      * 
-     * @returns {Number} 使用済み育成ポイント。
+     * @returns {number} 使用済み育成ポイント。
      */
     Game_Actor.prototype.usedGrowupPoint = function() {
         let usedPoint = _Game_Actor_usedGrowupPoint.call(this);
@@ -187,8 +187,8 @@
     /**
      * 基本パラメータベース値を得る。
      * 
-     * @param paramId {Number} パラメータID
-     * @returns {Number} パラメータ値
+     * @param paramId {number} パラメータID
+     * @returns {number} パラメータ値
      */
     Game_Actor.prototype.paramBase = function(paramId) {
         return _Game_Actor_paramBase.call(this, paramId) + this.gpParam(paramId);
@@ -197,8 +197,8 @@
     /**
      * GPによるパラメータ加算値を得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} GP加算パラメータ値
+     * @param {number} paramId パラメータID
+     * @returns {number} GP加算パラメータ値
      */
     Game_Actor.prototype.gpParam = function(paramId) {
         return Math.floor(this._gpParams[paramId] * growupItemEntries[paramId].growRate);
@@ -245,7 +245,7 @@
     /**
      * パラメータを育成可能かどうかを判定する。
      * 
-     * @param {Number} paramId パラメータID
+     * @param {number} paramId パラメータID
      */
     Game_Actor.prototype.gpParamGrowable = function(paramId) {
         return (this.gpParam(paramId) <  this.paramMax(paramId));
@@ -254,8 +254,8 @@
     /**
      * パラメータ育成に必要なコストを得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} コスト
+     * @param {number} paramId パラメータID
+     * @returns {number} コスト
      */
     Game_Actor.prototype.gpParamCost = function(paramId) {
         return this.calcGrowupParamCost(this._gpParams[paramId], growupItemEntries[paramId].costRate);
@@ -264,9 +264,9 @@
     /**
      * パラメータ育成に必要なコストを計算する。
      * 
-     * @param {Number} currentValue 現在値
-     * @param {Number} rate コスト上昇レート
-     * @returns {Number} コスト
+     * @param {number} currentValue 現在値
+     * @param {number} rate コスト上昇レート
+     * @returns {number} コスト
      */
     Game_Actor.prototype.calcGrowupParamCost = function(currentValue, rate) {
         return 1 + Math.floor(currentValue * rate);
@@ -278,7 +278,7 @@
      * 育成項目を適用する。
      * 
      * @param {GrowupItem} growupItem 育成項目
-     * @returns {Boolean} 適用できたかどうか。
+     * @returns {boolean} 適用できたかどうか。
      */
     Game_Actor.prototype.applyGrowup = function(growupItem) {
         if (growupItem.type === "param") {

@@ -84,7 +84,7 @@
     /**
      * 装備スロットのノートタグを処理する。
      * 
-     * @param {Object} obj DataClassノートタグ
+     * @param {object} obj DataClassノートタグ
      */
     const _processEquipSlotsNoteTag = function(obj) {
         obj.equipSlots = [];
@@ -226,7 +226,7 @@
     /**
      * 両手装備かどうかを判定する。
      * 
-     * @returns {Boolean} 両手装備
+     * @returns {boolean} 両手装備
      */
     Game_Actor.prototype.isBothHands = function() {
         const weapon = this.weapons()[0];
@@ -245,7 +245,7 @@
     /**
      * サブウエポンが必要かどうかを判定する。
      * 
-     * @returns {Boolean} サブウェポンの場合にはtrue, それ以外はfalse
+     * @returns {boolean} サブウェポンの場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isNeedsSubWeapon = function() {
         const weapon = this.mainWeapon();
@@ -265,7 +265,7 @@
     /**
      * 2番目のスロットが武器かどうかを得る。
      * 
-     * @returns {Boolean} 2番目のスロットが武器の場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 2番目のスロットが武器の場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.is2ndSlotIsWeapon = function() {
         return this.isDualWield() || this.isNeedsSubWeapon();
@@ -313,7 +313,7 @@
      * クラスを変更した場合など、スロット数が変動している場合に
      * エンプティなデータを返さないためにフックする。
      * 
-     * @param {Number} slotId スロットID
+     * @param {number} slotId スロットID
      * @param {DataItem} item 装備品(DataWeapon/DataArmor)
      */
     Game_Actor.prototype.changeEquip = function(slotId, item) {
@@ -331,8 +331,8 @@
      * クラスを変更した場合など、スロット数が変動している場合に
      * エンプティなデータを返さないためにフックする。
      * 
-     * @param {Number} slotId スロット番号
-     * @param {Object} item アイテム
+     * @param {number} slotId スロット番号
+     * @param {object} item アイテム
      */
     Game_Actor.prototype.forceChangeEquip = function(slotId, item) {
         if ((this._equips[slotId] === undefined) || (this._equips[slotId] === null)) {
@@ -343,7 +343,7 @@
     /**
      * 装備できないものを装備解除する。
      * 
-     * @param {Boolean} forcing 強制解除するかどうか。
+     * @param {boolean} forcing 強制解除するかどうか。
      *                  強制解除する場合、装備品は所持品に戻らず、消失する。
      * 
      * !!!overwrite!!! Game_Actor.releaseUnequippableItems()
@@ -373,9 +373,9 @@
     /**
      * slotNoで指定されるスロットにitemが装備可能かどうかを取得する。
      * 
-     * @param {Number} slotNo スロット番号
-     * @param {Object} item DataWeaponまたはDataArmor
-     * @returns {Boolean} 装備可能な場合にはtrue, それ以外はfalse
+     * @param {number} slotNo スロット番号
+     * @param {object} item DataWeaponまたはDataArmor
+     * @returns {boolean} 装備可能な場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.canEquipAtSlot = function(slotNo, item) {
         const slots = this.equipSlots();
@@ -400,8 +400,8 @@
     /**
      * 装備可能な武器タイプかどうかを判定する。
      * 
-     * @param {Number} wtypeId 武器タイプID
-     * @returns {Boolean} 装備可能な武器タイプの場合にはtrue, それ以外はfalseが返る。
+     * @param {number} wtypeId 武器タイプID
+     * @returns {boolean} 装備可能な武器タイプの場合にはtrue, それ以外はfalseが返る。
      */
     Game_Actor.prototype.isEquipWtypeOk = function(wtypeId) {
         return _Game_Actor_isEquipWtypeOk.call(this, wtypeId)
@@ -412,7 +412,7 @@
     /**
      * slotIdで指定されるスロットが、装備変更可能かどうかを取得する。
      * 
-     * @param {Number} slotId スロット番号
+     * @param {number} slotId スロット番号
      */
     Game_Actor.prototype.isEquipChangeOk = function(slotId) {
         return _Game_Actor_isEquipChangeOk.call(this, slotId)

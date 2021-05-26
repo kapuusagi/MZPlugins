@@ -132,8 +132,8 @@
     /**
      * 基本パラメータの加算値を得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} パラメータの値
+     * @param {number} paramId パラメータID
+     * @returns {number} パラメータの値
      */
     Game_BattlerBase.prototype.paramPlus = function(paramId) {
         const paramValue = _Game_BattlerBase_paramPlus.call(this, paramId);

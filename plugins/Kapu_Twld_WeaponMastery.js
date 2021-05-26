@@ -147,7 +147,7 @@
     /**
      * プラグインコマンドの対象を得る。
      * 
-     * @param {Object} args プラグインコマンド引数
+     * @param {object} args プラグインコマンド引数
      * @returns {Array<Game_Actor>} 対象のGame_Actorオブジェクト
      */
     const _getTargets = function(args) {
@@ -200,7 +200,7 @@
          * 値文字列からレートを得る。
          * 
          * @param {String} str 値文字列
-         * @returns {Number} レート文字列
+         * @returns {number} レート文字列
          */
         const _getRate = function(str) {
             if (str.slice(-1) === "%") {
@@ -213,7 +213,7 @@
         /**
          * ノートタグを処理する。
          * 
-         * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
+         * @param {object} obj データオブジェクト。(DataItem/DataSkill)
          */
         const _processNotetag = function(obj) {
             if (obj.meta.gainWmExp) {
@@ -246,8 +246,8 @@
     /**
      * typeIdで指定された武器タイプのマスタリーレベルを得る。
      * 
-     * @param {Number} typeId タイプID
-     * @returns {Number} レベル
+     * @param {number} typeId タイプID
+     * @returns {number} レベル
      */
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.wmLevel = function(typeId) {
@@ -269,7 +269,7 @@
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
@@ -313,8 +313,8 @@
     /**
      * typeIdで指定された武器タイプのマスタリーレベルを得る。
      * 
-     * @param {Number} typeId タイプID
-     * @returns {Number} レベル
+     * @param {number} typeId タイプID
+     * @returns {number} レベル
      */
     Game_Actor.prototype.wmLevel = function(typeId) {
         if ((typeId >= 0) && (typeId < $dataSystem.weaponTypes.length)) {
@@ -327,8 +327,8 @@
     /**
      * ウェポンマスタリーのEXPを得る。
      * 
-     * @param {Number} typeId タイプID
-     * @returns {Number} 現在のEXP
+     * @param {number} typeId タイプID
+     * @returns {number} 現在のEXP
      */
     Game_Actor.prototype.wmExp = function(typeId) {
         if ((typeId >= 0) && (typeId < $dataSystem.weaponTypes.length)) {
@@ -343,7 +343,7 @@
      * 次のレベルに必要なEXP到達値を得る。
      * あとxxxじゃないので注意。
      * 
-     * @param {Number} typeId 武器タイプID
+     * @param {number} typeId 武器タイプID
      */
     Game_Actor.prototype.wmExpNext = function(typeId) {
         const wmLevel = this.wmLevel(typeId);
@@ -353,8 +353,8 @@
     /**
      * ウェポンマスタリの経験値を上げる。
      * 
-     * @param {Number} typeId 武器タイプID
-     * @param {Number} exp 経験値
+     * @param {number} typeId 武器タイプID
+     * @param {number} exp 経験値
      */
     Game_Actor.prototype.gainWmExp = function(typeId, exp) {
         if ((typeId >= 0) && (typeId < $dataSystem.weaponTypes.length)) {
@@ -379,7 +379,7 @@
     /**
      * スキルまたはアイテムを使用する。
      * 
-     * @param {Object} item DataItemまたはDataSkill
+     * @param {object} item DataItemまたはDataSkill
      */
     Game_Actor.prototype.useItem = function(item) {
         if (DataManager.isSkill(item)) {
@@ -399,7 +399,7 @@
      * スキル使用時のウェポンマスタリーEXPを取得する。
      * 
      * @param {DataSkill} skill スキル 
-     * @returns {Number} ウェポンマスタリーEXP
+     * @returns {number} ウェポンマスタリーEXP
      */
     Game_Actor.prototype.skillWmExp = function(skill) {
         if (skill.meta.wmExp) {
@@ -426,9 +426,9 @@
     /**
      * エネミーをセットアップする。
      * 
-     * @param {Number} enemyId エネミーID
-     * @param {Number} x X位置
-     * @param {Number} y Y位置
+     * @param {number} enemyId エネミーID
+     * @param {number} x X位置
+     * @param {number} y Y位置
      */
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
         _Game_Enemy_setup.call(this, enemyId, x, y);
@@ -441,8 +441,8 @@
     /**
      * typeIdで指定された武器タイプのマスタリーレベルを得る。
      * 
-     * @param {Number} typeId タイプID
-     * @returns {Number} レベル
+     * @param {number} typeId タイプID
+     * @returns {number} レベル
      */
     // eslint-disable-next-line no-unused-vars
     Game_Enemy.prototype.wmLevel = function(typeId) {
@@ -454,8 +454,8 @@
         /**
          * 装備品のパラメータ値合計を得る。
          * 
-         * @param {Number} paramId パラメータID
-         * @returns {Number} 全装備品のパラメータ値合計
+         * @param {number} paramId パラメータID
+         * @returns {number} 全装備品のパラメータ値合計
          */
         Game_Actor.prototype.paramEquip = function(paramId) {
             const value = _Game_Actor_paramEquip.call(this, paramId);
@@ -509,7 +509,7 @@
     /**
      * スキルのウェポンマスタリータイプIDを得る。
      * 
-     * @param {Object} item スキル
+     * @param {object} item スキル
      */
     Game_Action.prototype.itemWmTypeId = function(item) {
         const wmType = Number(item.meta.wmType) || 0;

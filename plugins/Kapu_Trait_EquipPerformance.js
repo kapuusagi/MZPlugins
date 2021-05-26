@@ -125,7 +125,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processNoteTag = function(obj) {
         const patternWeapon = /<weaponPerf[: ]+(\d+),([+-]?\d+\.?\d+%?).*>/;
@@ -169,7 +169,7 @@
         /**
          * 武器性能強化特性文字列を得る。
          * 
-         * @param {Number} dataId データID
+         * @param {number} dataId データID
          * @returns {string} 文字列
          */
         TextManager.traitWeaponPerformance = function(dataId) {
@@ -193,7 +193,7 @@
         /**
          * 防具特性強化文字列を得る。
          * 
-         * @param {Number} dataId データID
+         * @param {number} dataId データID
          * @returns {string} 文字列
          */
         TextManager.traitArmorPerformance = function(dataId) {
@@ -219,9 +219,9 @@
     /**
      * 装備品の基本パラメータ値を得る。
      * 
-     * @param {Object} equipItem 装備品
-     * @param {Number} paramId パラメータID
-     * @returns {Number} 装備品のパラメータ値
+     * @param {object} equipItem 装備品
+     * @param {number} paramId パラメータID
+     * @returns {number} 装備品のパラメータ値
      */
     Game_Actor.prototype.paramEquipValue = function(equipItem, paramId) {
         const equipValue = _Game_Actor_paramEquipValue.call(this, equipItem, paramId);
@@ -242,8 +242,8 @@
         /**
          * 武器の性能可変レートを得る。
          * 
-         * @param {Number} wtypeId 武器タイプ
-         * @returns {Number} 変動レート
+         * @param {number} wtypeId 武器タイプ
+         * @returns {number} 変動レート
          */
         Game_Actor.prototype.paramEquipValueRateWeapon = function(wtypeId) {
             return Math.max(0, 1.0 + this.traitsSum(Game_BattlerBase.TRAIT_WEAPON_PERFORMANCE, wtypeId));
@@ -252,8 +252,8 @@
         /**
          * 武器の性能可変レートを得る。
          * 
-         * @param {Number} wtypeId 武器タイプ
-         * @returns {Number} 変動レート
+         * @param {number} wtypeId 武器タイプ
+         * @returns {number} 変動レート
          */
         // eslint-disable-next-line no-unused-vars
         Game_Actor.prototype.paramEquipValueRateWeapon = function(wtypeId) {
@@ -265,8 +265,8 @@
         /**
          * 防具の性能可変レートを得る。
          * 
-         * @param {Number} wtype 武器タイプ
-         * @returns {Number} 変動レート
+         * @param {number} wtype 武器タイプ
+         * @returns {number} 変動レート
          */
         Game_Actor.prototype.paramEquipValueRateArmor = function(atypeId) {
             return Math.max(0, 1.0 + this.traitsSum(Game_BattlerBase.TRAIT_ARMOR_PERFORMANCE, atypeId));
@@ -275,8 +275,8 @@
         /**
          * 防具の性能可変レートを得る。
          * 
-         * @param {Number} wtype 武器タイプ
-         * @returns {Number} 変動レート
+         * @param {number} wtype 武器タイプ
+         * @returns {number} 変動レート
          */
         // eslint-disable-next-line no-unused-vars
         Game_Actor.prototype.paramEquipValueRateArmor = function(atypeId) {

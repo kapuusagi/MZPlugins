@@ -135,7 +135,7 @@
      * アクターに適用可能な項目かどうかを取得する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Boolean} 既存データの変更の場合にはtrue、それ以外はfalse
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
      * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
@@ -148,7 +148,7 @@
      * 
      * Note: キャラメイク操作で初期値を設定するために呼び出される。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars
@@ -171,7 +171,7 @@
     /**
      * 編集中の設定を反映させる。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars

@@ -125,8 +125,8 @@
 
     /**
      * シーンの準備をする。
-     * @param {Number} アニメーションID
-     * @param {Boolean} 反転させるかどうか。
+     * @param {number} アニメーションID
+     * @param {boolean} 反転させるかどうか。
      */
     Scene_RunAnimation.prototype.prepare = function (animationId, mirror) {
         this._animationId = animationId;

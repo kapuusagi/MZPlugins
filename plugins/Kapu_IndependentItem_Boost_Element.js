@@ -68,7 +68,7 @@
     /**
      * 強化項目を適用する。
      * 
-     * @param {Object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
      * @param {string} key 強化項目名
      * @param {string} value 強化値
      */

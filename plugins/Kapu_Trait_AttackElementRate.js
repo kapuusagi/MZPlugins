@@ -103,7 +103,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processNoteTag = function(obj) {
         if (!obj.meta.elementAttackRate) {
@@ -151,8 +151,8 @@
     /**
      * 攻撃時補正値を得る。
      * 
-     * @param {Number} elementId 属性ID
-     * @returns {Number} 属性レート
+     * @param {number} elementId 属性ID
+     * @returns {number} 属性レート
      */
     Game_BattlerBase.prototype.elementAttackRate = function(elementId) {
         return this.traitsPi(Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE, elementId);
@@ -166,8 +166,8 @@
      * 対象に対する単一の属性効果を得る。
      * 
      * @param {Game_BattlerBase} target 
-     * @param {Number} elementId 属性ID
-     * @returns {Number} 属性倍率
+     * @param {number} elementId 属性ID
+     * @returns {number} 属性倍率
      */
     Game_Action.prototype.singleElementRate = function(target, elementId) {
         let rate = _Game_Action_singleElementRate.call(this, ...arguments);

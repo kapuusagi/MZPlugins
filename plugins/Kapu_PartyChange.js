@@ -287,8 +287,8 @@ function Scene_PartyChange() {
     /**
      * 真偽値を得る。
      * 
-     * @param {Object} valueStr 値文字列
-     * @returns {Boolean} 真偽値
+     * @param {object} valueStr 値文字列
+     * @returns {boolean} 真偽値
      */
     const _parseBoolean = function(valueStr) {
         if (typeof valueStr === "undefined") {
@@ -327,7 +327,7 @@ function Scene_PartyChange() {
     /**
      * 対象のアクターを得る。
      * 
-     * @param {Object} args 引数
+     * @param {object} args 引数
      * @returns {Game_Actor} アクター
      */
     const _getActor = function(args) {
@@ -382,7 +382,7 @@ function Scene_PartyChange() {
     /**
      * パーティー編成が有効かどうかを取得する。
      * 
-     * @returns {Boolean} パーティー編成が有効な場合にはtrue, それ以外はfalseが返る。
+     * @returns {boolean} パーティー編成が有効な場合にはtrue, それ以外はfalseが返る。
      */
     Game_System.prototype.isPartyChangeEnabled = function() {
         return this._partyChangeEnabled;
@@ -416,7 +416,7 @@ function Scene_PartyChange() {
     /**
      * パーティー変更が可能かどうかを得る。
      * 
-     * @returns {Boolean} パーティー変更が可能な場合にはtrue, それ以外はfalse
+     * @returns {boolean} パーティー変更が可能な場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isPartyChangeEnabled = function() {
         return this._partyChangeEnabled;
@@ -449,7 +449,7 @@ function Scene_PartyChange() {
     /**
      * 変更可能メンバーを得る。
      * 
-     * @returns {Number} 変更可能メンバー
+     * @returns {number} 変更可能メンバー
      */
     Game_Party.prototype.changeableMembers = function() {
         const members = [];
@@ -467,7 +467,7 @@ function Scene_PartyChange() {
     /**
      * 変更可能メンバーを追加する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Party.prototype.addChangeableMember = function(actorId) {
         if (!this._changeableMembers.includes(actorId)) {
@@ -481,7 +481,7 @@ function Scene_PartyChange() {
      * Note: 候補メンバー欄に表示はできるけれど、
      *       入れ替え禁止にする場合には Game_Actor.disablePartyChange() を使用すること。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Party.prototype.removeChangeableMember = function(actorId) {
         const index = this._changeableMembers.indexOf(actorId);
@@ -512,7 +512,7 @@ function Scene_PartyChange() {
     /**
      * 最大カラム数を得る。
      * 
-     * @returns {Number} カラム数
+     * @returns {number} カラム数
      */
     Window_PartyChangeMemberBase.prototype.maxCols = function() {
         const itemWidth = this.itemWidth();
@@ -522,7 +522,7 @@ function Scene_PartyChange() {
     /**
      * 項目の描画幅を得る。
      * 
-     * @returns {Number} 描画幅
+     * @returns {number} 描画幅
      */
     Window_PartyChangeMemberBase.prototype.itemWidth = function() {
         const spacing = this.colSpacing();
@@ -531,7 +531,7 @@ function Scene_PartyChange() {
     /**
      * 項目の描画高を得る。
      * 
-     * @returns {Number} 項目の描画高さ。
+     * @returns {number} 項目の描画高さ。
      */
     Window_PartyChangeMemberBase.prototype.itemHeight = function() {
         return Math.min(this.innerHeight, 160);
@@ -549,7 +549,7 @@ function Scene_PartyChange() {
     /**
      * indexに対応するアクターを得る。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * @returns {Game_Actor} Game_Actorオブジェクト。対応するものが無い場合にはnull。
      */
     // eslint-disable-next-line no-unused-vars
@@ -578,7 +578,7 @@ function Scene_PartyChange() {
     /**
      * 現在選択中の項目が選択可能かどうかを得る。
      * 
-     * @returns {Boolean} 選択可能である場合にはtrue, それ以外はfalse
+     * @returns {boolean} 選択可能である場合にはtrue, それ以外はfalse
      */
     Window_PartyChangeMemberBase.prototype.isCurrentItemEnabled = function() {
         const actor = this.actorAt(this.index());
@@ -588,8 +588,8 @@ function Scene_PartyChange() {
     /**
      * actor が選択可能かどうかを得る。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Boolean} 選択可能な場合にはtrue, それ以外はfalse
+     * @param {number} index インデックス番号
+     * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse
      */
     Window_PartyChangeMemberBase.prototype.isEnabled = function(actor) {
         return (actor === null) || (actor.isPartyChangeEnabled());
@@ -598,7 +598,7 @@ function Scene_PartyChange() {
     /**
      * 項目を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_PartyChangeMemberBase.prototype.drawItem = function(index) {
         this.drawPendingItemBackground(index);
@@ -610,7 +610,7 @@ function Scene_PartyChange() {
     /**
      * ペンディングの背景を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_PartyChangeMemberBase.prototype.drawPendingItemBackground = function(index) {
         if (index === this._pendingIndex) {
@@ -624,7 +624,7 @@ function Scene_PartyChange() {
     /**
      * アクターエントリを描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * @param {Game_Actor} actor Game_Actorオブジェクト
      */
     Window_PartyChangeMemberBase.prototype.drawActorEntry = function(index, actor) {
@@ -661,8 +661,8 @@ function Scene_PartyChange() {
      * 
      * Note：パーティー加入中アクターを識別するために使用する。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Boolean} アクティブな場合にはtrue、それ以外はfalse
+     * @param {number} index インデックス番号
+     * @returns {boolean} アクティブな場合にはtrue、それ以外はfalse
      */
     Window_PartyChangeMemberBase.prototype.isActiveActorAt = function(index) {
         return this.index() === index;
@@ -673,10 +673,10 @@ function Scene_PartyChange() {
      * 下向き中央のグラフィックを描画する。
      * 
      * @param {String} characterName キャラクターファイル名
-     * @param {Number} characterIndex キャラクターインデックス
-     * @param {Number} frameNo フレーム番号(センターが1)
-     * @param {Number} x 描画下端中央x位置
-     * @param {Number} y 描画下端y位置
+     * @param {number} characterIndex キャラクターインデックス
+     * @param {number} frameNo フレーム番号(センターが1)
+     * @param {number} x 描画下端中央x位置
+     * @param {number} y 描画下端y位置
      */
     // prettier-ignore
     Window_PartyChangeMemberBase.prototype.drawCharacterAt = function(
@@ -694,7 +694,7 @@ function Scene_PartyChange() {
     /**
      * 項目の背景を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_PartyChangeMemberBase.prototype.drawItemBackground = function(index) {
         const rect = this.itemRect(index);
@@ -788,7 +788,7 @@ function Scene_PartyChange() {
     /**
      * ペンディングインデックスを得る。
      * 
-     * @returns {Number} ペンディングインデックス
+     * @returns {number} ペンディングインデックス
      */
     Window_PartyChangeMemberBase.prototype.pendingIndex = function() {
         return this._pendingIndex;
@@ -797,7 +797,7 @@ function Scene_PartyChange() {
     /**
      * ペンディングインデックスを設定する。
      * 
-     * @param {Number} index インデックス
+     * @param {number} index インデックス
      */
     Window_PartyChangeMemberBase.prototype.setPendingIndex = function(index) {
         const lastPendingIndex = this._pendingIndex;
@@ -836,7 +836,7 @@ function Scene_PartyChange() {
     /**
      * 項目数を得る。
      * 
-     * @returns {Number} 項目数。
+     * @returns {number} 項目数。
      */
     Window_PartyChangePartyMembers.prototype.maxItems = function() {
         return Math.min($gameParty.allMembers().length + 1, partyMemberCount);
@@ -845,7 +845,7 @@ function Scene_PartyChange() {
     /**
      * indexに対応するアクターを得る。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * @returns {Game_Actor} Game_Actorオブジェクト。対応するものが無い場合にはnull。
      */
     Window_PartyChangePartyMembers.prototype.actorAt = function(index) {
@@ -856,8 +856,8 @@ function Scene_PartyChange() {
     /**
      * indexで指定されるアクターがアクティブかどうかを得る。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Boolean} アクティブな場合にはtrue、それ以外はfalse
+     * @param {number} index インデックス番号
+     * @returns {boolean} アクティブな場合にはtrue、それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
     Window_PartyChangePartyMembers.prototype.isActiveActorAt = function(index) {
@@ -913,7 +913,7 @@ function Scene_PartyChange() {
     /**
      * 項目数を得る。
      * 
-     * @returns {Number} 項目数。
+     * @returns {number} 項目数。
      */
     Window_PartyChangeCandidateMembers.prototype.maxItems = function() {
         return this._members.length + 1;
@@ -921,7 +921,7 @@ function Scene_PartyChange() {
     /**
      * indexに対応するアクターを得る。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * @returns {Game_Actor} Game_Actorオブジェクト。対応するものが無い場合にはnull。
      */
     Window_PartyChangeCandidateMembers.prototype.actorAt = function(index) {
@@ -969,8 +969,8 @@ function Scene_PartyChange() {
     /**
      * indexで指定されるアクターがアクティブかどうかを得る。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Boolean} アクティブな場合にはtrue、それ以外はfalse
+     * @param {number} index インデックス番号
+     * @returns {boolean} アクティブな場合にはtrue、それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
     Window_PartyChangeCandidateMembers.prototype.isActiveActorAt = function(index) {
@@ -1301,9 +1301,9 @@ function Scene_PartyChange() {
      * アクター名を描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_PartyChangeStatus.prototype.drawActorName = function(actor, x, y, width) {
         this.changeTextColor(ColorManager.hpColor(actor));
@@ -1313,8 +1313,8 @@ function Scene_PartyChange() {
      * アクターのレベルを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
      */
     Window_PartyChangeStatus.prototype.drawActorLevel = function(actor, x, y) {
         this.changeTextColor(ColorManager.systemColor());
@@ -1327,9 +1327,9 @@ function Scene_PartyChange() {
      * アクターのHPを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_PartyChangeStatus.prototype.drawActorHp = function(actor, x, y, width) {
         // ゲージ描画
@@ -1361,9 +1361,9 @@ function Scene_PartyChange() {
      * アクターのMPを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_PartyChangeStatus.prototype.drawActorMp = function(actor, x, y, width) {
         // ゲージ描画
@@ -1392,11 +1392,11 @@ function Scene_PartyChange() {
     /**
      * ゲージを描画する。
      * 
-     * @param {Object} gaugeData ゲージデータ。rate, backColor, color1, color2メンバを持つ。
-     * @param {Number} x ゲージ左上位置x
-     * @param {Number} y ゲージ左上位置y
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {object} gaugeData ゲージデータ。rate, backColor, color1, color2メンバを持つ。
+     * @param {number} x ゲージ左上位置x
+     * @param {number} y ゲージ左上位置y
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Window_PartyChangeStatus.prototype.drawGaugeRect = function(gaugeData, x, y, width, height) {
         const rate = gaugeData.rate;
@@ -1412,10 +1412,10 @@ function Scene_PartyChange() {
     /**
      * ゲージのテキストを描画する。
      * 
-     * @param {Object} data データ
-     * @param {Number} x ラベル左上位置 x
-     * @param {Number} y ラベル左上位置 y
-     * @param {Number} width 幅
+     * @param {object} data データ
+     * @param {number} x ラベル左上位置 x
+     * @param {number} y ラベル左上位置 y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_PartyChangeStatus.prototype.drawGaugeText = function(data, x, y, width) {
@@ -1442,10 +1442,10 @@ function Scene_PartyChange() {
      * 整数値タイプのパラメータを描画する。
      * 
      * @param {String} paramName パラメータ名
-     * @param {Number} value 値
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} value 値
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_PartyChangeStatus.prototype.drawParamValue = function(paramName, value, x, y, width) {
         if (typeof value === "undefined") {
@@ -1466,10 +1466,10 @@ function Scene_PartyChange() {
      * 装備スロットを描画する。
      * 
      * @param {String} スロット名
-     * @param {Object} item 装備品(DataWeapon/DataArmor)
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {object} item 装備品(DataWeapon/DataArmor)
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_PartyChangeStatus.prototype.drawEquipSlot = function(slotName, item, x, y, width) {
         const spacing = 16;
@@ -1483,10 +1483,10 @@ function Scene_PartyChange() {
     /**
      * 装備品名を描画する。
      * 
-     * @param {Object} item アイテム(DataWeapon/DataSKill)
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {object} item アイテム(DataWeapon/DataSKill)
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_PartyChangeStatus.prototype.drawEquipItemName = function(item, x, y, width) {
         if (item) {
@@ -1502,9 +1502,9 @@ function Scene_PartyChange() {
     /**
      * 水平ラインを描画する。
      * 
-     * @param {Number} x 描画x位置
-     * @param {Number} y 描画y位置
-     * @param {Number} width 幅
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 幅
      */
     Window_PartyChangeStatus.prototype.drawHorzLine = function(x, y, width) {
         const lineHeight = this.lineHeight();
@@ -1529,7 +1529,7 @@ function Scene_PartyChange() {
     };
     /**
      * ページボタンを作成する必要があるかどうかを取得する。
-     * @returns {Boolean} ページボタンが必要な場合にはtrue, それ以外はfalse
+     * @returns {boolean} ページボタンが必要な場合にはtrue, それ以外はfalse
      */
     Scene_PartyChange.prototype.needsPageButtons = function() {
         return false;
@@ -1584,7 +1584,7 @@ function Scene_PartyChange() {
     /**
      * メンバー候補ウィンドウの矩形領域を得る。
      * 
-     * @returns {Number} メンバー候補ウィンドウ矩形領域
+     * @returns {number} メンバー候補ウィンドウ矩形領域
      */
     Scene_PartyChange.prototype.candidateMembersWindowRect = function() {
         const rect = this.partyMemberWindowRect();
@@ -1624,7 +1624,7 @@ function Scene_PartyChange() {
     /**
      * ステータスエリアの幅を得る。
      * 
-     * @returns {Number} ステータスエリアの幅
+     * @returns {number} ステータスエリアの幅
      */
     Scene_PartyChange.prototype.statusAreaWidth = function() {
         return statusAreaWidth;
@@ -1633,7 +1633,7 @@ function Scene_PartyChange() {
     /**
      * パーティーメンバーウィンドウの高さを得る。
      * 
-     * @returns {Number} パーティーメンバーウィンドウの高さ
+     * @returns {number} パーティーメンバーウィンドウの高さ
      */
     Scene_PartyChange.prototype.partyMemberWindowHeight = function() {
         return partyMemberWindowHeight;
@@ -1760,7 +1760,7 @@ function Scene_PartyChange() {
     /**
      * アクターを外す
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Scene_PartyChange.prototype.doRemoveActor = function(actorId) {
         $gameParty.removeActor(actorId);
@@ -1770,8 +1770,8 @@ function Scene_PartyChange() {
      * 順序を入れ替える。
      * 移動元インデックスから移動先のインデックスに動く。挟まれるメンバーは1つずつずれる。
      * 
-     * @param {Number} srcIndex 移動元のインデックス
-     * @param {Number} dstIndex 移動先のインデックス
+     * @param {number} srcIndex 移動元のインデックス
+     * @param {number} dstIndex 移動先のインデックス
      */
     Scene_PartyChange.prototype.doSwapOrder = function(srcIndex, dstIndex) {
         if (srcIndex > dstIndex) {
@@ -1788,7 +1788,7 @@ function Scene_PartyChange() {
     /**
      * アクターを追加する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Scene_PartyChange.prototype.doAddActor = function(actorId) {
         $gameParty.addActor(actorId);

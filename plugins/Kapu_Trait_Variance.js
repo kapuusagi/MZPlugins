@@ -122,7 +122,7 @@
     /**
      * 変動レートを得る。
      * 
-     * @returns {Number} 変動レート。
+     * @returns {number} 変動レート。
      */
     Game_BattlerBase.prototype.varianceRate = function() {
         return this.sparam(Game_BattlerBase.TRAIT_SPARAM_DID_VARIANCE_RATE);
@@ -132,10 +132,10 @@
         /**
          * ばらつきレート
          * 
-         * @const {Number}
+         * @const {number}
          */
         Object.defineProperty(Game_BattlerBase.prototype, "varirate", {
-            /** @returns {Number} */
+            /** @returns {number} */
             get: function() { return this.varianceRate(); },
             configurable:true
         });
@@ -146,9 +146,9 @@
     /**
      * ばらつきを適用する。
      * 
-     * @param {Number} damage ダメージ値
-     * @param {Number} variance ばらつき(1で1％ばらつく)
-     * @returns {Number} ばらつき適用後のダメージ
+     * @param {number} damage ダメージ値
+     * @param {number} variance ばらつき(1で1％ばらつく)
+     * @returns {number} ばらつき適用後のダメージ
      * !!!overwrite!!! Game_Action.applyVariance()
      */
     Game_Action.prototype.applyVariance = function(damage, variance) {

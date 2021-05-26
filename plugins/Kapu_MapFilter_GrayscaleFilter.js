@@ -51,8 +51,8 @@
     /**
      * 真偽値を得る。
      * 
-     * @param {Object} valueStr 値文字列
-     * @returns {Boolean} 真偽値
+     * @param {object} valueStr 値文字列
+     * @returns {boolean} 真偽値
      */
     const _parseBoolean = function(valueStr) {
         if (typeof valueStr === "undefined") {

@@ -393,7 +393,7 @@
  *     name: {function(dataId:number, value:number) : string} 特性名を取得する関数
  *     value: {function(traits:Array<trait>) : number} 特性値を取得する関数
  *     str: {function(dataId:number, value:number) : string} 特性値を文字列化する関数
- *     baseValue : {Number} 特性を持っていない場合の基準値(増減量を計算するためのもの)
+ *     baseValue : {number} 特性を持っていない場合の基準値(増減量を計算するためのもの)
  * };
  * 
  * ベーシックシステムで定義済みの特性は TextManage._traitConverters に追加済み。
@@ -455,7 +455,7 @@
     /**
      * XParamタイプパラメータのラベルを得る。
      * 
-     * @param {Number} id XParam DID
+     * @param {number} id XParam DID
      * @returns {String} テキスト
      */
     TextManager.xparam = function(id) {
@@ -474,7 +474,7 @@
     /**
      * SParamタイプパラメータのラベルを得る。
      * 
-     * @param {Number} id SParam DID
+     * @param {number} id SParam DID
      * @returns {String} テキスト
      */
     TextManager.sparam = function(id) {
@@ -548,7 +548,7 @@
     /**
      * 属性名を得る。
      * 
-     * @param {Number} id 属性ID
+     * @param {number} id 属性ID
      * @returns {string} 属性名
      */
     TextManager.elementName = function(id) {
@@ -558,7 +558,7 @@
     /**
      * ステート名を得る。
      * 
-     * @param {Number} id ステートID
+     * @param {number} id ステートID
      * @returns {string} ステート名
      */
     TextManager.stateName = function(id) {
@@ -568,7 +568,7 @@
     /**
      * スキル名を得る。
      * 
-     * @param {Number} id スキルID
+     * @param {number} id スキルID
      * @returns {string} スキル名
      */
     TextManager.skillName = function(id) {
@@ -579,7 +579,7 @@
     /**
      * スキルタイプ名文字列を得る。
      * 
-     * @param {Number} id スキルタイプID
+     * @param {number} id スキルタイプID
      * @returns {string} スキルタイプ名
      */
     TextManager.skillTypeName = function(id) {
@@ -589,7 +589,7 @@
     /**
      * 武器タイプ名を得る。
      * 
-     * @param {Number} id 武器タイプID
+     * @param {number} id 武器タイプID
      * @returns {string} 武器タイプ名
      */
     TextManager.weaponTypeName = function(id) {
@@ -598,7 +598,7 @@
     /**
      * 防具タイプ名を得る。
      * 
-     * @param {Number} id 防具タイプID
+     * @param {number} id 防具タイプID
      * @returns {string} 防具タイプ名
      */
     TextManager.armorTypeName = function(id) {
@@ -608,7 +608,7 @@
     /**
      * 装備タイプ名を得る。
      * 
-     * @param {Number} id スロットタイプID
+     * @param {number} id スロットタイプID
      * @returns {string} 文字列
      */
     TextManager.equipTypeName = function(id) {
@@ -618,8 +618,8 @@
     /**
      * 属性防御特性のテキストを得る。
      * 
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {number} dataId データID
+     * @param {number} value 値
      * @returns {string} 文字列
      */
     TextManager.traitElementRate = function(dataId, value) {
@@ -630,7 +630,7 @@
     /**
      * デバフ受付率特性テキスト
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitDebuffRate = function(dataId) {
@@ -642,7 +642,7 @@
     /**
      * ステート受付率テキスト
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitStateRate = function(dataId, value) {
@@ -653,7 +653,7 @@
     /**
      * ステート防止テキスト
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitStateResist = function(dataId) {
@@ -665,7 +665,7 @@
     /**
      * パラメータレート特性文字列を得る。
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitParam = function(dataId, value) {
@@ -677,7 +677,7 @@
     /**
      * 攻撃属性付与特性文字列を得る。
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitAttackElement = function(dataId) {
@@ -689,7 +689,7 @@
     /**
      * 攻撃時ステート付与特性文字列を得る。
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitAttackState = function(dataId) {
@@ -701,7 +701,7 @@
     /**
      * 攻撃速度特性名
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     // eslint-disable-next-line no-unused-vars
@@ -712,7 +712,7 @@
     /**
      * 攻撃回数特性名
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     // eslint-disable-next-line no-unused-vars
@@ -723,7 +723,7 @@
     /**
      * 攻撃スキル変更特性名
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitAttackSkill = function(dataId) {
@@ -735,7 +735,7 @@
     /**
      * スキルタイプ追加特性
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitStypeAdd = function(dataId) {
@@ -747,7 +747,7 @@
     /**
      * スキルタイプ封印特性
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitStypeSeal = function(dataId) {
@@ -759,7 +759,7 @@
     /**
      * スキル追加特性
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitSkillAdd = function(dataId) {
@@ -771,7 +771,7 @@
     /**
      * スキル封印特性
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitSkillSeal = function(dataId) {
@@ -783,7 +783,7 @@
     /**
      * 装備武器タイプ追加
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitEquipWtype = function(dataId) {
@@ -794,7 +794,7 @@
     /**
      * 装備防具タイプ追加
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitEquipAtype = function(dataId) {
@@ -806,7 +806,7 @@
     /**
      * 装備ロック
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitEquipLock = function(dataId) {
@@ -817,7 +817,7 @@
     /**
      * 装備封印
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     TextManager.traitEquipSeal = function(dataId) {
@@ -833,7 +833,7 @@
     /**
      * スロットタイプ名
      * 
-     * @param {Number} id 装備タイプID
+     * @param {number} id 装備タイプID
      * @returns {string} 文字列
      */
     TextManager.slotTypeName = function(id) {
@@ -843,7 +843,7 @@
     /**
      * スロットタイプ変更
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     // eslint-disable-next-line no-unused-vars
@@ -857,7 +857,7 @@
     /**
      * 行動回数加算特性
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 文字列
      */
     // eslint-disable-next-line no-unused-vars
@@ -873,7 +873,7 @@
     /**
      * スペシャルフラグ特性
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} スペシャルフラグ特性
      */
     TextManager.traitSpecialflag = function(dataId) {
@@ -883,7 +883,7 @@
     /**
      * 崩壊状態特性
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} スペシャルフラグ特性
      */
     // eslint-disable-next-line
@@ -903,7 +903,7 @@
     /**
      * パーティーアビリティ特性
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} パーティーアビリティ名
      */
     TextManager.traitPartyAbility = function(dataId) {
@@ -915,7 +915,7 @@
      * 値の乗算合計を得る。
      * 
      * @param {Array<traits>} traits 特性配列
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     TextManager.traitValuePi = function(traits) {
         return traits.reduce((prev, t) => prev * t.value, 1);
@@ -924,7 +924,7 @@
      * 値の加算合計を得る。
      * 
      * @param {Array<traits>} traits 特性配列
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     TextManager.traitValueSum = function(traits) {
         return traits.reduce((prev, t) => prev + t.value, 0);
@@ -934,7 +934,7 @@
      * 値の数を得る。
      * 
      * @param {Array<traits>} traits 特性配列
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     TextManager.traitValueCount = function(traits) {
         return traits.length;
@@ -944,7 +944,7 @@
      * 値の最大値を得る。
      * 
      * @param {Array<traits>} traits 特性配列
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     TextManager.traitValueMax = function(traits) {
         return traits.reduce((prev, t) => Math.max(prev, t.value), 0);
@@ -954,7 +954,7 @@
      * スペシャルフラグの値を得る。
      * 
      * @param {Array<traits>} traits 特性配列
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     // eslint-disable-next-line no-unused-vars
     TextManager.traitValueSpecialFlag = function(traits) {
@@ -965,7 +965,7 @@
      * パーティーアビリティの値を得る。
      * 
      * @param {Array<traits>} traits 特性配列
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     TextManager.traitValuePartyAbility = function(traits) {
         const dataId = traits[0].dataId;
@@ -977,7 +977,7 @@
      * 0 を返す。
      * 
      * @param {Array<traits>} traits 特性配列
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     // eslint-disable-next-line no-unused-vars
     TextManager.traitValueNone = function(traits) {
@@ -986,8 +986,8 @@
     /**
      * 値文字列を得る。
      * 
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {number} dataId データID
+     * @param {number} value 値
      * @returns {string} 値文字列
      */
     // eslint-disable-next-line no-unused-vars
@@ -998,8 +998,8 @@
     /**
      * 割合文字列を得る。
      * 
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {number} dataId データID
+     * @param {number} value 値
      * @returns {string} 値文字列
      */
     // eslint-disable-next-line no-unused-vars
@@ -1011,8 +1011,8 @@
     /**
      * 割合(絶対値)文字列を得る。
      * 
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {number} dataId データID
+     * @param {number} value 値
      * @returns {string} 値文字列
      */
     TextManager.traitValueStrRateAbs = function(dataId, value) {
@@ -1024,8 +1024,8 @@
     /**
      * スペシャルフラグ値を得る。
      * 
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {number} dataId データID
+     * @param {number} value 値
      * @returns {string} スペシャルフラグ値
      */
     // eslint-disable-next-line no-unused-vars
@@ -1036,8 +1036,8 @@
     /**
      * パーティーアビリティの値を得る。
      * 
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {number} dataId データID
+     * @param {number} value 値
      * @returns {string} パーティーアビリティの値文字列を得る。
      */
     // eslint-disable-next-line no-unused-vars
@@ -1048,8 +1048,8 @@
     /**
      * 空文字列を返す。
      * 
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {number} dataId データID
+     * @param {number} value 値
      * @returns {string} 値文字列
      */
     // eslint-disable-next-line no-unused-vars
@@ -1138,9 +1138,9 @@
     /**
      * 特性を表す文字列を得る。
      * 
-     * @param {Number} code コード
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {number} code コード
+     * @param {number} dataId データID
+     * @param {number} value 値
      */
     TextManager.traitName = function(code, dataId, value) {
         const converter = this._traitConverters[code];
@@ -1154,9 +1154,9 @@
     /**
      * 特性値文字列を得る。
      * 
-     * @param {Number} code 特性コード
-     * @param {Number} dataId 特性データID
-     * @param {Number} value 特性値
+     * @param {number} code 特性コード
+     * @param {number} dataId 特性データID
+     * @param {number} value 特性値
      * @returns {string} 特性値文字列
      */
     TextManager.traitValueStr = function(code, dataId, value) {
@@ -1171,8 +1171,8 @@
     /**
      * ベース値を得る。
      * 
-     * @param {Number} code コード
-     * @returns {Number} ベース値
+     * @param {number} code コード
+     * @returns {number} ベース値
      */
     TextManager.traitBaseValue = function(code) {
         const converter = this._traitConverters[code];
@@ -1188,7 +1188,7 @@
      * 異なる特性値が混在する場合、先頭の特性値に一致するものだけを対象とする。
      * 
      * @param {Array<Trait>} traits 特性配列
-     * @returns {Number} 値を得る。
+     * @returns {number} 値を得る。
      */
     TextManager.traitValue = function(traits) {
         if (traits.length === 0) {

@@ -177,7 +177,7 @@
     /**
      * アイコンインデックスを得る。
      * 
-     * @returns {Number} アイコンインデックス。
+     * @returns {number} アイコンインデックス。
      */
     Sprite_PositionIcon.prototype.iconIndex = function() {
         if (this._battler) {
@@ -223,7 +223,7 @@
     /**
      * 影の割合を設定する。
      * 
-     * @param {Number} shadowRate 影の割合(0～255。255で影最大)
+     * @param {number} shadowRate 影の割合(0～255。255で影最大)
      */
     EnemyBattlePositionColorFilter.prototype.setShadowRate = function(shadowRate) {
         this.uniforms.shadowRate = shadowRate.clamp(0.0, 255.0);
@@ -231,7 +231,7 @@
     /**
      * 影の割合を取得する。
      * 
-     * @returns {Number} 影の割合(0～255。255で影最大)
+     * @returns {number} 影の割合(0～255。255で影最大)
      */
     EnemyBattlePositionColorFilter.prototype.shadowRate = function() {
         return this.uniforms.shadowRate;
@@ -430,7 +430,7 @@
     /**
      * 項目のステータスを描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * !!!overwrite!!! Window_MenuStatus.drawItemStatus()
      */
     Window_MenuStatus.prototype.drawItemStatus = function(index) {
@@ -452,9 +452,9 @@
      * アクターの位置を描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上X
-     * @param {Number} y 描画領域左上Y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上X
+     * @param {number} y 描画領域左上Y
+     * @param {number} width 幅
      * !!!overwrite!!! Window_Status.drawActorPosition()
      *     UI標示のため、オーバーライドする。
      */
@@ -486,9 +486,9 @@
         /**
          * ステータスブロック1Cを描画する。
          * 
-         * @param {Number} x 描画位置x
-         * @param {Number} y 描画位置y
-         * @param {Number} width 描画幅
+         * @param {number} x 描画位置x
+         * @param {number} y 描画位置y
+         * @param {number} width 描画幅
          */
         Window_EquipStatus.prototype.drawBlock1C = function(x, y, width) {
             _Window_EquipStatus_drawBlock1C.call(this, x, y, width);
@@ -504,11 +504,11 @@
         /**
          * 整数値タイプのパラメータを描画する。
          * 
-         * @param {Number} value1 値1（現在値）
-         * @param {Number} value2 値2（装備変更値）
-         * @param {Number} x 描画位置x
-         * @param {Number} y 描画位置y
-         * @param {Number} width 幅
+         * @param {number} value1 値1（現在値）
+         * @param {number} value2 値2（装備変更値）
+         * @param {number} x 描画位置x
+         * @param {number} y 描画位置y
+         * @param {number} width 幅
          */
         Window_EquipStatus.prototype.drawRangeDistance = function(value1, value2, x, y, width) {
             if (typeof value1 === "undefined") {

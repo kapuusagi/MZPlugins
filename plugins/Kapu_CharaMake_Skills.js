@@ -189,7 +189,7 @@ function Game_CharaMakeItem_Skills() {
     /**
      * groupNoで選択されているスキルセット番号を得る。
      * 
-     * @param {Number} groupNo スキルセットグループ番号
+     * @param {number} groupNo スキルセットグループ番号
      * @returns スキルセット番号
      */
     Game_Actor.prototype.skillSetNo = function(groupNo) {
@@ -199,8 +199,8 @@ function Game_CharaMakeItem_Skills() {
     /**
      * groupNoで選択されているスキルセット番号をnoに設定する。
      * 
-     * @param {Number} groupNo スキルセットグループ番号
-     * @param {Number} no スキルセット番号
+     * @param {number} groupNo スキルセットグループ番号
+     * @param {number} no スキルセット番号
      */
     Game_Actor.prototype.setSkillSetNo = function(groupNo, no) {
         this._selectedSkillSet[groupNo] = no;
@@ -210,7 +210,7 @@ function Game_CharaMakeItem_Skills() {
     /**
      * groupNoで選択されているスキルセットを得る。
      * 
-     * @param {Number} groupNo スキルセットグループ番号
+     * @param {number} groupNo スキルセットグループ番号
      * @returns {Array<DataSkill>} スキル配列
      */
     Game_Actor.prototype.skillSetSkills = function(groupNo) {
@@ -220,7 +220,7 @@ function Game_CharaMakeItem_Skills() {
     /**
      * groupNoで選択されているスキルセットのID配列を得る。
      * 
-     * @param {Number} groupNo スキルグループ番号
+     * @param {number} groupNo スキルグループ番号
      * @returns {Array<number>} スキルID配列
      */
     Game_Actor.prototype.skillSetSkillIds = function(groupNo) {
@@ -237,8 +237,8 @@ function Game_CharaMakeItem_Skills() {
     /**
      * skillIのスキルdが習得済みスキルかどうかを判定する。
      * 
-     * @param {Number} skillId スキルID
-     * @returns {Boolean} 習得済みの場合にはtrue, それ以外はfalse.
+     * @param {number} skillId スキルID
+     * @returns {boolean} 習得済みの場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isLearnedSkill = function(skillId) {
         if (_Game_Actor_isLearnedSkill.call(this, skillId)) {
@@ -283,7 +283,7 @@ function Game_CharaMakeItem_Skills() {
     /**
      * Game_CharaMakeItem_Skills を初期化する。
      * 
-     * @param {Number} スキルセットグループ番号
+     * @param {number} スキルセットグループ番号
      */
     Game_CharaMakeItem_Skills.prototype.initialize = function(groupNo) {
         this._groupNo = groupNo;
@@ -314,7 +314,7 @@ function Game_CharaMakeItem_Skills() {
      * アクターに適用可能な項目かどうかを取得する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Boolean} 既存データの変更の場合にはtrue、それ以外はfalse
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
      * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
@@ -328,7 +328,7 @@ function Game_CharaMakeItem_Skills() {
      * 
      * Note: キャラメイク操作で初期値を設定するために呼び出される。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars
@@ -346,7 +346,7 @@ function Game_CharaMakeItem_Skills() {
     /**
      * 編集中の設定を反映させる。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars

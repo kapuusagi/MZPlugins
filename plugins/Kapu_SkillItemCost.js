@@ -52,7 +52,7 @@
     /**
      * スキルのノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processSkillNotetag = function(obj) {
         if (obj.meta.consumeItem) {
@@ -92,7 +92,7 @@
      * スキルの使用コストが支払える状態かどうかを得る。
      * 
      * @param {DataSkill} skill 
-     * @returns {Boolean} スキルコストが支払える場合にはtrue, それ以外はfalse
+     * @returns {boolean} スキルコストが支払える場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.canPaySkillCost = function(skill) {
         return _Game_BattlerBase_canPaySkillCost.call(this, skill)
@@ -103,7 +103,7 @@
      * スキルの触媒アイテムコストが払えるかどうかを得る。
      * 
      * @param {DataSkill} skill スキル
-     * @returns {Boolean} 触媒アイテムがある場合にはtrue, それ以外はfalse
+     * @returns {boolean} 触媒アイテムがある場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.canPaySkillItemCost = function(skill) {
         if (this.isActor() && skill.itemCost) {
@@ -147,7 +147,7 @@
      * スキル使用時に消費するアイテムを得る。
      * 
      * @param {DataSkill} skill スキル
-     * @returns {Object} アイテム
+     * @returns {object} アイテム
      */    
     Game_BattlerBase.prototype.skillConsumeItem = function(skill) {
         if (skill.itemCost.kind === 1) {

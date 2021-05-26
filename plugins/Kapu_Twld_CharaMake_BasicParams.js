@@ -296,7 +296,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 項目数を得る。
      * 
-     * @returns {Number} 項目数。
+     * @returns {number} 項目数。
      */
     Window_CharaMakeItem_BasicParams.prototype.maxItems = function() {
         return this.paramCount() * 2 + 1; // パラメータ毎にUP/DOWN と 確定ボタン  
@@ -305,7 +305,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 振り分け対象のパラメータ数を得る。
      * 
-     * @returns {Number} パラメータ数
+     * @returns {number} パラメータ数
      */
     Window_CharaMakeItem_BasicParams.prototype.paramCount = function() {
         return (isLukEditable) ? 7 : 6;
@@ -314,7 +314,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 指定項目の描画領域を得る
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * @returns {Rectangle} 矩形領域
      */
     Window_CharaMakeItem_BasicParams.prototype.itemRect = function(index) {
@@ -350,8 +350,8 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * パラメータ振り分けコストを得る。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Number} パラメータ振り分けコスト
+     * @param {number} index インデックス番号
+     * @returns {number} パラメータ振り分けコスト
      */
     Window_CharaMakeItem_BasicParams.prototype.paramCost = function(index) {
         return this._customizedParams[index] + 1;
@@ -360,8 +360,8 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 項目が有効かどうかを得る。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Boolean} 項目が有効な場合にはtrue, それ以外はfalse.
+     * @param {number} index インデックス番号
+     * @returns {boolean} 項目が有効な場合にはtrue, それ以外はfalse.
      */
     Window_CharaMakeItem_BasicParams.prototype.isItemEnabled = function(index) {
         if (index < 0) {
@@ -384,7 +384,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * インセットを得る。
      * 
-     * @returns {Number} インセット
+     * @returns {number} インセット
      */
     Window_CharaMakeItem_BasicParams.prototype.inset = function() {
         return 24;
@@ -393,7 +393,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 減少ボタンのX位置を得る。
      * 
-     * @returns {Number} X位置
+     * @returns {number} X位置
      */
     Window_CharaMakeItem_BasicParams.prototype.buttonDownX = function() {
         return this.valueX() - (this.itemWidth() - this.colSpacing());
@@ -402,7 +402,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 値のx位置を得る。
      * 
-     * @returns {Number} 値のx位置
+     * @returns {number} 値のx位置
      */
     Window_CharaMakeItem_BasicParams.prototype.valueX = function() {
         return this.buttonUpX() - (this.colSpacing() + this.valueWidth());
@@ -411,8 +411,8 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * パラメータのY位置を得る。
      * 
-     * @param {Number} paramNo パラメータ番号
-     * @returns {Number} Y位置
+     * @param {number} paramNo パラメータ番号
+     * @returns {number} Y位置
      */
     Window_CharaMakeItem_BasicParams.prototype.buttonY = function(paramNo) {
         return paramNo * (this.lineHeight() + this.rowSpacing()) + this.lineHeight() + this.rowSpacing();
@@ -421,7 +421,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 値の表示幅を得る。
      * 
-     * @returns {Number} 値幅
+     * @returns {number} 値幅
      */
     Window_CharaMakeItem_BasicParams.prototype.valueWidth = function() {
         return 72;
@@ -430,7 +430,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 増加ボタンのx位置を得る
      * 
-     * @returns {Number} x位置
+     * @returns {number} x位置
      */
     Window_CharaMakeItem_BasicParams.prototype.buttonUpX = function() {
         return this.innerWidth - (this.inset() + this.itemWidth());
@@ -440,7 +440,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 項目の幅を得る。
      * 
-     * @returns {Number} 項目の幅
+     * @returns {number} 項目の幅
      */
     Window_CharaMakeItem_BasicParams.prototype.itemWidth = function() {
         return 80;
@@ -449,7 +449,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 項目の高さ
      * 
-     * @returns {Number} 項目の高さを得る。
+     * @returns {number} 項目の高さを得る。
      */
     Window_CharaMakeItem_BasicParams.prototype.itemHeight = function() {
         return this.lineHeight();
@@ -458,7 +458,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 行間のスペースを得る。
      * 
-     * @returns {Number} 行間スペース
+     * @returns {number} 行間スペース
      */
     Window_CharaMakeItem_BasicParams.prototype.rowSpacing = function() {
         return 12;
@@ -467,7 +467,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 最大カラム数を得る。
      * 
-     * @returns {Number} カラム数
+     * @returns {number} カラム数
      */
     Window_CharaMakeItem_BasicParams.prototype.maxCols = function() {
         return 2;
@@ -476,7 +476,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * コンテンツの高さを得る。
      * 
-     * @returns {Number} コンテンツの高さ。
+     * @returns {number} コンテンツの高さ。
      */
     Window_CharaMakeItem_BasicParams.prototype.contentsHeight = function() {
         return this.innerHeight;
@@ -485,7 +485,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 項目を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_CharaMakeItem_BasicParams.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
@@ -592,8 +592,8 @@ function Game_CharaMakeItem_BasicParams() {
      * アクターに適用可能な項目かどうかを取得する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Boolean} 既存データの変更の場合にはtrue、それ以外はfalse
-     * @returns {Boolean} 適用できる項目の場合にはtrue, それ以外はfalse.
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
+     * @returns {boolean} 適用できる項目の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_BasicParams.prototype.canApply = function(actor, isModify) {
@@ -605,7 +605,7 @@ function Game_CharaMakeItem_BasicParams() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
      * @param {Game_Actor} actor アクター
-     * @returns {Object} 追加するウィンドウ
+     * @returns {object} 追加するウィンドウ
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_BasicParams.prototype.createSelectWindows = function(rect, helpWindow, actor) {
@@ -626,7 +626,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 編集中のテキストを得る。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @returns {string} 編集項目の選択値(テキスト)
      */
     // eslint-disable-next-line no-unused-vars
@@ -637,7 +637,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 現在のアクターの情報を反映させる
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     Game_CharaMakeItem_BasicParams.prototype.setCurrent = function(windowEntry, actor) {
@@ -648,7 +648,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * 編集中の設定を反映させる。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     Game_CharaMakeItem_BasicParams.prototype.apply = function(windowEntry, actor) {
@@ -665,7 +665,7 @@ function Game_CharaMakeItem_BasicParams() {
      * initialValueStrをパースしてランダマイズしたパラメータを返す。
      * 
      * @param {string} initialValueStr 初期値文字列
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     const _randamizeBasicParam = function(initialValueStr) {
         let value = 10;
@@ -687,7 +687,7 @@ function Game_CharaMakeItem_BasicParams() {
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);

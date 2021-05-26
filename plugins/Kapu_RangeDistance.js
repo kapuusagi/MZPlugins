@@ -253,9 +253,9 @@
     /**
      * 戦闘位置移動効果をeffectsに追加する。
      * 
-     * @param {Object} obj エフェクトを追加するオブジェクト
-     * @param {Number} dataId データID
-     * @param {Number} rate 発生確率
+     * @param {object} obj エフェクトを追加するオブジェクト
+     * @param {number} dataId データID
+     * @param {number} rate 発生確率
      */
     const _addEffectMoveBattlePosition = function(obj, dataId, rate) {
         if (Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
@@ -272,7 +272,7 @@
      * レンジ文字列からレンジ値を得る。
      * 
      * @param {String} rangeStr レンジ文字列
-     * @returns {Number} レンジ 
+     * @returns {number} レンジ 
      */
     const _getRange = function(rangeStr) {
         const num = Number(rangeStr);
@@ -471,7 +471,7 @@
          * 
          * @param {Game_BattlerBase} target 対象
          * @param {DataEffect} effect エフェクトデータ
-         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         * @returns {boolean} 適用可能な場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testItemEffect = function(target, effect) {
             if (effect.code === Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
@@ -522,7 +522,7 @@
     /**
      * 列を対象にしたアクションかどうかを取得する。
      * 
-     * @returns {Boolean} 列を対象にしたアクションの場合にはtrue, それ以外はfalse
+     * @returns {boolean} 列を対象にしたアクションの場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.isForRow = function() {
         const item = this.item();
@@ -532,7 +532,7 @@
     /**
      * このアクションの射程距離を得る。
      * 
-     * @returns {Number} 射程距離
+     * @returns {number} 射程距離
      */
     Game_Action.prototype.itemRangeDistance = function() {
         const item = this.item();
@@ -547,7 +547,7 @@
      * 指定したユニットに適用する射程距離を得る。
      * 
      * @param {Game_Unit} unit ユニット
-     * @returns {Number} 射程距離
+     * @returns {number} 射程距離
      */
     Game_Action.prototype.rangeDistanceForUnit = function(unit) {
         const subject = this.subject();
@@ -741,7 +741,7 @@
     /**
      * 戦闘位置がサポートされているかどうかを返す。
      * 
-     * @returns {Boolean} 戦闘位置
+     * @returns {boolean} 戦闘位置
      */
     Game_System.prototype.isBattlePositionSupported = function() {
         return true;
@@ -762,7 +762,7 @@
     /**
      * 戦闘位置を設定する。
      * 
-     * @param {Number} position 戦闘位置
+     * @param {number} position 戦闘位置
      */
     Game_BattlerBase.prototype.setBattlePosition = function(position) {
         this._battlePosition = position;
@@ -771,7 +771,7 @@
     /**
      * 戦闘位置を取得する。
      * 
-     * @returns {Number} 戦闘位置
+     * @returns {number} 戦闘位置
      */
     Game_BattlerBase.prototype.battlePosition = function() {
         return this._battlePosition;
@@ -780,7 +780,7 @@
     /**
      * アイテムまたはスキルの射程距離を得る。
      * 
-     * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
+     * @param {object} item アイテム(DataITem)またはスキル(DataSkill)
      */
     Game_BattlerBase.prototype.itemRangeDistance = function(item) {
         if (this.isIgnoreRangeDistance()) {
@@ -796,7 +796,7 @@
     /**
      * このGame_Battlerが射程距離を無視するかどうかを取得する。
      * 
-     * @returns {Boolean} 射程距離を無視する場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 射程距離を無視する場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.isIgnoreRangeDistance = function() {
         if (Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE) {
@@ -809,7 +809,7 @@
     /**
      * デフォルトレンジを得る。
      * 
-     * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
+     * @param {object} item アイテム(DataITem)またはスキル(DataSkill)
      */
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.defaultRangeDistance = function(item) {
@@ -819,7 +819,7 @@
     /**
      * 通常攻撃射程を得る
      * 
-     * @returns {Number} 通常攻撃射程
+     * @returns {number} 通常攻撃射程
      */
     Game_BattlerBase.prototype.attackRangeDistance = function() {
         const attackSkillId = this.attackSkillId();
@@ -830,7 +830,7 @@
     /**
      * 戦闘位置移動がブロックできるかどうかを取得する。
      * 
-     * @returns {Boolean} 戦闘位置移動がブロックできる場合にはtrue, それ以外はfalse
+     * @returns {boolean} 戦闘位置移動がブロックできる場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.canBlockMoveBattlePosition = function() {
         if (Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION) {
@@ -880,7 +880,7 @@
     /**
      * デフォルトレンジを得る。
      * 
-     * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
+     * @param {object} item アイテム(DataITem)またはスキル(DataSkill)
      */
     // eslint-disable-next-line no-unused-vars
     Game_Enemy.prototype.defaultRangeDistance = function(item) {
@@ -896,7 +896,7 @@
     /**
      * デフォルトレンジを得る。
      * 
-     * @param {Object} item アイテム(DataITem)またはスキル(DataSkill)
+     * @param {object} item アイテム(DataITem)またはスキル(DataSkill)
      */
     // eslint-disable-next-line no-unused-vars
     Game_Actor.prototype.defaultRangeDistance = function(item) {
@@ -922,7 +922,7 @@
     /**
      * メンバーを選択する
      * 
-     * @param {Number} battlePosition 戦闘位置 
+     * @param {number} battlePosition 戦闘位置 
      */
     Game_Unit.prototype.selectRow = function(battlePosition) {
         for (const member of this.members()) {
@@ -936,8 +936,8 @@
     /**
      * 指定されたインデックスのBattlerの戦闘ポジションを変更する。
      * 
-     * @param {Number} index インデックス番号
-     * @param {Number} newPosition 新しい位置。未指定時は現在の設定と切り替え。
+     * @param {number} index インデックス番号
+     * @param {number} newPosition 新しい位置。未指定時は現在の設定と切り替え。
      */
     Game_Unit.prototype.changeBattlePosition = function(index, newPosition) {
         const battler = this.members()[index];
@@ -957,8 +957,8 @@
     /**
      * 前に移動可能かどうかを取得する。
      * 
-     * @param {Number} index メンバーのインデックス番号
-     * @returns {Boolean} 前に移動可能な場合にはtrue, それ以外はfalse
+     * @param {number} index メンバーのインデックス番号
+     * @returns {boolean} 前に移動可能な場合にはtrue, それ以外はfalse
      */
     Game_Unit.prototype.canMoveToFront = function(index) {
         // aliveメンバーが全員前衛。
@@ -977,7 +977,7 @@
     /**
      * 前に出る。
      * 
-     * @param {Number} メンバーのインデックス番号
+     * @param {number} メンバーのインデックス番号
      */
     Game_Unit.prototype.moveToFront = function(index) {
         // Backと違ってこっちはちょっと面倒。
@@ -1001,8 +1001,8 @@
     /**
      * 後衛に移動可能かどうかを判定する。
      * 
-     * @param {Number} index メンバーのインデックス番号
-     * @returns {Boolean} 後ろに移動可能な場合にはtrue, それ以外はfalse
+     * @param {number} index メンバーのインデックス番号
+     * @returns {boolean} 後ろに移動可能な場合にはtrue, それ以外はfalse
      */
     Game_Unit.prototype.canMoveToRear = function(index) {
         const member = this.members()[index];
@@ -1012,7 +1012,7 @@
     /**
      * 後退する。
      * 
-     * @param {Number} メンバーのインデックス番号
+     * @param {number} メンバーのインデックス番号
      */
     Game_Unit.prototype.moveToRear = function(index) {
         if (this.canMoveToRear(index)) {
@@ -1095,7 +1095,7 @@
     /**
      * 射程距離内のメンバーを得る。
      * 
-     * @param {Number} range 射程距離
+     * @param {number} range 射程距離
      * @returns {Array<Game_Battler>} メンバーの配列
      */
     Game_Unit.prototype.membersWithRange = function(range) {
@@ -1105,7 +1105,7 @@
     /**
      * 射程距離内の生存メンバーを得る。
      * 
-     * @param {Number} range 射程距離。
+     * @param {number} range 射程距離。
      * @returns {Array<Game_Battler>} メンバーの配列
      */
     Game_Unit.prototype.aliveMembersWithRange = function(range) {
@@ -1115,7 +1115,7 @@
     /**
      * 射程距離内の死亡メンバーを得る。
      * 
-     * @param {Number} range 射程距離。
+     * @param {number} range 射程距離。
      * @returns {Array<Game_Battler>} メンバーの配列
      */
     Game_Unit.prototype.deadMembersWithRange = function(range) {
@@ -1124,7 +1124,7 @@
     /**
      * 射程距離内メンバーの、ターゲット率の合計を得る。
      * 
-     * @returns {Number} ターゲット率合計
+     * @returns {number} ターゲット率合計
      */
     Game_Unit.prototype.tgrSumWithRange = function(range) {
         return this.aliveMembersWithRange(range).reduce((r, member) => r + member.tgr, 0);
@@ -1133,7 +1133,7 @@
     /**
      * 射程距離を加味した、ランダムなターゲットを得る。
      * 
-     * @param {Number} range 射程距離
+     * @param {number} range 射程距離
      * @returns {Game_Battler} ランダムなターゲット
      */
     Game_Unit.prototype.randomTargetWithRange = function(range) {
@@ -1151,7 +1151,7 @@
     /**
      * 射程距離を加味したランダムな死亡ターゲットを得る。
      * 
-     * @param {Number} range 射程距離
+     * @param {number} range 射程距離
      * @returns {Game_Battler} ランダムな死亡ターゲット
      */
     Game_Unit.prototype.randomDeadTargetWithRange = function(range) {
@@ -1164,8 +1164,8 @@
      * 実際にアクションを起こそうとした際、
      * 対象が死亡していたら切り替えて使用するための対象を得るためのインタフェース。
      * 
-     * @param {Number} index インデックス番号
-     * @param {Number} range 射程距離
+     * @param {number} index インデックス番号
+     * @param {number} range 射程距離
      * @returns {Game_Battler} indexで指定したメンバーが生存していれば、そのメンバーが返る。
      *                        生存していなければ、生存メンバーの先頭が返る。
      */
@@ -1177,8 +1177,8 @@
     /**
      * 指定された死亡対象を取得する。
      * 
-     * @param {Number} インデックス番号
-     * @param {Number} 射程距離
+     * @param {number} インデックス番号
+     * @param {number} 射程距離
      * @returns {Game_Battler} Game_Battlerオブジェクト。
      *         indexで指定した対象が死亡していない場合、deadMembers()の先頭が返る。
      */
@@ -1190,8 +1190,8 @@
     /**
      * 射程距離を加味した、生存または死亡対象を得る。
      * 
-     * @param {Number} インデックス番号
-     * @param {Number} 射程距離
+     * @param {number} インデックス番号
+     * @param {number} 射程距離
      * @returns {Game_Battler} Game_Battlerオブジェクト。
      *         indexで指定した対象が射程距離外の場合、射程距離内の先頭メンバーを得る。
      */
@@ -1210,7 +1210,7 @@
     /**
      * エネミーグループをセットアップする。
      * 
-     * @param {Number} troopId エネミーグループID
+     * @param {number} troopId エネミーグループID
      */
     Game_Troop.prototype.setup = function(troopId) {
         _Game_Troop_setup.call(this, troopId);
@@ -1233,7 +1233,7 @@
     /**
      * ターン先頭のイベントページを得る。
      * 
-     * @returns {Object} ページデータ。該当ページが無い場合にはnull.
+     * @returns {object} ページデータ。該当ページが無い場合にはnull.
      */
     Game_Troop.prototype.getFirstTurnEventPage = function() {
         const troop = this.troop();
@@ -1344,7 +1344,7 @@
     /**
      * 現在の選択が選択可能かどうかを取得する。
      * 
-     * @returns {Boolean} 選択可能な場合にtrue, それ以外はfalse
+     * @returns {boolean} 選択可能な場合にtrue, それ以外はfalse
      * !!!overwrite!!! Window_BattleEnemy_isCurrentItemEnabled
      */
     Window_BattleEnemy.prototype.isCurrentItemEnabled = function() {
@@ -1382,7 +1382,7 @@
     /**
      * 項目を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_BattleEnemy.prototype.drawItem = function(index) {
         const enemy = this._enemies[index];
@@ -1406,7 +1406,7 @@
     /**
      * 対象のエネミーを選択する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * !!!overwrite!!! Window_BattleEnemy_select
      */
     Window_BattleEnemy.prototype.select = function(index) {
@@ -1429,7 +1429,7 @@
     /**
      * 選択インデックスを設定する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * !!!overwrite!!! Window_BattleActor_select
      */
     Window_BattleActor.prototype.select = function(index) {

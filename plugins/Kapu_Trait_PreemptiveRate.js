@@ -111,7 +111,7 @@
         /**
          * ノートタグを処理する。
          * 
-         * @param {Object} obj データ
+         * @param {object} obj データ
          */
         const _processNoteTag = function(obj) {
             if (!obj.meta.preemptiveRate) {
@@ -147,7 +147,7 @@
     /**
      * マップをセットアップする。
      * 
-     * @param {Number} mapId マップID
+     * @param {number} mapId マップID
      */
     Game_Map.prototype.setup = function(mapId) {
         _Game_Map_setup.call(this, mapId);
@@ -161,7 +161,7 @@
     /**
      * マップの基本先制率を得る。
      * 
-     * @param {Number} rate 先制率
+     * @param {number} rate 先制率
      */
     Game_Map.prototype.setRatePreemptive = function(rate) {
         this._ratePreemptive = rate;
@@ -170,7 +170,7 @@
     /**
      * マップの基本先制率を得る。
      * 
-     * @returns {Number} 先制率
+     * @returns {number} 先制率
      */
     Game_Map.prototype.ratePreemptive = function() {
         return this._ratePreemptive;
@@ -181,8 +181,8 @@
     /**
      * このパーティーの先制攻撃率を得る。
      * 
-     * @param {Number} troopAgi 的グループのAGI
-     * @returns {Number} 先制攻撃率
+     * @param {number} troopAgi 的グループのAGI
+     * @returns {number} 先制攻撃率
      * !!!overwrite!!!
      */
     Game_Party.prototype.ratePreemptive = function(troopAgi) {

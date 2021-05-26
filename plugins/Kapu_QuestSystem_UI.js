@@ -350,7 +350,7 @@ function Scene_QuestShop() {
     /**
      * 最大項目数を得る。
      * 
-     * @returns {Number} 最大項目数
+     * @returns {number} 最大項目数
      */
     Window_MenuQuestList.prototype.maxItems = function() {
         return this._quests.length;
@@ -359,7 +359,7 @@ function Scene_QuestShop() {
     /**
      * indexで指定された項目のクエストデータを得る。
      * 
-     * @param {Number} index インデックス（未指定の場合には現在のインデックス）
+     * @param {number} index インデックス（未指定の場合には現在のインデックス）
      * @returns {Game_Quest} クエストデータ
      */
     Window_MenuQuestList.prototype.item = function(index) {
@@ -372,7 +372,7 @@ function Scene_QuestShop() {
     /**
      * 項目を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_MenuQuestList.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
@@ -471,7 +471,7 @@ function Scene_QuestShop() {
     /**
      * ラベル幅を得る。
      * 
-     * @returns {Number} ラベル幅
+     * @returns {number} ラベル幅
      */
     Window_QuestStatus.prototype.labelWidth = function() {
         return 120;
@@ -481,9 +481,9 @@ function Scene_QuestShop() {
      * クエスト名を描画する。
      * 
      * @param {Game_Quest}} quest クエスト
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_QuestStatus.prototype.drawQuestName = function(quest, x, y, width) {
         const labelWidth = this.labelWidth();
@@ -510,8 +510,8 @@ function Scene_QuestShop() {
      * 依頼内容を描画する。
      * 
      * @param {Game_Quest} quest クエスト
-     * @param {Number} x x位置
-     * @param {Number} y y位置
+     * @param {number} x x位置
+     * @param {number} y y位置
      */
     Window_QuestStatus.prototype.drawQuestDescription = function(quest, x, y) {
         const labelWidth = this.labelWidth();
@@ -527,8 +527,8 @@ function Scene_QuestShop() {
      * 達成条件を記述する。
      * 
      * @param {Game_Quest} quest クエスト
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
      */
     Window_QuestStatus.prototype.drawQuestAchieve = function(quest, x, y, width) {
         const labelWidth = this.labelWidth();
@@ -559,8 +559,8 @@ function Scene_QuestShop() {
      * 報酬を記述する。
      * 
      * @param {Game_Quest} quest クエスト
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
      */
     Window_QuestStatus.prototype.drawQuestRewards = function(quest, x, y) {
         const labelWidth = this.labelWidth();
@@ -574,7 +574,7 @@ function Scene_QuestShop() {
 
     /**
      * 水平ラインを描画する。
-     * @param {Number} y 描画位置y
+     * @param {number} y 描画位置y
      */
     Window_QuestStatus.prototype.drawHorzLine = function(y) {
         this.contents.paintOpacity = 48;
@@ -793,7 +793,7 @@ function Scene_QuestShop() {
     /**
      * 最大項目数を得る。
      * 
-     * @returns {Number} 最大項目数
+     * @returns {number} 最大項目数
      */
     Window_QuestShopUnderTakeList.prototype.maxItems = function() {
         return this._quests.length;
@@ -802,7 +802,7 @@ function Scene_QuestShop() {
     /**
      * indexで指定された項目のクエストデータを得る。
      * 
-     * @param {Number} index インデックス（未指定の場合には現在のインデックス）
+     * @param {number} index インデックス（未指定の場合には現在のインデックス）
      * @returns {Game_Quest} クエストデータ
      */
     Window_QuestShopUnderTakeList.prototype.item = function(index) {
@@ -823,8 +823,8 @@ function Scene_QuestShop() {
      * indexで指定される項目が選択可能かどうかを判定する。
      * 派生クラスはこのメソッドを実装して選択可否判定を行うこと。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Boolean} 選択可能な場合にはtrue, それ以外はfalse.
+     * @param {number} index インデックス番号
+     * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
     Window_QuestShopUnderTakeList.prototype.isEnabled = function(index) {
@@ -872,7 +872,7 @@ function Scene_QuestShop() {
     
     /**
      * 項目を描画する。
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_QuestShopUnderTakeList.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
@@ -914,7 +914,7 @@ function Scene_QuestShop() {
     /**
      * 最大項目数を得る。
      * 
-     * @returns {Number} 最大項目数
+     * @returns {number} 最大項目数
      */
     Window_QuestShopReportList.prototype.maxItems = function() {
         return this._quests.length;
@@ -923,7 +923,7 @@ function Scene_QuestShop() {
     /**
      * indexで指定された項目のクエストデータを得る。
      * 
-     * @param {Number} index インデックス（未指定の場合には現在のインデックス）
+     * @param {number} index インデックス（未指定の場合には現在のインデックス）
      * @returns {Game_Quest} クエストデータ
      */
     Window_QuestShopReportList.prototype.item = function(index) {
@@ -943,8 +943,8 @@ function Scene_QuestShop() {
     /**
      * indexで指定される項目が選択可能かどうかを判定する。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Boolean} 選択可能な場合にはtrue, それ以外はfalse
+     * @param {number} index インデックス番号
+     * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse
      */
     Window_QuestShopReportList.prototype.isEnabled = function(index) {
         const quest = this.item(index);
@@ -974,7 +974,7 @@ function Scene_QuestShop() {
     /**
      * 項目を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_QuestShopReportList.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
@@ -1013,9 +1013,9 @@ function Scene_QuestShop() {
 
     /**
      * ウィンドウを初期化する。
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_QuestShopGiveupList.prototype.initialize = function(x, y, width) {
         const height = Graphics.boxHeight;
@@ -1028,7 +1028,7 @@ function Scene_QuestShop() {
     /**
      * 最大項目数を得る。
      * 
-     * @returns {Number} 最大項目数
+     * @returns {number} 最大項目数
      */
     Window_QuestShopGiveupList.prototype.maxItems = function() {
         return this._quests.length;
@@ -1037,7 +1037,7 @@ function Scene_QuestShop() {
     /**
      * indexで指定された項目のクエストデータを得る。
      * 
-     * @param {Number} index インデックス（未指定の場合には現在のインデックス）
+     * @param {number} index インデックス（未指定の場合には現在のインデックス）
      * @returns {Game_Quest} クエストデータ
      */
     Window_QuestShopGiveupList.prototype.item = function(index) {
@@ -1056,8 +1056,8 @@ function Scene_QuestShop() {
 
     /**
      * indexで指定される項目が選択可能かどうかを判定する。
-     * @param {Number} index インデックス番号
-     * @returns {Boolean} 選択可能な場合にはtrue, それ以外はfalse
+     * @param {number} index インデックス番号
+     * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
     Window_QuestShopGiveupList.prototype.isEnabled = function(index) {
@@ -1085,7 +1085,7 @@ function Scene_QuestShop() {
     
     /**
      * 項目を描画する。
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_QuestShopGiveupList.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);

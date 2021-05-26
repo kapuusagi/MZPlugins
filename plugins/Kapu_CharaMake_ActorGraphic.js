@@ -257,7 +257,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * キャラクターメイキングセットの値を得る。
      * 
-     * @returns {Number} キャラクターメイキングセットの値
+     * @returns {number} キャラクターメイキングセットの値
      */
     Game_Temp.prototype.charaMakeActorGraphicSet = function() {
         return this._charaMakeActorGraphicSet;
@@ -265,7 +265,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * キャラクターメイキングセットの値を設定する。
      * 
-     * @param {Number} no キャラクターメイキングセットの値
+     * @param {number} no キャラクターメイキングセットの値
      */
     Game_Temp.prototype.setCharaMakeActorGraphicSet = function(no) {
         this._charaMakeActorGraphicSet = no.clamp(0, graphicSelectionSets.length - 1);
@@ -353,7 +353,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * 最大カラム数を得る。
      * 
-     * @returns {Number} カラム数
+     * @returns {number} カラム数
      */
     Window_CharaMakeVisualSelection.prototype.maxCols = function() {
         return Math.floor(this.innerWidth / 160);
@@ -361,7 +361,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * 項目の描画高を得る。
      * 
-     * @returns {Number} 項目の描画高さ。
+     * @returns {number} 項目の描画高さ。
      */
     Window_CharaMakeVisualSelection.prototype.itemHeight = function() {
         return 160;
@@ -387,7 +387,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * 項目を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_CharaMakeVisualSelection.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
@@ -442,7 +442,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * Game_CharaMakeItem_Visualを初期化する。
      * 
-     * @param {Number} no 番号
+     * @param {number} no 番号
      */
     Game_CharaMakeItem_Visual.prototype.initialize = function(no) {
         Game_CharaMakeItem.prototype.initialize.call(this, ...arguments);
@@ -469,7 +469,7 @@ function Sprite_CharaMake_Picture() {
      * アクターに適用可能な項目かどうかを取得する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Boolean} 既存データの変更の場合にはtrue、それ以外はfalse
+     * @param {boolean} 既存データの変更の場合にはtrue、それ以外はfalse
      * @returns 適用できる項目の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
@@ -482,7 +482,7 @@ function Sprite_CharaMake_Picture() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      * @param {Window_Help} helpWindow ヘルプウィンドウ
      * @param {Game_Actor} actor アクター
-     * @returns {Object} ウィンドウエントリ
+     * @returns {object} ウィンドウエントリ
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Visual.prototype.createSelectWindows = function(rect, helpWindow, actor) {
@@ -502,7 +502,7 @@ function Sprite_CharaMake_Picture() {
      * 
      * Note: キャラメイク操作で初期値を設定するために呼び出される。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars
@@ -535,7 +535,7 @@ function Sprite_CharaMake_Picture() {
      * デフォルトのグラフィックエントリを作成する。
      * 
      * @param {Game_Actor} actor アクター
-     * @returns {Object} 画像エントリ
+     * @returns {object} 画像エントリ
      */
     Game_CharaMakeItem_Visual.prototype.createDefaultEntry = function(actor) {
         return {
@@ -553,7 +553,7 @@ function Sprite_CharaMake_Picture() {
     /**
      * 編集中の設定を反映させる。
      * 
-     * @param {Object} windowEntry createSelectWindow()で返したウィンドウ
+     * @param {object} windowEntry createSelectWindow()で返したウィンドウ
      * @param {Game_Actor} acotr アクター
      */
     // eslint-disable-next-line no-unused-vars
@@ -579,7 +579,7 @@ function Sprite_CharaMake_Picture() {
      * 
      * @param {Window} windowEntry ウィンドウエントリ
      * @param {Game_Actor} actor アクター
-     * @returns {Boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 有効な選択状態の場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
     Game_CharaMakeItem_Visual.prototype.isValidSelection = function(windowEntry, actor) {

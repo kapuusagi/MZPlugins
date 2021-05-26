@@ -99,8 +99,8 @@
     /**
      * 引数からアクターIDを得る。
      * 
-     * @param {Object} arg 引数
-     * @returns {Number} アクターID
+     * @param {object} arg 引数
+     * @returns {number} アクターID
      */
     const _getActorId = function(arg) {
         const id = Number(arg.actorId) || 0;

@@ -154,7 +154,7 @@
         /**
          * ノートタグを処理する。
          * 
-         * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
+         * @param {object} obj データオブジェクト。(DataItem/DataSkill)
          */
         const _processNotetag = function(obj) {
             if (!obj.meta.updateLuk) {
@@ -199,10 +199,10 @@
     /**
      * LUK値を得る。
      * 
-     * @constant {Number}
+     * @constant {number}
      */
     Object.defineProperty(Game_BattlerBase.prototype, "luk", {
-        /** @returns {Number} */
+        /** @returns {number} */
         get: function() { return this.getLuk(); },
         configurable:true,
     });
@@ -211,7 +211,7 @@
     /**
      * パラメータを得る。
      * 
-     * @param {Number} paramId パラメータID
+     * @param {number} paramId パラメータID
      */
     Game_BattlerBase.prototype.param = function(paramId) {
         if (paramId === 7) {
@@ -227,7 +227,7 @@
      * バフやステートの特性による変動を除外した値を指す。
      * 既定の実装では以下の通り。
      * 
-     * @param {Number} paramId パラメータID
+     * @param {number} paramId パラメータID
      */
     Game_BattlerBase.prototype.paramBasePlus = function(paramId) {
         if (paramId === 7) {
@@ -240,7 +240,7 @@
     /**
      * LUK値を得る。
      * 
-     * @returns {Number} LUK値
+     * @returns {number} LUK値
      */
     Game_BattlerBase.prototype.getLuk = function() {
         const baseValue = this._luk.base + this._luk.variance + this.getLukPlus();
@@ -252,7 +252,7 @@
     /**
      * LUKの加算値を得る。
      * 
-     * @returns {Number} 加算値
+     * @returns {number} 加算値
      */
     Game_BattlerBase.prototype.getLukPlus = function() {
         return 0;
@@ -261,8 +261,8 @@
      * LUK値を更新する。
      * 未指定時、現在LUK変動値が低いほど上がりやすくなり、高いほど低くなりやすくなる。
      * 
-     * @param {Number} min 補正最小値(省略可) 省略時は変動量を1/10した値。
-     * @param {Number} max 補正最大値(省略可) 省略時はmin+10の値
+     * @param {number} min 補正最小値(省略可) 省略時は変動量を1/10した値。
+     * @param {number} max 補正最大値(省略可) 省略時はmin+10の値
      */
     Game_BattlerBase.prototype.updateLuk = function(min, max) {
         if ((typeof(min) === "undefined") || isNaN(min)) {
@@ -286,7 +286,7 @@
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
@@ -307,7 +307,7 @@
     /**
      * LUKの加算値を得る。
      * 
-     * @returns {Number} 加算値
+     * @returns {number} 加算値
      */
     Game_Actor.prototype.getLukPlus = function() {
         const equips = this.equips();
@@ -319,9 +319,9 @@
     /**
      * エネミーをセットアップする。
      * 
-     * @param {Number} enemyId エネミーID
-     * @param {Number} x X位置
-     * @param {Number} y Y位置
+     * @param {number} enemyId エネミーID
+     * @param {number} x X位置
+     * @param {number} y Y位置
      */
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
         _Game_Enemy_setup.call(this, enemyId, x, y);
@@ -339,7 +339,7 @@
     /**
      * LUK値を得る。
      * 
-     * @returns {Number} LUK値
+     * @returns {number} LUK値
      */
     Game_Enemy.prototype.getLuk = function() {
         return this._luk;
@@ -351,7 +351,7 @@
      * LUK値は0～100なので、1ポイント差分による影響度を上げ、対象より1多い毎に0.5%差が出る。。
      * 
      * @param {Game_Battler} target 対象
-     * @returns {Number} 確率上昇効果
+     * @returns {number} 確率上昇効果
      * !!!overwrite!!!
      */
     Game_Action.prototype.lukEffectRate = function(target) {

@@ -93,7 +93,7 @@
     /**
      * 瀕死で耐えるかどうかを得る。
      * 
-     * @returns {Boolean} 瀕死で耐える場合にはtrue, それ以外はfalse
+     * @returns {boolean} 瀕死で耐える場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isEndureDying = function() {
         return this.specialFlag(Game_BattlerBase.FLAG_ID_ENDURE_DYING);
@@ -105,7 +105,7 @@
     /**
      * HPを増減させ、resultデータに反映させる。
      * 
-     * @param {Number} value 増減させる値
+     * @param {number} value 増減させる値
      */
     Game_Battler.prototype.gainHp = function(value) {
         if ((value < 0) && this.isEndureDying() && (this.hp > 1)) {

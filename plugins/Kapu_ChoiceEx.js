@@ -296,7 +296,7 @@
     /**
      * 選択肢ウィンドウの選択が変わったときの処理を行う。
      * 
-     * @param {Number} index 選択肢ウィンドウの選択インデックス番号
+     * @param {number} index 選択肢ウィンドウの選択インデックス番号
      */
     Game_Message.prototype.choiceSelectionChanged = function(index) {
         this._choiceSelectedIndex = index;
@@ -308,7 +308,7 @@
     /**
      * 選択肢値を格納する変数IDを得る。
      * 
-     * @returns {Number} 変数ID
+     * @returns {number} 変数ID
      */
     Game_Message.prototype.choiceVariableId = function() {
         return this._choiceVariableId;
@@ -380,7 +380,7 @@
     /**
      * ヘルプテキスト文字列を得る。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      * @returns {Array<String>} ヘルプテキスト配列
      */
     Game_Message.prototype.choiceHelpText = function(index) {
@@ -391,7 +391,7 @@
     /**
      * 選択肢ヘルプ文字列を更新する。
      * 
-     * @param {Number} index 選択肢インデックス番号
+     * @param {number} index 選択肢インデックス番号
      */
     Game_Message.prototype.updateChoiceHelp = function(index) {
         this._choiceHelpText = this.choiceHelpText(index)
@@ -401,7 +401,7 @@
     /**
      * ヘルプかどうかを得る。
      * 
-     * @returns {Boolean} ヘルプの場合にはtrue, それ以外はfalse
+     * @returns {boolean} ヘルプの場合にはtrue, それ以外はfalse
      */
     Game_Message.prototype.isHelp = function() {
         return this._choiceHelpText.length > 0;
@@ -410,9 +410,9 @@
     /**
      * 選択肢ウィンドウの位置を設定する。
      * 
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} row 行数
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} row 行数
      */
     Game_Message.prototype.setChoicePos = function(x, y, row) {
         this._choiceX = x;
@@ -425,10 +425,10 @@
     /**
      * 選択肢ウィンドウ位置とサイズを設定する。
      * 
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Game_Message.prototype.setChoiceRect = function(x, y, width, height) {
         this._choiceX = x;
@@ -440,7 +440,7 @@
     /**
      * 選択肢ウィンドウのx位置を得る。
      * 
-     * @returns {Number} x位置
+     * @returns {number} x位置
      */
     Game_Message.prototype.choiceX = function() {
         return this._choiceX;
@@ -449,7 +449,7 @@
     /**
      * 選択肢ウィンドウのy位置を得る。
      * 
-     * @returns {Number} y位置
+     * @returns {number} y位置
      */
     Game_Message.prototype.choiceY = function() {
         return this._choiceY;
@@ -458,7 +458,7 @@
     /**
      * 選択肢ウィンドウの幅を得る。
      * 
-     * @returns {Number} 選択肢ウィンドウの幅
+     * @returns {number} 選択肢ウィンドウの幅
      */
     Game_Message.prototype.choiceWidth = function() {
         return this._choiceWidth;
@@ -467,7 +467,7 @@
     /**
      * 選択肢ウィンドウの高さを得る。
      * 
-     * @returns {Number} 選択肢ウィンドウの幅
+     * @returns {number} 選択肢ウィンドウの幅
      */
     Game_Message.prototype.choiceHeight = function() {
         return this._choiceHeight;
@@ -476,7 +476,7 @@
     /**
      * 最大行数を得る。
      * 
-     * @returns {Number} 最大行数
+     * @returns {number} 最大行数
      */
     Game_Message.prototype.choiceMaxRow = function() {
         return this._choiceMaxRow;
@@ -485,7 +485,7 @@
     /**
      * 選択肢変数IDを設定する。
      * 
-     * @param {Number} id 変数ID
+     * @param {number} id 変数ID
      */
     Game_Message.prototype.setChoiceVariableId = function(id) {
         this._choiceVariableId = id;
@@ -494,7 +494,7 @@
     /**
      * heightだけ選択肢ウィンドウの位置をずらす。
      * 
-     * @param {Number} height 高さ
+     * @param {number} height 高さ
      */
     Game_Message.prototype.shiftLine = function(height) {
         this._choiceY += height;
@@ -504,7 +504,7 @@
     /**
      * 選択肢選択中に、画像の操作を行うかどうかを設定する。
      * 
-     * @param {Boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     * @param {boolean} enabled 有効にする場合にはtrue, それ以外はfalse
      */
     Game_Message.prototype.setChoiceControlPicture = function(enabled) {
         this._choiceControlPicture = enabled;
@@ -513,7 +513,7 @@
     /**
      * 選択肢選択中に、画像の操作を行うかどうかを取得する。
      * 
-     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Game_Message.prototype.choiceControlPicture = function() {
         return this._choiceControlPicture;
@@ -522,7 +522,7 @@
     /**
      * ヘルプ操作を有効にするかどうかを設定する。
      * 
-     * @param {Boolean} enabled ヘルプ操作を有効にする場合にはtrue、それ以外はfalse
+     * @param {boolean} enabled ヘルプ操作を有効にする場合にはtrue、それ以外はfalse
      */
     Game_Message.prototype.setChoiceControlHelp = function(enabled) {
         this._choiceControlHelp = enabled;
@@ -531,7 +531,7 @@
     /**
      * ヘルプ操作が有効かどうかを得る。
      * 
-     * @returns {Boolean} ヘルプ操作が有効な場合にはtrue、それ以外はfalse
+     * @returns {boolean} ヘルプ操作が有効な場合にはtrue、それ以外はfalse
      */
     Game_Message.prototype.choiceControlHelp = function() {
         return this._choiceControlHelp;
@@ -568,10 +568,10 @@
      * 選択肢をセットアップする。
      * 
      * params[0] : {Array<String>} 選択肢の配列    
-     * params[1] : {Number} キャンセル選択の番号    
-     * params[2] : {Number} デフォルト選択の番号    
-     * params[3] : {Number} 位置(0:画面左端,1:中央,2:画面右端)    
-     * params[4] : {Number} 背景(0:不透明。通常のウィンドウ背景。 1:調光した背景, 2:完全透過)
+     * params[1] : {number} キャンセル選択の番号    
+     * params[2] : {number} デフォルト選択の番号    
+     * params[3] : {number} 位置(0:画面左端,1:中央,2:画面右端)    
+     * params[4] : {number} 背景(0:不透明。通常のウィンドウ背景。 1:調光した背景, 2:完全透過)
      * 
      * @param {Array<Object>} params パラメータ。
      * 
@@ -615,7 +615,7 @@
     /**
      * 選択肢が切り替わったときの処理を行う。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Game_Interpreter.prototype.onChoicing = function(index) {
         const choiceIndex = this._choiceData.results[index];
@@ -667,7 +667,7 @@
     /**
      * 選択肢で選択された時の処理を行う。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Game_Interpreter.prototype.onChoiced = function(index) {
         this._branch[this._indent] = this._choiceData.results[index];
@@ -678,8 +678,8 @@
      * 選択肢を追加する。再起コール用のインタフェース。
      * 
      * @param {Array<Object>} params パラメータ。
-     * @param {Number} scriptIndex スクリプトインデックス
-     * @param {Number} choiceIndexOffs 選択肢インデックスオフセット
+     * @param {number} scriptIndex スクリプトインデックス
+     * @param {number} choiceIndexOffs 選択肢インデックスオフセット
      */
     Game_Interpreter.prototype.addChoices = function(params, scriptIndex, choiceIndexOffs) {
         for (let n = 0; n < params[0].length; n++) {
@@ -725,7 +725,7 @@
     /**
      * 選択肢を追加する。
      * 
-     * @param {Number} choiceIndex 選択肢に割り当てるインデックス番号。
+     * @param {number} choiceIndex 選択肢に割り当てるインデックス番号。
      * @param {String} str 選択肢文字列
      */
     Game_Interpreter.prototype.addChoice = function(choiceIndex, str) {
@@ -751,7 +751,7 @@
     /**
      * 選択肢のヘルプテキストを得る。
      * 
-     * @param {Number} scriptIndex 分岐エントリのスクリプトインデックス
+     * @param {number} scriptIndex 分岐エントリのスクリプトインデックス
      * @returns {String} ヘルプテキスト
      */
     Game_Interpreter.prototype.getHelpText = function(scriptIndex) {
@@ -770,7 +770,7 @@
      * 選択肢を評価する。
      * 
      * @param {String} formula 
-     * @returns {Boolean} 選択肢が有効な場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 選択肢が有効な場合にはtrue, それ以外はfalse.
      */
     Game_Interpreter.prototype.evalChoice = function(formula) {
         try {
@@ -824,7 +824,7 @@
     /**
      * 選択肢ウィンドウのX位置を得る。
      * 
-     * @returns {Number} x位置
+     * @returns {number} x位置
      */
     Window_ChoiceList.prototype.windowX = function() {
         let x = $gameMessage.choiceX();
@@ -838,7 +838,7 @@
     /**
      * 選択ウィンドウのY位置を得る。
      * 
-     * @returns {Number} y位置
+     * @returns {number} y位置
      */
     Window_ChoiceList.prototype.windowY = function() {
         let y = $gameMessage.choiceY();
@@ -853,7 +853,7 @@
     /**
      * ウィンドウ幅を得る。
      * 
-     * @returns {Number} ウィンドウ幅
+     * @returns {number} ウィンドウ幅
      */
     Window_ChoiceList.prototype.windowWidth = function() {
         const width = $gameMessage.choiceWidth();
@@ -868,7 +868,7 @@
     /**
      * ウィンドウ高さを得る。
      * 
-     * @returns {Number} ウィンドウ高さ
+     * @returns {number} ウィンドウ高さ
      */
     Window_ChoiceList.prototype.windowHeight = function() {
         const height = $gameMessage.choiceHeight();
@@ -882,7 +882,7 @@
     /**
      * ウィンドウの行数を得る。
      * 
-     * @returns {Number} ウィンドウ行数
+     * @returns {number} ウィンドウ行数
      * !!!overwrite!!! Window_ChoiceList.numVisibleRows()
      *     返す有効行数を変更するため、オーバーライドする。
      */
@@ -908,7 +908,7 @@
     /**
      * 選択肢の項目を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_ChoiceList.prototype.drawItem = function(index) {
         this.changePaintOpacity(this.isCommandEnabled(index));
@@ -937,7 +937,7 @@
     /**
      * 選択する
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_ChoiceList.prototype.select = function(index) {
         _Window_ChoiceList_select.call(this, index);

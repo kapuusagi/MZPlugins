@@ -99,8 +99,8 @@
     /**
      * アクターIDを得る。
      * 
-     * @param {Object} args プラグインコマンド引数
-     * @returns {Number} アクターID
+     * @param {object} args プラグインコマンド引数
+     * @returns {number} アクターID
      */
     const _getActorId = function(args) {
         const actorId = Number(args.actorId) || 0;
@@ -126,7 +126,7 @@
     /**
      * GP習得スキル追加効果を追加する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      * @param {String} valueStr 値文字列
      */
     const _addGpLearnEffect = function(obj, valueStr) {
@@ -150,7 +150,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processSkillNotetag = function(obj) {
         obj.gpCost = 0;
@@ -176,7 +176,7 @@
         /**
          * ノートタグを処理する。
          * 
-         * @param {Object} obj データオブジェクト
+         * @param {object} obj データオブジェクト
          */
         const _processItemNotetag = function(obj) {
             if (obj.meta.addGpLearn) {
@@ -236,7 +236,7 @@
     /**
      * 使用済みGrowPointを得る。
      * 
-     * @returns {Number} 使用済み育成ポイント。
+     * @returns {number} 使用済み育成ポイント。
      */
     Game_Actor.prototype.usedGrowupPoint = function() {
         let usedPoint = _Game_Actor_usedGrowupPoint.call(this);
@@ -312,8 +312,8 @@
     /**
      * 習得済みスキルかどうかを判定する。
      * 
-     * @param {Number} skillId スキルID
-     * @returns {Boolean} GPにて習得済みのスキルである場合にはtrue, それ以外はfalse
+     * @param {number} skillId スキルID
+     * @returns {boolean} GPにて習得済みのスキルである場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isGpLearnedSkill = function (skillId) {
         return this._gpLearnedSkills.includes(skillId);
@@ -322,8 +322,8 @@
     /**
      * GP消費で習得可能スキルかどうかを判定する。
      * 
-     * @param {Number} skillId スキルID
-     * @returns {Boolean} GP消費で習得可能なスキルの場合にはtrue, それ以外はfalse
+     * @param {number} skillId スキルID
+     * @returns {boolean} GP消費で習得可能なスキルの場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isGpLearnableSkill = function (skillId) {
         return this._gpLearnableSkills.contains(skillId);
@@ -332,8 +332,8 @@
     /**
      * 習得可能スキルを追加する。
      * 
-     * @param {Number} skillId スキルID
-     * @returns {Boolean} 追加された場合にはtrue, それ以外はfalse.
+     * @param {number} skillId スキルID
+     * @returns {boolean} 追加された場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.addGpLearnableSkill = function(skillId) {
         if (!this.isGpLearnedSkill(skillId) && !this.isGpLearnableSkill(skillId)) {
@@ -419,7 +419,7 @@
      * 育成項目を適用する。
      * 
      * @param {GrowupItem} growupItem 育成項目
-     * @returns {Boolean} 適用できたかどうか。
+     * @returns {boolean} 適用できたかどうか。
      */
     Game_Actor.prototype.applyGrowup = function(growupItem) {
         if (growupItem.type === "skill") {
@@ -451,7 +451,7 @@
          * 
          * @param {Game_BattlerBase} target 対象
          * @param {DataEffect} effect エフェクトデータ
-         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         * @returns {boolean} 適用可能な場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testItemEffect = function(target, effect) {
             if (effect.code == Game_Action.EFFECT_ADD_GPLEARN_SKILL) {

@@ -186,8 +186,8 @@
     /**
      * 装備スロットの武器に設定されたスキルIDを得る。
      * 
-     * @param {Number} slotNo スロット番号
-     * @returns {Number} スキルID
+     * @param {number} slotNo スロット番号
+     * @returns {number} スキルID
      */
     Game_Actor.prototype.equipWeaponSkillId = function(slotNo) {
         const equips = this.equips();
@@ -210,7 +210,7 @@
     /**
      * 有効な武器スロットを設定する。
      * 
-     * @param {Number} validSlotNo 武器スロット番号
+     * @param {number} validSlotNo 武器スロット番号
      */
     Game_Actor.prototype.setValidWeaponSlot = function(validSlotNo) {
         const equipSlots = this.equipSlots();
@@ -241,7 +241,7 @@
     /**
      * ターゲットのインデックス番号を得る。
      * 
-     * @returns {Number} ターゲットのインデックス番号
+     * @returns {number} ターゲットのインデックス番号
      */
     Game_Action.prototype.targetIndex = function() {
         return this._targetIndex;
@@ -279,7 +279,7 @@
     /**
      * このアクションにスキル使用を設定する。
      * 
-     * @param {Number} skillId スキルID
+     * @param {number} skillId スキルID
      */
     Game_Action.prototype.setSkill = function(skillId) {
         _Game_Action_setSkill.call(this, skillId);
@@ -290,7 +290,7 @@
     /**
      * このアクションにアイテム使用を設定する。
      * 
-     * @param {Number} itemId アイテムID
+     * @param {number} itemId アイテムID
      */
     Game_Action.prototype.setItem = function(itemId) {
         _Game_Action_setItem.call(this, itemId);
@@ -301,7 +301,7 @@
     /**
      * このアクションが通常攻撃かどうかを得る。
      * 
-     * @returns {Boolean} 通常攻撃の場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 通常攻撃の場合にはtrue, それ以外はfalse.
      */
     Game_Action.prototype.isAttack = function() {
         return this._isAttack && _Game_Action_isAttack.call(this);
@@ -310,7 +310,7 @@
     /**
      * 武器スロット番号を設定する。
      * 
-     * @param {Number} slotNo スロット番号
+     * @param {number} slotNo スロット番号
      */
     Game_Action.prototype.setWeaponSlot = function(slotNo) {
         this._weaponSlot = slotNo;
@@ -321,8 +321,8 @@
      * ダメージ値を計算する。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @returns {Number} ダメージ値
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} ダメージ値
      * !!!overwrite!!! Game_Action.makeDamageValue
      */
     Game_Action.prototype.makeDamageValue = function(target, critical) {

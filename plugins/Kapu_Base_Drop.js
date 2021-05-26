@@ -60,7 +60,7 @@
     /**
      * ドロップアイテムを追加する。
      * 
-     * @param {Object} item DataItem/DataWeapon/DataArmor
+     * @param {object} item DataItem/DataWeapon/DataArmor
      */
     Game_Temp.prototype.addDropItem = function(item) {
         this._dropItems.push(item);
@@ -96,7 +96,7 @@
     /**
      * 追加のドロップアイテムを登録する。
      * 
-     * @param {Object} 報酬アイテムエントリ(kind, dataId, denominatorを持つオブジェクト)
+     * @param {object} 報酬アイテムエントリ(kind, dataId, denominatorを持つオブジェクト)
      */
     Game_Temp.prototype.addAdditionalRewardItems = function(item) {
         this._additionalDropItems.push(item);
@@ -115,7 +115,7 @@
     /**
      * 報酬ゴールドを増やす。
      * 
-     * @param {Number} gold ゴールド
+     * @param {number} gold ゴールド
      */
     Game_Temp.prototype.addAdditionalRewardGold = function(gold) {
         this._additionalGold = this._additionalGold + (gold || 0);
@@ -124,7 +124,7 @@
     /**
      * 追加の報酬金額を得る。
      * 
-     * @returns {Number} ゴールド
+     * @returns {number} ゴールド
      */
     Game_Temp.prototype.additionalRewardGold = function() {
         return this._additionalGold;
@@ -133,7 +133,7 @@
     /**
      * 報酬EXPを増やす。
      * 
-     * @param {Number} exp EXP
+     * @param {number} exp EXP
      */
     Game_Temp.prototype.addAdditionalRewardExp = function(exp) {
         this._additionalExp = this._additionalExp + (exp || 0);
@@ -142,7 +142,7 @@
     /**
      * 追加の報酬EXPを得る。
      * 
-     * @returns {Number} EXP
+     * @returns {number} EXP
      */
     Game_Temp.prototype.additionalRewardExp = function() {
         return this._additionalExp;
@@ -157,7 +157,7 @@
      * 戦闘を終了させる。
      * 本メソッドを呼ぶと、フェーズが"battleEnd"に遷移し、次のupdate()でSceneManager.pop()がコールされる。
      * 
-     * @param {Number} result 戦闘結果(0:勝利 , 1:中断(逃走を含む), 2:敗北)
+     * @param {number} result 戦闘結果(0:勝利 , 1:中断(逃走を含む), 2:敗北)
      */
     BattleManager.endBattle = function(result) {
         $gameTemp.clearDropItems();
@@ -171,14 +171,14 @@
     /**
      * ドロップアイテムの抽選回数を得る。
      * 
-     * @returns {Number} 抽選回数
+     * @returns {number} 抽選回数
      */
     Game_Party.prototype.dropItemLotteryCount = function() {
         return 1;
     };
     /**
      * ドロップレート補正倍率を得る。
-     * @returns {Number} ドロップレート補正倍率
+     * @returns {number} ドロップレート補正倍率
      */
     Game_Party.prototype.dropItemRate = function() {
         return this.hasDropItemDouble() ? 2 : 1;
@@ -187,7 +187,7 @@
     /**
      * 取得金額倍率を得る。
      *  
-     * @returns {Number} 取得金額倍率
+     * @returns {number} 取得金額倍率
      */
     Game_Party.prototype.dropGoldRate = function() {
         return this.hasGoldDouble() ? 2 : 1;
@@ -197,7 +197,7 @@
     /**
      * ゴールドレートを得る。
      * 
-     * @returns {Number} ゴールドレート。
+     * @returns {number} ゴールドレート。
      * !!!overwrite!!! Game_Troop.goldRate
      */
     Game_Troop.prototype.goldRate = function() {
@@ -206,7 +206,7 @@
     /**
      * ゴールドレートを得る。
      * 
-     * @returns {Number} ゴールドレート。
+     * @returns {number} ゴールドレート。
      * !!!overwrite!!! Game_Troop.goldRate
      */
     Game_Troop.prototype.goldRate = function() {
@@ -278,8 +278,8 @@
     /**
      * ドロップ条件を満たしているかどうかを調べる。
      * 
-     * @param {Object} dropItemEntry ドロップアイテムエントリ
-     * @returns {Boolean} ドロップ可能な場合にはtrue, それ以外はfalse
+     * @param {object} dropItemEntry ドロップアイテムエントリ
+     * @returns {boolean} ドロップ可能な場合にはtrue, それ以外はfalse
      */
     Game_Troop.prototype.isDropCondition = function(dropItemEntry) {
         return (dropItemEntry.kind > 0);
@@ -288,9 +288,9 @@
     /**
      * ドロップしたかどうかを判定する。
      * 
-     * @param {Object} dropItemEntry ドロップアイテムエントリ
-     * @param {Number} rate ドロップアイテムレート
-     * @returns {Boolean} ドロップした場合にはtrue, それ以外はfalse.
+     * @param {object} dropItemEntry ドロップアイテムエントリ
+     * @param {number} rate ドロップアイテムレート
+     * @returns {boolean} ドロップした場合にはtrue, それ以外はfalse.
      */
     Game_Troop.prototype.lotteryDropItem = function(dropItemEntry, rate) {
         return Math.random() * dropItemEntry.denominator < rate;
@@ -300,9 +300,9 @@
      * 
      * Note: Game_Enemyと二重定義になっていてよろしくない。
      * 
-     * @param {Number} kind アイテム種類(1:道具,2:武器,3:防具)
-     * @param {Number} dataId データID
-     * @return {Object} アイテムデータ(DataItem/DataWeapon/DataArmor)。
+     * @param {number} kind アイテム種類(1:道具,2:武器,3:防具)
+     * @param {number} dataId データID
+     * @return {object} アイテムデータ(DataItem/DataWeapon/DataArmor)。
      * kind,dataIdに相当するデータが無い場合にはnullが返る。
      */
     Game_Troop.prototype.itemObject = function(kind, dataId) {
@@ -323,7 +323,7 @@
     /**
      * アイテムドロップ率補正倍率を得る。
      * 
-     * @returns {Number} 補正倍率
+     * @returns {number} 補正倍率
      * !!!overwrite!!! Game_Enmy.dropItemRate
      */
     Game_Enemy.prototype.dropItemRate = function() {
@@ -360,9 +360,9 @@
      * ドロップアイテムエントリを得る。
      * 
      * Note: ベーシックシステムでは以下のフィールドを持ったオブジェクトの配列になる。
-     *       dataId : {Number} アイテム/武器/防具のID
-     *       denominator : {Number} ドロップ倍率の母数(1/255とかの255に相当)
-     *       kind : {Number} ドロップアイテム種類
+     *       dataId : {number} アイテム/武器/防具のID
+     *       denominator : {number} ドロップ倍率の母数(1/255とかの255に相当)
+     *       kind : {number} ドロップアイテム種類
      * 
      * @returns {Array<Object>} ドロップアイテムエントリ
      */
@@ -373,8 +373,8 @@
     /**
      * ドロップアイテムエントリがドロップ条件を満たしているかどうかを得る。
      * 
-     * @param {Object} dropItemEntry ドロップアイテムエントリ
-     * @returns {Boolean} ドロップアイテム条件を満たしている場合にはtrue, それ以外はfalse.
+     * @param {object} dropItemEntry ドロップアイテムエントリ
+     * @returns {boolean} ドロップアイテム条件を満たしている場合にはtrue, それ以外はfalse.
      */
     Game_Enemy.prototype.isDropCondition = function(dropItemEntry) {
         return (dropItemEntry.kind > 0);
@@ -382,9 +382,9 @@
     /**
      * ドロップしたかどうかを判定する。
      * 
-     * @param {Object} dropItemEntry ドロップアイテムエントリ
-     * @param {Number} rate ドロップアイテムレート
-     * @returns {Boolean} ドロップした場合にはtrue, それ以外はfalse.
+     * @param {object} dropItemEntry ドロップアイテムエントリ
+     * @param {number} rate ドロップアイテムレート
+     * @returns {boolean} ドロップした場合にはtrue, それ以外はfalse.
      */
     Game_Enemy.prototype.lotteryDropItem = function(dropItemEntry, rate) {
         return Math.random() * dropItemEntry.denominator < rate;

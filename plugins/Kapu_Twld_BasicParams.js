@@ -304,7 +304,7 @@
     /**
      * アクターIDを得る。
      * 
-     * @param {Object} args 引数
+     * @param {object} args 引数
      */
     const _getActorId = function(args) {
         const actorId = Number(args.actorId) || 0;
@@ -321,8 +321,8 @@
     /**
      * 値を得る。
      * 
-     * @param {Object} args 引数
-     * @returns {Number} 値
+     * @param {object} args 引数
+     * @returns {number} 値
      */
     const _getValue = function(args) {
         const variableId = Number(valueVariable) || 0;
@@ -351,7 +351,7 @@
      * 値を解析して基本パラメータの特性を追加する。
      * 
      * @param {TraitObject} obj traitsをメンバに持つオブジェクト
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @param {String} valueStr 値文字列
      */
     const _addBasicParamTrait = function(obj, dataId, valueStr) {
@@ -369,7 +369,7 @@
      * 基本パラメータ倍率補正特性を追加する。
      * 
      * @param {TraitObject} obj traitsをメンバに持つオブジェクト
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @param {String} valueStr 値文字列
      */
     const _addBasicParamRateTrait = function(obj, dataId, valueStr) {
@@ -427,7 +427,7 @@
         /**
          * アイテムとスキルのノートタグを処理する。
          * 
-         * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
+         * @param {object} obj データオブジェクト。(DataItem/DataSkill)
          */
         const _processEffectNotetag = function(obj) {
             const addTagNames = [
@@ -457,7 +457,7 @@
     /**
      * 基本パラメータに対応する名前を得る。
      * 
-     * @param {Number} paramId パラメータID
+     * @param {number} paramId パラメータID
      */
     TextManager.basicParam = function(paramId) {
         return paramLabels[paramId] || "";
@@ -466,8 +466,8 @@
     /**
      * 基本パラメータ加算特性名。
      * 
-     * @param {Number} dataId データID 
-     * @param {Number} value 値
+     * @param {number} dataId データID 
+     * @param {number} value 値
      * @returns {string} 文字列
      */
     TextManager.traitBasicParam = function(dataId, value) {
@@ -478,8 +478,8 @@
     /**
      * 基本パラメータ割合特性名。
      * 
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {number} dataId データID
+     * @param {number} value 値
      * @returns {string} 文字列
      */
     TextManager.traitBasicParamRate = function(dataId, value) {
@@ -535,8 +535,8 @@
          * パラメータを得る。
          * 
          * Note: AGI, LUKについて置き換えるためフックする。
-         * @param {Number} paramId パラメータID
-         * @returns {Number} パラメータ値
+         * @param {number} paramId パラメータID
+         * @returns {number} パラメータ値
          */
         Game_BattlerBase.prototype.param = function(paramId) {
             if (overwriteAGI && (paramId === 6)) {
@@ -553,8 +553,8 @@
          * パラメータを得る。
          * 
          * Note: 一部のメソッドで直接呼び出されるため、フックして置き換える必要がある。
-         * @param {Number} paramId パラメータID
-         * @returns {Number} パラメータ値
+         * @param {number} paramId パラメータID
+         * @returns {number} パラメータ値
          */
         Game_BattlerBase.prototype.paramBasePlus = function(paramId) {
             if (overwriteAGI && (paramId === 6)) {
@@ -570,8 +570,8 @@
     /**
      * 基本パラメータを得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} パラメータの値
+     * @param {number} paramId パラメータID
+     * @returns {number} パラメータの値
      */
     Game_BattlerBase.prototype.basicParam = function(paramId) {
         const baseValue = this.basicParamBase(paramId);
@@ -584,8 +584,8 @@
     /**
      * 基本パラメータのベース値を得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} パラメータの値
+     * @param {number} paramId パラメータID
+     * @returns {number} パラメータの値
      */
     Game_BattlerBase.prototype.basicParamBase = function(paramId) {
         return this._basicParams[paramId] + this._basicParamsAdd[paramId];
@@ -596,8 +596,8 @@
         /**
          * 基本パラメータの装備などによる加算値の合計を得る。
          * 
-         * @param {Number} paramId パラメータID
-         * @returns {Number} パラメータの値
+         * @param {number} paramId パラメータID
+         * @returns {number} パラメータの値
          */
         Game_BattlerBase.prototype.basicParamPlus = function(paramId) {
             return this.traitsSum(Game_BattlerBase.TRAIT_BASIC_PARAM, paramId);
@@ -606,8 +606,8 @@
         /**
          * 基本パラメータの装備などによる加算値の合計を得る。
          * 
-         * @param {Number} paramId パラメータID
-         * @returns {Number} パラメータの値
+         * @param {number} paramId パラメータID
+         * @returns {number} パラメータの値
          */
         // eslint-disable-next-line no-unused-vars
         Game_BattlerBase.prototype.basicParamPlus = function(paramId) {
@@ -619,8 +619,8 @@
         /**
          * 基本パラメータ乗算レートを得る。
          * 
-         * @param {Number} paramId パラメータID
-         * @returns {Number} 基本パラメータレート
+         * @param {number} paramId パラメータID
+         * @returns {number} 基本パラメータレート
          */
         Game_BattlerBase.prototype.basicParamRate = function(paramId) {
             return Math.max(0, 1.0 + this.traitsSum(Game_BattlerBase.TRAIT_BASIC_PARAM_RATE, paramId));
@@ -629,8 +629,8 @@
         /**
          * 基本パラメータ乗算レートを得る。
          * 
-         * @param {Number} paramId パラメータID
-         * @returns {Number} 基本パラメータレート
+         * @param {number} paramId パラメータID
+         * @returns {number} 基本パラメータレート
          */
         // eslint-disable-next-line no-unused-vars
         Game_BattlerBase.prototype.basicParamRate = function(paramId) {
@@ -641,8 +641,8 @@
     /**
      * 基本パラメータの最小値を得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} パラメータ最大値
+     * @param {number} paramId パラメータID
+     * @returns {number} パラメータ最大値
      */
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.basicParamMin = function(paramId) {
@@ -651,8 +651,8 @@
     /**
      * 基本パラメータの最大値を得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} パラメータ最大値
+     * @param {number} paramId パラメータID
+     * @returns {number} パラメータ最大値
      */
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.basicParamMax = function(paramId) {
@@ -665,7 +665,7 @@
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
@@ -686,8 +686,8 @@
     /**
      * 基本パラメータを増減する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} value 値
+     * @param {number} paramId パラメータID
+     * @param {number} value 値
      */
     Game_Actor.prototype.addBasicParam = function(paramId, value) {
         if ((paramId >= 0) && (paramId < this._basicParamsPlus.length)) {
@@ -701,8 +701,8 @@
     /**
      * 基本パラメータ生値を取得する。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} パラメータ値
+     * @param {number} paramId パラメータID
+     * @returns {number} パラメータ値
      */
     Game_Actor.prototype.basicParamRaw = function(paramId) {
         return this._basicParams[paramId];
@@ -714,9 +714,9 @@
     /**
      * エネミーをセットアップする。
      * 
-     * @param {Number} enemyId エネミーID
-     * @param {Number} x X位置
-     * @param {Number} y Y位置
+     * @param {number} enemyId エネミーID
+     * @param {number} x X位置
+     * @param {number} y Y位置
      */
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
         _Game_Enemy_setup.call(this, enemyId, x, y);
@@ -757,7 +757,7 @@
          * 
          * @param {Game_BattlerBase} target 対象
          * @param {DataEffect} effect エフェクトデータ
-         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         * @returns {boolean} 適用可能な場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testItemEffect = function(target, effect) {
             if (effect.code === Game_Action.EFFECT_GAIN_BASIC_PARAM) {

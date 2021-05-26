@@ -377,10 +377,10 @@ function Window_EquipItemName() {
      * アクターの顔グラフィックを描画する。
      * 
      * @param {Game_Battler} actor アクター
-     * @param {Number} x 描画領域左上X
-     * @param {Number} y 描画領域左上Y
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {number} x 描画領域左上X
+     * @param {number} y 描画領域左上Y
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */    
     Window_EquipActor.prototype.drawActorFace = function(actor, x, y, width, height) {
         if (actor.isDead()) {
@@ -399,7 +399,7 @@ function Window_EquipItemName() {
     /**
      * indexを選択する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_EquipSlot.prototype.select = function(index) {
         _Window_EquipSlot_select.call(this, index);
@@ -423,7 +423,7 @@ function Window_EquipItemName() {
     /**
      * スロットウィンドウの選択項目数を得る。
      * 
-     * @returns {Number} 選択項目数
+     * @returns {number} 選択項目数
      */
     Window_EquipSlot.prototype.maxItems = function() {
         if (this._actor) {
@@ -463,7 +463,7 @@ function Window_EquipItemName() {
     /**
      * スロット名の幅を得る。
      * 
-     * @returns {Number} スロット名の幅
+     * @returns {number} スロット名の幅
      */
     Window_EquipSlot.prototype.slotNameWidth = function() {
         return slotNameWidth;
@@ -472,10 +472,10 @@ function Window_EquipItemName() {
     /**
      * 装備品名を描画する。
      * 
-     * @param {Object} item 装備アイテム(DataWeapon/DataArmor)
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {object} item 装備アイテム(DataWeapon/DataArmor)
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_EquipSlot.prototype.drawEquipItemName = function(item, x, y, width) {
         if (item) {
@@ -491,8 +491,8 @@ function Window_EquipItemName() {
     /**
      * 項目が選択可能かどうかを得る。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Boolan} 選択可能な場合にはtrue, それ以外はfalse
+     * @param {number} index インデックス番号
+     * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse
      */
     Window_EquipSlot.prototype.isEnabled = function(index) {
         if (this._actor === null) {
@@ -516,8 +516,8 @@ function Window_EquipItemName() {
     /**
      * indexで指定されたスロットに装備されているアイテムを得る。
      * 
-     * @param {Number} index インデックス番号
-     * @returns {Object} アイテムオブジェクト。未装備の場合にはnull
+     * @param {number} index インデックス番号
+     * @returns {object} アイテムオブジェクト。未装備の場合にはnull
      */
     Window_EquipSlot.prototype.itemAt = function(index) {
         if (this._actor && (index < this._actor.equips().length)) {
@@ -570,10 +570,10 @@ function Window_EquipItemName() {
     /**
      * アイテム名を描画する。
      * 
-     * @param {Object} item アイテム(nameプロパティを持つオブジェクト)
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {object} item アイテム(nameプロパティを持つオブジェクト)
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_EquipItemName.prototype.drawEquipItemName = function(item, x, y, width) {
         if (item) {
@@ -623,9 +623,9 @@ function Window_EquipItemName() {
     /**
      * ステータスブロック1Aを描画する。
      * 
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_EquipStatus.prototype.drawBlock1A = function(x, y, width) {
         const actor = this._actor;
@@ -654,9 +654,9 @@ function Window_EquipItemName() {
     /**
      * ステータスブロック1Bを描画する。
      * 
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_EquipStatus.prototype.drawBlock1B = function(x, y, width) {
         const actor = this._actor;
@@ -681,9 +681,9 @@ function Window_EquipItemName() {
     /**
      * ステータスブロック1Cを描画する。
      * 
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_EquipStatus.prototype.drawBlock1C = function(x, y, width) {
         const actor = this._actor;
@@ -751,9 +751,9 @@ function Window_EquipItemName() {
     /**
      * 属性レート配列を描画する。
      * 
-     * @param {Number} x 描画x位置
-     * @param {Number} y 描画y位置
-     * @param {Number} width 描画幅
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 描画幅
      * @param {Array<Object>} 属性エントリ配列
      */
     Window_EquipStatus.prototype.drawElementRates = function(x, y, width, elementEntries) {
@@ -766,11 +766,11 @@ function Window_EquipItemName() {
     /**
      * 属性レートのパラメータを描画する。
      * 
-     * @param {Object} entry 属性エントリ
+     * @param {object} entry 属性エントリ
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_EquipStatus.prototype.drawElementRate = function(entry, actor, x, y, width) {
         if (!actor) {
@@ -877,7 +877,7 @@ function Window_EquipItemName() {
     /**
      * 属性レートを文字列に変換する。
      * 
-     * @param {Number} rate 割合
+     * @param {number} rate 割合
      * @returns {String} 割合を表す文字列
      */
     Window_EquipStatus.prototype.elementRateStr = function(rate) {
@@ -925,9 +925,9 @@ function Window_EquipItemName() {
     /**
      * paramEntryで指定されるパラメータを得る。
      * 
-     * @param {Object} paramEntry パラメータエントリ
+     * @param {object} paramEntry パラメータエントリ
      * @param {Game_Actor} actor アクター
-     * @returns {Number} 値
+     * @returns {number} 値
      */
     Window_EquipStatus.prototype.getCustomParam = function(paramEntry, actor) {
         try {
@@ -941,10 +941,10 @@ function Window_EquipItemName() {
     /**
      * パラメータを描画する。
      * 
-     * @param {Object} paramItem パラメータ
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {object} paramItem パラメータ
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_EquipStatus.prototype.drawParamItem = function(paramItem, x, y, width) {
         this.resetFontSettings();
@@ -982,11 +982,11 @@ function Window_EquipItemName() {
      * 整数値タイプのパラメータを描画する。
      * 
      * @param {String} paramName パラメータ名
-     * @param {Number} value1 値1（現在値）
-     * @param {Number} value2 値2（装備変更値）
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} value1 値1（現在値）
+     * @param {number} value2 値2（装備変更値）
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_EquipStatus.prototype.drawParamValue = function(paramName, value1, value2, x, y, width) {
         if (typeof value1 === "undefined") {
@@ -1022,11 +1022,11 @@ function Window_EquipItemName() {
      * 割合タイプのパラメータを描画する。
      * 
      * @param {String} paramName パラメータ名
-     * @param {Number} value1 値1（現在値）
-     * @param {Number} value2 値2（装備変更値）
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} value1 値1（現在値）
+     * @param {number} value2 値2（装備変更値）
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_EquipStatus.prototype.drawParamRate = function(paramName, value1, value2, x, y, width) {
         if (typeof value1 === "undefined") {
@@ -1064,9 +1064,9 @@ function Window_EquipItemName() {
     /**
      * 水平ラインを描画する。
      * 
-     * @param {Number} x 描画x位置
-     * @param {Number} y 描画y位置
-     * @param {Number} width 幅
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 幅
      */
     Window_EquipStatus.prototype.drawHorzLine = function(x, y, width) {
         this.changePaintOpacity(false);
@@ -1124,7 +1124,7 @@ function Window_EquipItemName() {
     /**
      * コマンドウィンドウ幅を得る。
      * 
-     * @returns {Number} コマンドウィンドウ幅
+     * @returns {number} コマンドウィンドウ幅
      */
     Scene_Equip.prototype.commandWindowWidth = function() {
         return commandWindowWidth;
@@ -1579,7 +1579,7 @@ function Window_EquipItemName() {
         /**
          * いずれかの入力ウィンドウがアクティブ（選択中）かどうかを判定する。
          * 
-         * @returns {Boolean} いずれかの入力ウィンドウがアクティブな場合にはtrue, それ以外はfalse
+         * @returns {boolean} いずれかの入力ウィンドウがアクティブな場合にはtrue, それ以外はfalse
          */
         Scene_Battle.prototype.isAnyInputWindowActive = function() {
             return _Scene_Battle_isAnyInputWindowActive.call(this)

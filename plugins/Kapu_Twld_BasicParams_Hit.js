@@ -43,7 +43,7 @@
      * ミスしたかどうかを評価する。
      * 
      * @param {Game_Battler} target 対象
-     * @returns {Boolean} ミスした場合にtrue, それ以外はfalse
+     * @returns {boolean} ミスした場合にtrue, それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.testMissed = function(target) {
@@ -53,7 +53,7 @@
      * 回避したかどうかを評価する。
      * 
      * @param {Game_Battler} target ターゲット
-     * @returns {Boolean} 回避できた場合にはtrue, それ以外はfalse
+     * @returns {boolean} 回避できた場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testEvaded = function(target) {
         if (this.isPhysical()) {
@@ -68,7 +68,7 @@
     /**
      * このスキルがロングレンジかどうかを得る。
      * 
-     * @returns {Boolean} ロングレンジの場合にはtrue, それ以外はfalse
+     * @returns {boolean} ロングレンジの場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.isLongRangeItem = function() {
         return this.item().meta.longRange;
@@ -79,7 +79,7 @@
      * 物理攻撃時の回避判定を行う。
      * 
      * @param {Game_Battler} target 対象
-     * @returns {Boolean} 命中した場合にはtrue, それ以外はfalse
+     * @returns {boolean} 命中した場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testEvaPhysical = function(target) {
         const subject = this.subject();
@@ -99,7 +99,7 @@
      * 魔法攻撃時の回避判定を行う。
      * 
      * @param {Game_Battler} target 対象
-     * @returns {Boolean} 命中した場合にはtrue, それ以外はfalse
+     * @returns {boolean} 命中した場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testEvaMagical = function(target) {
         const subject = this.subject();
@@ -115,7 +115,7 @@
      * クリティカル発生率を返す。
      * 
      * @param {Game_Battler} target
-     * @returns {Number} クリティカル率(0.0～1.0、1.0で100％発生)が返る。
+     * @returns {number} クリティカル率(0.0～1.0、1.0で100％発生)が返る。
      */
     Game_Action.prototype.itemCri = function(target) {
         const rate = _Game_Action_itemCri.call(this, target);
@@ -148,9 +148,9 @@
      * 小さい側の値が大きくなるほど、差分によるレートの差が出にくくなるようにした。
      * あと使用者より2倍速い相手にそう簡単に当てられないでしょ？という考えによる。
      * 
-     * @param {Number} targetVal ターゲットの値
-     * @param {Number} subjectVal 使用者の値
-     * @returns {Number} 相対補正値
+     * @param {number} targetVal ターゲットの値
+     * @param {number} subjectVal 使用者の値
+     * @returns {number} 相対補正値
      */
 
     Game_Action.prototype.relativeDiffRate = function(targetVal, subjectVal) {

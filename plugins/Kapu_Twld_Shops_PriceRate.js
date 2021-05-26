@@ -44,7 +44,7 @@
     /**
      * この店からの購入価格レートを取得する。
      * 
-     * @returns {Number} 販売価格レート(1.0で等倍)
+     * @returns {number} 販売価格レート(1.0で等倍)
      */
     Game_Shop.prototype.buyingPriceRate = function() {
         const rate = _Game_Shop_buyingPriceRate.call(this);
@@ -59,7 +59,7 @@
     /**
      * この店への売却価格レートを取得する。
      * 
-     * @param {Number} 売却価格レート(1.0で等倍)
+     * @param {number} 売却価格レート(1.0で等倍)
      */
     Game_Shop.prototype.sellingPriceRate = function() {
         const rate = _Game_Shop_sellingPriceRate.call(this);

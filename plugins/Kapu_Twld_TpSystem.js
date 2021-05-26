@@ -61,7 +61,7 @@
     /**
      * TPを上昇させる。
      * 
-     * @param {Number} value 上昇値
+     * @param {number} value 上昇値
      */
     Game_Battler.prototype.gainTp = function(value) {
         if ($gameParty.inBattle()) {
@@ -77,7 +77,7 @@
      * Game_Actionを初期化する。
      * 
      * @param {Game_Battler} subject 使用者
-     * @param {Boolean} forcing 強制実行
+     * @param {boolean} forcing 強制実行
      */
     Game_Action.prototype.initialize = function(subject, forcing) {
         _Game_Action_initialize.call(this, subject, forcing);
@@ -100,7 +100,7 @@
      * TPダメージレートを取得する。
      * 
      * @param {Game_Battler} ターゲット
-     * @returns {Number} TPダメージレート
+     * @returns {number} TPダメージレート
      */
     Game_Action.prototype.tpDamageRate = function(target) {
         return 1 + Math.max(0, ((this._subjectTp - target.tp) * 0.01));
@@ -111,8 +111,8 @@
      * ダメージ量の乗算ボーナスレートを得る。
      * 
      * @param {Game_Battler} target ターゲット。
-     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @returns {Number} 乗算ボーナスレート
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} 乗算ボーナスレート
      */
     Game_Action.prototype.multiplyDamageRate = function(target, critical) {
         const tpDamageRate = this.tpDamageRate(target);
@@ -124,7 +124,7 @@
      * 命中率を得る。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @returns {Number 命中率。
+     * @returns {number} 命中率。
      */
     Game_Action.prototype.itemHit = function(target) {
         const tpHitRate = ((this._subjectTp - target.tp) * 0.005).clamp(0, 0.5);
@@ -136,7 +136,7 @@
      * 回避率を得る。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @returns {Number} 回避率。
+     * @returns {number} 回避率。
      */
     Game_Action.prototype.itemEva = function(target) {
         const tpEvaRate = ((target.tp - this._subjectTp) * 0.005).clamp(0, 0.5);
@@ -149,7 +149,7 @@
      * このアクションのクリティカル率を得る。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @returns {Number} クリティカル率(0.0～1.0）
+     * @returns {number} クリティカル率(0.0～1.0）
      */
     Game_Action.prototype.itemCri = function(target) {
         const tpCriRate = ((this._subjectTp - target.tp) * 0.0025).clamp(0, 0.25);

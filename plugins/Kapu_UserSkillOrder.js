@@ -79,8 +79,8 @@
      * スキル並び順を得る。
      * 並び順リストにidの登録がなければ、末尾についかして並び順を返す。
      * 
-     * @param {Number} id スキルID番号
-     * @returns {Number} スキル並び順が返る。
+     * @param {number} id スキルID番号
+     * @returns {number} スキル並び順が返る。
      */
     Game_Actor.prototype.getSkillOrder = function(id) {
         let index = this._skillOrder.indexOf(id);
@@ -94,8 +94,8 @@
     };
     /**
      * スキルのaとbの並び順を入れ替える。
-     * @param {Number} skillId1 スキルID1
-     * @param {Number} skillId2 スキルID2
+     * @param {number} skillId1 スキルID1
+     * @param {number} skillId2 スキルID2
      */
     Game_Actor.prototype.swapSkillOrder = function(skillId1, skillId2) {
         const ai = this.getSkillOrder(skillId1);
@@ -132,7 +132,7 @@
     /**
      * スキル順入れ替え機能を有効にするかどうかを設定する。
      * 
-     * @param {Boolean} enabled スキル順入れ替えを有効にする場合にはtrue, それ以外はfalse
+     * @param {boolean} enabled スキル順入れ替えを有効にする場合にはtrue, それ以外はfalse
      */
     Window_SkillList.prototype.setOrderEditEnable = function(enabled) {
         if (this._orderEditEnable !== enabled) {
@@ -145,7 +145,7 @@
 
     /**
      * ペンディングインデックスを設定する。
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_SkillList.prototype.setPendingIndex = function(index) {
         if (this._pendingIndex !== index) {
@@ -156,7 +156,7 @@
 
     /**
      * ペンディングインデックスを取得する。
-     * @returns {Number} ペンディングインデックス
+     * @returns {number} ペンディングインデックス
      */
     Window_SkillList.prototype.getPendingIndex = function() {
         return this._pendingIndex;
@@ -181,7 +181,7 @@
     /**
      * 現在の選択項目が有効かどうかを判定する。
      * 
-     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Window_SkillList.prototype.isCurrentItemEnabled = function() {
         if (this._orderEditEnable
@@ -198,7 +198,7 @@
     /**
      * 項目を描画する
      * 
-     * @param {Number} index 項目のインデックス番号
+     * @param {number} index 項目のインデックス番号
      */
     Window_SkillList.prototype.drawItem = function(index) {
         if ((this._orderEditEnable) && (index == this._pendingIndex)) {

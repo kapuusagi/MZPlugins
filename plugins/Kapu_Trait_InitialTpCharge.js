@@ -105,7 +105,7 @@
     /**
      * 戦闘開始時の処理を行う。
      * 
-     * @param {Boolean} advantageous 有利な状態かどうか
+     * @param {boolean} advantageous 有利な状態かどうか
      */
     Game_Battler.prototype.onBattleStart = function(advantageous) {
         _Game_Battler_onBattleStart.call(this, advantageous);
@@ -118,7 +118,7 @@
     /**
      * 戦闘開始時初期TP値を得る。
      * 
-     * @returns {Number} 初期TP値。
+     * @returns {number} 初期TP値。
      */
     Game_Battler.prototype.initialTp = function() {
         const rate = this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_INITTP_RATE).clamp(0, 1);

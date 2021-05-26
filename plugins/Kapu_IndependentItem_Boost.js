@@ -175,9 +175,9 @@
      * レート文字列から率を取得する。
      * 
      * @param {string} str 成功率文字列
-     * @param {Number} min 最小値
-     * @param {Number} max 最大値
-     * @returns {Number} 率(min～max)
+     * @param {number} min 最小値
+     * @param {number} max 最大値
+     * @returns {number} 率(min～max)
      */
     const _parseRate = function(str, min, max) {
         let rate = 0.0;
@@ -216,7 +216,7 @@
      * 最大ブーストカウントをパースする
      * 
      * @param {string} str 最大ブースト可能数
-     * @returns {Number} 最大ブーストカウント[最小：最大]
+     * @returns {number} 最大ブーストカウント[最小：最大]
      */
     const _getMaxBoostCount = function(str) {
         const index = str.indexOf("-");
@@ -364,7 +364,7 @@
     /**
      * 強化状態をリセットする。
      * 
-     * @param {Object} item アイテム
+     * @param {object} item アイテム
      */
     DataManager.resetBoost = function(item) {
         if (DataManager.isWeapon(item)) {
@@ -424,11 +424,11 @@
     /**
      * 強化成功率を得る。
      * 
-     * @param {Object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
-     * @param {Number} userLevel 強化実行レベル
-     * @param {Object} catalystItem 素材アイテム。DataItem
-     * @param {Number} catalystItemCount 使用する素材アイテム数
-     * @returns {Number} 強化成功率(minSuccessRate ～ 1.0)
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @param {number} userLevel 強化実行レベル
+     * @param {object} catalystItem 素材アイテム。DataItem
+     * @param {number} catalystItemCount 使用する素材アイテム数
+     * @returns {number} 強化成功率(minSuccessRate ～ 1.0)
      */
     DataManager.getBoostSuccessRate = function(item, userLevel, catalystItem, catalystItemCount) {
         const boostCount = item.boostCount || 0;
@@ -444,8 +444,8 @@
     /**
      * 強化を行う。
      * 
-     * @param {Object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
-     * @param {Object} catalystItem 素材アイテム。DataItem
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @param {object} catalystItem 素材アイテム。DataItem
      */
     DataManager.boostIndependentItem = function(item, catalystItem) {
         if (!DataManager.isIndependentItem(item)) {
@@ -464,7 +464,7 @@
     /**
      * 強化項目を適用する。
      * 
-     * @param {Object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
      * @param {string} key 強化項目名
      * @param {string} value 強化値
      */
@@ -586,7 +586,7 @@
      *     min#:max#
      * 
      * @param {string} valueStr 
-     * @returns {Number} ブースト値
+     * @returns {number} ブースト値
      */
     DataManager.getBoostValueInt = function(valueStr) {
         return Math.round(DataManager.getBoostValueReal(valueStr));
@@ -602,7 +602,7 @@
      * 小数点以下2桁で丸めるように処理する。
      * 
      * @param {string} valueStr 
-     * @returns {Number} ブースト値
+     * @returns {number} ブースト値
      */
      DataManager.getBoostValueReal = function(valueStr) {
         const tokens = valueStr.split(":");
@@ -637,7 +637,7 @@
     /**
      * 強化アイテムの名前を更新する。
      * 
-     * @param {Object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
      */
     DataManager.updateBoostItemName = function(item) {
         const prefix = item.namePrefix || "";
@@ -652,10 +652,10 @@
      * アイテムに特性を追加する。
      * 既に同じ内容の特性を持っている場合には加算する。
      * 
-     * @param {Object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
-     * @param {Number} code 特性コード
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @param {number} code 特性コード
+     * @param {number} dataId データID
+     * @param {number} value 値
      */
     DataManager.addBoostTrait = function(item, code, dataId, value) {
         const trait = item.traits.find(function(t) {
@@ -672,8 +672,8 @@
     /**
      * 強化費用を得る。
      * 
-     * @param {Object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
-     * @returns {Number} 打ち直し費用
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @returns {number} 打ち直し費用
      */
     DataManager.getBoostPrice = function(item) {
         const nextBoostCount = (item.boostCount || 0) + 1;
@@ -689,8 +689,8 @@
     /**
      * 強化リセット費用を得る。
      * 
-     * @param {Object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
-     * @returns {Number} 打ち直し費用
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @returns {number} 打ち直し費用
      */
     DataManager.getResetBoostPrice = function(item) {
         return Math.floor(item.boostPrice / 2).clamp(minBoostPrice, $gameParty.maxGold());
@@ -699,8 +699,8 @@
     /**
      * 打ち直し費用を得る。
      * 
-     * @param {Object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
-     * @returns {Number} 打ち直し費用
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @returns {number} 打ち直し費用
      */
     DataManager.getResetPrice = function(item) {
         const price = Math.floor(item.boostPrice * (1.0 + item.boostCount * 0.1));
@@ -710,8 +710,8 @@
     /**
      * 強化可能なアイテムかどうかを取得する。
      * 
-     * @param {Object} item 対象のアイテム(DataWeapon/DataArmor)
-     * @returns {Boolean} 強化可能なアイテムの場合にはtrue, それ以外はfalse.
+     * @param {object} item 対象のアイテム(DataWeapon/DataArmor)
+     * @returns {boolean} 強化可能なアイテムの場合にはtrue, それ以外はfalse.
      */
     DataManager.isBoostableItem = function(item) {
         if (item.maxBoostCount) {
@@ -725,9 +725,9 @@
     /**
      * 素材を適用可能かどうかを取得する。
      * 
-     * @param {Object} item 素材アイテム
-     * @param {Object} equipment 装備品(DataWeapon/DataArmor)
-     * @returns {Boolean} 適用可能な場合にはtrue, 適用できない場合にはfalse.
+     * @param {object} item 素材アイテム
+     * @param {object} equipment 装備品(DataWeapon/DataArmor)
+     * @returns {boolean} 適用可能な場合にはtrue, 適用できない場合にはfalse.
      */
     DataManager.isBoostCatalystApplicable = function(item, equipment) {
         if (item.meta.boostCondition) {

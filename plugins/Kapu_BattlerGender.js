@@ -120,7 +120,7 @@
      * 性別文字列をパースして性別値を得る。
      * 
      * @param {string} str 文字列
-     * @returns {Number} 性別を表す定数値
+     * @returns {number} 性別を表す定数値
      */
     const _parseGender = function(str) {
         if ((str === "male") || (str === textGenderMale)) {
@@ -160,7 +160,7 @@
     /**
      * 性別名を得る。
      * 
-     * @param {Number} genderNo 性別番号
+     * @param {number} genderNo 性別番号
      * @returns {string} 性別名
      */
     TextManager.genderText = function(genderNo) {
@@ -219,7 +219,7 @@
     /**
      * 男性かどうかを判定する。
      * 
-     * @returns {Boolean} 男性の場合にはtrue, それ以外はfalse
+     * @returns {boolean} 男性の場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isMale = function() {
         return this._gender === Game_BattlerBase.GENDER_MALE;
@@ -228,7 +228,7 @@
     /**
      * 女性かどうかを判定する。
      * 
-     * @returns {Boolean} 男性の場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 男性の場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.isFemale = function() {
         return this._gender === Game_BattlerBase.GENDER_FEMALE;
@@ -239,7 +239,7 @@
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
@@ -254,7 +254,7 @@
     /**
      * 性別を変更する。
      * 
-     * @param {Object} gender 性別文字列or性別番号
+     * @param {object} gender 性別文字列or性別番号
      */
     Game_Actor.prototype.changeGender = function(gender) {
         this._gender = _parseGender(gender);
@@ -266,9 +266,9 @@
     /**
      * エネミーをセットアップする。
      * 
-     * @param {Number} enemyId エネミーID
-     * @param {Number} x X位置
-     * @param {Number} y Y位置
+     * @param {number} enemyId エネミーID
+     * @param {number} x X位置
+     * @param {number} y Y位置
      */
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
         _Game_Enemy_setup.call(this, enemyId, x, y);
@@ -283,7 +283,7 @@
     /**
      * 全員男性かどうかを判定する。
      * 
-     * @returns {Boolean} 全員男性の場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 全員男性の場合にはtrue, それ以外はfalse.
      */
     Game_Unit.prototype.isMaleOnly = function() {
         return this.allMembers().every(member => member.isMale());
@@ -292,7 +292,7 @@
     /**
      * 全員女性かどうかを判定する。
      * 
-     * @returns {Boolean} 全員女性の場合にはtrue, それ以外はfalse
+     * @returns {boolean} 全員女性の場合にはtrue, それ以外はfalse
      */
     Game_Unit.prototype.isFemaleOnly = function() {
         return this.allMembers().every(member => member.isFemale());

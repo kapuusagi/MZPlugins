@@ -120,8 +120,8 @@
     /**
      * stateIdで指定されるステートを持っているかどうかを取得する。
      * 
-     * @param {Number} stateId ステートID
-     * @returns {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
+     * @param {number} stateId ステートID
+     * @returns {boolean} ステートを持っている場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isStateAffected = function(stateId) {
         if (this.isPassiveStateAffected(stateId)) {
@@ -144,8 +144,8 @@
      * stateIdで指定されるステートが、
      * パッシブステートとして持っているかどうかを取得する。
      * 
-     * @param {Number} stateId ステートID
-     * @returns {Boolean} 保持しているパッシブステートに含まれる場合にはtrue,それ以外はfalse
+     * @param {number} stateId ステートID
+     * @returns {boolean} 保持しているパッシブステートに含まれる場合にはtrue,それ以外はfalse
      */
     Game_BattlerBase.prototype.isPassiveStateAffected = function(stateId) {
         return this._passiveStateIds.includes(stateId);
@@ -192,8 +192,8 @@
     /**
      * ステートを付与可能かどうか判定する。
      * 
-     * @param {Number} stateId ステートID
-     * @returns {Boolean} ステートを付与可能な場合にはtrue,それ以外はfalse
+     * @param {number} stateId ステートID
+     * @returns {boolean} ステートを付与可能な場合にはtrue,それ以外はfalse
      */
     Game_Battler.prototype.isStateAddable = function(stateId) {
         if (this.isPassiveStateAffected(stateId)) {
@@ -208,7 +208,7 @@
     /**
      * ステートを取り除く。
      * 
-     * @param {Number} stateId ステートID
+     * @param {number} stateId ステートID
      */
     Game_Battler.prototype.removeState = function(stateId) {
         if (!this.isPassiveStateAffected(stateId)) {
@@ -223,7 +223,7 @@
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
@@ -283,9 +283,9 @@
     /**
      * エネミーをセットアップする。
      * 
-     * @param {Number} enemyId エネミーID
-     * @param {Number} x X位置
-     * @param {Number} y Y位置
+     * @param {number} enemyId エネミーID
+     * @param {number} x X位置
+     * @param {number} y Y位置
      */
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
         _Game_Enemy_setup.call(this, enemyId, x, y);

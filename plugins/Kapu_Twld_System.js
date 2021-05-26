@@ -77,7 +77,7 @@
     /**
      * MaxHP/MaxMP/ATK/DEF/MATK/MDEFパラメータの増幅率を得る。
      * 
-     * @returns {Number} 増幅率
+     * @returns {number} 増幅率
      * !!!overwrite!!! Game_BattlerBase.paramRate()
      *     基本パラメータの割合増加を加算合成に変更するため、オーバーライドする。
      */
@@ -96,7 +96,7 @@
     /**
      * パッシブスキルを持っているかどうかを判定する。
      * 
-     * @returns {Boolean} パッシブスキルを持っている場合にはtrue, それ以外はfalse
+     * @returns {boolean} パッシブスキルを持っている場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.hasPassiveSkill = function() {
         return this.skills().some(function(skill) {
@@ -109,7 +109,7 @@
     /**
      * skillIdで指定されるスキルを習得する。
      * 
-     * @param {Number} skillId スキルID
+     * @param {number} skillId スキルID
      */
     Game_Actor.prototype.learnSkill = function(skillId) {
         _Game_Actor_learnSkill.call(this, skillId);
@@ -142,7 +142,7 @@
      * 
      * Note: ベーシックシステムではアクターがDead状態でもスキルがあるかどうかを判定していた。
      * 
-     * @param {Number} abilityId アビリティID
+     * @param {number} abilityId アビリティID
      * !!!overwrite!!! Game_Party.partyAbility()
      *     パーティーアビリティ有無は生存メンバーだけ対象にするため、オーバーライドする。
      */

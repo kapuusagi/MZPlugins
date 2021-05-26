@@ -61,7 +61,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processElementIdsNotetag = function(obj) {
         if (!("damage" in obj)) {
@@ -96,7 +96,7 @@
      * 属性による効果倍率を得る。
      * 
      * @param {Game_BattlerBase} target ターゲット
-     * @returns {Number} 効果倍率
+     * @returns {number} 効果倍率
      * !!!overwrite!!! Game_Action.calcElementRate
      */
     Game_Action.prototype.calcElementRate = function(target) {
@@ -118,7 +118,7 @@
      * 既定の実装では単純に最大値のレートを返す。
      * 
      * @param {Game_BattlerBase} target ターゲット
-     * @returns {Number} 効果倍率
+     * @returns {number} 効果倍率
      * !!!overwrite!!! Game_Action.elementsMaxRate
      */
     Game_Action.prototype.elementsMaxRate = function(target, elements) {
@@ -143,8 +143,8 @@
      * 単一の属性効果を得る。
      * 
      * @param {Game_BattlerBase} target 
-     * @param {Number} elementId 属性ID
-     * @returns {Number} 属性倍率
+     * @param {number} elementId 属性ID
+     * @returns {number} 属性倍率
      */
     Game_Action.prototype.singleElementRate = function(target, elementId) {
         return target.elementRate(elementId);

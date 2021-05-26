@@ -197,7 +197,7 @@
     /**
      * アイテムとスキルのノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト。(DataItem/DataSkill)
+     * @param {object} obj データオブジェクト。(DataItem/DataSkill)
      */
     const _processEffectNotetag = function(obj) {
         if (Game_Action.EFFECT_GAIN_TPB_CHARGE_TIME && obj.meta.gainTpbChargeTime) {
@@ -258,7 +258,7 @@
      * スキルのTPBコストを得る。
      * 
      * @param {DataSkill} skill スキル
-     * @returns {Number} TPBコスト
+     * @returns {number} TPBコスト
      */
     Game_BattlerBase.prototype.skillTpbCost = function(skill) {
         if (skill.meta.tpbCost) {
@@ -270,8 +270,8 @@
     /**
      * TPBコストを得る。
      * 
-     * @param {Object} item 
-     * @returns {Number} TPBコスト(0～1)を得る。
+     * @param {object} item 
+     * @returns {number} TPBコスト(0～1)を得る。
      */
     Game_BattlerBase.prototype.tpbCost = function(item) {
         if (DataManager.isSkill(item)) {
@@ -290,7 +290,7 @@
     /**
      * デフォルトのTPBコストを得る。
      * 
-     * @returns {Number} デフォルトのTPBコスト
+     * @returns {number} デフォルトのTPBコスト
      */
     Game_BattlerBase.prototype.defaultTpbCost = function() {
         return defaultTpbCost;
@@ -301,7 +301,7 @@
         /**
          * TPB減少効果を防ぐかどうかを取得する。
          * 
-         * @returns {Boolean} TPB減少効果を防ぐ場合にはtrue, それ以外はfalse
+         * @returns {boolean} TPB減少効果を防ぐ場合にはtrue, それ以外はfalse
          */
         Game_Battler.prototype.blockTpbLose = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_BLOCK_TPB_LOSE);
@@ -310,7 +310,7 @@
         /**
          * TPB減少効果を防ぐかどうかを取得する。
          * 
-         * @returns {Boolean} TPB減少効果を防ぐ場合にはtrue, それ以外はfalse
+         * @returns {boolean} TPB減少効果を防ぐ場合にはtrue, それ以外はfalse
          */
         Game_Battler.prototype.blockTpbLose = function() {
             return false;
@@ -320,7 +320,7 @@
         /**
          * TPBキャストブレークを防ぐかどうかを取得する。
          * 
-         * @returns {Boolean} キャストブレークを防ぐ場合にはtrue, それ以外はfalse
+         * @returns {boolean} キャストブレークを防ぐ場合にはtrue, それ以外はfalse
          */
         Game_Battler.prototype.blockTpbCastBreak = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_BLOCK_TPB_CAST_BREAK);
@@ -329,7 +329,7 @@
         /**
          * TPBキャストブレークを防ぐかどうかを取得する。
          * 
-         * @returns {Boolean} キャストブレークを防ぐ場合にはtrue, それ以外はfalse
+         * @returns {boolean} キャストブレークを防ぐ場合にはtrue, それ以外はfalse
          */
         Game_Battler.prototype.blockTpbCastBreak = function() {
             return false;
@@ -341,7 +341,7 @@
      * 1.0以上にすると行動が回ってくる。
      * チャージ中（キャストなどでない）場合にしか効果無い。
      * 
-     * @param {Number} value 値
+     * @param {number} value 値
      */
     Game_Battler.prototype.gainTpbChargeTime = function(value) {
         if (this.canMove() && this.isAlive() && (this._tpbState === "charging")) {
@@ -353,7 +353,7 @@
     /**
      * キャストタイムをvalueだけチャージする。
      * 
-     * @param {Number} value チャージ時間。
+     * @param {number} value チャージ時間。
      */
     Game_Battler.prototype.gainTpbCastTime = function(value) {
         if (this._tpbState === "casting") {
@@ -400,7 +400,7 @@
     /**
      * TPBチャージタイムを消費する。
      * 
-     * @param {Number} time 消費するTPB時間
+     * @param {number} time 消費するTPB時間
      */
     Game_Battler.prototype.consumeTpbChargeTime = function() {
         this._tpbState = "charging";
@@ -417,7 +417,7 @@
      * 
      * @param {Game_BattlerBase} target 対象
      * @param {DataEffect} effect エフェクトデータ
-     * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 適用可能な場合にはtrue, それ以外はfalse
      */
     Game_Action.prototype.testItemEffect = function(target, effect) {
         if ((Game_Action.EFFECT_GAIN_TPB_CHARGE_TIME && (effect.code === Game_Action.EFFECT_GAIN_TPB_CHARGE_TIME))

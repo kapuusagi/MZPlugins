@@ -125,8 +125,8 @@
     /**
      * 真偽値を得る。
      * 
-     * @param {Object} valueStr 値文字列
-     * @returns {Boolean} 真偽値
+     * @param {object} valueStr 値文字列
+     * @returns {boolean} 真偽値
      */
     const _parseBoolean = function(valueStr) {
         if (typeof valueStr === "undefined") {
@@ -422,7 +422,7 @@
      * @param {PIXI.FilterManager} filterManager フィルタマネージャ
      * @param {PIXI.RenderTarget} input 入力レンダリングターゲット
      * @param {PIXI.RenderTarget} output  出力レンダリングターゲット
-     * @param {Boolean} clear 出力をクリアする場合にはtrue, それ以外はfalse
+     * @param {boolean} clear 出力をクリアする場合にはtrue, それ以外はfalse
      */
     GodrayFilter.prototype.apply = function(filterManager, input, output, clear) {
         const {width, height} = input.filterFrame;
@@ -439,7 +439,7 @@
         /**
          * 角度
          * 
-         * @member {Number}
+         * @member {number}
          */
         angle: {
             get: function() { return this._angle; },
@@ -453,7 +453,7 @@
         /**
          * ゲイン
          * 
-         * @member {Number}
+         * @member {number}
          */
         gain: {
             get: function() { return this.uniforms.gain; },
@@ -462,7 +462,7 @@
         /**
          * 隙間
          * 
-         * @member {Number}
+         * @member {number}
          */
         lacunarity: {
             get: function() { return this.uniforms.lacunarity; },
@@ -471,7 +471,7 @@
         /**
          * パラレルかどうか
          * 
-         * @member {Boolean}
+         * @member {boolean}
          */
         parallel: {
             get: function() { return this._parallel; },
@@ -481,7 +481,7 @@
         /**
          * 光源中央X。(parallel===falseの場合のみ有効)
          * 
-         * @member {Number}
+         * @member {number}
          */
         centerX: {
             get: function() { return this._center.x; },
@@ -490,7 +490,7 @@
         /**
          * 光源中央y (parallel===falseの場合のみ有効)
          * 
-         * @member {Number}
+         * @member {number}
          */
         centerY: {
             get: function() { return this._center.y; },

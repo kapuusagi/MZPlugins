@@ -91,7 +91,7 @@
     /**
      * 個別アイテムの性能ランダム化を有効にするかどうかを設定する。
      * 
-     * @param {Boolean} enabled 有効にするかどうか。
+     * @param {boolean} enabled 有効にするかどうか。
      */
     Game_Temp.prototype.setIndependentItemRandomize = function(enabled) {
         this._isIndependentItemRandomize = enabled;
@@ -100,7 +100,7 @@
     /**
      * 個別アイテムの性能ランダム化が有効かどうかを取得する。
      * 
-     * @returns {Boolean} 有効にする場合にはtrue, それ以外はfalse
+     * @returns {boolean} 有効にする場合にはtrue, それ以外はfalse
      */
     Game_Temp.prototype.independentItemRandomize = function() {
         return this._isIndependentItemRandomize || false;
@@ -114,7 +114,7 @@
         /**
          * 購入処理をする。
          * 
-         * @param {Number} number 個数
+         * @param {number} number 個数
          */
         Scene_Shop.prototype.doBuy = function(number) {
             const prevEnabled = $gameTemp.independentItemRandomize();
@@ -178,7 +178,7 @@
     /**
      * itemで指定される個別アイテムの性能を、ベースアイテムのデータを元にばらつきを与える。
      * 
-     * @param {Object} item 個別アイテム(DataItem/DataWeapon/DataArmor)
+     * @param {object} item 個別アイテム(DataItem/DataWeapon/DataArmor)
      */
     DataManager.randomizeIndependenetItem = function(item) {
         if (DataManager.isIndependentItem(item)) {
@@ -198,7 +198,7 @@
      * varianceEffectを解析する。
      * 
      * @param {String} varianceStr varianceEffectノートタグの値
-     * @returns {Object} 効果変動量オブジェクト
+     * @returns {object} 効果変動量オブジェクト
      */
     const _parseVarianceEffect = function(varianceStr) {
         const tokens = varianceStr.split(",");
@@ -216,9 +216,9 @@
     /**
      * 効果量に変動分を加味した値を計算して返す。
      * 
-     * @param {Number} baseValue ベース値
-     * @param {Number} variance 変動量
-     * @returns {Number} 効果量。
+     * @param {number} baseValue ベース値
+     * @param {number} variance 変動量
+     * @returns {number} 効果量。
      */
     const _calcEffectValue = function(baseValue, variance) {
         if ((baseValue === 0) || (variance === 0)) {
@@ -285,9 +285,9 @@
     /**
      * 性能に変動分を加味した値を計算して返す。
      * 
-     * @param {Number} baseValue ベース値
-     * @param {Number} variance 変動量
-     * @returns {Number} 効果量。
+     * @param {number} baseValue ベース値
+     * @param {number} variance 変動量
+     * @returns {number} 効果量。
      */
     const _calcParamValue = function(baseValue, variance) {
         if (variance === 0) {
@@ -301,8 +301,8 @@
      * 武器性能をランダムに変動させる。
      * 変動効果が適用されるのはparamのパラメータのみ。traitsは影響させない。
      * 
-     * @param {Object} item アイテム
-     * @param {Object} baseItem ベースアイテム
+     * @param {object} item アイテム
+     * @param {object} baseItem ベースアイテム
      */
     DataManager.randomizeEquipPerformance = function(item, baseItem) {
         if (!baseItem.meta.varianceParam) {

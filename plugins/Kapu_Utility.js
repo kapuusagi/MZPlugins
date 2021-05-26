@@ -273,8 +273,8 @@
      * traitObjから、codeとparamIdを持つものの合計を得る。
      * 
      * @param {TraitObject} traitObj traitsをメンバに持つオブジェクト
-     * @param {Number} code Game_BattlerBase.TRAIT_～を指定する。
-     * @param {Number} dataId パラメータID
+     * @param {number} code Game_BattlerBase.TRAIT_～を指定する。
+     * @param {number} dataId パラメータID
      * @returns valueの合計値が返る。
      */
     DataManager.traitsSum = function(traitObj, code, dataId) {
@@ -291,8 +291,8 @@
      * traitObjから、codeとparamIdを持つものの乗算値合計を得る。
      * 
      * @param {TraitObject} traitObj traitsをメンバに持つオブジェクト
-     * @param {Number} code Game_BattlerBase.TRAIT_～を指定する。
-     * @param {Number} dataId パラメータID
+     * @param {number} code Game_BattlerBase.TRAIT_～を指定する。
+     * @param {number} dataId パラメータID
      * @returns valueの乗算合計値が返る。
      */
     DataManager.traitsPi = function(traitObj, code, dataId) {
@@ -312,7 +312,7 @@
     /**
      * abilityIdで指定される特性値のパーティーメンバー合計を得る。
      * 
-     * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
+     * @param {number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
      */
     Game_Party.prototype.partyTraitsSum = function(abilityId) {
         return this.battleMembers().reduce(function(prev, actor) {
@@ -328,8 +328,8 @@
      * abilityIdで指定される特性値のパーティーでの最大値を得る。
      * 増加効果の最大値を得たい場合に使用する。
      * 
-     * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
-     * @returns {Number} 最大値
+     * @param {number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
+     * @returns {number} 最大値
      */
     Game_Party.prototype.partyTraitsSumMax = function(abilityId) {
         return this.members().reduce(
@@ -339,8 +339,8 @@
      * abilityIdで指定される特性値のパーティーでの最小値を得る。
      * 減算効果の最大を得たい場合に使用する。
      * 
-     * @param {Number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
-     * @returns {Number} 最大値
+     * @param {number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
+     * @returns {number} 最大値
      */
     Game_Party.prototype.partyTraitsSumMin = function(abilityId) {
         return this.members().reduce(

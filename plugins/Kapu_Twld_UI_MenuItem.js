@@ -241,7 +241,7 @@ function Window_ItemInfo() {
     /**
      * 最大カラム数を取得する。
      * 
-     * @returns {Number} カラム数
+     * @returns {number} カラム数
      */
     Window_ItemCategoryVertical.prototype.maxCols = function() {
         return 1;
@@ -250,7 +250,7 @@ function Window_ItemInfo() {
     /**
      * 表示する行数を取得する。
      * 
-     * @returns {Number} 行数
+     * @returns {number} 行数
      */
     Window_ItemCategoryVertical.prototype.numVisibleRows = function() {
         return 4;
@@ -288,7 +288,7 @@ function Window_ItemInfo() {
      * コマンド選択対象として必要かどうかを得る。
      * 
      * @param {String} name 種類名
-     * @returns {Boolean} 選択対象として必要な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 選択対象として必要な場合にはtrue, それ以外はfalse
      */
     Window_ItemCategoryVertical.prototype.needsCommand = function(name) {
         const table = ["item", "weapon", "armor", "keyItem"];
@@ -311,7 +311,7 @@ function Window_ItemInfo() {
     /**
      * 選択が必要かどうかを得る。
      * 
-     * @returns {Boolean} 選択が必要な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 選択が必要な場合にはtrue, それ以外はfalse
      */
     Window_ItemCategoryVertical.prototype.needsSelection = function() {
         return this.maxItems() >= 2;
@@ -353,9 +353,9 @@ function Window_ItemInfo() {
     /**
      * 通常アイテム個数を表示する。
      * 
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_ItemCategoryVertical.prototype.drawNormalItemCount = function(x, y, width) {
         const normaIndependentlItems = $gameParty.items().filter((item) => {
@@ -372,9 +372,9 @@ function Window_ItemInfo() {
     /**
      * 武器個数を表示する。
      * 
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_ItemCategoryVertical.prototype.drawWeaponItemCount = function(x, y, width) {
         const independentWeapons = $gameParty.weapons().filter((weapon) => DataManager.isIndependentItem(weapon));
@@ -390,9 +390,9 @@ function Window_ItemInfo() {
     /**
      * 防具個数を表示する。
      * 
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_ItemCategoryVertical.prototype.drawArmorItemCount = function(x, y, width) {
         const independentArmors = $gameParty.armors().filter((armor) => DataManager.isIndependentItem(armor));
@@ -412,7 +412,7 @@ function Window_ItemInfo() {
      * itemに対してOKが選択できるかを取得する。
      * アイテムリストは常に有効。
      * 
-     * @returns {Boolean} OKが選択できる場合にはtrue, それ以外はfalse。
+     * @returns {boolean} OKが選択できる場合にはtrue, それ以外はfalse。
      * !!!overwrite!!! Window_ItemList.isEnabled()
      *     使うかどうかの選択を別ウィンドウで行うため、オーバーライドする。
      */
@@ -439,7 +439,7 @@ function Window_ItemInfo() {
     /**
      * アイテムを得る。
      * 
-     * @returns {Object} item アイテム
+     * @returns {object} item アイテム
      */
     Window_ItemCommand.prototype.item = function() {
         return this._item;
@@ -448,7 +448,7 @@ function Window_ItemInfo() {
     /**
      * アイテムを設定する。
      * 
-     * @param {Object} item アイテム
+     * @param {object} item アイテム
      */
     Window_ItemCommand.prototype.setItem = function(item) {
         if (this._item !== item) {
@@ -471,7 +471,7 @@ function Window_ItemInfo() {
     /**
      * itemを破棄可能かどうかを取得する。
      * 
-     * @param {Object} item アイテム
+     * @param {object} item アイテム
      */
     Window_ItemCommand.prototype.canDiscard = function(item) {
         if (item.meta.enableDiscard) {
@@ -506,7 +506,7 @@ function Window_ItemInfo() {
     /**
      * アイテムを設定する。
      * 
-     * @param {Object} item アイテム
+     * @param {object} item アイテム
      */
     Window_ItemInfo.prototype.setItem = function(item) {
         if (this._item !== item) {
@@ -526,7 +526,7 @@ function Window_ItemInfo() {
     /**
      * 項目間のスペースを得る。
      * 
-     * @returns {Number} 項目間のスペース
+     * @returns {number} 項目間のスペース
      */
     Window_ItemInfo.prototype.spacing = function() {
         return 8;
@@ -568,7 +568,7 @@ function Window_ItemInfo() {
     /**
      * 説明を描画する。
      * 
-     * @param {Object} item アイテム
+     * @param {object} item アイテム
      * @param {Rectangle} rect 描画領域
      */
     Window_ItemInfo.prototype.drawDescriptionBlock = function(item, rect) {
@@ -578,7 +578,7 @@ function Window_ItemInfo() {
     /**
      * 情報を描画する。
      * 
-     * @param {Object} item アイテム
+     * @param {object} item アイテム
      * @param {Rectangle} rect 描画領域
      */
     Window_ItemInfo.prototype.drawInformationBlock = function(item, rect) {
@@ -594,7 +594,7 @@ function Window_ItemInfo() {
     /**
      * アイテムの情報を描画する。
      * 
-     * @param {Object} item アイテム
+     * @param {object} item アイテム
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_ItemInfo.prototype.drawItemInformation = function(item, rect) {
@@ -647,7 +647,7 @@ function Window_ItemInfo() {
     /**
      * 武器の情報を描画する
      * 
-     * @param {Object} item アイテム
+     * @param {object} item アイテム
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_ItemInfo.prototype.drawWeaponInformation = function(item, rect) {
@@ -677,10 +677,10 @@ function Window_ItemInfo() {
     /**
      * 武器基本情報を描画する。
      * 
-     * @param {Object} item DataWeapon/DataArmor
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {object} item DataWeapon/DataArmor
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawWeaponBasicInformation = function(item, x, y, width) {
         const xLimit = x + width;
@@ -718,9 +718,9 @@ function Window_ItemInfo() {
      * 武器タイプを描画する。
      * 
      * @param {DataWeapon} item 武器
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 描画幅
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 描画幅
      */
     Window_ItemInfo.prototype.drawWeaponType = function(item, x, y, width) {
         const textLabel = textWeaponType + ":";
@@ -737,9 +737,9 @@ function Window_ItemInfo() {
      * 武器属性を描画する。
      * 
      * @param {DataWeapon} item 武器
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 描画幅
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 描画幅
      */
      Window_ItemInfo.prototype.drawWeaponElement = function(item, x, y, width) {
         const elementLabel = textLabelElement + ":";
@@ -799,7 +799,7 @@ function Window_ItemInfo() {
      * 武器スキルIDを取得する。
      * 
      * @param {DataWeapon} item 武器
-     * @returns {Number} スキルID
+     * @returns {number} スキルID
      */
     Window_ItemInfo.prototype.weaponSkillId = function(item) {
         let weaponSkillId = 1;
@@ -817,9 +817,9 @@ function Window_ItemInfo() {
      * 武器レンジ(Kapu_RangeDistance)が適用されていない場合には何も描画しない。
      * 
      * @param {DataWeapon} item 武器
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawWeaponRange = function(item, x, y, width) {
         if (typeof item.range === "undefined") {
@@ -865,9 +865,9 @@ function Window_ItemInfo() {
      * 武器のヒットレートを描画する。
      * 
      * @param {DataWeapon} item 武器
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawWeaponHitRate = function(item, x, y, width) {
         // スキルを引っ張ってきて、successRateを出す。
@@ -887,10 +887,10 @@ function Window_ItemInfo() {
     /**
      * 武器/防具の性能(基本パラメータ)を描画する。
      * 
-     * @param {Object} item DataWeapon/DataArmor
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {object} item DataWeapon/DataArmor
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawItemPerformance = function(item, x, y, width) {
         const padding = this.itemPadding();
@@ -915,11 +915,11 @@ function Window_ItemInfo() {
     /**
      * 武器/防具のパラメータを描画する。
      * 
-     * @param {Object} item DataWeapon/DataArmor
-     * @param {Number} paramId パラメータID
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {object} item DataWeapon/DataArmor
+     * @param {number} paramId パラメータID
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawItemParam = function(item, paramId, x, y, width) {
         const value = item.params[paramId];
@@ -943,11 +943,11 @@ function Window_ItemInfo() {
     /**
      * 装備効果を描画する。
      * 
-     * @param {Object} item DataArmor/DataWeapon
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {object} item DataArmor/DataWeapon
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Window_ItemInfo.prototype.drawEquipEffects = function(item, x, y, width, height) {
         if (item.meta.hideInformation) {
@@ -1001,7 +1001,7 @@ function Window_ItemInfo() {
     /**
      * 装備効果を取得する。
      * 
-     * @param {Object} item DataWeapon/DataArmor
+     * @param {object} item DataWeapon/DataArmor
      * @returns {Array<object>} 表示効果の配列。
      *                         {
      *                              name:{string}, // 項目文字列
@@ -1017,7 +1017,7 @@ function Window_ItemInfo() {
     /**
      * 武器/防具の特性による効果文字列を得る。
      * 
-     * @param {Object} item DataWeapon/DataArmor
+     * @param {object} item DataWeapon/DataArmor
      * @returns {Array<object>} 効果配列
      */
     Window_ItemInfo.prototype.displayEquipEffectsOfTraits = function(item) {
@@ -1077,7 +1077,7 @@ function Window_ItemInfo() {
     /**
      * 防具の情報を描画する。
      * 
-     * @param {Object} item アイテム
+     * @param {object} item アイテム
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_ItemInfo.prototype.drawArmorInformation = function(item, rect) {
@@ -1108,10 +1108,10 @@ function Window_ItemInfo() {
     /**
      * 防具の基本情報を描画する。
      * 
-     * @param {Object} item DataArmor
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {object} item DataArmor
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawArmorBasicInformation = function(item, x, y, width) {
         const xLimit = x + width;
@@ -1128,9 +1128,9 @@ function Window_ItemInfo() {
      * 防具タイプを描画する。
      * 
      * @param {DataArmor} item DataArmor
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawArmorType = function(item, x, y, width) {
         const textLabel = textArmorType + ":";
@@ -1146,9 +1146,9 @@ function Window_ItemInfo() {
     /**
      * 防具の特性として表示しない特性かどうかを得る。
      * 
-     * @param {Number} code コード
-     * @param {Number} dataId データID
-     * @returns {Boolean} 防具の特性として表示しない場合にはtrue, それ以外はfalse.
+     * @param {number} code コード
+     * @param {number} dataId データID
+     * @returns {boolean} 防具の特性として表示しない場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
     Window_ItemInfo.prototype.isIgnoreArmorTrait = function(code, dataId) {
@@ -1158,9 +1158,9 @@ function Window_ItemInfo() {
     /**
      * 水平ラインを描画する。
      * 
-     * @param {Number} x x位置
-     * @param {Number} y y位置
-     * @param {Number} width 幅
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawHorzLine = function(x, y, width) {
         this.drawRect(x, y, width, 5);
@@ -1237,7 +1237,7 @@ function Window_ItemInfo() {
     /**
      * コマンドウィンドウ幅を得る。
      * 
-     * @returns {Number} コマンドウィンドウ幅
+     * @returns {number} コマンドウィンドウ幅
      */
     Scene_Item.prototype.commandWindowWidth = function() {
         return 340;

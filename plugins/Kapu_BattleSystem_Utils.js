@@ -144,7 +144,7 @@
     /**
      * argsのフィールドを解析し、報酬を追加する。
      * 
-     * @param {Object} args パラメータオブジェクト
+     * @param {object} args パラメータオブジェクト
      */
     const _addRewardItems = function(args) {
         const goldMin = Math.max(0, Math.round(Number(args.additionalRewardGoldMin) || 0));

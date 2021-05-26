@@ -144,8 +144,8 @@
     /**
      * stateIdで指定されるステートを持っているかどうかを取得する。
      * 
-     * @param {Number} stateId ステートID
-     * @returns {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
+     * @param {number} stateId ステートID
+     * @returns {boolean} ステートを持っている場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isStateAffected = function(stateId) {
         if (this.isConditionStateAffected(stateId)) {
@@ -158,8 +158,8 @@
     /**
      * stateIdで指定されるステートを持っているかどうかを取得する。
      * 
-     * @param {Number} stateId ステートID
-     * @returns {Boolean} ステートを持っている場合にはtrue, それ以外はfalse
+     * @param {number} stateId ステートID
+     * @returns {boolean} ステートを持っている場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isConditionStateAffected = function(stateId) {
         return this._conditionStateIds.includes(stateId);
@@ -225,7 +225,7 @@
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, actorId);
@@ -275,9 +275,9 @@
     /**
      * エネミーをセットアップする。
      * 
-     * @param {Number} enemyId エネミーID
-     * @param {Number} x X位置
-     * @param {Number} y Y位置
+     * @param {number} enemyId エネミーID
+     * @param {number} x X位置
+     * @param {number} y Y位置
      */
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
         _Game_Enemy_setup.call(this, enemyId, x, y);

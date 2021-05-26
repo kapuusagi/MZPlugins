@@ -265,8 +265,8 @@ function Game_Buff() {
     /**
      * 割合を得る。
      * 
-     * @param {Number} valueStr 割合を表す文字列
-     * @returns {Number} 割合の値
+     * @param {number} valueStr 割合を表す文字列
+     * @returns {number} 割合の値
      */
     const _getRate = function(valueStr) {
         if (valueStr.slice(-1) === "%") {
@@ -279,11 +279,11 @@ function Game_Buff() {
     /**
      * エフェクトを追加する。
      * 
-     * @param {Object} obj DataItemまたはDataSkill
-     * @param {Number} code コード
-     * @param {Number} dataId データID
-     * @param {Number} value1 値1
-     * @param {Number} value2 値2
+     * @param {object} obj DataItemまたはDataSkill
+     * @param {number} code コード
+     * @param {number} dataId データID
+     * @param {number} value1 値1
+     * @param {number} value2 値2
      */
     const _addEffect = function(obj, code, dataId, value1, value2) {
         if (code) {
@@ -299,7 +299,7 @@ function Game_Buff() {
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processEffectNoteTag = function(obj) {
         // ノートタグを処理する。
@@ -349,10 +349,10 @@ function Game_Buff() {
     /**
      * 特性を追加する。
      * 
-     * @param {Object} obj データオブジェクト。
-     * @param {Number} code コード
-     * @param {Number} dataId データID
-     * @param {Number} value 値
+     * @param {object} obj データオブジェクト。
+     * @param {number} code コード
+     * @param {number} dataId データID
+     * @param {number} value 値
      */
     const _addTrait = function(obj, code, dataId, value) {
         if (code) {
@@ -367,7 +367,7 @@ function Game_Buff() {
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processStateNoteTag = function(obj) {
         // ノートタグを処理する。
@@ -413,7 +413,7 @@ function Game_Buff() {
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processTraitNoteTag = function(obj) {
         if (Game_BattlerBase.FLAG_ID_BUFFTURN_ADD && obj.meta.buffTurnAdd) {
@@ -487,7 +487,7 @@ function Game_Buff() {
     /**
      * バフ乗算レートを設定する。
      * 
-     * @param {Number} rate レート
+     * @param {number} rate レート
      */
     Game_Buff.prototype.setRate = function(rate) {
         if (rate > 0) {
@@ -508,7 +508,7 @@ function Game_Buff() {
     /**
      * バフ乗算レートを得る。
      * 
-     * @returns {Number} レート
+     * @returns {number} レート
      */
     Game_Buff.prototype.rate = function() {
         return this._rate;
@@ -517,7 +517,7 @@ function Game_Buff() {
     /**
      * バフ加減算値を得る。
      * 
-     * @returns {Number} 固定量加減算値。
+     * @returns {number} 固定量加減算値。
      */
     Game_Buff.prototype.value = function() {
         return this._value;
@@ -526,7 +526,7 @@ function Game_Buff() {
     /**
      * 固定加減量を設定する。
      * 
-     * @param {Number} value 固定加減量
+     * @param {number} value 固定加減量
      */
     Game_Buff.prototype.setValue = function(value) {
         if (value > 0) {
@@ -547,7 +547,7 @@ function Game_Buff() {
     /**
      * バフかどうかを得る。
      * 
-     * @returns {Boolean} バフの場合にはtrue, それ以外はfalse。
+     * @returns {boolean} バフの場合にはtrue, それ以外はfalse。
      */
     Game_Buff.prototype.isBuff = function() {
         return (this._rate > 0) || (this._value > 0);
@@ -556,7 +556,7 @@ function Game_Buff() {
     /**
      * デバフかどうかを得る。
      * 
-     * @returns {Boolean} デバフの場合にはtrue, それ以外はfalse。
+     * @returns {boolean} デバフの場合にはtrue, それ以外はfalse。
      */
     Game_Buff.prototype.isDebuff = function() {
         return (this._rate < 0) || (this._value < 0);
@@ -565,7 +565,7 @@ function Game_Buff() {
     /**
      * このバフが効果を及ぼす残りターン数を得る。
      * 
-     * @returns {Number} 残りターン数
+     * @returns {number} 残りターン数
      */
     Game_Buff.prototype.turns = function() {
         return this._turns;
@@ -574,7 +574,7 @@ function Game_Buff() {
     /**
      * このバフの残りターン数を設定する。
      * 
-     * @param {Number} turns ターン数
+     * @param {number} turns ターン数
      */
     Game_Buff.prototype.setTurns = function(turns) {
         this._turns = turns;
@@ -583,7 +583,7 @@ function Game_Buff() {
     /**
      * このバフの残りターン数を加減する。
      * 
-     * @param {Number} turns ターン数
+     * @param {number} turns ターン数
      */
     Game_Buff.prototype.gainTurns = function(turns) {
         this._turns = Math.max(0, this._turns + turns);
@@ -600,8 +600,8 @@ function Game_Buff() {
 
     /**
      * 
-     * @param {Number} baseValue ベース値
-     * @returns {Number} バフによる加算値
+     * @param {number} baseValue ベース値
+     * @returns {number} バフによる加算値
      */
     Game_Buff.prototype.calcBuffValue = function(baseValue) {
         if (this.isBuff()) {
@@ -618,8 +618,8 @@ function Game_Buff() {
     /**
      * 基本パラメータの バフに依る乗算レート。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} パラメータレート
+     * @param {number} paramId パラメータID
+     * @returns {number} パラメータレート
      * !!!overwrite!!! Game_BattlerBase.paramBuffRate()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -630,9 +630,9 @@ function Game_Buff() {
     /**
      * バフを適用する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} baseValue バフの適用元のベース値
-     * @returns {Number} バフを適用した後の値。
+     * @param {number} paramId パラメータID
+     * @param {number} baseValue バフの適用元のベース値
+     * @returns {number} バフを適用した後の値。
      * !!!overwrite!!! Game_BattlerBase.applyBuff()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -645,9 +645,9 @@ function Game_Buff() {
     /**
      * ステートバフの加減量を得る。
      * 
-     * @param {Number} paramId パラメータID 
-     * @param {Number} baseValue ベース値
-     * @returns {Number} 加減する値。
+     * @param {number} paramId パラメータID 
+     * @param {number} baseValue ベース値
+     * @returns {number} 加減する値。
      */
     Game_BattlerBase.prototype.stateBuff = function(paramId, baseValue) {
         const rate = this.traitsSum(Game_BattlerBase.TRAIT_STATE_RATEBUFF, paramId);
@@ -677,7 +677,7 @@ function Game_Buff() {
     /**
      * バフを消去する。
      * 
-     * @param {Number} paramId パラメータID
+     * @param {number} paramId パラメータID
      * !!!overwrite!!! Game_BattlerBase.eraseBuff()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -687,8 +687,8 @@ function Game_Buff() {
     /**
      * バフ段階を得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} バフ段階
+     * @param {number} paramId パラメータID
+     * @returns {number} バフ段階
      * !!!overwrite!!! Game_BattlerBase.buff()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -705,8 +705,8 @@ function Game_Buff() {
     /**
      * バフが適用されているかどうかを判定する。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Boolean} バフが適用されている場合にはtrue, それ以外はfalse.
+     * @param {number} paramId パラメータID
+     * @returns {boolean} バフが適用されている場合にはtrue, それ以外はfalse.
      * !!!overwrite!!! Game_BattlerBase.isBuffAffected()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -717,8 +717,8 @@ function Game_Buff() {
     /**
      * デバフが適用されているかどうかを得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Boolean} デバフが適用されている場合にはtrue, それ以外はfalse
+     * @param {number} paramId パラメータID
+     * @returns {boolean} デバフが適用されている場合にはtrue, それ以外はfalse
      * !!!overwrite!!! Game_BattlerBase.isDebuffAffected()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -728,8 +728,8 @@ function Game_Buff() {
     /**
      * バフまたはデバフが適用されているかどうかを取得する。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Boolean} バフまたはデバフが適用されている場合にはtrue, それ以外はfalse.
+     * @param {number} paramId パラメータID
+     * @returns {boolean} バフまたはデバフが適用されている場合にはtrue, それ以外はfalse.
      * !!!overwrite!!! Game_BattlerBase.isBuffOrDebuffAffected()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -740,8 +740,8 @@ function Game_Buff() {
     /**
      * バフ段階が最大かどうかを判定する。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Boolean} 最大減適用されている場合にはtrue, それ以外はfalse
+     * @param {number} paramId パラメータID
+     * @returns {boolean} 最大減適用されている場合にはtrue, それ以外はfalse
      * !!!overwrite!!! Game_BattlerBase.isMaxBuffAffected()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -753,8 +753,8 @@ function Game_Buff() {
     /**
      * デバフ段階が最大かどうかを判定する。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Boolean} 最大減適用されている場合にはtrue, それ以外はfalse
+     * @param {number} paramId パラメータID
+     * @returns {boolean} 最大減適用されている場合にはtrue, それ以外はfalse
      * !!!overwrite!!! Game_BattlerBase.isMaxDebuffAffected()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -766,7 +766,7 @@ function Game_Buff() {
     /**
      * バフを1段階引き上げる。
      * 
-     * @param {Number} paramId パラメータID
+     * @param {number} paramId パラメータID
      * !!!overwrite!!! Game_BattlerBase.increaseBuff()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -778,7 +778,7 @@ function Game_Buff() {
     /**
      * バフを1段階引き下げる。
      * 
-     * @param {Number} paramId パラメータID
+     * @param {number} paramId パラメータID
      * !!!overwrite!!! Game_BattlerBase.decreaseBuff()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -790,8 +790,8 @@ function Game_Buff() {
     /**
      * 割合バフ/デバフを設定する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} rate 効果量。(rate>0:バフ  rate<0:デバフ)
+     * @param {number} paramId パラメータID
+     * @param {number} rate 効果量。(rate>0:バフ  rate<0:デバフ)
      */
     Game_BattlerBase.prototype.setRateBuff = function(paramId, rate) {
         this._buffs[paramId].setRate(rate);
@@ -800,8 +800,8 @@ function Game_Buff() {
     /**
      * 固定量バフ/デバフを設定する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} value 効果量(value>0:バフ、value<0:デバフ)
+     * @param {number} paramId パラメータID
+     * @param {number} value 効果量(value>0:バフ、value<0:デバフ)
      */
     Game_BattlerBase.prototype.setFixedBuff = function(paramId, value) {
         this._buffs[paramId].setValue(value);
@@ -812,8 +812,8 @@ function Game_Buff() {
     /**
      * バフターンを上書きする。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} turns ターン数
+     * @param {number} paramId パラメータID
+     * @param {number} turns ターン数
      * !!!overwrite!!! Game_BattlerBase.overwriteBuffTurns()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -827,8 +827,8 @@ function Game_Buff() {
     /**
      * バフの効果ターンが切れたかどうかを取得する。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Boolean} 切れた場合にはtrue, それ以外はfalse
+     * @param {number} paramId パラメータID
+     * @returns {boolean} 切れた場合にはtrue, それ以外はfalse
      * !!!overwrite!!! Game_BattlerBase.isBuffExpired()
      *     割合バフと固定量バフを元に計算するため、オーバーライドする。
      */
@@ -870,9 +870,9 @@ function Game_Buff() {
     /**
      * バフのアイコン番号を得る。
      * 
-     * @param {Number} buffLevel バフレベル
-     * @param {Number} paramId パラメータID
-     * @returns {Number} アイコン番号。
+     * @param {number} buffLevel バフレベル
+     * @param {number} paramId パラメータID
+     * @returns {number} アイコン番号。
      * !!!overwrite!!! Game_BattlerBase.buffIcons()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -891,7 +891,7 @@ function Game_Buff() {
         /**
          * バフを付与する時のターンボーナスを得る。
          * 
-         * @returns {Number} 加算するターン数
+         * @returns {number} 加算するターン数
          */
         Game_BattlerBase.prototype.giveBuffTurnBonus = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_BUFFTURN_ADD) ? 1 : 0;
@@ -900,7 +900,7 @@ function Game_Buff() {
         /**
          * バフを付与する時のターンボーナスを得る。
          * 
-         * @returns {Number} 加算するターン数
+         * @returns {number} 加算するターン数
          */
         Game_BattlerBase.prototype.giveBuffTurnBonus = function() {
             return 0;
@@ -911,7 +911,7 @@ function Game_Buff() {
         /**
          * デバフを付与する時のターンボーナスを得る。
          * 
-         * @returns {Number} 加算するターン数
+         * @returns {number} 加算するターン数
          */
         Game_BattlerBase.prototype.giveDebuffTurnBonus = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_DEBUFFTURN_ADD) ? 1 : 0;
@@ -920,7 +920,7 @@ function Game_Buff() {
         /**
          * デバフを付与する時のターンボーナスを得る。
          * 
-         * @returns {Number} 加算するターン数
+         * @returns {number} 加算するターン数
          */
         Game_BattlerBase.prototype.giveDebuffTurnBonus = function() {
             return 0;
@@ -931,7 +931,7 @@ function Game_Buff() {
         /**
          * バフを受けるときのターンボーナスを得る。
          * 
-         * @returns {Number} 加算するターン数
+         * @returns {number} 加算するターン数
          */
         Game_BattlerBase.prototype.acceptBuffTurnBonus = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_ACPT_BUFFTURN_UP) ? 1 : 0;
@@ -940,7 +940,7 @@ function Game_Buff() {
         /**
          * バフを受けるときのターンボーナスを得る。
          * 
-         * @returns {Number} 加算するターン数
+         * @returns {number} 加算するターン数
          */
         Game_BattlerBase.prototype.acceptBuffTurnBonus = function() {
             return 0;
@@ -950,7 +950,7 @@ function Game_Buff() {
         /**
          * デバフを受けるときのターンボーナスを得る。
          * 
-         * @returns {Number} 加算するターン数
+         * @returns {number} 加算するターン数
          */
         Game_BattlerBase.prototype.acceptDebuffTurnBonus = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_ACPT_DEBUFFTURN_DOWN) ? -1 : 0;
@@ -959,7 +959,7 @@ function Game_Buff() {
         /**
          * デバフを受けるときのターンボーナスを得る。
          * 
-         * @returns {Number} 加算するターン数
+         * @returns {number} 加算するターン数
          */
         Game_BattlerBase.prototype.acceptDebuffTurnBonus = function() {
             return 0;
@@ -972,8 +972,8 @@ function Game_Buff() {
     /**
      * バフを付与する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} turns 効果ターン 
+     * @param {number} paramId パラメータID
+     * @param {number} turns 効果ターン 
      * !!!overwrite!!! Game_Battler.addBuff()
      *     バフデータ構造変更のためオーバーライドする。
      */
@@ -986,8 +986,8 @@ function Game_Buff() {
      * デバフを付与する。
      * 
      * Note:バフデータ構造変更のためオーバーライドする。
-     * @param {Number} paramId パラメータID
-     * @param {Number} turns 効果ターン数
+     * @param {number} paramId パラメータID
+     * @param {number} turns 効果ターン数
      */
     // eslint-disable-next-line no-unused-vars
     Game_Battler.prototype.addDebuff = function(paramId, turns) {
@@ -997,9 +997,9 @@ function Game_Buff() {
     /**
      * 固定割合のバフを付与する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} rate 割合。
-     * @param {Number} turns ターン数
+     * @param {number} paramId パラメータID
+     * @param {number} rate 割合。
+     * @param {number} turns ターン数
      */
     Game_Battler.prototype.addRateBuff = function(paramId, rate, turns) {
         if (this.isAlive()) {
@@ -1014,9 +1014,9 @@ function Game_Buff() {
     /**
      * 固定割合のデバフを付与する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} rate 割合。
-     * @param {Number} turns ターン数
+     * @param {number} paramId パラメータID
+     * @param {number} rate 割合。
+     * @param {number} turns ターン数
      */
     Game_Battler.prototype.addRateDebuff = function(paramId, rate, turns) {
         if (this.isAlive()) {
@@ -1031,9 +1031,9 @@ function Game_Buff() {
     /**
      * 固定量割合のバフを付与する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} value 値(
-     * @param {Number} turns ターン数
+     * @param {number} paramId パラメータID
+     * @param {number} value 値(
+     * @param {number} turns ターン数
      */
     Game_Battler.prototype.addFixedBuff = function(paramId, value, turns) {
         if (this.isAlive()) {
@@ -1048,9 +1048,9 @@ function Game_Buff() {
     /**
      * 固定量割合のバフまたはデバフを付与する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} value 値(value>0:バフ、value<0:デバフ)
-     * @param {Number} turns ターン数
+     * @param {number} paramId パラメータID
+     * @param {number} value 値(value>0:バフ、value<0:デバフ)
+     * @param {number} turns ターン数
      */
     Game_Battler.prototype.addFixedDebuff = function(paramId, value, turns) {
         if (this.isAlive()) {
@@ -1133,8 +1133,8 @@ function Game_Buff() {
      * バフ量を計算する。
      * 
      * @param {Game_Battler} target 対象
-     * @param {Number} paramId パラメータID
-     * @param {Number} value 指定された固定値
+     * @param {number} paramId パラメータID
+     * @param {number} value 指定された固定値
      */
     Game_Action.prototype.itemBuffValue = function(target, paramId, value) {
         const item = this.item();
@@ -1172,8 +1172,8 @@ function Game_Buff() {
      * デバフ量を計算する。
      * 
      * @param {Game_Battler} target 対象
-     * @param {Number} paramId パラメータID
-     * @param {Number} value 指定された固定値
+     * @param {number} paramId パラメータID
+     * @param {number} value 指定された固定値
      */
     Game_Action.prototype.itemDebuffValue = function(target, paramId, value) {
         const item = this.item();
@@ -1196,8 +1196,8 @@ function Game_Buff() {
      * バフターン数を得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @param {Number} turns 基本ターン数
-     * @returns {Number 効果ターン数が返る。
+     * @param {number} turns 基本ターン数
+     * @returns {number} 効果ターン数が返る。
      */
     Game_Action.prototype.itemBuffTurns = function(target, turns) {
         const subject = this.subject();
@@ -1210,8 +1210,8 @@ function Game_Buff() {
      * デバフターン数を得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @param {Number} turns 基本ターン数
-     * @returns {Number 効果ターン数が返る。
+     * @param {number} turns 基本ターン数
+     * @returns {number} 効果ターン数が返る。
      */
     Game_Action.prototype.itemDebuffTurns = function(target, turns) {
         const subject = this.subject();

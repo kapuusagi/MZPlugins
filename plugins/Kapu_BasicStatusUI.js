@@ -174,7 +174,7 @@
      * strを解析し、statusEntryオブジェクトを生成する。
      * 
      * @param {String} str 文字列
-     * @returns {Object} statusEntryオブジェクト
+     * @returns {object} statusEntryオブジェクト
      */
     const _parseDisplayItemEntry = function(str) {
         try {
@@ -301,7 +301,7 @@
     /**
      * 画像を描画する。
      * 
-     * @param {Number} 項目のインデックス番号
+     * @param {number} 項目のインデックス番号
      */
     Window_Status.prototype.drawActorPicture = function() {
         const actor = this._actor;
@@ -326,10 +326,10 @@
      * 画像を描画する。
      * 
      * @param {String} name 画像ファイル名
-     * @param {Number} x 描画領域左上 x位置
-     * @param {Number} y 描画領域左上 y位置
-     * @param {Number} width 描画領域幅
-     * @param {Number} height 描画領域高さ
+     * @param {number} x 描画領域左上 x位置
+     * @param {number} y 描画領域左上 y位置
+     * @param {number} width 描画領域幅
+     * @param {number} height 描画領域高さ
      */
     Window_Status.prototype.drawPicture = function(name, x, y, width, height) {
         const bitmap = ImageManager.loadPicture(name);
@@ -351,10 +351,10 @@
      * アクターの顔グラフィックを描画する。
      * 
      * @param {Game_Battler} actor アクター
-     * @param {Number} x 描画領域左上X
-     * @param {Number} y 描画領域左上Y
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {number} x 描画領域左上X
+     * @param {number} y 描画領域左上Y
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Window_Status.prototype.drawActorFace = function(actor, x, y, width, height) {
         if (actor.isDead()) {
@@ -389,8 +389,8 @@
      * ステータスブロック1を描画する。
      * アクター名、クラス名、ニックネームを描画する。
      * 
-     * @param {Number} x 描画範囲左上位置x
-     * @param {Number} y 描画範囲左上位置y
+     * @param {number} x 描画範囲左上位置x
+     * @param {number} y 描画範囲左上位置y
      */
     Window_Status.prototype.drawStatusBlock1 = function(x, y) {
         const lineHeight = this.lineHeight();
@@ -407,9 +407,9 @@
      * アクター名を描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上位置x
-     * @param {Number} y 描画領域左上位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上位置x
+     * @param {number} y 描画領域左上位置y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorName = function(actor, x, y, width) {
         this.contents.fontSize = $gameSystem.mainFontSize() + 8;
@@ -420,9 +420,9 @@
      * アクターのクラスを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上位置x
-     * @param {Number} y 描画領域左上位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上位置x
+     * @param {number} y 描画領域左上位置y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorClass = function(actor, x, y, width) {
         this.resetFontSettings();
@@ -438,9 +438,9 @@
      * アクターのニックネームを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上位置x
-     * @param {Number} y 描画領域左上位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上位置x
+     * @param {number} y 描画領域左上位置y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorNickname = function(actor, x, y, width) {
         this.resetFontSettings();
@@ -472,8 +472,8 @@
     /**
      * ステートを描画する。
      * 
-     * @param {Number} x 描画位置左上x
-     * @param {Number} y 描画位置左上y
+     * @param {number} x 描画位置左上x
+     * @param {number} y 描画位置左上y
      */
     Window_Status.prototype.drawStates = function(x, y) {
         const rect = this.baseTextRect();
@@ -490,8 +490,8 @@
     /**
      * ステータスブロック2を描画する。
      * 
-     * @param {Number} x 描画位置左上x
-     * @param {Number} y 描画位置左上y
+     * @param {number} x 描画位置左上x
+     * @param {number} y 描画位置左上y
      */
     Window_Status.prototype.drawStatusBlock2 = function(x, y) {
         const lineHeight = Math.floor(this.lineHeight() * 1.4);
@@ -509,9 +509,9 @@
      * レベルを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawActorLevel = function(actor, x, y, width) {
@@ -527,9 +527,9 @@
      * アクターのHPを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorHp = function(actor, x, y, width) {
         // ゲージ描画
@@ -557,9 +557,9 @@
      * アクターのMPを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorMp = function(actor, x, y, width) {
         // ゲージ描画
@@ -587,9 +587,9 @@
      * アクターのTPを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorTp = function(actor, x, y, width) {
         // ゲージ描画
@@ -617,11 +617,11 @@
     /**
      * ゲージを描画する。
      * 
-     * @param {Object} gaugeData ゲージデータ。rate, backColor, color1, color2メンバを持つ。
-     * @param {Number} x ゲージ左上位置x
-     * @param {Number} y ゲージ左上位置y
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {object} gaugeData ゲージデータ。rate, backColor, color1, color2メンバを持つ。
+     * @param {number} x ゲージ左上位置x
+     * @param {number} y ゲージ左上位置y
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Window_Status.prototype.drawGaugeRect = function(gaugeData, x, y, width, height) {
         const rate = gaugeData.rate;
@@ -640,10 +640,10 @@
     /**
      * ゲージのテキストを描画する。
      * 
-     * @param {Object} data データ
-     * @param {Number} x ラベル左上位置 x
-     * @param {Number} y ラベル左上位置 y
-     * @param {Number} width 幅
+     * @param {object} data データ
+     * @param {number} x ラベル左上位置 x
+     * @param {number} y ラベル左上位置 y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawGaugeText = function(data, x, y, width) {
@@ -666,8 +666,8 @@
      * ステータスブロック1を描画する。
      * アクター名、クラス名、ニックネームを描画する。
      * 
-     * @param {Number} x 描画範囲左上位置x
-     * @param {Number} y 描画範囲左上位置y
+     * @param {number} x 描画範囲左上位置x
+     * @param {number} y 描画範囲左上位置y
      */
     Window_Status.prototype.drawStatusBlock3 = function(x, y) {
         const lineHeight = this.lineHeight();
@@ -693,8 +693,8 @@
      * ステータスブロック4を描画する。
      * アクター名、クラス名、ニックネームを描画する。
      * 
-     * @param {Number} x 描画範囲左上位置x
-     * @param {Number} y 描画範囲左上位置y
+     * @param {number} x 描画範囲左上位置x
+     * @param {number} y 描画範囲左上位置y
      */
     Window_Status.prototype.drawStatusBlock4 = function(x, y) {
         const lineHeight = this.lineHeight();
@@ -750,8 +750,8 @@
     /**
      * カスタムパラメータが有効かどうかを取得する。
      * 
-     * @param {Object} item カスタムパラメータオブジェクト
-     * @returns {Boolean} カスタムパラメータが有効な場合にはtrue, それ以外はfalse.
+     * @param {object} item カスタムパラメータオブジェクト
+     * @returns {boolean} カスタムパラメータが有効な場合にはtrue, それ以外はfalse.
      */
     Window_StatusParams.prototype.isCustomParamEnabled = function(item) {
         return item.enabled && item.name && (item.propertyName in Game_Actor.prototype);
@@ -761,7 +761,7 @@
      * ページを追加する。
      * 
      * @param {Function} method メソッド
-     * @param {Object} arg メソッドに渡すパラメータ
+     * @param {object} arg メソッドに渡すパラメータ
      */
     Window_StatusParams.prototype.addPage = function(method, arg) {
         this._pages.push({ method:method, arg:arg });
@@ -770,7 +770,7 @@
     /**
      * ページ数を得る。
      * 
-     * @returns {Number} ページ数
+     * @returns {number} ページ数
      */
     Window_StatusParams.prototype.pageCount = function() {
         return this._pages.length;
@@ -779,7 +779,7 @@
     /**
      * ページ番号を設定する。
      * 
-     * @param {Number} pageNumber ページ番号
+     * @param {number} pageNumber ページ番号
      */
     Window_StatusParams.prototype.setPage = function(pageNumber) {
         if (this._pageNumber !== pageNumber) {
@@ -791,7 +791,7 @@
     /**
      * ページ番号を得る。
      * 
-     * @returns {Number} ページ番号
+     * @returns {number} ページ番号
      */
     Window_StatusParams.prototype.page = function() {
         return this._pageNumber;
@@ -819,7 +819,7 @@
     /**
      * パラメータページを描画する。
      * 
-     * @param {Object} arg 引数
+     * @param {object} arg 引数
      */
     // eslint-disable-next-line no-unused-vars
     Window_StatusParams.prototype.drawParamPage = function(arg) {
@@ -844,10 +844,10 @@
     /**
      * パラメータを描画する。
      * 
-     * @param {Number} paramId パラメータID
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} paramId パラメータID
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_StatusParams.prototype.drawParam = function(paramId, x, y, width) {
         const name = TextManager.param(paramId);
@@ -861,7 +861,7 @@
     /**
      * カスタマイズパラメータページを描画する。
      * 
-     * @param {Object} arg 引数。表示開始するカスタムパラメータID。
+     * @param {object} arg 引数。表示開始するカスタムパラメータID。
      */
     Window_StatusParams.prototype.drawCustomizeParamPage = function(arg) {
         const rect = this.baseTextRect();
@@ -897,10 +897,10 @@
     /**
      * カスタム項目を描画する。
      * 
-     * @param {Object} item アイテム
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {object} item アイテム
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_StatusParams.prototype.drawCustomizeParam = function(item, x, y, width) {
         const name = item.name;
@@ -919,7 +919,7 @@
     /**
      * エレメントレートを描画する。
      * 
-     * @param {Object} arg 引数。表示開始する属性ID。
+     * @param {object} arg 引数。表示開始する属性ID。
      */
     Window_StatusParams.prototype.drawElementRatePage = function(arg) {
         const rect = this.baseTextRect();
@@ -965,10 +965,10 @@
      * エレメントレートを描画する。
      * 
      * @param {String} name 属性名
-     * @param {Number} rate レート
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} rate レート
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_StatusParams.prototype.drawElementRate = function(name, rate, x, y, width) {
         this.changeTextColor(ColorManager.systemColor());
@@ -1024,7 +1024,7 @@
     /**
      * パラメータ表示領域の幅を得る。
      * 
-     * @returns {Number} パラメータ表示領域の幅
+     * @returns {number} パラメータ表示領域の幅
      */
     Scene_Status.prototype.statusParamsWidth = function() {
         return 720;

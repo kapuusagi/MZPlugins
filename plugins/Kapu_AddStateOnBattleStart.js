@@ -48,7 +48,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processNoteTag = function(obj) {
         obj.givenStatesOnBattleStart = [];
@@ -77,7 +77,7 @@
      * 
      * Note:このメソッドがコールされたとき、$gameParty.inBattle()はfalseを返す事に注意。
      * 
-     * @param {Boolean} advantageous 有利な状態かどうか
+     * @param {boolean} advantageous 有利な状態かどうか
      */
     Game_Battler.prototype.onBattleStart = function(advantageous) {
         const traitObjects = this.traitObjects();

@@ -76,8 +76,8 @@
     /**
      * 回復不可特性を追加する。
      * 
-     * @param {Object} obj オブジェクト
-     * @param {Number} target 対象
+     * @param {object} obj オブジェクト
+     * @param {number} target 対象
      */
     const _addUnrecoverTrait = function(obj, target) {
         const t = obj.traits.find((trait) => (trait.code === Game_BattlerBase.TRAIT_UNRECOVER) && (trait.dataId === target));
@@ -118,7 +118,7 @@
     /**
      * 回復不能ターゲット名を得る。
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} ターゲット名
      */
     TextManager.unrecoverTarget = function(dataId) {
@@ -147,7 +147,7 @@
     /**
      * targetを回復可能かどうかを調べる
      * 
-     * @param {Number} target 対象
+     * @param {number} target 対象
      */
     Game_BattlerBase.prototype.isUnrecover = function(target) {
         return this.traits(Game_BattlerBase.TRAIT_UNRECOVER).some(
@@ -158,7 +158,7 @@
     /**
      * HPが回復可能かどうかを得る。
      * 
-     * @returns {Boolean} 回復できる場合にはtrue, それ以外はfalse
+     * @returns {boolean} 回復できる場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isUnrecoverHp = function() {
         return this.isUnrecover(Game_BattlerBase.UNRECOVER_HP);
@@ -167,7 +167,7 @@
     /**
      * MPが回復可能かどうかを得る。
      * 
-     * @returns {Boolean} 回復できる場合にはtrue, それ以外はfalse
+     * @returns {boolean} 回復できる場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isUnrecoverMp = function() {
         return this.isUnrecover(Game_BattlerBase.UNRECOVER_MP);
@@ -178,7 +178,7 @@
     /**
      * HPを増減させ、resultデータに反映させる。
      * 
-     * @param {Number} value 増減させる値
+     * @param {number} value 増減させる値
      */
     Game_Battler.prototype.gainHp = function(value) {
         if ((value > 0) && this.isUnrecoverHp()) {
@@ -191,7 +191,7 @@
     /**
      * MPを増減させ、resultデータに反映させる。
      * 
-     * @param {Number} value 増減させる値
+     * @param {number} value 増減させる値
      */
     Game_Battler.prototype.gainMp = function(value) {
         if ((value > 0) && this.isUnrecoverMp()) {

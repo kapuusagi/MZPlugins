@@ -158,8 +158,8 @@
          * ダメージ値を計算する。
          * 
          * @param {Game_BattlerBase} target 対象
-         * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
-         * @returns {Number} ダメージ値
+         * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+         * @returns {number} ダメージ値
          * !!!overwrite!!! Game_Action.makeDamageValue
          */
         Game_Action.prototype.makeDamageValue = function(target, critical) {
@@ -204,8 +204,8 @@
          * ダメージ値を計算する。
          * 
          * @param {Game_BattlerBase} target 対象
-         * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
-         * @returns {Number} ダメージ値
+         * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+         * @returns {number} ダメージ値
          * !!!overwrite!!! Game_Action.makeDamageValue
          */
         Game_Action.prototype.makeDamageValue = function(target, critical) {
@@ -247,7 +247,7 @@
      * 最大ダメージを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @returns {Number} 最大ダメージ
+     * @returns {number} 最大ダメージ
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.maxDamage = function(target) {
@@ -267,7 +267,7 @@
      * ダメージ計算時、対象に追加で付与する特性を取得する。
      * 
      * @param {Game_Battler} target ターゲット
-     * @param {Boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
      * @param {Array<Trait>} trait 特性オブジェクト配列
      */
     // eslint-disable-next-line no-unused-vars
@@ -278,10 +278,10 @@
     /**
      * 乗算ボーナスを得る。
      * 
-     * @param {Number} value 基本ダメージ値
+     * @param {number} value 基本ダメージ値
      * @param {Game_Battler} target ターゲット。
-     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @returns {Number} 乗算ボーナス適用後の値
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} 乗算ボーナス適用後の値
      */
     Game_Action.prototype.applyDamageRate = function(value, target, critical) {
         if (this.isPhysical()) {
@@ -296,10 +296,10 @@
     /**
      * 物理ダメージレートを適用する。
      * 
-     * @param {Number} value 基本ダメージ値
+     * @param {number} value 基本ダメージ値
      * @param {Game_Battler} target ターゲット。
-     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @returns {Number} MDR適用後の値
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} MDR適用後の値
      */
     Game_Action.prototype.applyPhysicalDamageRate = function(value, target, critical) {
         return value * Math.max(0, this.itemPdr(target, critical));
@@ -308,10 +308,10 @@
     /**
      * 魔法ダメージレートを適用する。
      * 
-     * @param {Number} value 基本ダメージ値
+     * @param {number} value 基本ダメージ値
      * @param {Game_Battler} target ターゲット。
-     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @returns {Number} MDR適用後の値
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} MDR適用後の値
      */
     Game_Action.prototype.applyMagicalDamageRate = function(value, target, critical) {
         return value * Math.max(0, this.itemMdr(target, critical));
@@ -322,8 +322,8 @@
      * (加算・乗算用)
      * 
      * @param {Game_Battler} target ターゲット。
-     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @returns {Number} 乗算ボーナスレート
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} 乗算ボーナスレート
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.multiplyDamageRate = function(target, critical) {
@@ -333,9 +333,9 @@
     /**
      * リカバリレートによる効果を適用する。
      * 
-     * @param {Number} value 基本ダメージ値
+     * @param {number} value 基本ダメージ値
      * @param {Game_Battler} target ターゲット。
-     * @returns {Number} 乗算ボーナス適用後の値。
+     * @returns {number} 乗算ボーナス適用後の値。
      */
     Game_Action.prototype.applyRecoveryRate = function(value, target) {
         if (value < 0) {
@@ -349,8 +349,8 @@
      * 物理ダメージレートを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @returns {Number} 物理ダメージレート
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} 物理ダメージレート
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.itemPdr = function(target, critical) {
@@ -361,8 +361,8 @@
      * 魔法ダメージレートを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @param {Booelan} critical クリティカルの場合にはtrue, それ以外はfalse
-     * @returns {Number} 魔法ダメージレート。(0.0～、等倍は1.0)
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} 魔法ダメージレート。(0.0～、等倍は1.0)
      */
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.itemMdr = function(target, critical) {
@@ -373,7 +373,7 @@
      * 回復レートを得る。
      * 
      * @param {Game_Battler} target ターゲット
-     * @returns {Number} 回復レート(0.0～、等倍は1.0)
+     * @returns {number} 回復レート(0.0～、等倍は1.0)
      */
     Game_Action.prototype.itemRec = function(target) {
         return target.rec;

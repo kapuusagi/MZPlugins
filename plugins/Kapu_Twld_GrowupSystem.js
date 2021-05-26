@@ -91,8 +91,8 @@
     /**
      * レベルアップ時に加算するGrowPointを得る。
      * 
-     * @param {Number} level レベル
-     * @returns {Number} 加算するGrowPoint
+     * @param {number} level レベル
+     * @returns {number} 加算するGrowPoint
      * !!!overwrite!!! Game_Actor.growPointAtLevelUp()
      */
     Game_Actor.prototype.growPointAtLevelUp = function(level) {
@@ -114,7 +114,7 @@
     /**
      * 転生カウントを得る。
      * 
-     * @returns {Number} 転生回数
+     * @returns {number} 転生回数
      */
     Game_Actor.prototype.reincarnationCount = function() {
         return this._reincarnationCount;
@@ -122,7 +122,7 @@
     /**
      * 転生可能かどうかを返す。
      * 
-     * @returns {Boolean} 転生可能な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 転生可能な場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.canReincarnation = function() {
         return this.isMaxLevel();
@@ -180,8 +180,8 @@
     /**
      * 基本パラメータを得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} パラメータの値
+     * @param {number} paramId パラメータID
+     * @returns {number} パラメータの値
      */
     Game_Actor.prototype.basicParamBase = function(paramId) {
         return _Game_Actor_basicParamBase.call(this, paramId)
@@ -215,7 +215,7 @@
          * 育成項目を適用する。
          * 
          * @param {GrowupItem} growupItem 育成項目
-         * @returns {Boolean} 適用できたかどうか。
+         * @returns {boolean} 適用できたかどうか。
          */
         Game_Actor.prototype.applyGrowup = function(growupItem) {
             if (growupItem.type === "reincarnation") {

@@ -68,8 +68,8 @@
 
     /**
      * シーンの準備をする。
-     * @param {Number} アニメーションID
-     * @param {Boolean} 反転させるかどうか。
+     * @param {number} アニメーションID
+     * @param {boolean} 反転させるかどうか。
      */
     Scene_RunAnimation2.prototype.prepare = function (animationId, mirror) {
         this._animationId = animationId;
@@ -135,7 +135,7 @@
     /**
      * ビジーかどうかを判定する。
      * 
-     * @returns {Boolean} ビジーの場合にはtrue, それ以外はfalse.
+     * @returns {boolean} ビジーの場合にはtrue, それ以外はfalse.
      */
     Scene_RunAnimation2.prototype.isBusy = function () {
         if (this._animationSprite) {

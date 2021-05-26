@@ -67,7 +67,7 @@ function Scene_MyCommonEvent() {
     /**
      * シーンを作成する準備をする。
      * 
-     * @param {Number} eventId コモンイベントID
+     * @param {number} eventId コモンイベントID
      */
     Scene_MyCommonEvent.prototype.prepare = function(eventId) {
         this._commonEventId = eventId || 0;

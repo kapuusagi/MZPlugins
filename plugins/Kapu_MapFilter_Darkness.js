@@ -111,8 +111,8 @@
     /**
      * 真偽値を得る。
      * 
-     * @param {Object} valueStr 値文字列
-     * @returns {Boolean} 真偽値
+     * @param {object} valueStr 値文字列
+     * @returns {boolean} 真偽値
      */
     const _parseBoolean = function(valueStr) {
         if (typeof valueStr === "undefined") {
@@ -141,7 +141,7 @@
     /**
      * ノートタグを処理する。
      * 
-     * @param {Object} obj データ
+     * @param {object} obj データ
      */
      const _processNoteTag = function(obj) {
         if (Game_Party.ABILITY_EVENT_SEARCH && obj.meta.searchLevel) {
@@ -228,9 +228,9 @@
     /**
      * 光源を追加する。
      * 
-     * @param {Number} x 光源X
-     * @param {Number} y 光源Y
-     * @param {Number} brightness 輝度
+     * @param {number} x 光源X
+     * @param {number} y 光源Y
+     * @param {number} brightness 輝度
      * @param {Array<Number>} 光源の色
      */
     MapDarknessFilter.prototype.addLightSource = function(x, y, brightness, color) {
@@ -323,7 +323,7 @@
     /**
      * 光源の強さ設定する。
      * 
-     * @param {Number} brightness 輝度
+     * @param {number} brightness 輝度
      */
     Game_Character.prototype.setLightBrightness = function(brightness) {
         this._lightSourceBrightness = brightness;
@@ -332,7 +332,7 @@
     /**
      * 光源の強さを得る。
      * 
-     * @returns {Number} 光源の強さ
+     * @returns {number} 光源の強さ
      */
     Game_Character.prototype.lightSourceBrightness = function() {
         return this._lightSourceBrightness;
@@ -362,7 +362,7 @@
     /**
      * 光源の強さを得る。
      * 
-     * @returns {Number} 光源の強さ
+     * @returns {number} 光源の強さ
      */
     Game_Character.prototype.lightSourceTargetBrightness = function() {
         return this._lightSourceBrightness;
@@ -392,8 +392,8 @@
     /**
      * Game_Eventオブジェクトを初期化する
      * 
-     * @param {Number} mapId マップID
-     * @param {Number} eventId イベントID
+     * @param {number} mapId マップID
+     * @param {number} eventId イベントID
      */
     Game_Event.prototype.initialize = function(mapId, eventId) {
         _Game_Event_initialize.call(this, mapId, eventId);
@@ -432,7 +432,7 @@
     /**
      * 光源の強さを得る。
      * 
-     * @returns {Number} 光源の強さ
+     * @returns {number} 光源の強さ
      */
     Game_Event.prototype.lightSourceTargetBrightness = function() {
         if (this._erased) {
@@ -450,7 +450,7 @@
     /**
      * 光源の強さを得る。
      * 
-     * @returns {Number} 光源の強さ
+     * @returns {number} 光源の強さ
      */
     Game_Player.prototype.lightSourceTargetBrightness = function() {
         return $gameParty.lightBrightness();
@@ -461,7 +461,7 @@
         /**
          * サーチレベルを得る。
          * 
-         * @returns {Number} サーチレベル。
+         * @returns {number} サーチレベル。
          */
         Game_Party.prototype.eventSearchLevel = function() {
             return this.partyTraitsSumMax(Game_Party.ABILITY_EVENT_SEARCH);
@@ -470,7 +470,7 @@
         /**
          * サーチレベルを得る。
          * 
-         * @returns {Number} サーチレベル。
+         * @returns {number} サーチレベル。
          */
         Game_Party.prototype.eventSearchLevel = function() {
             return 0;

@@ -40,7 +40,7 @@
      * ダメージ計算時、対象に追加で付与する特性を取得する。
      * 
      * @param {Game_Battler} target ターゲット
-     * @param {Boolean} critical クリティカルかどうか
+     * @param {boolean} critical クリティカルかどうか
      * @param {Array<Trait>} trait 特性オブジェクト配列
      */
     Game_Action.prototype.additionalTargetTraits = function(target, critical) {

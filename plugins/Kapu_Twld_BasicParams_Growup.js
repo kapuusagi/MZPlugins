@@ -156,7 +156,7 @@
     /**
      * 使用済みGrowPointを得る。
      * 
-     * @returns {Number} 使用済み育成ポイント。
+     * @returns {number} 使用済み育成ポイント。
      */
     Game_Actor.prototype.usedGrowupPoint = function() {
         let usedPoint = _Game_Actor_usedGrowupPoint.call(this);
@@ -175,8 +175,8 @@
     /**
      * 基本パラメータを得る。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} パラメータの値
+     * @param {number} paramId パラメータID
+     * @returns {number} パラメータの値
      */
     Game_Actor.prototype.basicParamBase = function(paramId) {
         return _Game_Actor_basicParamBase.call(this, paramId)
@@ -222,8 +222,8 @@
     /**
      * paramIdで指定される基本パラメータが育成可能かどうかを取得する。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Boolean} 育成可能な場合にはtrue, それ以外はfalse
+     * @param {number} paramId パラメータID
+     * @returns {boolean} 育成可能な場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isBasicParamGrowupable = function(paramId) {
         return this._basicParamsGrown[paramId] < this.basicParamMax(paramId);
@@ -232,8 +232,8 @@
     /**
      * 育成コストを取得する。
      * 
-     * @param {Number} paramId パラメータID
-     * @returns {Number} 育成コスト
+     * @param {number} paramId パラメータID
+     * @returns {number} 育成コスト
      */
     Game_Actor.prototype.gpBasicParamCost = function(paramId) {
         const value = this._basicParamsGrown[paramId];
@@ -243,8 +243,8 @@
     /**
      * 育成コストを計算する。
      * 
-     * @param {Number} currentValue 現在値
-     * @returns {Number} 育成コスト
+     * @param {number} currentValue 現在値
+     * @returns {number} 育成コスト
      */
     Game_Actor.prototype.calcGrowupBasicParamCost = function(currentValue) {
         return Math.max(1, Math.floor(currentValue / 20))
@@ -256,7 +256,7 @@
      * 育成項目を適用する。
      * 
      * @param {GrowupItem} growupItem 育成項目
-     * @returns {Boolean} 適用できたかどうか。
+     * @returns {boolean} 適用できたかどうか。
      */
     Game_Actor.prototype.applyGrowup = function(growupItem) {
         if (growupItem.type === "basicParam") {

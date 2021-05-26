@@ -241,7 +241,7 @@ function Scene_Appraise() {
      * 鑑定価格レートを得る。
      * 
      * @param {String} arg パラメータとして渡された鑑定価格レート文字列
-     * @returns {Number} 鑑定価格レート
+     * @returns {number} 鑑定価格レート
      */
     const _getApprisePriceRate = function(arg) {
         const rate = Number(arg);
@@ -253,7 +253,7 @@ function Scene_Appraise() {
      * 最小鑑定価格を得る。
      * 
      * @param {String} arg パラメータとして渡された最小鑑定価格文字列
-     * @returns {Number} 最小鑑定価格
+     * @returns {number} 最小鑑定価格
      */
     const _getMinAppraisePrice = function(arg) {
         const price = Number(arg);
@@ -384,8 +384,8 @@ function Scene_Appraise() {
     /**
      * アイテムの鑑定レベルを取得する。
      * 
-     * @param {Object} item アイテム/武器/防具
-     * @returns {Number} 鑑定レベルが返る。
+     * @param {object} item アイテム/武器/防具
+     * @returns {number} 鑑定レベルが返る。
      */
     DataManager.getItemAppraiseLevel = function(item) {
         let level = 0;
@@ -403,7 +403,7 @@ function Scene_Appraise() {
      * itemの鑑定価格を取得する。
      * 
      * @param {Data_Item} item アイテム(Item/Weapon/Armor)
-     * @returns {Number} 鑑定価格が返る。
+     * @returns {number} 鑑定価格が返る。
      */
     DataManager.getItemAppraisePrice = function(item) {
         let price = Number(item.meta.appraisePrice);
@@ -445,8 +445,8 @@ function Scene_Appraise() {
      * いずれかに存在している場合にtrueを返す。
      * 他の場所(倉庫機能実装とか)に保管される場合には、本メソッドに使用判定を追加すること。
      * 
-     * @param {Object} independentItem 個別アイテムオブジェクト(DataItem/DataWeapon/DataArmor)
-     * @returns {Boolean} 使用されている場合にはtrue, それ以外はfalse
+     * @param {object} independentItem 個別アイテムオブジェクト(DataItem/DataWeapon/DataArmor)
+     * @returns {boolean} 使用されている場合にはtrue, それ以外はfalse
      */
     DataManager.isIndependentItemUsed = function(independentItem) {
         return _DataManager_isIndependentItemUsed.call(this, independentItem)
@@ -460,9 +460,9 @@ function Scene_Appraise() {
     /**
      * kind, dataIdで指定されるアイテムを得る。
      * 
-     * @param {Number} kind アイテム種類(1:道具,2:武器,3:防具)
-     * @param {Number} dataId データID
-     * @returns {Object} アイテムデータ(DataItem/DataWeapon/DataArmor)。
+     * @param {number} kind アイテム種類(1:道具,2:武器,3:防具)
+     * @param {number} dataId データID
+     * @returns {object} アイテムデータ(DataItem/DataWeapon/DataArmor)。
      *                 kind,dataIdに相当するデータが無い場合にはnullが返る。
      */
     Game_Enemy.prototype.itemObject = function(kind, dataId) {
@@ -496,8 +496,8 @@ function Scene_Appraise() {
     /**
      * 未鑑定アイテムを追加する。
      * 
-     * @param {Object} item 追加するアイテム。ここで指定したアイテムをラップした未鑑定アイテムを入手する。
-     * @param {Number} count 個数
+     * @param {object} item 追加するアイテム。ここで指定したアイテムをラップした未鑑定アイテムを入手する。
+     * @param {number} count 個数
      */
     Game_Party.prototype.gainAppraiseItem = function(item, count) {
         if ((item === null) || (count <= 0)) {
@@ -532,7 +532,7 @@ function Scene_Appraise() {
      * 
      * @param {Data_Item} a アイテムA
      * @param {Data_Item} b アイテムB
-     * @returns {Number} アイテムAがアイテムBより前にある場合には負数。
+     * @returns {number} アイテムAがアイテムBより前にある場合には負数。
      * アイテムAがアイテムBより後にある場合には正数。
      * それ以外は0が返る。
      */
@@ -615,9 +615,9 @@ function Scene_Appraise() {
      * 
      * @param {Game_Actor} actor アクター
      * @param {Data_Skill} skill スキル
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_AppraiseItemCount.prototype.drawSkillCost = function(actor, skill, x, y, width) {
         let costStr = "";
@@ -655,10 +655,10 @@ function Scene_Appraise() {
     /**
      * Window_AppraiseItemListを初期化する。
      * 
-     * @param {Number} x ウィンドウx位置
-     * @param {Number} y ウィンドウy位置
-     * @param {Number} width ウィンドウ幅
-     * @param {Number} height ウィンドウ高さ
+     * @param {number} x ウィンドウx位置
+     * @param {number} y ウィンドウy位置
+     * @param {number} width ウィンドウ幅
+     * @param {number} height ウィンドウ高さ
      */
     Window_AppraiseItemList.prototype.initialize = function(x, y, width, height) {
         this.makeItemList();
@@ -699,7 +699,7 @@ function Scene_Appraise() {
     /**
      * アイテムの最大数を取得する。
      * 
-     * @returns {Number} アイテムの最大数
+     * @returns {number} アイテムの最大数
      */
     Window_AppraiseItemList.prototype.maxItems = function() {
         return this._items.length;
@@ -708,7 +708,7 @@ function Scene_Appraise() {
     /**
      * 鑑定レベルを設定する。
      * 
-     * @param {Number} level 鑑定レベル。
+     * @param {number} level 鑑定レベル。
      */
     Window_AppraiseItemList.prototype.setAppraiseLevel = function(level) {
         this._appraiseLevel = level;
@@ -726,7 +726,7 @@ function Scene_Appraise() {
 
     /**
      * 現在の所持金を設定する。
-     * @param {Number} monery 所持金
+     * @param {number} monery 所持金
      */
     Window_AppraiseItemList.prototype.setMonery = function(money) {
         this._monery = money;
@@ -736,7 +736,7 @@ function Scene_Appraise() {
     /**
      * 価格表示をするかどうかを設定する。
      * 
-     * @param {Boolean} visible 価格表示する場合にはtrue, それ以外はfalse.
+     * @param {boolean} visible 価格表示する場合にはtrue, それ以外はfalse.
      */
     Window_AppraiseItemList.prototype.setPriceVisiable = function(visible) {
         this._priceVisible = visible;
@@ -746,7 +746,7 @@ function Scene_Appraise() {
     /**
      * 現在の選択項目が有効かどうかを判定する。
      * 
-     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Window_AppraiseItemList.prototype.isCurrentItemEnabled = function() {
         return this.isEnabled(this._items[this.index()]);
@@ -771,7 +771,7 @@ function Scene_Appraise() {
      * itemの鑑定価格を取得する。
      * 
      * @param {Data_Item} item アイテム(Item/Weapon/Armor)
-     * @returns {Number} 鑑定価格
+     * @returns {number} 鑑定価格
      */
     Window_AppraiseItemList.prototype.itemAppraisePrice = function(item) {
         return DataManager.getItemAppraisePrice(item);
@@ -780,7 +780,7 @@ function Scene_Appraise() {
     /**
      * アイテムの鑑定レベルを得る。
      * 
-     * @returns {Number} 鑑定レベルが返る。未設定時は0が返る。
+     * @returns {number} 鑑定レベルが返る。未設定時は0が返る。
      */
     Window_AppraiseItemList.prototype.itemAppraiseLevel = function(item) {
         return DataManager.getItemAppraiseLevel(item);
@@ -804,7 +804,7 @@ function Scene_Appraise() {
 
     /**
      * アイテムを描画する。
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_AppraiseItemList.prototype.drawItem = function(index) {
         const item = this._items[index];
@@ -883,8 +883,8 @@ function Scene_Appraise() {
      * 鑑定したアイテムを描画する。
      * 
      * @param {Data_Item} item アイテム
-     * @param {Number} x x位置
-     * @param {Number} y y位置
+     * @param {number} x x位置
+     * @param {number} y y位置
      */
     Window_AppraiseResult.prototype.drawResultItem = function(item, x, y) {
         this.resetTextColor();
@@ -934,7 +934,7 @@ function Scene_Appraise() {
     /**
      * アイテム/スキルの鑑定レベルを取得する。
      * 
-     * @returns {Number} 鑑定レベル。
+     * @returns {number} 鑑定レベル。
      */
     Scene_Appraise.prototype.itemAppraiseLevel = function() {
         // 複数の鑑定レベルを持っているならば、そのうち最も高いものを返す。
@@ -1083,7 +1083,7 @@ function Scene_Appraise() {
     /**
      * 継続可能かどうかを判定する。
      * 
-     * @returns {Boolean} 継続可能な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 継続可能な場合にはtrue, それ以外はfalse
      */
     Scene_Appraise.prototype.isContinuous = function() {
         if (DataManager.isItem(this._item)) {
@@ -1132,8 +1132,8 @@ function Scene_Appraise() {
         /**
          * 使用可能な条件かどうかを判定する。
          * 
-         * @param {Object} item DataItem/DataSkill
-         * @returns {Boolean} 使用可能な場合にはtrue, それ以外はfalse.
+         * @param {object} item DataItem/DataSkill
+         * @returns {boolean} 使用可能な場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.meetsUsableItemConditions = function(item) {
             if (this.testApprise(item) && $gameParty.inBattle()) {
@@ -1146,8 +1146,8 @@ function Scene_Appraise() {
         /**
          * itemで指定されるアイテムまたはスキルが鑑定効果を持つかどうかを得る。
          * 
-         * @param {Object} item DataItem/DataSkill
-         * @returns {Boolean} 鑑定効果がある場合にはtrue, それ以外はfalse.
+         * @param {object} item DataItem/DataSkill
+         * @returns {boolean} 鑑定効果がある場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.testApprise = function(item) {
             return item.effects.some(
@@ -1178,8 +1178,8 @@ function Scene_Appraise() {
         /**
          * itemで指定されるアイテムまたはスキルが鑑定効果を持つかどうかを得る。
          * 
-         * @param {Object} item DataItem/DataSkill
-         * @returns {Boolean} 鑑定効果がある場合にはtrue, それ以外はfalse.
+         * @param {object} item DataItem/DataSkill
+         * @returns {boolean} 鑑定効果がある場合にはtrue, それ以外はfalse.
          */
         Scene_ItemBase.prototype.testApprise = function(item) {
             return item.effects.some(
@@ -1205,9 +1205,9 @@ function Scene_Appraise() {
     /**
      * シーンの作成準備をする。
      * 
-     * @param {Number} alevel 鑑定レベル。
-     * @param {Number} clerkOffsetX 店員画像表示オフセットX
-     * @param {Number} clerkOffsetY 店員画像表示オフセットY
+     * @param {number} alevel 鑑定レベル。
+     * @param {number} clerkOffsetX 店員画像表示オフセットX
+     * @param {number} clerkOffsetY 店員画像表示オフセットY
      */
     Scene_AppraiseShop.prototype.prepare = function(alevel, filename, clerkOffsetX, clerkOffsetY) {
         this._appraiseLevel = alevel;

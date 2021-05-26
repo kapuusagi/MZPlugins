@@ -209,9 +209,9 @@
      * キャプチャ画像を保存する。
      * bitmapにnullを渡すと解放する。
      * 
-     * @param {Number} no 番号
+     * @param {number} no 番号
      * @param {Bitmap} bitmap ビットマップ
-     * @param {Object} data 保存データ
+     * @param {object} data 保存データ
      */
     Game_Temp.prototype.setCaptureImage = function(no, bitmap, data) {
         if (this._captureImages[no]) {
@@ -226,7 +226,7 @@
     /**
      * キャプチャ画像を取得する。
      * 
-     * @param {Number} no 番号
+     * @param {number} no 番号
      * @returns {Bitmap} ビットマップ
      */
     Game_Temp.prototype.captureImage = function(no) {
@@ -319,7 +319,7 @@
     const _DataManager_makeSaveContents = DataManager.makeSaveContents;
     /**
      * 保存するデータを作成する。
-     * @returns {Object} 保存するデータ
+     * @returns {object} 保存するデータ
      */
     DataManager.makeSaveContents = function() {
         const contents = _DataManager_makeSaveContents.call(this);
@@ -340,7 +340,7 @@
     const _DataManager_extractSaveContents = DataManager.extractSaveContents;
     /**
      * 保存されたデータを展開し、メモリ上に読み出す。
-     * @param {Object} contents 保存データ
+     * @param {object} contents 保存データ
      */
     DataManager.extractSaveContents = function(contents) {
         _DataManager_extractSaveContents.call(this, contents);

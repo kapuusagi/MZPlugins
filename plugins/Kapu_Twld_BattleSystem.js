@@ -271,7 +271,7 @@ function Sprite_BattleHudPicture() {
     /**
      * アクターIDを得る。
      * 
-     * @param {Object} args 引数
+     * @param {object} args 引数
      */
     const _getActorId = function(args) {
         const actorId = Number(args.actorId) || 0;
@@ -315,7 +315,7 @@ function Sprite_BattleHudPicture() {
      * 戦闘システムがサイドビューかどうかを判定する。
      * TwldBattleSystemはフロントビュー固定。
      * 
-     * @returns {Boolean} サイドビューの場合にはtrue, それ以外はfalse
+     * @returns {boolean} サイドビューの場合にはtrue, それ以外はfalse
      */
     Game_System.prototype.isSideView = function() {
         return false;
@@ -326,7 +326,7 @@ function Sprite_BattleHudPicture() {
     /**
      * TPBキャスト中かどうかを判定する。
      * 
-     * @returns {Boolean} TPBキャスト中の場合にはtrue, それ以外はfalse
+     * @returns {boolean} TPBキャスト中の場合にはtrue, それ以外はfalse
      */
     Game_Battler.prototype.isTpbCasting = function() {
         return (this._tpbState === "casting");
@@ -335,7 +335,7 @@ function Sprite_BattleHudPicture() {
     /**
      * TPBキャストタイムを得る。
      * 
-     * @returns {Number} TPBキャストタイム
+     * @returns {number} TPBキャストタイム
      */
     Game_Battler.prototype.tpbCastTime = function() {
         return this._tpbCastTime;
@@ -357,7 +357,7 @@ function Sprite_BattleHudPicture() {
     /**
      * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
      * 
-     * @param {Number} actorId アクターID
+     * @param {number} actorId アクターID
      */
     Game_Actor.prototype.setup = function(actorId) {
         _Game_Actor_setup.call(this, ...arguments);
@@ -390,7 +390,7 @@ function Sprite_BattleHudPicture() {
      * 戦闘グラフィックのスプライトを表示するかどうかを取得する。
      * isSpriteVisibleがtrueになっていないと、ダメージポップアップは表示されない。
      * 
-     * @returns {Boolean} スプライトを表示する場合にはtrue, それ以外はfalse
+     * @returns {boolean} スプライトを表示する場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.isSpriteVisible = function() {
         return true;
@@ -400,7 +400,7 @@ function Sprite_BattleHudPicture() {
     // Game_Party
     /**
      * 最大戦闘参加メンバー数を得る。
-     * @returns {Number} 最大戦闘参加メンバー数が返る。
+     * @returns {number} 最大戦闘参加メンバー数が返る。
      */
     Game_Party.prototype.maxBattleMembers = function() {
         return maxBattleMembers;
@@ -433,7 +433,7 @@ function Sprite_BattleHudPicture() {
     /**
      * アイテムを設定する。
      * 
-     * @param {Object} item アイテム。(DataItem/DataWeapon/DataArmor/DataSkill)
+     * @param {object} item アイテム。(DataItem/DataWeapon/DataArmor/DataSkill)
      */
     Window_HudItemName.prototype.setItem = function(item) {
         if (this._item !== item) {
@@ -479,7 +479,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 項目を描画する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_BattleActor.prototype.drawItem = function(index) {
         const actor = this.actor(index);
@@ -490,7 +490,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 最大カラム数を得る。
      * 
-     * @returns {Number} 最大カラム数
+     * @returns {number} 最大カラム数
      */
     Window_BattleActor.prototype.maxCols = function() {
         return 1;
@@ -499,7 +499,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 1項目の高さを得る。
      * 
-     * @returns {Number} 1項目の高さ。
+     * @returns {number} 1項目の高さ。
      */
     Window_BattleStatus.prototype.itemHeight = function() {
         return this.lineHeight();
@@ -508,7 +508,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 最大行数を得る。
      * 
-     * @returns {Number} 最大行数。
+     * @returns {number} 最大行数。
      */
     Window_BattleActor.prototype.maxRows = function() {
         return this.innerHeight / this.itemHeight();
@@ -517,7 +517,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 行スペースを得る。
      * 
-     * @returns {Number} 行スペース
+     * @returns {number} 行スペース
      */
     Window_BattleActor.prototype.rowSpacing = function() {
         return 4;
@@ -545,7 +545,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 最大カラム数を得る。
      * 
-     * @returns {Number} 最大カラム数
+     * @returns {number} 最大カラム数
      */
     Window_BattleEnemy.prototype.maxCols = function() {
         return 1;
@@ -585,7 +585,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 値を描画するかどうかを設定する。
      * 
-     * @param {Boolean} isDraw 値を描画するかどうか
+     * @param {boolean} isDraw 値を描画するかどうか
      */
     Sprite_BattleHudHpGauge.prototype.setDrawValue = function(isDraw) {
         if (this._drawValue !== isDraw) {
@@ -596,7 +596,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ラベルのフォントサイズを得る。
      * 
-     * @returns {Number} フォントサイズ
+     * @returns {number} フォントサイズ
      */
     Sprite_BattleHudHpGauge.prototype.labelFontSize = function() {
         return gaugeLabelHpFontSize;
@@ -605,7 +605,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ゲージ描画のX位置を取得する。
      * 
-     * @returns {Number} X位置
+     * @returns {number} X位置
      */
     Sprite_BattleHudHpGauge.prototype.gaugeX = function() {
         return 16;
@@ -614,7 +614,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 値のフォントサイズを得る。
      * 
-     * @returns {Number} 値のフォントサイズ。
+     * @returns {number} 値のフォントサイズ。
      */
     Sprite_BattleHudHpGauge.prototype.valueFontSize = function() {
         return gaugeValueHpFontSize;
@@ -678,7 +678,7 @@ function Sprite_BattleHudPicture() {
     /**
      * Bitmapの幅を得る。
      * 
-     * @returns {Number} Bitmapの幅。
+     * @returns {number} Bitmapの幅。
      */
     Sprite_BattleHudMpTpGauge.prototype.bitmapWidth = function() {
         return 96;
@@ -687,7 +687,7 @@ function Sprite_BattleHudPicture() {
     /**
      * Bitmapの高さを得る。
      * 
-     * @returns {Number} Bitmapの高さ。
+     * @returns {number} Bitmapの高さ。
      */
     Sprite_BattleHudMpTpGauge.prototype.bitmapHeight = function() {
         return 12;
@@ -696,7 +696,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ゲージの高さを得る。
      * 
-     * @returns {Number} ゲージの高さ。
+     * @returns {number} ゲージの高さ。
      */
     Sprite_BattleHudMpTpGauge.prototype.gaugeHeight = function() {
         return 8;
@@ -705,7 +705,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ラベルのフォントサイズを得る。
      * 
-     * @returns {Number} フォントサイズ
+     * @returns {number} フォントサイズ
      */
     Sprite_BattleHudMpTpGauge.prototype.labelFontSize = function() {
         return gaugeLabelFontSize;
@@ -714,7 +714,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 値のフォントサイズを得る。
      * 
-     * @returns {Number} 値のフォントサイズ。
+     * @returns {number} 値のフォントサイズ。
      */
     Sprite_BattleHudMpTpGauge.prototype.valueFontSize = function() {
         return gaugeValueFontSize;
@@ -723,7 +723,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ゲージ描画のX位置を取得する。
      * 
-     * @returns {Number} X位置
+     * @returns {number} X位置
      */
     Sprite_BattleHudMpTpGauge.prototype.gaugeX = function() {
         return 16;
@@ -757,7 +757,7 @@ function Sprite_BattleHudPicture() {
     /**
      * Bitmapの幅を得る。
      * 
-     * @returns {Number} Bitmapの幅。
+     * @returns {number} Bitmapの幅。
      */
     Sprite_BattleHudTpbGauge.prototype.bitmapWidth = function() {
         return 96;
@@ -766,7 +766,7 @@ function Sprite_BattleHudPicture() {
     /**
      * Bitmapの高さを得る。
      * 
-     * @returns {Number} Bitmapの高さ。
+     * @returns {number} Bitmapの高さ。
      */
     Sprite_BattleHudTpbGauge.prototype.bitmapHeight = function() {
         return 12;
@@ -775,7 +775,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ゲージ描画のX位置を取得する。
      * 
-     * @returns {Number} X位置
+     * @returns {number} X位置
      */
     Sprite_BattleHudTpbGauge.prototype.gaugeX = function() {
         return 0;
@@ -784,7 +784,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ゲージの高さを得る。
      * 
-     * @returns {Number} ゲージの高さ。
+     * @returns {number} ゲージの高さ。
      */
     Sprite_BattleHudTpbGauge.prototype.gaugeHeight = function() {
         return 8;
@@ -793,7 +793,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ラベルのフォントサイズを得る。
      * 
-     * @returns {Number} フォントサイズ
+     * @returns {number} フォントサイズ
      */
     Sprite_BattleHudTpbGauge.prototype.labelFontSize = function() {
         return gaugeLabelFontSize;
@@ -802,7 +802,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 値のフォントサイズを得る。
      * 
-     * @returns {Number} 値のフォントサイズ。
+     * @returns {number} 値のフォントサイズ。
      */
     Sprite_BattleHudTpbGauge.prototype.valueFontSize = function() {
         return gaugeValueFontSize;
@@ -811,7 +811,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 現在値を取得する。
      * 
-     * @returns {Number} 現在値。
+     * @returns {number} 現在値。
      */
     Sprite_BattleHudTpbGauge.prototype.currentValue = function() {
         if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
@@ -823,7 +823,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 現在のゲージ最大値を得る。
      * 
-     * @returns {Number} ゲージ最大値
+     * @returns {number} ゲージ最大値
      */ 
     Sprite_BattleHudTpbGauge.prototype.currentMaxValue = function() {
         if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
@@ -916,7 +916,7 @@ function Sprite_BattleHudPicture() {
     /**
      * フラッシュ処理が必要かどうかを取得する。
      * 
-     * @returns {Boolean} フラッシュが必要な場合にはtrue, それ以外はfalse
+     * @returns {boolean} フラッシュが必要な場合にはtrue, それ以外はfalse
      */
     Sprite_BattleHudTpbGauge.prototype.isFlashing = function() {
         return this._battler && (this._battler.isInputting() || this._battler.isTpbCasting());
@@ -981,7 +981,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ビットマップの高さを得る。
      * 
-     * @returns {Number} Bitmapの高さ
+     * @returns {number} Bitmapの高さ
      */
     Sprite_BattleHudActorName.prototype.bitmapHeight = function() {
         return 18;
@@ -989,7 +989,7 @@ function Sprite_BattleHudPicture() {
     /**
      * Sprite_Nameの名前表示用フォントサイズを得る。
      * 
-     * @returns {Number} 名前表示用フォントサイズ。
+     * @returns {number} 名前表示用フォントサイズ。
      */
     Sprite_BattleHudActorName.prototype.fontSize = function() {
         return 16;
@@ -1101,8 +1101,8 @@ function Sprite_BattleHudPicture() {
     /**
      * アイコンを描画する。
      * 
-     * @param {Number} iconIndex 描画するアイコンのインデックス
-     * @param {Number} drawIndex 書き込み先位置(0~3)
+     * @param {number} iconIndex 描画するアイコンのインデックス
+     * @param {number} drawIndex 書き込み先位置(0~3)
      */
     Sprite_HudStateIcons.prototype.drawIcon = function(iconIndex, drawIndex) {
         // 所定のアイコンをbltでコピーしていく。
@@ -1118,7 +1118,7 @@ function Sprite_BattleHudPicture() {
     /**
      * このスプライトを表示するべきかどうかを取得する。
      * 
-     * @returns {Boolean} 表示するべき場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 表示するべき場合にはtrue, それ以外はfalse.
      */
     Sprite_HudStateIcons.prototype.shouldDisplay = function() {
         const battler = this._battler;
@@ -1173,8 +1173,8 @@ function Sprite_BattleHudPicture() {
     /**
      * ホーム位置を設定する。
      * 
-     * @param {Number} x X位置
-     * @param {Number} y Y位置
+     * @param {number} x X位置
+     * @param {number} y Y位置
      */
     Sprite_Enemy.prototype.setHome = function(x, y) {
         _Sprite_Enemy_setHome.call(this, x + enemyAreaOffsetX, y);
@@ -1216,7 +1216,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ゲージが可視状態かどうかを取得する。
      * 
-     * @returns {Boolean} 可視状態の場合にはtrue, それ以外はfalse
+     * @returns {boolean} 可視状態の場合にはtrue, それ以外はfalse
      */
     Sprite_Enemy.prototype.isGaugeVisible = function() {
         return displayEnemyGauge && this._battler && this._battler.isSpriteVisible()
@@ -1246,7 +1246,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ステータス領域の幅を得る。
      * 
-     * @returns {Number} ステータス領域の幅
+     * @returns {number} ステータス領域の幅
      */
     Sprite_BattleHudActor.prototype.statusAreaWidth = function() {
         return statusAreaWidth;
@@ -1255,7 +1255,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ステータス領域の高さを得る。
      * 
-     * @returns {Number} ステータスエリアの高さ
+     * @returns {number} ステータスエリアの高さ
      */
     Sprite_BattleHudActor.prototype.statusAreaHeight = function() {
         return statusAreaHeight;
@@ -1442,7 +1442,7 @@ function Sprite_BattleHudPicture() {
     /**
      * HUDの位置を得る。
      * 
-     * @param {Number} index 位置
+     * @param {number} index 位置
      */
     Sprite_BattleHudActor.prototype.setHudPosition = function(index) {
         const battleMemberCount = $gameParty.battleMembers().length;
@@ -1522,7 +1522,7 @@ function Sprite_BattleHudPicture() {
     /**
      * メインスプライトの色補正を得る。
      * 
-     * @returns {Object} 色補正
+     * @returns {object} 色補正
      */
     Sprite_BattleHudActor.prototype.mainSpriteColorCondition = function() {
         return {
@@ -1535,7 +1535,7 @@ function Sprite_BattleHudPicture() {
     /**
      * メインスプライトの彩度補正値を得る。
      * 
-     * @returns {Number} 彩度補正値(0～255)
+     * @returns {number} 彩度補正値(0～255)
      */
     Sprite_BattleHudActor.prototype.mainSpriteSaturation = function() {
         return (this._actor.isDead()) ? 0 : 255;
@@ -1544,7 +1544,7 @@ function Sprite_BattleHudPicture() {
     /**
      * メインスプライトの輝度補正値を取得する。
      * 
-     * @returns {Number} 輝度(0～255)
+     * @returns {number} 輝度(0～255)
      */
     Sprite_BattleHudActor.prototype.mainSpriteBrightness = function() {
         return (this._actor.isDead()) ? 128 : 255;
@@ -1552,7 +1552,7 @@ function Sprite_BattleHudPicture() {
     /**
      * メインスプライトの不透明度を得る。
      * 
-     * @returns {Number} 不透明度(0～255)
+     * @returns {number} 不透明度(0～255)
      */
     Sprite_BattleHudActor.prototype.mainSpriteOpacity = function() {
         return 255;
@@ -1587,7 +1587,7 @@ function Sprite_BattleHudPicture() {
      * Faceをメインスプライト画像として読み出す。
      * 
      * @param {String} faceName 顔グラフィックファイル名
-     * @param {Number} faceIndex 顔グラフィックファイル中のインデックス番号
+     * @param {number} faceIndex 顔グラフィックファイル中のインデックス番号
      */
     Sprite_BattleHudActor.prototype.loadMainSpriteBitmapFace = function(faceName, faceIndex) {
         this._mainSprite.bitmap = ImageManager.loadFace(faceName, faceIndex);
@@ -1629,7 +1629,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ダメージポップアップ位置Yを取得する。
      * 
-     * @returns {Number} ポップアップ位置y
+     * @returns {number} ポップアップ位置y
      */
     Sprite_BattleHudActor.prototype.damageOffsetY = function() {
         return ImageManager.faceHeight - this.statusAreaHeight() - 60;
@@ -1663,7 +1663,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 表示を行う水平方向位置を得る。
      * 
-     * @param {Number} x 画面上のX位置
+     * @param {number} x 画面上のX位置
      */
     DisplayBattlePictureFilter.prototype.setValidX = function(x) {
         this.uniforms.zeroX = Number(x) || 0;
@@ -1719,7 +1719,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 色差を設定する。
      * 
-     * @param {Number} saturation 色差変更値
+     * @param {number} saturation 色差変更値
      */
     BattleHudActorFilter.prototype.setSaturation = function(saturation) {
         this.uniforms.saturation = saturation.clamp(0, +255.0);
@@ -1728,7 +1728,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 色差を取得する。
      * 
-     * @returns {Number} 色差変更値
+     * @returns {number} 色差変更値
      */
     BattleHudActorFilter.prototype.saturation = function() {
         return this.uniforms.saturation;
@@ -1737,7 +1737,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 輝度補正値を設定する。
      * 
-     * @param {Number} brightness 輝度
+     * @param {number} brightness 輝度
      */
     BattleHudActorFilter.prototype.setBrightness = function(brightness) {
         this.uniforms.brightness = brightness.clamp(0, 255.0);
@@ -1746,7 +1746,7 @@ function Sprite_BattleHudPicture() {
     /**
      * 輝度補正値を得る。
      * 
-     * @returns {Number} 輝度補正値
+     * @returns {number} 輝度補正値
      */
     BattleHudActorFilter.prototype.brightness = function() {
         return this.uniforms.brightness;
@@ -2023,7 +2023,7 @@ function Sprite_BattleHudPicture() {
      * ターゲットに対応するSpriteを取得する。
      * 派生クラスにて実装する事。
      * 
-     * @param {Object} target ターゲット(Game_BattlerBaseオブジェクト)
+     * @param {object} target ターゲット(Game_BattlerBaseオブジェクト)
      * @returns {Sprite} 対象のスプライト
      */
     Spriteset_Battle.prototype.findTargetSprite = function(target) {
@@ -2495,7 +2495,7 @@ function Sprite_BattleHudPicture() {
     /**
      * いずれかの入力ウィンドウがアクティブ（選択中）かどうかを判定する。
      * 
-     * @returns {Boolean} いずれかの入力ウィンドウがアクティブな場合にはtrue, それ以外はfalse
+     * @returns {boolean} いずれかの入力ウィンドウがアクティブな場合にはtrue, それ以外はfalse
      */
     Scene_Battle.prototype.isAnyInputWindowActive = function() {
         return _Scene_Battle_isAnyInputWindowActive.call(this);

@@ -107,8 +107,8 @@
     /**
      * 真偽値を得る。
      * 
-     * @param {Object} valueStr 値文字列
-     * @returns {Boolean} 真偽値
+     * @param {object} valueStr 値文字列
+     * @returns {boolean} 真偽値
      */
     const _parseBoolean = function(valueStr) {
         if (typeof valueStr === "undefined") {
@@ -249,7 +249,7 @@
         /**
          * Blurフィルタの強さ
          *
-         * @member {Number}
+         * @member {number}
          */
         blur: {
             get: function () {
@@ -263,7 +263,7 @@
         /**
          * Blurフィルタの勾配の強さ。
          *
-         * @member {Number}
+         * @member {number}
          */
         gradientBlur: {
             get: function ()
@@ -449,7 +449,7 @@
     /**
      * ぼかしの中央を設定する。
      * 
-     * @param {Number} y 中央位置
+     * @param {number} y 中央位置
      */
     MapTiltShiftFilter.prototype.setCenterY = function(y) {
         this._centerY = y;
@@ -460,7 +460,7 @@
         /**
          * Blurの強さ
          *
-         * @member {Number}
+         * @member {number}
          */
         blur: {
             get: function ()
@@ -477,7 +477,7 @@
         /**
          * Blurをかける勾配の強さ
          *
-         * @member {Number}
+         * @member {number}
          */
         gradientBlur: {
             get: function ()
@@ -493,7 +493,7 @@
         /**
          * プレイヤーに追従させるかどうか。
          * 
-         * @returns {Boolean}
+         * @returns {boolean}
          */
         playerCenter: {
             get: function() { 

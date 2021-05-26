@@ -134,7 +134,7 @@
     /**
      * ドロップアイテムの抽選回数を得る。
      * 
-     * @returns {Number} 抽選回数
+     * @returns {number} 抽選回数
      */
     Game_Party.prototype.dropItemLotteryCount = function() {
         if (this.partyAbility(Game_Party.ABILITY_TRIPLE_DROP)) {

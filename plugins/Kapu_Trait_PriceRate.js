@@ -143,8 +143,8 @@
     /**
      * ブール値を得る。
      * 
-     * @param {Object} str 引数
-     * @returns {Boolean} ブール値
+     * @param {object} str 引数
+     * @returns {boolean} ブール値
      */
     const _getBoolean = function(str) {
         switch (typeof str) {
@@ -171,7 +171,7 @@
      * 割合を得る。
      * 
      * @param {String} str 文字列
-     * @returns {Number} 割合を得る。
+     * @returns {number} 割合を得る。
      */
     const _getRate = function(str) {
         if (str.slice(-1) === "%") {
@@ -182,7 +182,7 @@
     };
     /**
      * ノートタグを処理する。
-     * @param {Object} obj データ
+     * @param {object} obj データ
      */
     const _processNoteTag = function(obj) {
         if (obj.meta.buyingPriceRate) {
@@ -243,7 +243,7 @@
     /**
      * 購入価格レート特性が有効かどうかを取得する。
      * 
-     * @returns {Boolean} 価格レート特性が有効な場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 価格レート特性が有効な場合にはtrue, それ以外はfalse.
      */
     Game_Temp.prototype.enableBuyingPriceRateTrait = function() {
         return this._enableBuyingPriceRateTrait;
@@ -252,7 +252,7 @@
     /**
      * 購入価格レート特性の有効/無効を設定する。
      * 
-     * @param {Boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     * @param {boolean} enabled 有効にする場合にはtrue, それ以外はfalse
      */
     Game_Temp.prototype.setEnableBuyingPriceRateTrait = function(enabled) {
         this._enableBuyingPriceRateTrait = enabled;
@@ -261,7 +261,7 @@
     /**
      * 売却価格レート特性が有効かどうかを取得する。
      * 
-     * @returns {Boolean} 価格レート特性が有効な場合にはtrue, それ以外はfalse.
+     * @returns {boolean} 価格レート特性が有効な場合にはtrue, それ以外はfalse.
      */
     Game_Temp.prototype.enableSellingPriceRateTrait = function() {
         return this._enableSellingPriceRateTrait;
@@ -270,7 +270,7 @@
     /**
      * 売却価格レート特性の有効/無効を設定する。
      * 
-     * @param {Boolean} enabled 有効にする場合にはtrue, それ以外はfalse
+     * @param {boolean} enabled 有効にする場合にはtrue, それ以外はfalse
      */
     Game_Temp.prototype.setEnableSellingPriceRateTrait = function(enabled) {
         this._enableSellingPriceRateTrait = enabled;
@@ -281,7 +281,7 @@
     /**
      * 購入価格レート
      * 
-     * @returns {Number} 購入価格レート
+     * @returns {number} 購入価格レート
      */
     Game_BattlerBase.prototype.buyingPriceRate = function() {
         return this.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, Game_Party.ABILITY_BUYING_PRICE_RATE);
@@ -290,7 +290,7 @@
     /**
      * 売却価格レート
      * 
-     * @returns {Number} 売却価格レート。
+     * @returns {number} 売却価格レート。
      */
     Game_BattlerBase.prototype.sellingPriceRate = function() {
         return this.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, Game_Party.ABILITY_SELLING_PRICE_RATE);
@@ -301,7 +301,7 @@
     /**
      * 購入価格レートを得る。
      * 
-     * @returns {Number} 購入価格レート
+     * @returns {number} 購入価格レート
      */
     Game_Party.prototype.buyingPriceRate = function() {
         const discountRate = this.partyTraitsSumMax(Game_Party.ABILITY_BUYING_PRICE_RATE);
@@ -311,7 +311,7 @@
     /**
      * 売却価格レートを得る。
      * 
-     * @returns {Number} 売却価格レート
+     * @returns {number} 売却価格レート
      */
     Game_Party.prototype.sellingPriceRate = function() {
         return Math.max(0, 1 + this.partyTraitsSumMax(Game_Party.ABILITY_SELLING_PRICE_RATE));
@@ -326,8 +326,8 @@
     /**
      * 購入価格を得る。
      * 
-     * @param {Object} item アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {Number} 購入価格
+     * @param {object} item アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {number} 購入価格
      */
     Window_ShopBuy.prototype.price = function(item) {
         const price = _Window_ShopBuy_price.call(this, item);
@@ -347,7 +347,7 @@
         /**
          * 売却価格を得る。
          * 
-         * @returns {Number} 売却価格
+         * @returns {number} 売却価格
          */
         Scene_Shop.prototype.sellingPrice = function() {
             let sellingPrice = this._item.price * basicSellingPriceRate;
@@ -361,7 +361,7 @@
         /**
          * 売却価格を得る。
          * 
-         * @returns {Number} 売却価格
+         * @returns {number} 売却価格
          */
         Scene_Shop.prototype.sellingPrice = function() {
             const price = _Scene_Shop_sellingPrice.call(this);

@@ -113,7 +113,7 @@
         /**
          * ノートタグを処理する。
          * 
-         * @param {Object} obj データオブジェクト
+         * @param {object} obj データオブジェクト
          */
         const _processNoteTag = function(obj) {
             if (obj.meta.criticalDamageRate) {
@@ -148,10 +148,10 @@
         Object.defineProperties(Game_BattlerBase.prototype, {
             /**
              * 物理クリティカルダメージレート(PhysicalCriticalDamageRate)
-             * @const {Number}
+             * @const {number}
              */
             pcdr: {
-                /** @returns {Number} */
+                /** @returns {number} */
                 get: function() {
                     return this.criticalDamageRatePhysical();
                 },
@@ -159,10 +159,10 @@
             },
             /**
              * 魔法クリティカルダメージレート(MagicalCriticalDamageRate)
-             * @const {Number} 
+             * @const {number} 
              */
             mcdr: {
-                /** @returns {Number} */
+                /** @returns {number} */
                 get: function() {
                     return this.criticalDamageRateMagical();
                 },
@@ -173,7 +173,7 @@
     /**
      * 物理攻撃のクリティカル倍率を取得する。
      * 
-     * @returns {Number} クリティカル倍率。
+     * @returns {number} クリティカル倍率。
      */
     Game_BattlerBase.prototype.criticalDamageRatePhysical = function () {
         return this.criticalDamageRate();
@@ -182,7 +182,7 @@
     /**
      * 魔法攻撃のクリティカル倍率を取得する。
      * 
-     * @returns {Number} クリティカル倍率。
+     * @returns {number} クリティカル倍率。
      */
     Game_BattlerBase.prototype.criticalDamageRateMagical = function() {
         return this.criticalDamageRate();
@@ -192,7 +192,7 @@
         /**
          * クリティカルダメージレートを得る。
          * 
-         * @returns {Number} クリティカルダメージレート
+         * @returns {number} クリティカルダメージレート
          */
         Game_BattlerBase.prototype.criticalDamageRate = function() {
             return Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CDR);
@@ -201,7 +201,7 @@
         /**
          * クリティカルダメージレートを得る。
          * 
-         * @returns {Number} クリティカルダメージレート
+         * @returns {number} クリティカルダメージレート
          */
         Game_BattlerBase.prototype.criticalDamageRate = function() {
             return Game_BattlerBase.BASIC_CRITICAL_DAMAGE_RATE;
@@ -212,10 +212,10 @@
     Object.defineProperties(Game_BattlerBase.prototype, {
         /**
          * 物理クリティカルレートを表すプロパティ。
-         * @const {Number}
+         * @const {number}
          */
         pcdr: {
-            /** @returns {Number} */
+            /** @returns {number} */
             get: function() {
                 return this.criticalDamageRatePhysical();
             },
@@ -223,10 +223,10 @@
         },
         /**
          * 魔法クリティカルレートを表すプロパティ。
-         * @const {Number}
+         * @const {number}
          */
         mcdr: {
-            /** @returns {Number} */
+            /** @returns {number} */
             get: function() {
                 return this.criticalDamageRateMagical();
             },
@@ -241,8 +241,8 @@
      * 
      * Note: クリティカル時のダメージ倍率計算式を変更するため、オーバーライドする。
      * 
-     * @param {Number} damage ダメージ
-     * @returns {Number} クリティカル適用後のダメージ
+     * @param {number} damage ダメージ
+     * @returns {number} クリティカル適用後のダメージ
      * !!!overwrite!!! Game_Action.applyCritical
      */
     Game_Action.prototype.applyCritical = function(damage) {

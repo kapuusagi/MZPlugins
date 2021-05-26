@@ -101,7 +101,7 @@
     /**
      * elementAbsorb ノートタグを処理する。
      * 
-     * @param {Object} obj データオブジェクト
+     * @param {object} obj データオブジェクト
      */
     const _processElementAbsorbNoteTag = function(obj) {
         if (!obj.meta.elementAbsorb) {
@@ -138,7 +138,7 @@
     /**
      * 属性吸収特性のテキストを得る。
      * 
-     * @param {Number} dataId データID
+     * @param {number} dataId データID
      * @returns {string} 属性吸収特性を表すテキスト
      */
      TextManager.traitElementAbsorb = function(dataId) {
@@ -163,8 +163,8 @@
      * 属性IDで指定された属性の、吸収レートを得る。
      * 吸収レートは、特性値の中で最大のものを適用する。
      * 
-     * @param {Number} elementId 属性ID
-     * @returns {Number} 吸収レート
+     * @param {number} elementId 属性ID
+     * @returns {number} 吸収レート
      */
     Game_BattlerBase.prototype.elementAbsorbRate = function(elementId) {
         return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_ABSORB, elementId).reduce((r, trait) => {
@@ -179,8 +179,8 @@
     /**
      * このGame_BattlerBaseがelementIdで指定される属性を、吸収可能かどうかを判定して返す。
      * 
-     * @param {Number} elementId 属性ID
-     * @returns {Boolean} 属性を吸収可能な場合にはtrue, それ以外はfalse
+     * @param {number} elementId 属性ID
+     * @returns {boolean} 属性を吸収可能な場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isAbsorbElement = function(elementId) {
         return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_ABSORB,
@@ -192,8 +192,8 @@
     /**
      * このBattlerの属性ダメージレートを得る。
      *  
-     * @param {Number} elementId 属性ID
-     * @returns {Number} 属性倍率。
+     * @param {number} elementId 属性ID
+     * @returns {number} 属性倍率。
      */
     Game_BattlerBase.prototype.elementRate = function(elementId) {
         const rate = _Game_BattlerBase_elementRate.call(this, ...arguments);

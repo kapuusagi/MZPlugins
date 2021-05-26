@@ -445,7 +445,7 @@ function Window_StatusProfile() {
 
     /**
      * ウィンドウのカラム数を取得する。
-     * @returns {Number} カラム数
+     * @returns {number} カラム数
      */
     Window_StatusCategory.prototype.maxCols = function() {
         return 1;
@@ -453,7 +453,7 @@ function Window_StatusProfile() {
 
     /**
      * ウィンドウの表示行数を取得する。
-     * @returns {Number} 表示行数
+     * @returns {number} 表示行数
      */
     Window_StatusCategory.prototype.numVisibleRows = function() {
         return 4;
@@ -475,7 +475,7 @@ function Window_StatusProfile() {
     /**
      * indexで指定される項目を選択する。
      * 
-     * @param {Number} index インデックス番号
+     * @param {number} index インデックス番号
      */
     Window_StatusCategory.prototype.select = function(index) {
         Window_Command.prototype.select.call(this, index);
@@ -608,10 +608,10 @@ function Window_StatusProfile() {
      * 
      * @param {Game_Actor} actor アクター
      * @param {Game_Actor} noEquipActor 未装備アクター
-     * @param {Number} x 描画開始x位置
-     * @param {Number} y 描画開始y位置
-     * @param {Number} width 幅
-     * @param {Number} maxLineCount 最大行数
+     * @param {number} x 描画開始x位置
+     * @param {number} y 描画開始y位置
+     * @param {number} width 幅
+     * @param {number} maxLineCount 最大行数
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawBlock2A = function(actor, noEquipActor, x, y, width, maxLineCount) {
@@ -651,10 +651,10 @@ function Window_StatusProfile() {
      * 
      * @param {Game_Actor} actor アクター
      * @param {Game_Actor} noEquipActor 未装備アクター
-     * @param {Number} x 描画開始x位置
-     * @param {Number} y 描画開始y位置
-     * @param {Number} width 幅
-     * @param {Number} maxLineCount 最大行数
+     * @param {number} x 描画開始x位置
+     * @param {number} y 描画開始y位置
+     * @param {number} width 幅
+     * @param {number} maxLineCount 最大行数
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawBlock2B = function(actor, noEquipActor, x, y, width, maxLineCount) {
@@ -690,10 +690,10 @@ function Window_StatusProfile() {
      * 
      * @param {Game_Actor} actor アクター
      * @param {Game_Actor} noEquipActor 未装備アクター
-     * @param {Number} x 描画開始x位置
-     * @param {Number} y 描画開始y位置
-     * @param {Number} width 幅
-     * @param {Number} maxLineCount 最大行数
+     * @param {number} x 描画開始x位置
+     * @param {number} y 描画開始y位置
+     * @param {number} width 幅
+     * @param {number} maxLineCount 最大行数
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawBlock2C = function(actor, noEquipActor, x, y, width, maxLineCount) {
@@ -724,10 +724,10 @@ function Window_StatusProfile() {
      * 
      * @param {Game_Actor} actor アクター
      * @param {Game_Actor} noEquipActor 未装備アクター
-     * @param {Number} x 描画開始x位置
-     * @param {Number} y 描画開始y位置
-     * @param {Number} width 幅
-     * @param {Number} maxLineCount 最大行数
+     * @param {number} x 描画開始x位置
+     * @param {number} y 描画開始y位置
+     * @param {number} width 幅
+     * @param {number} maxLineCount 最大行数
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawBlock2D = function(actor, noEquipActor, x, y, width, maxLineCount) {
@@ -747,11 +747,11 @@ function Window_StatusProfile() {
      * 整数値タイプのパラメータを描画する。
      * 
      * @param {String} paramName パラメータ名
-     * @param {Number} value1 値1（現在値）
-     * @param {Number} value2 値2（未装備値）
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} value1 値1（現在値）
+     * @param {number} value2 値2（未装備値）
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawParamValue = function(paramName, value1, value2, x, y, width) {
         if (typeof value1 === "undefined") {
@@ -778,11 +778,11 @@ function Window_StatusProfile() {
      * 割合タイプのパラメータを描画する。
      * 
      * @param {String} paramName パラメータ名
-     * @param {Number} value1 値1（現在値）
-     * @param {Number} value2 値2（未装備値）
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} value1 値1（現在値）
+     * @param {number} value2 値2（未装備値）
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawParamRate = function(paramName, value1, value2, x, y, width) {
         if (typeof value1 === "undefined") {
@@ -854,9 +854,9 @@ function Window_StatusProfile() {
     /**
      * 水平ラインを描画する。
      * 
-     * @param {Number} x 描画x位置
-     * @param {Number} y 描画y位置
-     * @param {Number} width 幅
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawHorzLine = function(x, y, width) {
         this.changePaintOpacity(false);
@@ -868,9 +868,9 @@ function Window_StatusProfile() {
      * レベルを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawActorLevel = function(actor, x, y, width) {
@@ -885,9 +885,9 @@ function Window_StatusProfile() {
      * 育成ポイントを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorGrowPoint = function(actor, x, y, width) {
         this.resetFontSettings();
@@ -901,9 +901,9 @@ function Window_StatusProfile() {
      * ギルドランクを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorGuildRank = function(actor, x, y, width) {
         this.resetFontSettings();
@@ -917,9 +917,9 @@ function Window_StatusProfile() {
      * EXPを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorExp = function(actor, x, y, width) {
         this.resetFontSettings();
@@ -933,9 +933,9 @@ function Window_StatusProfile() {
      * NextExpを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorNext = function(actor, x, y, width) {
         this.resetFontSettings();
@@ -951,9 +951,9 @@ function Window_StatusProfile() {
      * アクターのHPを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorHp = function(actor, x, y, width) {
         // ゲージ描画
@@ -985,9 +985,9 @@ function Window_StatusProfile() {
      * アクターのMPを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorMp = function(actor, x, y, width) {
         // ゲージ描画
@@ -1018,9 +1018,9 @@ function Window_StatusProfile() {
      * アクターのTPを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上x
-     * @param {Number} y 描画領域左上y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上x
+     * @param {number} y 描画領域左上y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawActorTp = function(actor, x, y, width) {
@@ -1037,11 +1037,11 @@ function Window_StatusProfile() {
     /**
      * ゲージを描画する。
      * 
-     * @param {Object} gaugeData ゲージデータ。rate, backColor, color1, color2メンバを持つ。
-     * @param {Number} x ゲージ左上位置x
-     * @param {Number} y ゲージ左上位置y
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {object} gaugeData ゲージデータ。rate, backColor, color1, color2メンバを持つ。
+     * @param {number} x ゲージ左上位置x
+     * @param {number} y ゲージ左上位置y
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Window_Status.prototype.drawGaugeRect = function(gaugeData, x, y, width, height) {
         const rate = gaugeData.rate;
@@ -1057,10 +1057,10 @@ function Window_StatusProfile() {
     /**
      * ゲージのテキストを描画する。
      * 
-     * @param {Object} data データ
-     * @param {Number} x ラベル左上位置 x
-     * @param {Number} y ラベル左上位置 y
-     * @param {Number} width 幅
+     * @param {object} data データ
+     * @param {number} x ラベル左上位置 x
+     * @param {number} y ラベル左上位置 y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawGaugeText = function(data, x, y, width) {
@@ -1086,10 +1086,10 @@ function Window_StatusProfile() {
      * アクターの顔グラフィックを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上X
-     * @param {Number} y 描画領域左上Y
-     * @param {Number} width 幅
-     * @param {Number} height 高さ
+     * @param {number} x 描画領域左上X
+     * @param {number} y 描画領域左上Y
+     * @param {number} width 幅
+     * @param {number} height 高さ
      */
     Window_Status.prototype.drawActorFace = function(actor, x, y, width, height) {
         if (actor.isDead()) {
@@ -1103,9 +1103,9 @@ function Window_StatusProfile() {
      * アクターのクラスを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上X
-     * @param {Number} y 描画領域左上Y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上X
+     * @param {number} y 描画領域左上Y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorClass = function(actor, x, y, width) {
         const displayClassName = actor.currentClass().name + ((actor.gender) ? ("\u30fb" + actor.gender) : "");
@@ -1127,9 +1127,9 @@ function Window_StatusProfile() {
      * アクターのニックネームを描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上X
-     * @param {Number} y 描画領域左上Y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上X
+     * @param {number} y 描画領域左上Y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorNickname = function(actor, x, y, width) {
         const nickName = actor.nickname();
@@ -1153,9 +1153,9 @@ function Window_StatusProfile() {
      * アクターの位置を描画する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上X
-     * @param {Number} y 描画領域左上Y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上X
+     * @param {number} y 描画領域左上Y
+     * @param {number} width 幅
      */
     // eslint-disable-next-line no-unused-vars
     Window_Status.prototype.drawActorPosition = function(actor, x, w, width) {
@@ -1166,9 +1166,9 @@ function Window_StatusProfile() {
      * アクターのステートを標示する。
      * 
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画領域左上X
-     * @param {Number} y 描画領域左上Y
-     * @param {Number} width 幅
+     * @param {number} x 描画領域左上X
+     * @param {number} y 描画領域左上Y
+     * @param {number} width 幅
      */
     Window_Status.prototype.drawActorStates = function(actor, x, y, width) {
         const icons = actor.stateIcons();
@@ -1185,7 +1185,7 @@ function Window_StatusProfile() {
     /**
      * ステータスラベルの幅を得る。
      * 
-     * @returns {Number} ステータスラベルの幅
+     * @returns {number} ステータスラベルの幅
      */
     Window_Status.prototype.statusLabelWidth = function() {
         return statusLabelWidth;
@@ -1249,9 +1249,9 @@ function Window_StatusProfile() {
     /**
      * 属性レート配列を描画する。
      * 
-     * @param {Number} x 描画x位置
-     * @param {Number} y 描画y位置
-     * @param {Number} width 描画幅
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 描画幅
      * @param {Array<Object>} 属性エントリ配列
      */
     Window_StatusParams.prototype.drawElementRates = function(x, y, width, elementEntries) {
@@ -1264,11 +1264,11 @@ function Window_StatusProfile() {
     /**
      * 属性レートのパラメータを描画する。
      * 
-     * @param {Object} entry 属性エントリ
+     * @param {object} entry 属性エントリ
      * @param {Game_Actor} actor アクター
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 幅
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
      */
     Window_StatusParams.prototype.drawElementRate = function(entry, actor, x, y, width) {
         if (!actor) {
@@ -1387,10 +1387,10 @@ function Window_StatusProfile() {
     /**
      * パラメータを描画する。
      * 
-     * @param {Object} paramItem パラメータ
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {object} paramItem パラメータ
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_StatusParams.prototype.drawParamItem = function(paramItem, x, y, width) {
         this.resetFontSettings();
@@ -1416,9 +1416,9 @@ function Window_StatusProfile() {
     /**
      * 水平ラインを描画する。
      * 
-     * @param {Number} x 描画x位置
-     * @param {Number} y 描画y位置
-     * @param {Number} width 幅
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 幅
      */
     Window_StatusParams.prototype.drawHorzLine = function(x, y, width) {
         this.changePaintOpacity(false);
@@ -1486,10 +1486,10 @@ function Window_StatusProfile() {
      * 装備スロットを描画する。
      * 
      * @param {String} スロット名
-     * @param {Object} item 装備品(DataWeapon/DataArmor)
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {object} item 装備品(DataWeapon/DataArmor)
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_StatusEquip.prototype.drawEquipSlot = function(slotName, item, x, y, width) {
         const spacing = 16;
@@ -1503,10 +1503,10 @@ function Window_StatusProfile() {
     /**
      * 装備品名を描画する。
      * 
-     * @param {Object} item アイテム(DataWeapon/DataSKill)
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
+     * @param {object} item アイテム(DataWeapon/DataSKill)
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
      */
     Window_StatusEquip.prototype.drawEquipItemName = function(item, x, y, width) {
         if (item) {
@@ -1564,10 +1564,10 @@ function Window_StatusProfile() {
     /**
      * ウェポンマスタリーを描画する。
      * 
-     * @param {Object} wm ウェポンマスタリー
-     * @param {Number} x 描画x位置
-     * @param {Number} y 描画y位置
-     * @param {Number} width 描画幅
+     * @param {object} wm ウェポンマスタリー
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 描画幅
      */
     Window_StatusEquip.prototype.drawWeaponMastery = function(wm, x, y, width) {
         const lineHeight = this.lineHeight();
@@ -1601,11 +1601,11 @@ function Window_StatusProfile() {
     /**
      * ゲージを描画する。
      * 
-     * @param {Number} rate 割合
-     * @param {Number} x 描画位置x
-     * @param {Number} y 描画位置y
-     * @param {Number} width 描画幅
-     * @param {Number} height 描画高
+     * @param {number} rate 割合
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
+     * @param {number} height 描画高
      */
     Window_StatusEquip.prototype.drawExpGauge = function(rate, x, y, width, height) {
         const fillW = Math.floor((width - 2) * rate);
@@ -1661,9 +1661,9 @@ function Window_StatusProfile() {
     /**
      * 水平ラインを描画する。
      * 
-     * @param {Number} x 描画x位置
-     * @param {Number} y 描画y位置
-     * @param {Number} width 幅
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 幅
      */
     Window_StatusEquip.prototype.drawHorzLine = function(x, y, width) {
         this.changePaintOpacity(false);
@@ -1834,9 +1834,9 @@ function Window_StatusProfile() {
     /**
      * 水平ラインを描画する。
      * 
-     * @param {Number} x 描画x位置
-     * @param {Number} y 描画y位置
-     * @param {Number} width 幅
+     * @param {number} x 描画x位置
+     * @param {number} y 描画y位置
+     * @param {number} width 幅
      */
     Window_StatusProfile.prototype.drawHorzLine = function(x, y, width) {
         this.changePaintOpacity(false);
@@ -2011,7 +2011,7 @@ function Window_StatusProfile() {
     /**
      * ヘルプウィンドウの高さを得る。
      * 
-     * @returns {Number} ヘルプウィンドウの高さ
+     * @returns {number} ヘルプウィンドウの高さ
      * !!!overwrite!!! Scene_Status.helpAreaHeight()
      *     ヘルプウィンドウを使用するのでオーバーライドする。
      */
@@ -2052,7 +2052,7 @@ function Window_StatusProfile() {
     /**
      * コマンドウィンドウ幅を得る。
      * 
-     * @returns {Number} コマンドウィンドウ幅。
+     * @returns {number} コマンドウィンドウ幅。
      */
     Scene_Status.prototype.commandWindowWidth = function() {
         return commandWindowWidth;

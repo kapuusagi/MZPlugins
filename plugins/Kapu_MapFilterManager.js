@@ -191,7 +191,7 @@ function MapFilterManager() {
      * filterNameに一致するフィルタエントリを得る。
      * 
      * @param {String} filterName フィルタ名
-     * @returns {Object} フィルタエントリ。該当するエントリが無い場合にはnull.
+     * @returns {object} フィルタエントリ。該当するエントリが無い場合にはnull.
      */
     MapFilterManager.findFilterEntry = function(filterName) {
         return this._filters.find(entry => entry.name === filterName) || null;
@@ -201,7 +201,7 @@ function MapFilterManager() {
      * filterNameに対応するフィルタのインスタンスを得る。
      * 
      * @param {String} filterName フィルタ名
-     * @returns {Object} フィルタのインスタンス。
+     * @returns {object} フィルタのインスタンス。
      */
     MapFilterManager.filter = function(filterName) {
         const entry = this.findFilterEntry(filterName);
@@ -227,7 +227,7 @@ function MapFilterManager() {
     /**
      * フィルタ全体に対する有効/無効を取得する。
      * 
-     * @returns {Boolean} フィルタ全体に対して有効な場合にはtrue, それ以外はfalse
+     * @returns {boolean} フィルタ全体に対して有効な場合にはtrue, それ以外はfalse
      */
     MapFilterManager.isGlobalActive = function() {
         return this._globalEnable;
@@ -275,7 +275,7 @@ function MapFilterManager() {
      * fileNameで指定したフィルタが有効かどうかを判定する。
      * 
      * @param {String} filterName 
-     * @returns {Boolean} 有効な場合にはtrue, それ以外はfalse
+     * @returns {boolean} 有効な場合にはtrue, それ以外はfalse
      */
     MapFilterManager.isActive = function(filterName) {
         const entry = this.findFilterEntry(filterName);
@@ -336,7 +336,7 @@ function MapFilterManager() {
     /**
      * フィルタのtimeパラメータを更新する。
      * 
-     * @param {Boolean} sceneActive シーンがアクティブかどうか
+     * @param {boolean} sceneActive シーンがアクティブかどうか
      */
     MapFilterManager.updateTime = function(sceneActive) {
         if (sceneActive) {
@@ -378,7 +378,7 @@ function MapFilterManager() {
     /**
      * ロードしたデータを反映させる。
      * 
-     * @param {Object} contents ロードデータ
+     * @param {object} contents ロードデータ
      */
     MapFilterManager.loadContents = function(contents) {
         this.clear();

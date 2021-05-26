@@ -149,7 +149,7 @@
 
     /**
      * メッセージウィンドウがクローズ処理中かどうかを取得する。
-     * @returns {Boolean} クローズ処理中の場合にはtrue, それ以外はfalse
+     * @returns {boolean} クローズ処理中の場合にはtrue, それ以外はfalse
      */
     Scene_HelloWorld.prototype.isMessageWindowClosing = function () {
         return this._messageWindow.isClosing();
