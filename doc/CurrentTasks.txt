@@ -4,5 +4,9 @@ Kapu_ChoiceByRoulette
     複数条件設定できないのをナントカする。
     コードがぐちゃっとしてるのをナントカする。
     
-
+Kapu_EquipSkill
+    既存のスロット拡張で実現しようとしたが、これだと、
+    traits() -> allTraits() -> equips()でスキルが返り、
+    スキルのtraitsフィールドはundefinedなので例外が飛ぶ。
+    そのため適用は不可。
 

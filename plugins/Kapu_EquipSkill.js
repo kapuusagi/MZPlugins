@@ -9,7 +9,7 @@
  * @param skillSlotTypes
  * @text スキルスロットタイプ
  * @desc スキルスロットタイプリスト。どのスロット番号に、どのスキルタイプをセット可能とするかを指定します。
- * @type EqukipSkilSlot
+ * @type struct<EqukipSkilSlot>[]
  * @default []
  * 
  * @help 
@@ -52,11 +52,11 @@
  * ============================================
  * Version.0.1.0 動作未確認。
  */
-/*~struct~EqukipSkilSlot
+/*~struct~EqukipSkilSlot:
  * 
  * @param etypeId
- * @text スロットタイプ番号
- * @desc 装備可能にするスロットタイプ番号
+ * @text 装備タイプ番号
+ * @desc スキルを装備可能にする装備タイプ番号。1は武器なので指定しないこと。
  * @type number
  *
  * @param stypeIds
@@ -75,7 +75,7 @@
             const stypeIds = [];
             const ids = JSON.parse(entry.stypeIds).map(str => Number(str) || 0);
             for (const id of ids) {
-                if ((id > 0) && !stypeIds.includes(id)) {
+                if ((id >= 0) && !stypeIds.includes(id)) {
                     stypeIds.push(id);
                 }
             }
@@ -143,7 +143,7 @@
      */
     Game_Actor.prototype.learnSkill = function(skillId) {
         if (!this.isLearnedSkill(skillId)) {
-            const skill = $dataSkills[skillid];
+            const skill = $dataSkills[skillId];
             if (skill.meta.equipSkill) {
                 this._equipableSkills.push(skillId);
                 this._equipableSkills.sort((a, b) => a - b);
@@ -178,7 +178,7 @@
      * @return {boolean} 習得済みの場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isLearnedSkill = function(skillId) {
-        return this._equipableSkills.includes(skillid) || _Game_Actor_isLearnedSkill.call(tis, skillId);
+        return this._equipableSkills.includes(skillId) || _Game_Actor_isLearnedSkill.call(this, skillId);
     };
 
     const _Game_Actor_skills = Game_Actor.prototype.skills;
@@ -280,7 +280,7 @@
                 this._data = [null];
             }
         } else {
-            _Window_EquipItem_makeItemList.call();
+            _Window_EquipItem_makeItemList.call(this);
         }
     };
 
@@ -290,7 +290,7 @@
      * @returns {boolean} スキル装備スロットの場合にはtrue, それ以外はfalse.
      */
     Window_EquipItem.prototype.isEquipSkillSlot = function() {
-        return skillSlotTypes[this.etypeid()] ? true : false;
+        return skillSlotTypes[this.etypeId()] ? true : false;
     };
 
     /**
@@ -299,7 +299,7 @@
      * @returns {Array<number>} 装備可能なスキルタイプIDリスト
      */
     Window_EquipItem.prototype.stypeIds = function() {
-        return skillSlotTypes[this.etypeid()] || [];
+        return skillSlotTypes[this.etypeId()] || [];
     };
 
     const _Window_EquipItem_includes = Window_EquipItem.prototype.includes;
