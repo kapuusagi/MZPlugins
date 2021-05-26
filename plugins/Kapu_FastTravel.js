@@ -364,7 +364,8 @@ function Scene_SelectFastTravelPosition() {
          */
          const _processNoteTag = function(obj) {
             if (obj.meta.effectFastTravel) {
-                const eventId = Number(obj.meta.effectFastTravel) || commonEventId;
+                const eventId = (typeof obj.meta.effectFastTravel === "boolean")
+                        ? commonEventId : Number(obj.meta.effectFastTravel);
                 obj.effects.push({
                     code: Game_Action.EFFECT_FASTTRAVEL,
                     dataId: eventId,
