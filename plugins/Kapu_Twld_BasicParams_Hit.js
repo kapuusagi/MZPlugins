@@ -45,6 +45,7 @@
      * @param {Game_Battler} target 対象
      * @returns {Boolean} ミスした場合にtrue, それ以外はfalse
      */
+    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.testMissed = function(target) {
         return false;
     };

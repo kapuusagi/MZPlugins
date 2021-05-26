@@ -1170,7 +1170,7 @@ function Scene_TwldShop() {
                     
             }
         }
-    }
+    };
     //------------------------------------------------------------------------------
     // Window_TwldShopItemCategory
     Window_TwldShopItemCategory.prototype = Object.create(Window_Command.prototype);
@@ -1202,7 +1202,7 @@ function Scene_TwldShop() {
      */
     Window_TwldShopItemCategory.prototype.setItemWindow = function(itemWindow) {
         this._itemWindow = itemWindow;
-    }
+    };
 
     /**
      * 最大カラム数を得る。

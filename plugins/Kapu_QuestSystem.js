@@ -72,7 +72,7 @@
  * 
  * @arg setQuestDone
  * @text クエストを完了にする。
- * @desc　指定クエストを完了状態にする。
+ * @desc 指定クエストを完了状態にする。
  * 
  * @arg variableId
  * @text クエストID(変数指定)
