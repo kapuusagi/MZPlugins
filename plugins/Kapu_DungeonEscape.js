@@ -6,7 +6,7 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
- * @command registerEscapePosition
+ * @command registerDungeonEscapePosition
  * @text 地点登録
  * @desc エスケープ位置を登録する。既に登録済みの場合には上書きする。
  * 
@@ -35,7 +35,7 @@
  * @default -1
  * @min -1 * 
  * 
- * @command clearEscapePosition
+ * @command clearDungeonEscapePosition
  * @text エスケープ地点クリア
  * @desc エスケープ地点をクリアする。ダンジョンから出たときなどに使用する。エスケープ実行時にクリアされる。
  * 
@@ -115,7 +115,7 @@
  * 
  * 
  * マップ
- *   <canUseEscape>
+ *   <canUseDungeonEscape>
  *     エスケープ効果のアイテム/スキルを使用可能とする。
  * 
  * ============================================
@@ -150,23 +150,23 @@
     }
 
 
-    PluginManager.registerCommand(pluginName, "registerEscapePosition", args => {
+    PluginManager.registerCommand(pluginName, "registerDungeonEscapePosition", args => {
         const mapId = Number(args.mapId) || $gameMap.mapId();
         const x = (Number(args.x) >= 0) ? Number(args.x) : $gamePlayer.x;
         const y = (Number(args.y) >= 0) ? Number(args.y) : $gamePlayer.y;
-        $gameParty.setEscapePosition(mapId, x, y);
+        $gameParty.setDungeonEscapePosition(mapId, x, y);
     });
 
     // eslint-disable-next-line no-unused-vars
-    PluginManager.registerCommand(pluginName, "clearEscapePosition", args => {
-        $gameParty.clearEscapePosition();
+    PluginManager.registerCommand(pluginName, "clearDungeonEscapePosition", args => {
+        $gameParty.clearDungeonEscapePosition();
     });
 
     PluginManager.registerCommand(pluginName, "escape", args => {
         const callCommonEvent = (args.callCommonEvent === undefined)
                 ? true : (args.callCommonEvent === "true");
-        $gameParty.restoreEscapePosition();
-        $gameParty.clearEscapePosition();
+        $gameParty.restoreDungeonEscapePosition();
+        $gameParty.clearDungeonEscapePosition();
         if (callCommonEvent && (commonEventId > 0)) {
             $gameTemp.reserveCommonEvent(this._commonEventId);
         }
@@ -195,6 +195,36 @@
     }
 
 
+    //------------------------------------------------------------------------------
+    // Game_Actor
+    if (Game_Action.EFFECT_DUNGEONESCAPE) {
+        const _Game_Actor_meetsUsableItemConditions = Game_Actor.prototype.meetsUsableItemConditions;
+        /**
+         * 使用可能な条件かどうかを判定する。
+         * 
+         * @param {Object} item DataItem/DataSkill
+         * @returns {Boolean} 使用可能な場合にはtrue, それ以外はfalse.
+         */
+        Game_Actor.prototype.meetsUsableItemConditions = function(item) {
+            if (this.testDungeonEscape(item) && ($gameParty.inBattle() || !$gameMap.canUseDungeonEscape())) {
+                // ダンジョンエスケープ効果があって、戦闘中かダンジョンエスケープ出来ないマップにいる。
+                return false;
+            }
+            return _Game_Actor_meetsUsableItemConditions.call(this, item);
+        };
+    
+        /**
+         * itemで指定されるアイテムまたはスキルがダンジョンエスケープ効果を持つかどうかを得る。
+         * 
+         * @param {Object} item DataItem/DataSkill
+         * @returns {Boolean} ダンジョンエスケープ効果がある場合にはtrue, それ以外はfalse.
+         */
+        Game_Actor.prototype.testDungeonEscape = function(item) {
+            return item.effects.some(
+                effect => effect && effect.code === Game_Action.EFFECT_DUNGEONESCAPE
+            );
+        };
+    }
 
     //------------------------------------------------------------------------------
     // Game_Party
@@ -214,7 +244,7 @@
      * @param {Number} x x位置
      * @param {Number} y ｙ位置
      */
-    Game_Party.prototype.setEscapePosition = function(mapId, x, y) {
+    Game_Party.prototype.setDungeonEscapePosition = function(mapId, x, y) {
         this._escapePosition[0] = mapId;
         this._escapePosition[1] = x;
         this._escapePosition[2] = y;
@@ -223,14 +253,14 @@
     /**
      * エスケープ位置をクリアする。
      */
-    Game_Party.prototype.clearEscapePosition = function() {
+    Game_Party.prototype.clearDungeonEscapePosition = function() {
         this._escapePosition = [];
     };
 
     /**
      * エスケープ位置を変数に復帰させる。
      */
-    Game_Party.prototype.restoreEscapePosition = function() {
+    Game_Party.prototype.restoreDungeonEscapePosition = function() {
         if (mapVariableId > 0) {
             const mapId = this._escapePosition[0] || 0;
             $gameVariables.setValue(mapVariableId, mapId);
@@ -251,9 +281,9 @@
      * 
      * @returns {Boolean} エスケープ可能な場合にはtrue, それ以外はfalse.
      */
-     Game_Map.prototype.canUseEscape = function() {
-        if ($dataMap.meta.canUseEscape) {
-            return this.testEscapeCondition();
+     Game_Map.prototype.canUseDungeonEscape = function() {
+        if ($dataMap.meta.canUseDungeonEscape) {
+            return this.testDungeonEscapeCondition();
         } else {
             return false;
         }
@@ -263,7 +293,7 @@
      * 
      * @returns {Boolean} エスケープ条件
      */
-    Game_Map.prototype.testEscapeCondition = function() {
+    Game_Map.prototype.testDungeonEscapeCondition = function() {
         if (escapeCondition) {
             try {
                 return eval(escapeCondition);
@@ -276,30 +306,7 @@
             return true; // 未指定時は許可
         }
     };
-    //------------------------------------------------------------------------------
-    // Game_Action
-    // 
-    if (Game_Action.EFFECT_DUNGEONESCAPE) {
-        const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
-        /**
-         * 効果を適用可能かどうかを判定する。
-         * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
-         * 
-         * @param {Game_BattlerBase} target 対象
-         * @param {DataEffect} effect エフェクトデータ
-         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
-         */
-        Game_Action.prototype.testItemEffect = function(target, effect) {
-            if (effect.code === Game_Action.EFFECT_DUNGEONESCAPE) {
-                // 戦闘中以外かつ、現在のマップがエスケープ可能
-                return !$gameParty.inBattle() && $gameMap.canUseEscape();
-            } else {
-                return _Game_Action_testItemEffect.call(this, target, effect);
-            }
-        };
 
-
-    }
     //------------------------------------------------------------------------------
     // Scene_ItemBase
     // 
@@ -310,18 +317,24 @@
          */
         Scene_ItemBase.prototype.determineItem = function() {
             const item = this.item();
-            if (item.effects.some((effect) => effect.code === Game_Action.EFFECT_DUNGEONESCAPE)) {
-                if (!$gameParty.inBattle() && $gameMap.canUseEscape()) {
-                    // 使用可能な状態 -> シーン呼び出しする。
-                    // コモンイベントを呼び出して終わり。
-                    this.useDungeonEscapeItem();
-                } else {
-                    SoundManager.playBuzzer();
-                    this.activateItemWindow();
-                }
+            if (this.testDungeonEscape(item)) {
+                // コモンイベントを呼び出して終わり。
+                this.useDungeonEscapeItem();
             } else {
                 _Scene_ItemBase_determineItem.call(this);
             }
+        };
+
+        /**
+         * itemで指定されるアイテムまたはスキルがダンジョンエスケープ効果を持つかどうかを取得する。
+         * 
+         * @param {Object} item DataItem/DataSkill
+         * @returns {Boolean} ダンジョンエスケープ効果を持つ場合にはtrue, それ以外はfalse.
+         */
+        Scene_ItemBase.prototype.testDungeonEscape = function(item) {
+            return item.effects.some(
+                effect => effect && effect.code === Game_Action.EFFECT_DUNGEONESCAPE
+            );
         };
 
         /**
@@ -330,7 +343,7 @@
         Scene_ItemBase.prototype.useDungeonEscapeItem = function() {
             this.playSeForItem();
             this.user().useItem(this.item());
-            $gameParty.restoreEscapePosition();
+            $gameParty.restoreDungeonEscapePosition();
             if (commonEventId) {
                 $gameTemp.reserveCommonEvent(commonEventId);
             }

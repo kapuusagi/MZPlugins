@@ -548,6 +548,8 @@ Traitの持ってるメンバ
 |EFFECT_COMMON_EVENT|44|||||
 
 独自の効果を追加するなら、以下はフックする必要があるかもしれない。
+但し、下記はアクター/エネミーを対象にした場合のみコールされる。
+対象「なし」にすると呼び出されないことに注意が必要。
 
 * __Game_Action.testItemEffect()__
 
@@ -562,6 +564,58 @@ Traitの持ってるメンバ
         独自の処理を実装したら、Game_Action.makeSuccess(target)をコールして、
         効果があったよ設定しておこう。
         やらないと、バトルログに「効果が無かった」と出力される。
+
+### 使用可否判定について
+
+アイテムまたはスキルを使用可能かどうかを判定する処理は以下のようになっている。
+
+Window_ItemList.prototype.isEnabled
+-> Game_Party.canUse(item)
+-> Game_BattlerBase.canUse(item)
+-> Game_BattlerBase.meetsSkillConditions または Game_BattlerBase.meetsItemConditions
+
+スキルの場合
+
+    Game_BattlerBase.meetsUsableItemConditions(skill)
+        使用可能な状態か。
+    Game_BattlerBase.isSkillWtypeOk(skill)
+        スキル使用に必要な武器タイプの条件は満たされているか
+    Game_BattlerBase.canPaySkillCost(skill)
+        スキルコストを支払える状態か。
+    !Game_BattlerBase.isSkillSealed(skill.id)
+        スキルは禁止されていない。
+    !Game_BattlerBase.isSkillTypeSealed(skill.stypeId)
+        スキルタイプは禁止されていない。
+
+
+アイテムの場合
+        
+    Game_BattlerBase.meetsUsableItemConditions(item)
+        使用可能な状態か
+    $gameParty.hasItem(item)
+        残数があるか。
+
+共通の判定
+
+    Game_BattlerBase.meetsUsableItemConditions
+        使用者が動ける(canMove) かつ、 使用機会(メニュー画面/戦闘中/いつでも)が適合する(isOccasionOk)
+        
+なんかスペシャルな効果を判定したいならば？
+    Game_Actorに実装されている、逃走アイテム/スキルの使用条件テストが参考になる。
+    1つのアイテム/スキルに複数効果がある場合の判定には使えない点に注意。
+
+    Game_Actor.prototype.meetsUsableItemConditions = function(item) {
+        if ($gameParty.inBattle()) {
+            if (!BattleManager.canEscape() && this.testEscape(item)) {
+                return false;
+            }
+        }
+        return Game_BattlerBase.prototype.meetsUsableItemConditions.call(
+            this,
+            item
+        );
+    };
+
 
 ### ■ scopeって何？
 

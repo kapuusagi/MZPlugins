@@ -1126,29 +1126,35 @@ function Scene_Appraise() {
     };
 
     //------------------------------------------------------------------------------
-    // Game_Action
-    // 
+    // Scene_Actor
     if (Game_Action.EFFECT_APPRAISE) {
-        const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
+        const _Game_Actor_meetsUsableItemConditions = Game_Actor.prototype.meetsUsableItemConditions;
         /**
-         * 効果を適用可能かどうかを判定する。
-         * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
+         * 使用可能な条件かどうかを判定する。
          * 
-         * @param {Game_BattlerBase} target 対象
-         * @param {DataEffect} effect エフェクトデータ
-         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
+         * @param {Object} item DataItem/DataSkill
+         * @returns {Boolean} 使用可能な場合にはtrue, それ以外はfalse.
          */
-        Game_Action.prototype.testItemEffect = function(target, effect) {
-            if (Game_Action.EFFECT_APPRAISE
-                    && (effect.code === Game_Action.EFFECT_APPRAISE)) {
-                // 戦闘中以外は使用可能
-                return !$gameParty.inBattle();
-            } else {
-                return _Game_Action_testItemEffect.call(this, target, effect);
+        Game_Actor.prototype.meetsUsableItemConditions = function(item) {
+            if (this.testApprise(item) && $gameParty.inBattle()) {
+                // 鑑定効果があって、戦闘中。
+                return false;
             }
+            return _Game_Actor_meetsUsableItemConditions.call(this, item);
+        };
+    
+        /**
+         * itemで指定されるアイテムまたはスキルが鑑定効果を持つかどうかを得る。
+         * 
+         * @param {Object} item DataItem/DataSkill
+         * @returns {Boolean} 鑑定効果がある場合にはtrue, それ以外はfalse.
+         */
+        Game_Actor.prototype.testApprise = function(item) {
+            return item.effects.some(
+                effect => effect && effect.code === Game_Action.EFFECT_APPRAISE
+            );
         };
     }
-
 
     //------------------------------------------------------------------------------
     // Scene_ItemBase
@@ -1160,13 +1166,25 @@ function Scene_Appraise() {
          */
         Scene_ItemBase.prototype.determineItem = function() {
             const item = this.item();
-            if (item.effects.some((effect) => effect.code === Game_Action.EFFECT_APPRAISE)) {
+            if (this.testApprise(item)) {
                 // シーン呼び出しする。
                 SceneManager.push(Scene_Appraise);
                 SceneManager.prepareNextScene(this.user(), item);
             } else {
                 _Scene_ItemBase_determineItem.call(this);
             }
+        };
+
+        /**
+         * itemで指定されるアイテムまたはスキルが鑑定効果を持つかどうかを得る。
+         * 
+         * @param {Object} item DataItem/DataSkill
+         * @returns {Boolean} 鑑定効果がある場合にはtrue, それ以外はfalse.
+         */
+        Scene_ItemBase.prototype.testApprise = function(item) {
+            return item.effects.some(
+                effect => effect && effect.code === Game_Action.EFFECT_APPRAISE
+            );
         };
     }
     //------------------------------------------------------------------------------

@@ -403,6 +403,34 @@ function Scene_SelectFastTravelPosition() {
         return this._fastTravelPositions[travelPositionId] || false;
     };
 
+    if (Game_Action.EFFECT_FASTTRAVEL) {
+        const _Game_Actor_meetsUsableItemConditions = Game_Actor.prototype.meetsUsableItemConditions;
+        /**
+         * 使用可能な条件かどうかを判定する。
+         * 
+         * @param {Object} item DataItem/DataSkill
+         * @returns {Boolean} 使用可能な場合にはtrue, それ以外はfalse.
+         */
+        Game_Actor.prototype.meetsUsableItemConditions = function(item) {
+            if (this.testFastTravel(item) && ($gameParty.inBattle() || !$gameMap.canUseFastTravel())) {
+                // ファストトラベル効果があって、戦闘中かファストトラベル出来ないマップにいる。
+                return false;
+            }
+            return _Game_Actor_meetsUsableItemConditions.call(this, item);
+        };
+    
+        /**
+         * itemで指定されるアイテムまたはスキルがファストトラベル効果を持つかどうかを得る。
+         * 
+         * @param {Object} item DataItem/DataSkill
+         * @returns {Boolean} ファストトラベル効果がある場合にはtrue, それ以外はfalse.
+         */
+        Game_Actor.prototype.testFastTravel = function(item) {
+            return item.effects.some(
+                effect => effect && effect.code === Game_Action.EFFECT_FASTTRAVEL
+            );
+        };
+    }
     //------------------------------------------------------------------------------
     // Game_Party
     const _Game_Party_initialize = Game_Party.prototype.initialize;
@@ -480,6 +508,7 @@ function Scene_SelectFastTravelPosition() {
     Game_Party.prototype.canFastTravel = function(travelPositionId) {
         return this._allMembers().some(member => member.canFastTravel(travelPositionId));
     };
+
     //------------------------------------------------------------------------------
     // Game_Actors
     /**
@@ -820,30 +849,7 @@ function Scene_SelectFastTravelPosition() {
 
         this.popScene();
     };
-    //------------------------------------------------------------------------------
-    // Game_Action
-    // 
-    if (Game_Action.EFFECT_FASTTRAVEL) {
-        const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
-        /**
-         * 効果を適用可能かどうかを判定する。
-         * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
-         * 
-         * @param {Game_BattlerBase} target 対象
-         * @param {DataEffect} effect エフェクトデータ
-         * @returns {Boolean} 適用可能な場合にはtrue, それ以外はfalse
-         */
-        Game_Action.prototype.testItemEffect = function(target, effect) {
-            if (effect.code === Game_Action.EFFECT_FASTTRAVEL) {
-                // 戦闘中以外かつ、現在のマップがファストトラベル可能
-                return !$gameParty.inBattle() && $gameMap.canUseFastTravel();
-            } else {
-                return _Game_Action_testItemEffect.call(this, target, effect);
-            }
-        };
 
-
-    }
     //------------------------------------------------------------------------------
     // Scene_ItemBase
     // 
@@ -854,25 +860,29 @@ function Scene_SelectFastTravelPosition() {
          */
         Scene_ItemBase.prototype.determineItem = function() {
             const item = this.item();
-            if (item.effects.some((effect) => effect.code === Game_Action.EFFECT_FASTTRAVEL)) {
-                if (!$gameParty.inBattle() && $gameMap.canUseFastTravel()) {
-                    // 使用可能な状態 -> シーン呼び出しする。
-                    SceneManager.push(Scene_SelectFastTravelPosition);
-                    if (DataManager.isSkill(item)) {
-                        SceneManager.prepareNextScene([this.user()], mapVariableId, xVariableId, yVariableId, commonEventId, item);
-                    } else {
-                        SceneManager.prepareNextScene($gameParty.allMembers(), mapVariableId, xVariableId, yVariableId, commonEventId, item);
-                    }
+            if (this.testFastTravel(item)) {
+                // 使用可能な状態 -> シーン呼び出しする。
+                SceneManager.push(Scene_SelectFastTravelPosition);
+                if (DataManager.isSkill(item)) {
+                    SceneManager.prepareNextScene([this.user()], mapVariableId, xVariableId, yVariableId, commonEventId, item);
                 } else {
-                    SoundManager.playBuzzer();
-                    this.activateItemWindow();
+                    SceneManager.prepareNextScene($gameParty.allMembers(), mapVariableId, xVariableId, yVariableId, commonEventId, item);
                 }
             } else {
                 _Scene_ItemBase_determineItem.call(this);
             }
         };
+        /**
+         * itemにファストトラベル効果があるかを判定する。
+         * 
+         * @param {Object} item DataItem/DataSkill
+         * @returns {Boolean} ファストトラベル効果がある場合にはtrue, それ以外はfalse.
+         */
+        Scene_ItemBase.prototype.testFastTravel = function(item) {
+            return item.effects.some(
+                effect => effect && effect.code === Game_Action.EFFECT_FASTTRAVEL
+            );
+        };
     }
-    //------------------------------------------------------------------------------
-    // TODO : メソッドフック・拡張
 
 })();
