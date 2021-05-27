@@ -9,7 +9,7 @@
  * @command changeAbility
  * @text アビリティを習得する/忘れる。
  * 
- * @param operation
+ * @arg operation
  * @text 操作
  * @desc 操作
  * @type select
@@ -18,13 +18,13 @@
  * @option 忘れる
  * @value forget
  * 
- * @param abilityId
+ * @arg abilityId
  * @text アビリティID
  * @desc アビリティID
  * @type armor
  * @default 0
  * 
- * @param target
+ * @arg target
  * @text 対象
  * @desc 対象
  * @type select
@@ -37,19 +37,19 @@
  * @option パーティー全員
  * @value partyMembers
  * 
- * @param actorId
+ * @arg actorId
  * @text アクターID
  * @desc アクターID(指定したアクターの場合のみ)
  * @type actor
  * @default 0
  * 
- * @param variableId
+ * @arg variableId
  * @text アクター指定変数
  * @desc アクター指定変数(変数で指定したアクターの場合のみ)
  * @type variable
  * @default 0
  * 
- * @param partyPosition
+ * @arg partyPosition
  * @text 位置指定
  * @desc 位置指定(パーティーの所定の位置のアクターの場合のみ)
  * @type number
@@ -277,23 +277,29 @@
     /**
      * 装備を初期化する。
      * 
-     * @param {Array<Number>} equips 装備品ID配列
+     * @param {Array<number>} equips 装備品ID配列
      */
     Game_Actor.prototype.initEquips = function(equips) {
-        _Game_Actor_initEquips.call(this, equips);
-
-        // データベースでスキル装備スロットに指定されているところに装備しているものは習得済みとする。
-        const equipSlots = this.equipSlots();
-        const currentEquips = this.equips();
-        for (let slotNo = 0; slotNo < equipSlots; slotNo++) {
-            const etypeId = equipSlots[slotNo];
-            if (abilityEquipTypes.includes(etypeId)) {
-                const equipment = currentEquips[slotNo];
-                if (equipment) {
-                    this.learnAbility(equipment.id);
+        // データベースでスキル装備スロットに指定されているところに装備しているものは
+        // 習得済みとする。
+        const equipAbilities = [];
+        for (let slotNo = 0; slotNo < equips.length; slotNo++) {
+            const id = equips[slotNo];
+            if (id > 0) {
+                const etypeId = ((slotNo === 1) && this.isDualWired())
+                        ? 1 : (slotNo + 1);
+                if (abilityEquipTypes.includes(etypeId)) {
+                    const ability = $dataArmors[id];
+                    if (ability) {
+                        this.learnAbility(id);
+                        equipAbilities.push($dataArmors[id]);
+                    }
+                    equips[slotNo] = 0;
                 }
             }
         }
+
+        _Game_Actor_initEquips.call(this, equips);
     };
 
     /**
@@ -336,7 +342,7 @@
      */
     Game_Actor.prototype.abilities = function() {
         const abilities = [];
-        for (const id in this._abilities) {
+        for (const id of this._abilities) {
             const ability = $dataArmors[id];
             if (ability && !abilities.includes(ability)) {
                 abilities.push(ability);
@@ -395,7 +401,7 @@
      *       派生クラスでは何のリストにしているのか、includes()のメソッドに注意すること。
      */
     Window_EquipItem.prototype.makeItemList = function() {
-        if (this.isEquipSkillSlot()) {
+        if (this.isEquipAbilitySlot()) {
             if (this._actor) {
                 this._data = this._actor.abilities().filter(ability => this.includes(ability));
                 this._data.push(null);
@@ -408,9 +414,9 @@
     };
 
     /**
-     * スキル装備スロットかどうかを得る。ｓ
+     * アビリティ装備スロットかどうかを得る。ｓ
      * 
-     * @returns {boolean} スキル装備スロットの場合にはtrue, それ以外はfalse.
+     * @returns {boolean} アビリティ装備スロットの場合にはtrue, それ以外はfalse.
      */
     Window_EquipItem.prototype.isEquipAbilitySlot = function() {
         return abilityEquipTypes.includes(this.etypeId());
