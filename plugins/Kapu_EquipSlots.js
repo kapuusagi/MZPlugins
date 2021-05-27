@@ -438,10 +438,12 @@
      * 装備を変更する。
      * パーティーの所持品にitemIdで指定するアイテムが無い場合には変更できない。
      * 
-     * Note: このメソッドはプラグインコマンドによる呼び出しのみ。
+     * Note: このメソッドはインタプリタによる呼び出し時に呼び出される。
      * 
      * @param {number} etypeId 装備タイプID
      * @param {number} itemId アイテムID
+     * !!!overwrite!!! Game_Actor.changeEquipById
+     *     装備タイプ、ID指定での要求の場合、該当スロットを適切に呼び出すためにオーバーライドする。
      */
     Game_Actor.prototype.changeEquipById = function(etypeId, itemId) {
         // プラグインコマンドからの呼び出しのみ。
