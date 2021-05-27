@@ -3,7 +3,7 @@
  * @plugindesc TWLD向け装備画面プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_EquipSlot
+ * @base Kapu_EquipSlots
  * @base Kapu_Trait_Penetrate
  * @orderAfter Kapu_Trait_Penetrate
  * 
