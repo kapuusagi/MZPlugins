@@ -184,6 +184,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.5.1 インタプリタから装備変更操作をしたとき、装備スロットが動的に変わっていると動作しない不具合を修正した。
  * Version.0.5.0 武器/防具のソートメソッドを変更し、IDの前に種別でソートするようにした。
  * Version.0.4.5 アイテム一覧で、個別アイテムを複数持っていた場合の表示がおかしい不具合を修正した。
  * Version.0.4.4 各カテゴリの既定の個別アイテム設定でtrueを設定しても効果がない不具合を修正した。
@@ -843,7 +844,6 @@
     };
 
     const _Game_Actor_changeEquipById = Game_Actor.prototype.changeEquipById;
-
     /**
      * 装備を変更する。
      * パーティーの所持品にitemIdで指定するアイテムが無い場合には変更できない。
@@ -859,10 +859,10 @@
             const independentItem = $gameParty.getMatchingIndependentItem(baseItem, false);
             if (independentItem) {
                 // 該当装備品があった
-                this.changeEquip(slotId, independentItem);
+                _Game_Actor_changeEquipById.call(this, etypeId, independentItem.id);
             }
         } else {
-            _Game_Actor_changeEquipById.call(this, ...arguments);
+            _Game_Actor_changeEquipById.call(this, etypeId, itemId);
         }
     };
 
