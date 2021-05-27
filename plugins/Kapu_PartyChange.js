@@ -197,6 +197,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Window_PartyChangeStatusをWindow_StatusBaseを派生させるように変更した。
  * Version.0.1.0 新規作成。
  */
 
@@ -1143,7 +1144,7 @@ function Scene_PartyChange() {
     //------------------------------------------------------------------------------
     // Window_PartyChangeStatus
 
-    Window_PartyChangeStatus.prototype = Object.create(Window_Selectable.prototype);
+    Window_PartyChangeStatus.prototype = Object.create(Window_StatusBase.prototype);
     Window_PartyChangeStatus.prototype.constructor = Window_PartyChangeStatus;
 
     /**
@@ -1152,7 +1153,7 @@ function Scene_PartyChange() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_PartyChangeStatus.prototype.initialize = function(rect) {
-        Window_Selectable.prototype.initialize.call(this, rect);
+        Window_StatusBase.prototype.initialize.call(this, rect);
         this._actor = null;
         this._imageSprite = new Sprite_StatusBackgroundPicture();
         this._imageSprite.setDisplayArea(new Rectangle(0, 0, rect.width, rect.height));
@@ -1176,16 +1177,12 @@ function Scene_PartyChange() {
     /**
      * コンテンツを描画する。
      */
-    Window_PartyChangeStatus.prototype.paint = function() {
-        if (this.contents) {
-            this.contents.clear();
-            this.contentsBack.clear();
-
-            if (this._actor) {
-                this.drawBlock1();
-                this.drawBlock2();
-                this.drawBlock3();
-            }
+    Window_PartyChangeStatus.prototype.refresh = function() {
+        Window_StatusBase.prototype.refresh.call(this);
+        if (this._actor) {
+            this.drawBlock1();
+            this.drawBlock2();
+            this.drawBlock3();
         }
     };
     /**
@@ -1279,7 +1276,7 @@ function Scene_PartyChange() {
             const slots = actor.equipSlots();
             const equips = actor.equips();
             for (let i = 0; i < slots.length; i++) {
-                const slotName = $dataSystem.equipTypes[slots[i]];
+                const slotName = this.actorSlotName(actor, i);
                 this.drawEquipSlot(slotName, equips[i], rect.x, rect.y + lineHeight * i, rect.width);
             }
         }
