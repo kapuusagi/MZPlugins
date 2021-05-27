@@ -112,14 +112,14 @@
         if (obj.meta.equipSlots) {
             const tokens = obj.meta.equipSlots.split(",");
             for (const token of tokens) {
-                const index = token.indexOf(':');
                 let equipType = 0;
                 let name = "";
+                const index = token.indexOf(':');
                 if (index > 0) {
                     equipType = Number(token.substr(0, index));
                     name = token.substr(index + 1).trim();
                 } else {
-                    equipType = Number(index);
+                    equipType = Number(token);
                     name = ""; // Use default.
                 }
                 if ((equipType > 0) && (equipType < $dataSystem.equipTypes.length)) {
@@ -254,9 +254,9 @@
     Game_Actor.prototype.equipableSlotNo = function(item, emptyOnly) {
         const equipTypesOfSlots = this.equipTypesOfSlots();
         for (let slotNo = 0; slotNo < equipTypesOfSlots.length; slotNo++) {
-            if (equipTypesOfSlots.includes(item.etypeId)) {
+            if (equipTypesOfSlots[slotNo].includes(item.etypeId)) {
                 // このスロットと装備タイプが一致。
-                if (!emptyOnly || this._equips[i].isNull()) {
+                if (!emptyOnly || this._equips[slotNo].isNull()) {
                     return slotNo;
                 }
             }
@@ -318,7 +318,17 @@
      * @return {Array<string>} 装備スロット名配列
      */
     Game_Actor.prototype.equipSlotNames = function() {
-        return this.currentClass().equipSlots.map(slot => slot.name || $dataSystem.equipTypes[slot.etypeId]);
+        const slotNames = [];
+        const equipSlots = this.currentClass().equipSlots;
+        for (let slotNo = 0; slotNo < equipSlots.length; slotNo++) {
+            if (equipSlots[slotNo].name) {
+                slotNames.push(equipSlots[slotNo].name);
+            } else {
+                const etypeId = this.equipSlots()[slotNo];
+                slotNames.push($dataSystem.equipTypes[etypeId]);
+            }
+        }
+        return slotNames;
     };
 
     /**
@@ -352,7 +362,7 @@
     Game_Actor.prototype.subWeaponSlotNo = function() {
         const equipSlots = this.currentClass().equipSlots;
         for (let slotNo = 0; slotNo < equipSlots.length; slotNo++) {
-            if (equipSlots.etypeId === etypeIdOfSubWeapon) {
+            if (equipSlots[slotNo].etypeId === etypeIdOfSubWeapon) {
                 return slotNo;
             }
         }
@@ -376,7 +386,8 @@
             }
         } else if (this.isDualWield()) {
             const replaceIndex = this.subWeaponSlotNo();
-            if (replaceIndex >= 0) {
+            if ((replaceIndex >= 0) && this._equips[replaceIndex].isWeapon()) {
+                // リプレース対象装備箇所に武器が装備されている場合のみ名前変更
                 slots[replaceIndex] = 1;
             }
         }
@@ -507,7 +518,7 @@
     Game_Actor.prototype.canEquipAtSlot = function(slotNo, item) {
         const etypeIdOfSlot = this.equipTypesOfSlots();
         const etypeIds = etypeIdOfSlot[slotNo];
-        const subweaponSlotNo = this.subWeaponSlotNo();
+        const subWeaponSlotNo = this.subWeaponSlotNo();
         if (slotNo >= etypeIdOfSlot.length) {
             // スロットが減って装備不可。
             return false;
@@ -515,11 +526,14 @@
         if (item) {
             if (!etypeIds.includes(item.etypeId)) {
                 return false; // 装備タイプ対象外
-            } else if ((slotNo === subweaponSlotNo) && item.meta.bothHands) {
+            } else if ((slotNo === subWeaponSlotNo) && item.meta.bothHands) {
                 return false; // サブウェポンスロットに両手装備品を装備
-            } else if ((slotNo === subweaponSlotNo) && this.isBothHands()) {
+            } else if ((slotNo === subWeaponSlotNo) && this.isBothHands()) {
                 // 両手の時はサブウェポンスロットを強制リジェクト。
                 return false; // 両手持ち装備品装着済み。
+            } else if ((slotNo === subWeaponSlotNo) && item.subWeaponTypes) {
+                // サブウェポンスロットにサブウェポンを必要とする装備はできない。
+                return false;
             } else {
                 return this.canEquip(item);
             }
@@ -570,7 +584,7 @@
         }
         return (
             this._actor &&
-            this._actor.canEquip(item) &&
+            this._actor.canEquipAtSlot(this._slotId, item) &&
             this.equipTypes().includes(item.etypeId)
         );
     };
@@ -581,7 +595,7 @@
      * @return {Array<number>} 装備タイプ番号
      */
     Window_EquipItem.prototype.equipTypes = function() {
-        if (this_actor && (this._slotId >= 0)) {
+        if (this._actor && (this._slotId >= 0)) {
             return this._actor.equipTypesOfSlots()[this._slotId];
         } else {
             return [ 0 ];
@@ -600,7 +614,13 @@
      *     定義されたスロット名を返すため、オーバーライドする。
      */
     Window_StatusBase.prototype.actorSlotName = function(actor, index) {
-        return actor.equipSlotNames[index] || "";
+        const name = actor.equipSlotNames()[index];
+        if (name) {
+            return name;
+        } else {
+            const etypeId = actor.equipSlots()[index];
+            return $dataSystem.equipTypes[etypeId];
+        }
     };
     
 })();
