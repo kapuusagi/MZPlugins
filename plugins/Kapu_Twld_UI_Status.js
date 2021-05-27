@@ -1473,9 +1473,9 @@ function Window_StatusProfile() {
             // 装備一覧を描画する。
             const slots = actor.equipSlots();
             const equips = actor.equips();
-            for (let i = 0; i < slots.length; i++) {
-                const slotName = $dataSystem.equipTypes[slots[i]];
-                this.drawEquipSlot(slotName, equips[i], rect.x, rect.y + lineHeight * i, rect.width);
+            for (let slotNo = 0; slotNo < slots.length; slotNo++) {
+                const slotName = this.actorSlotName(actor, slotNo);
+                this.drawEquipSlot(slotName, equips[slotNo], rect.x, rect.y + lineHeight * slotNo, rect.width);
             }
         }
 
