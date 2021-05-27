@@ -182,11 +182,11 @@
  * ファストトラベル位置オブジェクト
  * {
  *    id : {number} 1以上の管理インデックスです。
- *    name : {String} 識別名(選択対象として表示されます。)
+ *    name : {string} 識別名(選択対象として表示されます。)
  *    mapId : {number} マップID
  *    x : {number} x位置
  *    y : {number} y位置
- *    condition : {String} 移動可能条件(eval()で評価されます)
+ *    condition : {string} 移動可能条件(eval()で評価されます)
  * }
  * 
  * ============================================

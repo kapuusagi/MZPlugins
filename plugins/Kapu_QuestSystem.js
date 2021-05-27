@@ -688,7 +688,7 @@ function Game_Quest() {
     /**
      * 達成条件メッセージを得る。
      * 
-     * @returns {String} 達成条件メッセージ
+     * @returns {string} 達成条件メッセージ
      */
     Game_Quest.prototype.achieveText = function() {
         const questData = this.questData();

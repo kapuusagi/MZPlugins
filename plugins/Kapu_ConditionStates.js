@@ -46,7 +46,7 @@
     /**
      * 条件付きパッシブステートを解析し、オブジェクトを生成する。
      * 
-     * @param {String} str 解析対象の文字列
+     * @param {string} str 解析対象の文字列
      * @returns {ConditionState} 条件付きパッシブステートオブジェクト。解析エラーの場合にはnull.
      */
     const _parseCondition = function(str) {

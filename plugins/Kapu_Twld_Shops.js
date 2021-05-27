@@ -1282,7 +1282,7 @@ function Scene_TwldShop() {
      * 
      * @param {number} id 店ID番号
      * @param {number} mode ショップモード
-     * @param {String} clerkFileName 店員画像ファイル名。店員画像が無い場合にはnull
+     * @param {string} clerkFileName 店員画像ファイル名。店員画像が無い場合にはnull
      * @param {number} clerkOffsetX 店員画像表示オフセットX
      * @param {number} clerkOffsetY 店員画像表示オフセットY
      */
@@ -1594,7 +1594,7 @@ function Scene_TwldShop() {
     /**
      * 所持金単位を得る。
      * 
-     * @returns {String} 所持金の単位。
+     * @returns {string} 所持金の単位。
      */
     Scene_TwldShop.prototype.currencyUnit = function() {
         return this._goldWindow.currencyUnit();

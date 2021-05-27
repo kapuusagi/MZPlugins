@@ -60,7 +60,7 @@
 
     /**
      * シーンの準備をする。
-     * @param {String} msg メッセージ
+     * @param {string} msg メッセージ
      */
     Scene_HelloWorld.prototype.prepare = function (msg) {
         this._msg = msg || "";

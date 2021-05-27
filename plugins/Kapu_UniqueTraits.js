@@ -163,7 +163,7 @@
      * 
      * 固有特性はステートクリアで消去されない特性。
      * 
-     * @param {String} name 識別名
+     * @param {string} name 識別名
      * @param {Trait} trait 特性オブジェクト
      */
     Game_BattlerBase.prototype.addUniqueTrait = function(name, trait) {
@@ -179,7 +179,7 @@
     /**
      * 指定した名前の特性を削除する。
      * 
-     * @param {String} name 特性識別名
+     * @param {string} name 特性識別名
      */
     Game_BattlerBase.prototype.removeUniqueTraits = function(name) {
         // 削除するとインデックスが繰り下がるので、後ろから一致判定する。

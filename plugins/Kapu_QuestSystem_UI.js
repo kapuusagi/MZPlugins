@@ -1135,7 +1135,7 @@ function Scene_QuestShop() {
 
     /**
      * テキストを設定する。
-     * @param {String} text 表示メッセージ
+     * @param {string} text 表示メッセージ
      */
     Window_QuestShopMessage.prototype.setText = function(text) {
         this._text = text;

@@ -605,7 +605,7 @@ function Window_BattleRewards() {
     /**
      * 描画するラベルを取得する。
      * 
-     * @returns {String} ラベル文字列。
+     * @returns {string} ラベル文字列。
      */
     Sprite_BattleHudExpGauge.prototype.label = function() {
         return TextManager.expA;

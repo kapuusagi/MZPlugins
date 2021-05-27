@@ -131,7 +131,7 @@
     /**
      * 画像を描画する。
      * 
-     * @param {String} name 画像ファイル名
+     * @param {string} name 画像ファイル名
      * @param {number} x 描画領域左上 x位置
      * @param {number} y 描画領域左上 y位置
      * @param {number} width 描画領域幅
@@ -188,7 +188,7 @@
      * 描画フィルターを設定する。
      * (MDNのドキュメントを見る限り、ChromeとFirefoxじゃないと動かない？)
      * 
-     * @param {String} filterStr 描画フィルター文字列。
+     * @param {string} filterStr 描画フィルター文字列。
      */
     Window_MenuStatus.prototype.setPaintFilter = function(filterStr) {
         this.contents.context.filter = filterStr;
@@ -327,7 +327,7 @@
     /**
      * ゲージを描画する。
      * 
-     * @param {String} type ゲージタイプ。("hp" または "mp")
+     * @param {string} type ゲージタイプ。("hp" または "mp")
      * @param {number} current 現在値
      * @param {number} max 最大値
      * @param {number} x ゲージ左上位置x

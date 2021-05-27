@@ -182,7 +182,7 @@
     /**
      * strを解析し、レートを得る。
      * 
-     * @param {String} str 文字列
+     * @param {string} str 文字列
      * @returns レートを得る。
      */
     const _getRate = function(str) {

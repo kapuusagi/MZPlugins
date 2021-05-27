@@ -91,7 +91,7 @@ function Game_SubAction() {
     /**
      * strをパースしてStateActionオブジェクトを構築する。
      * 
-     * @param {String} str 文字列
+     * @param {string} str 文字列
      * @returns {object} StateActionオブジェクト
      */
     const _parseAction = function(str) {

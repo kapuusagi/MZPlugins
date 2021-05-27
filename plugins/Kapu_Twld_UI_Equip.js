@@ -267,7 +267,7 @@ function Window_EquipItemName() {
     /**
      * 属性エントリ配列を得る。
      * 
-     * @param {String} value 値
+     * @param {string} value 値
      * @returns {Array<Object>} 属性エントリ配列
      */
     const _parseElementEntries = function(value) {
@@ -296,7 +296,7 @@ function Window_EquipItemName() {
     /**
      * ステータスに表示するカスタムパラメータを得る。
      * 
-     * @param {String} value 値文字列
+     * @param {string} value 値文字列
      * @returns {Array<StatusParamEntry>} カスタムパラメータエントリ
      */
     const _parseStatusParamEntries = function(value) {
@@ -546,7 +546,7 @@ function Window_EquipItemName() {
     /**
      * 現在の装備品情報を設定する。
      * 
-     * @param {String} slotName スロット名
+     * @param {string} slotName スロット名
      * @param {Data_Item} item 装備品
      */
     Window_EquipItemName.prototype.setEquipItem = function(slotName, item) {
@@ -878,7 +878,7 @@ function Window_EquipItemName() {
      * 属性レートを文字列に変換する。
      * 
      * @param {number} rate 割合
-     * @returns {String} 割合を表す文字列
+     * @returns {string} 割合を表す文字列
      */
     Window_EquipStatus.prototype.elementRateStr = function(rate) {
         return (rate >= 0)
@@ -981,7 +981,7 @@ function Window_EquipItemName() {
     /**
      * 整数値タイプのパラメータを描画する。
      * 
-     * @param {String} paramName パラメータ名
+     * @param {string} paramName パラメータ名
      * @param {number} value1 値1（現在値）
      * @param {number} value2 値2（装備変更値）
      * @param {number} x 描画位置x
@@ -1021,7 +1021,7 @@ function Window_EquipItemName() {
     /**
      * 割合タイプのパラメータを描画する。
      * 
-     * @param {String} paramName パラメータ名
+     * @param {string} paramName パラメータ名
      * @param {number} value1 値1（現在値）
      * @param {number} value2 値2（装備変更値）
      * @param {number} x 描画位置x

@@ -111,7 +111,7 @@
     /**
      * 文字列を解析してレートを得る。
      * 
-     * @param {String} valueStr 文字列
+     * @param {string} valueStr 文字列
      * @returns {number} 値
      */
     const _getRate = function(valueStr) {

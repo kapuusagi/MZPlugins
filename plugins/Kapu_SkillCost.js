@@ -147,7 +147,7 @@
     /**
      * 割合パラメータを計算する。
      * 
-     * @param {String} valueStr 文字列
+     * @param {string} valueStr 文字列
      */
     const _parseRate = function(valueStr) {
         if (valueStr.slice(-1) === "%") {
@@ -387,7 +387,7 @@
             /**
              * HPコストカラーを得る。
              * 
-             * @returns {String} HPコストカラー
+             * @returns {string} HPコストカラー
              */
             ColorManager.hpCostColor = function() {
                 return this.normalColor();

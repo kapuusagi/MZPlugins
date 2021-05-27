@@ -127,7 +127,7 @@
      * GP習得スキル追加効果を追加する。
      * 
      * @param {object} obj データオブジェクト
-     * @param {String} valueStr 値文字列
+     * @param {string} valueStr 値文字列
      */
     const _addGpLearnEffect = function(obj, valueStr) {
         const nums = valueStr.split(",").map(token => Math.floor((Number(token) || 0)));

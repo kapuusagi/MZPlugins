@@ -253,7 +253,7 @@ function Scene_Growup() {
     /**
      * アクター画像を描画するときのフィルターを得る。
      * 
-     * @returns {String} 描画フィルター文字列
+     * @returns {string} 描画フィルター文字列
      */
     Window_GrowupActorStatus.prototype.actorImagePaintFilter = function() {
         if (!growupOnDead) {
@@ -279,7 +279,7 @@ function Scene_Growup() {
     /**
      * 画像を描画する。
      * 
-     * @param {String} name 画像ファイル名
+     * @param {string} name 画像ファイル名
      * @param {number} x 描画領域左上 x位置
      * @param {number} y 描画領域左上 y位置
      * @param {number} width 描画領域幅
@@ -405,7 +405,7 @@ function Scene_Growup() {
      * 描画フィルターを設定する。
      * (MDNのドキュメントを見る限り、ChromeとFirefoxじゃないと動かない？)
      * 
-     * @param {String} filterStr 描画フィルター文字列。
+     * @param {string} filterStr 描画フィルター文字列。
      */
     Window_GrowupActorStatus.prototype.setPaintFilter = function(filterStr) {
         this.contents.context.filter = filterStr;
@@ -607,7 +607,7 @@ function Scene_Growup() {
     /**
      * 選択項目のメッセージを設定する。
      * 
-     * @param {String} msg メッセージ
+     * @param {string} msg メッセージ
      */
     Window_ConfirmApply.prototype.setMessage = function(msg) {
         this._items[0] = msg;

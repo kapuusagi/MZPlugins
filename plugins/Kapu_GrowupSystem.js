@@ -147,11 +147,11 @@
  * 育成項目は Game_Actor.growupItems にて配列を返す。
  * GrowupItem = {
  *     iconIndex : {number} アイコンインデックス
- *     name : {String} 項目名
- *     type : {String} 育成タイプ。(プラグインで識別に使用する文字列)
+ *     name : {string} 項目名
+ *     type : {string} 育成タイプ。(プラグインで識別に使用する文字列)
  *     id : {number} 成長処理側で使用する識別ID
  *     cost : {number} growPointのコスト
- *     description : {String} 説明用文字列。
+ *     description : {string} 説明用文字列。
  * }
  * 実際の育成処理は
  * Game_Actor.prototype.applyGrowup

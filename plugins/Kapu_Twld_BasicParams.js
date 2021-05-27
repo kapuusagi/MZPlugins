@@ -352,7 +352,7 @@
      * 
      * @param {TraitObject} obj traitsをメンバに持つオブジェクト
      * @param {number} dataId データID
-     * @param {String} valueStr 値文字列
+     * @param {string} valueStr 値文字列
      */
     const _addBasicParamTrait = function(obj, dataId, valueStr) {
         const value = Math.round((Number(valueStr) || 0));
@@ -370,7 +370,7 @@
      * 
      * @param {TraitObject} obj traitsをメンバに持つオブジェクト
      * @param {number} dataId データID
-     * @param {String} valueStr 値文字列
+     * @param {string} valueStr 値文字列
      */
     const _addBasicParamRateTrait = function(obj, dataId, valueStr) {
         let rate;

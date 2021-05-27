@@ -271,7 +271,7 @@
     /**
      * レンジ文字列からレンジ値を得る。
      * 
-     * @param {String} rangeStr レンジ文字列
+     * @param {string} rangeStr レンジ文字列
      * @returns {number} レンジ 
      */
     const _getRange = function(rangeStr) {

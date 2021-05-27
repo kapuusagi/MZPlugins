@@ -292,7 +292,7 @@
     /**
      * img/pictures以下のファイルをロードする。
      * 
-     * @param {String} filename 画像ファイル名
+     * @param {string} filename 画像ファイル名
      * @returns {Bitmap} ビットマップオブジェクト
      */
     ImageManager.loadPicture = function(filename) {

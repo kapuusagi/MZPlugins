@@ -239,7 +239,7 @@
     /**
      * GLSLソースを得る。
      * 
-     * @returns {String} GLSLソース。
+     * @returns {string} GLSLソース。
      */
     EnemyBattlePositionColorFilter.prototype._fragmentSrc = function() {
         const src =

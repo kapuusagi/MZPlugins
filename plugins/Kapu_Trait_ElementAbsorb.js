@@ -88,7 +88,7 @@
     /**
      * 割合パラメータを計算する。
      * 
-     * @param {String} valueStr 文字列
+     * @param {string} valueStr 文字列
      */
     const _parseRate = function(valueStr) {
         if (valueStr.slice(-1) === "%") {

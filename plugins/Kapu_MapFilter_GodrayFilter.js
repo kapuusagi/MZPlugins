@@ -267,7 +267,7 @@
     /**
      * バーテックスシェーダーソースを得る。
      * 
-     * @returns {String} バーテックスシェーダーソース
+     * @returns {string} バーテックスシェーダーソース
      */
     GodrayFilter.prototype._vertexSrc = function() {
         return null;
@@ -275,7 +275,7 @@
     /**
      * フラグメントシェーダーソースを得る。
      * 
-     * @returns {String} フラグメントシェーダーソース
+     * @returns {string} フラグメントシェーダーソース
      */
     GodrayFilter.prototype._fragmentSrc = function() {
         const src = 

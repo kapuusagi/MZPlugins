@@ -287,7 +287,7 @@ function Window_ItemInfo() {
     /**
      * コマンド選択対象として必要かどうかを得る。
      * 
-     * @param {String} name 種類名
+     * @param {string} name 種類名
      * @returns {boolean} 選択対象として必要な場合にはtrue, それ以外はfalse
      */
     Window_ItemCategoryVertical.prototype.needsCommand = function(name) {

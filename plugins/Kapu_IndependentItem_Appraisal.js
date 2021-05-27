@@ -240,7 +240,7 @@ function Scene_Appraise() {
     /**
      * 鑑定価格レートを得る。
      * 
-     * @param {String} arg パラメータとして渡された鑑定価格レート文字列
+     * @param {string} arg パラメータとして渡された鑑定価格レート文字列
      * @returns {number} 鑑定価格レート
      */
     const _getApprisePriceRate = function(arg) {
@@ -252,7 +252,7 @@ function Scene_Appraise() {
     /**
      * 最小鑑定価格を得る。
      * 
-     * @param {String} arg パラメータとして渡された最小鑑定価格文字列
+     * @param {string} arg パラメータとして渡された最小鑑定価格文字列
      * @returns {number} 最小鑑定価格
      */
     const _getMinAppraisePrice = function(arg) {
@@ -264,7 +264,7 @@ function Scene_Appraise() {
     /**
      * 解析レベルを解析する。
      * 
-     * @param {String} str 文字
+     * @param {string} str 文字
      */
     const _parseAppraiseLevel = function(str) {
         const value = Math.floor((Number(str) || 0));
@@ -325,7 +325,7 @@ function Scene_Appraise() {
     /**
      * 鑑定アイテムを得る。
      * 
-     * @param {String} itemStr アイテム文字列
+     * @param {string} itemStr アイテム文字列
      * @returns {Data_Item} 該当するアイテムオブジェクト
      */
     const _getAppraisedItem = function(itemStr) {
@@ -422,7 +422,7 @@ function Scene_Appraise() {
      * itemを表すIDを文字列化したものを得る。
      * 
      * @param {Data_Item} アイテム
-     * @returns {String} 文字列化したものを返す。
+     * @returns {string} 文字列化したものを返す。
      */
     DataManager.getItemStr = function(item) {
         if (DataManager.isItem(item)) {

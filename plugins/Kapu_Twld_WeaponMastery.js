@@ -199,7 +199,7 @@
         /**
          * 値文字列からレートを得る。
          * 
-         * @param {String} str 値文字列
+         * @param {string} str 値文字列
          * @returns {number} レート文字列
          */
         const _getRate = function(str) {

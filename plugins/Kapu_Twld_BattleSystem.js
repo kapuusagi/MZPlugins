@@ -296,7 +296,7 @@ function Sprite_BattleHudPicture() {
     /**
      * TPBキャスト中ゲージ色1を得る。
      * 
-     * @returns {String} CSSスタイルの色データ
+     * @returns {string} CSSスタイルの色データ
      */
     ColorManager.tpbCastGaugeColor1 = function() {
         return ColorManager.mpGaugeColor2();
@@ -304,7 +304,7 @@ function Sprite_BattleHudPicture() {
     /**
      * TPBキャスト中ゲージ色2を得る。
      * 
-     * @returns {String} CSSスタイルの色データ
+     * @returns {string} CSSスタイルの色データ
      */
     ColorManager.tbpCastGaugeColor2 = function() {
         return ColorManager.mpGaugeColor2();
@@ -370,7 +370,7 @@ function Sprite_BattleHudPicture() {
     /**
      * フロントビュー画像ファイル名を取得する。
      * 
-     * @returns {String} フロントビュー戦闘グラフィックファイル名。
+     * @returns {string} フロントビュー戦闘グラフィックファイル名。
      */
     Game_Actor.prototype.battlePicture = function() {
         return this._battlePicture;
@@ -379,7 +379,7 @@ function Sprite_BattleHudPicture() {
     /**
      * フロントビュー戦画像ファイル名を設定する。
      * 
-     * @param {String} pictureName フロントビュー戦闘グラフィックファイル名。
+     * @param {string} pictureName フロントビュー戦闘グラフィックファイル名。
      */
     Game_Actor.prototype.setBattlePicture = function(pictureName) {
         this._battlePicture = pictureName;
@@ -849,7 +849,7 @@ function Sprite_BattleHudPicture() {
     /**
      * ゲージカラー2を得る。
      * 
-     * @returns {String} カラー
+     * @returns {string} カラー
      */
     Sprite_BattleHudTpbGauge.prototype.gaugeColor2 = function() {
         if (this._battler && this._statusType === "time" && this._battler.isTpbCasting()) {
@@ -887,7 +887,7 @@ function Sprite_BattleHudPicture() {
     /**
      * TPBタイムラベルの文字を得る。
      * 
-     * @returns {String} TPBタイムラベル
+     * @returns {string} TPBタイムラベル
      */
     Sprite_BattleHudTpbGauge.prototype.tpbTimeLabel = function() {
         if (this._battler.isTpbCasting()) {
@@ -1586,7 +1586,7 @@ function Sprite_BattleHudPicture() {
     /**
      * Faceをメインスプライト画像として読み出す。
      * 
-     * @param {String} faceName 顔グラフィックファイル名
+     * @param {string} faceName 顔グラフィックファイル名
      * @param {number} faceIndex 顔グラフィックファイル中のインデックス番号
      */
     Sprite_BattleHudActor.prototype.loadMainSpriteBitmapFace = function(faceName, faceIndex) {

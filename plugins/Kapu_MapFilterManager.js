@@ -152,7 +152,7 @@ function MapFilterManager() {
     /**
      * フィルタを登録する。
      * 
-     * @param {String} filterName フィルタ識別名
+     * @param {string} filterName フィルタ識別名
      * @param {Method} constructionMethod 構築メソッド
      * @param {Array<String>} saveProperties 保存プロパティ名
      */
@@ -190,7 +190,7 @@ function MapFilterManager() {
     /**
      * filterNameに一致するフィルタエントリを得る。
      * 
-     * @param {String} filterName フィルタ名
+     * @param {string} filterName フィルタ名
      * @returns {object} フィルタエントリ。該当するエントリが無い場合にはnull.
      */
     MapFilterManager.findFilterEntry = function(filterName) {
@@ -200,7 +200,7 @@ function MapFilterManager() {
     /**
      * filterNameに対応するフィルタのインスタンスを得る。
      * 
-     * @param {String} filterName フィルタ名
+     * @param {string} filterName フィルタ名
      * @returns {object} フィルタのインスタンス。
      */
     MapFilterManager.filter = function(filterName) {
@@ -236,7 +236,7 @@ function MapFilterManager() {
     /**
      * filterNameで指定するフィルタを有効にする。
      * 
-     * @param {String} filterName フィルタ名
+     * @param {string} filterName フィルタ名
      */
     MapFilterManager.activate = function(filterName) {
         const entry = this.findFilterEntry(filterName);
@@ -255,7 +255,7 @@ function MapFilterManager() {
     /**
      * filterNameに一致するフィルタを取り除く。
      * 
-     * @param {String} filterName キー名
+     * @param {string} filterName キー名
      */
     MapFilterManager.deactivate = function(filterName) {
         const entry = this.findFilterEntry(filterName);
@@ -274,7 +274,7 @@ function MapFilterManager() {
     /**
      * fileNameで指定したフィルタが有効かどうかを判定する。
      * 
-     * @param {String} filterName 
+     * @param {string} filterName 
      * @returns {boolean} 有効な場合にはtrue, それ以外はfalse
      */
     MapFilterManager.isActive = function(filterName) {

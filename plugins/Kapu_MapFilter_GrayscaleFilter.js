@@ -98,7 +98,7 @@
         /**
      * バーテックスシェーダーのソースを得る。
      * 
-     * @returns {String} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
+     * @returns {string} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
      */
     GrayscaleFilter.prototype._vertexSrc = function() {
         const src = null;
@@ -107,7 +107,7 @@
     /**
      * フラグメントシェーダのソースを得る。
      * 
-     * @returns {String} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
+     * @returns {string} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
      */
     GrayscaleFilter.prototype._fragmentSrc = function() {
         const src = 

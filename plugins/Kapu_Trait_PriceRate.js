@@ -170,7 +170,7 @@
     /**
      * 割合を得る。
      * 
-     * @param {String} str 文字列
+     * @param {string} str 文字列
      * @returns {number} 割合を得る。
      */
     const _getRate = function(str) {

@@ -173,7 +173,7 @@
     /**
      * strを解析し、statusEntryオブジェクトを生成する。
      * 
-     * @param {String} str 文字列
+     * @param {string} str 文字列
      * @returns {object} statusEntryオブジェクト
      */
     const _parseDisplayItemEntry = function(str) {
@@ -241,7 +241,7 @@
     /**
      * 左ボタン押下を処理する。
      * 
-     * @param {String} symbol 呼び出すハンドラのシンボル
+     * @param {string} symbol 呼び出すハンドラのシンボル
      */
     Window_Status.prototype.processButton = function(symbol) {
         this.playCursorSound();
@@ -280,7 +280,7 @@
     /**
      * ステータス画面に表示する画像ファイル名を得る。
      * 
-     * @returns {String} 画像ファイル名。未定義の場合には空文字列。
+     * @returns {string} 画像ファイル名。未定義の場合には空文字列。
      */
     Window_Status.prototype.statusPictureName = function() {
         const actor = this._actor;
@@ -325,7 +325,7 @@
     /**
      * 画像を描画する。
      * 
-     * @param {String} name 画像ファイル名
+     * @param {string} name 画像ファイル名
      * @param {number} x 描画領域左上 x位置
      * @param {number} y 描画領域左上 y位置
      * @param {number} width 描画領域幅
@@ -456,7 +456,7 @@
      * 描画フィルターを設定する。
      * (MDNのドキュメントを見る限り、ChromeとFirefoxじゃないと動かない？)
      * 
-     * @param {String} filterStr 描画フィルター文字列。
+     * @param {string} filterStr 描画フィルター文字列。
      */
     Window_Status.prototype.setPaintFilter = function(filterStr) {
         this.contents.context.filter = filterStr;
@@ -964,7 +964,7 @@
     /**
      * エレメントレートを描画する。
      * 
-     * @param {String} name 属性名
+     * @param {string} name 属性名
      * @param {number} rate レート
      * @param {number} x 描画領域左上x
      * @param {number} y 描画領域左上y

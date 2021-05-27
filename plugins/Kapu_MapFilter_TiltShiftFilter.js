@@ -189,7 +189,7 @@
     /**
      * バーテックスシェーダーソースを得る。
      * 
-     * @returns {String} バーテックスシェーダーソース
+     * @returns {string} バーテックスシェーダーソース
      */
     TiltShiftAxisFilter.prototype._vertexSrc = function() {
         const src = null;
@@ -199,7 +199,7 @@
     /**
      * フラグメントシェーダーソースを得る。
      * 
-     * @returns {String} フラグメントシェーダーソース
+     * @returns {string} フラグメントシェーダーソース
      */
     TiltShiftAxisFilter.prototype._fragmentSrc = function() {
         const src =

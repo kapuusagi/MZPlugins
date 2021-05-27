@@ -197,7 +197,7 @@
     /**
      * varianceEffectを解析する。
      * 
-     * @param {String} varianceStr varianceEffectノートタグの値
+     * @param {string} varianceStr varianceEffectノートタグの値
      * @returns {object} 効果変動量オブジェクト
      */
     const _parseVarianceEffect = function(varianceStr) {
@@ -256,7 +256,7 @@
     /**
      * varianceParamのタグ値を解析する。
      * 
-     * @param {String} varianceStr 
+     * @param {string} varianceStr 
      * @returns {Array<Number>} 配列データ
      */
     const _parseVarianceParam = function(varianceStr) {

@@ -382,7 +382,7 @@ function Window_StatusProfile() {
     /**
      * ステータスに表示するカスタムパラメータを得る。
      * 
-     * @param {String} value 値文字列
+     * @param {string} value 値文字列
      * @returns {Array<StatusParamEntry>} カスタムパラメータエントリ
      */
     const _parseStatusParamEntries = function(value) {
@@ -406,7 +406,7 @@ function Window_StatusProfile() {
     /**
      * 整数値配列を得る。
      * 
-     * @param {String} value 値文字列
+     * @param {string} value 値文字列
      * @returns {Array<Number>} 値配列
      */
     const _parseIntegerArray = function(value) {
@@ -746,7 +746,7 @@ function Window_StatusProfile() {
     /**
      * 整数値タイプのパラメータを描画する。
      * 
-     * @param {String} paramName パラメータ名
+     * @param {string} paramName パラメータ名
      * @param {number} value1 値1（現在値）
      * @param {number} value2 値2（未装備値）
      * @param {number} x 描画位置x
@@ -777,7 +777,7 @@ function Window_StatusProfile() {
     /**
      * 割合タイプのパラメータを描画する。
      * 
-     * @param {String} paramName パラメータ名
+     * @param {string} paramName パラメータ名
      * @param {number} value1 値1（現在値）
      * @param {number} value2 値2（未装備値）
      * @param {number} x 描画位置x
@@ -1485,7 +1485,7 @@ function Window_StatusProfile() {
     /**
      * 装備スロットを描画する。
      * 
-     * @param {String} スロット名
+     * @param {string} スロット名
      * @param {object} item 装備品(DataWeapon/DataArmor)
      * @param {number} x 描画位置x
      * @param {number} y 描画位置y
@@ -1903,7 +1903,7 @@ function Window_StatusProfile() {
     /**
      * アクターの画像ファイル名を得る。
      * 
-     * @returns {String} 画像ファイル名。未設定または設定されていない場合には空文字列。
+     * @returns {string} 画像ファイル名。未設定または設定されていない場合には空文字列。
      */
     Sprite_StatusBackgroundPicture.prototype.pictureName = function() {
         const actor = this._actor;

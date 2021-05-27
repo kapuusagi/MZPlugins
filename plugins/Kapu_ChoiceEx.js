@@ -726,7 +726,7 @@
      * 選択肢を追加する。
      * 
      * @param {number} choiceIndex 選択肢に割り当てるインデックス番号。
-     * @param {String} str 選択肢文字列
+     * @param {string} str 選択肢文字列
      */
     Game_Interpreter.prototype.addChoice = function(choiceIndex, str) {
         const patternCondition = /\s*if\((.+?)\)/;
@@ -752,7 +752,7 @@
      * 選択肢のヘルプテキストを得る。
      * 
      * @param {number} scriptIndex 分岐エントリのスクリプトインデックス
-     * @returns {String} ヘルプテキスト
+     * @returns {string} ヘルプテキスト
      */
     Game_Interpreter.prototype.getHelpText = function(scriptIndex) {
         const texts = [];
@@ -769,7 +769,7 @@
     /**
      * 選択肢を評価する。
      * 
-     * @param {String} formula 
+     * @param {string} formula 
      * @returns {boolean} 選択肢が有効な場合にはtrue, それ以外はfalse.
      */
     Game_Interpreter.prototype.evalChoice = function(formula) {

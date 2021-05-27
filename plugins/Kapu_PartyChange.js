@@ -672,7 +672,7 @@ function Scene_PartyChange() {
      * キャラクターを描画する。
      * 下向き中央のグラフィックを描画する。
      * 
-     * @param {String} characterName キャラクターファイル名
+     * @param {string} characterName キャラクターファイル名
      * @param {number} characterIndex キャラクターインデックス
      * @param {number} frameNo フレーム番号(センターが1)
      * @param {number} x 描画下端中央x位置
@@ -1082,7 +1082,7 @@ function Scene_PartyChange() {
     /**
      * アクターの画像ファイル名を得る。
      * 
-     * @returns {String} 画像ファイル名。未設定または設定されていない場合には空文字列。
+     * @returns {string} 画像ファイル名。未設定または設定されていない場合には空文字列。
      */
     Sprite_StatusBackgroundPicture.prototype.pictureName = function() {
         const actor = this._actor;
@@ -1441,7 +1441,7 @@ function Scene_PartyChange() {
     /**
      * 整数値タイプのパラメータを描画する。
      * 
-     * @param {String} paramName パラメータ名
+     * @param {string} paramName パラメータ名
      * @param {number} value 値
      * @param {number} x 描画位置x
      * @param {number} y 描画位置y
@@ -1465,7 +1465,7 @@ function Scene_PartyChange() {
     /**
      * 装備スロットを描画する。
      * 
-     * @param {String} スロット名
+     * @param {string} スロット名
      * @param {object} item 装備品(DataWeapon/DataArmor)
      * @param {number} x 描画位置x
      * @param {number} y 描画位置y
