@@ -3,6 +3,7 @@
  * @plugindesc TWLD向け装備画面プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_EquipSlot
  * @base Kapu_Trait_Penetrate
  * @orderAfter Kapu_Trait_Penetrate
  * 
@@ -1248,7 +1249,7 @@ function Window_EquipItemName() {
         if (index < equipSlots.length) {
             // 現在の装備ウィンドウと
             // アイテム選択ウィンドウを表示させ、アイテム選択ウィンドウを有効にする。
-            const slotName = $dataSystem.equipTypes[equipSlots[index]]
+            const slotName = actor.equipSlotNames()[index];
             const equipItem = actor.equips()[index];
             this._equipItemNameWindow.setEquipItem(slotName, equipItem);
             this._equipItemNameWindow.show();
@@ -1525,8 +1526,7 @@ function Window_EquipItemName() {
 
             const index = this._equipSlotWindow.index();
             const actor = BattleManager.actor();
-            const equipSlots = actor.equipSlots();
-            const slotName = $dataSystem.equipTypes[equipSlots[index]];
+            const slotName = actor.equipSlotNames()[index];
             const equipItem = actor.equips()[index];
             this._equipItemNameWindow.setEquipItem(slotName, equipItem);
             this._equipItemWindow.refresh();
