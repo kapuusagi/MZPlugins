@@ -111,7 +111,7 @@
         } else {
             const weaponActions = this.makeWeaponAttackActions(action);
             for (let index = weaponActions.length - 1; index >= 0; index--) {
-                this._actions.push(weaponActions[index]);
+                this._actions.unshift(weaponActions[index]);
             }
         }
     };
