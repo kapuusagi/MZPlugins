@@ -180,10 +180,7 @@ namespace MZUtils.JsonData
                 else if (c == ']')
                 {
                     reader.Consume();
-                    if (obj != null)
-                    {
-                        DataConstructor.AddArrayData(array, obj);
-                    }
+                    DataConstructor.AddArrayData(array, obj);
                     break;
                 }
                 else

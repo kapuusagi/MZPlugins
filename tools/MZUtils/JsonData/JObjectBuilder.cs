@@ -92,13 +92,13 @@ namespace MZUtils.JsonData
                 }
                 sb.Append('\"').Append(paramName).Append("\":{");
                 int i = 0;
-                foreach (var pair in data)
+                foreach (System.Collections.DictionaryEntry entry in data)
                 {
                     if (i > 0)
                     {
                         sb.Append(',');
                     }
-                    sb.Append('\"').Append(paramName).Append("\":").Append(data.ToString());
+                    Append(entry.Key.ToString(), entry.Value);
                     i++;
                 }
                 sb.Append("}");
@@ -134,7 +134,10 @@ namespace MZUtils.JsonData
                     {
                         sb.Append(',');
                     }
-                    sb.Append(obj.ToString());
+                    if (obj != null)
+                    {
+                        sb.Append(obj.ToString());
+                    }
                     i++;
                 }
                 sb.Append("]");

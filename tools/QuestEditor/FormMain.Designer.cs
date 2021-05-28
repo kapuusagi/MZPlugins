@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.panel1 = new System.Windows.Forms.Panel();
             this.dataGridViewQuests = new System.Windows.Forms.DataGridView();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -53,6 +53,8 @@
             this.label7 = new System.Windows.Forms.Label();
             this.numericUpDownGuildExp = new System.Windows.Forms.NumericUpDown();
             this.buttonGenerateRewardMessage = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.textBoxNote = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.textBoxDescription = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
@@ -86,8 +88,6 @@
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
             this.comboBoxGuildRank = new System.Windows.Forms.ComboBox();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.textBoxNote = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewQuests)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -99,6 +99,7 @@
             this.tableLayoutPanel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardGold)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownGuildExp)).BeginInit();
+            this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -113,7 +114,6 @@
             this.panel2.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
-            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -131,8 +131,8 @@
             this.dataGridViewQuests.AllowUserToAddRows = false;
             this.dataGridViewQuests.AllowUserToDeleteRows = false;
             this.dataGridViewQuests.AllowUserToResizeRows = false;
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.dataGridViewQuests.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dataGridViewQuests.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridViewQuests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewQuests.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewQuests.Location = new System.Drawing.Point(0, 0);
@@ -404,6 +404,28 @@
             this.buttonGenerateRewardMessage.Text = "Generate";
             this.buttonGenerateRewardMessage.UseVisualStyleBackColor = true;
             this.buttonGenerateRewardMessage.Click += new System.EventHandler(this.OnButtonGenerateRewardMessage);
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.textBoxNote);
+            this.groupBox3.Dock = System.Windows.Forms.DockStyle.Right;
+            this.groupBox3.Location = new System.Drawing.Point(476, 295);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(124, 252);
+            this.groupBox3.TabIndex = 16;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Note";
+            this.groupBox3.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
+            // 
+            // textBoxNote
+            // 
+            this.textBoxNote.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxNote.Location = new System.Drawing.Point(3, 15);
+            this.textBoxNote.Multiline = true;
+            this.textBoxNote.Name = "textBoxNote";
+            this.textBoxNote.Size = new System.Drawing.Size(118, 234);
+            this.textBoxNote.TabIndex = 0;
+            this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
             // 
             // groupBox2
             // 
@@ -833,28 +855,6 @@
             this.comboBoxGuildRank.TabIndex = 1;
             this.comboBoxGuildRank.SelectedValueChanged += new System.EventHandler(this.OnComboBoxGuildRankSelectedValueChanged);
             // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.textBoxNote);
-            this.groupBox3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.groupBox3.Location = new System.Drawing.Point(476, 295);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(124, 252);
-            this.groupBox3.TabIndex = 16;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Note";
-            this.groupBox3.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
-            // 
-            // textBoxNote
-            // 
-            this.textBoxNote.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxNote.Location = new System.Drawing.Point(3, 15);
-            this.textBoxNote.Multiline = true;
-            this.textBoxNote.Name = "textBoxNote";
-            this.textBoxNote.Size = new System.Drawing.Size(118, 234);
-            this.textBoxNote.TabIndex = 0;
-            this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -883,6 +883,8 @@
             this.tableLayoutPanel5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardGold)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownGuildExp)).EndInit();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
@@ -904,8 +906,6 @@
             this.tableLayoutPanel2.PerformLayout();
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 

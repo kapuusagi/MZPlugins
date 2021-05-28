@@ -17,7 +17,7 @@ namespace MZUtils
         /// <summary>
         /// 消耗品かどうか
         /// </summary>
-        public Boolean Consumable { get; set; } = false;
+        public bool Consumable { get; set; } = false;
         /// <summary>
         /// ダメージ効果
         /// </summary>
