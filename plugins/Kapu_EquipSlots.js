@@ -5,12 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
- * 
- * @param etypeIdOfSubWeapon
- * @text サブウェポン時置換装備タイプ番号
- * @descサブウェポン特性(二刀流/サブウエポン必須装備)を持っている場合に、武器を装備可能にする装備タイプ番号
- * @type number
- * @default 2
+ * @base Kapu_Base_Equip
+ * @orderAfter Kapu_Base_Equip
  * 
  * @param subWeaponEquipTypeId
  * @text サブウェポン武器タイプID
@@ -94,7 +90,6 @@
 (() => {
     const pluginName = "Kapu_EquipSlots";
     const parameters = PluginManager.parameters(pluginName);
-    const etypeIdOfSubWeapon = Number(parameters["etypeIdOfSubWeapon"]) || 2;
     const subWeaponEquipTypeId = Number(parameters["subWeaponEquipTypeId"]) || 0;
     const textSubWeaponSlotName = parameters["textSubWeaponSlotName"] || "Weapon";
     if (!subWeaponEquipTypeId) {
@@ -178,33 +173,32 @@
     }
     //------------------------------------------------------------------------------
     // Game_Actor
-
+    const _Game_Actor_baseEquipSlots = Game_Actor.prototype.baseEquipSlots;
     /**
-     * 装備を初期化する。
+     * ベースの装備スロット情報を得る。
      * 
-     * @param {Array<Number>} equips 装備品ID配列
-     * !!!overwrite!!! Game_Actor.initEquips
-     *     スロット構成をカスタマイズできるようにしたため、オーバーライドする。
+     * @returns {Array<object>} ベースの装備スロット情報
      */
-    Game_Actor.prototype.initEquips = function(equips) {
-        // 装備品オブジェクト配列を作成する。
-        // データベース上での指定は、$dataSystem.equipTypes準拠だからだ。
-        const equipItems = [];
-        const actor = this.actor();
-        for (let i = 0; i < equips.length; i++) {
-            const itemId = equips[i];
-            if (itemId <= 0) {
-                continue;
-            }
-             // equipsはインデックス0から始まるけど、equipTypesは1から始まるので1ずれる
-            const equipType = $dataSystem.equipTypes[i + 1];
-            if ((equipType === $dataSystem.equipTypes[1]) 
-                    || ((i == 1) && this.isDualWield())) {
-                equipItems.push($dataWeapons[itemId]);
-            } else {
-                equipItems.push($dataArmors[itemId]);
-            }
+    Game_Actor.prototype.baseEquipSlots = function() {
+        const equipSlots = this.currentClass().equipSlots.slice();
+        if (equipSlots.length > 0) {
+            return equipSlots;
+        } else {
+            return _Game_Actor_baseEquipSlots.call(this);
         }
+    };
+
+    const _Game_Actor_initialEquipments = Game_Actor.prototype.initialEquipments;
+    /**
+     * アクターの初期装備を得る。
+     * 
+     * @param {Array<number>} 装備品ID配列。（種類はシステムの装備スロット番号に依存）
+     * @return {Array<object>} 初期装備アイテム配列
+     */
+    Game_Actor.prototype.initialEquipments = function(equips) {
+        const items = _Game_Actor_initialEquipments.call(this, equips);
+
+        const actor = this.actor();
         if (actor.meta.equippedItems) {
             const tokens = actor.meta.equippedItems.split(",");
             for (const token of tokens) {
@@ -223,45 +217,7 @@
             }
         }
 
-        this._equips = [];
-        const equipSlotCount = this.equipSlots().length;
-        for (let i = 0; i < equipSlotCount; i++) {
-            this._equips[i] = new Game_Item();
-        }
-        for (const equipItem of equipItems) {
-            if (!equipItem) {
-                continue;
-            }
-            const slotNo = this.equipableSlotNo(equipItem, true);
-            if (slotNo >= 0) {
-                // 装備させる。
-                this._equips[slotNo].setEquip(DataManager.isWeapon(equipItem), equipItem.id);
-            }
-        }
-
-        this.releaseUnequippableItems(true);
-        this.recoverAll();
-        this.refresh();
-    };
-
-    /**
-     * itemを装備可能なスロット番号を得る。
-     * 
-     * @param {object} item アイテム(DataWeapon/DataArmor)
-     * @param {boolean} emptyOnly 空きスロットを探索する場合にはtrue, それ以外はfalse.
-     * @return {number} スロット番号
-     */
-    Game_Actor.prototype.equipableSlotNo = function(item, emptyOnly) {
-        const equipTypesOfSlots = this.equipTypesOfSlots();
-        for (let slotNo = 0; slotNo < equipTypesOfSlots.length; slotNo++) {
-            if (equipTypesOfSlots[slotNo].includes(item.etypeId)) {
-                // このスロットと装備タイプが一致。
-                if (!emptyOnly || this._equips[slotNo].isNull()) {
-                    return slotNo;
-                }
-            }
-        }
-        return -1;
+        return items;
     };
 
     /**
@@ -270,7 +226,7 @@
      * @returns {boolean} 両手装備
      */
     Game_Actor.prototype.isBothHands = function() {
-        const weapon = this.weapons()[0];
+        const weapon = this.mainWeapon();
         return (weapon && weapon.meta.bothHands);
     };
 
@@ -303,95 +259,64 @@
         return (weapon && weapon.subWeaponTypes) ? weapon.subWeaponTypes : [];
     };
 
+    const _Game_Actor_equipTypesOfSubWeaponSlot = Game_Actor.prototype.equipTypesOfSubWeaponSlot;
     /**
-     * 2番目のスロットが武器かどうかを得る。
+     * サブウェポンスロットに装備可能な装備タイプを得る。
      * 
-     * @returns {boolean} 2番目のスロットが武器の場合にはtrue, それ以外はfalse.
+     * @param {number} slotNo スロット番号
+     * @returns {Array<number>} 装備タイプID配列
      */
-    Game_Actor.prototype.is2ndSlotIsWeapon = function() {
-        return this.isDualWield() || this.isNeedsSubWeapon();
+    Game_Actor.prototype.equipTypesOfSubWeaponSlot = function(slotNo) {
+        if (this.isNeedsSubWeapon()) {
+            return [ subWeaponEquipTypeId ];
+        } else {
+            return _Game_Actor_equipTypesOfSubWeaponSlot.call(this, slotNo);
+        }
     };
 
     /**
-     * 装備スロット名を得る。
+     * 二刀流時のサブウェポンスロットに装備可能な装備タイプを得る。
      * 
-     * @return {Array<string>} 装備スロット名配列
+     * @param {number} slotNo スロット番号
+     * @returns {Array<number>} 装備タイプID配列
+     * !!!overwrite!!! Game_Actor.equipTypesOfSubWeaponSlotDualWired
+     *     二刀流時、防具と洗濯装備できるようにするためオーバーライドする。
      */
-    Game_Actor.prototype.equipSlotNames = function() {
-        const slotNames = [];
-        const equipSlots = this.currentClass().equipSlots;
-        for (let slotNo = 0; slotNo < equipSlots.length; slotNo++) {
-            if (equipSlots[slotNo].name) {
-                slotNames.push(equipSlots[slotNo].name);
-            } else {
-                const etypeId = this.equipSlots()[slotNo];
-                slotNames.push($dataSystem.equipTypes[etypeId]);
-            }
+    // eslint-disable-next-line no-unused-vars
+    Game_Actor.prototype.equipTypesOfSubWeaponSlotDualWired = function(slotNo) {
+        return [ 1, this._equipSlots[slotNo].etypeId ];
+    };
+
+
+    const _Game_Actor_subWeaponEquipTypeId = Game_Actor.prototype.subWeaponEquipTypeId;
+    /**
+     * サブウェポンスロットの装備タイプ番号を得る。
+     * 
+     * @return {number} 装備タイプ番号
+     */
+    Game_Actor.prototype.subWeaponEquipTypeId = function() {
+        if (this.isNeedsSubWeapon()) {
+            return subWeaponEquipTypeId;
+        } else {
+            return _Game_Actor_subWeaponEquipTypeId.call(this);
         }
-        return slotNames;
     };
 
     /**
-     * 装備スロットタイプIDを得る。
+     * 二刀流時のサブウェポンスロットの装備タイプ番号を得る。
      * 
-     * @return {Array<Array<number>>} 装備可能タイプID配列
+     * @returns {number} 装備タイプ番号
+     * !!!overwrite!!! Game_Actor.subWeaponEquiptypeIdDualWired
+     *      二刀流の時は、武器を装備しているときだけ武器装備スロットタイプを返す。
      */
-    Game_Actor.prototype.equipTypesOfSlots = function() {
-        const equipTypesOfSlots = this.currentClass().equipSlots.map(slot => [ slot.etypeId ]);
-        if (subWeaponEquipTypeId && this.isNeedsSubWeapon()) {
-            const etypeIds = equipTypesOfSlots.find(etypeIds => etypeIds.includes(etypeIdOfSubWeapon));
-            if (etypeIds) {
-                // サブウエポン指定の場合には完全に置換
-                etypeIds[0] = subWeaponEquipTypeId;
-            }
-        } else if (this.isDualWield()) {
-            const etypeIds = equipTypesOfSlots.find(etypeIds => etypeIds.includes(etypeIdOfSubWeapon));
-            if (etypeIds) {
-                etypeIds.unshift(1);
-            }
+    Game_Actor.prototype.subWeaponEquiptypeIdDualWired = function() {
+        const subWeaponSlotNo = this.subweaponSlotNo();
+        if (subWeaponSlotNo >= 0) {
+            return this._equips[subWeaponSlotNo].isWeapon()
+                    ? 1 : this._equipSlots[subWeaponSlotNo].etypeId;
+        } else {
+            return 1;
         }
-
-        return equipTypesOfSlots;
-    };
-
-    /**
-     * サブウェポンスロット番号を得る。
-     * 
-     * @return {number} サブウェポンスロット番号
-     */
-    Game_Actor.prototype.subWeaponSlotNo = function() {
-        const equipSlots = this.currentClass().equipSlots;
-        for (let slotNo = 0; slotNo < equipSlots.length; slotNo++) {
-            if (equipSlots[slotNo].etypeId === etypeIdOfSubWeapon) {
-                return slotNo;
-            }
-        }
-        return -1;
-    };
-
-    /**
-     * 装備スロット配列を得る。
-     * 
-     * @returns {Array<Number>} 装備スロット配列。装備タイプが格納された配列が返る。
-     * !!!overwrite!!! Game_Actor.equipSlots()
-     *     装備スロットを動的に構築するためにオーバーライドする。
-     *     これ自体はベーシックシステムとの互換性のために用意する。
-     */
-    Game_Actor.prototype.equipSlots = function() {
-        const slots = this.currentClass().equipSlots.map(slot => slot.etypeId);
-        if (subWeaponEquipTypeId && this.isNeedsSubWeapon()) {
-            const replaceIndex = this.subWeaponSlotNo();
-            if (replaceIndex >= 0) {
-                slots[replaceIndex] = subWeaponEquipTypeId;
-            }
-        } else if (this.isDualWield()) {
-            const replaceIndex = this.subWeaponSlotNo();
-            if ((replaceIndex >= 0) && this._equips[replaceIndex].isWeapon()) {
-                // リプレース対象装備箇所に武器が装備されている場合のみ名前変更
-                slots[replaceIndex] = 1;
-            }
-        }
-        return slots;
     };
 
     const _Game_Actor_equips = Game_Actor.prototype.equips;
@@ -411,6 +336,7 @@
         return _Game_Actor_equips.call(this); // _equipsが返る。(はず)
     };
 
+    const _Game_Actor_changeEquip = Game_Actor.prototype.changeEquip;
     /**
      * 装備を変更する。
      * パーティーの所持品にitemが無い場合には変更できない。
@@ -420,48 +346,13 @@
      * 
      * @param {number} slotId スロットID
      * @param {DataItem} item 装備品(DataWeapon/DataArmor)
-     * !!!overwrite!!! Game_Actor.changeEquip
-     *     装備スロットに対する複数タイプサポートのためにオーバーライドする。
      */
     Game_Actor.prototype.changeEquip = function(slotId, item) {
         if ((this._equips[slotId] === undefined) || (this._equips[slotId] === null)) {
             this._equips[slotId] = new Game_Item();
         }
-        if (this.tradeItemWithParty(item, this.equips()[slotId]) 
-                && (!item || this.equipTypesOfSlots()[slotId].includes(item.etypeId))) {
-            this._equips[slotId].setObject(item);
-            this.refresh();
-        }
+        _Game_Actor_changeEquip.call(this, slotId, item);
     };
-
-    /**
-     * 装備を変更する。
-     * パーティーの所持品にitemIdで指定するアイテムが無い場合には変更できない。
-     * 
-     * Note: このメソッドはインタプリタによる呼び出し時に呼び出される。
-     * 
-     * @param {number} etypeId 装備タイプID
-     * @param {number} itemId アイテムID
-     * !!!overwrite!!! Game_Actor.changeEquipById
-     *     装備タイプ、ID指定での要求の場合、該当スロットを適切に呼び出すためにオーバーライドする。
-     */
-    Game_Actor.prototype.changeEquipById = function(etypeId, itemId) {
-        // プラグインコマンドからの呼び出しのみ。
-        // つまり、DualWiredとか考慮されていないから、ベーシックシステムでの
-        // スロット並びを考慮して装備対象アイテムを取得し、
-        // 装備させる必要がある。
-        const slotId = etypeId - 1;
-        if (slotId === 0) {
-            const weapon = $dataWeapons[itemId];
-            const slotNo = this.equipableSlotNo(weapon, false);
-            this.changeEquip(slotNo, weapon);
-        } else {
-            const armor = $dataArmors[itemId];
-            const slotNo = this.equipableSlotNo(armor, false);
-            this.changeEquip(slotNo, armor);
-        }
-    };    
-
     const _Game_Actor_forceChangeEquip = Game_Actor.prototype.forceChangeEquip;
     /**
      * 装備を変更する。
@@ -480,36 +371,8 @@
         }
         _Game_Actor_forceChangeEquip.call(this, slotId, item);
     };
-    /**
-     * 装備できないものを装備解除する。
-     * 
-     * @param {boolean} forcing 強制解除するかどうか。
-     *                  強制解除する場合、装備品は所持品に戻らず、消失する。
-     * 
-     * !!!overwrite!!! Game_Actor.releaseUnequippableItems()
-     *     装備品解除により、装備可能スロットが変化することがあり得るため、オーバーライドする。
-     */
-    Game_Actor.prototype.releaseUnequippableItems = function(forcing) {
-        for (;;) {
-            const equips = this.equips();
-            let changed = false;
-            for (let i = 0; i < equips.length; i++) {
-                const item = equips[i];
-                if (!this.canEquipAtSlot(i, item)) {
-                    if (!forcing) {
-                        this.tradeItemWithParty(null, item);
-                    }
-                    this._equips[i].setObject(null);
-                    changed = true;
-                }
-            }
-            if (!changed) {
-                // 取り外しがなかったら終了。
-                break;
-            }
-        }
-    };
 
+    const _Game_Actor_canEquipAtSlot = Game_Actor.prototype.canEquipAtSlot;
     /**
      * slotNoで指定されるスロットにitemが装備可能かどうかを取得する。
      * 
@@ -518,29 +381,22 @@
      * @returns {boolean} 装備可能な場合にはtrue, それ以外はfalse
      */
     Game_Actor.prototype.canEquipAtSlot = function(slotNo, item) {
-        const etypeIdOfSlot = this.equipTypesOfSlots();
-        const etypeIds = etypeIdOfSlot[slotNo];
-        const subWeaponSlotNo = this.subWeaponSlotNo();
-        if (slotNo >= etypeIdOfSlot.length) {
-            // スロットが減って装備不可。
-            return false;
-        }
-        if (item) {
-            if (!etypeIds.includes(item.etypeId)) {
-                return false; // 装備タイプ対象外
-            } else if ((slotNo === subWeaponSlotNo) && item.meta.bothHands) {
-                return false; // サブウェポンスロットに両手装備品を装備
-            } else if ((slotNo === subWeaponSlotNo) && this.isBothHands()) {
+        if (item && (slotNo === this.subWeaponSlotNo())) {
+            if (this.bothHands()) {
                 // 両手の時はサブウェポンスロットを強制リジェクト。
-                return false; // 両手持ち装備品装着済み。
-            } else if ((slotNo === subWeaponSlotNo) && item.subWeaponTypes) {
+                return false;
+            }
+            if (item.meta.bothHands) {
+                // サブウェポンスロットに両手装備品を装備
+                return false;
+            }
+            if (item.subWeaponTypes) {
                 // サブウェポンスロットにサブウェポンを必要とする装備はできない。
                 return false;
-            } else {
-                return this.canEquip(item);
             }
         }
-        return true;
+
+        return _Game_Actor_canEquipAtSlot.call(this, slotNo, item);
     };
 
     const _Game_Actor_isEquipWtypeOk = Game_Actor.prototype.isEquipWtypeOk;
@@ -567,62 +423,8 @@
                 && ((slotId !== this.subWeaponSlotNo()) || !this.isBothHands());
     };
 
-    //------------------------------------------------------------------------------
-    // Window_EquipItem
 
-    /**
-     * itemがこのリストに含まれるかどうかを判定する。
-     * 
-     * Note: 候補として表示させない場合にはfalseを返す。
-     * 
-     * @param {object} item アイテム
-     * @returns {boolean} 含まれる場合にはtrue, それ以外はfalse.
-     * !!!overwrite!!! Window_EquipItem.includes
-     *     所定のスロットに装備可能なタイプを複数持たせるため、オーバーライドする。
-     */
-    Window_EquipItem.prototype.includes = function(item) {
-        if (item === null) {
-            return true;
-        }
-        return (
-            this._actor &&
-            this._actor.canEquipAtSlot(this._slotId, item) &&
-            this.equipTypes().includes(item.etypeId)
-        );
-    };
 
-    /**
-     * このスロットの装備タイプ番号を得る。
-     * 
-     * @return {Array<number>} 装備タイプ番号
-     */
-    Window_EquipItem.prototype.equipTypes = function() {
-        if (this._actor && (this._slotId >= 0)) {
-            return this._actor.equipTypesOfSlots()[this._slotId];
-        } else {
-            return [ 0 ];
-        }
-    }
 
-    //------------------------------------------------------------------------------
-    // Window_StatusBase
-    /**
-     * 装備スロット名を得る。
-     * 
-     * @param {Game_Actor} actor アクター
-     * @param {number} index スロット番号
-     * @returns {string} スロット名
-     * !!!overwrite!!! Window_StatusBase.actorSlotName
-     *     定義されたスロット名を返すため、オーバーライドする。
-     */
-    Window_StatusBase.prototype.actorSlotName = function(actor, index) {
-        const name = actor.equipSlotNames()[index];
-        if (name) {
-            return name;
-        } else {
-            const etypeId = actor.equipSlots()[index];
-            return $dataSystem.equipTypes[etypeId];
-        }
-    };
     
 })();
