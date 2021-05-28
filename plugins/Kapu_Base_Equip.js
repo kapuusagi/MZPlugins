@@ -29,7 +29,8 @@
 (() => {
     const pluginName = "Kapu_Base_Equip";
     const parameters = PluginManager.parameters(pluginName);
-    const etypeIdOfSubWeapon = parameters["etypeIdOfSubWeapon"] || 2;
+    
+    const etypeIdOfSubWeapon = Number(parameters["etypeIdOfSubWeapon"]) || 2;
 
     //------------------------------------------------------------------------------
     // Game_Actor
@@ -328,7 +329,7 @@
      Game_Actor.prototype.changeEquip = function(slotId, item) {
         if (this.canEquipAtSlot(slotId, item)) {
             if (this.tradeItemWithParty(item, this.equips()[slotId])) {
-                this._equip[slotId].setObject(item);
+                this._equips[slotId].setObject(item);
                 this.refresh();
             }
         }
@@ -389,6 +390,15 @@
                 break;
             }
         }
+    };
+
+    /**
+     * メインウェポンを得る。
+     * 
+     * @returns {DataWeapon} メインウェポン。無い場合にはnull
+     */
+    Game_Actor.prototype.mainWeapon = function() {
+        return this.weapons()[0]
     };
 
     /**

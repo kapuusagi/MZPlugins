@@ -21,10 +21,23 @@
  * @default 武器
  * 
  * @help 
- * クラス毎に装備スロットを変更するためのプラグイン。UIは基本的に変更しない。
- * また、サブウェポンの概念を追加する。
- * サブウェポンは、矢や弾のような概念を提供するためのもの。SkillItemCostと組み合わせると
- * 指定した装備品を触媒として消費していく、といった仕組みができる。
+ * 装備スロットの機能を変更するプラグイン。
+ * 以下の機能を提供します。
+ * ・クラス毎に装備スロットを設定可能になります。
+ *   
+ * ・二刀流特性を持っているとき、武器または盾を装備選択可能になります。
+ *   ベーシックシステムでは二刀流特性があるとき、盾は装備できません。
+ *   二刀流特性を追加すると、盾が装備できなくなるという問題を回避します。
+ *   
+ * ・サブウェポン指定された武器を装備した場合に、盾スロットに相当するところを
+ *   専用のサブウェポン装備スロットに変更します。
+ *   弓と矢で別々な装備を用意したいような機能を実現します。
+ *    サブウェポンは、矢や弾のような概念を提供するためのもの。SkillItemCostと組み合わせると
+ *    指定した装備品を触媒として消費していく、といった仕組みができる。
+ *   <subWeaponType>ノートタグ参照。
+ * 
+ * ・両手装備武器を明示することができるようになります。
+ *   <bothHands>ノートタグ参照。
  * 
  *      
  * ヒント：
@@ -82,6 +95,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 Kapu_Base_Equipにコア部分を分離した。
  * Version.0.3.0 盾装備部位(サブウェポンスロットと呼称した)を指定出来るように修正。
  *               二刀流のとき、盾または武器を選択装備できるようにした。
  * Version.0.2.0 両手装備品、サブウェポンの概念を追加するように修正した。
@@ -180,12 +194,14 @@
      * @returns {Array<object>} ベースの装備スロット情報
      */
     Game_Actor.prototype.baseEquipSlots = function() {
-        const equipSlots = this.currentClass().equipSlots.slice();
-        if (equipSlots.length > 0) {
-            return equipSlots;
-        } else {
-            return _Game_Actor_baseEquipSlots.call(this);
+        const dataClass = this.currentClass();
+        if (dataClass) {
+            const equipSlots = dataClass.equipSlots.slice();
+            if (equipSlots.length > 0) {
+                return equipSlots;
+            }
         }
+        return _Game_Actor_baseEquipSlots.call(this);
     };
 
     const _Game_Actor_initialEquipments = Game_Actor.prototype.initialEquipments;
@@ -228,15 +244,6 @@
     Game_Actor.prototype.isBothHands = function() {
         const weapon = this.mainWeapon();
         return (weapon && weapon.meta.bothHands);
-    };
-
-    /**
-     * メインウェポンを得る。
-     * 
-     * @returns {DataWeapon} メインウェポン。無い場合にはnull
-     */
-    Game_Actor.prototype.mainWeapon = function() {
-        return this.weapons()[0]
     };
 
     /**
@@ -310,7 +317,7 @@
      *      二刀流の時は、武器を装備しているときだけ武器装備スロットタイプを返す。
      */
     Game_Actor.prototype.subWeaponEquiptypeIdDualWired = function() {
-        const subWeaponSlotNo = this.subweaponSlotNo();
+        const subWeaponSlotNo = this.subWeaponSlotNo();
         if (subWeaponSlotNo >= 0) {
             return this._equips[subWeaponSlotNo].isWeapon()
                     ? 1 : this._equipSlots[subWeaponSlotNo].etypeId;
@@ -382,7 +389,7 @@
      */
     Game_Actor.prototype.canEquipAtSlot = function(slotNo, item) {
         if (item && (slotNo === this.subWeaponSlotNo())) {
-            if (this.bothHands()) {
+            if (this.isBothHands()) {
                 // 両手の時はサブウェポンスロットを強制リジェクト。
                 return false;
             }
