@@ -89,7 +89,8 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.2.0 光源色を設定できるようにした。動作未確認。
+ * Version.0.3.0 フィルタ順によっては正しく描画されない不具合を修正した。
+ * Version.0.2.0 光源色を設定できるようにした。
  * Version.0.1.0 新規作成
  */
 (() => {
@@ -189,7 +190,11 @@
         };
     }
     //------------------------------------------------------------------------------
-    // BackgroundFilter
+    // DarknessBackgroundFilter
+    /**
+     * 背景を描画する。
+     * 最小輝度を表現するフィルタ。
+     */
     function DarknessBackgroundFilter() {
         this.initialize(...arguments);  
     }
@@ -197,6 +202,9 @@
     DarknessBackgroundFilter.prototype = Object.create(PIXI.Filter.prototype);
     DarknessBackgroundFilter.prototype.constructor = DarknessBackgroundFilter;
 
+    /**
+     * DarknessBackgroundFilterを初期化する。
+     */
     DarknessBackgroundFilter.prototype.initialize = function() {
         PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
         this.uniforms.brightness = 0.0;
@@ -205,6 +213,9 @@
 
     };
     Object.defineProperties(DarknessBackgroundFilter.prototype, {
+        /**
+         * 輝度(0～255)
+         */
         brightness: {
             get: function() { return this._brightness; },
             set: function(value) {
@@ -246,8 +257,124 @@
         return src;
     };    
     //------------------------------------------------------------------------------
-    // LightEffectFilter
+    // DarknessLightSourceFilter
+    /**
+     * 暗闇中の光源をレンダリングするためのフィルタ
+     */
+    function DarknessLightSourceFilter() {
+        this.initialize(...arguments);
+    }
 
+    DarknessLightSourceFilter.prototype = Object.create(PIXI.Filter.prototype);
+    DarknessLightSourceFilter.prototype.constructor = DarknessLightSourceFilter;
+
+    /**
+     * DarknessLightSourceFilterを初期化する。
+     */
+    DarknessLightSourceFilter.prototype.initialize = function() {
+        PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
+        this.uniforms.sourcePoint = [0.5, 0.5];
+        this.uniforms.brightness = 0.1;
+        this.uniforms.lightColor = [255,255,255,255];
+        this.uniforms.boxWidth = 100;
+        this.uniforms.boxHeight = 100;
+    };
+    /**
+     * バーテックスシェーダーのソースを得る。
+     * 
+     * @returns {string} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
+     */
+     DarknessLightSourceFilter.prototype._vertexSrc = function() {
+        const src = null;
+        return src;
+    };
+    /**
+     * フラグメントシェーダのソースを得る。
+     * 
+     * Note : 光源輝度(brightness)を単純な照らせる範囲として扱い、
+     *        光源中央からの距離(distance)を超えると見えなくなる（a=0)
+     *        境界部分は今のところ線形(傾き1)でぼかしている。
+     * 
+     * 
+     * @returns {string} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
+     */
+     DarknessLightSourceFilter.prototype._fragmentSrc = function() {
+        const src = 
+                "precision mediump float;" +
+                "" +
+                "uniform sampler2D uSampler;" +
+                "varying vec2 vTextureCoord;" +
+                "uniform vec2 sourcePoint;" +
+                "uniform float brightness;" +
+                "uniform vec4 lightColor;" +
+                "uniform float boxWidth;" +
+                "uniform float boxHeight;" +
+                "uniform float time;" +
+                "" +
+                "void main(void){" +
+                "    vec4 smpColor = texture2D(uSampler, vTextureCoord);" +
+                "    vec2 texturePos = vec2(vTextureCoord.x * boxWidth, vTextureCoord.y * boxHeight);" +
+                "    vec2 sourcePos = vec2(sourcePoint.x, sourcePoint.y);" +
+                "    float distance = distance(sourcePos, texturePos) * (0.95 + 0.1 * sin(" + Math.PI + " * time));" +
+                "    float a = clamp((1.0 - distance / brightness), 0.0, 1.0);" +
+                "    vec4 rgba = smpColor * a * lightColor / 255.0;" +
+                "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, a);" +
+                "}";
+        return src;
+    };
+    Object.defineProperties(DarknessLightSourceFilter.prototype, {
+        /**
+         * 光源座標
+         */
+        sourcePoint: {
+            get: function() { return this.uniforms.sourcePoint; },
+            set: function(value) { this.uniforms.sourcePoint = value; }
+        },
+        /**
+         * 光源輝度(1～255)
+         */
+        brightness: {
+            get: function() { return this.uniforms.brightness; },
+            set: function(value) { this.uniforms.brightness = Math.max(1, value); }
+        },
+        /**
+         * 光源の色
+         * Array<number> [R,G,B,A]
+         * 各0～255
+         */
+        lightColor: {
+            get: function() { return this.uniforms.lightColor; },
+            set: function(value) { this.uniforms.lightColor = value; }
+        },
+        /**
+         * 画面の幅
+         */
+        boxWidth: {
+            get: function() { return this.uniforms.boxWidth; },
+            set: function(value) { this.uniforms.boxWidth = value; }
+        },
+
+        /**
+         * 画面の高さ
+         */
+        boxHeight: {
+            get: function() { return this.uniforms.boxHeight; },
+            set: function(value) { this.uniforms.boxHeight = value; }
+        },
+
+        /**
+         * 時間[sec]
+         */
+        time: {
+            get: function() { return this.uniforms.time;},
+            set: function(value) { this.uniforms.time = value; }
+        }
+
+
+
+
+
+    });
     //------------------------------------------------------------------------------
     // MapDarknessFilter
     /**
@@ -264,18 +391,13 @@
      * MapDarknessFilterを初期化する。
      */
     MapDarknessFilter.prototype.initialize = function() {
-        PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
-        this.uniforms.sourcePoint = [0.5, 0.5];
-        this.uniforms.brightness = 0.1;
-        this.uniforms.lightColor = [255,255,255,255];
-        this.uniforms.boxWidth = 100;
-        this.uniforms.boxHeight = 100;
+        PIXI.Filter.call(this);
         this._lightSources = [];
-
         this._backgroundFilter = new DarknessBackgroundFilter();
         this._backgroundFilter.brightness = 0;
+        this._lightSourceFilter = new DarknessLightSourceFilter();
 
-        this.time = 0;
+        this._time = 0;
     };
 
     /**
@@ -298,49 +420,6 @@
     };
 
     /**
-     * バーテックスシェーダーのソースを得る。
-     * 
-     * @returns {string} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
-     */
-    MapDarknessFilter.prototype._vertexSrc = function() {
-        const src = null;
-        return src;
-    };
-    /**
-     * フラグメントシェーダのソースを得る。
-     * 
-     * Note : 光源輝度(brightness)を単純な照らせる範囲として扱い、
-     *        光源中央からの距離(distance)を超えると見えなくなる（a=0)
-     *        境界部分は今のところ線形(傾き1)でぼかしている。
-     * 
-     * 
-     * @returns {string} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
-     */
-    MapDarknessFilter.prototype._fragmentSrc = function() {
-        const src = 
-                "precision mediump float;" +
-                "" +
-                "uniform sampler2D uSampler;" +
-                "varying vec2 vTextureCoord;" +
-                "uniform vec2 sourcePoint;" +
-                "uniform float brightness;" +
-                "uniform vec4 lightColor;" +
-                "uniform float boxWidth;" +
-                "uniform float boxHeight;" +
-                "uniform float time;" +
-                "" +
-                "void main(void){" +
-                "    vec4 smpColor = texture2D(uSampler, vTextureCoord);" +
-                "    vec2 texturePos = vec2(vTextureCoord.x * boxWidth, vTextureCoord.y * boxHeight);" +
-                "    vec2 sourcePos = vec2(sourcePoint.x, sourcePoint.y);" +
-                "    float distance = distance(sourcePos, texturePos) * 0.95 + 0.1 * sin(" + Math.PI + " * time);" +
-                "    float a = clamp((1.0 - distance / brightness), 0.0, 1.0);" +
-                "    vec4 rgba = smpColor * a * lightColor / 255.0;" +
-                "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, a);" +
-                "}";
-        return src;
-    };
-    /**
      * フィルタを適用する。
      * 
      * @param {PIXI.FilterManager} filterManager 
@@ -351,15 +430,15 @@
         // まず背景をレンダリングする。
         this._backgroundFilter.apply(filterManager, input, output);
 
-        this.uniforms.boxWidth = Graphics.boxWidth;
-        this.uniforms.boxHeight = Graphics.boxHeight;
-        this.uniforms.time = this.time;
+        this._lightSourceFilter.boxWidth = Graphics.boxWidth;
+        this._lightSourceFilter.boxHeight = Graphics.boxHeight;
+        this._lightSourceFilter.time = this._time;
 
         for (const lightSource of this._lightSources) {
-            this.uniforms.sourcePoint = lightSource.point;
-            this.uniforms.brightness = lightSource.brightness;
-            this.uniforms.lightColor = lightSource.color;
-            PIXI.Filter.prototype.apply.call(this, filterManager, input, output);
+            this._lightSourceFilter.sourcePoint = lightSource.point;
+            this._lightSourceFilter.brightness = lightSource.brightness;
+            this._lightSourceFilter.lightColor = lightSource.color;
+            this._lightSourceFilter.apply(filterManager, input, output);
         }
     };
 
@@ -373,6 +452,10 @@
                 }
             }
         },
+        time: {
+            get: function() { return this._time; },
+            set: function(value) { this._time = value; }
+        }
     });
     //------------------------------------------------------------------------------
     // Game_Character
