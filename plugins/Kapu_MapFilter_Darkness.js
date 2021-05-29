@@ -270,12 +270,10 @@
         this.uniforms.lightColor = [255,255,255,255];
         this.uniforms.boxWidth = 100;
         this.uniforms.boxHeight = 100;
-        this.uniforms.minBrightness = 0.0;
         this._lightSources = [];
-        this._minBrightness = 0;
 
-        this._colorFilter = new DarknessBackgroundFilter();
-        this._colorFilter.brightness = 0;
+        this._backgroundFilter = new DarknessBackgroundFilter();
+        this._backgroundFilter.brightness = 0;
 
         this.time = 0;
     };
@@ -311,6 +309,11 @@
     /**
      * フラグメントシェーダのソースを得る。
      * 
+     * Note : 光源輝度(brightness)を単純な照らせる範囲として扱い、
+     *        光源中央からの距離(distance)を超えると見えなくなる（a=0)
+     *        境界部分は今のところ線形(傾き1)でぼかしている。
+     * 
+     * 
      * @returns {string} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
      */
     MapDarknessFilter.prototype._fragmentSrc = function() {
@@ -325,18 +328,15 @@
                 "uniform float boxWidth;" +
                 "uniform float boxHeight;" +
                 "uniform float time;" +
-                "uniform float minBrightness;" +
                 "" +
                 "void main(void){" +
                 "    vec4 smpColor = texture2D(uSampler, vTextureCoord);" +
                 "    vec2 texturePos = vec2(vTextureCoord.x * boxWidth, vTextureCoord.y * boxHeight);" +
                 "    vec2 sourcePos = vec2(sourcePoint.x, sourcePoint.y);" +
-                "    float distance = distance(sourcePos, texturePos);" +
-                "    float rate = 0.95 + 0.1 * sin(" + Math.PI + " * time);" +
-                "    float a = clamp((1.0 - distance * rate / brightness), 0.0, 1.0) * (1.0 - minBrightness);" +
-                "    vec4 rgba = smpColor * minBrightness + smpColor * a * lightColor / 255.0;" +
+                "    float distance = distance(sourcePos, texturePos) * 0.95 + 0.1 * sin(" + Math.PI + " * time);" +
+                "    float a = clamp((1.0 - distance / brightness), 0.0, 1.0);" +
+                "    vec4 rgba = smpColor * a * lightColor / 255.0;" +
                 "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, a);" +
-                // "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, 0.5);" +
                 "}";
         return src;
     };
@@ -348,7 +348,8 @@
      * @param {PIXI.RenderTexture} output 出力レンダリングターゲット
      */
     MapDarknessFilter.prototype.apply = function(filterManager, input, output) {
-        this._colorFilter.apply(filterManager, input, output);
+        // まず背景をレンダリングする。
+        this._backgroundFilter.apply(filterManager, input, output);
 
         this.uniforms.boxWidth = Graphics.boxWidth;
         this.uniforms.boxHeight = Graphics.boxHeight;
@@ -366,9 +367,9 @@
         minBrightness: {
             get: function() { return this._minBrightness; },
             set: function(value) {
-                if (this._minBrightness !== value) {
-                    this._minBrightness = value;
-                    this.uniforms.minBrightness = value / 255.0;
+                if (this._)
+                if (this._backgroundFilter.brightness !== value) {
+                    this._backgroundFilter.brightness = value;
                 }
             }
         },
