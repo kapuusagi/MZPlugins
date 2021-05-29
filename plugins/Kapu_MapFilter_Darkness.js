@@ -56,7 +56,7 @@
  * 光が届かない場所で、プレイヤーの視界を制限するような仕組みを実現するためのものです。
  * 
  * ■ 使用時の注意
- * なし。
+ * あんまり試していないけれど、光源が多くなると処理が重くなる(当たり前)。
  * 
  * ■ プラグイン開発者向け
  * なし。
@@ -188,6 +188,65 @@
             str: TextManager.traitValueInt
         };
     }
+    //------------------------------------------------------------------------------
+    // BackgroundFilter
+    function DarknessBackgroundFilter() {
+        this.initialize(...arguments);  
+    }
+
+    DarknessBackgroundFilter.prototype = Object.create(PIXI.Filter.prototype);
+    DarknessBackgroundFilter.prototype.constructor = DarknessBackgroundFilter;
+
+    DarknessBackgroundFilter.prototype.initialize = function() {
+        PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
+        this.uniforms.brightness = 0.0;
+        this._brightness = 0;
+
+
+    };
+    Object.defineProperties(DarknessBackgroundFilter.prototype, {
+        brightness: {
+            get: function() { return this._brightness; },
+            set: function(value) {
+                if (this._brightness !== value) {
+                    this._brightness = value;
+                    this.uniforms.brightness = (value / 255.0).clamp(0.0, 1.0);
+                }
+            }
+        },
+    });
+
+    /**
+     * バーテックスシェーダーのソースを得る。
+     * 
+     * @returns {string} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
+     */
+    DarknessBackgroundFilter.prototype._vertexSrc = function() {
+        const src = null;
+        return src;
+    };
+    /**
+     * フラグメントシェーダのソースを得る。
+     * 
+     * @returns {string} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
+     */
+    DarknessBackgroundFilter.prototype._fragmentSrc = function() {
+        const src = 
+                "precision mediump float;" +
+                "" +
+                "uniform sampler2D uSampler;" +
+                "varying vec2 vTextureCoord;" +
+                "uniform float brightness;" +
+                "" +
+                "void main(void){" +
+                "    vec4 smpColor = texture2D(uSampler, vTextureCoord);" +
+                "    vec4 rgba = smpColor * brightness;" +
+                "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, 1.0);" +
+                "}";
+        return src;
+    };    
+    //------------------------------------------------------------------------------
+    // LightEffectFilter
 
     //------------------------------------------------------------------------------
     // MapDarknessFilter
@@ -214,6 +273,9 @@
         this.uniforms.minBrightness = 0.0;
         this._lightSources = [];
         this._minBrightness = 0;
+
+        this._colorFilter = new DarknessBackgroundFilter();
+        this._colorFilter.brightness = 0;
 
         this.time = 0;
     };
@@ -274,6 +336,7 @@
                 "    float a = clamp((1.0 - distance * rate / brightness), 0.0, 1.0) * (1.0 - minBrightness);" +
                 "    vec4 rgba = smpColor * minBrightness + smpColor * a * lightColor / 255.0;" +
                 "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, a);" +
+                // "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, 0.5);" +
                 "}";
         return src;
     };
@@ -285,6 +348,8 @@
      * @param {PIXI.RenderTexture} output 出力レンダリングターゲット
      */
     MapDarknessFilter.prototype.apply = function(filterManager, input, output) {
+        this._colorFilter.apply(filterManager, input, output);
+
         this.uniforms.boxWidth = Graphics.boxWidth;
         this.uniforms.boxHeight = Graphics.boxHeight;
         this.uniforms.time = this.time;
