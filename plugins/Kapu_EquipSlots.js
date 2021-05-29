@@ -173,18 +173,7 @@
         }
     };
     DataManager.addNotetagParserWeapons(_processWeaponNoteTag);
-    //------------------------------------------------------------------------------
-    // Scene_Boot
-    if (subWeaponEquipTypeId) {
-        const _Scene_Boot_start = Scene_Boot.prototype.start;
-        /**
-         * Scene_Bootを開始する。
-         */
-        Scene_Boot.prototype.start = function () {
-            $dataSystem.equipTypes[subWeaponEquipTypeId] = textSubWeaponSlotName;
-            _Scene_Boot_start.call(this);
-        };
-    }
+
     //------------------------------------------------------------------------------
     // Game_Actor
     const _Game_Actor_baseEquipSlots = Game_Actor.prototype.baseEquipSlots;
@@ -236,6 +225,20 @@
         return items;
     };
 
+    const _Game_Actor_equipSlotNameAt = Game_Actor.prototype.equipSlotNameAt;
+    /**
+     * 指定スロット番号のスロット名を得る。
+     * 
+     * @param {number} slotNo スロット番号
+     * @returns {string} スロット名
+     */
+    Game_Actor.prototype.equipSlotNameAt = function(slotNo) {
+        if ((slotNo == this.subWeaponSlotNo()) && this.isNeedsSubWeapon()) {
+            return textSubWeaponSlotName;
+        } else {
+            return _Game_Actor_equipSlotNameAt.call(this, slotNo);
+        }
+    };
     /**
      * 両手装備かどうかを判定する。
      * 

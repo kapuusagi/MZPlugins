@@ -208,11 +208,21 @@
             if (this._equipSlots[slotNo].name) {
                 slotNames.push(this._equipSlots[slotNo].name);
             } else {
-                const etypeId = this.equipSlots()[slotNo];
-                slotNames.push($dataSystem.equipTypes[etypeId]);
+                slotNames.push(this.equipSlotNameAt(slotNo));
             }
         }
         return slotNames;
+    };
+
+    /**
+     * 指定スロット番号のスロット名を得る。
+     * 
+     * @param {number} slotNo スロット番号
+     * @returns {string} スロット名
+     */
+    Game_Actor.prototype.equipSlotNameAt = function(slotNo) {
+        const etypeId = this.equipSlots()[slotNo];
+        return $dataSystem.equipTypes[etypeId];
     };
 
     /**
@@ -474,5 +484,5 @@
      */
     Window_StatusBase.prototype.actorSlotName = function(actor, index) {
         return actor.equipSlotNames()[index];
-    };    
+    };
 })();
