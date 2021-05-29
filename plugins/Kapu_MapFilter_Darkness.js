@@ -316,7 +316,7 @@
                 "    vec2 texturePos = vec2(vTextureCoord.x * boxWidth, vTextureCoord.y * boxHeight);" +
                 "    vec2 sourcePos = vec2(sourcePoint.x, sourcePoint.y);" +
                 "    float distance = distance(sourcePos, texturePos) * (0.95 + 0.1 * sin(" + Math.PI + " * time));" +
-                "    float a = clamp((1.0 - distance / brightness), 0.0, 1.0);" +
+                "    float a = cos(" + Math.PI + " * clamp(distance / brightness, 0.0, 1.0));" +
                 "    vec4 rgba = smpColor * a * lightColor / 255.0;" +
                 "    gl_FragColor = vec4(rgba.x, rgba.y, rgba.z, a);" +
                 "}";
