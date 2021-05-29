@@ -13,6 +13,7 @@
  * @text 操作
  * @desc 操作
  * @type select
+ * @default learn
  * @option 習得する。
  * @value learn
  * @option 忘れる
@@ -28,6 +29,7 @@
  * @text 対象
  * @desc 対象
  * @type select
+ * @default actorId
  * @option 指定したアクター
  * @value actorId
  * @option 変数で指定したアクター
@@ -209,9 +211,8 @@
             }
             obj.learningAbilities = [];
 
-            data.meta = {};
             for (;;) {
-                const match = regExp.exec(data.note);
+                const match = regExp.exec(obj.note);
                 if (match) {
                     const ids = match[1].split(',').map(token => Number(token) || 0);
                     if ((ids.length >= 2) && (ids[0] > 0)) {
@@ -294,12 +295,24 @@
                         this.learnAbility(id);
                         equipAbilities.push($dataArmors[id]);
                     }
-                    equips[slotNo] = 0;
                 }
             }
         }
 
         _Game_Actor_initEquips.call(this, equips);
+    };
+
+    const _Game_Actor_levelUp = Game_Actor.prototype.levelUp;
+    /**
+     * レベルアップ処理をする。
+     */
+    Game_Actor.prototype.levelUp = function() {
+        _Game_Actor_levelUp.call(this);
+        for (const learningAbility of this.currentClass().learningAbilities) {
+            if (learningAbility.level === this._level) {
+                this.learnAbility(learningAbility.abilityId);
+            }
+        }
     };
 
     /**
