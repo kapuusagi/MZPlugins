@@ -308,7 +308,8 @@ function MapFilterManager() {
         for (const entry of this._filters) {
             if (this._globalEnable && entry.active) {
                 if (!filters.includes(entry.instance)) {
-                    filters.push(entry.instance);
+                    // Note: 既存フィルタの前に追加しないと、フェードなどの処理が正しく行われない。
+                    filters.unshift(entry.instance);
                     if (debugEnable) {
                         console.log(pluginName + ":Filter add to map. " + entry.name);
                     }
