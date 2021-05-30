@@ -90,6 +90,7 @@
  * 変更履歴
  * ============================================
  * Version.0.3.0 フィルタ順によっては正しく描画されない不具合を修正した。
+ *               描画範囲外の光源はレンダリングから外すようにした。
  * Version.0.2.0 光源色を設定できるようにした。
  * Version.0.1.0 新規作成
  */
@@ -526,6 +527,19 @@
         return this._lightSourceColor;
     };
 
+    /**
+     * 光源レンダリング位置にあるかどうかを得る。
+     * 
+     * @returns {boolean} 光源レンダリング位置にある場合にはtrue, それ以外はfalse.
+     */
+    Game_Character.prototype.isLightSourceRenderPosition = function() {
+        const x = this.screenX();
+        const y = this.screenY();
+        const brightness = this.lightSourceBrightness();
+        return (((x + brightness) >= 0) && ((x - brightness) <= Graphics.boxWidth)
+                && ((y + brightness) >= 0) && ((y - brightness) <= Graphics.boxHeight));
+    };
+
     //------------------------------------------------------------------------------
     // Game_Event
     const _Game_Event_initMembers = Game_Event.prototype.initMembers;
@@ -653,21 +667,21 @@
             const filter = MapFilterManager.filter(MapFilterManager.FILTER_DARKNESS);
             if (filter) {
                 filter.clearLightSources();
-                if (!$gamePlayer.isTransparent()) {
+                if (!$gamePlayer.isTransparent() && $gamePlayer.isLightSourceRenderPosition()) {
                     filter.addLightSource($gamePlayer.screenX(), $gamePlayer.screenY() - 16, 
                             $gamePlayer.lightSourceBrightness(), $gamePlayer.lightSourceColor());
                 }
                 // 光源追加
                 const events = $gameMap.events();
                 for (const event of events) {
-                    if (!event.isTransparent() && event.lightSourceBrightness() > 0) {
+                    if (!event.isTransparent() && (event.lightSourceBrightness() > 0) && event.isLightSourceRenderPosition()) {
                         filter.addLightSource(event.screenX(), event.screenY() - 24, 
                                 event.lightSourceBrightness(), event.lightSourceColor());
                     }
                 }
                 const vehicles = $gameMap.vehicles();
                 for (const vahicle of vehicles) {
-                    if (!vahicle.isTransparent()) {
+                    if (!vahicle.isTransparent() && vahicle.isLightSourceRenderPosition()) {
                         // 乗り物が表示されていたら光源セット。
                         filter.addLightSource(vahicle.screenX(), vahicle.screenY() - 24,
                                 vahicle.lightSourceBrightness(), vahicle.lightSourceColor());
