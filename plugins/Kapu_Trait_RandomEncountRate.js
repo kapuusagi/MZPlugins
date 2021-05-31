@@ -34,9 +34,9 @@
  * @help 
  * Traitにランダムエンカウント率特性を追加します。
  * ベーシックシステムではマップごとにエンカウント歩数が設定されており、
- * 特定のタイミングでエンカウント歩数が更新されます。
+ * 歩行毎にエンカウント進捗量だけ減算されます。
  * 
- * 本特性はこのエンカウント歩数に作用し、エンカウント率補正特性を実現します。
+ * 本特性はこのエンカウント進捗量に作用し、エンカウント率補正特性を実現します。
  * ランダムエンカウント時のみ有効。
  * パーティー中に本特性を複数所持していた場合、加算合計になります。
  * 
@@ -131,19 +131,16 @@
 
     //------------------------------------------------------------------------------
     // Game_Player
-    const _Game_Player_makeEncounterCount = Game_Player.prototype.makeEncounterCount;
+
+    const _Game_Player_encounterProgressValue =  Game_Player.prototype.encounterProgressValue;
     /**
-     * エンカウントするまでのカウンタを作成する。
+     * エンカウント進捗度を得る。
+     * Note: 歩行毎に _encounterCount を本カウントだけ減算し、0になったらエンカウントする。
      * 
-     * Note: エンカウント数がどんどん減っていき、0になるとエンカウントする仕組み。
+     * @returns {number} エンカウント進捗度
      */
-    Game_Player.prototype.makeEncounterCount = function() {
-        _Game_Player_makeEncounterCount.call(this);
-        const encountRate = $gameParty.randomEncountRate();
-        if (encountRate > 0) {
-            this._encounterCount = Math.floor(this._encounterCount / encountRate);
-        } else {
-            this._encounterCount = Number.MAX_SAFE_INTEGER;
-        }
+    Game_Player.prototype.encounterProgressValue = function() {
+        const value = _Game_Player_encounterProgressValue.call(this);
+        return value * $gameParty.randomEncountRate();
     };
 })();
