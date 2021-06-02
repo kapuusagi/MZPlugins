@@ -326,6 +326,7 @@
     Object.defineProperties(DarknessLightSourceFilter.prototype, {
         /**
          * 光源座標
+         * @constant {number[2]}
          */
         sourcePoint: {
             get: function() { return this.uniforms.sourcePoint; },
@@ -333,6 +334,7 @@
         },
         /**
          * 光源輝度(1～255)
+         * @constant {number}
          */
         brightness: {
             get: function() { return this.uniforms.brightness; },
@@ -342,6 +344,7 @@
          * 光源の色
          * Array<number> [R,G,B,A]
          * 各0～255
+         * @constant {number}
          */
         lightColor: {
             get: function() { return this.uniforms.lightColor; },
@@ -349,6 +352,7 @@
         },
         /**
          * 画面の幅
+         * @constant {number}
          */
         boxWidth: {
             get: function() { return this.uniforms.boxWidth; },
@@ -357,6 +361,7 @@
 
         /**
          * 画面の高さ
+         * @constant {number}
          */
         boxHeight: {
             get: function() { return this.uniforms.boxHeight; },
@@ -365,6 +370,7 @@
 
         /**
          * 時間[sec]
+         * @constant {number}
          */
         time: {
             get: function() { return this.uniforms.time;},
@@ -444,8 +450,12 @@
     };
 
     Object.defineProperties(MapDarknessFilter.prototype, {
+        /**
+         * 輝度(0～255)
+         * @constant {number}
+         */
         minBrightness: {
-            get: function() { return this._minBrightness; },
+            get: function() { return this._backgroundFilter.brightness; },
             set: function(value) {
                 if (this._)
                 if (this._backgroundFilter.brightness !== value) {
@@ -453,6 +463,10 @@
                 }
             }
         },
+        /**
+         * 時間[sec]
+         * @constant {number}
+         */
         time: {
             get: function() { return this._time; },
             set: function(value) { this._time = value; }
