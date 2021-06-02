@@ -20,6 +20,23 @@
  * @default false
  * 
  * 
+ * @command setFilterBrightness
+ * @text 暗闇輝度変更
+ * @desc 暗闇の輝度を変更する。
+ * 
+ * @arg brightness
+ * @text 輝度
+ * @desc 輝度(0～255)。255にすると全表示。0にすると範囲外が真っ暗。
+ * @type number
+ * @default 0
+ * 
+ * @arg duration
+ * @text 変更時間
+ * @desc 変更に要する時間。単位はフレーム数。0にすると即座に適用。
+ * @type number
+ * @default 0
+ * 
+ * 
  * @command changeEventBrightness
  * @text イベントの光源強度変更
  * @desc イベントの光源強度を変更する。（マップを切り替えると設定は消える。切り替えても保持したいならば、ノートタグと変数を使用すること）
@@ -233,6 +250,12 @@
         } else {
             MapFilterManager.deactivate(MapFilterManager.FILTER_DARKNESS);
         }
+    });
+
+    PluginManager.registerCommand(pluginName, "setFilterBrightness", args => {
+        const brightness = Math.round(Number(args.brightness) || 0).clamp(0, 255);
+        const duration = Number(args.duration) || 0;
+        $gameScreen.changeDarknessFilterBrightness(brightness, duration);
     });
 
     PluginManager.registerCommand(pluginName, "changeEventBrightness", args => {
@@ -883,7 +906,98 @@
             return defaultBrightness;
         };
     }
+    //------------------------------------------------------------------------------
+    // Game_Screen
+    const _Game_Screen_clear = Game_Screen.prototype.clear;
+    /**
+     * 各種パラメータを初期化する。
+     */
+    Game_Screen.prototype.clear = function() {
+        _Game_Screen_clear.call(this);
+        this.clearDarkness();
+    };
 
+    /**
+     * 暗闇フィルタ用輝度を設定する。
+     * 
+     * @returns {number} 輝度
+     */
+    Game_Screen.prototype.darknessFilterBrightness = function() {
+        return this._darknessFilterBrightness;
+    };
+
+    /**
+     * 暗闇エフェクトをクリアする。
+     */
+    Game_Screen.prototype.clearDarkness = function() {
+        this._darknessFilterBrightness = 255;
+        this._darknessFilterBrightnessTarget = 255;
+        this._darknessFilterBrightnessDuration = 0;
+    };
+    const _Game_Screen_update = Game_Screen.prototype.update;
+    /**
+     * Game_Screenを更新する。
+     * 
+     * Note: 画面エフェクトの遷移などを処理する。
+     */
+    Game_Screen.prototype.update = function() {
+        _Game_Screen_update.call(this);
+        this.updateDarknessFilterBrightness();
+    };
+
+    /**
+     * 暗闇フィルタの暗闇具合を変更する。
+     * 
+     * @param {number} brightness 輝度(255で全表示、0で黒)
+     * @param {number} duration 遷移に要する時間[フレーム数]。0で即時適用
+     */
+    Game_Screen.prototype.changeDarknessFilterBrightness = function(brightness, duration) {
+        this._darknessFilterBrightnessTarget = brightness;
+        this._darknessFilterBrightnessDuration = duration;
+        if (duration === 0) {
+            this._darknessFilterBrightness = brightness;
+        }        
+    };
+
+    /**
+     * 暗闇フィルタ用輝度パラメータを更新する。
+     */
+    Game_Screen.prototype.updateDarknessFilterBrightness = function() {
+        if (this._darknessFilterBrightnessDuration > 0) {
+            const d = this._darknessFilterBrightnessDuration;
+            this._darknessFilterBrightness = (this._darknessFilterBrightness * (d - 1) + this._darknessFilterBrightnessTarget / d);
+            this._darknessFilterBrightnessDuration--;
+        }
+    };
+
+    //------------------------------------------------------------------------------
+    // Spriteset_Map
+    const _Spriteset_Map_initialize = Spriteset_Map.prototype.initialize;
+    /**
+     * Spriteset_Mapを初期化する。
+     */
+    Spriteset_Map.prototype.initialize = function() {
+        _Spriteset_Map_initialize.call(this);
+        this._darknessFilter = MapFilterManager.filter(MapFilterManager.FILTER_DARKNESS);
+    };
+
+    const _Spriteset_Map_update = Spriteset_Map.prototype.update;
+    /**
+     * マップのスプライトセットを更新する。
+     */
+    Spriteset_Map.prototype.update = function() {
+        _Spriteset_Map_update.call(this);
+        this.updateDarknessFilter();
+    };
+
+    /**
+     * 暗闇フィルタの暗闇の明るさを更新する。
+     */
+    Spriteset_Map.prototype.updateDarknessFilter = function() {
+        if (this._darknessFilter) {
+            this._darknessFilter.minBrightness = $gameScreen.darknessFilterBrightness();
+        }
+    };
     //------------------------------------------------------------------------------
     // MapFilterManager
     const _Scene_Map_updateMain = Scene_Map.prototype.updateMain;
@@ -923,7 +1037,7 @@
     //------------------------------------------------------------------------------
     // MapFilterManager
     MapFilterManager.registerFilter(MapFilterManager.FILTER_DARKNESS, MapDarknessFilter,
-        [ "minBrightness" ] );
+        [ ] );
 
 
 
