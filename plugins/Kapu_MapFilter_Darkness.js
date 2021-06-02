@@ -20,12 +20,73 @@
  * @default false
  * 
  * 
+ * @command changeEventBrightness
+ * @text イベントの光源強度変更
+ * @desc イベントの光源強度を変更する。（マップを切り替えると設定は消える。切り替えても保持したいならば、ノートタグと変数を使用すること）
+ * 
+ * @arg eventId
+ * @text イベントID
+ * @desc イベントID
+ * @type number
+ * @default 0
+ * 
+ * @arg variableId
+ * @text 光源の強さとして使用する変数ID
+ * @desc 光源の強さとして使用する変数ID (マップを切り替えると設定は破棄されることに注意)
+ * @type variableId
+ * @default 0
+ * 
+ * @arg brightness
+ * @text 光源の強さ
+ * @desc 光源の強さ。変数が指定されている場合には変数が優先される。
+ * @type number
+ * @default 0
+ * @min 0
+ * 
+ * 
+ * 
+ * @command changeVehicleBrightness
+ * @text 乗り物光源量設定
+ * @desc 乗り物の光源量をデフォルトから変更する。(光源量は保存される)
+ * 
+ * @arg type
+ * @text 乗り物タイプ
+ * @desc 設定する乗り物のタイプ
+ * @type select
+ * @option 小型船
+ * @value boat
+ * @option 大型船
+ * @value ship
+ * @option 飛行船
+ * @option airship
+ * 
+ * @arg brightnessGetOff
+ * @text 光源の強さ（非乗船時）
+ * @desc 非乗船時、マップに表示されるときの光源の強さ。-1で変更無し。
+ * @type number
+ * @default 0
+ * @min -1
+* 
+ * @arg brightnessGetOn
+ * @text 光源の強さ（非乗船時）
+ * @desc 乗船時、マップに表示されるときの光源の強さ。-1で変更無し。
+ * @type number
+ * @default 0
+ * @min -1
+ * 
+ * @arg immidiately
+ * @text 即座に適用
+ * @desc 光源強度を即座に適用する場合にはtrue,ふわっと切り替わるようにするならfalse
+ * @type boolean
+ * @default false
+ * 
+ * 
+ * 
  * @param defaultBrightness
  * @text 輝度
  * @desc アクター標準時の輝度と、サーチ時のターゲット輝度
  * @type number
  * @default 64
- * 
  * 
  * @param eventSearchAbilityId
  * @text ターゲット探索アビリティID
@@ -50,6 +111,42 @@
  * @desc パーティー光源特性名
  * @type string
  * @default 照明
+ * 
+ * @param brightnessOfBoatGetOff
+ * @text ボートの光源の強さ(非乗船時)
+ * @desc ボートの光源の強さ(非乗船時)
+ * @type number
+ * @default 0
+ * 
+ * @param brightnessOfBoatGetOn
+ * @text ボートの光源の強さ(乗船時)
+ * @desc ボートの光源の強さ(乗船時)
+ * @type number
+ * @default 256
+ * 
+ * @param brightnessOfShipGetOff
+ * @text 船の光源の強さ(非乗船時)
+ * @desc 船の光源の強さ(非乗船時)
+ * @type number
+ * @default 0
+ * 
+ * @param brightnessOfShipGetOn
+ * @text 船の光源の強さ(乗船時)
+ * @desc 船の光源の強さ(乗船時)
+ * @type number
+ * @default 384
+ * 
+ * @param brightnessOfAirshipGetOff
+ * @text 飛行船の光源の強さ(非乗船時)
+ * @desc 飛行船の光源の強さ(非乗船時)
+ * @type number
+ * @default 0
+ * 
+ * @param brightnessOfAirshipGetOn
+ * @text 飛行船の光源の強さ(乗船時)
+ * @desc 飛行船の光源の強さ(乗船時)
+ * @type number
+ * @default 512
  * 
  * @help 
  * プレイヤーと指定したイベントの周囲だけ見えるようにするプラグインです。
@@ -97,7 +194,7 @@
 (() => {
     const pluginName = "Kapu_MapFilter_Darkness";
     const parameters = PluginManager.parameters(pluginName);
-    const defaultBrightness = parameters["defaultBrightness"] || 64;
+    const defaultBrightness = Number(parameters["defaultBrightness"]) || 64;
     
     Game_Party.ABILITY_EVENT_SEARCH = parameters["eventSearchAbilityId"] || 0;
     if (!Game_Party.ABILITY_EVENT_SEARCH) {
@@ -136,6 +233,33 @@
         } else {
             MapFilterManager.deactivate(MapFilterManager.FILTER_DARKNESS);
         }
+    });
+
+    PluginManager.registerCommand(pluginName, "changeEventBrightness", args => {
+        const eventId = Number(args.eventId) || 0;
+        const event = $gameMap.event(eventId);
+        if (event) {
+            const variableId = Number(args.variableId) || 0;
+            const brightness = Number(args.brightness) || 0;
+            const immidiately = (args.immidiately === undefined) ? false : (args.immidiately === "true");
+            event.changeLightSourceBrightness(variableId, brightness, immidiately);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, "changeVehicleBrightness", args => {
+        const type = args.type || "none";
+        const vehicle = $gameMap.vehicle(type);
+        if (vehicle) {
+            const brightnessGetOff = Number(args.brightnessGetOff) || -1;
+            if (brightnessGetOff >= 0) {
+                vehicle.setLightSourceBrightnessGetOff(brightnessGetOff);
+            }
+            const brightnessGetOn = Number(args.brightnessGetOn) || -1;
+            if (brightnessGetOn >= 0) {
+                vehicle.setLightSourceBrightnessGetOn(brightnessGetOn);
+            }
+        }
+
     });
 
     //------------------------------------------------------------------------------
@@ -494,7 +618,9 @@
     };
 
     /**
-     * 光源の強さを得る。
+     * 現在の光源の強さを得る。
+     * 
+     * Note: 現在の光源の強さは、フレーム毎に光源の強さに近づくようになっている。
      * 
      * @returns {number} 光源の強さ
      */
@@ -574,23 +700,25 @@
      */
     Game_Event.prototype.initialize = function(mapId, eventId) {
         _Game_Event_initialize.call(this, mapId, eventId);
+        this.initLightSourceBrightness();
+    };
+
+    /**
+     * 光源を初期化する。
+     */
+    Game_Event.prototype.initLightSourceBrightness = function() {
         const event = this.event();
         if (event.meta.lightSource) {
+            let variableId = 0;
+            let brightness = 0;
             if (event.meta.lightSource.match(/\\v\[(\d+)\]/)) {
-                const variableId = Number(RegExp.$1);
-                this._lightSourceVariableId = RegExp.$1;
-                const brightness = $gameVariables.value(variableId);
-                this.setLightBrightness(brightness, true);
-                this._lightSourceFixedBrightness = 0;
+                variableId = Number(RegExp.$1);
             } else {
-                const brightness = Number(event.meta.lightSource);
-                this._lightSourceVariableId = 0;
-                this.setLightBrightness(brightness, true);
-                this._lightSourceFixedBrightness = brightness;
+                brightness = Number(event.meta.lightSource);
             }
+            this.changeLightSourceBrightness(variableId, brightness, true);
         } else {
-            this._lightSourceVariableId = 0;
-            this._lightSourceFixedBrightness = 0;
+            this.changeLightSourceBrightness(0, 0, true);
         }
         if (event.meta.searchLevel) {
             this._searchLevel = Math.floor(Number(event.meta.searchLevel) || 9999);
@@ -622,6 +750,22 @@
         }
     };
 
+    /**
+     * 光源の強さを設定する。
+     * 
+     * @param {number} variableId 変数ID
+     * @param {number} brightness 輝度
+     * @param {boolean} immidiately 即座に変更する場合にはtrue, それ以外はfalse
+     */
+    Game_Event.prototype.changeLightSourceBrightness = function(variableId, brightness, immidiately) {
+        this._lightSourceVariableId = variableId;
+        this._lightSourceFixedBrightness = brightness;
+        if (immidiately) {
+            const targetBrightness = this.lightSourceTargetBrightness();
+            this.setLightBrightness(targetBrightness);
+        }
+    };
+
     //------------------------------------------------------------------------------
     // Game_Player
     /**
@@ -632,6 +776,77 @@
     Game_Player.prototype.lightSourceTargetBrightness = function() {
         return $gameParty.lightBrightness();
     };
+
+    //------------------------------------------------------------------------------
+    // Game_Vehicle
+    const _Game_Vehicle_initialize = Game_Vehicle.prototype.initialize;
+    /**
+     * Game_Vehicleを初期化する。
+     * 
+     * @param {string} type タイプ("boat", "ship", "airship")
+     */
+    Game_Vehicle.prototype.initialize = function(type) {
+        _Game_Vehicle_initialize.call(this, type);
+        this.initLightSourceBrightness();
+    };
+
+    /**
+     * 光源の強さを初期化する。
+     */
+    Game_Vehicle.prototype.initLightSourceBrightness = function() {
+        let getOffBrightness = 0;
+        let getOnBrightness = 0;
+        switch (this._type) {
+            case "boat":
+                getOffBrightness = Number(parameters["brightnessOfBoatGetOff"]) || 0;
+                getOnBrightness = Number(parameters["brightnessOfBoatGetOn"]) || 256;
+                break;
+            case "ship":
+                getOffBrightness = Number(parameters["brightnessOfShipGetOff"]) || 0;
+                getOnBrightness = Number(parameters["brightnessOfShipGetOn"]) || 384;
+                break;
+            case "airship":
+                getOffBrightness = Number(parameters["brightnessOfAirshipGetOff"]) || 0;
+                getOnBrightness = Number(parameters["brightnessOfAirshipGetOn"]) || 512;
+                break;
+        }
+        this._lightSourceBrightnessGetOff = getOffBrightness;
+        this._lightSourceBrightnessGetOn = getOnBrightness;
+    };
+
+    /**
+     * 光源の強さを得る。
+     * 
+     * @returns {number} 光源の強さ
+     */
+    Game_Vehicle.prototype.lightSourceTargetBrightness = function() {
+        if (this._driving) {
+            return this._lightSourceBrightnessGetOn;
+        } else {
+            return this._lightSourceBrightnessGetOff;
+        }
+    };
+
+    /**
+     * 光源の強さを設定する。
+     * 
+     * @param {number} brightnessGetOff 非乗船時輝度 
+     */
+    Game_Vehicle.prototype.setLightSourceBrightnessGetOff = function(brightnessGetOff) {
+        this._lightSourceBrightnessGetOff = brightnessGetOff;
+    };
+
+    /**
+     * 光源の強さを設定する。
+     * 
+     * @param {number} brightnessGetOn 乗船時輝度
+     */
+     Game_Vehicle.prototype.setLightSourceBrightnessGetOn = function(brightnessGetOn) {
+        this._lightSourceBrightnessGetOn = brightnessGetOn;
+    };
+
+
+
     //------------------------------------------------------------------------------
     // Game_Party
     if (Game_Party.ABILITY_EVENT_SEARCH) {
