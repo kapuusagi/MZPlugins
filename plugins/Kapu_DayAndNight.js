@@ -485,7 +485,7 @@
         this._weather = Game_Map.WEATHER_SUNNY; // 晴れ
         this._weatherPower = 1; // 天候の強さ
         this._weatherEffectRegions = []; // 天候ON/OFF領域ID
-        this._actualWeather = this._weather;
+        this._weatherEnableAtRegion = true; // 領域による天候ON/OFF状態
         this.onTimeRangeEnter();
         this.onWeatherEnter();
         this.applyTimeRangeAndWeatherEffects(true);
@@ -710,7 +710,7 @@
             }
         }
         if (this.isApplyWeatherEffects()) {
-            const weather = weatherEntries[this._actualWeather];
+            const weather = this.currentWeather();
             if (weather) {
                 const brightness = Math.round(brightness * weather.brightness / 255);
                 const type = weather.type;
@@ -730,38 +730,17 @@
         }
     };
 
-
     /**
-     * 適用するべき天候エフェクトIDを得る。
+     * 適用するべき現在の天候を得る。
      * 
-     * @returns {number} 天候エフェクトID
+     * @returns {object} 天候データ
      */
-    Game_Map.prototype.watherEffectId = function() {
-        if (this._weatherEffectRegions.length > 0) {
-            const regionId = $gamePlayer.regionId();
-            if (!this._weatherEffectRegions.includes(regionId)) {
-                return this._weather;
-            } else {
-                return 0;
-            }
+    Game_Map.prototype.currentWeather = function() {
+        if (this._weatherEnableAtRegion) {
+            return weatherEntries[this._weather];
         } else {
-            return this._weather;
+            return weatherEntries[Game_Map.WEATHER_SUNNY];
         }
-    };
-
-    /**
-     * 天候エフェクトを得る。
-     */
-    Game_Map.prototype.weatherEffect = function() {
-        if (this._weatherEffectRegions.length > 0) {
-            const regionId = $gamePlayer.regionId();
-            if (!this._weatherEffectRegions.includes(regionId)) {
-                // 無効は晴れ
-                return weatherEntries[Game_Map.WEATHER_SUNNY];
-            }
-        }
-
-        return ;  
     };
 
     const _Game_Map_refresh = Game_Map.prototype.refresh;
@@ -773,25 +752,27 @@
         this.applyTimeRangeAndWeatherEffects(true);
     };
 
-    //------------------------------------------------------------------------------
-    // Game_Player
+    const _Game_Map_update = Game_Map.prototype.update;
 
-    const _Game_Player_updateNonmoving = Game_Player.prototype.updateNonmoving;
     /**
-     * 移動中でない場合の更新を行う。
+     * Game_Mapを更新する。
      * 
-     * Note: 移動中でないというのは、タイルの位置までの移動中かどうか、を表す。
-     *       例えば右へ2マス移動する場合を考えたとき、右へ1マス移動したところで1回以上呼び出されることになる。
-     * Note: 歩数カウントもここでやる。
-     * 
-     * @param {boolean} wasMoving 移動したかどうか
-     * @param {boolean} sceneActive シーンがアクティブかどうか。
+     * @param {boolean} sceneActive シーンがアクティブかどうか
      */
-    Game_Player.prototype.updateNonmoving = function(wasMoving, sceneActive) {
-        _Game_Player_updateNonmoving.call(this, wasMoving, sceneActive);
-        if (wasMoving) {
-            $gameMap.updateWeatherRegion(this.regionId());
+    Game_Map.prototype.update = function(sceneActive) {
+        _Game_Map_update.call(this, sceneActive);
+        this.updateWeatherRegion();
+    };
+    /**
+     * 領域による天候状態を更新する。
+     */
+    Game_Map.prototype.updateWeatherRegion = function() {
+        const isEnabled = (this._weatherEffectRegions.length > 0)
+                ? this._weatherEffectRegions.includes($gamePlayer.regionId())
+                : true;
+        if (this._weatherEnableAtRegion !== isEnabled) {
+            this._weatherEnableAtRegion = isEnabled;
+            this.applyTimeRangeAndWeatherEffects();
         }
     };
-
 })();
