@@ -604,7 +604,6 @@
         minBrightness: {
             get: function() { return this._backgroundFilter.brightness; },
             set: function(value) {
-                if (this._)
                 if (this._backgroundFilter.brightness !== value) {
                     this._backgroundFilter.brightness = value;
                 }
@@ -1038,7 +1037,7 @@
     // MapFilterManager
     MapFilterManager.registerFilter(MapFilterManager.FILTER_DARKNESS, MapDarknessFilter,
         [ ] );
-
+    MapFilterManager.activate(MapFilterManager.FILTER_DARKNESS);
 
 
 })();
