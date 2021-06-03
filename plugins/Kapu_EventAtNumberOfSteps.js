@@ -8,11 +8,18 @@
  * @text 歩数イベント登録
  * @desc 歩数イベントを登録する。
  * 
+ * @arg id
+ * @text 歩数イベントID
+ * @desc 歩数イベントID
+ * @type number
+ * @default 0
+ * 
  * @arg data
  * @text 歩数イベントデータ
  * @desc 歩数イベントデータ
  * @type struct<StepEvent>
  * @default {"commonEventId":"0","stepCount":"0","isOnce":"false","mapIds":"[]","switchId":"0","isWalk":"false","isInBoat":"false","isInShip":"false","isInAirship":"false"}
+ * 
  * 
  * @command removeEvent
  * @text 歩数イベント削除
@@ -45,6 +52,7 @@
  * @text カウンタ値加算
  * @desc カウンタの値を増減する。0～イベント歩数の範囲を超えることはない。
  * 
+ * 
  * @arg id
  * @text 歩数イベントID
  * @desc 歩数イベントID
@@ -64,6 +72,13 @@
  * @desc 格納する変数のID。
  * @type variable
  * @default 0
+ * 
+ * 
+ * @param initialEvents
+ * @text 初期歩数イベント
+ * @desc ゲームを最初から開始したときに、予めセットする歩数イベント。idは1から順に割り振られる。
+ * @type struct<StepEvent>[]
+ * @default []
  * 
  * @help 
  * 以下の機能を提供する。
@@ -114,7 +129,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 /*~struct~StepEvent:
  *
@@ -124,9 +139,15 @@
  * @type common_event
  * @default 0
  * 
+ * @param stepCountVariableId
+ * @text 歩数条件(変数)
+ * @desc 歩数条件を変数で与えます。イベント登録後、変数の値を変更しても反映されません。
+ * @type variable
+ * @default 0
+ * 
  * @param stepCount
- * @text 歩数
- * @desc 歩数条件
+ * @text 歩数条件(固定値) 
+ * @desc 歩数条件を固定値で与えます。変数指定が無い場合のみ有効。
  * @type number
  * @default 1
  * @min 0
@@ -184,32 +205,48 @@ function Game_StepEvent() {
 
 (() => {
     const pluginName = "Kapu_EventAtNumberOfSteps";
-    // const parameters = PluginManager.parameters(pluginName);
+    const parameters = PluginManager.parameters(pluginName);
 
+    /**
+     * eventにeventDataが保持するパラメータをセットアップする。
+     * 
+     * @param {object} event イベント
+     * @param {object} eventData イベントデータ
+     */
+    const _setupStepEvents = function(event, eventData) {
+        const commonEventId = Number(eventData.commonEventId) || 0;
+        const stepCountVariableId = Number(eventData.stepCountVariableId) || 0;
+        const stepCount = (stepCountVariableId > 0) 
+                ? $gameVariables.value(stepCountVariableId) : (Number(eventData.stepCount) || 0);
+        const isOnce = (eventData.isOnce === undefined)
+                ? false : (eventData.isOnce === "true");
+        const mapIds = JSON.parse(eventData.mapIds).map(str => Number(str) || 0);
+        const switchId = Number(eventData.switchId);
+        const isWalk = (eventData.isWalk === undefined) ? false : (eventData.isWalk === "true");
+        const isInBoat = (eventData.isInBoat === undefined) ? false : (eventData.isInBoat === "true");
+        const isInShip = (eventData.isInShip === undefined) ? false : (eventData.isInShip === "true");
+        const isInAirship = (eventData.isInAirship === undefined) ? false : (eventData.isInAirship === "true");
+        event.setup(commonEventId, stepCount, isOnce);
+        event.setMapIds(mapIds);
+        event.setSwitchId(switchId);
+        event.setWalk(isWalk);
+        event.setInBoat(isInBoat);
+        event.setInShip(isInShip);
+        event.setInAirship(isInAirship);
+    };
 
     PluginManager.registerCommand(pluginName, "registerEvent", args => {
         const id = Number(args.id) || 0;
         if ((id > 0) && args.data) {
-            const commonEventId = Number(args.data.commonEventId) || 0;
-            const stepCount = Number(args.data.stepCount) || 0;
-            const isOnce = (args.data.isOnce === undefined)
-                    ? false : (args.data.isOnce === "true");
-            const mapIds = JSON.parse(args.data.mapIds).map(str => Number(str) || 0);
-            const switchId = Number(args.data.switchId);
-            const isWalk = (args.data.isWalk === undefined) ? false : (args.data.isWalk === "true");
-            const isInBoat = (args.data.isInBoat === undefined) ? false : (args.data.isInBoat === "true");
-            const isInShip = (args.data.isInShip === undefined) ? false : (args.data.isInShip === "true");
-            const isInAirship = (args.data.isInAirship === undefined) ? false : (args.data.isInAirship === "true");
-
-            const event = $gamePlayer.stepEvent(id, false);
-            if (event) {
-                event.setup(commonEventId, stepCount, isOnce);
-                event.setMapIds(mapIds);
-                event.setSwitchId(switchId);
-                event.setWalk(isWalk);
-                event.setInBoat(isInBoat);
-                event.setInShip(isInShip);
-                event.setInAirship(isInAirship);
+            try {
+                const event = $gamePlayer.stepEvent(id, false);
+                if (event) {
+                    const eventData = JSON.parse(args.data);
+                    _setupStepEvents(event, eventData);
+                }
+            }
+            catch (e) {
+                console.error(e);
             }
         }
     });
@@ -255,6 +292,7 @@ function Game_StepEvent() {
         this._id = id;
         this._stepCount = 0; // 現在の歩数
         this._commonEventId = 0;
+        this._commonEventReserved = false; // コモンイベントを呼び出したかどうか
         this._isOnce = false;
         this.clearCondition();
     };
@@ -311,7 +349,7 @@ function Game_StepEvent() {
     Game_StepEvent.prototype.setup = function(commonEventId, stepCount, isOnce) {
         this.clearCondition();
         this._commonEventId = commonEventId;
-        this._stepCount = stepCount;
+        this._condition.stepCount = stepCount;
         this._isOnce = isOnce;
         this.resetCounter();
     };
@@ -320,6 +358,7 @@ function Game_StepEvent() {
      * カウンターをリセットする。
      */
     Game_StepEvent.prototype.resetCounter = function() {
+        this._commonEventReserved = false;
         this._stepCount = 0;
     };
 
@@ -398,15 +437,21 @@ function Game_StepEvent() {
      */
     Game_StepEvent.prototype.update = function() {
         if (this.isValid() && this.meetsStepCondition()) {
-            this._stepCount++;
-            if (this._stepCount >= this._condition.stepCount) {
-                $gameTemp.reserveCommonEvent(this._commonEventId);
+            if (!this._commonEventReserved) {
+                this._stepCount++;
+                if (this._stepCount >= this._condition.stepCount) {
+                    $gameTemp.reserveCommonEvent(this._commonEventId);
+                    this._commonEventReserved = true;
+                    if (!this._isOnce) {
+                        this.resetCounter();
+                    }
+                }
+            } else {
                 if (this._isOnce) {
                     this.clearCondition();
                     this._commonEventId = 0;
                     this._isOnce = false;
                 }
-                this.resetCounter();
             }
         }
     };
@@ -431,16 +476,33 @@ function Game_StepEvent() {
             return false; // マップIDが指定されたものでない。
         } else if (condition.switchId && !$gameSwitches.value(commonEvent.switchId)) {
             return false; // スイッチIDが指定されており、該当スイッチがOFF
-        } else if (condition.isWalk && $gamePlayer.isInVehicle()) {
-            return false; // 歩行中が指定されていて、何らかの乗り物に乗っている。
-        } else if (condition.isInBoat && !$gamePlayer.isInBoat()) {
-            return false; // 小型船乗船中が指定されていて、小型船に乗船中でない。
-        } else if (condition.isInShip && !$gamePlayer.isInShip()) {
-            return false; // 船乗船中が指定されていて、船に乗船中でない。
-        } else if (condition.isInAirship && $gamePlayer.isInAirship()) {
-            return false; // 飛行船乗船中が指定されていて、飛行船に乗船中でない。
+        } else if (!this.meetsMoveTypeCondition()) {
+            return false; // 移動タイプが一致しない。
+        } else {
+            return true;
         }
-        return true;
+    }
+    /**
+     * 移動タイプによる歩数加算条件を満たすかどうかを取得する。
+     * 
+     * @returns {boolean} 条件を満たす場合にはtrue, それ以外はfalse.
+     */
+    Game_StepEvent.prototype.meetsMoveTypeCondition = function() {
+        const condition = this._condition;
+        if (condition.isWalk || condition.isInBoat || condition.isInShip || condition.isInAirship) {
+            // いずれかの条件がセットされている。
+            if ((condition.isWalk && !$gamePlayer.isInVehicle())
+                    || (condition.isInBoat && $gamePlayer.isInBoat())
+                    || (condition.isInShip && $gamePlayer.isInShip())
+                    || (condition.isInAirship && $gamePlayer.isInAirship())) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            // いずれの条件もセットされていない。
+            return true;
+        }
     };
 
     //------------------------------------------------------------------------------
@@ -454,7 +516,30 @@ function Game_StepEvent() {
      */
     Game_Player.prototype.initMembers = function() {
         _Game_Player_initMembers.call(this);
+        this.initStepEvents();
+    };
+
+    /**
+     * 歩数イベントを初期化する。
+     * 
+     * Note: プラグインパラメータで指定された歩数イベントもセットされる。
+     */
+    Game_Player.prototype.initStepEvents = function() {
         this._stepEvents = [];
+
+        try {
+            const eventEntries = JSON.parse(parameters["initialEvents"]).map(str => JSON.parse(str));
+            for (let i = 0; i < eventEntries.length; i++) {
+                const eventData = eventEntries[i];
+                const id = i + 1;
+                const event = this.stepEvent(id, false);
+                _setupStepEvents(event, eventData);
+            }
+            _setupStepEvents
+        }
+        catch (e) {
+            console.error(e);
+        }
     };
 
     /**
