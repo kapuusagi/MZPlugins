@@ -159,7 +159,47 @@
  * @type variable
  * @default 0
  * 
+ * @param startTimeRangeEnable
+ * @text 開始時時間帯機能有効
+ * @desc ニューゲーム時に時間帯機能を有効にする場合にはtrue.
+ * @type boolean
+ * @default false
  * 
+ * @param initialTimeRange
+ * @text 開始時時間帯
+ * @desc ニューゲーム時、最初に設定されている時間帯
+ * @type select
+ * @default 2
+ * @option 朝
+ * @value 1
+ * @option 昼
+ * @value 2
+ * @option 夕方
+ * @value 3
+ * @option 夜
+ * @value 4
+ * @option 深夜
+ * @value 5
+ * 
+ * @param startWeatherEnable
+ * @text 開始時天候機能有効
+ * @desc ニューゲーム時に天候機能を有効にする場合にはtrue.
+ * @type boolean
+ * @default false
+ * 
+ * @param initialWeather
+ * @text 開始時天候
+ * @desc ニューゲーム時、最初に設定されている天候
+ * @type select
+ * @default 1
+ * @option 晴れ
+ * @value 1
+ * @option 雨
+ * @value 2
+ * @option 嵐
+ * @value 3
+ * @option 雪
+ * @value 4
  * 
  * @help 
  * 昼と夜機能を実現するためのプラグイン。
@@ -344,10 +384,27 @@
 
 (() => {
     const pluginName = "Kapu_TimeRangeAndWeather";
+
+    Game_Map.TIMERANGE_MORNING = 1; // 朝
+    Game_Map.TIMERANGE_NOON = 2; // 昼
+    Game_Map.TIMERANGE_EVENING = 3; // 夕方
+    Game_Map.TIMERANGE_NIGHT = 4; // 夜
+    Game_Map.TIMERANGE_MIDNIGHT = 5; // 深夜
+
+    Game_Map.WEATHER_SUNNY = 1; // 晴れ(天候エフェクト"none")
+    Game_Map.WEATHER_RAIN = 2; // 雨(天候エフェクト"rain"")
+    Game_Map.WEATHER_STORM = 3; // 嵐(天候エフェクト"storm")
+    Game_Map.WEATHER_SNOW = 4; // 雪(天候エフェクト"snow"")
+
     const parameters = PluginManager.parameters(pluginName);
     const storeTimeRangeVariableId = Number(parameters["storeTimeRangeVariableId"]) || 0;
     const storeWeatherVariableId = Number(parameters["storeWeatherVariableId"] || 0);
-    const timeRangeEntries = [ null ];
+    const startTimeRangeEnable = (parameters["startTimeRangeEnable"] === undefined)
+            ? false : (parameters["startTimeRangeEnable"] === "true");
+    const initialTimeRange = Number(parameters["initialTimeRange"]) || Game_Map.TIMERANGE_NOON;
+    const startWeatherEnable = (parameters["startWeatherEnable"] === undefined)
+            ? false : (parameters["startWeatherEnable"] === "true");
+    const initialWeather = Number(parameters["initialWeather"]) || Game_Map.WEATHER_SUNNY;
 
     /**
      * 時間帯データを分析する。
@@ -394,14 +451,13 @@
             };
         }
     };
-   
-    timeRangeEntries[1].push( _parseTimeRangeData(1, parameters["morning"] || "{}"));
-    timeRangeEntries[2].push( _parseTimeRangeData(2, parameters["noon"] || "{}"));
-    timeRangeEntries[3].push( _parseTimeRangeData(3, parameters["evening"] || "{}"));
-    timeRangeEntries[4].push( _parseTimeRangeData(4, parameters["night"] || "{}"));
-    timeRangeEntries[5].push( _parseTimeRangeData(5, parameters["midNight"] || "{}"));
+    const timeRangeEntries = [ null ];
+    timeRangeEntries[1] = _parseTimeRangeData(1, parameters["morning"] || "{}");
+    timeRangeEntries[2] = _parseTimeRangeData(2, parameters["noon"] || "{}");
+    timeRangeEntries[3] = _parseTimeRangeData(3, parameters["evening"] || "{}");
+    timeRangeEntries[4] = _parseTimeRangeData(4, parameters["night"] || "{}");
+    timeRangeEntries[5] = _parseTimeRangeData(5, parameters["midNight"] || "{}");
 
-    const weatherEntries = [ null, ];
     /**
      * 時間帯データを分析する。
      * 
@@ -451,6 +507,7 @@
         }
     };
 
+    const weatherEntries = [ null, ];
     weatherEntries.push(_parseWeatherData(1, "none", parameters["sunny"] || "{}"));
     weatherEntries.push(_parseWeatherData(2, "rain", parameters["rain"] || "{}"));
     weatherEntries.push(_parseWeatherData(3, "storm", parameters["storm"] || "{}"));
@@ -529,18 +586,32 @@
         }
     };
     //------------------------------------------------------------------------------
+    // DataManager
+    const _DataManager_setupNewGame = DataManager.setupNewGame;
+    /**
+     * New Gameをセットアップする。
+     */
+    DataManager.setupNewGame = function() {
+        _DataManager_setupNewGame.call(this);
+        // 設定されているスイッチ状態を初期化する。
+        const timeRange = timeRangeEntries[initialTimeRange];
+        if (timeRange && (timeRange.onSwitchId > 0)) {
+            $gameSwitches.setValue(timeRange.onSwitchId, true);
+        }
+        if (storeTimeRangeVariableId > 0) {
+            $gameVariables.setValue(storeTimeRangeVariableId, initialTimeRange)
+        }
+        const weather = weatherEntries[initialWeather];
+        if (weather && (weather.onSwitchId > 0)) {
+            $gameSwitches.setValue(weather.onSwitchId, true);
+        }
+        if (storeWeatherVariableId > 0) {
+            $gameVariables.setValue(storeWeatherVariableId, initialWeather);
+        }
+    };
+    //------------------------------------------------------------------------------
     // Game_Map
     //
-    Game_Map.TIMERANGE_MORNING = 1; // 朝
-    Game_Map.TIMERANGE_NOON = 2; // 昼
-    Game_Map.TIMERANGE_EVENING = 3; // 夕方
-    Game_Map.TIMERANGE_NIGHT = 4; // 夜
-    Game_Map.TIMERANGE_MIDNIGHT = 5; // 深夜
-
-    Game_Map.WEATHER_SUNNY = 1; // 晴れ(天候エフェクト"none")
-    Game_Map.WEATHER_RAIN = 2; // 雨(天候エフェクト"rain"")
-    Game_Map.WEATHER_STORM = 3; // 嵐(天候エフェクト"storm")
-    Game_Map.WEATHER_SNOW = 4; // 雪(天候エフェクト"snow"")
 
     const _Game_Map_initialize = Game_Map.prototype.initialize;
     /**
@@ -549,17 +620,14 @@
     Game_Map.prototype.initialize = function() {
         _Game_Map_initialize.call(this);
         this._isMapTimeRangeEnabled = true; // マップのノートタグによってON/OFFされるフラグ
-        this._isTimeRangeEnabled = true; // システム全体のコントロール
+        this._isTimeRangeEnabled = startTimeRangeEnable; // システム全体のコントロール
         this._isMapWeatherEnabled = true;// マップのノートタグによってON/OFFされるフラグ
-        this._isWeatherEnabled = true; // システム全体のコントロール
-        this._timeRange = Game_Map.TIMERANGE_NOON; // 日中
-        this._weather = Game_Map.WEATHER_SUNNY; // 晴れ
+        this._isWeatherEnabled = startWeatherEnable; // システム全体のコントロール
+        this._timeRange = initialTimeRange;
+        this._weather = initialWeather;
         this._weatherPower = 1; // 天候の強さ
         this._weatherEffectRegions = []; // 天候ON/OFF領域ID
         this._weatherEnableAtRegion = true; // 領域による天候ON/OFF状態
-        this.onTimeRangeEnter();
-        this.onWeatherEnter();
-        this.applyTimeRangeAndWeatherEffects(0);
     };
 
     /**
