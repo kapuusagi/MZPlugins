@@ -189,17 +189,12 @@
  * ・「天候」をプラグインパラメータで指定した変数に格納することができる。
  * 
  * 歩数で昼夜を切り替えたい場合には、EventAtNumberOfStepsで時間帯変更イベントを呼び出すか、
- * 補助プラグインDayAndNightByStepsを導入する。
- * 
- * 
+ * 補助プラグインを導入する。
  * 
  * ■ 使用時の注意
  * Kapu_MapFilter及びKapu_MapFilter_Darknessを使用します。
  * MapFilter_DarknessはON/OFFしないこと。OFFすると、暗闇状態が正常に反映されなくなります。
- * 
- * 
  * 画面の天候エフェクト/画面のトーン変更と競合します。
- * 
  * 
  * これはプラグインを使わなくてもインタプリタで実現できそう。というかカスタマイズしたいならインタプリタでゴリゴリ書いた方がいい。
  * 
@@ -324,7 +319,7 @@
  */
 
 (() => {
-    const pluginName = "Kapu_DayAndNight";
+    const pluginName = "Kapu_TimeRangeAndWeather";
     const parameters = PluginManager.parameters(pluginName);
     const storeTimeRangeVariableId = Number(parameters["storeTimeRangeVariableId"]) || 0;
     const storeWeatherVariableId = Number(parameters["storeWeatherVariableId"] || 0);
