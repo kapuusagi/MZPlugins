@@ -92,7 +92,7 @@
  * @default 120
  * 
  * 
- * @param moning
+ * @param morning
  * @text 朝データ
  * @desc 朝データ
  * @type struct<TimeRangeData>
@@ -200,7 +200,31 @@
  * 
  * 
  * ■ プラグイン開発者向け
+ * 時間帯を表す以下の定数を追加します。
+ *  Game_Map.TIMERANGE_MORNING   朝
+ *  Game_Map.TIMERANGE_NOON     昼
+ *  Game_Map.TIMERANGE_EVENING  夕方
+ *  Game_Map.TIMERANGE_NIGHT    夜
+ *  Game_Map.TIMERANGE_MIDNIGHT 深夜
  * 
+ * 時間帯を変更するには
+ * $gameMap.changeTimeRange(timeRange:number, duration:number) : void
+ *    timeRange : 変更する時間帯
+ *    duration : 変更にかける時間
+ * を使用します。
+ * 
+ * 天候を表す以下の定数を追加します。
+ *  Game_Map.WEATHER_SUNNY  晴れ(天候エフェクト"none")
+ *  Game_Map.WEATHER_RAIN   雨(天候エフェクト"rain"")
+ *  Game_Map.WEATHER_STORM  嵐(天候エフェクト"storm")
+ *  Game_Map.WEATHER_SNOW   雪(天候エフェクト"snow"")
+ * 
+ * 天候を変更するには
+ * $gameMap.changeWeather(weather:number, power:number, duration:number) : void
+ *    weather : 変更する天気
+ *    power : 天気の強さ
+ *    duration : 変更にかける時間
+ * を使用します。
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -371,7 +395,7 @@
         }
     };
    
-    timeRangeEntries[1].push( _parseTimeRangeData(1, parameters["moning"] || "{}"));
+    timeRangeEntries[1].push( _parseTimeRangeData(1, parameters["morning"] || "{}"));
     timeRangeEntries[2].push( _parseTimeRangeData(2, parameters["noon"] || "{}"));
     timeRangeEntries[3].push( _parseTimeRangeData(3, parameters["evening"] || "{}"));
     timeRangeEntries[4].push( _parseTimeRangeData(4, parameters["night"] || "{}"));
@@ -507,7 +531,7 @@
     //------------------------------------------------------------------------------
     // Game_Map
     //
-    Game_Map.TIMERANGE_MONING = 1; // 朝
+    Game_Map.TIMERANGE_MORNING = 1; // 朝
     Game_Map.TIMERANGE_NOON = 2; // 昼
     Game_Map.TIMERANGE_EVENING = 3; // 夕方
     Game_Map.TIMERANGE_NIGHT = 4; // 夜
@@ -516,7 +540,7 @@
     Game_Map.WEATHER_SUNNY = 1; // 晴れ(天候エフェクト"none")
     Game_Map.WEATHER_RAIN = 2; // 雨(天候エフェクト"rain"")
     Game_Map.WEATHER_STORM = 3; // 嵐(天候エフェクト"storm")
-    Game_Map.WEATHER_SNOW = 4; // 天候(天候エフェクト"snow"")
+    Game_Map.WEATHER_SNOW = 4; // 雪(天候エフェクト"snow"")
 
     const _Game_Map_initialize = Game_Map.prototype.initialize;
     /**
@@ -805,24 +829,15 @@
         this.applyTimeRangeAndWeatherEffects(0);
     };
 
-    const _Game_Map_update = Game_Map.prototype.update;
 
     /**
-     * Game_Mapを更新する。
-     * 
-     * @param {boolean} sceneActive シーンがアクティブかどうか
-     */
-    Game_Map.prototype.update = function(sceneActive) {
-        _Game_Map_update.call(this, sceneActive);
-        this.updateWeatherRegion();
-    };
-    /**
      * 領域による天候状態を更新する。
+     * 
+     * @param {number} regionId 領域ID
      */
-    Game_Map.prototype.updateWeatherRegion = function() {
+    Game_Map.prototype.setWeatherRegion = function(regionId) {
         const isEnabled = (this._weatherEffectRegions.length > 0)
-                ? this._weatherEffectRegions.includes($gamePlayer.regionId())
-                : true;
+                ? this._weatherEffectRegions.includes(regionId) : true;
         if (this._weatherEnableAtRegion !== isEnabled) {
             this._weatherEnableAtRegion = isEnabled;
             this.applyTimeRangeAndWeatherEffects(0);
@@ -960,6 +975,16 @@
         } else {
             return true;
         }
+    };
+    //------------------------------------------------------------------------------
+    // Game_Player
+    const _Game_Player_onRegionChanged = Game_Player.prototype.onRegionChanged;
+    /**
+     * プレイヤーのリージョンが変わったときの処理を行う。
+     */
+    Game_Player.prototype.onRegionChanged = function() {
+        _Game_Player_onRegionChanged.call(this);
+        $gameMap.setWeatherRegion(this.regionId());
     };
     //------------------------------------------------------------------------------
     // Game_Enemy

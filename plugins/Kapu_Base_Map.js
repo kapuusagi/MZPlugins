@@ -90,6 +90,7 @@
     const encounterProgressValueBush = Number(parameters["encounterProgressValueBush"]) || 0;
     //------------------------------------------------------------------------------
     // Game_Map
+
     /**
      * マップの基本不意打ち率を得る。
      * 
@@ -159,8 +160,49 @@
         return true;
     };
 
+
+
+
     //------------------------------------------------------------------------------
     // Game_Player
+    const _Game_Player_initMembers = Game_Player.prototype.initMembers;
+    /**
+     * メンバーを初期化する。
+     * 
+     * Note: 基底クラスのコンストラクタから呼び出される。
+     */
+    Game_Player.prototype.initMembers = function() {
+        _Game_Player_initMembers.call(this);
+        this._prevRegionId = 0;
+        this._prevMapId = 0;
+    };
+
+    const _Game_Player_update = Game_Player.prototype.update;
+    /**
+     * Game_Playerオブジェクトを更新する。
+     * 
+     * @param {boolean} sceneActive シーンがアクティブな場合にはtrue, それ以外はfalse
+     */
+    Game_Player.prototype.update = function(sceneActive) {
+        _Game_Player_update.call(this, sceneActive);
+        if (sceneActive) {
+            const regionId = this.regionId();
+            const mapId = $gameMap.mapId();
+            if ((regionId !== this._prevRegionId) || (mapId !== this._prevMapId)) {
+                this.onRegionChanged();
+                this._prevRegionId = regionId;
+                this._prevMapId = mapId;
+            }
+        }
+    };
+
+    /**
+     * プレイヤーのリージョンが変わったときの処理を行う。
+     */
+    Game_Player.prototype.onRegionChanged = function() {
+
+    };
+
     /**
      * エンカウント進捗度を得る。
      * Note: 歩行毎に _encounterCount を本カウントだけ減算し、0になったらエンカウントする。
@@ -180,8 +222,6 @@
         return value;
     };
 
-    //------------------------------------------------------------------------------
-    // Game_Player
     const _Game_Player_meetsEncounterConditions = Game_Player.prototype.meetsEncounterConditions;
     /**
      * encounterで指定するうグループにエンカウントするかどうかを得る。
@@ -192,7 +232,7 @@
     Game_Player.prototype.meetsEncounterConditions = function(encounter) {
         return _Game_Player_meetsEncounterConditions.call(this, encounter)
             && $gameMap.testEncountCondition(encounter.troopId)
-    };    
+    };
     //------------------------------------------------------------------------------
     // Game_Party
     /**
