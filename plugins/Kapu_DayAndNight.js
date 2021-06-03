@@ -3,6 +3,8 @@
  * @plugindesc 昼夜機能プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Base_Map
+ * @orderAfter Kapu_Base_Map
  * 
  * @command changeEffectEnable
  * @text エフェクトON/OFF変更
@@ -165,12 +167,12 @@
  * 1. 時間帯機能
  * ・朝、昼、夕方 夜、深夜の「時間帯」を持たせることができる。
  *   時間帯はマップエフェクトを主としたものになる。
- *   (TODO) 「時間帯」はプラグインコマンドを使用するか、補助プラグインにより切り替えることができる。
- *          表示を瞬間的に切り替える/フェードさせるの2つを選択できる。
+ * ・「時間帯」はプラグインコマンドを使用するか、補助プラグインにより切り替えることができる。
  * ・「時間帯」に切り替わった時、指定したスイッチをONにすることができる。
  * ・「時間帯」から切り替わった時、指定したスイッチをOFFにすることができる。
- *   (TODO) 「時間帯」にランダムエンカウント率を絡めることができる。
- *   (TODO) 「時間帯」にランダムエンカウント時のエネミー出現ON/OFFを絡めることができる。
+ *   「時間帯」にランダムエンカウント率を絡めることができる。
+ * ・「時間帯」に不意打ち率補正値を入れることができる。
+ *   「時間帯」にランダムエンカウント時のエネミー出現ON/OFFを絡めることができる。
  * ・マップのノートタグにて、昼夜のエフェクトをかけるかどうかを設定することができる。
  * ・時間帯をプラグインパラメータで指定した変数に格納することができる。
  * 
@@ -179,8 +181,9 @@
  *   切り替えはプラグインコマンドを使用するか、補助プラグインにより切り替える。
  * ・天候状態に切り替わった時、指定したスイッチをONにすることが出来る。
  * ・天候状態から切り替わった時、指定したスイッチをOFFにすることが出来る。
- *   (TODO) 「時間帯」にランダムエンカウント率を絡めることができる。
- *   (TODO) 「時間帯」にランダムエンカウント時のエネミー出現ON/OFFを絡めることができる。
+ * ・「天候」に不意打ち率補正値を入れることができる。
+ *   「天候」にランダムエンカウント率を絡めることができる。
+ *   「天候」にランダムエンカウント時のエネミー出現ON/OFFを絡めることができる。
  * ・マップのノートタグにて、天候エフェクトをかけるかどうかを設定することができる。
  *   マップのノートタグにて天候エフェクトをかけるかどうかを設定することができる。
  * ・「天候」をプラグインパラメータで指定した変数に格納することができる。
@@ -219,6 +222,14 @@
  *   <weatherEffect:id#,id#,...>
  *     このマップのid#で指定された領域にいるとき、天候状態を表す画面効果を有効にする。
  * 
+ * エネミー
+ *   <encountTimeRanges:id#,id#,...>
+ *     エンカウントする時間帯をid#,id#,..で指定した時間帯に制限する。
+ *     マップのノートタグでtimeRangeEffectが指定されている場合のみ判定する。
+ *   <encountWeathers:id#,id#,...>
+ *     エンカウントする時間帯をid#,id#,...で指定した時間帯に制限する。
+ *     マップのノートタグでweatherEffectが指定されている場合のみ判定する。
+ * 
  * ============================================
  * 変更履歴
  * ============================================
@@ -255,14 +266,14 @@
  *
  * @param encountRate
  * @text エンカウントレート
- * @desc 時間帯に適用するエンカウントレート。1.0で変更無し。
+ * @desc 時間帯に適用するエンカウントレート。1.0で変更無し。1未満でエンカウント率減少。
  * @type number
  * @decimals 2
  * @min 0.00
  * 
  * @param surpriseRate
- * @text 急襲レート
- * @desc 時間帯に適用する急襲レート。1.0で変更無し。
+ * @text 不意打ち率
+ * @desc 時間帯に適用する急襲レート。1.0で変更無し。1未満で不意打ち率減少。
  * @type number
  * @decimals 2
  * @min 0.00
@@ -305,7 +316,7 @@
  * @min 0.00
  * 
  * @param surpriseRate
- * @text 急襲レート
+ * @text 不意打ち率
  * @desc 時間帯に適用する急襲レート。1.0で変更無し。
  * @type number
  * @decimals 2
@@ -336,6 +347,8 @@
             while (colorTone.length < 4) {
                 colorTone.push(255);
             }
+            const encountRate = Math.max(0, Number(obj.encountRate) || 1);
+            const surpriseRate = Math.max(0, Number(obj.surpriseRate) || 1);
 
             return {
                 id:id,
@@ -343,7 +356,9 @@
                 onSwitchId:onSwitchId,
                 offSwitchId:offSwitchId,
                 brightness:brightness,
-                colorTone:colorTone
+                colorTone:colorTone,
+                encountRate:encountRate,
+                surpriseRate:surpriseRate
             };
         }
         catch (e) {
@@ -354,7 +369,9 @@
                 onSwitchId:0,
                 offSwitchId:0,
                 brightness:255,
-                colorTone:[255,255,255,255]
+                colorTone:[255,255,255,255],
+                encountRate:1,
+                surpriseRate:1
             };
         }
     };
@@ -384,6 +401,8 @@
             while (colorTone.length < 4) {
                 colorTone.push(255);
             }
+            const encountRate = Math.max(0, Number(obj.encountRate) || 1);
+            const surpriseRate = Math.max(0, Number(obj.surpriseRate) || 1);
 
             return {
                 id:id,
@@ -392,7 +411,9 @@
                 onSwitchId:onSwitchId,
                 offSwitchId:offSwitchId,
                 brightness:brightness,
-                colorTone:colorTone
+                colorTone:colorTone,
+                encountRate:encountRate,
+                surpriseRate:surpriseRate
             };
         }
         catch (e) {
@@ -404,7 +425,9 @@
                 onSwitchId:0,
                 offSwitchId:0,
                 brightness:255,
-                colorTone:[255,255,255,255]
+                colorTone:[255,255,255,255],
+                encountRate:1,
+                surpriseRate:1
             };
         }
     };
@@ -447,7 +470,45 @@
         $gameMap.setWeatherEnable(isWeatherEnabled);
     });
 
-
+    /**
+     * エネミーデータの遭遇時間帯データを初期化する。
+     * 
+     * Note: 予めノートタグを処理する方法も考えたが、
+     *       起動時のパフォーマンス低下を下げるため、遅延評価で行うこととした。
+     *       遭遇判定処理で一度計算したら、後はキャッシュされる。
+     * 
+     * @param {DataEnemy} enemy エネミー
+     */
+    const _initEnemyTimeRanges = function(enemy) {
+        enemy.encountTimeRanges = [];
+        if (enemy.meta.encountTimeRanges) {
+            const timeRanges = enemy.meta.encountTimeRanges.split(",").map(token => Number(token) || 0);
+            for (const timeRange of timeRanges) {
+                if ((timeRange > 0) && !enemy.encountTimeRanges.includes(timeRange)) {
+                    enemy.encountTimeRanges.push(timeRange);
+                }
+            }
+        }
+    };
+    /**
+     * エネミーデータの遭遇天候データを初期化する。
+     * 
+     * Note: 予めノートタグを処理する方法も考えたが、
+     *       起動時のパフォーマンス低下を下げるため、遅延評価で行うこととした。
+     *       遭遇判定処理で一度計算したら、後はキャッシュされる。
+     * 
+     */
+    const _initEnemyWeathers = function(enemy) {
+        enemy.encountWeathers = [];
+        if (enemy.meta.encountWeathers) {
+            const weathers = enemy.meta.encountWeathers.split(",").map(token => Number(token) || 0);
+            for (const weather of weathers) {
+                if ((weather > 0) && !enemy.encountWeathers.includes(weather)) {
+                    enemy.encountWeathers.push(weather);
+                }
+            }
+        }
+    };
     //------------------------------------------------------------------------------
     // Game_Map
     //
@@ -575,8 +636,6 @@
         }
     };
 
-
-
     /**
      * 時間帯エフェクトを適用するかどうかを得る。
      * 
@@ -683,7 +742,6 @@
         }
     };
 
-
     /**
      * 時間帯と天候エフェクトを反映させる。
      * 
@@ -692,7 +750,7 @@
     Game_Map.prototype.applyTimeRangeAndWeatherEffects = function(duration) {
         let colorTone = null;
         if (this.isApplyTimeRangeEffects()) {
-            const timeRange = timeRangeEntries[this._timeRange];
+            const timeRange = this.currentTimeRange();
             if (timeRange) {
                 const brightness = timeRange.brightness;
                 colorTone = timeRange.colorTone.clone();
@@ -718,6 +776,15 @@
         if (colorTone) {
             $gameScreen.startTint(colorTone, duration);
         }
+    };
+
+    /**
+     * 現在の時間帯データを得る。
+     * 
+     * @returns {object} 時間帯データ
+     */
+    Game_Map.prototype.currentTimeRange = function() {
+        return timeRangeEntries[this._timeRange];
     };
 
     /**
@@ -763,6 +830,156 @@
         if (this._weatherEnableAtRegion !== isEnabled) {
             this._weatherEnableAtRegion = isEnabled;
             this.applyTimeRangeAndWeatherEffects(0);
+        }
+    };
+
+    const _Game_Map_rateSurprise = Game_Map.prototype.rateSurprise;
+    /**
+     * マップの基本不意打ち率を得る。
+     * 
+     * @returns {number} 不意打ち率
+     */
+    Game_Map.prototype.rateSurprise = function() {
+        return _Game_Map_rateSurprise.call(this) + this.rateSurpriseTimeRange() + this.rateSurpriseWeather();
+    }; 
+
+    /**
+     * 時間帯による不意打ち率補正値を得る。
+     * 
+     * @returns {number} 不意打ち率
+     */
+    Game_Map.prototype.rateSurpriseTimeRange = function() {
+        const timeRange = this.currentTimeRange();
+        return (timeRange) ? timeRange.surpriseRate : 0;
+    };
+
+    /**
+     * 天候による不意打ち率補正値を得る。
+     * 
+     * @returns {number} 不意打ち率
+     */
+    Game_Map.prototype.rateSurpriseWeather = function() {
+        const weather = this.currentWeather();
+        return (weather) ? weather.surpriseRate : 0;
+    };
+
+    const _Game_Map_encounterProgressValue = Game_Map.prototype.encounterProgressValue;
+    /**
+     * ランダムエンカウント進捗度を得る。
+     * 
+     * @param {number} x アクターのx位置
+     * @param {number} y アクターのy位置
+     * @returns {number} 進捗度
+     */
+    Game_Map.prototype.encounterProgressValue = function(x, y) {
+        return _Game_Map_encounterProgressValue.call(this, x, y)
+                * this.encounterProgressValueOfWeather()
+                * this.encounterProgressValueOfTimeRange();
+    };
+
+    /**
+     * 時間帯によるエンカウント率補正値を得る。
+     * 
+     * @returns {number} エンカウント率補正率
+     */
+    Game_Map.prototype.encounterProgressValueOfTimeRange = function() {
+        const timeRange = this.currentTimeRange();
+        return (timeRange) ? timeRange.encountRate : 1;
+    };
+
+    /**
+     * 時間帯によるエンカウント率補正値を得る。
+     * 
+     * @returns {number} エンカウント率補正率
+     */
+    Game_Map.prototype.encounterProgressValueOfWeather = function() {
+        const weather = this.currentWeather();
+        return (weather) ? weather.encountRate : 1;
+    };
+
+    const _Game_Map_isEncountToEnemy = Game_Map.prototype.isEncountToEnemy;
+    /**
+     * enemyIdで指定されるエネミーと遭遇するかどうかを判定する。
+     * 
+     * @param {number} enemyId エネミーID
+     * @returns {boolean} 遭遇する場合にはtrue, 遭遇しない場合にはfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Map.prototype.isEncountToEnemy = function(enemyId) {
+        return _Game_Map_isEncountToEnemy.call(this, enemyId)
+                && this.isEnemyEncountTimeRange(enemyId)
+                && this.isEnemyEncountWeather(enemyId);
+    };
+
+    /**
+     * 時間帯条件でエンカウントするかどうかを得る。
+     * 
+     * @param {number} enemyId エネミーID
+     * @returns {boolean} エンカウントする場合にはtrue, エンカウントしない場合にはfalse
+     */
+    Game_Map.prototype.isEnemyEncountTimeRange = function(enemyId) {
+        if (this.isApplyTimeRangeEffects()) {
+            const enemy = $dataEnemies[enemyId];
+            if (enemy) {
+                if (!enemy.encountTimeRanges) {
+                    _initEnemyTimeRanges(enemy);
+                }
+                if ((enemy.encountTimeRanges.length > 0) && !enemy.encountTimeRanges.includes(this._timeRange)) {
+                    // 遭遇する時間帯が指定されていて、該当する時間帯でない。
+                    return false;
+                } else {
+                    // 時間帯が未指定か、該当する時間帯である。
+                    return true;
+                }
+            } else {
+                return false; // エネミーデータ無し。
+            }
+        } else {
+            return true;
+        }
+    };
+    /**
+     * 天候条件でエンカウントするかどうかを得る。
+     * 
+     * @param {number} enemyId エネミーID
+     * @returns {boolean} エンカウントする場合にはtrue, エンカウントしない場合にはfalse
+     */
+    Game_Map.prototype.isEnemyEncountWeather = function(enemyId) {
+        if (this.isApplyWeatherEffects()) {
+            const enemy = $dataEnemies[enemyId];
+            if (enemy) {
+                if (!enemy.encountWeathers) {
+                    _initEnemyWeathers(enemy);
+                }
+                if ((enemy.encountWeathers.length > 0) && !enemy.encountWeathers.includes(this._weather)) {
+                    // 遭遇する天候が指定されていて、該当する天候。
+                    return false;
+                } else {
+                    // 時間帯が未指定か、該当する時間帯である。
+                    return true;
+                }
+            } else {
+                return false; // エネミーデータなし
+            }
+        } else {
+            return true;
+        }
+    };
+    //------------------------------------------------------------------------------
+    // Game_Enemy
+    const _Game_Enemy_setup = Game_Enemy.prototype.setup;
+    /**
+     * エネミーをセットアップする。
+     * 
+     * @param {number} enemyId エネミーID
+     * @param {number} x X位置
+     * @param {number} y Y位置
+     */
+    Game_Enemy.prototype.setup = function(enemyId, x, y) {
+        _Game_Enemy_setup.call(this, enemyId, x, y);
+        if (!$gameMap.isEnemyEncountTimeRange(enemyId) || !$gameMap.isEnemyEncountWeather(enemeyId)) {
+            // 時間帯・天候条件が合わないので参加しない。
+            this.hide();
         }
     };
 })();
