@@ -62,7 +62,7 @@
  * 
  * @arg textHelpMessage
  * @text ヘルプメッセージ
- * @type string
+ * @type multiline_string
  * 
  * 
  * @command deleteActor

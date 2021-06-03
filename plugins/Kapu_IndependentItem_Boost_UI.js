@@ -61,27 +61,27 @@
  * 
  * @arg textHelpBoost
  * @text 強化ヘルプテキスト
- * @type string
+ * @type multiline_string
  * @default
  * 
  * @arg textHelpResetBoost
  * @text 強化リセットヘルプテキスト
- * @type string
+ * @type multiline_string
  * @default
  * 
  * @arg textHelpReinitialize
  * @text 再初期化ヘルプテキスト
- * @type string
+ * @type multiline_string
  * @default
  * 
  * @arg textHelpRename
  * @text リネームヘルプテキスト
- * @type string
+ * @type multiline_string
  * @default
  * 
  * @arg textHelpCancel
  * @text キャンセルヘルプテキスト
- * @type string
+ * @type multiline_string
  * 
  * 
  * @param maxItemNameWidth
