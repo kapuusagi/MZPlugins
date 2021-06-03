@@ -46,11 +46,11 @@
  * @type bool
  * @default false
  * 
- * @arg immidiately
- * @text 即座に適用する
- * @desc 時間帯のエフェクト適用を即座に行う場合はtrue。falseにすると徐々に変更する。
- * @type boolean
- * @default false
+ * @arg duration
+ * @text 変化にかけるフレーム数
+ * @desc 天候のエフェクト適用にかけるフレーム数。0にすると即座に変化する。
+ * @type number
+ * @default 120
  * 
  * 
  * @command changeWeather
@@ -83,11 +83,11 @@
  * @type boolean
  * @default false
  * 
- * @arg immidiately
- * @text 即座に適用する
- * @desc 天候のエフェクト適用を即座に行う場合はtrue。falseにすると徐々に変更する。
- * @type boolean
- * @default false
+ * @arg duration
+ * @text 変化にかけるフレーム数
+ * @desc 天候のエフェクト適用にかけるフレーム数。0にすると即座に変化する。
+ * @type number
+ * @default 120
  * 
  * 
  * @param moning
@@ -156,14 +156,6 @@
  * @desc 天候を格納する変数ID。格納される値は1:晴れ,2:雨,3:嵐,4:雪
  * @type variable
  * @default 0
- * 
- * @param timeRangeEffectDuration
- * @text エフェクト適用時のデュレーション
- * @desc エフェクト適用時、変化に要するデュレーション[フレーム数]
- * @type number
- * @default 120
- * @min 0
- * 
  * 
  * 
  * 
@@ -325,7 +317,6 @@
     const parameters = PluginManager.parameters(pluginName);
     const storeTimeRangeVariableId = Number(parameters["storeTimeRangeVariableId"]) || 0;
     const storeWeatherVariableId = Number(parameters["storeWeatherVariableId"] || 0);
-    const timeRangeEffectDuration = Number(parameters["timeRangeEffectDuration"]) || 120;
     const timeRangeEntries = [ null ];
 
     /**
@@ -428,11 +419,11 @@
     PluginManager.registerCommand(pluginName, "changeTimeRange", function(args) {
         const interpreter = this;
         const timeRange = Number(args.timeRange) || Game_Map.TIMERANGE_NOON;
-        const immidiately = (args.immidiately === undefined) ? false : (args.immidiately === "true");
-        $gameMap.changeTimeRange(timeRange, immidiately);
+        const duration = Number(args.duration) || 120;
+        $gameMap.changeTimeRange(timeRange, duration);
         const isWait = (args.isWait === undefined) ? false : (args.isWait === "true");
         if (isWait) {
-            interpreter.wait(timeRangeEffectDuration);
+            interpreter.wait(duration);
         }
     });
 
@@ -441,11 +432,11 @@
         const interpreter = this;
         const weather = Number(args.weather) || Game_Map.WEATHER_SUNNY;
         const power = Number(args.power) || 1;
-        const immidiately = (args.immidiately === undefined) ? false : (args.immidiately === "true");
-        $gameMap.changeWeather(weather, power, immidiately);
+        const duration = Number(args.duration) || 120;
+        $gameMap.changeWeather(weather, power, duration);
         const isWait = (args.isWait === undefined) ? false : (args.isWait === "true");
         if (isWait) {
-            interpreter.wait(timeRangeEffectDuration);
+            interpreter.wait(duration);
         }
     });
 
@@ -488,21 +479,21 @@
         this._weatherEnableAtRegion = true; // 領域による天候ON/OFF状態
         this.onTimeRangeEnter();
         this.onWeatherEnter();
-        this.applyTimeRangeAndWeatherEffects(true);
+        this.applyTimeRangeAndWeatherEffects(0);
     };
 
     /**
      * 時間帯を変更する。
      * 
      * @param {number} timeRange 時間帯
-     * @param {boolean} immidiately エフェクトを即座に適用するかどうか。
+     * @param {number} duration 変化にかける時間[フレーム数]。0にすると即座に適用
      */
-    Game_Map.prototype.changeTimeRange = function(timeRange, immidiately) {
+    Game_Map.prototype.changeTimeRange = function(timeRange, duration) {
         if (this._timeRange !== timeRange) {
             this.onTimeRangeLeave()
             this._timeRange = timeRange;
             this.onTimeRangeEnter();
-            this.applyTimeRangeAndWeatherEffects(immidiately);
+            this.applyTimeRangeAndWeatherEffects(duration);
         }
     };
 
@@ -511,15 +502,15 @@
      * 
      * @param {number} weather 
      * @param {number} power 
-     * @param {boolean} immidiately エフェクトを即座に適用するかどうか。
+     * @param {boolean} duration 変化にかける時間[フレーム数]。0にすると即座に適用
      */
-    Game_Map.prototype.changeWeather = function(weather, power, immidiately) {
+    Game_Map.prototype.changeWeather = function(weather, power, duration) {
         if ((this._weather !== weather) || (this._weatherPower !== power)) {
             this.onWeatherLeave();
             this._weather = weather;
             this._weatherPower = power;
             this.onWeatherEnter();
-            this.applyTimeRangeAndWeatherEffects(immidiately);
+            this.applyTimeRangeAndWeatherEffects(duration);
         }
     };
 
@@ -661,7 +652,7 @@
         if (this._isTimeRangeEnabled !== isEnabled) {
             this._isTimeRangeEnabled = isEnabled;
             if (this._isTimeRangeEnabled) {
-                this.applyTimeRangeAndWeatherEffects(true);
+                this.applyTimeRangeAndWeatherEffects(0);
             }
         }
     };
@@ -687,7 +678,7 @@
         if (this._isWeatherEnabled !== isEnabled) {
             this._isWeatherEnabled = isEnabled;
             if (this._isWeatherEnabled) {
-                this.applyTimeRangeAndWeatherEffects(true);
+                this.applyTimeRangeAndWeatherEffects(0);
             }
         }
     };
@@ -696,10 +687,9 @@
     /**
      * 時間帯と天候エフェクトを反映させる。
      * 
-     * @param {boolean} immidiately 即座に変更する場合にはtrue, 徐々にエフェクト反映の場合にはfalse.
+     * @param {number} duration 変化に要する時間[フレーム数]。0で即座に適用。
      */
-    Game_Map.prototype.applyTimeRangeAndWeatherEffects = function(immidiately) {
-        const duration = (immidiately) ? 0 : timeRangeEffectDuration;
+    Game_Map.prototype.applyTimeRangeAndWeatherEffects = function(duration) {
         let colorTone = null;
         if (this.isApplyTimeRangeEffects()) {
             const timeRange = timeRangeEntries[this._timeRange];
@@ -749,7 +739,7 @@
      */
     Game_Map.prototype.refresh = function() {
         _Game_Map_refresh.call(this);
-        this.applyTimeRangeAndWeatherEffects(true);
+        this.applyTimeRangeAndWeatherEffects(0);
     };
 
     const _Game_Map_update = Game_Map.prototype.update;
@@ -772,7 +762,7 @@
                 : true;
         if (this._weatherEnableAtRegion !== isEnabled) {
             this._weatherEnableAtRegion = isEnabled;
-            this.applyTimeRangeAndWeatherEffects();
+            this.applyTimeRangeAndWeatherEffects(0);
         }
     };
 })();
