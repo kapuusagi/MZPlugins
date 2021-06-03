@@ -524,9 +524,9 @@
      */
     Game_Map.prototype.initialize = function() {
         _Game_Map_initialize.call(this);
-        this._isTimeRangeEffectEnabled = true; // マップのノートタグによってON/OFFされるフラグ
+        this._isMapTimeRangeEnabled = true; // マップのノートタグによってON/OFFされるフラグ
         this._isTimeRangeEnabled = true; // システム全体のコントロール
-        this._isWeatherEffectEnabled = true;// マップのノートタグによってON/OFFされるフラグ
+        this._isMapWeatherEnabled = true;// マップのノートタグによってON/OFFされるフラグ
         this._isWeatherEnabled = true; // システム全体のコントロール
         this._timeRange = Game_Map.TIMERANGE_NOON; // 日中
         this._weather = Game_Map.WEATHER_SUNNY; // 晴れ
@@ -637,7 +637,7 @@
      * @returns {number} 適用する場合にはtrue, それ以外はfalse
      */
     Game_Map.prototype.isApplyTimeRangeEffects = function() {
-        return this._isTimeRangeEffectEnabled && this._isTimeRangeEnabled;
+        return this._isMapTimeRangeEnabled && this._isTimeRangeEnabled;
     };
 
     /**
@@ -646,7 +646,7 @@
      * @returns {number} 適用する場合にはtrue, それ以外はfalse.
      */
     Game_Map.prototype.isApplyWeatherEffects = function() {
-        return this._isWeatherEnabled && this._isTimeRangeEnabled;
+        return this._isWeatherEnabled && this._isWeatherEnabled;
     };
 
     const _Game_Map_setup = Game_Map.prototype.setup;
@@ -666,10 +666,10 @@
      * 時間帯と天候エフェクトの有効/無効をセットアップする。
      */
     Game_Map.prototype.setupTimeRangeAndWeatherEffects = function() {
-        this._isTimeRangeEffectEnabled = $dataMap.meta.timeRangeEffect || false;
+        this._isMapTimeRangeEnabled = $dataMap.meta.timeRangeEffect || false;
         const weatherEffect = $dataMap.meta.weatherEffect;
         if (weatherEffect) {
-            this._isWeatherEffectEnabled = true;
+            this._isMapWeatherEnabled = true;
             this._weatherEffectRegions = [];
             if (typeof weatherEffect === "string") {
                 const ids = weatherEffect.split(",").map(str => Number(str) || 0);
@@ -680,7 +680,7 @@
                 }
             }
         } else {
-            this._isWeatherEffectEnabled = false;
+            this._isMapWeatherEnabled = false;
             this._weatherEffectRegions = [];
         }
         this.applyTimeRangeAndWeatherEffects(0);
