@@ -5,6 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @base Kapu_Base_Map
+ * @orderAfter Kapu_Base_Map
  * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitPartyAbilityId
@@ -15,24 +17,6 @@
  * @max 9999
  * @min 6
  * 
- * @param surpriseRateFast
- * @text 先制攻撃率（早）
- * @desc エネミーよりパーティーの速度が速い場合の先制攻撃率
- * @type number
- * @decimals 2
- * @default 0.05
- * @min 0.00
- * @max 1.00
- * 
- * @param surpriseRateLate
- * @text 先制攻撃率（遅）
- * @desc エネミーよりパーティーの速度が遅い場合の先制攻撃率
- * @type number
- * @decimals 2
- * @default 0.03
- * @min 0.00
- * @max 1.00
- *  
  * @param textTraitSurpriseRate
  * @text 不意打ち率特性名
  * @desc 不意打ち率特性名
@@ -83,14 +67,13 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Kapu_Base_Mapを使用するように変更
  * Version.0.1.0 PreemptiveRateと逆のものがなかったので追加。
  */
 (() => {
     const pluginName = "Kapu_Trait_SurpriseRate";
     const parameters = PluginManager.parameters(pluginName);
 
-    const surpriseRateLate = Math.min(1, Math.max(0, (Number(parameters["surpriseRateLate"]) || 0.05)));
-    const surpriseRateFast = Math.min(surpriseRateLate, Math.max(0, (Number(parameters["surpriseRateFast"]) || 0.03)));
 
     Game_Party.ABILITY_SURPRISE_RATE = Number(parameters["traitPartyAbilityId"]) || 0;
     if (!Game_Party.ABILITY_SURPRISE_RATE) {
@@ -165,36 +148,28 @@
     Game_Map.prototype.setRateSurprise = function(rate) {
         this._rateSurprise = rate;
     };
-
+    const _Game_Map_rateSurprise =  Game_Map.prototype.rateSurprise;
     /**
      * マップの基本不意打ち率を得る。
      * 
      * @returns {number} 不意打ち率
      */
     Game_Map.prototype.rateSurprise = function() {
-        return this._rateSurprise;
+        return  _Game_Map_rateSurprise.call(this) + this._rateSurprise;
     };
     
     //------------------------------------------------------------------------------
     // Game_Party
+
+    const _Game_Party_rateSurpriseOfParty = Game_Party.prototype.rateSurpriseOfParty;
     /**
-     * このパーティーの不意打ち率を得る。
+     * パーティー特製による不意打ち率補正値を得る。
      * 
-     * @param {number} troopAgi 不意打ち率
-     * @returns {number} 不意打ち率
-     * !!!overwrite!!! Game_Party.rateSurprise
+     * @returns {number} 不意打ち率補正値
      */
-    Game_Party.prototype.rateSurprise = function(troopAgi) {
-        let rate = 0;
-        if (!this.hasCancelSurprise()) {
-            rate = this.agility() >= troopAgi ? surpriseRateFast : surpriseRateLate;
-            rate += $gameMap.surpriseRate();
-            rate += this.partyTraitsSum(Game_Party.ABILITY_SURPRISE_RATE);
-        }
-        return rate;
+    Game_Party.prototype.rateSurpriseOfParty = function() {
+        return _Game_Party_rateSurpriseOfParty.call(this) + this.partyTraitsSum(Game_Party.ABILITY_SURPRISE_RATE);
     };
-
-
 
 })();
 
