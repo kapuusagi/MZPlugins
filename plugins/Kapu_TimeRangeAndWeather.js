@@ -211,6 +211,12 @@
  * @option 雪
  * @value 4
  * 
+ * @param weatherEffectDuration
+ * @text 天候エフェクト遷移時間
+ * @desc 領域をまたいで天候エフェクトが変わるときの遷移時間(フレーム数)
+ * @type number
+ * @default 30
+ * 
  * @help 
  * 昼と夜機能を実現するためのプラグイン。
  * 以下の機能を提供する。
@@ -244,7 +250,13 @@
  * ■ 使用時の注意
  * Kapu_MapFilter及びKapu_MapFilter_Darknessを使用します。
  * MapFilter_DarknessはON/OFFしないこと。OFFすると、暗闇状態が正常に反映されなくなります。
- * 画面の天候エフェクト/画面のトーン変更と競合します。
+ * 画面の天候エフェクト/画面のトーンを使用します。
+ * イベント等で天候・カラートーンを操作したい場合には、
+ * (1)エフェクトON/OFF変更でOFFにする。
+ * (2)イベントで使用するエフェクトを適用する。
+ *    :
+ * (3)イベントが完了したらエフェクトをONにする。
+ *    (瞬間的に切り替わるのでフェードアウト->エフェクトON->フェードインを使うのが望ましい)
  * 
  * これはプラグインを使わなくてもインタプリタで実現できそう。というかカスタマイズしたいならインタプリタでゴリゴリ書いた方がいい。
  * 
@@ -290,6 +302,7 @@
  *     このマップで天候状態を表す画面効果を有効にする。
  *   <weatherEffect:id#,id#,...>
  *     このマップのid#で指定された領域にいるとき、天候状態を表す画面効果を有効にする。
+ *     領域指定されていないところはidが0になる。
  * 
  * エネミー
  *   <encountTimeRanges:id#,id#,...>
@@ -302,7 +315,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 /*~struct~TimeRangeData:
  *
@@ -420,6 +433,7 @@
     const startWeatherEnable = (parameters["startWeatherEnable"] === undefined)
             ? false : (parameters["startWeatherEnable"] === "true");
     const initialWeather = Number(parameters["initialWeather"]) || Game_Map.WEATHER_SUNNY;
+    const weatherEffectDuration = Number(parameters["weatherEffectDuration"]) || 30;
 
     /**
      * 時間帯データを分析する。
@@ -807,24 +821,6 @@
         }
     };
 
-    /**
-     * 時間帯エフェクトを適用するかどうかを得る。
-     * 
-     * @returns {number} 適用する場合にはtrue, それ以外はfalse
-     */
-    Game_Map.prototype.isApplyTimeRangeEffects = function() {
-        return this._isMapTimeRangeEnabled && this._isTimeRangeEnabled;
-    };
-
-    /**
-     * 天候エフェクトを適用するかどうかを得る。
-     * 
-     * @returns {number} 適用する場合にはtrue, それ以外はfalse.
-     */
-    Game_Map.prototype.isApplyWeatherEffects = function() {
-        return this._isWeatherEnabled && this._isWeatherEnabled;
-    };
-
     const _Game_Map_setup = Game_Map.prototype.setup;
     /**
      * マップをセットアップする。
@@ -853,6 +849,9 @@
                     if (!this._weatherEffectRegions.includes(id)) {
                         this._weatherEffectRegions.push(id);
                     }
+                }
+                if (!this._weatherEffectRegions.includes(0)) {
+                    this._weatherEffectRegions.push(0);
                 }
             }
         } else {
@@ -920,32 +919,57 @@
      * @param {number} duration 変化に要する時間[フレーム数]。0で即座に適用。
      */
     Game_Map.prototype.applyTimeRangeAndWeatherEffects = function(duration) {
-        let colorTone = null;
-        let brightness = 255;
-        if (this.isApplyTimeRangeEffects()) {
-            const timeRange = this.currentTimeRange();
-            if (timeRange) {
-                brightness = timeRange.brightness;
-                colorTone = timeRange.colorTone.clone();
-            }
-        }
-        if (this.isApplyWeatherEffects()) {
-            const weather = this.currentWeather();
-            if (weather) {
-                brightness = Math.round(brightness * weather.brightness / 255);
-                const type = weather.type;
-                const power = this._weatherPower;
-                if (colorTone) {
-                    for (let i = 0; i < 4; i++) {
-                        colorTone[i] = Math.round((colorTone[i] + weather.colorTone[i]) / 2);
-                    }
-                } else {
-                    colorTone = weather.colorTone.clone();
+        let colorTone = null; // nullで変化させない。
+        let brightness = -1; // -1で変化させない。
+        let weatherType = null; // nullで変化させない
+        let weatherPower = 0;
+        if (this._isTimeRangeEnabled) {
+            if (this._isMapTimeRangeEnabled) {
+                const timeRange = this.currentTimeRange();
+                if (timeRange) {
+                    brightness = timeRange.brightness;
+                    colorTone = timeRange.colorTone.clone();
                 }
-                $gameScreen.changeWeather(type, power, duration);
+            } else {
+                brightness = 255;
+                colorTone = [0, 0, 0, 0];
             }
         }
-        $gameScreen.changeDarknessFilterBrightness(brightness, duration);
+        if (this._isWeatherEnabled) {
+            if (this._isMapWeatherEnabled) {
+                // 天候有効マップ
+                const weather = this.currentWeather();
+                if (weather) {
+                    if (brightness >= 0) {
+                        brightness = Math.round(brightness * weather.brightness / 255);
+                    } else {
+                        brightness = weather.brightness;
+                    }
+                    weatherType = weather.type;
+                    weatherPower = this._weatherPower;
+                    if (colorTone) {
+                        for (let i = 0; i < 4; i++) {
+                            colorTone[i] = Math.round((colorTone[i] + weather.colorTone[i]) / 2);
+                        }
+                    } else {
+                        colorTone = weather.colorTone.clone();
+                    }
+                }
+            } else {
+                // 天候無効マップ
+                weatherType = "none";
+                weatherPower = 0;
+                if (brightness < 0) {
+                    brightness = 255;
+                }
+            }
+        }
+        if (weatherType) {
+            $gameScreen.changeWeather(weatherType, weatherPower, duration);
+        }
+        if (brightness >= 0) {
+            $gameScreen.changeDarknessFilterBrightness(brightness, duration);
+        }
         if (colorTone) {
             $gameScreen.startTint(colorTone, duration);
         }
@@ -983,7 +1007,7 @@
                 ? this._weatherEffectRegions.includes(regionId) : true;
         if (this._weatherEnableAtRegion !== isEnabled) {
             this._weatherEnableAtRegion = isEnabled;
-            this.applyTimeRangeAndWeatherEffects(0);
+            this.applyTimeRangeAndWeatherEffects(weatherEffectDuration);
         }
     };
 
@@ -1004,7 +1028,7 @@
      */
     Game_Map.prototype.rateSurpriseTimeRange = function() {
         const timeRange = this.currentTimeRange();
-        return (timeRange) ? timeRange.surpriseRate : 0;
+        return (this._isMapTimeRangeEnabled && timeRange) ? timeRange.surpriseRate : 0;
     };
 
     /**
@@ -1014,7 +1038,7 @@
      */
     Game_Map.prototype.rateSurpriseWeather = function() {
         const weather = this.currentWeather();
-        return (weather) ? weather.surpriseRate : 0;
+        return (this._isMapWeatherEnabled && weather) ? weather.surpriseRate : 0;
     };
 
     const _Game_Map_encounterProgressValue = Game_Map.prototype.encounterProgressValue;
@@ -1072,7 +1096,7 @@
      * @returns {boolean} エンカウントする場合にはtrue, エンカウントしない場合にはfalse
      */
     Game_Map.prototype.isEnemyEncountTimeRange = function(enemyId) {
-        if (this.isApplyTimeRangeEffects()) {
+        if (this._isTimeRangeEnabled && this._isMapTimeRangeEnabled) {
             const enemy = $dataEnemies[enemyId];
             if (enemy) {
                 if (!enemy.encountTimeRanges) {
@@ -1099,7 +1123,7 @@
      * @returns {boolean} エンカウントする場合にはtrue, エンカウントしない場合にはfalse
      */
     Game_Map.prototype.isEnemyEncountWeather = function(enemyId) {
-        if (this.isApplyWeatherEffects()) {
+        if (this._isWeatherEnabled && this._isMapWeatherEnabled) {
             const enemy = $dataEnemies[enemyId];
             if (enemy) {
                 if (!enemy.encountWeathers) {
