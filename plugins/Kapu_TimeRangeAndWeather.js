@@ -31,6 +31,8 @@
  * @desc 遷移先の時間帯
  * @type select
  * @default 1
+ * @option 次の時間帯
+ * @value -1
  * @option 朝
  * @value 1
  * @option 昼
@@ -45,7 +47,7 @@
  * @arg isWait
  * @text 変更完了を待機する
  * @desc 変更完了を待機する場合にtrue, 待機しない場合にfalse.
- * @type bool
+ * @type boolean
  * @default false
  * 
  * @arg duration
@@ -64,6 +66,8 @@
  * @desc 変更する天候
  * @type select
  * @default 1
+ * @option ランダム
+ * @value -1
  * @option 晴れ
  * @value 1
  * @option 雨
@@ -96,55 +100,55 @@
  * @text 朝データ
  * @desc 朝データ
  * @type struct<TimeRangeData>
- * @default {"name":"朝","onSwitchId":"0","offSwitchId":"0","brightness":"255","colorTone":"[220,220,255,255]","encountRate":"1.00","surpriseRate":"1.00"}
+ * @default {"name":"朝","onSwitchId":"0","offSwitchId":"0","brightness":"255","colorTone":"[-16,-16,0,0]","encountRate":"1.00","surpriseRate":"1.00"}
  * 
  * @param noon
  * @text 昼データ
  * @desc 昼データ
  * @type struct<TimeRangeData>
- * @default {"name":"昼","onSwitchId":"0","offSwitchId":"0","brightness":"255","colorTone":"[255,255,255,255]","encountRate":"1.00","surpriseRate":"1.00"}
+ * @default {"name":"昼","onSwitchId":"0","offSwitchId":"0","brightness":"255","colorTone":"[0,0,0,0]","encountRate":"1.00","surpriseRate":"1.00"}
  * 
  * @param evening
  * @text 夕方データ
  * @desc 夕方データ
  * @type struct<TimeRangeData>
- * @default {"name":"夕方","onSwitchId":"0","offSwitchId":"0","brightness":"255","colorTone":"[255,220,180,255]","encountRate":"1.10","surpriseRate":"1.00"}
+ * @default {"name":"夕方","onSwitchId":"0","offSwitchId":"0","brightness":"255","colorTone":"[0,-32,-64,0]","encountRate":"1.10","surpriseRate":"1.00"}
  * 
  * @param night
  * @text 夜データ
  * @desc 夜データ
  * @type struct<TimeRangeData>
- * @default {"name":"夜","onSwitchId":"0","offSwitchId":"0","brightness":"128","colorTone":"[180,180,180,255]","encountRate":"1.50","surpriseRate":"1.50"}
+ * @default {"name":"夜","onSwitchId":"0","offSwitchId":"0","brightness":"128","colorTone":"[-64,-64,-64,0]","encountRate":"1.50","surpriseRate":"1.50"}
  * 
  * @param midNight
  * @text 深夜データ
  * @desc 深夜データ
  * @type struct<TimeRangeData>
- * @default {"name":"深夜","onSwitchId":"0","offSwitchId":"0","brightness":"64","colorTone":"[180,180,180,255]","encountRate":"2.00","surpriseRate":"2.00"}
+ * @default {"name":"深夜","onSwitchId":"0","offSwitchId":"0","brightness":"64","colorTone":"[-64,-64,-64,0]","encountRate":"2.00","surpriseRate":"2.00"}
  * 
  * @param sunny
  * @text 晴れデータ
  * @desc 晴れデータ
  * @type struct<WeatherData>
- * @default {"name":"晴れ","onSwitchId":"0","offSwitchId":"0","brightness":"255","colorTone":"[255,255,255,255]","encountRate":"1.00","surpriseRate":"1.00"}
+ * @default {"name":"晴れ","onSwitchId":"0","offSwitchId":"0","brightness":"255","colorTone":"[0,0,0,0]","encountRate":"1.00","surpriseRate":"1.00"}
  * 
  * @param rain
  * @text 雨天データ
  * @desc 雨天データ
- * @type struct <WeatherData>
- * @default {"name":"雨","onSwitchId":"0","offSwitchId":"0","brightness":"180","colorTone":"[255,255,255,255]","encountRate":"1.00","surpriseRate":"1.00"}
+ * @type struct<WeatherData>
+ * @default {"name":"雨","onSwitchId":"0","offSwitchId":"0","brightness":"180","colorTone":"[-16,-16,0,0]","encountRate":"1.00","surpriseRate":"1.00"}
  * 
  * @param storm
  * @text 嵐データ
  * @desc 嵐データ
- * @type struct <WeatherData>
- * @default {"name":"嵐","onSwitchId":"0","offSwitchId":"0","brightness":"128","colorTone":"[255,255,255,255]","encountRate":"1.00","surpriseRate":"2.00"}
+ * @type struct<WeatherData>
+ * @default {"name":"嵐","onSwitchId":"0","offSwitchId":"0","brightness":"128","colorTone":"[-16,-16,0,0]","encountRate":"1.00","surpriseRate":"2.00"}
  * 
  * @param snow
  * @text 雪データ
  * @desc 雪データ
- * @type struct <WeatherData>
- * @default {"name":"雪","onSwitchId":"0","offSwitchId":"0","brightness":"200","colorTone":"[255,255,255,255]","encountRate":"1.00","surpriseRate":"1.00"}
+ * @type struct<WeatherData>
+ * @default {"name":"雪","onSwitchId":"0","offSwitchId":"0","brightness":"200","colorTone":"[-16,-16,-16,0]","encountRate":"1.00","surpriseRate":"1.25"}
  * 
  * 
  * @param storeTimeRangeVariableId
@@ -156,6 +160,12 @@
  * @param storeWeatherVariableId
  * @text 天候変数ID
  * @desc 天候を格納する変数ID。格納される値は1:晴れ,2:雨,3:嵐,4:雪
+ * @type variable
+ * @default 0
+ * 
+ * @param storeWeatherPowerVariableId
+ * @text 変更強度変数ID
+ * @desc 天候の強度を格納する変数ID。
  * @type variable
  * @default 0
  * 
@@ -241,7 +251,7 @@
  * 
  * ■ プラグイン開発者向け
  * 時間帯を表す以下の定数を追加します。
- *  Game_Map.TIMERANGE_MORNING   朝
+ *  Game_Map.TIMERANGE_MORNING  朝
  *  Game_Map.TIMERANGE_NOON     昼
  *  Game_Map.TIMERANGE_EVENING  夕方
  *  Game_Map.TIMERANGE_NIGHT    夜
@@ -320,8 +330,10 @@
  * 
  * @param colorTone
  * @text カラートーン
- * @desc 時間帯に適用するカラートーン。R,G,B,Gray
+ * @desc 時間帯に適用するカラートーン。(R,G,B,Gray) R,G,Bは-255～255で0で変化なし。Grayは255で灰色、0で変化なし
  * @type number[]
+ * @min -255
+ * @max 255
  *
  * @param encountRate
  * @text エンカウントレート
@@ -364,8 +376,10 @@
  *
  * @param colorTone
  * @text カラートーン
- * @desc 時間帯に適用するカラートーン。R,G,B,Gray
+ * @desc 時間帯に適用するカラートーン。(R,G,B,Gray) R,G,Bは-255～255で0で変化なし。Grayは255で灰色、0で変化なし
  * @type number[]
+ * @min -255
+ * @max 255
  * 
  * @param encountRate
  * @text エンカウントレート
@@ -398,7 +412,8 @@
 
     const parameters = PluginManager.parameters(pluginName);
     const storeTimeRangeVariableId = Number(parameters["storeTimeRangeVariableId"]) || 0;
-    const storeWeatherVariableId = Number(parameters["storeWeatherVariableId"] || 0);
+    const storeWeatherVariableId = Number(parameters["storeWeatherVariableId"]) || 0;
+    const storeWeatherPowerVariableId = Number(parameters["storeWeatherPowerVariableId"]) || 0;
     const startTimeRangeEnable = (parameters["startTimeRangeEnable"] === undefined)
             ? false : (parameters["startTimeRangeEnable"] === "true");
     const initialTimeRange = Number(parameters["initialTimeRange"]) || Game_Map.TIMERANGE_NOON;
@@ -419,9 +434,12 @@
             const onSwitchId = Number(obj.onSwitchId) || 0;
             const offSwitchId = Number(obj.offSwitchId) || 0;
             const brightness = (Number(obj.brightness) || 0).clamp(0, 255);
-            const colorTone = JSON.parse(obj.colorTone).map(str => Number(str) || 0);
+            const colorTone = JSON.parse(obj.colorTone).map(str => (Number(str) || 0).clamp(-255, 255));
             while (colorTone.length < 4) {
                 colorTone.push(255);
+            }
+            if (colorTone[3] < 0) {
+                colorTone[3] = 0;
             }
             const encountRate = Math.max(0, Number(obj.encountRate) || 1);
             const surpriseRate = Math.max(0, Number(obj.surpriseRate) || 1);
@@ -445,7 +463,7 @@
                 onSwitchId:0,
                 offSwitchId:0,
                 brightness:255,
-                colorTone:[255,255,255,255],
+                colorTone:[0,0,0,0],
                 encountRate:1,
                 surpriseRate:1
             };
@@ -472,9 +490,12 @@
             const onSwitchId = Number(obj.onSwitchId) || 0;
             const offSwitchId = Number(obj.offSwitchId) || 0;
             const brightness = (Number(obj.brightness) || 0).clamp(0, 255);
-            const colorTone = JSON.parse(obj.colorTone).map(str => Number(str) || 0);
+            const colorTone = JSON.parse(obj.colorTone).map(str => (Number(str) || 0).clamp(-255,255));
             while (colorTone.length < 4) {
-                colorTone.push(255);
+                colorTone.push(0);
+            }
+            if (colorTone[3] < 0) {
+                colorTone[3] = 0;
             }
             const encountRate = Math.max(0, Number(obj.encountRate) || 1);
             const surpriseRate = Math.max(0, Number(obj.surpriseRate) || 1);
@@ -519,7 +540,12 @@
         const interpreter = this;
         const timeRange = Number(args.timeRange) || Game_Map.TIMERANGE_NOON;
         const duration = Number(args.duration) || 120;
-        $gameMap.changeTimeRange(timeRange, duration);
+        if (timeRange < 0) {
+            // 次の時間帯
+            $gameMap.changeNextTimeRange(duration);
+        } else {
+            $gameMap.changeTimeRange(timeRange, duration);
+        }
         const isWait = (args.isWait === undefined) ? false : (args.isWait === "true");
         if (isWait) {
             interpreter.wait(duration);
@@ -532,7 +558,15 @@
         const weather = Number(args.weather) || Game_Map.WEATHER_SUNNY;
         const power = Number(args.power) || 1;
         const duration = Number(args.duration) || 120;
-        $gameMap.changeWeather(weather, power, duration);
+        if (weather < 0) {
+            // ランダム
+            const randomWeather = Math.randomInt(5);
+            if (randomWeather > 0) {
+                $gameMap.changeWeather(randomWeather, power, duration);
+            }
+        } else {
+            $gameMap.changeWeather(weather, power, duration);
+        }
         const isWait = (args.isWait === undefined) ? false : (args.isWait === "true");
         if (isWait) {
             interpreter.wait(duration);
@@ -608,6 +642,9 @@
         if (storeWeatherVariableId > 0) {
             $gameVariables.setValue(storeWeatherVariableId, initialWeather);
         }
+        if (storeWeatherPowerVariableId > 0) {
+            $gameVariables.setValue(storeWeatherPowerVariableId, 0);
+        }
     };
     //------------------------------------------------------------------------------
     // Game_Map
@@ -629,6 +666,16 @@
         this._weatherEffectRegions = []; // 天候ON/OFF領域ID
         this._weatherEnableAtRegion = true; // 領域による天候ON/OFF状態
     };
+    /**
+     * 次の時間帯に遷移させる。
+     * 
+     * @param {number} duration 変化にかけるフレーム数
+     */
+    Game_Map.prototype.changeNextTimeRange = function(duration) {
+        const nextTimeRange =  (this._timeRange === Game_Map.TIMERANGE_MIDNIGHT)
+                ? Game_Map.TIMERANGE_MORNING : (this._timeRange + 1);
+        this.changeTimeRange(nextTimeRange, duration);
+    };
 
     /**
      * 時間帯を変更する。
@@ -637,12 +684,23 @@
      * @param {number} duration 変化にかける時間[フレーム数]。0にすると即座に適用
      */
     Game_Map.prototype.changeTimeRange = function(timeRange, duration) {
-        if (this._timeRange !== timeRange) {
-            this.onTimeRangeLeave()
-            this._timeRange = timeRange;
-            this.onTimeRangeEnter();
-            this.applyTimeRangeAndWeatherEffects(duration);
+        if (timeRangeEntries[timeRange]) {
+            if (this._timeRange !== timeRange) {
+                this.onTimeRangeLeave()
+                this._timeRange = timeRange;
+                this.onTimeRangeEnter();
+                this.applyTimeRangeAndWeatherEffects(duration);
+            }
         }
+    };
+
+    /**
+     * 現在の時間帯を得る。
+     * 
+     * @returns {number} 時間帯
+     */
+    Game_Map.prototype.timeRange = function() {
+        return this._timeRange;
     };
 
     /**
@@ -653,13 +711,35 @@
      * @param {boolean} duration 変化にかける時間[フレーム数]。0にすると即座に適用
      */
     Game_Map.prototype.changeWeather = function(weather, power, duration) {
-        if ((this._weather !== weather) || (this._weatherPower !== power)) {
-            this.onWeatherLeave();
-            this._weather = weather;
-            this._weatherPower = power;
-            this.onWeatherEnter();
-            this.applyTimeRangeAndWeatherEffects(duration);
+        if (weatherEntries[weather]) {
+            if ((weather !== Game_Map.WEATHER_SUNNY) && (power <= 0)) {
+                power = 1;
+            }
+            if ((this._weather !== weather) || (this._weatherPower !== power)) {
+                this.onWeatherLeave();
+                this._weather = weather;
+                this._weatherPower = power;
+                this.onWeatherEnter();
+                this.applyTimeRangeAndWeatherEffects(duration);
+            }
         }
+    };
+
+    /**
+     * 天候を得る。
+     * 
+     * @returns {number} 天候
+     */
+    Game_Map.prototype.weather = function() {
+        return this._weather;
+    };
+    /**
+     * 天候の強さを得る。
+     * 
+     * @returns {number} 天候の強さ
+     */
+    Game_Map.prototype.weatherPower = function() {
+        return this._weatherPower;
     };
 
     /**
@@ -708,6 +788,10 @@
         if (storeWeatherVariableId > 0) {
             const value = (weather) ? weather.id : 0;
             $gameVariables.setValue(storeWeatherVariableId, value);
+        }
+        if (storeWeatherPowerVariableId > 0) {
+            const value = this._weatherPower;
+            $gameVariables.setValue(storeWeatherPowerVariableId, value);
         }
     };
 
@@ -837,18 +921,18 @@
      */
     Game_Map.prototype.applyTimeRangeAndWeatherEffects = function(duration) {
         let colorTone = null;
+        let brightness = 255;
         if (this.isApplyTimeRangeEffects()) {
             const timeRange = this.currentTimeRange();
             if (timeRange) {
-                const brightness = timeRange.brightness;
+                brightness = timeRange.brightness;
                 colorTone = timeRange.colorTone.clone();
-                $gameScreen.changeDarknessFilterBrightness(brightness, duration);
             }
         }
         if (this.isApplyWeatherEffects()) {
             const weather = this.currentWeather();
             if (weather) {
-                const brightness = Math.round(brightness * weather.brightness / 255);
+                brightness = Math.round(brightness * weather.brightness / 255);
                 const type = weather.type;
                 const power = this._weatherPower;
                 if (colorTone) {
@@ -861,6 +945,7 @@
                 $gameScreen.changeWeather(type, power, duration);
             }
         }
+        $gameScreen.changeDarknessFilterBrightness(brightness, duration);
         if (colorTone) {
             $gameScreen.startTint(colorTone, duration);
         }
@@ -887,16 +972,6 @@
             return weatherEntries[Game_Map.WEATHER_SUNNY];
         }
     };
-
-    const _Game_Map_refresh = Game_Map.prototype.refresh;
-    /**
-     * マップの状態をを更新する。
-     */
-    Game_Map.prototype.refresh = function() {
-        _Game_Map_refresh.call(this);
-        this.applyTimeRangeAndWeatherEffects(0);
-    };
-
 
     /**
      * 領域による天候状態を更新する。
@@ -1066,7 +1141,7 @@
      */
     Game_Enemy.prototype.setup = function(enemyId, x, y) {
         _Game_Enemy_setup.call(this, enemyId, x, y);
-        if (!$gameMap.isEnemyEncountTimeRange(enemyId) || !$gameMap.isEnemyEncountWeather(enemeyId)) {
+        if (!$gameMap.isEnemyEncountTimeRange(enemyId) || !$gameMap.isEnemyEncountWeather(enemyId)) {
             // 時間帯・天候条件が合わないので参加しない。
             this.hide();
         }
