@@ -9,23 +9,28 @@ namespace QEditor
     /// <summary>
     /// イベント
     /// </summary>
-    public class AchiveEvent : IAchive
+    public class AchieveEvent : IAchieve
     {
-        private DataAchive data;
+        private DataAchieve data;
 
         /// <summary>
         /// AchiveEventを構築する。
         /// </summary>
         /// <param name="data"></param>
-        public AchiveEvent(DataAchive data)
+        public AchieveEvent(DataAchieve data)
         {
             this.data = data;
         }
 
         /// <summary>
+        /// データを得る
+        /// </summary>
+        public DataAchieve Data { get => data; }
+
+        /// <summary>
         /// 達成条件の種類を得る。
         /// </summary>
-        public AchiveType Type { get => AchiveType.Event; }
+        public AchieveType Type { get => AchieveType.Event; }
 
         /// <summary>
         /// スイッチ番号
@@ -40,9 +45,13 @@ namespace QEditor
             set => data.Value2 = (value) ? 1 : 0;
         }
 
+        /// <summary>
+        /// このオブジェクトの文字列表現を得る。
+        /// </summary>
+        /// <returns>文字列表現</returns>
         public override string ToString()
         {
-            return $"";
+            return ProjectData.GetSwitchName(SwitchNo) + "=" + (SwitchCondition ? "ON" : "OFF");
         }
     }
 }

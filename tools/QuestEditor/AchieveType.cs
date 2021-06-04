@@ -9,7 +9,7 @@ namespace QEditor
     /// <summary>
     /// 達成条件タイプ
     /// </summary>
-    public enum AchiveType
+    public enum AchieveType
     {
         Subjugation = 0,
         Collection = 1,

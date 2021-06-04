@@ -14,17 +14,13 @@ namespace QEditor
     public partial class FormMain : Form
     {
         
-        private List<DataQuest> Quests { get; set; } = new List<DataQuest>();
-
-        private List<IItem> selectableItemList = new List<IItem>();
-        private List<DataItem> items = new List<DataItem>();
-        private List<DataWeapon> weapons = new List<DataWeapon>();
-        private List<DataArmor> armors = new List<DataArmor>();
-        private List<DataEnemy> enemies = new List<DataEnemy>();
-
+        // アイテムリスト
         private FormSelectableItemList itemListForm;
+        // 達成条件追加フォーム
+        private FormAddAchieve addAchieveForm;
+        // フォルダ選択ダイアログ
         private FolderSelectDialog folderSelectDialog;
-
+        // 編集中フォルダ
         private string EditingDir { get; set; } = string.Empty;
 
         /// <summary>
@@ -34,11 +30,12 @@ namespace QEditor
         {
             InitializeComponent();
             InitializeQuestDataTable();
-            InitializeItemDataTable();
+            InitializeAchieveDataTable();
+            InitializeRewardItemDataTable();
         }
 
         /// <summary>
-        /// データテーブル
+        /// クエスト一覧を表示するデータテーブルを初期化する。
         /// </summary>
         private void InitializeQuestDataTable()
         {
@@ -49,15 +46,28 @@ namespace QEditor
                 ColumnName = "id",
             });
             dataGridViewQuests.DataSource = dt;
-
-            Quests.Add(null);
-            Quests.Add(new DataQuest() { Id = 1 });
         }
 
         /// <summary>
-        /// データテーブルを初期化する。
+        /// 達成条件データテーブルを初期化する。
         /// </summary>
-        private void InitializeItemDataTable()
+        private void InitializeAchieveDataTable()
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add(new DataColumn()
+            {
+                DataType = typeof(string),
+                ColumnName = "achieve",
+                ReadOnly = true
+            });
+            dataGridViewAchieves.DataSource = dt;
+            dataGridViewAchieves.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+        }
+
+        /// <summary>
+        /// 報酬アイテムを表示するデータテーブルを初期化する。
+        /// </summary>
+        private void InitializeRewardItemDataTable()
         {
             DataTable dt = new DataTable();
             dt.Columns.Add(new DataColumn()
@@ -75,7 +85,6 @@ namespace QEditor
             dataGridViewRewardItems.Columns[0].Width = 240;
             dataGridViewRewardItems.Columns[1].Width = 48;
             dataGridViewRewardItems.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-
         }
 
         /// <summary>
@@ -204,114 +213,15 @@ namespace QEditor
         /// <param name="dir">フォルダ</param>
         private void ProcessOpen(string dir)
         {
-            selectableItemList.Clear();
-            items.Clear();
-            weapons.Clear();
-            armors.Clear();
-            enemies.Clear();
-            Quests.Clear();
+            ProjectData.Load(dir);
 
-            ReadDataFiles(dir);
-            AddSelectableItems(selectableItemList, items);
-            AddSelectableItems(selectableItemList, weapons);
-            AddSelectableItems(selectableItemList, armors);
             if (itemListForm != null)
             {
-                itemListForm.SetItemList(selectableItemList);
+                itemListForm.SetItemList(ProjectData.SelectableItemList);
             }
 
-            comboBoxEnemy.Items.Clear();
-            foreach (var enemy in enemies)
-            {
-                comboBoxEnemy.Items.Add(enemy?.Name ?? string.Empty);
-            }
-            comboBoxItem.Items.Clear();
-            foreach (var item in items)
-            {
-                comboBoxItem.Items.Add(item?.Name ?? string.Empty);
-            }
 
             ModelToUI();
-        }
-
-        /// <summary>
-        /// データファイルを読み出す。
-        /// </summary>
-        /// <param name="dir">フォルダ</param>
-        private void ReadDataFiles(string dir)
-        {
-            string itemsPath = System.IO.Path.Combine(dir, "Items.json");
-            if (System.IO.File.Exists(itemsPath))
-            {
-                items = DataItemListParser.Read(itemsPath);
-            }
-
-            string weaponsPath = System.IO.Path.Combine(dir, "Weapons.json");
-            if (System.IO.File.Exists(weaponsPath))
-            {
-                weapons = DataWeaponListParser.Read(weaponsPath);
-            }
-
-            string armorsPath = System.IO.Path.Combine(dir, "Armors.json");
-            if (System.IO.File.Exists(armorsPath))
-            {
-                armors = DataArmorListParser.Read(armorsPath);
-            }
-
-            string enemiesPath = System.IO.Path.Combine(dir, "Enemies.json");
-            if (System.IO.File.Exists(enemiesPath))
-            {
-                enemies = DataEnemyListParser.Read(enemiesPath);
-            }
-
-
-            string questsPath = System.IO.Path.Combine(dir, "Quests.json");
-            if (System.IO.File.Exists(questsPath))
-            {
-                Quests = DataQuestListReader.Read(questsPath);
-                if (!Quests.Contains(null))
-                {
-                    Quests.Add(null);
-                }
-                Quests.Sort((a, b) =>
-                {
-                    if (a == null)
-                    {
-                        return -1;
-                    }
-                    else if (b == null)
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return a.Id - b.Id;
-                    }
-                });
-
-            }
-        }
-
-        /// <summary>
-        /// 選択アイテムを追加する。
-        /// 名前未設定だとか、nullなエントリは表示しないようにする。
-        /// </summary>
-        /// <param name="list">追加するリスト</param>
-        /// <param name="sourceList">追加元のリスト</param>
-        private void AddSelectableItems(List<IItem> list, System.Collections.IList sourceList)
-        {
-            foreach (IItem item in sourceList)
-            {
-                if (item == null)
-                {
-                    continue;
-                }
-                if (string.IsNullOrEmpty(item.Name))
-                {
-                    continue;
-                }
-                list.Add(item);
-            }
         }
 
         /// <summary>
@@ -320,7 +230,7 @@ namespace QEditor
         /// <param name="dir">フォルダ</param>
         private void ProcessSave(string dir)
         {
-            DataQuestWriter.Write(dir, Quests);
+            DataQuestWriter.Write(dir, ProjectData.Quests);
         }
 
         /// <summary>
@@ -331,26 +241,28 @@ namespace QEditor
         private void OnButtonChangeItemCountClick(object sender, EventArgs e)
         {
             FormNumberInput form = new FormNumberInput();
-            form.Number = Quests.Count - 1;
+            form.Number = ProjectData.Quests.Count - 1;
             if (form.ShowDialog(this) != DialogResult.OK)
             {
                 return;
             }
 
+            var quests = ProjectData.Quests;
+
             int newCount = form.Number + 1;
-            if (newCount >= Quests.Count)
+            if (newCount >= quests.Count)
             {
-                while (Quests.Count < newCount)
+                while (quests.Count < newCount)
                 {
-                    int id = Quests.Count;
-                    Quests.Add(new DataQuest() { Id = id });
+                    int id = quests.Count;
+                    quests.Add(new DataQuest() { Id = id });
                 }
             }
-            else if (newCount >= Quests.Count)
+            else if (newCount >= quests.Count)
             {
-                while (Quests.Count > newCount)
+                while (quests.Count > newCount)
                 {
-                    Quests.RemoveAt(Quests.Count - 1);
+                    quests.RemoveAt(quests.Count - 1);
                 }
             }
 
@@ -365,10 +277,10 @@ namespace QEditor
             DataTable dt = (DataTable)(dataGridViewQuests.DataSource);
             dt.Clear();
 
-            for (int i = 1; i < Quests.Count; i++)
+            for (int i = 1; i < ProjectData.Quests.Count; i++)
             {
                 var row = dt.NewRow();
-                var quest = Quests[i];
+                var quest = ProjectData.Quests[i];
                 row[0] = string.Format("{0,4:0}:{1}", quest.Id, quest.Name);
                 dt.Rows.Add(row);
             }
@@ -385,35 +297,8 @@ namespace QEditor
             textBoxName.Text = quest?.Name ?? string.Empty;
             comboBoxGuildRank.SelectedIndex = quest?.GuildRank ?? 0;
             textBoxEntrustCondition.Text = quest?.EntrustCondition ?? string.Empty;
-            if (quest != null)
-            {
-                radioButtonQtSubjugation.Checked = (quest.QuestType == 1);
-                radioButtonQtCollection.Checked = (quest.QuestType == 2);
-                radioButtonQtEvent.Checked = (quest.QuestType == 3);
-                if (quest.QuestType == 1)
-                {
-                    comboBoxEnemy.SelectedIndex = quest.Achieve[0];
-                    quest.Achieve[1] = Math.Max(1, Math.Min(100, quest.Achieve[1]));
-                    numericUpDownEnemyCount.Value =quest.Achieve[1];
-                }
-                else if (quest.QuestType == 2)
-                {
-                    comboBoxItem.SelectedIndex = quest.Achieve[0];
-                    quest.Achieve[1] = Math.Max(1, Math.Min(99, quest.Achieve[1]));
-                    numericUpDownItemCount.Value = quest.Achieve[1];
-                }
-                else if (quest.QuestType == 3)
-                {
-                    quest.Achieve[0] = Math.Max(1, Math.Min(9999, quest.Achieve[0]));
-                    numericUpDownSwitch.Value = quest.Achieve[0];
-                }
-            }
-            else
-            {
-                radioButtonQtSubjugation.Checked = false;
-                radioButtonQtCollection.Checked = false;
-                radioButtonQtEvent.Checked = false;
-            }
+            ApplyAchievesToDataTable(quest);
+
             textBoxAchieveMsg.Text = quest?.AchieveMessage ?? string.Empty;
             textBoxDescription.Text = quest?.Description ?? string.Empty;
             textBoxRewardMsg.Text = quest?.RewardsMessage ?? string.Empty;
@@ -429,20 +314,51 @@ namespace QEditor
                 numericUpDownGuildExp.Value = numericUpDownGuildExp.Minimum;
                 numericUpDownRewardGold.Value = numericUpDownRewardGold.Minimum;
             }
+            ApplyRewardItemToDataTable(quest);
+            textBoxNote.Text = quest?.Note ?? string.Empty;
+
+            panelEdit.Enabled = (quest != null);
+        }
+
+        /// <summary>
+        /// クエストのデータを達成条件データテーブルに反映する。
+        /// </summary>
+        /// <param name="quest">クエストデータ</param>
+        private void ApplyAchievesToDataTable(DataQuest quest)
+        {
+            DataTable dt = (DataTable)(dataGridViewAchieves.DataSource);
+            dt.Rows.Clear();
+            if (quest != null)
+            {
+                foreach (var achieve in quest.Achieves)
+                {
+                    var row = dt.NewRow();
+                    SetAchieveRow(row, achieve);
+                    dt.Rows.Add(row);
+                }
+            }
+        }
+
+        /// <summary>
+        /// クエストデータを達成条件データテーブルに反映させる。
+        /// </summary>
+        /// <param name="quest">クエストデータ</param>
+        private void ApplyRewardItemToDataTable(DataQuest quest)
+        {
             DataTable dt = (DataTable)(dataGridViewRewardItems.DataSource);
             dt.Rows.Clear();
             if (quest != null)
             {
                 foreach (var rewardItem in quest.RewardItems)
                 {
-                    var row = dt.NewRow();
-                    SetRewardItemRow(row, rewardItem);
-                    dt.Rows.Add(row);
+                    if (rewardItem != null)
+                    {
+                        var row = dt.NewRow();
+                        SetRewardItemRow(row, rewardItem);
+                        dt.Rows.Add(row);
+                    }
                 }
             }
-            textBoxNote.Text = quest?.Note ?? string.Empty;
-
-            panelEdit.Enabled = (quest != null);
         }
 
         /// <summary>
@@ -452,34 +368,12 @@ namespace QEditor
         /// <param name="rewardItem">RewardItemオブジェクト</param>
         private void SetRewardItemRow(DataRow row, RewardItem rewardItem)
         {
-            row[0] = GetItemName(rewardItem.Kind, rewardItem.DataId);
+            var itemName = ProjectData.GetItemName(rewardItem.Kind, rewardItem.DataId);
+            row[0] = itemName;
             row[1] = rewardItem.Value;
         }
 
-        /// <summary>
-        /// アイテム名を得る。
-        /// </summary>
-        /// <param name="kind">種類</param>
-        /// <param name="id">ID番号</param>
-        /// <returns>報酬アイテム名</returns>
-        private string GetItemName(int kind, int id)
-        {
-            if ((kind == 1) && (id > 0) && (id < items.Count))
-            {
-                return "Item:" + items[id].Name;
-            }
-            else if ((kind == 2) && (id > 0) && (id < weapons.Count))
-            {
-                return "Weapon:" + weapons[id].Name;
-            }
-            else if ((kind == 3) && (id > 0) && (id < armors.Count))
-            {
-                return "Armor:" + armors[id].Name;
-            }
 
-
-            return $"type{kind}:{id}";
-        }
 
         /// <summary>
         /// 現在編集中のクエストデータを取得する。
@@ -493,9 +387,9 @@ namespace QEditor
                 return null;
             }
             int index = rows[0].Index + 1;
-            if ((index >= 0) && (index < Quests.Count))
+            if ((index >= 0) && (index < ProjectData.Quests.Count))
             {
-                return Quests[index];
+                return ProjectData.Quests[index];
             }
             else
             {
@@ -549,114 +443,6 @@ namespace QEditor
             if (quest != null)
             {
                 quest.EntrustCondition = textBoxEntrustCondition.Text;
-            }
-        }
-
-        /// <summary>
-        /// クエストタイプのラジオボタン選択状態が変更されたときに通知を受け取る。
-        /// 本メソッドはradioButtonQtSubjugation/radioButtonQtCollection/radioButtonQtEventの
-        /// イベントを一括で処理する。
-        /// </summary>
-        /// <param name="sender">送信元オブジェクト</param>
-        /// <param name="e">イベントオブジェクト</param>
-        private void OnRadioButtonQtCheckedChanged(object sender, EventArgs e)
-        {
-            RadioButton rb = (RadioButton)(sender);
-            if (rb.Checked)
-            {
-                // OFF->ON時のみ処理する。
-                DataQuest quest = GetCurrentQuest();
-                if (quest != null)
-                {
-                    if (rb == radioButtonQtSubjugation)
-                    {
-                        quest.QuestType = 1;
-                    }
-                    else if (rb == radioButtonQtCollection)
-                    {
-                        quest.QuestType = 2;
-                    }
-                    else if (rb == radioButtonQtEvent)
-                    {
-                        quest.QuestType = 3;
-                    }
-                }
-                radioButtonQtSubjugation.Checked = (rb == radioButtonQtSubjugation);
-                radioButtonQtCollection.Checked = (rb == radioButtonQtCollection);
-                radioButtonQtEvent.Checked = (rb == radioButtonQtEvent);
-            }
-            flowLayoutPanelQtSubjugation.Enabled = radioButtonQtSubjugation.Checked;
-            flowLayoutPanelQtCollection.Enabled = radioButtonQtCollection.Checked;
-            flowLayoutPanelQtEvent.Enabled = radioButtonQtEvent.Checked;
-        }
-
-        /// <summary>
-        /// エネミーコンボボックスの選択が変更されたときに通知を受け取る。
-        /// </summary>
-        /// <param name="sender">送信元オブジェクト</param>
-        /// <param name="e">イベントオブジェクト</param>
-        private void OnComboBoxEnemySelectedIndexChanged(object sender, EventArgs e)
-        {
-            DataQuest quest = GetCurrentQuest();
-            if ((quest != null) && (quest.QuestType == 1))
-            {
-                quest.Achieve[0] = comboBoxEnemy.SelectedIndex;
-            }
-        }
-
-        /// <summary>
-        /// エネミー数入力欄の数値が変更されたときに通知を受け取る。
-        /// </summary>
-        /// <param name="sender">送信元オブジェクト</param>
-        /// <param name="e">イベントオブジェクト</param>
-        private void OnNumericUpDownEnemyCountValueChanged(object sender, EventArgs e)
-        {
-            DataQuest quest = GetCurrentQuest();
-            if ((quest != null) && (quest.QuestType == 1))
-            {
-                quest.Achieve[1] = (int)(numericUpDownEnemyCount.Value);
-            }
-        }
-
-        /// <summary>
-        /// アイテム選択コンボボックスの選択内容が変更されたときに通知を受け取る。
-        /// </summary>
-        /// <param name="sender">送信元オブジェクト</param>
-        /// <param name="e">イベントオブジェクト</param>
-        private void OnComboBoxItemSelectedItemChanged(object sender, EventArgs e)
-        {
-            DataQuest quest = GetCurrentQuest();
-            if ((quest != null) && (quest.QuestType == 2))
-            {
-                quest.Achieve[0] = comboBoxItem.SelectedIndex;
-            }
-        }
-
-        /// <summary>
-        /// アイテム数入力欄の選択内容が変更されたときに通知を受け取る。
-        /// </summary>
-        /// <param name="sender">送信元オブジェクト</param>
-        /// <param name="e">イベントオブジェクト</param>
-        private void OnNumericUpDownItemCountValueChanged(object sender, EventArgs e)
-        {
-            DataQuest quest = GetCurrentQuest();
-            if ((quest != null) && (quest.QuestType == 2))
-            {
-                quest.Achieve[1] = (int)(numericUpDownItemCount.Value);
-            }
-        }
-
-        /// <summary>
-        /// スイッチ番号入力欄の値が変更されたときに通知を受け取る。
-        /// </summary>
-        /// <param name="sender">送信元オブジェクト</param>
-        /// <param name="e">イベントオブジェクト</param>
-        private void OnNumericUpDownSwitchValueChanged(object sender, EventArgs e)
-        {
-            DataQuest quest = GetCurrentQuest();
-            if ((quest != null) && (quest.QuestType == 3))
-            {
-                quest.Achieve[0] = (int)(numericUpDownSwitch.Value);
             }
         }
 
@@ -728,7 +514,7 @@ namespace QEditor
                 itemListForm = new FormSelectableItemList();
                 itemListForm.FormClosed += OnItemListFormClosed;
                 itemListForm.ItemSelected += OnItemListItemSelected;
-                itemListForm.SetItemList(selectableItemList);
+                itemListForm.SetItemList(ProjectData.SelectableItemList);
             }
             itemListForm.Show(this);
         }
@@ -739,6 +525,9 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnItemListFormClosed(object sender, FormClosedEventArgs e)
         {
+            itemListForm.FormClosed -= OnItemListFormClosed;
+            itemListForm.ItemSelected -= OnItemListItemSelected;
+            itemListForm.Dispose();
             itemListForm = null;
         }
 
@@ -843,8 +632,6 @@ namespace QEditor
                     }
                     break;
             }
-            
-
         }
 
         /// <summary>
@@ -878,20 +665,24 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnButtonGenerateDescriptionClick(object sender, EventArgs e)
         {
-            if (radioButtonQtSubjugation.Checked)
-            {
-                string name = comboBoxEnemy.SelectedItem.ToString() ?? "";
-                textBoxDescription.Text = $"{name}を討伐してください。";
-            }
-            else if (radioButtonQtCollection.Checked)
-            {
-                string name = comboBoxItem.SelectedItem.ToString() ?? "";
-                textBoxDescription.Text = $"{name}を集めてきてください。";
-            }
-            else
-            {
-                // 指定不可。
-            }
+
+
+
+
+            //if (radioButtonQtSubjugation.Checked)
+            //{
+            //    string name = comboBoxEnemy.SelectedItem.ToString() ?? "";
+            //    textBoxDescription.Text = $"{name}を討伐してください。";
+            //}
+            //else if (radioButtonQtCollection.Checked)
+            //{
+            //    string name = comboBoxItem.SelectedItem.ToString() ?? "";
+            //    textBoxDescription.Text = $"{name}を集めてきてください。";
+            //}
+            //else
+            //{
+            //    // 指定不可。
+            //}
         }
 
         /// <summary>
@@ -901,20 +692,20 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnButtonGenerateNameClick(object sender, EventArgs e)
         {
-            if (radioButtonQtSubjugation.Checked)
-            {
-                string name = comboBoxEnemy.SelectedItem.ToString() ?? "";
-                textBoxName.Text = $"{name}の討伐";
-            }
-            else if (radioButtonQtCollection.Checked)
-            {
-                string name = comboBoxItem.SelectedItem.ToString() ?? "";
-                textBoxName.Text = $"{name}の採取";
-            }
-            else
-            {
-                // 指定不可。
-            }
+            //if (radioButtonQtSubjugation.Checked)
+            //{
+            //    string name = comboBoxEnemy.SelectedItem.ToString() ?? "";
+            //    textBoxName.Text = $"{name}の討伐";
+            //}
+            //else if (radioButtonQtCollection.Checked)
+            //{
+            //    string name = comboBoxItem.SelectedItem.ToString() ?? "";
+            //    textBoxName.Text = $"{name}の採取";
+            //}
+            //else
+            //{
+            //    // 指定不可。
+            //}
         }
 
         /// <summary>
@@ -924,22 +715,22 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnButtonGenerateAchieveMessageClick(object sender, EventArgs e)
         {
-            if (radioButtonQtSubjugation.Checked)
-            {
-                string name = comboBoxEnemy.SelectedItem.ToString() ?? "";
-                int enemyCount = (int)(numericUpDownEnemyCount.Value);
-                textBoxAchieveMsg.Text = $"{name}を{enemyCount}体討伐する。";
-            }
-            else if (radioButtonQtCollection.Checked)
-            {
-                string name = comboBoxItem.SelectedItem.ToString() ?? "";
-                int itemCount = (int)(numericUpDownItemCount.Value);
-                textBoxAchieveMsg.Text = $"{name}を{itemCount}個集める。";
-            }
-            else
-            {
-                // 指定不可。
-            }
+            //if (radioButtonQtSubjugation.Checked)
+            //{
+            //    string name = comboBoxEnemy.SelectedItem.ToString() ?? "";
+            //    int enemyCount = (int)(numericUpDownEnemyCount.Value);
+            //    textBoxAchieveMsg.Text = $"{name}を{enemyCount}体討伐する。";
+            //}
+            //else if (radioButtonQtCollection.Checked)
+            //{
+            //    string name = comboBoxItem.SelectedItem.ToString() ?? "";
+            //    int itemCount = (int)(numericUpDownItemCount.Value);
+            //    textBoxAchieveMsg.Text = $"{name}を{itemCount}個集める。";
+            //}
+            //else
+            //{
+            //    // 指定不可。
+            //}
         }
 
         /// <summary>
@@ -949,8 +740,8 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnButtonGenerateRewardMessage(object sender, EventArgs e)
         {
-            StringBuilder sb = new StringBuilder();
-            DataQuest quest = GetCurrentQuest();
+            var sb = new StringBuilder();
+            var quest = GetCurrentQuest();
             if (quest == null)
             {
                 return;
@@ -962,7 +753,7 @@ namespace QEditor
             }
             foreach (RewardItem rewardItem in quest.RewardItems)
             {
-                string itemName = GetRewardItemName(rewardItem);
+                string itemName = ProjectData.GetItemName(rewardItem.Kind, rewardItem.DataId); ;
                 int itemCount = rewardItem.Value;
                 if (sb.Length > 0)
                 {
@@ -971,31 +762,6 @@ namespace QEditor
                 sb.Append(itemName).Append('×').Append(itemCount);
             }
             textBoxRewardMsg.Text = (sb.Length > 0) ? sb.ToString() : "なし";
-        }
-
-        /// <summary>
-        /// アイテム名を得る。
-        /// </summary>
-        /// <param name="rewardItem">報酬アイテムエントリ</param>
-        /// <returns>報酬アイテム名</returns>
-        private string GetRewardItemName(RewardItem rewardItem)
-        {
-            int kind = rewardItem.Kind;
-            int id = rewardItem.DataId;
-            if ((kind == 1) && (id > 0) && (id < items.Count))
-            {
-                return items[id].Name;
-            }
-            else if ((kind == 2) && (id > 0) && (id < weapons.Count))
-            {
-                return weapons[id].Name;
-            }
-            else if ((kind == 3) && (id > 0) && (id < armors.Count))
-            {
-                return armors[id].Name;
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -1011,6 +777,90 @@ namespace QEditor
                 return;
             }
             quest.Note = textBoxNote.Text;
+        }
+
+        /// <summary>
+        /// 達成条件追加ボタンがクリックされた時に通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnButtonAchieveAddClick(object sender, EventArgs e)
+        {
+            if (addAchieveForm == null)
+            {
+                addAchieveForm = new FormAddAchieve();
+                addAchieveForm.Parent = this;
+                addAchieveForm.OkClick += OnButtonAddAchiveOkClick;
+                addAchieveForm.FormClosed += OnFormAddAchieveClosed;
+            }
+            addAchieveForm.Show();
+        }
+
+        /// <summary>
+        /// 達成条件選択ウィンドウが閉じられたときに通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnFormAddAchieveClosed(object sender, FormClosedEventArgs e)
+        {
+            addAchieveForm.OkClick -= OnButtonAddAchiveOkClick;
+            addAchieveForm.FormClosed -= OnFormAddAchieveClosed;
+            addAchieveForm.Dispose();
+            addAchieveForm = null;
+        }
+
+        /// <summary>
+        /// 達成条件選択ウィンドウでOKボタンがクリックされた時に通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnButtonAddAchiveOkClick(object sender, EventArgs e)
+        {
+            DataQuest quest = GetCurrentQuest();
+            if (quest == null)
+            {
+                return;
+            }
+            var achieve = addAchieveForm.Achieve;
+            quest.Achieves.Add(achieve);
+
+            DataTable dt = (DataTable)(dataGridViewAchieves.DataSource);
+            var row = dt.NewRow();
+            SetAchieveRow(row, achieve);
+            dt.Rows.Add(row);
+        }
+
+        /// <summary>
+        /// 達成条件データを設定する。
+        /// </summary>
+        /// <param name="row">行</param>
+        /// <param name="achieve">達成条件</param>
+        private void SetAchieveRow(DataRow row, IAchieve achieve)
+        {
+            row[0] = achieve.ToString();
+        }
+
+        /// <summary>
+        /// 達成条件の行が削除されたときの処理を行う。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnDataGridViewAchievesRowRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
+        {
+            DataQuest quest = GetCurrentQuest();
+            if (quest == null)
+            {
+                return;
+            }
+
+            int index = e.RowIndex;
+            for (int count = 0; count < e.RowCount; count++)
+            {
+                if (index < quest.Achieves.Count)
+                {
+                    quest.Achieves.RemoveAt(index);
+                }
+            }
         }
     }
 }

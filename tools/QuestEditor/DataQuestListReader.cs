@@ -43,11 +43,12 @@ namespace QEditor
                 if (parent == null)
                 {
                     return new List<DataQuest>();
-                } else if (parent is DataQuest)
+                }
+                else if (parent is DataQuest)
                 {
-                    if (paramName.Equals("achieve"))
+                    if (paramName.Equals("achieves"))
                     {
-                        return new List<int>();
+                        return new List<DataAchieve>();
                     }
                     else if (paramName.Equals("rewardItems"))
                     {
@@ -73,6 +74,10 @@ namespace QEditor
                 {
                     rewardItems.Add((RewardItem)(data));
                 }
+                else if (array is List<DataAchieve> achieves)
+                {
+                    achieves.Add((DataAchieve)(data));
+                }
                 else if (array is List<int> achieve)
                 {
                     achieve.Add((int)((double)(data)));
@@ -95,6 +100,10 @@ namespace QEditor
                 {
                     return new RewardItem();
                 }
+                else if (parent is List<DataAchieve>)
+                {
+                    return new DataAchieve();
+                }
 
                 throw new Exception("Parse error : " + paramName);
             }
@@ -113,6 +122,10 @@ namespace QEditor
                 else if (dictionary is RewardItem reward)
                 {
                     reward.SetValue(key, data);
+                }
+                else if (dictionary is DataAchieve achieve)
+                {
+                    achieve.SetValue(key, data);
                 }
             }
 

@@ -6,25 +6,30 @@ using System.Threading.Tasks;
 
 namespace QEditor
 {
-    public class AchiveSubjugation : IAchive
+    public class AchieveSubjugation : IAchieve
     {
-        private DataAchive data;
+        private DataAchieve data;
 
         /// <summary>
         /// 討伐達成条件オブジェクトを構築する。
         /// </summary>
         /// <param name="data">データ</param>
-        public AchiveSubjugation(DataAchive data)
+        public AchieveSubjugation(DataAchieve data)
         {
             this.data = data;
-            this.data.Type = (int)(AchiveType.Subjugation);
+            this.data.Type = (int)(AchieveType.Subjugation);
         }
+
+        /// <summary>
+        /// データを得る
+        /// </summary>
+        public DataAchieve Data { get => data; }
 
         /// <summary>
         /// タイプ
         /// </summary>
-        public AchiveType Type {
-            get => AchiveType.Subjugation;
+        public AchieveType Type {
+            get => AchieveType.Subjugation;
         }
         /// <summary>
         /// エネミーID
@@ -35,6 +40,13 @@ namespace QEditor
         /// </summary>
         public int EnemyCount { get => data.Value3; set => data.Value3 = value; }
 
-
+        /// <summary>
+        /// このオブジェクトの文字列表現を得る。
+        /// </summary>
+        /// <returns>文字列</returns>
+        public override string ToString()
+        {
+            return $"Kill {ProjectData.GetEnemyName(EnemyId)}x{EnemyCount}";
+        }
     }
 }

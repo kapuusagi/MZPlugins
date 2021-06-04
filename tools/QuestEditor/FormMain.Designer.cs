@@ -60,23 +60,12 @@
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonGenerateDescription = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.label6 = new System.Windows.Forms.Label();
-            this.radioButtonQtEvent = new System.Windows.Forms.RadioButton();
-            this.radioButtonQtSubjugation = new System.Windows.Forms.RadioButton();
-            this.radioButtonQtCollection = new System.Windows.Forms.RadioButton();
-            this.flowLayoutPanelQtSubjugation = new System.Windows.Forms.FlowLayoutPanel();
-            this.comboBoxEnemy = new System.Windows.Forms.ComboBox();
-            this.numericUpDownEnemyCount = new System.Windows.Forms.NumericUpDown();
-            this.flowLayoutPanelQtCollection = new System.Windows.Forms.FlowLayoutPanel();
-            this.comboBoxItem = new System.Windows.Forms.ComboBox();
-            this.numericUpDownItemCount = new System.Windows.Forms.NumericUpDown();
-            this.flowLayoutPanelQtEvent = new System.Windows.Forms.FlowLayoutPanel();
-            this.label9 = new System.Windows.Forms.Label();
-            this.numericUpDownSwitch = new System.Windows.Forms.NumericUpDown();
-            this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
-            this.label10 = new System.Windows.Forms.Label();
-            this.textBoxAchieveMsg = new System.Windows.Forms.TextBox();
             this.buttonGenerateAchieveMessage = new System.Windows.Forms.Button();
+            this.textBoxAchieveMsg = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.dataGridViewAchieves = new System.Windows.Forms.DataGridView();
+            this.buttonAddAchieve = new System.Windows.Forms.Button();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.label5 = new System.Windows.Forms.Label();
             this.textBoxEntrustCondition = new System.Windows.Forms.TextBox();
@@ -103,13 +92,7 @@
             this.groupBox2.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
-            this.flowLayoutPanelQtSubjugation.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEnemyCount)).BeginInit();
-            this.flowLayoutPanelQtCollection.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownItemCount)).BeginInit();
-            this.flowLayoutPanelQtEvent.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSwitch)).BeginInit();
-            this.tableLayoutPanel7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAchieves)).BeginInit();
             this.tableLayoutPanel3.SuspendLayout();
             this.panel2.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -236,7 +219,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 295);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(476, 252);
+            this.groupBox1.Size = new System.Drawing.Size(371, 252);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Rewards";
@@ -255,7 +238,7 @@
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(470, 113);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(365, 113);
             this.tableLayoutPanel6.TabIndex = 1;
             // 
             // label8
@@ -269,7 +252,7 @@
             // 
             // buttonAddItem
             // 
-            this.buttonAddItem.Location = new System.Drawing.Point(392, 3);
+            this.buttonAddItem.Location = new System.Drawing.Point(287, 3);
             this.buttonAddItem.Name = "buttonAddItem";
             this.buttonAddItem.Size = new System.Drawing.Size(75, 23);
             this.buttonAddItem.TabIndex = 2;
@@ -289,7 +272,7 @@
             this.dataGridViewRewardItems.RowHeadersVisible = false;
             this.dataGridViewRewardItems.RowTemplate.Height = 21;
             this.dataGridViewRewardItems.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewRewardItems.Size = new System.Drawing.Size(344, 107);
+            this.dataGridViewRewardItems.Size = new System.Drawing.Size(239, 107);
             this.dataGridViewRewardItems.TabIndex = 1;
             this.dataGridViewRewardItems.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnDataGridViewRewardItemsCellValueChanged);
             this.dataGridViewRewardItems.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.OnDataGridViewRewardItemsRowsRemoved);
@@ -314,7 +297,7 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(470, 121);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(365, 121);
             this.tableLayoutPanel5.TabIndex = 0;
             // 
             // numericUpDownRewardGold
@@ -357,7 +340,7 @@
             this.textBoxRewardMsg.Location = new System.Drawing.Point(63, 3);
             this.textBoxRewardMsg.Multiline = true;
             this.textBoxRewardMsg.Name = "textBoxRewardMsg";
-            this.textBoxRewardMsg.Size = new System.Drawing.Size(323, 66);
+            this.textBoxRewardMsg.Size = new System.Drawing.Size(218, 66);
             this.textBoxRewardMsg.TabIndex = 0;
             this.textBoxRewardMsg.TextChanged += new System.EventHandler(this.OnTextBoxRewardMsgTextChanged);
             // 
@@ -397,7 +380,7 @@
             // 
             // buttonGenerateRewardMessage
             // 
-            this.buttonGenerateRewardMessage.Location = new System.Drawing.Point(392, 3);
+            this.buttonGenerateRewardMessage.Location = new System.Drawing.Point(287, 3);
             this.buttonGenerateRewardMessage.Name = "buttonGenerateRewardMessage";
             this.buttonGenerateRewardMessage.Size = new System.Drawing.Size(75, 23);
             this.buttonGenerateRewardMessage.TabIndex = 1;
@@ -409,9 +392,9 @@
             // 
             this.groupBox3.Controls.Add(this.textBoxNote);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.groupBox3.Location = new System.Drawing.Point(476, 295);
+            this.groupBox3.Location = new System.Drawing.Point(371, 295);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(124, 252);
+            this.groupBox3.Size = new System.Drawing.Size(229, 252);
             this.groupBox3.TabIndex = 16;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Note";
@@ -423,7 +406,7 @@
             this.textBoxNote.Location = new System.Drawing.Point(3, 15);
             this.textBoxNote.Multiline = true;
             this.textBoxNote.Name = "textBoxNote";
-            this.textBoxNote.Size = new System.Drawing.Size(118, 234);
+            this.textBoxNote.Size = new System.Drawing.Size(223, 234);
             this.textBoxNote.TabIndex = 0;
             this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
             // 
@@ -474,248 +457,82 @@
             // 
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.buttonGenerateAchieveMessage, 2, 1);
+            this.tableLayoutPanel1.Controls.Add(this.textBoxAchieveMsg, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.label10, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.label6, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.radioButtonQtEvent, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.radioButtonQtSubjugation, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.radioButtonQtCollection, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanelQtSubjugation, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanelQtCollection, 2, 1);
-            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanelQtEvent, 2, 2);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel7, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.dataGridViewAchieves, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.buttonAddAchieve, 2, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 76);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25.00062F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25.00063F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25.00063F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 24.99813F));
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 32F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(600, 120);
             this.tableLayoutPanel1.TabIndex = 15;
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(64, 12);
-            this.label6.TabIndex = 0;
-            this.label6.Text = "Quest Type";
-            // 
-            // radioButtonQtEvent
-            // 
-            this.radioButtonQtEvent.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.radioButtonQtEvent.AutoSize = true;
-            this.radioButtonQtEvent.Location = new System.Drawing.Point(73, 67);
-            this.radioButtonQtEvent.Name = "radioButtonQtEvent";
-            this.radioButtonQtEvent.Size = new System.Drawing.Size(52, 16);
-            this.radioButtonQtEvent.TabIndex = 3;
-            this.radioButtonQtEvent.TabStop = true;
-            this.radioButtonQtEvent.Text = "Event";
-            this.radioButtonQtEvent.UseVisualStyleBackColor = true;
-            this.radioButtonQtEvent.CheckedChanged += new System.EventHandler(this.OnRadioButtonQtCheckedChanged);
-            // 
-            // radioButtonQtSubjugation
-            // 
-            this.radioButtonQtSubjugation.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.radioButtonQtSubjugation.AutoSize = true;
-            this.radioButtonQtSubjugation.Location = new System.Drawing.Point(73, 7);
-            this.radioButtonQtSubjugation.Name = "radioButtonQtSubjugation";
-            this.radioButtonQtSubjugation.Size = new System.Drawing.Size(82, 16);
-            this.radioButtonQtSubjugation.TabIndex = 1;
-            this.radioButtonQtSubjugation.TabStop = true;
-            this.radioButtonQtSubjugation.Text = "Subjugation";
-            this.radioButtonQtSubjugation.UseVisualStyleBackColor = true;
-            this.radioButtonQtSubjugation.CheckedChanged += new System.EventHandler(this.OnRadioButtonQtCheckedChanged);
-            // 
-            // radioButtonQtCollection
-            // 
-            this.radioButtonQtCollection.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.radioButtonQtCollection.AutoSize = true;
-            this.radioButtonQtCollection.Location = new System.Drawing.Point(73, 37);
-            this.radioButtonQtCollection.Name = "radioButtonQtCollection";
-            this.radioButtonQtCollection.Size = new System.Drawing.Size(74, 16);
-            this.radioButtonQtCollection.TabIndex = 2;
-            this.radioButtonQtCollection.TabStop = true;
-            this.radioButtonQtCollection.Text = "Collection";
-            this.radioButtonQtCollection.UseVisualStyleBackColor = true;
-            this.radioButtonQtCollection.CheckedChanged += new System.EventHandler(this.OnRadioButtonQtCheckedChanged);
-            // 
-            // flowLayoutPanelQtSubjugation
-            // 
-            this.flowLayoutPanelQtSubjugation.Controls.Add(this.comboBoxEnemy);
-            this.flowLayoutPanelQtSubjugation.Controls.Add(this.numericUpDownEnemyCount);
-            this.flowLayoutPanelQtSubjugation.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanelQtSubjugation.Location = new System.Drawing.Point(161, 3);
-            this.flowLayoutPanelQtSubjugation.Name = "flowLayoutPanelQtSubjugation";
-            this.flowLayoutPanelQtSubjugation.Size = new System.Drawing.Size(436, 24);
-            this.flowLayoutPanelQtSubjugation.TabIndex = 15;
-            // 
-            // comboBoxEnemy
-            // 
-            this.comboBoxEnemy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxEnemy.FormattingEnabled = true;
-            this.comboBoxEnemy.Location = new System.Drawing.Point(3, 3);
-            this.comboBoxEnemy.Name = "comboBoxEnemy";
-            this.comboBoxEnemy.Size = new System.Drawing.Size(160, 20);
-            this.comboBoxEnemy.TabIndex = 0;
-            this.comboBoxEnemy.SelectedIndexChanged += new System.EventHandler(this.OnComboBoxEnemySelectedIndexChanged);
-            // 
-            // numericUpDownEnemyCount
-            // 
-            this.numericUpDownEnemyCount.Location = new System.Drawing.Point(169, 3);
-            this.numericUpDownEnemyCount.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDownEnemyCount.Name = "numericUpDownEnemyCount";
-            this.numericUpDownEnemyCount.Size = new System.Drawing.Size(79, 19);
-            this.numericUpDownEnemyCount.TabIndex = 1;
-            this.numericUpDownEnemyCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.numericUpDownEnemyCount.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDownEnemyCount.ValueChanged += new System.EventHandler(this.OnNumericUpDownEnemyCountValueChanged);
-            // 
-            // flowLayoutPanelQtCollection
-            // 
-            this.flowLayoutPanelQtCollection.Controls.Add(this.comboBoxItem);
-            this.flowLayoutPanelQtCollection.Controls.Add(this.numericUpDownItemCount);
-            this.flowLayoutPanelQtCollection.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanelQtCollection.Location = new System.Drawing.Point(161, 33);
-            this.flowLayoutPanelQtCollection.Name = "flowLayoutPanelQtCollection";
-            this.flowLayoutPanelQtCollection.Size = new System.Drawing.Size(436, 24);
-            this.flowLayoutPanelQtCollection.TabIndex = 16;
-            // 
-            // comboBoxItem
-            // 
-            this.comboBoxItem.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxItem.FormattingEnabled = true;
-            this.comboBoxItem.Location = new System.Drawing.Point(3, 3);
-            this.comboBoxItem.Name = "comboBoxItem";
-            this.comboBoxItem.Size = new System.Drawing.Size(160, 20);
-            this.comboBoxItem.TabIndex = 0;
-            this.comboBoxItem.SelectedValueChanged += new System.EventHandler(this.OnComboBoxItemSelectedItemChanged);
-            // 
-            // numericUpDownItemCount
-            // 
-            this.numericUpDownItemCount.Location = new System.Drawing.Point(169, 3);
-            this.numericUpDownItemCount.Maximum = new decimal(new int[] {
-            99,
-            0,
-            0,
-            0});
-            this.numericUpDownItemCount.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDownItemCount.Name = "numericUpDownItemCount";
-            this.numericUpDownItemCount.Size = new System.Drawing.Size(79, 19);
-            this.numericUpDownItemCount.TabIndex = 1;
-            this.numericUpDownItemCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.numericUpDownItemCount.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDownItemCount.ValueChanged += new System.EventHandler(this.OnNumericUpDownItemCountValueChanged);
-            // 
-            // flowLayoutPanelQtEvent
-            // 
-            this.flowLayoutPanelQtEvent.Controls.Add(this.label9);
-            this.flowLayoutPanelQtEvent.Controls.Add(this.numericUpDownSwitch);
-            this.flowLayoutPanelQtEvent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanelQtEvent.Location = new System.Drawing.Point(161, 63);
-            this.flowLayoutPanelQtEvent.Name = "flowLayoutPanelQtEvent";
-            this.flowLayoutPanelQtEvent.Size = new System.Drawing.Size(436, 24);
-            this.flowLayoutPanelQtEvent.TabIndex = 17;
-            // 
-            // label9
-            // 
-            this.label9.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(3, 6);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(39, 12);
-            this.label9.TabIndex = 0;
-            this.label9.Text = "Switch";
-            // 
-            // numericUpDownSwitch
-            // 
-            this.numericUpDownSwitch.Location = new System.Drawing.Point(48, 3);
-            this.numericUpDownSwitch.Maximum = new decimal(new int[] {
-            9999,
-            0,
-            0,
-            0});
-            this.numericUpDownSwitch.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDownSwitch.Name = "numericUpDownSwitch";
-            this.numericUpDownSwitch.Size = new System.Drawing.Size(76, 19);
-            this.numericUpDownSwitch.TabIndex = 1;
-            this.numericUpDownSwitch.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDownSwitch.ValueChanged += new System.EventHandler(this.OnNumericUpDownSwitchValueChanged);
-            // 
-            // tableLayoutPanel7
-            // 
-            this.tableLayoutPanel7.ColumnCount = 3;
-            this.tableLayoutPanel1.SetColumnSpan(this.tableLayoutPanel7, 3);
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel7.Controls.Add(this.label10, 0, 0);
-            this.tableLayoutPanel7.Controls.Add(this.textBoxAchieveMsg, 1, 0);
-            this.tableLayoutPanel7.Controls.Add(this.buttonGenerateAchieveMessage, 2, 0);
-            this.tableLayoutPanel7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel7.Location = new System.Drawing.Point(3, 93);
-            this.tableLayoutPanel7.Name = "tableLayoutPanel7";
-            this.tableLayoutPanel7.RowCount = 1;
-            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(594, 24);
-            this.tableLayoutPanel7.TabIndex = 18;
-            // 
-            // label10
-            // 
-            this.label10.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(3, 6);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(73, 12);
-            this.label10.TabIndex = 0;
-            this.label10.Text = "Achieve Msg.";
-            // 
-            // textBoxAchieveMsg
-            // 
-            this.textBoxAchieveMsg.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxAchieveMsg.Location = new System.Drawing.Point(82, 3);
-            this.textBoxAchieveMsg.Name = "textBoxAchieveMsg";
-            this.textBoxAchieveMsg.Size = new System.Drawing.Size(428, 19);
-            this.textBoxAchieveMsg.TabIndex = 1;
-            this.textBoxAchieveMsg.TextChanged += new System.EventHandler(this.OnTextBoxAchieveMsgTextChanged);
-            // 
             // buttonGenerateAchieveMessage
             // 
-            this.buttonGenerateAchieveMessage.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.buttonGenerateAchieveMessage.Location = new System.Drawing.Point(516, 3);
+            this.buttonGenerateAchieveMessage.Location = new System.Drawing.Point(522, 91);
             this.buttonGenerateAchieveMessage.Name = "buttonGenerateAchieveMessage";
             this.buttonGenerateAchieveMessage.Size = new System.Drawing.Size(75, 18);
             this.buttonGenerateAchieveMessage.TabIndex = 2;
             this.buttonGenerateAchieveMessage.Text = "Generate";
             this.buttonGenerateAchieveMessage.UseVisualStyleBackColor = true;
             this.buttonGenerateAchieveMessage.Click += new System.EventHandler(this.OnButtonGenerateAchieveMessageClick);
+            // 
+            // textBoxAchieveMsg
+            // 
+            this.textBoxAchieveMsg.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxAchieveMsg.Location = new System.Drawing.Point(82, 91);
+            this.textBoxAchieveMsg.Multiline = true;
+            this.textBoxAchieveMsg.Name = "textBoxAchieveMsg";
+            this.textBoxAchieveMsg.Size = new System.Drawing.Size(434, 26);
+            this.textBoxAchieveMsg.TabIndex = 1;
+            this.textBoxAchieveMsg.TextChanged += new System.EventHandler(this.OnTextBoxAchieveMsgTextChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(3, 88);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(73, 12);
+            this.label10.TabIndex = 0;
+            this.label10.Text = "Achieve Msg.";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(3, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(52, 12);
+            this.label6.TabIndex = 0;
+            this.label6.Text = "Achieves";
+            // 
+            // dataGridViewAchieves
+            // 
+            this.dataGridViewAchieves.AllowUserToAddRows = false;
+            this.dataGridViewAchieves.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewAchieves.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridViewAchieves.Location = new System.Drawing.Point(82, 3);
+            this.dataGridViewAchieves.Name = "dataGridViewAchieves";
+            this.dataGridViewAchieves.RowTemplate.Height = 21;
+            this.dataGridViewAchieves.Size = new System.Drawing.Size(434, 82);
+            this.dataGridViewAchieves.TabIndex = 19;
+            this.dataGridViewAchieves.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.OnDataGridViewAchievesRowRemoved);
+            // 
+            // buttonAddAchieve
+            // 
+            this.buttonAddAchieve.Location = new System.Drawing.Point(522, 3);
+            this.buttonAddAchieve.Name = "buttonAddAchieve";
+            this.buttonAddAchieve.Size = new System.Drawing.Size(75, 23);
+            this.buttonAddAchieve.TabIndex = 20;
+            this.buttonAddAchieve.Text = "Add";
+            this.buttonAddAchieve.UseVisualStyleBackColor = true;
+            this.buttonAddAchieve.Click += new System.EventHandler(this.OnButtonAchieveAddClick);
             // 
             // tableLayoutPanel3
             // 
@@ -890,15 +707,7 @@
             this.flowLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
-            this.flowLayoutPanelQtSubjugation.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEnemyCount)).EndInit();
-            this.flowLayoutPanelQtCollection.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownItemCount)).EndInit();
-            this.flowLayoutPanelQtEvent.ResumeLayout(false);
-            this.flowLayoutPanelQtEvent.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSwitch)).EndInit();
-            this.tableLayoutPanel7.ResumeLayout(false);
-            this.tableLayoutPanel7.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAchieves)).EndInit();
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
             this.panel2.ResumeLayout(false);
@@ -938,9 +747,6 @@
         private System.Windows.Forms.NumericUpDown numericUpDownGuildExp;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.RadioButton radioButtonQtEvent;
-        private System.Windows.Forms.RadioButton radioButtonQtSubjugation;
-        private System.Windows.Forms.RadioButton radioButtonQtCollection;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBoxEntrustCondition;
@@ -953,25 +759,17 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBoxGuildRank;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelQtSubjugation;
-        private System.Windows.Forms.ComboBox comboBoxEnemy;
-        private System.Windows.Forms.NumericUpDown numericUpDownEnemyCount;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelQtCollection;
-        private System.Windows.Forms.ComboBox comboBoxItem;
-        private System.Windows.Forms.NumericUpDown numericUpDownItemCount;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelQtEvent;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.NumericUpDown numericUpDownSwitch;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.TextBox textBoxAchieveMsg;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
         private System.Windows.Forms.Button buttonGenerateDescription;
         private System.Windows.Forms.Button buttonGenerateName;
-        private System.Windows.Forms.Button buttonGenerateAchieveMessage;
         private System.Windows.Forms.Button buttonGenerateRewardMessage;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.TextBox textBoxNote;
+        private System.Windows.Forms.Button buttonGenerateAchieveMessage;
+        private System.Windows.Forms.TextBox textBoxAchieveMsg;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.DataGridView dataGridViewAchieves;
+        private System.Windows.Forms.Button buttonAddAchieve;
     }
 }
 

@@ -10,25 +10,30 @@ namespace QEditor
     /// <summary>
     /// 採取条件
     /// </summary>
-    public class AchiveCollection : IAchive
+    public class AchieveCollection : IAchieve
     {
-        private DataAchive data;
+        private DataAchieve data;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="data"></param>
-        public AchiveCollection(DataAchive data)
+        public AchieveCollection(DataAchieve data)
         {
             this.data = data;
-            data.Type = (int)(AchiveType.Collection);
+            data.Type = (int)(AchieveType.Collection);
         }
+        /// <summary>
+        /// データを得る
+        /// </summary>
+        public DataAchieve Data { get => data; }
+
         /// <summary>
         /// 達成条件の種類を得る。
         /// </summary>
-        public AchiveType Type { get => AchiveType.Collection; }
+        public AchieveType Type { get => AchieveType.Collection; }
 
         /// <summary>
-        /// アイテム種類
+        /// アイテム種類(1:アイテム,2:武器,3:防具)
         /// </summary>
         public ItemType ItemType {
             get => (ItemType)(Enum.ToObject(typeof(ItemType), data.Value1));
@@ -48,6 +53,15 @@ namespace QEditor
         public int Count {
             get => data.Value3;
             set => data.Value3 = value;
+        }
+
+        /// <summary>
+        /// このオブジェクトの文字列表現を得る。
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return $"Correct {ProjectData.GetItemName(data.Value1, ItemId)}x{Count}";
         }
     }
 }

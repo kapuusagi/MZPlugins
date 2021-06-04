@@ -46,15 +46,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AchiveCollection.cs" />
-    <Compile Include="AchiveEvent.cs" />
-    <Compile Include="AchiveSubjugation.cs" />
-    <Compile Include="AchiveType.cs" />
-    <Compile Include="DataAchive.cs" />
+    <Compile Include="AchieveCollection.cs" />
+    <Compile Include="AchieveEvent.cs" />
+    <Compile Include="AchieveSubjugation.cs" />
+    <Compile Include="AchieveType.cs" />
+    <Compile Include="DataAchieve.cs" />
     <Compile Include="DataQuest.cs" />
     <Compile Include="DataQuestWriter.cs" />
     <Compile Include="DataQuestListReader.cs" />
     <Compile Include="FolderSelectDialog.cs" />
+    <Compile Include="FormAddAchieve.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAddAchieve.Designer.cs">
+      <DependentUpon>FormAddAchieve.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -73,11 +79,15 @@
     <Compile Include="FormSelectableItemList.designer.cs">
       <DependentUpon>FormSelectableItemList.cs</DependentUpon>
     </Compile>
-    <Compile Include="IAchive.cs" />
+    <Compile Include="IAchieve.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ProjectData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RewardItem.cs" />
     <Compile Include="Settings.cs" />
+    <EmbeddedResource Include="FormAddAchieve.resx">
+      <DependentUpon>FormAddAchieve.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>

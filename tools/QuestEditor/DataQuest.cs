@@ -34,12 +34,8 @@ namespace QEditor
         public int QuestType { get; set; } = 0;
         /// <summary>
         /// 達成条件データ
-        /// 内容はクエストタイプに依存。
-        /// 討伐クエスト： 0:エネミーID   1:数量
-        /// 採取クエスト： 0:アイテムID（Itemのみ指定可能） 1:数量
-        /// イベント； 0:スイッチ番号 1:(未使用)
         /// </summary>
-        public int[] Achieve { get; private set; } = new int[2];
+        public List<IAchieve> Achieves { get; private set; } = new List<IAchieve>();
         /// <summary>
         /// 報酬金額
         /// </summary>
@@ -95,16 +91,13 @@ namespace QEditor
                     break;
                 case "achieve":
                     {
-                        List<int> array = (List<int>)(value);
-                        for (int i = 0; i < 2; i++)
+                        Achieves.Clear();
+                        foreach (var dataAchieve in (List<DataAchieve>)(value))
                         {
-                            if (i < array.Count)
+                            IAchieve achieve = GetAchieveObject(dataAchieve);
+                            if (achieve != null)
                             {
-                                Achieve[i] = array[i];
-                            }
-                            else
-                            {
-                                Achieve[i] = 0;
+                                Achieves.Add(achieve);
                             }
                         }
                     }
@@ -135,6 +128,27 @@ namespace QEditor
         }
 
         /// <summary>
+        /// 達成条件オブジェクトを得る。
+        /// </summary>
+        /// <param name="dataAchieve">データ</param>
+        /// <returns>達成条件オブジェクト。</returns>
+        private IAchieve GetAchieveObject(DataAchieve dataAchieve)
+        {
+            var type = (AchieveType)(Enum.ToObject(typeof(AchieveType), dataAchieve.Type));
+            switch (type)
+            {
+                case AchieveType.Subjugation:
+                    return new AchieveSubjugation(dataAchieve);
+                case AchieveType.Collection:
+                    return new AchieveCollection(dataAchieve);
+                case AchieveType.Event:
+                    return new AchieveEvent(dataAchieve);
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
         /// このオブジェクトの文字列表現を得る。
         /// </summary>
         /// <returns>文字列表現</returns>
@@ -146,7 +160,8 @@ namespace QEditor
             job.Append("guildExp", GuildExp);
             job.Append("entrustCondition", EntrustCondition);
             job.Append("qtype", QuestType);
-            job.Append("achieve", Achieve);
+            var achieves = Achieves.Select(a => a.Data).ToArray();
+            job.Append("achieves", achieves);
             job.Append("rewardGold", RewardGold);
             job.Append("rewardItems", RewardItems);
             job.Append("name", Name);

@@ -6,11 +6,15 @@ using System.Threading.Tasks;
 
 namespace QEditor
 {
-    interface IAchive
+    public interface IAchieve
     {
         /// <summary>
         /// 達成条件タイプ
         /// </summary>
-        AchiveType Type { get; }
+        AchieveType Type { get; }
+        /// <summary>
+        /// データを得る
+        /// </summary>
+        DataAchieve Data { get; }
     }
 }
