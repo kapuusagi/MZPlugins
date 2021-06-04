@@ -29,6 +29,8 @@
  * @desc 輝度(0～255)。255にすると全表示。0にすると範囲外が真っ暗。
  * @type number
  * @default 0
+ * @min 0
+ * @max 255
  * 
  * @arg duration
  * @text 変更時間
@@ -36,6 +38,11 @@
  * @type number
  * @default 0
  * 
+ * @arg isWait
+ * @text 変更を待つ
+ * @desc 変更を待つ場合にはtrue, 待たない場合にはfalse
+ * @type boolean
+ * @default true
  * 
  * @command changeEventBrightness
  * @text イベントの光源強度変更
@@ -252,10 +259,15 @@
         }
     });
 
-    PluginManager.registerCommand(pluginName, "setFilterBrightness", args => {
+    PluginManager.registerCommand(pluginName, "setFilterBrightness", function(args) {
+        const interpreter = this;
         const brightness = Math.round(Number(args.brightness) || 0).clamp(0, 255);
         const duration = Number(args.duration) || 0;
+        const isWait = (args.isWait === undefined) ? false : (args.isWait === "true");
         $gameScreen.changeDarknessFilterBrightness(brightness, duration);
+        if (isWait) {
+            interpreter.wait(duration);
+        }
     });
 
     PluginManager.registerCommand(pluginName, "changeEventBrightness", args => {
@@ -964,7 +976,7 @@
     Game_Screen.prototype.updateDarknessFilterBrightness = function() {
         if (this._darknessFilterBrightnessDuration > 0) {
             const d = this._darknessFilterBrightnessDuration;
-            this._darknessFilterBrightness = (this._darknessFilterBrightness * (d - 1) + this._darknessFilterBrightnessTarget / d);
+            this._darknessFilterBrightness = (this._darknessFilterBrightness * (d - 1) + this._darknessFilterBrightnessTarget) / d;
             this._darknessFilterBrightnessDuration--;
         }
     };
