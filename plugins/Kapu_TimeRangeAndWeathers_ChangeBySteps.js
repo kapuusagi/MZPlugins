@@ -38,7 +38,8 @@
  * @param stepsOfEvening
  * @text 経過歩数(夕方)
  * @desc 夕方の時間帯を維持する歩数
- * @type 16
+ * @type number
+ * @default 16
  * 
  * @param stepsOfNight
  * @text 経過歩数(夜)
@@ -70,6 +71,18 @@
  * @desc 時間帯/天候エフェクトを反映させるとき、遷移にかける時間[フレーム数]
  * @type number
  * @default 120
+ * 
+ * @param initialStepTimeRangeChange
+ * @text 開始時ステップによる時間変更有効状態
+ * @desc ニューゲーム開始時歩数による時間帯遷移を有効にする場合にはtrue
+ * @type boolean
+ * @default false
+ * 
+ * @param initialStepWeatherChange
+ * @text 開始時ステップによる天候変更有効状態
+ * @desc ニューゲーム開始時歩数による時間帯遷移を有効にする場合にはtrue
+ * @type boolean
+ * @default false
  * 
  * 
  * @help 
@@ -111,6 +124,11 @@
     const dayilyCommonEventId = Math.round(Number(parameters["dayilyCommonEventId"]) || 0);
     const stepsOfWether = Number(parameters["stepsOfWether"]) || 32;
     const effectDuration = Math.max(0, Math.round(parameters["effectDuration"]) || 60);
+    const initialStepTimeRangeChange = (parameters["initialStepTimeRangeChange"] === undefined)
+            ? false : (parameters["initialStepTimeRangeChange"] === "true");
+    const initialStepWeatherChange = (parameters["initialStepWeatherChange"] === undefined)
+            ? false : (parameters["initialStepWeatherChange"] === "true");
+
 
     const stepCountOfTimeRanges = [];
     stepCountOfTimeRanges[Game_Map.TIMERANGE_MORNING] = Number(parameters["stepsOfMorning"]) || 16;
@@ -179,8 +197,8 @@
      */
     Game_Map.prototype.initialize = function() {
         _Game_Map_initialize.call(this);
-        this._changeTimeRangeBySteps = false; // 歩行による時間帯操作が有効
-        this._changeWeatherBySteps = false; // 歩行による天候操作が有効
+        this._changeTimeRangeBySteps = initialStepTimeRangeChange; // 歩行による時間帯操作が有効
+        this._changeWeatherBySteps = initialStepWeatherChange; // 歩行による天候操作が有効
         this._changeTimeRangeMap = false; // 歩行による時間帯変更が有効なマップ
         this._changeWeatherMap = false; // 歩行による天候変更が有効なマップ
         this._regionWeathers = [];
@@ -246,32 +264,21 @@
         }
     };
 
-    const _Game_Map_changeTimeRange = Game_Map.prototype.changeTimeRange;
+
+    const _Game_Map_onTimeRangeEnter = Game_Map.prototype.onTimeRangeEnter;
     /**
-     * 時間帯を変更する。
-     * 
-     * @param {number} timeRange 時間帯
-     * @param {number} duration 変化にかける時間[フレーム数]。0にすると即座に適用
+     * 時間帯がONになるときの処理を行う。
      */
-    Game_Map.prototype.changeTimeRange = function(timeRange, duration) {
-        const prevTimeRange = this._timeRange;
-        _Game_Map_changeTimeRange.call(this, timeRange, duration);
-        if ((prevTimeRange !== this._timeRange) && (timeRange === Game_Map.TIMERANGE_MORNING)) {
-            // 日付が変わった
+    Game_Map.prototype.onTimeRangeEnter = function() {
+        _Game_Map_onTimeRangeEnter.call(this);
+        if (this._timeRange === Game_Map.TIMERANGE_MORNING) {
             if (dayilyCommonEventId > 0) {
                 $gameTemp.reserveCommonEvent(dayilyCommonEventId);
             }
         }
     };
 
-    /**
-     * 次の時間帯に遷移させる。
-     */
-    Game_Map.prototype.changeNextTimeRange = function() {
-        const nextTimeRange =  (this._timeRange === Game_Map.TIMERANGE_MIDNIGHT)
-                ? Game_Map.TIMERANGE_MORNING : (this._timeRange + 1);
-        this.changeTimeRange(nextTimeRange, effectDuration);
-    };
+
 
     /**
      * 歩数による時間帯変更が有効かどうかを得る。
@@ -383,18 +390,20 @@
      */
     Game_Player.prototype.updateNonmoving = function(wasMoving, sceneActive) {
         _Game_Player_updateNonmoving.call(this, wasMoving, sceneActive);
-        if (!$gameMap.isEventRunning() && wasMoving) {
+        if (wasMoving) {
             const appendCount = Math.pow(2, 4 - this.moveSpeed());
             if ($gameMap.isChangeTimeRangeMap()) {
                 this._stepCounterOfTimeRange += appendCount;
                 if (this._stepCounterOfTimeRange >= $gameMap.stepCountOfTimeRange()) {
-                    $gameMap.changeNextTimeRange();
+                    $gameMap.changeNextTimeRange(effectDuration);
+                    this._stepCounterOfTimeRange = 0;
                 }
             }
             if ($gameMap.isChangeWeatherMap()) {
                 this._stepCounterOfWeather += appendCount;
                 if (this._stepCounterOfWeather >= $gameMap.stepCountOfWeather()) {
                     $gameMap.changeWeatherRandom();
+                    this._stepCounterOfWeather = 0;
                 }
             }
         }
