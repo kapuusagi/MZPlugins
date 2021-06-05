@@ -704,7 +704,7 @@ $dataWeathers = [];
                 this.onTimeRangeLeave()
                 this._timeRange = timeRange;
                 this.onTimeRangeEnter();
-                this.SuperWeatherEffects(duration);
+                this.applyTimeRangeAndWeatherEffects(duration);
             }
         }
     };
