@@ -130,12 +130,12 @@
             ? false : (parameters["initialStepWeatherChange"] === "true");
 
 
-    const stepCountOfTimeRanges = [];
-    stepCountOfTimeRanges[Game_Map.TIMERANGE_MORNING] = Number(parameters["stepsOfMorning"]) || 16;
-    stepCountOfTimeRanges[Game_Map.TIMERANGE_NOON] = Number(parameters["stepsOfNoon"]) || 128;
-    stepCountOfTimeRanges[Game_Map.TIMERANGE_EVENING] = Number(parameters["stepsOfEvening"]) || 16;
-    stepCountOfTimeRanges[Game_Map.TIMERANGE_NIGHT] = Number(parameters["stepsOfNight"]) || 64;
-    stepCountOfTimeRanges[Game_Map.TIMERANGE_MIDNIGHT] = Number(parameters["stepsOfMidNight"]) || 64;
+    
+    $dataTimeRanges[Game_Map.TIMERANGE_MORNING].stepCount = Number(parameters["stepsOfMorning"]) || 16;
+    $dataTimeRanges[Game_Map.TIMERANGE_NOON].stepCount = Number(parameters["stepsOfNoon"]) || 128;
+    $dataTimeRanges[Game_Map.TIMERANGE_EVENING].stepCount = Number(parameters["stepsOfEvening"]) || 16;
+    $dataTimeRanges[Game_Map.TIMERANGE_NIGHT].stepCount = Number(parameters["stepsOfNight"]) || 64;
+    $dataTimeRanges[Game_Map.TIMERANGE_MIDNIGHT].stepCount = Number(parameters["stepsOfMidNight"]) || 64;
 
     PluginManager.registerCommand(pluginName, "changeStepEnable", args => {
         const isChangeTimeRange = (args.isChangeTimeRange === undefined)
@@ -295,7 +295,8 @@
      * @returns {number} 歩数
      */
     Game_Map.prototype.stepCountOfTimeRange = function() {
-        return stepCountOfTimeRanges[this._timeRange] || 0;
+        const timeRange = $dataTimeRanges[this._timeRange];
+        return (timeRange) ? timeRange.stepCount : 0;
     };
 
     /**
