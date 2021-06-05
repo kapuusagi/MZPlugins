@@ -704,7 +704,7 @@ $dataWeathers = [];
                 this.onTimeRangeLeave()
                 this._timeRange = timeRange;
                 this.onTimeRangeEnter();
-                this.applyTimeRangeAndWeatherEffects(duration);
+                this.SuperWeatherEffects(duration);
             }
         }
     };
@@ -1020,7 +1020,7 @@ $dataWeathers = [];
      * @returns {number} 不意打ち率
      */
     Game_Map.prototype.rateSurprise = function() {
-        return _Game_Map_rateSurprise.call(this) + this.rateSurpriseTimeRange() + this.rateSurpriseWeather();
+        return Math.max(0, _Game_Map_rateSurprise.call(this) + this.rateSurpriseTimeRange() + this.rateSurpriseWeather());
     }; 
 
     /**
@@ -1030,7 +1030,7 @@ $dataWeathers = [];
      */
     Game_Map.prototype.rateSurpriseTimeRange = function() {
         const timeRange = this.currentTimeRange();
-        return (this._isMapTimeRangeEnabled && timeRange) ? timeRange.surpriseRate : 0;
+        return (this._isMapTimeRangeEnabled && timeRange) ? (timeRange.surpriseRate - 1) : 0;
     };
 
     /**
@@ -1040,7 +1040,7 @@ $dataWeathers = [];
      */
     Game_Map.prototype.rateSurpriseWeather = function() {
         const weather = this.currentWeather();
-        return (this._isMapWeatherEnabled && weather) ? weather.surpriseRate : 0;
+        return (this._isMapWeatherEnabled && weather) ? (weather.surpriseRate - 1) : 0;
     };
 
     const _Game_Map_encounterProgressValue = Game_Map.prototype.encounterProgressValue;
