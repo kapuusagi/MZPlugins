@@ -3,8 +3,8 @@
  * @plugindesc マップを歩くと時間帯と天候が変わるようにするプラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_TimeRangeAndWeathers
- * @orderAfter Kapu_TimeRangeAndWeathers
+ * @base Kapu_TimeRangeAndWeather
+ * @orderAfter Kapu_TimeRangeAndWeather
  * 
  * @command changeStepEnable
  * @text 歩数による変更制御ON/OFF
