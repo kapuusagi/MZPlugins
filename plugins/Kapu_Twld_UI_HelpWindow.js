@@ -31,16 +31,11 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 (() => {
     // const pluginName = "Kapu_Twld_UI_HelpWindow";
     // const parameters = PluginManager.parameters(pluginName);
-
-    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-    //     // TODO : コマンドの処理。
-    //     // パラメータメンバは @argで指定した名前でアクセスできる。
-    // });
 
     //------------------------------------------------------------------------------
     // Window_Help
@@ -52,14 +47,14 @@
      */
     Window_Help.prototype.initialize = function(rect) {
         _Window_Help_initialize.call(this, rect);
+        this.initMembers();
+        this._clearRequired = false;
     };
 
     /**
      * メンバを初期化する。
      */
     Window_Help.prototype.initMembers = function() {
-        this._text = "";
-        this._textState = null;
         this._textState = null;
         this._waitCount = 0;
         this.clearFlags();
@@ -83,12 +78,13 @@
     Window_Help.prototype.setText = function(text) {
         if (this._text !== text) {
             this._text = text;
-            const textState = this.createTextState(this._text, 0, 0, 0);
+            const textState = this.createTextState(text, 0, 0, 0);
             textState.x = this.newLineX(textState);
             textState.startX = textState.x;
             this._textState = textState;
             this.newPage(this._textState);
         }
+        this._clearRequired = false;
     };
     /**
      * メッセージ改ページする。
@@ -118,18 +114,28 @@
      * 表示テキストをクリアする。
      * 
      * !!!overwrite!!! Window_Help.clear()
+     *     Window_Selectable.updateHelpからclear()が呼ばれて、ウィンドウがメッセージ表示途中でクリアされ、
+     *     正しく表示されなくなるためオーバーライドする。
+     *     代わりにclearRequiredフラグをセットし、update()の中でコンテンツのクリアを行うようにする。
+     *     ヘルプメッセージを表示する制御をしている場合、clear()の後にsetText()が呼ばれるので、
+     *     setTextが呼ばれた場合にはclearRequiredフラグは解除する。
+     *     異なるテキストを表示する場合にはウィンドウがクリアされるし、
+     *     同じテキストを表示するならば変更はなくメッセージ表示が継続される。
+     *     
      */
     Window_Help.prototype.clear = function() {
-        this.contents.clear();
-        this.initMembers();
+        this._clearRequired = true;
     };
 
-    const _Window_Help_update = Window_help.prototype.update;
+    const _Window_Help_update = Window_Help.prototype.update;
     /**
      * 更新する。
      */
-    Window_help.prototype.update = function() {
+    Window_Help.prototype.update = function() {
         _Window_Help_update.call(this);
+        if (this._clearRequired) {
+            this.contents.clear();
+        }
         while (!this.isOpening() && !this.isClosing()) {
             if (this.updateWait()) {
                 return ; // ウェイト継続
@@ -208,7 +214,22 @@
             this._showFast = true;
         }
     };
-
+    /**
+     * トリガーされているかどうかを得る。
+     * 
+     * @returns {boolean} トリガーされていたらtrue, それ以外はfalse.
+     */
+    Window_Help.prototype.isTriggered = function() {
+        if (this.active) {
+            return (
+                Input.isRepeated("ok") ||
+                Input.isRepeated("cancel") ||
+                TouchInput.isRepeated()
+            );
+        } else {
+            return true;
+        }
+    };
     /**
      * ブレーク可能かどうかを得る。
      * 
@@ -293,8 +314,7 @@
     /**
      * リフレッシュする。
      */
-     Window_Help.prototype.refresh = function() {
-        const rect = this.baseTextRect();
-        this.drawTextEx(this._text, rect.x, rect.y, rect.width);
+    Window_Help.prototype.refresh = function() {
+        // Do nothing.
     };
 })();
