@@ -1010,7 +1010,7 @@
         }
     };
     //------------------------------------------------------------------------------
-    // MapFilterManager
+    // Scene_Map
     const _Scene_Map_updateMain = Scene_Map.prototype.updateMain;
     /**
      * メインの更新処理をする。
