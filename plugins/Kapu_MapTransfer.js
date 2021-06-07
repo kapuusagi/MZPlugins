@@ -11,11 +11,29 @@
  * @arg effect
  * @text エフェクト
  * @desc 場所移動処理時のエフェクト
+ * @default fade
  * @type select
  * @option フェードアウト/フェードイン
  * @value fade
  * @option ディゾルブ
  * @value dissolve
+ * 
+ * @arg fadeOutType
+ * @arg フェードアウトタイプ
+ * @desc フェードアウトタイプ(表示させるときの形状)
+ * @type select
+ * @option 通常
+ * @value normal
+ * @option 丸
+ * @value circle
+ * 
+ * @arg fadeInType
+ * @text フェードインタイプ
+ * @desc フェードインタイプ(表示させるときの形状)
+ * @option 通常
+ * @value normal
+ * @option 丸
+ * @value circle
  * 
  * @param dissolveSpeed
  * @text ディゾルブ速度
@@ -83,6 +101,8 @@
 
 
         const effect = args.effect || "fade";
+        const fadeOutType = args.fadeOutType || "normal";
+        const fadeInType = args.fadeInType || "normal";
         const eventId = this.isOnCurrentMap() ? this._eventId : 0;
         const transferProcessList = [];
 
@@ -100,7 +120,7 @@
         }
 
         if (nextIndex < this._list.length) {
-            $gameTemp.setupTransferEffect(effect, eventId, transferProcessList);
+            $gameTemp.setupTransferEffect([ effect, fadeInType, fadeOutType], eventId, transferProcessList);
             this._index = nextIndex - 1;
         } else {
             // 末尾まで転送要求は無い。
@@ -130,7 +150,7 @@
     /**
      * 次回の場所移動イベントをセットアップする。
      * 
-     * @param {string} effect 転送エフェクト
+     * @param {Array<string>} effect 転送エフェクト
      * @param {number} イベントID
      * @param {Array<object>} transferProcessList フェードアウト中に行う処理。
      */
@@ -143,7 +163,7 @@
     /**
      * マップ転送エフェクトを得る。
      * 
-     * @return {string} エフェクト種類
+     * @return {Array<string>} エフェクト種類
      */
     Game_Temp.prototype.mapTransferEffect = function() {
         return this._mapTransferEffect;
@@ -201,7 +221,6 @@
     //------------------------------------------------------------------------------
     // Scene_Base
 
-
     /**
      * ディゾルブアウトをセットアップする。
      * 
@@ -247,6 +266,13 @@
      */
     Scene_Base.prototype.update = function() {
         _Scene_Base_update.call(this);
+        this.updateDissolve();
+    };
+
+    /**
+     * ディゾルブ処理を更新する。
+     */
+    Scene_Base.prototype.updateDissolve = function() {
         if (this._dissolveDuration > 0) {
             if (this._dissolveSprite) {
                 let opacity = this._dissolveSprite.opacity;
@@ -261,10 +287,12 @@
                     this._dissolveSprite.opacity = opacity;
                 }
             }
+            this._dissolveDuration--;
         }
     };
     //------------------------------------------------------------------------------
     // Scene_Map
+ 
     const _Scene_Map_update = Scene_Map.prototype.update;
     /**
      * Scene_Mapを更新する。
@@ -329,12 +357,20 @@
      * Note: 全画面を黒または白に変化させる。
      */
     Scene_Map.prototype.fadeInForTransfer = function() {
-        switch ($gameTemp.mapTransferEffect()) {
+        const effect = $gameTemp.mapTransferEffect();
+        switch (effect[0]) {
             case "dissolve":
                 this.setupDissolveIn(dissolveSpeed);
                 break;
             default:
-                _Scene_Map_fadeInForTransfer.call(this);
+                switch (effect[2]) {
+                    case "circle":
+                        this.startCircleFadeIn(this.fadeSpeed());
+                        break;
+                    default:
+                        _Scene_Map_fadeInForTransfer.call(this);
+                        break;
+                }
                 break;
         }
     };
@@ -346,12 +382,20 @@
      * Note: 全画面を黒または白に変化させる。
      */
     Scene_Map.prototype.fadeOutForTransfer = function() {
-        switch ($gameTemp.mapTransferEffect()) {
+        const effect = $gameTemp.mapTransferEffect();
+        switch (effect[0]) {
             case "dissolve":
                 this.setupDissolveOut();
                 break;
             default:
-                _Scene_Map_fadeOutForTransfer.call(this);
+                switch (effect[1]) {
+                    case "circle":
+                        this.startCircleFadeOut(this.fadeSpeed());
+                        break;
+                    default:
+                        _Scene_Map_fadeOutForTransfer.call(this);
+                        break;
+                }
                 break;
         }
     };
