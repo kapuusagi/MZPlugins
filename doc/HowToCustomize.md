@@ -1523,3 +1523,71 @@ __Game_CommonEvent.refresh__ で　__Game_Interpreter__ のインスタンスを
     3. ウェイトが解除されるとインタプリタが次のコマンドを実行する。
 
 Scene_MessageとGame_Message、Game_Interpreterを使えば独自シーンでコモンイベントを処理することも出来そう。
+
+### フェードイン/フェードアウトについて
+
+ベーシックシステムでは2つのフェードがある。なんと場所移動によるフェードイン、フェードアウト操作と、
+ユーザーによるフェードイン/フェードアウト操作は異なるのだ。
+
+(a). 場所移動のフェードイン/フェードアウト
+
+__$gamePlayer__ に __reserveTransfer()__ で指定された場所移動処理によるもの。
+__reserveTransfer()__ が呼ばれると、 __$gamePlayer.isTransferring()__ が __true__ を返すようになる。
+すると、 __Scene_Map__ にて
+__Scene_Map.updateTransferPlayer__ -> __SceneManager.stop__ -> __Scene_Map.stop()__ -> __Scene_Map.fadeOutForTransfer__ となり、フェードアウトする。
+移動すると、
+__Scene_Map.start__ -> __Scene_Map.fadeInForTransfer__ によりフェードインする。
+
+フェード処理自体は __Scene_Base.updateColorFilter__ により更新が行われる。
+__Scene_Base._colorFilter__ の __blendColor__ パラメータを操作することでエフェクトが実現される。
+Sceneのカラーフィルタが対象なので、全ての画面が対象になる。
+
+
+
+(b). ユーザーによるフェードイン/フェードアウト 
+
+__Game_Screen__ が処理する。 __Game_Screen.updateFadeIn__ 及び __Game_Screen.updateFadeOut__ によりフェード具合が更新され、それを参照する __Spriteset.updateOverallFilters__ でフェード具合が描画される。 
+ __overallFilter.setBrightness()__ が呼ばれ、設定が反映される。
+ __Spriteset__ が対象になるため、それ以外（メニューボタンなど）は対象にならない。
+フェードインとフェードアウトの処理が重なった場合、フェードアウトが優先されるが、最終的な結果は終わりが後にきた方が優先される。
+
+(c). 戦闘開始時のフェードイン・フェードアウト
+
+__Scene_Map__ で次のシーンが __Scene_Battle__ であることを検出すると、
+__launchBattle__ -> __startEncounterEffect__ -> __updateEncounterEffect__ -> __startFadeOut__ が呼ばれて、フェードアウト処理が行われる。
+その後、 __Scene_Battle.start()__ にて __Scene_Battle.startFadeIn__ が呼び出され、フェードインする。
+※その他のエンカウントエフェクト(フラッシュとズーム)は下記を参照。
+  __Scene_Map.startEncounterEffect__ 及び __SceneMap.updateEncounterEffect__ を参照。
+
+
+### 場所移動処理について
+
+タイムスライスされているのでわかりにくいが、少し整理すると次のようになっている。
+
+    1. （マップの）インタプリタから場所移動処理が呼ばれる。
+    2. $gamePlayerに場所移動要求が保存される。
+    3. （マップの）インタプリタはtransferウェイト状態になり、次のコマンドは実行されない。
+    4. Scene_Mapで$gamePlayerに保存された場所移動要求を検出する。
+    5. Scene_Map.stop()にてフェードアウトが設定される
+    6. フェードアウト処理中はビジーが継続するためマップ移動しない。
+       ※Scene_Base.isBusy -> Scene_Base.isFade()
+    7. Scene_Map.create()にて、$gamePlayerの転送情報がセットされていることにより、
+       onTransfer()がコールされる。
+    8. SceneManagerにより、Scene_Map.isReady()が呼ばれる。
+       isReady()の中で$gamePlayerの転送要求フラグが立っている場合、
+       $gamePlayer.performTransfer()を呼び出す。
+    9. performTransfer内でマップのロード(マップが変わる場合)や$gamePlayerの場所移動が行われる。
+    10．Scene_Map.start()にて、フェードイン要求及びonTransfeRend()がコールされる。
+       startにフェードインが処理が入っているため、フェードアウト中はupdate()がコールされない(=インタプリタは止まっている)
+       また、オートセーブ機能が有効だった場合、このタイミングでオートセーブ要求が発行される。
+    11. transferウェイトが解除され、(マップの)インタプリタが処理を継続する。
+
+そのため、フェードアウト中にコモンイベントを呼び出して実行しようとすると、結構厄介である。
+
+マップがロードされたときの処理を追加・変更したい場合
+    -> Game_Map.setupをフック。
+アクターが移動しているときにフラグをクリアなど(同マップ/他のマップに関わらず)
+    -> Game_Player.performTransferをフック。
+    -> Scene_Map.onTransferをフック。(リソースの開放や設定のクリアなどはこちら？)
+    
+
