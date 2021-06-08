@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.panel1 = new System.Windows.Forms.Panel();
             this.dataGridViewQuests = new System.Windows.Forms.DataGridView();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -114,8 +114,8 @@
             this.dataGridViewQuests.AllowUserToAddRows = false;
             this.dataGridViewQuests.AllowUserToDeleteRows = false;
             this.dataGridViewQuests.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.dataGridViewQuests.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dataGridViewQuests.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewQuests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewQuests.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewQuests.Location = new System.Drawing.Point(0, 0);
@@ -515,11 +515,15 @@
             // dataGridViewAchieves
             // 
             this.dataGridViewAchieves.AllowUserToAddRows = false;
+            this.dataGridViewAchieves.AllowUserToResizeRows = false;
             this.dataGridViewAchieves.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewAchieves.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewAchieves.Location = new System.Drawing.Point(82, 3);
+            this.dataGridViewAchieves.MultiSelect = false;
             this.dataGridViewAchieves.Name = "dataGridViewAchieves";
+            this.dataGridViewAchieves.RowHeadersVisible = false;
             this.dataGridViewAchieves.RowTemplate.Height = 21;
+            this.dataGridViewAchieves.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridViewAchieves.Size = new System.Drawing.Size(434, 82);
             this.dataGridViewAchieves.TabIndex = 19;
             this.dataGridViewAchieves.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.OnDataGridViewAchievesRowRemoved);

@@ -789,7 +789,6 @@ namespace QEditor
             if (addAchieveForm == null)
             {
                 addAchieveForm = new FormAddAchieve();
-                addAchieveForm.Parent = this;
                 addAchieveForm.OkClick += OnButtonAddAchiveOkClick;
                 addAchieveForm.FormClosed += OnFormAddAchieveClosed;
             }
@@ -822,6 +821,10 @@ namespace QEditor
                 return;
             }
             var achieve = addAchieveForm.Achieve;
+            if (achieve == null)
+            {
+                return;
+            }
             quest.Achieves.Add(achieve);
 
             DataTable dt = (DataTable)(dataGridViewAchieves.DataSource);
