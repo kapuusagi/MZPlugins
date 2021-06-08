@@ -549,7 +549,7 @@ namespace QEditor
             {
                 var id = achieveSubjugation.EnemyId;
                 var enemyName = ProjectData.GetEnemyName(id);
-                return $"Defeat {enemyName}";
+                return $"Slay {enemyName}";
             }
             else if (achieve is AchieveCollection achieveCollection)
             {

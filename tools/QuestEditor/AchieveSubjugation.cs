@@ -50,7 +50,7 @@ namespace QEditor
             if (string.IsNullOrEmpty(enemyName)) {
                 enemyName = $"EnemyId({EnemyId})";
             }
-            return $"Defeat {enemyName}x{EnemyCount}";
+            return $"Slay {enemyName}x{EnemyCount}";
         }
     }
 }
