@@ -80,6 +80,12 @@
       <DependentUpon>FormSelectableItemList.cs</DependentUpon>
     </Compile>
     <Compile Include="IAchieve.cs" />
+    <Compile Include="PanelQuestEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PanelQuestEditor.Designer.cs">
+      <DependentUpon>PanelQuestEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="ProjectData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -96,6 +102,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormSelectableItemList.resx">
       <DependentUpon>FormSelectableItemList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PanelQuestEditor.resx">
+      <DependentUpon>PanelQuestEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

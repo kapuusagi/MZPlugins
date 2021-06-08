@@ -169,6 +169,26 @@ namespace QEditor
                 list.Add(item);
             }
         }
+
+        /// <summary>
+        /// アイテム種類名を得る。
+        /// </summary>
+        /// <param name="kind">アイテム種類</param>
+        /// <returns></returns>
+        public static string GetItemKindName(ItemType kind)
+        {
+            switch (kind)
+            {
+                case ItemType.Item:
+                    return "Item";
+                case ItemType.Weapon:
+                    return "Weapon";
+                case ItemType.Armor:
+                    return "Armor";
+                default:
+                    return $"???";
+            }
+        }
         /// <summary>
         /// アイテム名を得る。
         /// </summary>
@@ -186,7 +206,7 @@ namespace QEditor
                 case ItemType.Armor:
                     return GetArmorName(id);
                 default:
-                    return $"???{id}[]";
+                    return $"???";
             }
         }
         /// <summary>
@@ -206,7 +226,7 @@ namespace QEditor
                 case 3:
                     return GetArmorName(id);
                 default:
-                    return $"???{id}[]";
+                    return $"???";
             }
         }
 
@@ -219,11 +239,11 @@ namespace QEditor
         {
             if ((id > 0) && (id < items.Count))
             {
-                return $"Item{id}[{items[id].Name}]";
+                return items[id].Name;
             }
             else
             {
-                return $"Item{id}[]";
+                return "???";
             }
         }
 
@@ -236,11 +256,11 @@ namespace QEditor
         {
             if ((id > 0) && (id < weapons.Count))
             {
-                return $"Weapon{id}[{weapons[id].Name}]";
+                return weapons[id].Name;
             }
             else
             {
-                return $"Weapon{id}[]";
+                return "???";
             }
         }
 
@@ -253,11 +273,11 @@ namespace QEditor
         {
             if ((id > 0) && (id < armors.Count))
             {
-                return $"Armor{id}[{armors[id].Name}]";
+                return armors[id].Name;
             }
             else
             {
-                return $"Armor{id}[]";
+                return "???";
             }
 
         }
@@ -272,12 +292,13 @@ namespace QEditor
         {
             if ((switchId > 0) && (switchId < dataSystem.Switches.Count))
             {
-                return $"SW{switchId}[{dataSystem.Switches[switchId]}]";
+                var name = dataSystem.Switches[switchId];
+                if (!string.IsNullOrEmpty(name))
+                {
+                    return name;
+                }
             }
-            else
-            {
-                return $"SW{switchId}[]";
-            }
+            return $"SW{switchId}";
         }
 
         /// <summary>
@@ -289,12 +310,21 @@ namespace QEditor
         {
             if ((enemyId > 0) && (enemyId < enemies.Count))
             {
-                return $"Enemy{enemyId}[{enemies[enemyId].Name}]";
+                return enemies[enemyId].Name;
             }
             else
             {
-                return $"Enemy{enemyId}[]";
+                return "???";
             }
+        }
+
+        /// <summary>
+        /// お金の単位文字列を得る。
+        /// </summary>
+        /// <returns>文字列</returns>
+        public static string GetCurrencyUnit()
+        {
+            return dataSystem.CurrencyUnit;
         }
     }
 }

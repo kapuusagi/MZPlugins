@@ -46,7 +46,11 @@ namespace QEditor
         /// <returns>文字列</returns>
         public override string ToString()
         {
-            return $"Kill {ProjectData.GetEnemyName(EnemyId)}x{EnemyCount}";
+            var enemyName = ProjectData.GetEnemyName(EnemyId);
+            if (string.IsNullOrEmpty(enemyName)) {
+                enemyName = $"EnemyId({EnemyId})";
+            }
+            return $"Defeat {enemyName}x{EnemyCount}";
         }
     }
 }

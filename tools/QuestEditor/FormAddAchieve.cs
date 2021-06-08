@@ -90,7 +90,7 @@ namespace QEditor
             var index = e.Index;
             var enemy = ((index >= 0) && (index < comboBox.Items.Count))
                 ? (DataEnemy)(comboBox.Items[index]) : null;
-            var text = (enemy != null) ? ProjectData.GetEnemyName(enemy.Id) : string.Empty;
+            var text = (enemy != null) ? $"{enemy.Id}:{ProjectData.GetEnemyName(enemy.Id)}" : string.Empty;
 
             //使用するブラシ
             using (var brush = new SolidBrush(e.ForeColor))
@@ -103,6 +103,11 @@ namespace QEditor
             e.DrawFocusRectangle();
         }
 
+        /// <summary>
+        /// アイテムコンボボックスの項目を描画する。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
         private void OnComboBoxItemsDrawItem(object sender, DrawItemEventArgs e)
         {
             //背景を描画する
@@ -114,7 +119,7 @@ namespace QEditor
             var index = e.Index;
             var item = ((index >= 0) && (index < comboBox.Items.Count))
                 ? (IItem)(comboBox.Items[index]) : null;
-            var text = (item != null) ? ProjectData.GetItemName(item.Kind, item.Id) : string.Empty;
+            var text = (item != null) ? $"{item.Kind} {item.Id}[{ProjectData.GetItemName(item.Kind, item.Id)}]" : string.Empty;
 
             //使用するブラシ
             using (var brush = new SolidBrush(e.ForeColor))

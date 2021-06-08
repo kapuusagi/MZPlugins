@@ -61,7 +61,7 @@ namespace QEditor
         /// <returns></returns>
         public override string ToString()
         {
-            return $"Correct {ProjectData.GetItemName(data.Value1, ItemId)}x{Count}";
+            return $"Correct {ItemType}[{ProjectData.GetItemName(ItemType, ItemId)}]x{Count}";
         }
     }
 }

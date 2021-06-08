@@ -89,7 +89,7 @@ namespace QEditor
                 case "qtype":
                     QuestType = (int)((double)(value));
                     break;
-                case "achieve":
+                case "achieves":
                     {
                         Achieves.Clear();
                         foreach (var dataAchieve in (List<DataAchieve>)(value))

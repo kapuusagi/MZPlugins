@@ -30,8 +30,8 @@ namespace QEditor
         private void InitializeComponent()
         {
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.buttonOk = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
+            this.buttonOk = new System.Windows.Forms.Button();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -75,16 +75,6 @@ namespace QEditor
             this.flowLayoutPanel1.Size = new System.Drawing.Size(475, 29);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
-            // buttonOk
-            // 
-            this.buttonOk.Location = new System.Drawing.Point(316, 3);
-            this.buttonOk.Name = "buttonOk";
-            this.buttonOk.Size = new System.Drawing.Size(75, 23);
-            this.buttonOk.TabIndex = 0;
-            this.buttonOk.Text = "OK";
-            this.buttonOk.UseVisualStyleBackColor = true;
-            this.buttonOk.Click += new System.EventHandler(this.OnButtonOkClick);
-            // 
             // buttonCancel
             // 
             this.buttonCancel.Location = new System.Drawing.Point(397, 3);
@@ -94,6 +84,16 @@ namespace QEditor
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.OnButtonCancelClick);
+            // 
+            // buttonOk
+            // 
+            this.buttonOk.Location = new System.Drawing.Point(316, 3);
+            this.buttonOk.Name = "buttonOk";
+            this.buttonOk.Size = new System.Drawing.Size(75, 23);
+            this.buttonOk.TabIndex = 0;
+            this.buttonOk.Text = "OK";
+            this.buttonOk.UseVisualStyleBackColor = true;
+            this.buttonOk.Click += new System.EventHandler(this.OnButtonOkClick);
             // 
             // tabControl
             // 
@@ -240,6 +240,7 @@ namespace QEditor
             this.comboBoxItems.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBoxItems.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBoxItems.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxItems.FormattingEnabled = true;
             this.comboBoxItems.Location = new System.Drawing.Point(47, 3);
             this.comboBoxItems.Name = "comboBoxItems";

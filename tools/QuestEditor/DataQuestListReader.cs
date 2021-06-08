@@ -72,11 +72,17 @@ namespace QEditor
                 }
                 else if (array is List<RewardItem> rewardItems)
                 {
-                    rewardItems.Add((RewardItem)(data));
+                    if (data != null)
+                    {
+                        rewardItems.Add((RewardItem)(data));
+                    }
                 }
                 else if (array is List<DataAchieve> achieves)
                 {
-                    achieves.Add((DataAchieve)(data));
+                    if (data != null)
+                    {
+                        achieves.Add((DataAchieve)(data));
+                    }
                 }
                 else if (array is List<int> achieve)
                 {
