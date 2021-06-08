@@ -22,6 +22,8 @@ namespace QEditor
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.textBoxName = new System.Windows.Forms.TextBox();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.generateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxDescription = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -47,9 +49,6 @@ namespace QEditor
             this.numericUpDownRewardGold = new System.Windows.Forms.NumericUpDown();
             this.label11 = new System.Windows.Forms.Label();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
-            this.dataGridViewEventCancel = new System.Windows.Forms.DataGridView();
-            this.dataGridViewEventComplete = new System.Windows.Forms.DataGridView();
-            this.dataGridViewEventAccept = new System.Windows.Forms.DataGridView();
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
@@ -59,10 +58,15 @@ namespace QEditor
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.textBoxNote = new System.Windows.Forms.TextBox();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.generateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textBoxOnAccept = new System.Windows.Forms.TextBox();
+            this.textBoxOnComplete = new System.Windows.Forms.TextBox();
+            this.textBoxOnCancel = new System.Windows.Forms.TextBox();
+            this.contextMenuStripScript = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.insertSwitchControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.insertVariableControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -73,12 +77,9 @@ namespace QEditor
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownGuildExp)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardGold)).BeginInit();
             this.tableLayoutPanel6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewEventCancel)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewEventComplete)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewEventAccept)).BeginInit();
             this.tableLayoutPanel7.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            this.contextMenuStrip1.SuspendLayout();
+            this.contextMenuStripScript.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -124,6 +125,20 @@ namespace QEditor
             this.textBoxName.Size = new System.Drawing.Size(332, 19);
             this.textBoxName.TabIndex = 1;
             this.textBoxName.TextChanged += new System.EventHandler(this.OnTextBoxNameChanged);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.generateToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(122, 26);
+            // 
+            // generateToolStripMenuItem
+            // 
+            this.generateToolStripMenuItem.Name = "generateToolStripMenuItem";
+            this.generateToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.generateToolStripMenuItem.Text = "Generate";
+            this.generateToolStripMenuItem.Click += new System.EventHandler(this.OnContextMenuGenerateClick);
             // 
             // label1
             // 
@@ -453,12 +468,12 @@ namespace QEditor
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
-            this.tableLayoutPanel6.Controls.Add(this.dataGridViewEventCancel, 2, 1);
-            this.tableLayoutPanel6.Controls.Add(this.dataGridViewEventComplete, 1, 1);
-            this.tableLayoutPanel6.Controls.Add(this.dataGridViewEventAccept, 0, 1);
+            this.tableLayoutPanel6.Controls.Add(this.textBoxOnCancel, 2, 1);
+            this.tableLayoutPanel6.Controls.Add(this.textBoxOnComplete, 1, 1);
             this.tableLayoutPanel6.Controls.Add(this.label12, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.label13, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.label14, 2, 0);
+            this.tableLayoutPanel6.Controls.Add(this.textBoxOnAccept, 0, 1);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(103, 35);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
@@ -468,77 +483,32 @@ namespace QEditor
             this.tableLayoutPanel6.Size = new System.Drawing.Size(495, 82);
             this.tableLayoutPanel6.TabIndex = 22;
             // 
-            // dataGridViewEventCancel
-            // 
-            this.dataGridViewEventCancel.AllowUserToAddRows = false;
-            this.dataGridViewEventCancel.AllowUserToResizeRows = false;
-            this.dataGridViewEventCancel.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewEventCancel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridViewEventCancel.Location = new System.Drawing.Point(332, 15);
-            this.dataGridViewEventCancel.MultiSelect = false;
-            this.dataGridViewEventCancel.Name = "dataGridViewEventCancel";
-            this.dataGridViewEventCancel.RowHeadersVisible = false;
-            this.dataGridViewEventCancel.RowTemplate.Height = 21;
-            this.dataGridViewEventCancel.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewEventCancel.Size = new System.Drawing.Size(160, 64);
-            this.dataGridViewEventCancel.TabIndex = 25;
-            // 
-            // dataGridViewEventComplete
-            // 
-            this.dataGridViewEventComplete.AllowUserToAddRows = false;
-            this.dataGridViewEventComplete.AllowUserToResizeRows = false;
-            this.dataGridViewEventComplete.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewEventComplete.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridViewEventComplete.Location = new System.Drawing.Point(167, 15);
-            this.dataGridViewEventComplete.MultiSelect = false;
-            this.dataGridViewEventComplete.Name = "dataGridViewEventComplete";
-            this.dataGridViewEventComplete.RowHeadersVisible = false;
-            this.dataGridViewEventComplete.RowTemplate.Height = 21;
-            this.dataGridViewEventComplete.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewEventComplete.Size = new System.Drawing.Size(159, 64);
-            this.dataGridViewEventComplete.TabIndex = 24;
-            // 
-            // dataGridViewEventAccept
-            // 
-            this.dataGridViewEventAccept.AllowUserToAddRows = false;
-            this.dataGridViewEventAccept.AllowUserToResizeRows = false;
-            this.dataGridViewEventAccept.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewEventAccept.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridViewEventAccept.Location = new System.Drawing.Point(3, 15);
-            this.dataGridViewEventAccept.MultiSelect = false;
-            this.dataGridViewEventAccept.Name = "dataGridViewEventAccept";
-            this.dataGridViewEventAccept.RowHeadersVisible = false;
-            this.dataGridViewEventAccept.RowTemplate.Height = 21;
-            this.dataGridViewEventAccept.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewEventAccept.Size = new System.Drawing.Size(158, 64);
-            this.dataGridViewEventAccept.TabIndex = 23;
-            // 
             // label12
             // 
             this.label12.AutoSize = true;
             this.label12.Location = new System.Drawing.Point(3, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(70, 12);
+            this.label12.Size = new System.Drawing.Size(103, 12);
             this.label12.TabIndex = 0;
-            this.label12.Text = "When accept";
+            this.label12.Text = "When accept (eval)";
             // 
             // label13
             // 
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(167, 0);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(82, 12);
+            this.label13.Size = new System.Drawing.Size(115, 12);
             this.label13.TabIndex = 1;
-            this.label13.Text = "When complete";
+            this.label13.Text = "When complete (eval)";
             // 
             // label14
             // 
             this.label14.AutoSize = true;
             this.label14.Location = new System.Drawing.Point(332, 0);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(69, 12);
+            this.label14.Size = new System.Drawing.Size(102, 12);
             this.label14.TabIndex = 2;
-            this.label14.Text = "When cancel";
+            this.label14.Text = "When cancel (eval)";
             // 
             // label15
             // 
@@ -604,19 +574,66 @@ namespace QEditor
             this.textBoxNote.TabIndex = 0;
             this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
             // 
-            // contextMenuStrip1
+            // textBoxOnAccept
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.generateToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(122, 26);
+            this.textBoxOnAccept.ContextMenuStrip = this.contextMenuStripScript;
+            this.textBoxOnAccept.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxOnAccept.Location = new System.Drawing.Point(3, 15);
+            this.textBoxOnAccept.Multiline = true;
+            this.textBoxOnAccept.Name = "textBoxOnAccept";
+            this.textBoxOnAccept.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBoxOnAccept.Size = new System.Drawing.Size(158, 64);
+            this.textBoxOnAccept.TabIndex = 3;
+            this.textBoxOnAccept.WordWrap = false;
+            this.textBoxOnAccept.TextChanged += new System.EventHandler(this.OnTextBoxOnAcceptTextChanged);
             // 
-            // generateToolStripMenuItem
+            // textBoxOnComplete
             // 
-            this.generateToolStripMenuItem.Name = "generateToolStripMenuItem";
-            this.generateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.generateToolStripMenuItem.Text = "Generate";
-            this.generateToolStripMenuItem.Click += new System.EventHandler(this.OnContextMenuGenerateClick);
+            this.textBoxOnComplete.ContextMenuStrip = this.contextMenuStripScript;
+            this.textBoxOnComplete.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxOnComplete.Location = new System.Drawing.Point(167, 15);
+            this.textBoxOnComplete.Multiline = true;
+            this.textBoxOnComplete.Name = "textBoxOnComplete";
+            this.textBoxOnComplete.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBoxOnComplete.Size = new System.Drawing.Size(159, 64);
+            this.textBoxOnComplete.TabIndex = 4;
+            this.textBoxOnComplete.WordWrap = false;
+            this.textBoxOnComplete.TextChanged += new System.EventHandler(this.OnTextBoxOnCompleteTextChanged);
+            // 
+            // textBoxOnCancel
+            // 
+            this.textBoxOnCancel.ContextMenuStrip = this.contextMenuStripScript;
+            this.textBoxOnCancel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxOnCancel.Location = new System.Drawing.Point(332, 15);
+            this.textBoxOnCancel.Multiline = true;
+            this.textBoxOnCancel.Name = "textBoxOnCancel";
+            this.textBoxOnCancel.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBoxOnCancel.Size = new System.Drawing.Size(160, 64);
+            this.textBoxOnCancel.TabIndex = 5;
+            this.textBoxOnCancel.WordWrap = false;
+            this.textBoxOnCancel.TextChanged += new System.EventHandler(this.OnTextBoxOnCancelTextChanged);
+            // 
+            // contextMenuStripScript
+            // 
+            this.contextMenuStripScript.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.insertSwitchControlToolStripMenuItem,
+            this.insertVariableControlToolStripMenuItem});
+            this.contextMenuStripScript.Name = "contextMenuStripScript";
+            this.contextMenuStripScript.Size = new System.Drawing.Size(189, 48);
+            // 
+            // insertSwitchControlToolStripMenuItem
+            // 
+            this.insertSwitchControlToolStripMenuItem.Name = "insertSwitchControlToolStripMenuItem";
+            this.insertSwitchControlToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.insertSwitchControlToolStripMenuItem.Text = "Insert switch control";
+            this.insertSwitchControlToolStripMenuItem.Click += new System.EventHandler(this.OnContextMenuInsertSwitchControlClick);
+            // 
+            // insertVariableControlToolStripMenuItem
+            // 
+            this.insertVariableControlToolStripMenuItem.Name = "insertVariableControlToolStripMenuItem";
+            this.insertVariableControlToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.insertVariableControlToolStripMenuItem.Text = "Insert variable control";
+            this.insertVariableControlToolStripMenuItem.Click += new System.EventHandler(this.OnContextMenuInsertVariableControlClick);
             // 
             // PanelQuestEditor
             // 
@@ -631,6 +648,7 @@ namespace QEditor
             this.groupBox1.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -645,14 +663,11 @@ namespace QEditor
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardGold)).EndInit();
             this.tableLayoutPanel6.ResumeLayout(false);
             this.tableLayoutPanel6.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewEventCancel)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewEventComplete)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewEventAccept)).EndInit();
             this.tableLayoutPanel7.ResumeLayout(false);
             this.tableLayoutPanel7.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
-            this.contextMenuStrip1.ResumeLayout(false);
+            this.contextMenuStripScript.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -696,10 +711,13 @@ namespace QEditor
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
         private System.Windows.Forms.TextBox textBoxEntrustCondition;
         private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.DataGridView dataGridViewEventCancel;
-        private System.Windows.Forms.DataGridView dataGridViewEventComplete;
-        private System.Windows.Forms.DataGridView dataGridViewEventAccept;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem generateToolStripMenuItem;
+        private System.Windows.Forms.TextBox textBoxOnCancel;
+        private System.Windows.Forms.TextBox textBoxOnComplete;
+        private System.Windows.Forms.TextBox textBoxOnAccept;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripScript;
+        private System.Windows.Forms.ToolStripMenuItem insertSwitchControlToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem insertVariableControlToolStripMenuItem;
     }
 }

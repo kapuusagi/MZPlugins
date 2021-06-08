@@ -28,11 +28,6 @@ namespace QEditor
         /// </summary>
         public string EntrustCondition { get; set; } = string.Empty;
         /// <summary>
-        /// クエストタイプ。
-        /// 1:討伐, 2:採取, 3:イベント
-        /// </summary>
-        public int QuestType { get; set; } = 0;
-        /// <summary>
         /// 達成条件データ
         /// </summary>
         public List<IAchieve> Achieves { get; private set; } = new List<IAchieve>();
@@ -61,6 +56,18 @@ namespace QEditor
         /// </summary>
         public string Description { get; set; } = string.Empty;
         /// <summary>
+        /// 受託時処理
+        /// </summary>
+        public string OnAcceptScript { get; set; } = string.Empty;
+        /// <summary>
+        /// 完了時処理
+        /// </summary>
+        public string OnCompleteScript { get; set; } = string.Empty;
+        /// <summary>
+        /// キャンセル時処理
+        /// </summary>
+        public string OnCancelScript { get; set; } = string.Empty;
+        /// <summary>
         /// ノートタグ
         /// </summary>
         public string Note { get; set; } = string.Empty;
@@ -85,9 +92,6 @@ namespace QEditor
                     break;
                 case "entrustCondition":
                     EntrustCondition = (string)(value);
-                    break;
-                case "qtype":
-                    QuestType = (int)((double)(value));
                     break;
                 case "achieves":
                     {
@@ -120,6 +124,15 @@ namespace QEditor
                     break;
                 case "description":
                     Description = (string)(value);
+                    break;
+                case "onAccept":
+                    OnAcceptScript = (string)(value);
+                    break;
+                case "onComplete":
+                    OnCompleteScript = (string)(value);
+                    break;
+                case "onCancel":
+                    OnCancelScript = (string)(value);
                     break;
                 case "note":
                     Note = (string)(value);
@@ -159,7 +172,6 @@ namespace QEditor
             job.Append("guildRank", GuildRank);
             job.Append("guildExp", GuildExp);
             job.Append("entrustCondition", EntrustCondition);
-            job.Append("qtype", QuestType);
             var achieves = Achieves.Select(a => a.Data).ToArray();
             job.Append("achieves", achieves);
             job.Append("rewardGold", RewardGold);
@@ -168,6 +180,9 @@ namespace QEditor
             job.Append("achieveMsg", AchieveMessage);
             job.Append("rewardMsg", RewardsMessage);
             job.Append("description", Description);
+            job.Append("onAccept", OnAcceptScript);
+            job.Append("onComplete", OnCompleteScript);
+            job.Append("onCancel", OnCancelScript);
             job.Append("note", Note);
             return job.ToString();
         }

@@ -10,6 +10,9 @@ using System.Windows.Forms;
 
 namespace QEditor
 {
+    /// <summary>
+    /// クエストエディタパネル
+    /// </summary>
     public partial class PanelQuestEditor : UserControl
     {
         // アイテムリスト
@@ -120,6 +123,9 @@ namespace QEditor
             textBoxAchieveMsg.Text = quest?.AchieveMessage ?? string.Empty;
             textBoxRewardMsg.Text = quest?.RewardsMessage ?? string.Empty;
             textBoxEntrustCondition.Text = quest?.EntrustCondition ?? string.Empty;
+            textBoxOnAccept.Text = quest?.OnAcceptScript ?? string.Empty;
+            textBoxOnComplete.Text = quest?.OnCompleteScript ?? string.Empty;
+            textBoxOnCancel.Text = quest?.OnCancelScript ?? string.Empty;
 
             int guildExp = quest?.GuildExp ?? 0;
             numericUpDownGuildExp.Value = Math.Max(numericUpDownGuildExp.Minimum, Math.Min(numericUpDownGuildExp.Maximum, guildExp));
@@ -646,7 +652,7 @@ namespace QEditor
                     }
                     sb.Append(itemName).Append('×').Append(itemCount);
                 }
-                textBoxRewardMsg.Text = (sb.Length > 0) ? sb.ToString() : "なし";
+                textBoxRewardMsg.Text = (sb.Length > 0) ? sb.ToString() : "None";
             }
         }
 
@@ -660,6 +666,73 @@ namespace QEditor
             if (quest != null)
             {
                 quest.Note = textBoxNote.Text;
+            }
+        }
+
+        /// <summary>
+        /// 受託時処理テキストボックスのテキストが変更されたときに通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnTextBoxOnAcceptTextChanged(object sender, EventArgs e)
+        {
+            if (quest != null)
+            {
+                quest.OnAcceptScript = textBoxOnAccept.Text;
+            }
+        }
+
+        /// <summary>
+        /// 完了時処理テキストボックスのテキストが変更されたときに通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnTextBoxOnCompleteTextChanged(object sender, EventArgs e)
+        {
+            if (quest != null)
+            {
+                quest.OnCompleteScript = textBoxOnComplete.Text;
+            }
+        }
+
+        /// <summary>
+        /// キャンセル時処理テキストボックスのテキストが変更されたときに通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnTextBoxOnCancelTextChanged(object sender, EventArgs e)
+        {
+            if (quest != null)
+            {
+                quest.OnCancelScript = textBoxOnCancel.Text;
+            }
+        }
+
+        /// <summary>
+        /// スイッチ操作コンテキストメニューがクリックされた時の処理を行う。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnContextMenuInsertSwitchControlClick(object sender, EventArgs e)
+        {
+            var control = contextMenuStripScript.SourceControl;
+            if (control is TextBox textBox)
+            {
+                textBox.Text = textBox.Text + "\n$gameSwitches.setValue(SwId,true);";
+            }
+        }
+
+        /// <summary>
+        /// 変数操作コンテキストメニューがクリックされた時の処理を行う。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnContextMenuInsertVariableControlClick(object sender, EventArgs e)
+        {
+            var control = contextMenuStripScript.SourceControl;
+            if (control is TextBox textBox)
+            {
+                textBox.Text = textBox.Text + "\n$gameVariables.setValue(SwId,true);";
             }
         }
     }
