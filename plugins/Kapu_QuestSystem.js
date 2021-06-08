@@ -107,13 +107,7 @@
  * @type string
  * @default %1の討伐
  * 
- * @param textQuestDescSubjugation
- * @text 討伐クエスト詳細の書式
- * @desc 討伐クエスト詳細書式。%1にエネミー名が入る。クエスト詳細未指定時のみ有効
- * @type string
- * @default %1を討伐してください。
- * 
- * @param textQuestAchiveSubjugation
+ * @param textQuestAchieveSubjugation
  * @text 討伐クエスト達成条件の書式
  * @desc 討伐クエスト達成条件の書式。%1にエネミー名、%2に数が入る。クエスト達成条件テキスト未指定時のみ有効。
  * @type string
@@ -126,26 +120,23 @@
  * @default %1の採取
  * 
  * 
- * @param textQuestDescCollection
- * @text 採取クエスト詳細書式
- * @desc 採取クエスト詳細書式。%1に採取アイテム名が入る。クエスト詳細未指定時のみ有効。
- * @type string
- * @default %1を採取してください。
- * 
- * @param textQuestAchiveCollection
+ * @param textQuestAchieveCollection
  * @text 採取クエスト達成条件の書式
  * @desc 採取クエスト達成条件の書式。%1に採取アイテム名、%2に数が入る。クエスト達成条件テキスト未指定時のみ有効。
  * @type string
  * @default %1を%2個収集する。
  * 
+ * @param textRewardNone
+ * @text 報酬無しテキスト
+ * @desc 報酬無い場合の表示用テキスト
+ * @type string
+ * @default なし
  * 
  * @help 
  * クエストシステム。
  * 
- * TODO : クエストマネージャ(QuestManager)を用意した方がいいのではないか。
  * TODO : 受託時のカスタム処理/完了時のカスタム処理を追加する。受けたときにスイッチをOFFにしたりしたいよね。
- * TODO : 完了時のコモンイベント呼び出しなど。
- * TODO : ペナルティの内容
+ * TODO : ペナルティの内容見直したい
  * TODO : 達成条件。＆で複数指定できるようにしたい。ORはやらない。
  * 
  * ■ 使用時の注意
@@ -198,11 +189,7 @@
  * Quests.json展開先
  */
 $dataQuests = null;
-/**
- * 動的に変わるQuestデータ
- * Game_Questsが格納される
- */
-$gameQuests = null;
+
 
 /**
  * 新しいGame_Questデータを構築する。
@@ -221,11 +208,18 @@ function Game_Quest() {
     const parameters = PluginManager.parameters(pluginName);
     const maxGuildExp = Math.max(0, Number(parameters["maxGuildExp"]) || 999999);
     const textQuestTitleSubjugation = parameters["textQuestTitleSubjugation"] || "Subjugation %1";
-    const textQuestDescSubjugation = parameters["textQuestDescSubjugation"] || "Please %1 to death.";
-    const textQuestAchiveSubjugation = parameters["textQuestAchiveSubjugation"] || "Subjugation %1 x %2";
+    const textQuestAchieveSubjugation = parameters["textQuestAchieveSubjugation"] || "Subjugation %1 x %2";
     const textQuestTitleCollection = parameters["textQuestTitleCollection"] || "Collect %1";
-    const textQuestDescCollection = parameters["textQuestDescCollection"] || "Please collect %1.";
-    const textQuestAchiveCollection = parameters["textQuestAchiveCollection"] || "Collect %1 x %2";
+    const textQuestAchieveCollection = parameters["textQuestAchieveCollection"] || "Collect %1 x %2";
+
+    Game_Quest.STATUS_TRYING = 0;
+    Game_Quest.STATUS_DONE = 1;
+
+    Game_Quest.ACHIEVE_SUBJUGATION = 1; // 討伐条件 value1:マップID(未使用) value2エネミーID:, value3:討伐数
+    Game_Quest.ACHIEVE_COLLECTION = 2; // 採取条件 value1:種類(1:アイテム,2:武器,3:防具), value2:ID, value3:数量
+    Game_Quest.ACHIEVE_EVENT = 3; // イベント条件 value1:スイッチID, value2:スイッチ状態(0:ON, 1:OFF)
+
+
 
     DataManager._guildRanks = [];
     
@@ -313,43 +307,6 @@ function Game_Quest() {
     // DataManager
     DataManager._databaseFiles.push({ name:"$dataQuests", src:"Quests.json" });
 
-    const _DataManager_createGameObjects = DataManager.createGameObjects;
-    /**
-     * 必要なオブジェクトを構築する。
-     */
-    DataManager.createGameObjects = function() {
-        _DataManager_createGameObjects.call(this);
-        $gameQuests = new Game_Quests();
-    };
-
-    const _DataManager_makeSaveContents = DataManager.makeSaveContents;
-
-    /**
-     * セーブデータに入れるデータを構築する。
-     * 
-     * @returns {Dictionary} 保存するコンテンツ
-     */
-    DataManager.makeSaveContents = function() {
-        const contents = _DataManager_makeSaveContents.call(this);
-        contents.quests = $gameQuests;
-        return contents;
-    };
-
-    const _DataManager_extractSaveContents = DataManager.extractSaveContents;
-    /**
-     * セーブデータから必要なコンテンツを展開する。
-     * 
-     * @param {Dictionary} contents コンテンツ
-     */
-    DataManager.extractSaveContents = function(contents) {
-        _DataManager_extractSaveContents.call(this, ...arguments);
-        const quests = contents.quests;
-        if (quests) {
-            $gameQuests = quests;
-        }
-    };    
-
-
     /**
      * ギルドランク情報を得る。
      * 
@@ -379,6 +336,144 @@ function Game_Quest() {
 
         return this._guildRanks[0];
     };
+
+    /**
+     * 種類とIDからアイテムを得る。
+     * 
+     * @param {number} kind 種類
+     * @param {number} id ID
+     * @returns {object} アイテム
+     */
+    const _targetItem = function(kind, id) {
+        switch (kind) {
+            case 1:
+                return $gameItems[id] || null;
+            case 2:
+                return $gameWeapons[id] || null;
+            case 3:
+                return $gameArmors[id] || null;
+            default:
+                return null;
+        }
+    };
+
+    /**
+     * 種類とIDからアイテム名を得る。
+     * 
+     * @param {number} kind 種類
+     * @param {number} id ID
+     * @returns {string} アイテム名
+     */
+    const _targetItemName = function(kind, id) {
+        const item = _targetItem(kind, id);
+        return (item) ? item.name : "";
+    };
+
+    /**
+     * 達成条件概要を得る。
+     * 
+     * @param {DataAchieve} achieve 達成条件
+     * @returns {string} 概要文字列
+     */
+    const _getAchieveOverviewText = function(achieve) {
+        switch (achieve.type) {
+            case Game_Quest.ACHIEVE_SUBJUGATION:
+                return textQuestTitleSubjugation.format($dataEnemies[achieve.value2]);
+            case Game_Quest.ACHIEVE_COLLECTION:
+                return textQuestTitleCollection.format(_targetItemName(achieve.value1, achieve.value2));
+            case Game_Quest.ACHIEVE_EVENT:
+                return $dataSystem.switches[achieve.value1] || "";
+            default:
+                return "";
+        }
+    };
+
+    /**
+     * クエスト詳細文字列を得る。
+     * 
+     * @param {Array<DataAchieve>} achieves 達成条件リスト
+     * @returns {string} 概要文字列
+     */
+    const _generateQuestDescription = function(achieves) {
+        let description = "";
+        for (const achieve of achieves) {
+            const overviewText = _getAchieveOverviewText(achieve);
+            if (overviewText) {
+                if (description) {
+                    description = description + "," + overviewText;
+                } else {
+                    description = overviewText;
+                }
+            }
+        }
+        return description;
+    };
+    /**
+     * 達成条件概要を得る。
+     * 
+     * @param {DataAchieve} achieve 達成条件
+     * @returns {string} 概要文字列
+     */
+    const _getAchieveText = function(achieve) {
+        switch (achieve.type) {
+            case Game_Quest.ACHIEVE_SUBJUGATION:
+                return textQuestAchieveSubjugation.format($dataEnemies[achieve.value2]);
+            case Game_Quest.ACHIEVE_COLLECTION:
+                return textQuestAchieveCollection.format(_targetItemName(achieve.value1, achieve.value2));
+            case Game_Quest.ACHIEVE_EVENT:
+                return $dataSystem.switches[achieve.value1] || "";
+            default:
+                return "";
+        }
+    };
+    /**
+     * クエスト達成条件文字列を得る。
+     * 
+     * @param {Array<DataAchieve>} achieves 達成条件リスト
+     * @returns {string} 達成条件文字列
+     */
+    const _generateAchieveMessage = function(achieves) {
+        let message = "";
+        for (const achieve of achieves) {
+            const text = _getAchieveText(achieve);
+            if (text) {
+                if (message) {
+                    message = message + "," + text;
+                } else {
+                    message = text;
+                }
+            }
+        }
+        return message;
+    };
+
+    /**
+     * 報酬メッセージを生成する
+     * 
+     * @param {number} gold ゴールド
+     * @param {Array<object>} items アイテム配列
+     * @return {string} 報酬メッセージ
+     */
+    const _generateRewardMessage = function(gold, rewardItems) {
+        let message = "";
+        if (gold > 0) {
+            message = gold + TextManager.currencyUnit;
+        }
+        for (const rewardItem of rewardItems) {
+            const itemName = _targetItemName(rewardItem.kind, rewardItem.dataId);
+            if (itemName) {
+                if (message) {
+                    message = ", " + itemName + "\u00d7" + rewardItem.value;
+                } else {
+                    message = itemName + "\u00d7" + rewardItem.value;
+                }
+            }
+        }
+
+        return message || textRewardNone;
+    };
+
+
     //------------------------------------------------------------------------------
     // BattleManager
     const _BattleManager_endBattle = BattleManager.endBattle;
@@ -388,7 +483,7 @@ function Game_Quest() {
      * @param {number} result 結果(0:勝利, 1:逃走などで終了。, 2:敗北)
      */
     BattleManager.endBattle = function(result) {
-        // 倒したえねみーを東坡数加算する。
+        // 倒したえねみーの討伐数を加算する。
         $gameTroop.deadMembers().forEach(function(enemy) {
             $gameParty.addSubjugationTarget(enemy);
         });
@@ -466,13 +561,6 @@ function Game_Quest() {
     //------------------------------------------------------------------------------
     // Game_Quest
 
-    Game_Quest.STATUS_TRYING = 0;
-    Game_Quest.STATUS_DONE = 1;
-
-    Game_Quest.QTYPE_SUBJUGATION = 1; // 討伐依頼, achieve[0]エネミーID, acieve[1]が数量
-    Game_Quest.QTYPE_COLLECTION = 2; // 採取依頼, achieve[0]がアイテムID, achieve[1]が数量
-    Game_Quest.QTYPE_EVENT = 3; // イベント依頼。achieve[0]がスイッチ番号
-
     /**
      * 初期化する。
      * 
@@ -481,7 +569,83 @@ function Game_Quest() {
      Game_Quest.prototype.initialize = function(id) {
         this._id = id;
         this._status = Game_Quest.STATUS_TRYING;
-        this._value = 0; // 討伐数など。
+        this.initAchieves();
+    };
+
+    /**
+     * 達成条件データを初期化する。
+     */
+    Game_Quest.prototype.initAchieves = function() {
+        this._achieves = [];
+        const questData = this.questData();
+        for (const achieve of questData.achieves) {
+            this.addAchieve(achieve);
+        }
+    };
+
+    /**
+     * 達成条件を追加する。
+     * 
+     * @param {object} achieve 達成条件
+     * @returns {boolean} 達成条件を追加した場合にはtrue, それ以外はfalse
+     */
+    Game_Quest.prototype.addAchieve = function(achieve) {
+        switch (achieve.type) {
+            case Game_Quest.ACHIEVE_SUBJUGATION:
+                {
+                    const entry = this._achieves.find(a => (a.type === achieve.type) && (a.value1 === achieve.value1) && (a.value2 === achieve.value2));
+                    if (entry) {
+                        // 既に登録済みの達成条件がある。討伐数を加算。
+                        entry.value3 += achieve.value3;
+                        return true;
+                    } else {
+                        return this.registerNewAchieve(achieve);
+                    }
+                }
+            case Game_Quest.ACHIEVE_COLLECTION:
+                {
+                    const entry = this._achieves.find(a => (a.type === achieve.type) && (a.value1 === achieve.value1) && (a.value2 === achieve.value2));
+                    if (entry) {
+                        // 既に登録済みの達成条件がある。採取数を加算。
+                        entry.value3 += achieve.value3;
+                        return true;
+                    } else {
+                        return this.registerNewAchieve(achieve);
+                    }
+                }
+            case Game_Quest.ACHIEVE_EVENT:
+                {
+                    const entry = this._achieves.find(a => (a.type === achieve.type) && (a.value1 == achieve.value1));
+                    if (entry) {
+                        // 同じイベント条件がある。達成条件の状態を上書き。
+                        entry.value2 = achieve.value2;
+                        return true;
+                    } else {
+                        return this.registerNewAchieve(achieve);
+                    }
+                }
+            default:
+                return false;
+        }
+    };
+
+    /**
+     * 達成条件を新規登録する。
+     * 
+     * Note: 予め同じターゲットの達成条件が無いことを確認する事。
+     * 
+     * @param {object} achieve 達成条件
+     * @returns {boolean} 達成条件を追加した場合にはtrue, それ以外はfalse
+     */
+    Game_Quest.prototype.registerNewAchieve = function(achieve) {
+        this._achieves.push({
+            type:achieve.type,
+            value1:achieve.value1,
+            value2:achieve.value2,
+            value3:achieve.value3,
+            current:0
+        });
+        return true;
     };
 
     /**
@@ -494,62 +658,6 @@ function Game_Quest() {
     };
 
     /**
-     * 経過を得る。
-     * 
-     * @returns {number} 現在値
-     */
-    Game_Quest.prototype.getElapse = function() {
-        const questData = this.questData();
-        if (questData) {
-            if (questData.qtype === Game_Quest.QTYPE_SUBJUGATION) {
-                return this._value;
-            } else if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
-                const itemId = questData.achieve[0];
-                const item = $dataItems[itemId];
-                return this.countPartyItem(item);
-            }
-        }
-        return 0;
-    };
-
-    /**
-     * itemで指定されたアイテムの数を数える。
-     * YEP_ItemCoreで採取対象が個別アイテムの場合、正しくカウントできない問題があったため用意した。
-     * 
-     * @param {object} item アイテム(DataItem/DataWeapon/DataArmor)
-     * @returns {number} アイテムの数
-     */
-    Game_Quest.prototype.countPartyItem = function(baseItem) {
-        return $gameParty.numItems(baseItem);
-    };
-
-
-    /**
-     * トータルカウントを得る。
-     * 
-     * ・討伐クエストの場合：総討伐数
-     * ・採取クエストの場合：総採取数
-     * ・上記以外：0
-     * 
-     * @returns {number} トータルカウント
-     */
-    Game_Quest.prototype.getTotal = function() {
-        const questData = this.questData();
-        if (questData) {
-            if (questData.qtype === Game_Quest.QTYPE_SUBJUGATION) {
-                return questData.achieve[1];
-            } else if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
-                return questData.achieve[1];
-            } else {
-                return 0;
-            }
-        } else {
-            return 0;
-        }
-    };
-
-
-    /**
      * クエストデータを得る。
      * 
      * @returns {DataQuest} クエストデータ
@@ -558,76 +666,6 @@ function Game_Quest() {
         return $dataQuests[this._id];
     };
 
-    /**
-     * このクエストの適正ギルドランクを得る。
-     * 
-     * @returns {number} ギルドランク
-     */
-    Game_Quest.prototype.guildRank = function() {
-        const questData = this.questData();
-        return (questData) ? questData.guildRank : 0;
-    };
-
-    /**
-     * このクエストのギルドEXPを得る。
-     * 
-     * @returns {number} ギルドEXP
-     */
-    Game_Quest.prototype.guildExp = function() {
-        const questData = this.questData();
-        return (questData) ? questData.guildExp : 0;
-    };
-
-    /**
-     * クエストの状態を取得する。
-     * 
-     * @returns {number} 状態(Game_Quest.STATUS_xxxx が返る。)
-     */
-    Game_Quest.prototype.status = function() {
-        return this._status;
-    };
-
-    /**
-     * 討伐対象かどうかを判定する。
-     * 
-     * @param {number} enemyId エネミーID
-     * @returns {boolean} 討伐対象の場合にはtrue, それ以外はfalse
-     */
-    Game_Quest.prototype.isSubjugationTarget = function(enemyId) {
-        const questData = this.questData();
-        if (questData) {
-            if ((questData.qtype === Game_Quest.QTYPE_SUBJUGATION)
-                    && (questData.achieve[0] === enemyId)) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    /**
-     * 討伐数を加算する。
-     * 
-     * @param {number} enemyId エネミーID
-     */
-    Game_Quest.prototype.incrementSubjugationTarget = function(enemyId) {
-        const questData = this.questData();
-        if (questData) {
-            if ((questData.qtype === Game_Quest.QTYPE_SUBJUGATION)
-                    && (questData.achieve[0] === enemyId)) {
-                this._value = (this._value + 1).clamp(0, questData.achieve[1]);
-            }
-        }
-    };
-
-    /**
-     * 受託条件を取得する。
-     * 
-     * @returns {string} 受託条件
-     */
-    Game_Quest.prototype.entrustCondition = function() {
-        const questData = this.questData();
-        return (questData) ? questData.entrustCondition : "";
-    };
 
     /**
      * クエスト名を得る。
@@ -637,22 +675,10 @@ function Game_Quest() {
     Game_Quest.prototype.name = function() {
         const questData = this.questData();
         if (questData) {
-            if (questData.name) {
-                return questData.name;
-            } else {
-                // 自動生成できるなら生成する。
-                if (questData.qtype === Game_Quest.QTYPE_SUBJUGATION) {
-                    const enemyName = this.targetName();
-                    if (enemyName) {
-                        return textQuestTitleSubjugation.format(enemyName);
-                    }
-                } else if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
-                    const itemName = this.targetName();
-                    if (itemName) {
-                        return textQuestTitleCollection.format(itemName);
-                    }
-                }
+            if (!questData.name && (questData.achieves.length > 0)) {
+                questData.name = _getAchieveOverviewText(questData.achieves[0]);
             }
+            return questData.name;
         }
         return "";
     };
@@ -665,24 +691,12 @@ function Game_Quest() {
     Game_Quest.prototype.description = function() {
         const questData = this.questData();
         if (questData) {
-            if (questData.description) {
-                return questData.description;
-            } else {
-                // 自動生成できるなら生成する。
-                if (questData.qtype === Game_Quest.QTYPE_SUBJUGATION) {
-                    const enemyName = this.targetName();
-                    if (enemyName) {
-                        return textQuestDescSubjugation.format(enemyName);
-                    }
-                } else if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
-                    const itemName = this.targetName();
-                    if (itemName) {
-                        return textQuestDescCollection.format(itemName);
-                    }
-                }
+            if (!questData.description && (questData.achieves.length > 0)) {
+                questData.description = _generateQuestDescription(questData.achieves);
             }
+            return questData.description;
         }
-        return "?";
+        return "";
     };
 
     /**
@@ -693,26 +707,216 @@ function Game_Quest() {
     Game_Quest.prototype.achieveText = function() {
         const questData = this.questData();
         if (questData) {
-            if (questData.achieveMsg) {
-                return questData.achieveMsg;
-            } else {
-                // 自動生成できるなら生成する。
-                if (questData.qtype === Game_Quest.QTYPE_SUBJUGATION) {
-                    const enemyName = this.targetName();
-                    if (enemyName) {
-                        const count = this.getTotal();
-                        return textQuestAchiveSubjugation.format(enemyName, count);
-                    }
-                } else if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
-                    const itemName = this.targetName();
-                    if (itemName) {
-                        const itemCount = this.getTotal();
-                        return textQuestAchiveCollection.format(itemName, itemCount);
-                    }
+            if (!questData.achieveMsg && (questdata.achieves.length > 0)) {
+                questData.achieveMsg = _generateAchieveMessage(questData.achieves);
+            }
+            return questdata.achieveMsg;
+        }
+        return "";
+    };
+
+    /**
+     * 報酬テキストを取得する。
+     * 
+     * @returns {string} 報酬テキスト
+     */
+    Game_Quest.prototype.rewardText = function() {
+        const questData = this.questData();
+        if (questData) {
+            if (!questData.rewardMsg) {
+                questData.rewardMsg = _generateRewardMessage(questData.rewardGold, questData.rewardItems);
+            }
+            return questData.rewardMsg;
+        }
+        return "";
+    };
+    /**
+     * このクエストの適正ギルドランクを得る。
+     * 
+     * @returns {number} ギルドランク
+     */
+    Game_Quest.prototype.guildRank = function() {
+        const questData = this.questData();
+        return (questData) ? questData.guildRank : 0;
+    };
+
+
+    /**
+     * クエストの状態を取得する。
+     * 
+     * @returns {number} 状態(Game_Quest.STATUS_xxxx が返る。)
+     */
+    Game_Quest.prototype.status = function() {
+        return this._status;
+    };
+
+    /**
+     * 達成条件の数を得る。
+     * 
+     * @returns {number} 達成条件の数
+     */
+    Game_Quest.prototype.achieveCount = function() {
+        return this._achieves.length;
+    };
+    /**
+     * 討伐の達成条件を得る。
+     * 
+     * @returns {Array<object>} 達成条件 
+     */
+    Game_Quest.prototype.collectionAchieves = function() {
+        return this._achieves.filter(achieve => achieve.type === Game_Quest.ACHIEVE_SUBJUGATION);
+    };
+
+
+    /**
+     * 採取の達成条件を得る。
+     * 
+     * @returns {Array<object>} 達成条件 
+     */
+    Game_Quest.prototype.collectionAchieves = function() {
+        return this._achieves.filter(achieve => achieve.type === Game_Quest.ACHIEVE_COLLECTION);
+    };
+    /**
+     * イベントの達成条件を得る。
+     * 
+     * @returns {Array<object>} 達成条件 
+     */
+    Game_Quest.prototype.collectionAchieves = function() {
+        return this._achieves.filter(achieve => achieve.type === Game_Quest.ACHIEVE_EVENT);
+    };
+
+
+    /**
+     * 達成条件のステータスを得る。
+     * 
+     * @param {number} no 達成条件インデックス
+     * @returns {object} 達成条件状態。noが不正な場合にはnull.
+     */
+    Game_Quest.prototype.achieveStatus = function(no) {
+        const achieve = this._achieves[no];
+        if (achieve) {
+            const status =  this.isAchieveDone(achieve) ? Game_Quest.STATUS_DONE : Game_Quest.STATUS_TRYING;
+            const current = this.achieveCurrent(achieve);
+            const total = this.achieveTotal(achieve);
+            return {
+                name: _getAchieveText(achieve),
+                status:status,
+                current:current,
+                total:total
+            };
+        } else {
+            return null;
+        }
+    };
+
+    /**
+     * 達成条件の達成状態を得る。
+     * 
+     * @param {object} achieve 達成条件オブジェクト
+     * @returns {boolean} 達成条件を満たしている場合にはtrue, 満たしていない場合にはfalse.
+     */
+    Game_Quest.prototype.isAchieveDone = function(achieve) {
+        switch (achieve.type) {
+            case Game_Quest.ACHIEVE_SUBJUGATION:
+                return (achieve.current >= achieve.value3);
+            case Game_Quest.ACHIEVE_COLLECTION:
+                {
+                    const item = _targetItem(achieve.value1, achieve.value2);
+                    return ($gameParty.numItems(item) >= achieve.value3);
+                }
+            case Game_Quest.ACHIEVE_EVENT:
+                {
+                    const switchId = achieve.value1;
+                    const condition = achieve.value2 === 0;
+                    return ($gameSwitches.value(switchId) === condition);
+                }
+            default:
+                return false;
+        }
+    };
+
+    /**
+     * 達成条件の現在のカウントを得る。
+     * 
+     * @param {object} achieve 達成条件オブジェクト
+     * @returns {number} 現在のカウント
+     */
+    Game_Quest.prototype.achieveCurrent = function(achieve) {
+        switch (achieve.type) {
+            case Game_Quest.ACHIEVE_SUBJUGATION:
+                return achieve.current;
+            case Game_Quest.ACHIEVE_COLLECTION:
+                {
+                    const item = _targetItem(achieve.value1, achieve.value2);
+                    return $gameParty.numItems(item);
+                }
+            case Game_Quest.ACHIEVE_EVENT:
+                {
+                    const switchId = achieve.value1;
+                    const condition = achieve.value2 === 0;
+                    return ($gameSwitches.value(switchId) === condition) ? 1 : 0;
+                }
+            default:
+                return 0;
+        }
+    };
+
+    /**
+     * 達成条件のトータルカウントを得る。
+     * 
+     * @param {object} achieve 達成条件
+     * @returns {number} トータルカウント
+     */
+    Game_Quest.prototype.achieveTotal = function(achieve) {
+        switch (achieve.type) {
+            case Game_Quest.ACHIEVE_SUBJUGATION:
+                return achieve.value3;
+            case Game_Quest.ACHIEVE_COLLECTION:
+                return achieve.value3;
+            case Game_Quest.ACHIEVE_EVENT:
+                return 1;
+            default:
+                return 0;
+        }
+    };
+
+    /**
+     * enemyIdで指定されるエネミーが、このクエストの討伐対象かどうかを判定する。
+     * 
+     * @param {number} enemyId エネミーID
+     * @returns {boolean} 討伐対象の場合にはtrue, それ以外はfalse
+     */
+    Game_Quest.prototype.isSubjugationTarget = function(enemyId) {
+        return this._achieves.some(achieve => (achieve.type === Game_Quest.ACHIEVE_SUBJUGATION) && (achieve.value2 === enemyId));
+    };
+
+    /**
+     * 討伐数を加算する。
+     * 
+     * @param {number} enemyId エネミーID
+     */
+    Game_Quest.prototype.incrementSubjugationTarget = function(enemyId) {
+        const questData = this.questData();
+        if (questData) {
+            for (const achieve of this._achieves) {
+                if ((achieve.type === Game_Quest.ACHIEVE_SUBJUGATION)
+                        && (achieve.value2 === enemyId)
+                        && (achieve.current < achieve.value3)) {
+                    achieve.current++;
+                    break;
                 }
             }
         }
-        return "";
+    };
+
+    /**
+     * 受託条件を取得する。
+     * 
+     * @returns {string} 受託条件
+     */
+    Game_Quest.prototype.entrustCondition = function() {
+        const questData = this.questData();
+        return (questData) ? questData.entrustCondition : "";
     };
 
     /**
@@ -736,118 +940,102 @@ function Game_Quest() {
     };
 
     /**
+     * 報酬を作成する。
+     * 
+     * @returns {object} 報酬
+     */
+    Game_Quest.prototype.makeRewards = function() {
+        const guildExp = this.rewardGuildExp();
+        const gold = this.rewardGold();
+        const items = this.rewardItems();
+        return {
+            guildExp:guildExp,
+            gold:gold,
+            items:items
+        }
+    };
+    /**
+     * このクエストのギルドEXPを得る。
+     * 
+     * @returns {number} ギルドEXP
+     */
+    Game_Quest.prototype.rewardGuildExp = function() {
+        const questData = this.questData();
+        return (questData) ? questData.guildExp : 0;
+    };
+    /**
+     * このクエストの報酬ゴールドを得る。
+     * 
+     * @returns {number} 報酬ゴールド
+     */
+    Game_Quest.prototype.rewardGold = function() {
+        const questData = this.questData();
+        return (questData) ? questData.rewardGold : 0;
+    };
+
+    /**
      * 報酬アイテムを得る。
      * 
-     * @param {RewardItem}} entry 報酬アイテムエントリ
-     * @returns {object} アイテム(DataItem/DataWeapon/DataArmor)
+     * @returns {Array<object>} 報酬アイテム
      */
-     Game_Quest.prototype.getRewardItem = function(entry) {
-        if (entry.kind === 1) {
-            return $dataItems[entry.dataId];
-        } else if (entry.kind === 2) {
-            return $dataWeapons[entry.dataId];
-        } else if (entry.kind === 3) {
-            return $dataArmors[entry.dataId];
-        } else {
-            return null;
-        }
-    };
-
-    /**
-     * 報酬テキストを取得する。
-     * 
-     * @returns {string} 報酬テキスト
-     */
-    Game_Quest.prototype.rewardText = function() {
+    Game_Quest.prototype.rewardItems = function() {
+        const items = [];
         const questData = this.questData();
         if (questData) {
-            if (questData.rewardMsg) {
-                return questData.rewardMsg;
-            } else {
-                let msg = "";
-                if (questData.rewardGold) {
-                    msg += questData.rewardGold + TextManager.currencyUnit + "\n";
+            for (const rewardItem of questData.rewardItems) {
+                const item = _targetItemName(rewardItem.kind, rewardItem.dataId);
+                for (let i = 0; i < rewardItem.value; i++) {
+                    items.push(item);
                 }
-                return this.rewardItems().reduce(function(prev, entry) {
-                    if (prev) {
-                        return prev + "\n" + entry[0].name + "\u00d7" + entry[1];
-                    } else {
-                        return entry[0].name + "\u00d7" + entry[1];
-                    }
-                }, msg);
             }
         }
-
-        return "";
+        return items;
     };
 
-    /**
-     * ターゲット名を得る。
-     * 
-     * @returns {string} ターゲット名
-     */
-    Game_Quest.prototype.targetName = function() {
-        const questData = this.questData();
-        if (questData.qtype === Game_Quest.QTYPE_SUBJUGATION) {
-            const enemyId = questData.achieve[0];
-            const enemy = $dataEnemies[enemyId];
-            return enemy ? enemy.name : "";
-        } else if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
-            const itemId = questData.achieve[0];
-            const item = $dataItems[itemId];
-            return item ? item.name : "";
-        } else {
-            return "";
-        }
-    };
 
     /**
      * 状態を更新する。
      */
-    Game_Quest.prototype.update = function() {
-        const questData = this.questData();
-        if (questData) {
-            if (questData.qtype === GameQuest.QTYPE_SUBJUGATION) {
-                this._status = (this.getElapse() >= this.getTotal())
-                        ? Game_Quest.STATUS_DONE : Game_Quest.STATUS_TRYING;
-            } else if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
-                this._status = (this.getElapse() >= this.getTotal())
-                        ? Game_Quest.STATUS_DONE : Game_Quest.STATUS_TRYING;
-            } else if (questData.qtype === Game_Quest.QTYPE_EVENT) {
-                const switchId = questData.achieve[0];
-                if (switchId) {
-                    this._status = $gameSwitches.value(switchId)
-                            ? Game_Quest.STATUS_DONE : Game_Quest.STATUS_TRYING;
-                }
-            }
-        }
+    Game_Quest.prototype.refresh = function() {
+        const isTrying = this._achieves.some(achieve => !this.isAchieveDone(achieve));
+        this._status = isTrying ? Game_Quest.STATUS_TRYING : Game_Quest.STATUS_DONE;
     };
 
     /**
      * 強制的に達成状態にする。
-     * 
-     * 討伐数加算。
-     * 所持数加算。
      */
     Game_Quest.prototype.done = function() {
         this._status = Game_Quest.STATUS_DONE;
-        const questData = this.questData();
-        if (questData) {
-            if (questData.qtype === Game_Quest.QTYPE_SUBJUGATION) {
-                this._value = this.getTotal();
-            } else if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
-                const lackCount = this.getTotal() - this.getElapse();
-                if (lackCount > 0) {
-                    const itemId = questData.achieve[0];
-                    const item = $dataItems[itemId];
-                    $gameParty.gainItem(item, lackCount);
+        for (const achieve of this._achieves) {
+            this.setAchieveDone(achieve);
+        }
+        this.refresh();
+    };
+
+    /**
+     * noで指定された達成条件を満たすように達成条件を変更する。
+     * 
+     * @param {object} achieve 達成条件オブジェクト
+     */
+    Game_Quest.prototype.setAchieveDone = function(achieve) {
+        switch (achieve.type) {
+            case Game_Quest.ACHIEVE_SUBJUGATION:
+                achieve.value3 = achieve.current;
+                break;
+            case Game_Quest.ACHIEVE_COLLECTION:
+                {
+                    const item = _targetItem(achieve.value1, achieve.value2);
+                    const numItems = $gameParty.numItems(item);
+                    if (numItems < achieve.value3) {
+                        achieve.value3 = numItems;
+                    }
                 }
-            } else if (questData.qtype === Game_Quest.QTYPE_EVENT) {
-                const switchId = questData.achieve[0];
-                if (switchId) {
-                    $gameSwitches.setValue(switchId, true);
+                break;
+            case Game_Quest.ACHIEVE_EVENT:
+                {
+                    achieve.value2 = $gameSwitches.value(achieve.value1) ? 0 : 1;
                 }
-            }
+                break;
         }
     };
 
@@ -874,16 +1062,6 @@ function Game_Quest() {
             }
         }
         return "";
-    };
-
-    /**
-     * 報酬金額を得る。
-     * 
-     * @returns {number} 報酬金額
-     */
-    Game_Quest.prototype.rewardGold = function() {
-        const questData = this.questData();
-        return (questData) ? questData.rewardGold : 0;
     };
 
     /**
@@ -970,7 +1148,7 @@ function Game_Quest() {
      */
     Game_Party.prototype.addQuest = function(quest) {
         this._quests.push(quest); 
-        quest.update();
+        quest.refresh();
     };
 
     /**
@@ -995,6 +1173,13 @@ function Game_Quest() {
     Game_Party.prototype.loseQuestCollectItems = function(id) {
         const quest = this._quests.find(q => q.id === id);
         if (quest) {
+            const achieves = quest.collectionAchieves();
+            
+
+            // TODO:
+
+
+            const achieves = quest.achieves();
             const questData = quest.questData();
             if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
                 // 採取の場合、対象アイテムを減らす。
@@ -1108,7 +1293,7 @@ function Game_Quest() {
      */
     Game_Party.prototype.updateQuests = function() {
         this._quests.forEach(function(q) {
-            q.update();
+            q.refresh();
         });
     };
 
