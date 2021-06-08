@@ -41,8 +41,8 @@ namespace QEditor
         /// true:ONの時, false:OFFの時
         /// </summary>
         public bool SwitchCondition {
-            get => data.Value2 != 0;
-            set => data.Value2 = (value) ? 1 : 0;
+            get => data.Value2 == 0;
+            set => data.Value2 = (value) ? 0 : 1;
         }
 
         /// <summary>
