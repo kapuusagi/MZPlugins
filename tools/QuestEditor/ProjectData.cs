@@ -326,5 +326,22 @@ namespace QEditor
         {
             return dataSystem.CurrencyUnit;
         }
+
+        /// <summary>
+        /// 「経験値」の短縮形テキストを得る。
+        /// </summary>
+        /// <returns>文字列</returns>
+        public static string GetTextExpA()
+        {
+            var basicList = dataSystem.Terms.Basic;
+            if (basicList.Count > 9)
+            {
+                return basicList[9];
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
     }
 }

@@ -132,10 +132,41 @@
  * @type string
  * @default なし
  * 
+ * @param guildExpCoefDifficult
+ * @text ギルド経験値補正(難易度高)
+ * @desc 達成報酬、ペナルティ時に適用されるギルド経験値補正量(難易度高い場合)
+ * @type number
+ * @decimals 2
+ * @default 0.50
+ * 
+ * @param guildExpCoefEasy
+ * @text ギルド経験値補正(難易度低)
+ * @desc 達成報酬、ペナルティ時に適用されるギルド経験値補正量(難易度低い場合)
+ * @type number
+ * @decimals 2
+ * @default 0.50
+ * 
+ * @param penaltyGoldRate
+ * @text ペナルティゴールドレート
+ * @desc キャンセル時に支払うゴールドレート
+ * @type number
+ * @decimals 2
+ * @default 0.30
+ * 
  * @help 
  * クエストシステム。
  * 
- * TODO : 受託時のカスタム処理/完了時のカスタム処理を追加する。受けたときにスイッチをOFFにしたりしたいよね。
+ * x. 受託条件
+ * 
+ * x. 受託時のカスタム処理/完了時のカスタム処理。
+ *   クエスト受託中だけ特定のシンボルエネミーを出したい場合など、クエスト受託時ONにするなど。
+ *   エディタ作るのが面倒なので、スクリプトを実行する構造にした。
+ * 
+ * x. キャンセル時ペナルティ
+ *   キャンセル時のペナルティは、お金とギルドEXPとした。
+ *   クエストに設定されている報酬金額にプラグインパラメータで指定したゴールドレートを乗算した値を減算する。
+ * 
+ * 
  * TODO : ペナルティの内容見直したい
  * TODO : 達成条件。＆で複数指定できるようにしたい。ORはやらない。
  * 
@@ -200,6 +231,14 @@ function Game_Quest() {
     this.initialize(...arguments);
 }
 
+/**
+ * QuestManager
+ * 
+ * 受託処理/報告処理を行う。
+ */
+function QuestManager() {
+    throw new Error("This is a static class");
+}
 
 
 
@@ -211,6 +250,9 @@ function Game_Quest() {
     const textQuestAchieveSubjugation = parameters["textQuestAchieveSubjugation"] || "Subjugation %1 x %2";
     const textQuestTitleCollection = parameters["textQuestTitleCollection"] || "Collect %1";
     const textQuestAchieveCollection = parameters["textQuestAchieveCollection"] || "Collect %1 x %2";
+    const guildExpCoefDifficult = Math.max(0, (Number(parameters["guildExpCoefDifficult"]) || 0));
+    const guildExpCoefEasy = (Number(parameters["guildExpCoefEasy"]) || 0).clamp(0, 1.0);
+    const penaltyGoldRate = (Number(parameters["penaltyGoldRate"]) || 0.3).clamp(0.01, 1.0);
 
     Game_Quest.STATUS_TRYING = 0;
     Game_Quest.STATUS_DONE = 1;
@@ -451,19 +493,27 @@ function Game_Quest() {
      * 報酬メッセージを生成する
      * 
      * @param {number} gold ゴールド
+     * @param {number} exp 経験値
      * @param {Array<object>} items アイテム配列
      * @return {string} 報酬メッセージ
      */
-    const _generateRewardMessage = function(gold, rewardItems) {
+    const _generateRewardMessage = function(gold, exp, rewardItems) {
         let message = "";
         if (gold > 0) {
             message = gold + TextManager.currencyUnit;
+        }
+        if (exp > 0) {
+            if (message) {
+                message = message + ", " + TextManager.expA + " " + exp;
+            } else {
+                message = TextManager.expA + " " + exp;
+            }
         }
         for (const rewardItem of rewardItems) {
             const itemName = _targetItemName(rewardItem.kind, rewardItem.dataId);
             if (itemName) {
                 if (message) {
-                    message = ", " + itemName + "\u00d7" + rewardItem.value;
+                    message = message + ", " + itemName + "\u00d7" + rewardItem.value;
                 } else {
                     message = itemName + "\u00d7" + rewardItem.value;
                 }
@@ -528,16 +578,24 @@ function Game_Quest() {
     };
 
     /**
-     * EXPを加算する。
+     * ギルドEXPを加算する。
      * 
      * Note: このメソッドは単純加算するのみ。適正ランク/不適正ランクなどによる、
      *       倍率調整は呼び出し元で実施することを想定する。。
      * 
-     * @param {number} gainExp 加算する量
+     * @param {number} guildExp 加算する量
      */
-    Game_Actor.prototype.gainGuildExp = function(gainExp) {
-        gainExp = Math.max(0, gainExp || 0);
-        this._guildExp = (this._guildExp + gainExp).clamp(0, maxGuildExp);
+    Game_Actor.prototype.gainGuildExp = function(guildExp) {
+        this._guildExp = (this._guildExp + guildExp).clamp(0, maxGuildExp);
+    };
+
+    /**
+     * ギルドEXPを減らす。
+     * 
+     * @param {number} guildExp ギルドEXP
+     */
+    Game_Actor.prototype.loseGuildExp = function(guildExp) {
+        this.gainGuildExp(-guildExp);
     };
 
     /**
@@ -577,8 +635,8 @@ function Game_Quest() {
      */
     Game_Quest.prototype.initAchieves = function() {
         this._achieves = [];
-        const questData = this.questData();
-        for (const achieve of questData.achieves) {
+        const dataQuest = this.dataQuest();
+        for (const achieve of dataQuest.achieves) {
             this.addAchieve(achieve);
         }
     };
@@ -662,7 +720,7 @@ function Game_Quest() {
      * 
      * @returns {DataQuest} クエストデータ
      */
-    Game_Quest.prototype.questData = function() {
+    Game_Quest.prototype.dataQuest = function() {
         return $dataQuests[this._id];
     };
 
@@ -673,12 +731,12 @@ function Game_Quest() {
      * @returns {string} クエスト名
      */
     Game_Quest.prototype.name = function() {
-        const questData = this.questData();
-        if (questData) {
-            if (!questData.name && (questData.achieves.length > 0)) {
-                questData.name = _getAchieveOverviewText(questData.achieves[0]);
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
+            if (!dataQuest.name && (dataQuest.achieves.length > 0)) {
+                dataQuest.name = _getAchieveOverviewText(dataQuest.achieves[0]);
             }
-            return questData.name;
+            return dataQuest.name;
         }
         return "";
     };
@@ -689,12 +747,12 @@ function Game_Quest() {
      * @returns {string} 説明文
      */
     Game_Quest.prototype.description = function() {
-        const questData = this.questData();
-        if (questData) {
-            if (!questData.description && (questData.achieves.length > 0)) {
-                questData.description = _generateQuestDescription(questData.achieves);
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
+            if (!dataQuest.description && (dataQuest.achieves.length > 0)) {
+                dataQuest.description = _generateQuestDescription(dataQuest.achieves);
             }
-            return questData.description;
+            return dataQuest.description;
         }
         return "";
     };
@@ -705,10 +763,10 @@ function Game_Quest() {
      * @returns {string} 達成条件メッセージ
      */
     Game_Quest.prototype.achieveText = function() {
-        const questData = this.questData();
-        if (questData) {
-            if (!questData.achieveMsg && (questdata.achieves.length > 0)) {
-                questData.achieveMsg = _generateAchieveMessage(questData.achieves);
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
+            if (!dataQuest.achieveMsg && (questdata.achieves.length > 0)) {
+                dataQuest.achieveMsg = _generateAchieveMessage(dataQuest.achieves);
             }
             return questdata.achieveMsg;
         }
@@ -721,12 +779,12 @@ function Game_Quest() {
      * @returns {string} 報酬テキスト
      */
     Game_Quest.prototype.rewardText = function() {
-        const questData = this.questData();
-        if (questData) {
-            if (!questData.rewardMsg) {
-                questData.rewardMsg = _generateRewardMessage(questData.rewardGold, questData.rewardItems);
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
+            if (!dataQuest.rewardMsg) {
+                dataQuest.rewardMsg = _generateRewardMessage(dataQuest.rewardGold, dataQuest.rewardExp, dataQuest.rewardItems);
             }
-            return questData.rewardMsg;
+            return dataQuest.rewardMsg;
         }
         return "";
     };
@@ -736,8 +794,8 @@ function Game_Quest() {
      * @returns {number} ギルドランク
      */
     Game_Quest.prototype.guildRank = function() {
-        const questData = this.questData();
-        return (questData) ? questData.guildRank : 0;
+        const dataQuest = this.dataQuest();
+        return (dataQuest) ? dataQuest.guildRank : 0;
     };
 
 
@@ -892,12 +950,13 @@ function Game_Quest() {
 
     /**
      * 討伐数を加算する。
+     * enemyIdを対象とした討伐クエストが無い場合には何も変化しない。
      * 
      * @param {number} enemyId エネミーID
      */
     Game_Quest.prototype.incrementSubjugationTarget = function(enemyId) {
-        const questData = this.questData();
-        if (questData) {
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
             for (const achieve of this._achieves) {
                 if ((achieve.type === Game_Quest.ACHIEVE_SUBJUGATION)
                         && (achieve.value2 === enemyId)
@@ -915,8 +974,8 @@ function Game_Quest() {
      * @returns {string} 受託条件
      */
     Game_Quest.prototype.entrustCondition = function() {
-        const questData = this.questData();
-        return (questData) ? questData.entrustCondition : "";
+        const dataQuest = this.dataQuest();
+        return (dataQuest) ? dataQuest.entrustCondition : "";
     };
 
     /**
@@ -926,9 +985,9 @@ function Game_Quest() {
      */
     Game_Quest.prototype.rewardItems = function() {
         const items = [];
-        const questData = this.questData();
-        if (questData) {
-            questData.rewardItems.forEach(function(entry) {
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
+            dataQuest.rewardItems.forEach(function(entry) {
                 const item = this.getRewardItem(entry);
                 const num = entry.value;
                 if ((items != null) && (num > 0)) {
@@ -946,10 +1005,12 @@ function Game_Quest() {
      */
     Game_Quest.prototype.makeRewards = function() {
         const guildExp = this.rewardGuildExp();
+        const exp = this.rewardExp();
         const gold = this.rewardGold();
         const items = this.rewardItems();
         return {
             guildExp:guildExp,
+            exp:exp,
             gold:gold,
             items:items
         }
@@ -960,8 +1021,18 @@ function Game_Quest() {
      * @returns {number} ギルドEXP
      */
     Game_Quest.prototype.rewardGuildExp = function() {
-        const questData = this.questData();
-        return (questData) ? questData.guildExp : 0;
+        const dataQuest = this.dataQuest();
+        return (dataQuest) ? dataQuest.guildExp : 0;
+    };
+
+    /**
+     * このクエストの報酬経験値を得る。
+     * 
+     * @returns {number} 経験値
+     */
+    Game_Quest.prototype.rewardExp = function() {
+        const dataQuest = this.dataQuest();
+        return (dataQuest) ? dataQuest.rewardExp : 0;
     };
     /**
      * このクエストの報酬ゴールドを得る。
@@ -969,8 +1040,8 @@ function Game_Quest() {
      * @returns {number} 報酬ゴールド
      */
     Game_Quest.prototype.rewardGold = function() {
-        const questData = this.questData();
-        return (questData) ? questData.rewardGold : 0;
+        const dataQuest = this.dataQuest();
+        return (dataQuest) ? dataQuest.rewardGold : 0;
     };
 
     /**
@@ -980,9 +1051,9 @@ function Game_Quest() {
      */
     Game_Quest.prototype.rewardItems = function() {
         const items = [];
-        const questData = this.questData();
-        if (questData) {
-            for (const rewardItem of questData.rewardItems) {
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
+            for (const rewardItem of dataQuest.rewardItems) {
                 const item = _targetItemName(rewardItem.kind, rewardItem.dataId);
                 for (let i = 0; i < rewardItem.value; i++) {
                     items.push(item);
@@ -1054,9 +1125,9 @@ function Game_Quest() {
      * @returns {string} ランク名
      */
     Game_Quest.prototype.rankName = function() {
-        const questData = this.questData();
-        if (questData) {
-            const rankInfo = DataManager.guildRank(questData.guildRank);
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
+            const rankInfo = DataManager.guildRank(dataQuest.guildRank);
             if (rankInfo) {
                 return rankInof.name;
             }
@@ -1070,14 +1141,14 @@ function Game_Quest() {
      * @returns {number} ペナルティ金額
      */
     Game_Quest.prototype.penaltyGold = function() {
-        const questData = this.questData();
-        if (questData) {
-            if (questData.rewardGold) {
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
+            if (dataQuest.rewardGold) {
                 // 報酬金額が設定されている
-                return Math.round(questData.rewardGold * this.penaltyGoldRate());
-            } else if (questData.guildRank) {
+                return Math.round(dataQuest.rewardGold * this.penaltyGoldRate());
+            } else if (dataQuest.guildRank) {
                 // ギルドランクが指定されている。
-                const rankInfo = DataManager.guildrank(questData.guildRank);
+                const rankInfo = DataManager.guildrank(dataQuest.guildRank);
                 return Math.floor(rankInfo.exp * this.penaltyGoldRate());
             }
         }
@@ -1090,7 +1161,55 @@ function Game_Quest() {
      * @returns {number} ペナルティ金額レート
      */
     Game_Quest.prototype.penaltyGoldRate = function() {
-        return 0.3;
+        return penaltyGoldRate;
+    };
+
+    /**
+     * 受託時の処理を行う。
+     */
+    Game_Quest.prototype.onAccept = function() {
+        const dataQuest = this.dataQuest();
+        if (dataQuest && dataQuest.onAccept) {
+            try {
+                eval(dataQuest.onAccept);
+            }
+            catch (e) {
+                console.error("quest:id=" + dataQuest.id + ", name=" + dataQuest.name);
+                console.error(e);
+            }
+        }
+    };
+
+    /**
+     * 完了時の処理を行う。
+     */
+    Game_Quest.prototype.onComplete = function() {
+        const dataQuest = this.dataQuest();
+        if (dataQuest && dataQuest.onComplete) {
+            try {
+                eval(dataQuest.onComplete);
+            }
+            catch (e) {
+                console.error("quest:id=" + dataQuest.id + ", name=" + dataQuest.name);
+                console.error(e);
+            }
+        }
+    };
+
+    /**
+     * ギブアップ時の処理を行う。
+     */
+    Game_Quest.prototype.onGiveup = function() {
+        const dataQuest = this.dataQuest();
+        if (dataQuest && dataQuest.onCancel) {
+            try {
+                eval(dataQuest.onCancel);
+            }
+            catch (e) {
+                console.error("quest:id=" + dataQuest.id + ", name=" + dataQuest.name);
+                console.error(e);
+            }
+        }
     };
 
     //------------------------------------------------------------------------------
@@ -1102,30 +1221,6 @@ function Game_Quest() {
     Game_Party.prototype.initialize = function() {
         _Game_Party_initialize.call(this);
         this._quests = []; // 受領中のクエスト
-    };
-
-
-    /**
-     * クエストが受託可能かどうかを判定する。
-     * 
-     * @param {Game_Quest} quest クエスト
-     * @returns {boolean} 受託可能な場合にはtrue, それ以外はfalse.
-     */
-    Game_Party.prototype.canAcceptQuest = function(quest) {
-        const condition = quest.entrustCondition();
-        if (condition) {
-            const guildRank = this.guildRank(); // eslint-disable-line no-unused-vars
-            try {
-                return eval(condition);
-            }
-            catch (e) {
-                console.log(e);
-                return false;
-            }
-        } else {
-            return true; // 条件設定なし。
-        }
-
     };
 
     /**
@@ -1165,110 +1260,8 @@ function Game_Quest() {
         }
     };
 
-    /**
-     * idで指定されるクエストの採取アイテムを減らす
-     * 
-     * @param {number} id クエストID
-     */
-    Game_Party.prototype.loseQuestCollectItems = function(id) {
-        const quest = this._quests.find(q => q.id === id);
-        if (quest) {
-            const achieves = quest.collectionAchieves();
-            for (const achieve of achieves) {
-                const item = _targetItemName(achieve.value1, achieve.value2);
-                if (item) {
-                    this.loseItem(item, achieve.value3, false);
-                }
-            }
-        }
-    };
 
-    /**
-     * クエスト報酬を得る。
-     * 
-     * @param {number} id クエストID
-     */
-    Game_Party.prototype.gainQuestRewards = function(id) {
-        const quest = this._quests.find(q => q.id === id);
-        if (quest) {
-            const rewards = quest.makeRewards();
-            // ギルドEXP加算
-            const questGuildRank = quest.guildRank();
-            const guildExp = quest.guildExp();
-            for (const actor of this.allMembers()) {
-                if (questGuildRank === 0) {
-                    // クエストに適正ランクが指定されていない場合には
-                    // Expをそのまま加算する。
-                    actor.gainGuildExp(guildExp);
-                } else {
-                    const rate = 1.0 + (questGuildRank - actor.guildRank()) * 0.5;
-                    // アクターのギルドランクより、クエストの適正ランクが低い。
-                    // 加算されるギルドEXPは減る。
-                    const exp = Math.min(Math.floor(guildExp * rate), 1);
-                    actor.gainGuildExp(exp);
-                }
-            }
-            if (rewards.gold) {
-                this.gainGold(rewards.gold);
-            }
-            // アイテム加算
-            for (const item of rewards.item) {
-                $gameParty.gainItem(item, 1, false);
-            }
-        }
-    };
 
-    /**
-     * クエストを報告する。
-     * 
-     * Note: 完了状態かどうかは判定されていないしない。
-     * 
-     * @param {number} id クエストID
-     * @param {number} loseCollectItems 収集アイテムを減らす場合にはtrue
-     * @param {boolean} getRewards 報酬を加算する場合にはtrue, 加算しない場合にはfalse
-     */
-    Game_Party.prototype.reportQuest = function(id, loseCollectItems, getRewards) {
-        if (this.isTryingQuest(id)) {
-            if (loseCollectItems) {
-                this.loseQuestCollectItems(id);
-            }
-            if (getRewards) {
-                this.gainQuestRewards(id);
-            }
-            this.removeQuest(id);
-        }
-
-    };
-
-    /**
-     * クエストペナルティを支払う
-     * 
-     * @param {number} id クエストID
-     */
-    Game_Party.prototype.payQuestPenalty = function(id) {
-        const quest = this._quests.find(q => q.id === id);
-        if (quest) {
-            const penaltyGold = Math.min(quest.penaltyGold(), $gameParty.gold());
-            if (penaltyGold) {
-                this.loseGold(penaltyGold);
-            }
-        }
-    };
-
-    /**
-     * idで指定されるクエストをギブアップする。
-     * 
-     * @param {number} id クエストID
-     * @param {boolean} payPenalty ペナルティを払うかどうか
-     */
-    Game_Party.prototype.giveupQuest = function(id, payPenalty) {
-        if (this.isTryingQuest(id)) {
-            if (payPenalty) {
-                this.payQuestPenalty();
-            }
-            this.removeQuest(id);
-        }
-    };
 
     /**
      * 受領中のクエスト一覧を得る。
@@ -1282,23 +1275,10 @@ function Game_Quest() {
     /**
      * クエストの状態を更新する。
      */
-    Game_Party.prototype.updateQuests = function() {
-        this._quests.forEach(function(q) {
-            q.refresh();
-        });
-    };
-
-    /**
-     * クエストを完了にする。
-     * 
-     * @param {number} id クエストID
-     */
-    Game_Party.prototype.doneQuest = function(id) {
-        this._quests.forEach(function(q) {
-            if (q.id() === id) {
-                q.done();
-            }
-        });
+    Game_Party.prototype.refreshQuests = function() {
+        for (const quest of this._quests) {
+            quest.refresh();
+        }
     };
 
     /**
@@ -1324,11 +1304,288 @@ function Game_Quest() {
     Game_Party.prototype.addSubjugationTarget = function(enemy) {
         const enemyId = enemy.enemyId();
         this._quests.forEach(function(q) {
-            if (q.isSubjugationTarget(enemyId)) {
-                q.incrementSubjugationTarget(enemyId);
-            }
+            q.incrementSubjugationTarget(enemyId);
         });
     };
 
+    //------------------------------------------------------------------------------
+    // QuestManager
+    /**
+     * idで指定されるクエストが有効かどうかを得る。
+     * 
+     * @param {number} id クエストID
+     * @returns {boolean} 有効なクエストな場合にはtrue, それ以外はfalse
+     */
+    QuestManager.isValidQuest = function(id) {
+        const quest = $dataQuests[id];
+        if (quest) {
+            // クエスト名が設定されていて、達成条件が1つ以上存在するなら有効であると判定する。
+            return quest.name && (quest.achieves.length > 0);
+        }
+        return false;
+    };
+    /**
+     * クエストが受託可能かどうかを判定する。
+     * 
+     * @param {number} クエストID
+     * @returns {boolean} 受託可能な場合にはtrue, それ以外はfalse.
+     */
+    QuestManager.canAcceptQuest = function(id) {
+        if (this.isValidQuest(id)) {
+            const dataQuest = $dataQuests[id];
+            return this.testEntrustCondition(dataQuest);
+        }
+        return false;
+    };
+
+    /**
+     * 指定されたクエストを受けるとこができるかどうかテストする。
+     * 
+     * @param {DataQuest} dataQuest クエストデータ
+     * @returns {boolean} 受託可能ならばtrue, 受託できないならばfalse.
+     */
+    QuestManager.testEntrustCondition = function(dataQuest) {
+        const condition = dataQuest.entrustCondition();
+        if (condition) {
+            const quest = dataQuest; // eslint-disable-line no-unused-vars
+            const guildRank = this.guildRank(); // eslint-disable-line no-unused-vars
+            try {
+                return eval(condition);
+            }
+            catch (e) {
+                console.log(e);
+                return false;
+            }
+        } else {
+            return true; // 条件設定なし。
+        }
+    };
+
+    /**
+     * idで指定されるクエストを受託する。
+     * 
+     * @param {number} id クエストID
+     */
+    QuestManager.acceptQuest = function(id) {
+        if (this.canAcceptQuest(id)) {
+            const quest = new Game_Quest(id);
+            $gameParty.addQuest(quest);
+            quest.onAccept();
+        }
+    };
+
+    /**
+     * idで指定されるクエストが報告可能かどうかを判定する。
+     * 
+     * @param {number} id クエストID
+     * @return {boolean} 報告可能な場合にはtrue, それ以外はfalse
+     */
+    QuestManager.canReportQuest = function(id) {
+        const quest = $gameParty.quests().find(q => q.id() === id);
+        return (quest && quest.isDone());
+    };
+
+    /**
+     * クエストを報告する。
+     * 
+     * Note: 完了状態かどうかは判定されない。呼び出し元で判定すること。
+     * 
+     * @param {number} id クエストID
+     * @param {number} loseQuestItems 収集アイテムを減らす場合にはtrue
+     * @param {boolean} getRewards 報酬を加算する場合にはtrue, 加算しない場合にはfalse
+     */
+    QuestManager.reportQuest = function(id, loseQuestItems, getRewards) {
+        const quest = $gameParty.quests().find(q => q.id() === id);
+        if (quest) {
+            if (loseQuestItems) {
+                this.loseQuestItems(quest);
+            }
+            if (getRewards) {
+                this.gainQuestRewards(quest);
+            }
+            quest.onComplete();
+            this.removeQuest(id);
+        }
+    };
+
+    /**
+     * idで指定されるクエストの採取アイテムを減らす
+     * 
+     * @param {Game_Quest} クエスト
+     */
+    QuestManager.loseQuestItems = function(quest) {
+        if (quest) {
+            const achieves = quest.collectionAchieves();
+            for (const achieve of achieves) {
+                const item = _targetItemName(achieve.value1, achieve.value2);
+                if (item) {
+                    $gameParty.loseItem(item, achieve.value3, false);
+                }
+            }
+        }
+    };
+
+    /**
+     * クエスト報酬を得る。
+     * 
+     * @param {Game_Quest} quest クエスト
+     */
+    QuestManager.gainQuestRewards = function(quest) {
+        if (quest) {
+            const rewards = quest.makeRewards();
+            this.gainQuestRewardGuildExp(quest.guildRank(), rewards.guildExp);
+            this.gainRewardGold(rewards.gold);
+            this.gainRewardExp(rewards.exp);
+            this.gainRewardItems(rewards.items);
+        }
+    };
+
+    /**
+     * クエスト報酬のギルドEXPを加算する。
+     * 
+     * @param {number} guildRank クエストの適正ギルドランク
+     * @param {number} guildExp ギルドEXP
+     */
+    QuestManager.gainQuestRewardGuildExp = function(guildRank, guildExp) {
+        // ギルドランク補正をかけて、加算していく
+        for (const actor of $gameParty.allMembers()) {
+            const gainExp = this.correctGuildExp(actor.guildRank(), guildRank, guildExp);
+            actor.gainGuildExp(gainExp);
+        }
+    };
+
+    /**
+     * クエスト報酬のEXPを加算する。
+     * 
+     * @param {number} exp 経験値
+     */
+    QuestManager.gainRewardExp = function(exp) {
+        for (const actor of $gameParty.allMembers()) {
+            actor.gainExp(exp);
+        }
+    };
+    /**
+     * 達成報酬のゴールドを加算する。
+     * 
+     * @param {number} gold 増やす金額
+     */
+    QuestManager.gainRewardGold = function(gold) {
+        if (gold) {
+            $gameParty.gainGold(gold);
+        }
+    };
+    /**
+     * アイテムを加算する。
+     * 
+     * @param {Array<object>} items アイテム
+     */
+    QuestManager.gainRewardItems = function(items) {
+        for (const item of items) {
+            $gameParty.gainItem(item, 1, false);
+        }
+};
+
+    /**
+     * ギルド経験値の補正値を得る。
+     * 
+     * @param {number} actorGuildRank アクターのギルドランク
+     * @param {number} questGuildRank クエストのギルドランク
+     * @param {number} guildExp クエストのギルド経験値
+     * @returns {number} ギルド経験値
+     */
+    QuestManager.correctGuildExp = function(actorGuildRank, questGuildRank, guildExp) {
+        if (questGuildRank === 0) {
+            // クエストに適正ギルドランク指定がない。 -> そのまま返す。
+            return guildExp;
+        } else {
+            if (actorGuildRank < (questGuildRank - 1)) {
+                // 適正ランクより2つ以上低い(困難なのを達成)
+                const baseCoef = Math.max(1, 1 + guildExpCoefDifficult);
+                const difficultLevel = questGuildRank - 1 - actorGuildRank;
+                return Math.max(1, Math.round(guildExp * Math.pow(baseCoef, difficultLevel)));
+            } else if (actorGuildRank > (questGuildRank + 1)) {
+                // 適正ランクより2つ以上高い(簡単なのを達成)
+                const baseCoef = (1.0 - guildExpCoefEasy).clamp(0, 1.0);
+                const easyLevel = actorGuildRank - questGuildRank - 1;
+                return Math.max(1, Math.round(guildExp * Math.pow(baseCoef, easyLevel)));
+            } else {
+                // 適正ランクの前後は補正なし。
+                return guildExp;
+            }
+        }
+    };
+
+
+
+    /**
+     * 指定IDのクエストを報告可能状態(done)にする。
+     * 
+     * @param {number} id クエストID
+     */
+    QuestManager.doneQuest = function(id) {
+        const quests = $gameParty.quests().filter(q => q.id() === id);
+        for (const quest of quests) {
+            quest.done();
+        }
+    };
+
+    /**
+     * idで指定されるクエストをギブアップする。
+     * 
+     * @param {number} id クエストID
+     * @param {boolean} payPenalty ペナルティを払うかどうか
+     */
+    QuestManager.giveupQuest = function(id, payPenalty) {
+        const quests = $gameParty.quests().filter(q => q.id() === id);
+        for (const quest of quests) {
+            if (payPenalty) {
+                this.payPenalty(quest);
+            }
+            quest.onGiveup();
+            $gameParty.removeQuest(id);
+        }
+    };
+
+    /**
+     * ペナルティを支払う。
+     * 
+     * @param {Game_Quest} quest クエスト
+     */
+    QuestManager.payPenalty = function(quest) {
+        if (quest) {
+            // 所持金以上のものは撮られない
+            this.payPenaltyGold(quest.penaltyGold());
+            // ギルドEXPを減らす
+            this.payPenaltyGuildExp(quest.guildRank(), quest.guildExp());
+        }
+    };
+
+    /**
+     * ペナルティ金額を払う。
+     * 
+     * @param {number} gold ペナルティ金額
+     */
+    QuestManager.payPenaltyGold = function(gold) {
+        const penaltyGold = Math.min(gold, $gameParty.gold());
+        if (penaltyGold) {
+            this.loseGold(penaltyGold);
+        }
+    };
+
+    /**
+     * ペナルティとしてギルド経験値を払う。
+     * 
+     * @param {number} guildRank ペナルティ金額
+     * @param {number} guildExp ペナルティ経験値
+     */
+    QuestManager.payPenaltyGuildExp = function(guildRank, guildExp) {
+        if (guildExp) {
+            // ギルドランク補正をかけて、減算していく
+            for (const actor of $gameParty.allMembers()) {
+                const loseGuildExp = this.correctGuildExp(actor.guildRank(), guildRank, guildExp);
+                actor.loseGuildExp(loseGuildExp);
+            }
+        }
+    };
 
 })();

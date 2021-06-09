@@ -131,6 +131,8 @@ namespace QEditor
             numericUpDownGuildExp.Value = Math.Max(numericUpDownGuildExp.Minimum, Math.Min(numericUpDownGuildExp.Maximum, guildExp));
             int rewardGold = quest?.RewardGold ?? 0;
             numericUpDownRewardGold.Value = Math.Max(numericUpDownRewardGold.Minimum, Math.Min(numericUpDownRewardGold.Maximum, rewardGold));
+            int rewardExp = quest?.RewardExp ?? 0;
+            numericUpDownRewardExp.Value = Math.Max(numericUpDownRewardExp.Minimum, Math.Min(numericUpDownRewardExp.Maximum, rewardExp));
             ApplyAchievesToDataTable(quest);
             ApplyRewardItemToDataTable(quest);
             textBoxNote.Text = quest?.Note ?? string.Empty;
@@ -209,16 +211,6 @@ namespace QEditor
         }
 
         /// <summary>
-        /// 名前生成ボタンがクリックされた時に通知を受け取る
-        /// </summary>
-        /// <param name="sender">送信元オブジェクト</param>
-        /// <param name="e">イベントオブジェクト</param>
-        private void OnButtonGenerateNameClick(object sender, EventArgs e)
-        {
-            // TODO : 
-        }
-
-        /// <summary>
         /// ギルドランクコンボボックスの選択が変更された時に通知を受け取る。
         /// </summary>
         /// <param name="sender">送信元オブジェクト</param>
@@ -258,16 +250,6 @@ namespace QEditor
         }
 
         /// <summary>
-        /// 達成条件生成ボタンがクリックされた時に通知を受け取る。
-        /// </summary>
-        /// <param name="sender">送信元オブジェクト</param>
-        /// <param name="e">イベントオブジェクト</param>
-        private void OnButtonGenerateAchieveMessageClick(object sender, EventArgs e)
-        {
-            // TODO :
-        }
-
-        /// <summary>
         /// 報酬メッセージテキストボックスのテキストが変更されたときに通知を受け取る。
         /// </summary>
         /// <param name="sender">送信元オブジェクト</param>
@@ -278,16 +260,6 @@ namespace QEditor
             {
                 quest.RewardsMessage = textBoxRewardMsg.Text;
             }
-        }
-
-        /// <summary>
-        /// 報酬メッセージがクリックされた時の処理を行う。
-        /// </summary>
-        /// <param name="sender">送信元オブジェクト</param>
-        /// <param name="e">イベントオブジェクト</param>
-        private void OnButtonGenerateRewardsMessageClick(object sender, EventArgs e)
-        {
-            // TODO :
         }
 
         /// <summary>
@@ -326,6 +298,19 @@ namespace QEditor
             if (quest != null)
             {
                 quest.RewardGold = (int)(numericUpDownRewardGold.Value);
+            }
+        }
+
+        /// <summary>
+        /// 報酬EXPの数値が変更されたときに通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnNumericUpDownRewardExpValueChanged(object sender, EventArgs e)
+        {
+            if (quest != null)
+            {
+                quest.RewardExp = (int)(numericUpDownRewardExp.Value);
             }
         }
         /// <summary>
@@ -641,6 +626,14 @@ namespace QEditor
                 if (quest.RewardGold > 0)
                 {
                     sb.Append(quest.RewardGold).Append(ProjectData.GetCurrencyUnit());
+                }
+                if (quest.RewardExp > 0)
+                {
+                    if (sb.Length > 0)
+                    {
+                        sb.Append("\r\n");
+                    }
+                    sb.Append(ProjectData.GetTextExpA()).Append(' ').Append(quest.RewardExp);
                 }
                 foreach (RewardItem rewardItem in quest.RewardItems)
                 {

@@ -36,6 +36,10 @@ namespace QEditor
         /// </summary>
         public int RewardGold { get; set; } = 0;
         /// <summary>
+        /// 報酬経験値
+        /// </summary>
+        public int RewardExp { get; set; } = 0;
+        /// <summary>
         /// 報酬アイテム
         /// </summary>
         public List<RewardItem> RewardItems { get; private set; } = new List<RewardItem>();
@@ -109,6 +113,9 @@ namespace QEditor
                 case "rewardGold":
                     RewardGold = (int)((double)(value));
                     break;
+                case "rewardExp":
+                    RewardExp = (int)((double)(value));
+                    break;
                 case "rewardItems":
                     RewardItems.Clear();
                     RewardItems.AddRange((List<RewardItem>)(value));
@@ -175,6 +182,7 @@ namespace QEditor
             var achieves = Achieves.Select(a => a.Data).ToArray();
             job.Append("achieves", achieves);
             job.Append("rewardGold", RewardGold);
+            job.Append("rewardExp", RewardExp);
             job.Append("rewardItems", RewardItems);
             job.Append("name", Name);
             job.Append("achieveMsg", AchieveMessage);
