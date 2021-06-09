@@ -149,6 +149,12 @@
  * @type string
  * @default なし
  * 
+ * @param textDeadlineNone
+ * @text 期限なしテキスト
+ * @desc 受託後の期限制限がないことを表すテキスト。(期限は本プラグインでは提供しない)
+ * @type string
+ * @default 無期限
+ * 
  * @param guildExpCoefDifficult
  * @text ギルド経験値補正(難易度高)
  * @desc 達成報酬、ペナルティ時に適用されるギルド経験値補正量(難易度高い場合)
@@ -313,6 +319,7 @@ function QuestManager() {
     const textQuestAchieveSubjugation = parameters["textQuestAchieveSubjugation"] || "Subjugation %1 x %2";
     const textQuestTitleCollection = parameters["textQuestTitleCollection"] || "Collect %1";
     const textQuestAchieveCollection = parameters["textQuestAchieveCollection"] || "Collect %1 x %2";
+    const textDeadlineNone = parameters["textDeadlineNone"] || "No deadline";
     const guildExpCoefDifficult = Math.max(0, (Number(parameters["guildExpCoefDifficult"]) || 0));
     const guildExpCoefEasy = (Number(parameters["guildExpCoefEasy"]) || 0).clamp(0, 1.0);
     const penaltyGoldRate = (Number(parameters["penaltyGoldRate"]) || 0.3).clamp(0.01, 1.0);
@@ -1205,6 +1212,15 @@ function QuestManager() {
     };
 
     /**
+     * 失敗したかどうかを取得する。
+     * 
+     * @returns {boolean} 失敗した場合にはtrue, それ以外はfalse
+     */
+    Game_Quest.prototype.isFail = function() {
+        return this._status === Game_Quest.STATUS_FAIL;
+    };
+
+    /**
      * ランク名を得る。
      * 
      * @returns {string} ランク名
@@ -1295,6 +1311,15 @@ function QuestManager() {
                 console.error(e);
             }
         }
+    };
+
+    /**
+     * 制限時間テキストを得る。
+     * 
+     * @returns {string} 制限時間テキスト
+     */
+    Game_Quest.prototype.deadLineText = function() {
+        return textDeadlineNone;
     };
 
     //------------------------------------------------------------------------------
