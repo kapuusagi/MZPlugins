@@ -1114,7 +1114,7 @@ function Game_Quest() {
     Game_Party.prototype.canAcceptQuest = function(quest) {
         const condition = quest.entrustCondition();
         if (condition) {
-            const guildRank = $gameParty.guildRank(); // eslint-disable-line no-unused-vars
+            const guildRank = this.guildRank(); // eslint-disable-line no-unused-vars
             try {
                 return eval(condition);
             }
@@ -1174,19 +1174,11 @@ function Game_Quest() {
         const quest = this._quests.find(q => q.id === id);
         if (quest) {
             const achieves = quest.collectionAchieves();
-            
-
-            // TODO:
-
-
-            const achieves = quest.achieves();
-            const questData = quest.questData();
-            if (questData.qtype === Game_Quest.QTYPE_COLLECTION) {
-                // 採取の場合、対象アイテムを減らす。
-                const itemId = questData.achieve[0];
-                const itemCount = questData.achieve[1];
-                const correctItem = $dataItems[itemId];
-                $gameParty.loseItem(correctItem, itemCount, true);
+            for (const achieve of achieves) {
+                const item = _targetItemName(achieve.value1, achieve.value2);
+                if (item) {
+                    this.loseItem(item, achieve.value3, false);
+                }
             }
         }
     };
@@ -1199,19 +1191,11 @@ function Game_Quest() {
     Game_Party.prototype.gainQuestRewards = function(id) {
         const quest = this._quests.find(q => q.id === id);
         if (quest) {
-            if (quest.rewardGold() > 0) {
-                this.gainGold(quest.rewardGold());
-            }
-            // アイテム加算
-            const rewardItems = quest.rewardItems();
-            rewardItems.forEach(function(entry) {
-                $gameParty.gainItem(entry[0], entry[1]);
-            });
-    
+            const rewards = quest.makeRewards();
             // ギルドEXP加算
             const questGuildRank = quest.guildRank();
             const guildExp = quest.guildExp();
-            $gameParty.allMembers().forEach(function(actor) {
+            for (const actor of this.allMembers()) {
                 if (questGuildRank === 0) {
                     // クエストに適正ランクが指定されていない場合には
                     // Expをそのまま加算する。
@@ -1223,7 +1207,14 @@ function Game_Quest() {
                     const exp = Math.min(Math.floor(guildExp * rate), 1);
                     actor.gainGuildExp(exp);
                 }
-            });
+            }
+            if (rewards.gold) {
+                this.gainGold(rewards.gold);
+            }
+            // アイテム加算
+            for (const item of rewards.item) {
+                $gameParty.gainItem(item, 1, false);
+            }
         }
     };
 
