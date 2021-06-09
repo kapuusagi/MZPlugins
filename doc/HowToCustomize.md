@@ -1591,3 +1591,13 @@ __launchBattle__ -> __startEncounterEffect__ -> __updateEncounterEffect__ -> __s
     -> Scene_Map.onTransferをフック。(リソースの開放や設定のクリアなどはこちら？)
     
 
+### プレイ時間を得るには？
+
+Game_System.playtime()で秒数が得られる。
+但し本メソッドで経過時間を得た場合、誤差が最大で±118フレーム発生する。
+
+フレーム単位で正確な値を得たいならば、Graphics.frameCountを使用する。
+カウンタのオーバーフローを心配したくなるが、
+Javascriptの整数表現最大値(Number.MAX_SAFE_INTEGER)で表現されたとすると、
+通算で285,616,414年以上持つみたいなので現実的な面で問題ない。
+但しこのカウンタはシーンが非アクティブだろうと歩進する。
