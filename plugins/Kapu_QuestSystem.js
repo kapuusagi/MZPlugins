@@ -189,6 +189,16 @@
  *   キャンセル時のペナルティは、お金とギルドEXPとした。
  *   クエストに設定されている報酬金額にプラグインパラメータで指定したゴールドレートを乗算した値を減算する。
  * 
+ * ギルドランクの取得用コマンドは面倒なので用意しない。
+ * 以下のようなコードで取得出来るので、標準にある、「スクリプトの値を変数に格納」で格納することを想定する。
+ * ・パーティーのギルドランク(平均)
+ *   $gameParty.guildRank()
+ * ・指定したアクターのギルドランク
+ *   const a = $gameActors.actor(id); (a) ? a.guildRank() : 0
+ * ・N番目のメンバーのギルドランク
+ *   $gameParty.allMembers()[no].guildRank()
+ * 
+ * 
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
@@ -457,6 +467,17 @@ function QuestManager() {
     };
 
     /**
+     * ギルドランクに対応するランク情報を得る。
+     * 
+     * @param {number} rank ギルドランク
+     * @returns {GuildRankInfo} ギルドランク情報。該当エントリが無い場合には一番低いランクが返る。
+     */
+    DataManager.guildRankByRank = function(rank) {
+        const rankInfo = this._guildRanks.find(gr => gr.rank === rank);
+        return (rankInfo) ? rankInfo : this._guildRanks[0];
+    };
+
+    /**
      * 種類とIDからアイテムを得る。
      * 
      * @param {number} kind 種類
@@ -650,7 +671,7 @@ function QuestManager() {
      * 
      * @returns {number} ギルドEXP
      */
-     Game_Actor.prototype.guildExp = function() {
+    Game_Actor.prototype.guildExp = function() {
         return this._guildExp;
     };
 
@@ -679,7 +700,7 @@ function QuestManager() {
     /**
      * アクターのギルドランクを得る。
      * 
-     * @returns {number} 
+     * @returns {number} ギルドランク番号
      */
     Game_Actor.prototype.guildRank = function() {
         const rankInfo = DataManager.guildRankByExp(this._guildExp);
@@ -1344,6 +1365,17 @@ function QuestManager() {
             return prev + member.guildRank();
         }, 0);
         return Math.floor(totalRank / members.length);
+    };
+
+    /**
+     * このパーティーのギルドランク名を得る。
+     * 
+     * @returns {string} ギルドランク名
+     */
+    Game_Party.prototype.guildRankName = function() {
+        const guildRank = this.guildRank();
+        const rankInfo = DataManager.guildRankByRank(guildRank);
+        return rankInfo.name;
     };
 
     /**
