@@ -48,9 +48,10 @@
  * @type boolean
  * @default true
  * 
- * @commad cancelQuest
- * @text クエストをキャンセルする
- * @desc クエストをキャンセルし、受託中リストから削除する。受けていない場合には何もしない。
+ * 
+ * @commad giveupQuest
+ * @text クエストをギブアップする
+ * @desc クエストをギブアップし、受託中リストから削除する。受けていない場合には何もしない。
  * 
  * @arg variableId
  * @text クエストID(変数指定)
@@ -70,9 +71,27 @@
  * @type boolean
  * @default true
  * 
- * @arg setQuestDone
+ * 
+ * @command setQuestDone
  * @text クエストを完了にする。
  * @desc 指定クエストを完了状態にする。
+ * 
+ * @arg variableId
+ * @text クエストID(変数指定)
+ * @desc クエストID(変数指定)。1以上の値を指定した場合に有効。
+ * @type variable
+ * @default 0
+ * 
+ * @arg id
+ * @text クエストID
+ * @desc クエストのID(変数指定がされていない場合のみ有効)
+ * @type number
+ * @default 0
+ * 
+ * 
+ * @command setQuestFail
+ * @text クエストを失敗にする。
+ * @desc 指定クエストを失敗状態にする。
  * 
  * @arg variableId
  * @text クエストID(変数指定)
@@ -98,8 +117,6 @@
  * @desc 1アクターあたりの最大ギルドEXP
  * @type number
  * @default 99999
- * 
- * 
  * 
  * @param textQuestTitleSubjugation
  * @text 討伐クエストタイトル書式
@@ -166,18 +183,63 @@
  *   キャンセル時のペナルティは、お金とギルドEXPとした。
  *   クエストに設定されている報酬金額にプラグインパラメータで指定したゴールドレートを乗算した値を減算する。
  * 
- * 
- * TODO : ペナルティの内容見直したい
- * TODO : 達成条件。＆で複数指定できるようにしたい。ORはやらない。
- * 
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
+ * クエストの受領/達成報告/キャンセル操作をする場合には、QuestManagerのインタフェースを使用します。
+ * QuestManager.acceptQuest(id:number):void
+ *   idで指定したクエストを受領する。
+ * QuestManager.reportQuest(id:number,loseCollectItems:boolean,getRewards:boolean):void
+ *   idで指定したクエストを完了報告する。
+ *   受託していない場合には何もしない。
+ *   lostCollectItemsにtrueを指定すると、採取条件のアイテムを失う。falseにすると採取アイテムは減らない。
+ *   getRewardsにtrueを指定すると、報酬を得る。falseにすると報酬は得ない。
+ * QuestManager.giveupQuest(id:number,payPenalty:boolean):void
+ *   idで指定したクエストをギブアップ報告する。
+ *   受託していない場合には何もしない。
+ *   payPenaltyにtrueを指定すると、ペナルティを支払う。falseにするとペナルティは支払わない。
+ * QuestManager.setQuestDone(id:number):void
+ *   idで指定したクエストを完了状態にする。
+ *   受託していない場合には何もしない。
+ * QuestManager.setQuestFail(id:number):void
+ *   idで指定したクエストを失敗状態にする。
+ *   受託していない場合には何もしない。
+ *   既に完了しているならば失敗にできない。
+ * 
+ * クエストデータについての追加の処理について
+ * Game_Quest.onAccept():void
+ *   クエストを受託したときに呼ばれる。
+ * Game_Quest.onComplete():void
+ *   クエストを完了したときに呼ばれる。
+ * Game_Quest.onCancel():void
+ *   クエストをキャンセルしたときに呼ばれる。
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
+ * クエストを受ける
+ *   指定したクエストを受領状態にします。
+ *   受領可能な条件を満たしているかどうかは判定しません。
+ *   既に受領済みの場合には何もしません。
  * 
+ * クエストを完了報告する
+ *   指定したクエストを完了報告します。
+ *   受領していない場合にはなにもしません。
+ *   完了条件を満たしているかどうかは判定しません。
+ * 
+ * クエストをギブアップする
+ *   指定したクエストをギブアップします。
+ *   受領していない場合には何もしません。
+ * 
+ * クエストを完了状態にする
+ *   指定したクエストを完了状態にする。
+ *   正確には、現状の討伐数、採取状態に条件を引き下げるて完了にする。
+ *   依頼主が「もういいや」という場合に使用する。
+ * 
+ * クエストを失敗状態にする
+ *   指定したクエストを失敗状態にする。
+ *   時間制限や達成が出来なくなった場合に使用する。
+ *   失敗状態になると、クエストの状態が更新されなくなる。
  * 
  * ============================================
  * ノートタグ
@@ -185,6 +247,7 @@
  * アクター
  *   <guildRank:rank#>
  *     初期ギルドランクをrank#とする。
+ *     初期ギルドEXPはギルドランクに応じた値になる。
  *   <guildExp:exp#>
  *     初期ギルドEXPをexp#とする。guildRankタグを未指定時のみ有効。
  * ============================================
@@ -256,6 +319,7 @@ function QuestManager() {
 
     Game_Quest.STATUS_TRYING = 0;
     Game_Quest.STATUS_DONE = 1;
+    Game_Quest.STATUS_FAIL = 2;
 
     Game_Quest.ACHIEVE_SUBJUGATION = 1; // 討伐条件 value1:マップID(未使用) value2エネミーID:, value3:討伐数
     Game_Quest.ACHIEVE_COLLECTION = 2; // 採取条件 value1:種類(1:アイテム,2:武器,3:防具), value2:ID, value3:数量
@@ -310,8 +374,8 @@ function QuestManager() {
     PluginManager.registerCommand(pluginName, "acceptQuest", args => {
         const id = _getQuestId(args);
         if (id > 0) {
-            if (!$gameParty.isTryingQuest(id)) {
-                $gameParty.addQuest(new Game_Quest(id));
+            if (!$gameParty.isAcceptQuest(id)) {
+                QuestManager.acceptQuest(id);
             }
         }
     });
@@ -323,27 +387,33 @@ function QuestManager() {
         const getRewards = (args.getRewards === undefined)
                 ? true : (args.getRewards === "true");
         if (id > 0) {
-            $gameParty.reportQuest(id, loseCollectItems, getRewards);
+            QuestManager.reportQuest(id, loseCollectItems, getRewards);
         }
 
     });
 
-    PluginManager.registerCommand(pluginName, "cancelQuest", args => {
+    PluginManager.registerCommand(pluginName, "giveupQuest", args => {
         const id = _getQuestId(args);
         const payPenalty = (args.payPenalty === undefined)
                 ? true : (args.payPenalty === "true");
         if (id > 0) {
-            $gameParty.giveupQuest(id, payPenalty);
+            QuestManager.giveupQuest(id, payPenalty);
         }
-
     });
 
     PluginManager.prototype.registerCommand(pluginName, "setQuestDone", args => {
         const id = _getQuestId(args);
         if (id > 0) {
-            $gameParty.doneQuest(id);
+            QuestManager.setQuestDone(id);
         }
     });
+
+    PluginManager.prototype.registerCommand(pluginName, "setQuestFail", args => {
+        const id = _getQuestId(args);
+        if (id > 0) {
+            QuestManager.setQuestFail(id);
+        }
+    })
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -598,6 +668,7 @@ function QuestManager() {
         this.gainGuildExp(-guildExp);
     };
 
+
     /**
      * アクターのギルドランクを得る。
      * 
@@ -610,6 +681,7 @@ function QuestManager() {
 
     /**
      * ギルドランク名を得る。
+     * 
      * @returns {string} ギルドランク名
      */
     Game_Actor.prototype.guildRankName = function() {
@@ -955,8 +1027,7 @@ function QuestManager() {
      * @param {number} enemyId エネミーID
      */
     Game_Quest.prototype.incrementSubjugationTarget = function(enemyId) {
-        const dataQuest = this.dataQuest();
-        if (dataQuest) {
+        if (this._status === Game_Quest.STATUS_TRYING) {
             for (const achieve of this._achieves) {
                 if ((achieve.type === Game_Quest.ACHIEVE_SUBJUGATION)
                         && (achieve.value2 === enemyId)
@@ -1063,24 +1134,38 @@ function QuestManager() {
         return items;
     };
 
+    /**
+     * このクエストを失敗状態にする。
+     * 
+     * Note:既に完了/失敗状態の場合には変化しない。
+     */
+    Game_Quest.prototype.setFail = function() {
+        if (this._status === Game_Quest.STATUS_TRYING) {
+            this._status = Game_Quest.STATUS_FAIL;
+        }
+    };
 
     /**
      * 状態を更新する。
      */
     Game_Quest.prototype.refresh = function() {
-        const isTrying = this._achieves.some(achieve => !this.isAchieveDone(achieve));
-        this._status = isTrying ? Game_Quest.STATUS_TRYING : Game_Quest.STATUS_DONE;
+        if (this._status !== Game_Quest.STATUS_FAIL) {
+            const isTrying = this._achieves.some(achieve => !this.isAchieveDone(achieve));
+            this._status = isTrying ? Game_Quest.STATUS_TRYING : Game_Quest.STATUS_DONE;
+        }
     };
 
     /**
      * 強制的に達成状態にする。
      */
     Game_Quest.prototype.done = function() {
-        this._status = Game_Quest.STATUS_DONE;
-        for (const achieve of this._achieves) {
-            this.setAchieveDone(achieve);
+        if (this._status !== Game_Quest.STATUS_FAIL) {
+            this._status = Game_Quest.STATUS_DONE;
+            for (const achieve of this._achieves) {
+                this.setAchieveDone(achieve);
+            }
+            this.refresh();
         }
-        this.refresh();
     };
 
     /**
@@ -1260,9 +1345,6 @@ function QuestManager() {
         }
     };
 
-
-
-
     /**
      * 受領中のクエスト一覧を得る。
      * 
@@ -1287,7 +1369,7 @@ function QuestManager() {
      * @param {number} id クエストID
      * @returns {boolean} 請負中の場合にはtrue, それ以外はfalse
      */
-    Game_Party.prototype.isTryingQuest = function(id) {
+    Game_Party.prototype.isAcceptQuest = function(id) {
         for (let i = 0; i < this._quests.length; i++) {
             if (this._quests[i].id() === id) {
                 return true;
@@ -1522,10 +1604,21 @@ function QuestManager() {
      * 
      * @param {number} id クエストID
      */
-    QuestManager.doneQuest = function(id) {
+    QuestManager.setQuestDone = function(id) {
         const quests = $gameParty.quests().filter(q => q.id() === id);
         for (const quest of quests) {
             quest.done();
+        }
+    };
+    /**
+     * 指定IDのクエストを失敗状態(faile)にする。
+     * 
+     * @param {number} id クエストID
+     */
+     QuestManager.setQuestDone = function(id) {
+        const quests = $gameParty.quests().filter(q => q.id() === id);
+        for (const quest of quests) {
+            quest.setFail();
         }
     };
 
