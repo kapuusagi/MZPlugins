@@ -148,6 +148,26 @@
  * @default %1をギブアップしますか？
  * 
  * 
+ * @param colorQuestDone
+ * @text 成功したクエストの色
+ * @desc 成功したクエストの色
+ * @type string
+ * @default rgb(128,255,255)
+ * 
+ * @param colorQuestFail
+ * @text 失敗したクエストの色
+ * @desc 失敗したクエストの色
+ * @type string
+ * @default rgb(255,0,0)
+ * 
+ * TODO:ギルドランクが上下したときにメッセージを出したい。
+ * TODO:複数条件に対応していない。
+ * TODO:メッセージ表示に変えたい。
+ * TODO:プラグインコマンドでクエスト受注選択したい。クエストIDを変数に格納
+ * TODO:クエスト報告選択したい。クエストIDを変数に格納
+ * TODO:クエスト破棄選択したい。クエストIDを変数に格納
+ * TODO:ぎゅちゃっとしてるので、クエストメニュー画面とクエストショップを分けた方がいいかも？
+ * 
  * @help 
  * 
  * ■ 使用時の注意
@@ -204,7 +224,7 @@
 
 /**
  * Window_MenuQuestList
- * クエストリストウィンドウ
+ * クエストリストウィンドウ。メニュー画面にてクエスト一覧を表示する。
  */
  function Window_MenuQuestList() {
     this.initialize(...arguments);
@@ -212,7 +232,8 @@
 
 /**
  * Window_QuestStatus
- * クエストステータスウィンドウ
+ * クエストステータスウィンドウ。クエストの情報を表示する。
+ * メニュー及びショップにて、クエストの状態を表示するために使用される。
  */
 function Window_QuestStatus() {
     this.initialize(...arguments);
@@ -220,7 +241,7 @@ function Window_QuestStatus() {
 
 /**
  * Scene_MenuQuest
- * 受領中のクエストと状態表示
+ * 受領中のクエストと状態表示するシーン。
  */
  function Scene_MenuQuest() {
     this.initialize(...arguments);
@@ -313,6 +334,9 @@ function Scene_QuestShop() {
     const textMessageConfirmRank2 = parameters["textMessageConfirmRank2"] || "Do you accept %1?";
     const textMessageConfirmGiveup = parameters["textMessageConfirmGiveup"] || "Giveup %1?";
 
+    const colorQuestDone = parameters["colorQuestDone"] || "rgb(128,255,255)";
+    const colorQuestFail = parameters["colorQuestFail"] || "rgb(255,0,0)";
+
     PluginManager.registerCommand(pluginName, "startMenuScene", args => { // eslint-disable-line no-unused-vars
         SceneManager.push(Scene_MenuQuest);
     });
@@ -380,7 +404,9 @@ function Scene_QuestShop() {
         if (quest) {
             const name = quest.name();
             if (quest.isDone()) {
-                this.changeTextColor(ColorManager.textColor(1));
+                this.changeTextColor(colorQuestDone);
+            } else if (quest.isFail()) {
+                this.changeTextColor(colorQuestFail)
             } else {
                 this.resetTextColor();
             }
@@ -408,7 +434,7 @@ function Scene_QuestShop() {
     };
     //------------------------------------------------------------------------------
     // Window_QuestStatus
-    Window_QuestStatus.prototype = Object.create(Window_Base.prototype);
+    Window_QuestStatus.prototype = Object.create(Window_Selectable.prototype);
     Window_QuestStatus.prototype.constructor = Window_QuestStatus;
 
     /**
@@ -417,8 +443,9 @@ function Scene_QuestShop() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_QuestStatus.prototype.initialize = function(rect) {
-        Window_Base.prototype.initialize.call(this, rect);
+        Window_Selectable.prototype.initialize.call(this, rect);
         this._quest = null;
+        this._pageIndex = 0;
     };
 
     /**
@@ -428,15 +455,54 @@ function Scene_QuestShop() {
      */
     Window_QuestStatus.prototype.setQuest = function(quest) {
         this._quest = quest;
+        this._pageIndex = 0;
         this.refresh();
-    }
+    };
+
+    /**
+     * ページインデックスを得る。
+     * 
+     * @returns {number} ページインデックス
+     */
+    Window_QuestStatus.prototype.pageIndex = function() {
+        return this._pageIndex;
+    };
+
+    /**
+     * ページインデックスを変更する。
+     * 
+     */
+    Window_QuestStatus.prototype.changePageIndex = function() {
+        const prevPageIndex = this._pageIndex;
+        const pageIndex = (this._pageIndex + 1);
+        if (pageIndex >= this.maxPages()) {
+            this._pageIndex = 0;
+        } else {
+            this._pageIndex = pageIndex;
+        }
+        if (this._pageIndex !== prevPageIndex) {
+            this.refresh();
+        }
+    };
+
+    /**
+     * 最大ページ数を得る。
+     */
+    Window_QuestStatus.prototype.maxPages = function() {
+        return 1;
+    };
+
+
 
     /**
      * 表示を更新する。
      */
     Window_QuestStatus.prototype.refresh = function() {
-        const quest = this._quest;
         this.contents.clear();
+
+        // TODO : デザインも含めて書き替える事。
+
+        const quest = this._quest;
         if (quest === null) {
             return;
         }
@@ -446,8 +512,9 @@ function Scene_QuestShop() {
 
         const x = this.itemPadding();
         let y = this.itemPadding();
-        // クエスト名（Window_MenuQuestListにあるからいらないかも？）
-        this.drawQuestName(quest, x, y, contentsWidth);
+
+        // クエスト名などの基本情報
+        this.drawBasicBlock(quest, x, y, contentsWidth);
         y += lineHeight;
         this.drawHorzLine(y + 4);
         y += 8;
@@ -478,18 +545,29 @@ function Scene_QuestShop() {
     };
 
     /**
-     * クエスト名を描画する。
+     * クエスト名ブロックを描画する。
      * 
      * @param {Game_Quest}} quest クエスト
      * @param {number} x x位置
      * @param {number} y y位置
      * @param {number} width 幅
      */
-    Window_QuestStatus.prototype.drawQuestName = function(quest, x, y, width) {
+    Window_QuestStatus.prototype.drawBasicBlock = function(quest, x, y, width) {
         const labelWidth = this.labelWidth();
+        const lineHeight = this.lineHeight();
         const padding = this.itemPadding();
+        // サクッと書く
+        this.drawQuestName(quest, x, y, width);
+
+        const rankY = y + lineHeight;
+        const rankWidth = (width - padding) / 2;
+        this.drawQuestGuildRank(quest, x, rankY, rankWidth);
+        
+
+
         const rankWidth = 120;
         const nameWidth = width - padding * 2 - labelWidth - rankWidth;
+
         this.changeTextColor(ColorManager.systemColor());
         this.drawText(textLabelQuestName + ":", x, y, labelWidth);
         x += labelWidth + padding;
@@ -504,6 +582,26 @@ function Scene_QuestShop() {
         const rankLabelWidth = this.textWidth(labelRank);
         x += rankLabelWidth;
         this.drawText(quest.rankName(), x, y, rankWidth - rankLabelWidth)
+    };
+
+    /**
+     * クエスト名を描画する。
+     * 
+     * @param {Game_Quest} quest クエストデータ
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 描画幅
+     */
+    Window_QuestStatus.prototype.drawQuestName = function(quest, x, y, width) {
+        const labelWidth = this.labelWidth();
+        const padding = this.itemPadding();
+        const nameX = x + labelWidth + padding;
+        const nameWidth = width - (labelWidth + padding);
+
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(textLabelQuestName + ":", x, y, labelWidth);
+        this.resetTextColor();
+        this.drawText(quest.name(), nameX, y, nameWidth);
     };
 
     /**
