@@ -60,6 +60,12 @@
  * @type number
  * @default 32
  * 
+ * @param dayCountVariableId
+ * @text 日付歩進毎にカウントアップさせる変数ID
+ * @desc 日付歩進毎にカウントアップさせる変数ID
+ * @type variable
+ * @default 0
+ * 
  * @param dayilyCommonEventId
  * @text 朝になる毎に呼び出すコモンイベント
  * @desc 朝になる毎に呼び出すコモンイベント
@@ -83,7 +89,6 @@
  * @desc ニューゲーム開始時歩数による時間帯遷移を有効にする場合にはtrue
  * @type boolean
  * @default false
- * 
  * 
  * @help 
  * マップを歩くと時間帯と天候が変わるようにするプラグイン。
@@ -128,7 +133,7 @@
             ? false : (parameters["initialStepTimeRangeChange"] === "true");
     const initialStepWeatherChange = (parameters["initialStepWeatherChange"] === undefined)
             ? false : (parameters["initialStepWeatherChange"] === "true");
-
+    const dayCountVariableId = Math.round(Number(parameters["dayCountVariableId"]) || 0);
 
     
     $dataTimeRanges[Game_Map.TIMERANGE_MORNING].stepCount = Number(parameters["stepsOfMorning"]) || 16;
@@ -272,6 +277,10 @@
     Game_Map.prototype.onTimeRangeEnter = function() {
         _Game_Map_onTimeRangeEnter.call(this);
         if (this._timeRange === Game_Map.TIMERANGE_MORNING) {
+            if (dayCountVariableId > 0) {
+                const today = $gameVariables.value(dayCountVariableId);
+                $gameVariables.setValue(dayCountVariableId, today + 1);
+            }
             if (dayilyCommonEventId > 0) {
                 $gameTemp.reserveCommonEvent(dayilyCommonEventId);
             }
@@ -420,7 +429,7 @@
             this._stepCounterOfWeather = 0;
             $gameMap.changeWeatherRandom();
         }
-    };     
+    };
 
 
 })();
