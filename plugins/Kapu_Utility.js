@@ -56,11 +56,15 @@
  * ============================================
  * ノートタグ
  * ============================================
- * ノートタグはありません。
+ * クラス/スキル/武器/防具/ステート
+ *   <traitsUnduplicatable>
+ *     パーティー中に多重効果を持たせたくないオブジェクトに指定する。
  * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 ノートタグ traitsUnduplicatable を追加。
+ *               加算値特性で重複させたくない場合に使用する。（人数xステートで効果が増減するとか）
  * Version.0.3.0 Mapのノートタグ解析タイミングが正しくない不具合を修正した。
  * Version.0.2.0 $gameParty.partyTraitsSumMin()を追加した。
  *               $gameParty.partyTraitsSumMax()が上手く動作していない不具合を修正。
@@ -275,7 +279,7 @@
      * @param {TraitObject} traitObj traitsをメンバに持つオブジェクト
      * @param {number} code Game_BattlerBase.TRAIT_～を指定する。
      * @param {number} dataId パラメータID
-     * @returns valueの合計値が返る。
+     * @returns {number} valueの合計値が返る。
      */
     DataManager.traitsSum = function(traitObj, code, dataId) {
         const traits = traitObj.traits;
@@ -293,7 +297,7 @@
      * @param {TraitObject} traitObj traitsをメンバに持つオブジェクト
      * @param {number} code Game_BattlerBase.TRAIT_～を指定する。
      * @param {number} dataId パラメータID
-     * @returns valueの乗算合計値が返る。
+     * @returns {number} valueの乗算合計値が返る。
      */
     DataManager.traitsPi = function(traitObj, code, dataId) {
         const traits = traitObj.traits;
@@ -305,22 +309,36 @@
             }
         }, 1);
     };
-
     //------------------------------------------------------------------------------
     // Game_Party
+    /**
+     * 同一の特性オブジェクトを除いた特性オブジェクトを得る。
+     * 
+     * Note: 特性をかぶらせたくない場合に使用する。
+     * 
+     * @returns {Array<object>} 同一の特性オブジェクト配列。
+     */
+    Game_Party.prototype.partyTraitObjects = function() {
+        const objs = [];
+        for (const member of this.aliveMembers()) {
+            for (const traitObject of member.traitObjects()) {
+                if (!(traitObject.meta.traitsUnduplicatable && objs.includes(traitObject))) {
+                    // traitsUnduplicatable指定が無いか、objsに含まれていない。
+                    objs.push(traitObject);
+                }
+            }
+        }
+        return objs;
+    };
 
     /**
      * abilityIdで指定される特性値のパーティーメンバー合計を得る。
      * 
-     * @param {number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
+     * @param {number} abilityId アビリティID(Game_Party.ABILITY～)
      */
     Game_Party.prototype.partyTraitsSum = function(abilityId) {
-        return this.battleMembers().reduce(function(prev, actor) {
-            if (!actor.isDead()) {
-                return prev + actor.traitsSum(Game_BattlerBase.TRAIT_PARTY_ABILITY, abilityId);
-            } else {
-                return prev;
-            }
+        return this.partyTraitObjects().reduce(function(prev, traitObject) {
+            return prev + DataManager.traitsSum(traitObject, Game_BattlerBase.TRAIT_PARTY_ABILITY, abilityId)
         }, 0);
     };
 
@@ -328,7 +346,7 @@
      * abilityIdで指定される特性値のパーティーでの最大値を得る。
      * 増加効果の最大値を得たい場合に使用する。
      * 
-     * @param {number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
+     * @param {number} abilityId アビリティID(Game_Party.ABILITY_～)
      * @returns {number} 最大値
      */
     Game_Party.prototype.partyTraitsSumMax = function(abilityId) {
@@ -339,7 +357,7 @@
      * abilityIdで指定される特性値のパーティーでの最小値を得る。
      * 減算効果の最大を得たい場合に使用する。
      * 
-     * @param {number} abilityId アビリティID(Game_Party.PARTY_ABILITY)
+     * @param {number} abilityId アビリティID(Game_Party.ABILITY_～)
      * @returns {number} 最大値
      */
     Game_Party.prototype.partyTraitsSumMin = function(abilityId) {
