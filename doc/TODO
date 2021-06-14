@@ -1,0 +1,37 @@
+
+動作確認が必要なプラグインリスト:
+  ☐ Kapu_Trait_RandomEncountRate
+  ☐ Kapu_MapFilter_CircleFade
+  ☐ Kapu_MapTransfer
+  ☐ Kapu_QuestSystem
+  ☐ Kapu_QuestSystem_UI
+  ☐ Kapu_TimeRangeAndWeather
+  ☐ Kapu_TimeRangeAndWeathers_ChangeBySteps
+  ☐ Kapu_TimerExtend
+  ☐ Kapu_Trait_ParamAdd
+
+機能拡張予定:
+  Kapu_BattlerGender:
+    ☐ 男女両方にヒットする性別を追加する。
+  Kapu_ChoiceByRoulette:
+    ☐ 戦闘中にルーレット選択させたい。
+  Kapu_DungeonEscape:
+    ☐ 使用効果にダンジョンエスケープをつけると、他の効果を付与できない制限をなんとかしたい。
+  Kapu_FastTravel:
+    ☐ 使用効果にファストトラベルを付けると、他の効果を付与できない制限をなんとかしたい。
+  Kapu_PartyChange:
+    ☐ パーティー離脱時、ステート解除（ベーシックシステムでやっているなら不要）
+  Kapu_QuestSystem_UI:
+    ☐ ギルドランクが上下したときにメッセージを出したい。コモンイベントを呼べるようにするか？
+    ☐ 店で操作したときメッセージ表示。各店に個性を持たせたい。
+    クエストショップをカスタム対応させるための個別I/F化:
+      ☐ プラグインコマンドでクエスト受注選択したい。クエストIDを変数に格納
+      ☐ クエスト報告選択したい。クエストIDを変数に格納
+      ☐ クエスト破棄選択したい。クエストIDを変数に格納
+  Kapu_Trait_MultipleDrop:
+    ☐ ユニークアイテム指定。だれかが所持していたらドロップさせない仕組み
+  Kapu_Twld_Shops:
+    ☐ 店で操作したときメッセージ表示。各店に個性を持たせたい。
+
+その他:
+  ☐ Kapu_MapTransferにイメージフェードを追加したい。
