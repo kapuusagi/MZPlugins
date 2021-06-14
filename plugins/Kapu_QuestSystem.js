@@ -911,6 +911,8 @@ function QuestManager() {
     /**
      * 達成条件の数を得る。
      * 
+     * Note: 個別の達成条件状態を取得する際に使用する。状態自体はachieveStatus()を使用する。 
+     * 
      * @returns {number} 達成条件の数
      */
     Game_Quest.prototype.achieveCount = function() {
@@ -947,17 +949,26 @@ function QuestManager() {
     /**
      * 達成条件のステータスを得る。
      * 
+     * Note : 返すオブジェクトの詳細は次の通り
+     *        {
+     *             text : {string} 達成条件文字列(xxxxをyyyy討伐とか)
+     *             status : {number} Game_Quest.STATUS_xxx
+     *             current : {number} 現在値
+     *             total : {number} 目標値
+     *        }
+     * 
      * @param {number} no 達成条件インデックス
      * @returns {object} 達成条件状態。noが不正な場合にはnull.
      */
     Game_Quest.prototype.achieveStatus = function(no) {
         const achieve = this._achieves[no];
         if (achieve) {
-            const status =  this.isAchieveDone(achieve) ? Game_Quest.STATUS_DONE : Game_Quest.STATUS_TRYING;
+            const status =  this.isAchieveDone(achieve) ? Game_Quest.STATUS_DONE 
+                    : (this.isFail() ? Game_Quest.STATUS_FAIL : Game_Quest.STATUS_TRYING);
             const current = this.achieveCurrent(achieve);
             const total = this.achieveTotal(achieve);
             return {
-                name: _getAchieveText(achieve),
+                text: _getAchieveText(achieve),
                 status:status,
                 current:current,
                 total:total
@@ -1339,7 +1350,7 @@ function QuestManager() {
      * 
      * @returns {string} 制限時間テキスト
      */
-    Game_Quest.prototype.deadLineText = function() {
+    Game_Quest.prototype.deadlineText = function() {
         return textDeadlineNone;
     };
 

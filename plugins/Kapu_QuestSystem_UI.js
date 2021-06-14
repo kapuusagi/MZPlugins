@@ -50,7 +50,27 @@
  * @text ランクラベルテキスト
  * @desc ランクラベルとして使用される文字列
  * @type string
- * @default ランク
+ * @default 推奨ランク
+ * 
+ * @param textNoProperRank
+ * @text 推奨ランクなしテキスト
+ * @desc 推奨ランクが無い場合に表示するテキスト
+ * @type string
+ * @default 全て
+ * 
+ * @param textLabelDeadline
+ * @text 期日ラベルテキスト
+ * @desc 期日ラベルとして使用される文字列
+ * @type string
+ * @default 期日
+ * 
+ * @param textNoDeadline
+ * @text 期日なしテキスト
+ * @desc 期日が無い場合に使用される文字列
+ * @type string
+ * @default 無期限
+ * 
+ * 
  * 
  * @param textLabelDesc
  * @text 詳細ラベルテキスト
@@ -147,6 +167,11 @@
  * @type string
  * @default %1をギブアップしますか？
  * 
+ * @param colorAchieveDone
+ * @text 達成したクエストの色
+ * @desc 達成したクエストの色
+ * @type string
+ * @default rgb(128,255,255)
  * 
  * @param colorQuestDone
  * @text 成功したクエストの色
@@ -159,6 +184,7 @@
  * @desc 失敗したクエストの色
  * @type string
  * @default rgb(255,0,0)
+ * 
  * 
  * TODO:ギルドランクが上下したときにメッセージを出したい。
  * TODO:複数条件に対応していない。
@@ -315,6 +341,9 @@ function Scene_QuestShop() {
     const successSe = JSON.parse(parameters["successSe"] || "{}");
     const textLabelQuestName = parameters["textLabelQuestName"] || "Name";
     const textLabelRank = parameters["textLabelRank"] || "Rank";
+    const textNoProperRank = parameters["textNoProperRank"] || "All";
+    const textLabelDeadline = parameters["textLabelDeadline"] || "Deadline";
+    const textNoDeadline = parameters["textNoDeadline"] || "None";
     const textLabelDesc = parameters["textLabelDesc"] || "Description";
     const textLabelAchive = parameters["textLabelAchive"] || "Achive";
     const textLabelRewards = parameters["textLabelRewards"] || "Rewards";
@@ -334,6 +363,7 @@ function Scene_QuestShop() {
     const textMessageConfirmRank2 = parameters["textMessageConfirmRank2"] || "Do you accept %1?";
     const textMessageConfirmGiveup = parameters["textMessageConfirmGiveup"] || "Giveup %1?";
 
+    const colorAchieveDone = parameters["colorAchieveDone"] || "rgb(128,255,255)";
     const colorQuestDone = parameters["colorQuestDone"] || "rgb(128,255,255)";
     const colorQuestFail = parameters["colorQuestFail"] || "rgb(255,0,0)";
 
@@ -386,7 +416,7 @@ function Scene_QuestShop() {
      * @param {number} index インデックス（未指定の場合には現在のインデックス）
      * @returns {Game_Quest} クエストデータ
      */
-    Window_MenuQuestList.prototype.item = function(index) {
+    Window_MenuQuestList.prototype.quest = function(index) {
         if (index === undefined) {
             index = this.index();
         }
@@ -400,7 +430,7 @@ function Scene_QuestShop() {
      */
     Window_MenuQuestList.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
-        const quest = this.item(index);
+        const quest = this.quest(index);
         if (quest) {
             const name = quest.name();
             if (quest.isDone()) {
@@ -429,7 +459,11 @@ function Scene_QuestShop() {
      */
     Window_MenuQuestList.prototype.callUpdateHelp = function() {
         if (this._statusWindow) {
-            this._statusWindow.setQuest(this.item());
+            const quest = this.quest();
+            if (quest) {
+                quest.refresh();
+            }
+            this._statusWindow.setQuest(quest);
         }
     };
     //------------------------------------------------------------------------------
@@ -470,9 +504,8 @@ function Scene_QuestShop() {
 
     /**
      * ページインデックスを変更する。
-     * 
      */
-    Window_QuestStatus.prototype.changePageIndex = function() {
+    Window_QuestStatus.prototype.nextPage = function() {
         const prevPageIndex = this._pageIndex;
         const pageIndex = (this._pageIndex + 1);
         if (pageIndex >= this.maxPages()) {
@@ -489,18 +522,14 @@ function Scene_QuestShop() {
      * 最大ページ数を得る。
      */
     Window_QuestStatus.prototype.maxPages = function() {
-        return 1;
+        return 2;
     };
-
-
 
     /**
      * 表示を更新する。
      */
     Window_QuestStatus.prototype.refresh = function() {
         this.contents.clear();
-
-        // TODO : デザインも含めて書き替える事。
 
         const quest = this._quest;
         if (quest === null) {
@@ -513,27 +542,16 @@ function Scene_QuestShop() {
         const x = this.itemPadding();
         let y = this.itemPadding();
 
-        // クエスト名などの基本情報
+        // クエスト名などの基本情報(2行)
         this.drawBasicBlock(quest, x, y, contentsWidth);
-        y += lineHeight;
+        y += lineHeight * 2;
         this.drawHorzLine(y + 4);
         y += 8;
 
-        // 概要
-        this.drawQuestDescription(quest, x, y);
-        y += lineHeight * 3;
-        this.drawHorzLine(y + 4);
-        y += 8;
-
-        // 達成条件
-        this.drawQuestAchieve(quest, x, y, contentsWidth);
-        y += lineHeight * 4;
-        this.drawHorzLine(y + 4);
-        y += 8;
-
-        // 報酬
-        this.drawQuestRewards(quest, x, y);
+        const height = this.contentsHeight() - y;
+        this.drawPage(quest, x, y, contentsWidth, height);
     };
+
 
     /**
      * ラベル幅を得る。
@@ -553,7 +571,6 @@ function Scene_QuestShop() {
      * @param {number} width 幅
      */
     Window_QuestStatus.prototype.drawBasicBlock = function(quest, x, y, width) {
-        const labelWidth = this.labelWidth();
         const lineHeight = this.lineHeight();
         const padding = this.itemPadding();
         // サクッと書く
@@ -562,46 +579,148 @@ function Scene_QuestShop() {
         const rankY = y + lineHeight;
         const rankWidth = (width - padding) / 2;
         this.drawQuestGuildRank(quest, x, rankY, rankWidth);
-        
 
+        const deadLineX = x + rankWidth + padding;
+        const deadLineY = rankY;
+        const deadLineWidth = rankWidth;
+        this.drawQuestDeadline(this._pageIndex, quest, deadLineX, deadLineY, deadLineWidth);
+    };
 
-        const rankWidth = 120;
-        const nameWidth = width - padding * 2 - labelWidth - rankWidth;
+    /**
+     * ページを描画する。
+     * 
+     * @param {number} page ページ番号
+     * @param {Game_Quest} quest クエスト
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     * @param {number} height 高さ
+     */
+    Window_QuestStatus.prototype.drawPage = function(page, quest, x, y, width, height) {
+        if (page === 0) {
+            this.drawPage0(quest, x, y, width, height);
+        } else if (page === 1) {
+            this.drawPage1(quest, x, y, width, height);
+        }
+    };
 
+    /**
+     * クエストを描画する。
+     * 
+     * @param {Game_Quest} quest クエスト
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     * @param {number} height 高さ
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_QuestStatus.prototype.drawPage0 = function(quest, x, y, width, height) {
+        const lineHeight = this.lineHeight();
+        // 概要(2行)
+        this.drawQuestDescription(quest, x, y, width);
+        y += lineHeight * 2;
+        this.drawHorzLine(y + 4);
+        y += 8;
+
+        // 達成条件(3行)
+        this.drawQuestAchieveMsg(quest, x, y, width);
+        y += lineHeight * 3;
+        this.drawHorzLine(y + 4);
+        y += 8;
+
+        // 報酬(3行)
+        this.drawQuestRewardsMsg(quest, x, y);
+    };
+    /**
+     * クエストを描画する。
+     * 
+     * @param {Game_Quest} quest クエスト
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     * @param {number} height 高さ
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_QuestStatus.prototype.drawPage1 = function(quest, x, y, width, height) {
+        // 達成条件を詳細に書く
+        const lineHeight = this.lineHeight();
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText(textLabelQuestName + ":", x, y, labelWidth);
-        x += labelWidth + padding;
-        this.resetTextColor();
-        this.drawText(quest.name(), x, y, nameWidth);
-        x += nameWidth + padding;
-        this.changeTextColor(ColorManager.systemColor());
-
-        const labelRank = textLabelRank + ":";
-        this.drawText(labelRank, x, y, rankWidth);
-        this.resetTextColor();
-        const rankLabelWidth = this.textWidth(labelRank);
-        x += rankLabelWidth;
-        this.drawText(quest.rankName(), x, y, rankWidth - rankLabelWidth)
+        this.drawText(textLabelAchive, x, y, width);
+        y += this.lineHeight;
+        for (let no = 0; no < quest.achieveCount(); no++) {
+            const achieveStatus = quest.achieveStatus(no);
+            if (achieveStatus) {
+                // 達成条件文字列(text)と達成条件状態を書く。
+                this.drawQuestAchieveStatus(achieveStatus, x, y, width);
+                y += lineHeight;
+            }
+        }
     };
 
     /**
      * クエスト名を描画する。
-     * 
-     * @param {Game_Quest} quest クエストデータ
+     *
+     * @param {Game_Quest} quest クエスト
      * @param {number} x x位置
      * @param {number} y y位置
-     * @param {number} width 描画幅
+     * @param {number} width 幅
      */
     Window_QuestStatus.prototype.drawQuestName = function(quest, x, y, width) {
         const labelWidth = this.labelWidth();
         const padding = this.itemPadding();
-        const nameX = x + labelWidth + padding;
-        const nameWidth = width - (labelWidth + padding);
-
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText(textLabelQuestName + ":", x, y, labelWidth);
+        this.drawText(textLabelQuestName + ":", x, y, labelWidth, "right");
         this.resetTextColor();
+        const nameX = x + labelWidth + padding;
+        const nameWidth = width - labelWidth - padding;
         this.drawText(quest.name(), nameX, y, nameWidth);
+    };
+
+    /**
+     * クエストのギルドランクを描画する。
+     * 
+     * @param {Game_Quest} quest  クエストデータ
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     */
+    Window_QuestStatus.prototype.drawQuestGuildRank = function(quest, x, y, width) {
+        const labelWidth = this.labelWidth();
+        const padding = this.itemPadding();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(textLabelRank + ":", x, y, labelWidth, "right");
+        this.resetTextColor();
+        const rankX = x + labelWidth + padding;
+        const rankWidth = width - labelWidth - padding;
+        if (quest.guildRank() > 0) {
+            this.drawText(quest.rankName(), rankX, y, rankWidth);
+        } else {
+            this.drawText(textNoProperRank, rankX, y, rankWidth);
+        }
+    };
+
+    /**
+     * クエストの期日を描画する。
+     * 
+     * @param {Game_Quest} quest  クエストデータ
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     */
+    Window_QuestStatus.prototype.drawQuestDeadline = function(quest, x, y, width) {
+        const labelWidth = this.labelWidth();
+        const padding = this.itemPadding();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(textLabelDeadline + ":", x, y, labelWidth, "right");
+        this.resetTextColor();
+        const deadlineX = x + labelWidth + padding;
+        const deadlineWidth = width - labelWidth - padding;
+        const deadlineText = quest.deadlineText();
+        if (deadlineText) {
+            this.drawText(deadlineText, deadlineX, y, deadlineWidth);
+        } else {
+            this.drawText(textNoDeadline, deadlineX, y, deadlineWidth);
+        }
     };
 
     /**
@@ -610,64 +729,80 @@ function Scene_QuestShop() {
      * @param {Game_Quest} quest クエスト
      * @param {number} x x位置
      * @param {number} y y位置
+     * @param {number} width 描画幅
      */
-    Window_QuestStatus.prototype.drawQuestDescription = function(quest, x, y) {
+    Window_QuestStatus.prototype.drawQuestDescription = function(quest, x, y, width) {
         const labelWidth = this.labelWidth();
         const padding = this.itemPadding();
         this.changeTextColor(ColorManager.systemColor());
         const text = textLabelDesc + ":";
         this.drawText(text, x, y, labelWidth, "right");
         this.resetTextColor();
-        this.drawTextEx(quest.description(), x + labelWidth + padding, y);
+        const descWidth = width - labelWidth - padding;
+        this.drawTextEx(quest.description(), x + labelWidth + padding, y, descWidth);
     };
 
     /**
-     * 達成条件を記述する。
+     * 依頼の達成条件文を描画する。
      * 
      * @param {Game_Quest} quest クエスト
-     * @param {number} x 描画位置x
-     * @param {number} y 描画位置y
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 描画幅
      */
-    Window_QuestStatus.prototype.drawQuestAchieve = function(quest, x, y, width) {
+    Window_QuestStatus.prototype.drawQuestAchieveMsg = function(quest, x, y, width) {
         const labelWidth = this.labelWidth();
         const padding = this.itemPadding();
         this.changeTextColor(ColorManager.systemColor());
         const text = textLabelAchive + ":";
         this.drawText(text, x, y, labelWidth, "right");
         this.resetTextColor();
-        this.drawTextEx(quest.achieveText(), x + labelWidth + padding, y);
-        y += this.lineHeight() * 3;
-
-        const total = quest.getTotal();
-        if (total > 0) {
-            const numWidth = this.textWidth("XX/XX"); 
-            const name = quest.getTargetName();
-            let nameWidth = this.textWidth(name) + 6;
-            if ((nameWidth + numWidth) > width) {
-                nameWidth = width - numWidth - 6;
-            }
-            const elapse = quest.getElapse();
-            this.resetTextColor();
-            this.drawText(name, x, y, nameWidth);
-            this.drawText(elapse + "/" + total, x + nameWidth + 6, y, numWidth, "left");
-        }
+        const msgWidth = width - labelWidth - padding;
+        this.drawTextEx(quest.achieveText(), x + labelWidth + padding, y, msgWidth);
     };
 
     /**
-     * 報酬を記述する。
+     * 依頼の報酬文を描画する。
      * 
      * @param {Game_Quest} quest クエスト
-     * @param {number} x 描画位置x
-     * @param {number} y 描画位置y
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 描画幅
      */
-    Window_QuestStatus.prototype.drawQuestRewards = function(quest, x, y) {
+    Window_QuestStatus.prototype.drawQuestRewardsMsg = function(quest, x, y, width) {
         const labelWidth = this.labelWidth();
         const padding = this.itemPadding();
         this.changeTextColor(ColorManager.systemColor());
         const text = textLabelRewards + ":";
-        this.drawText(text, x, y, labelWidth);
+        this.drawText(text, x, y, labelWidth, "right");
         this.resetTextColor();
-        this.drawTextEx(quest.rewardText(), x + labelWidth + padding, y);
+        const msgWidth = width - labelWidth - padding;
+        this.drawTextEx(quest.rewardText(), x + labelWidth + padding, y, msgWidth);
+    };
+
+    /**
+     * 達成条件ステータスを描画する。
+     * 
+     * @param {object} status 達成条件ステータスオブジェクト
+     * @param {number} x x値 
+     * @param {number} y y値
+     * @param {number} width 幅 
+     */
+    Window_QuestStatus.prototype.drawQuestAchieveStatus = function(status, x, y, width) {
+        const countWidth = Math.min(this.textWidth("xxx/xxx"), width * 0.4);
+        if (status.status === Game_Quest.STATUS_DONE) {
+            this.changeTextColor(colorAchieveDone);
+        } else if (status.status === Game_Quest.STATUS_FAIL) {
+            this.changeTextColor(colorQuestFail);
+        } else {
+            this.resetTextColor();
+        }
+        const padding = this.itemPadding();
+        const textWidth = width - countWidth - padding;
+        this.drawText(status.text, x, y, textWidth);
+        const countX = x + textWidth + padding;
+        const countText = status.current + "/" + status.total;
+        this.drawText(countText, countX, y, countWidth, "right");
     };
 
     /**
@@ -772,8 +907,8 @@ function Scene_QuestShop() {
      * コマンド画面でOK操作されたときの処理を行う。
      */
     Scene_MenuQuest.prototype.onCommandOk = function() {
+        this._statusWindow.nextPage();
         this._commandWindow.activate();
-
     };
 
     /**
@@ -828,7 +963,6 @@ function Scene_QuestShop() {
         Scene_Menu.prototype.commandQuest = function() {
             SceneManager.push(Scene_MenuQuest);
         };
-
     }
     //------------------------------------------------------------------------------
     // Window_QuestShopCommand
@@ -903,7 +1037,7 @@ function Scene_QuestShop() {
      * @param {number} index インデックス（未指定の場合には現在のインデックス）
      * @returns {Game_Quest} クエストデータ
      */
-    Window_QuestShopUnderTakeList.prototype.item = function(index) {
+    Window_QuestShopUnderTakeList.prototype.quest = function(index) {
         if (index === undefined) {
             index = this.index();
         }
@@ -929,13 +1063,13 @@ function Scene_QuestShop() {
         if ($gameParty.quests().length >= 3) {
             return false; // 3件以上受託中。
         }
-        const quest = this.item(index);
-        if ($gameParty.isTryingQuest(quest.id())) {
+        const quest = this.quest(index);
+        if ($gameParty.isAcceptQuest(quest.id())) {
             return false; // 既に受託中
         }
 
         // 受託可否判定
-        return $gameParty.canAcceptQuest(quest);
+        return QuestManager.canAcceptQuest(quest.id());
     };
 
     /**
@@ -952,10 +1086,10 @@ function Scene_QuestShop() {
      */
     Window_QuestShopUnderTakeList.prototype.callUpdateHelp = function() {
         if (this._statusWindow) {
-            let quest = this.item();
+            let quest = this.quest();
             if (quest !== null) {
                 const questId = quest.id();
-                if ($gameParty.isTryingQuest(questId)) {
+                if ($gameParty.isAcceptQuest(questId)) {
                     // もし受領中クエストがあるなら、そっちのデータを表示する。
                     quest = $gameParty.quests().find(function(q) {
                         return q.id() === questId;
@@ -985,7 +1119,7 @@ function Scene_QuestShop() {
             }
             const nameWidth = rect.width - 96;
             this.drawText(name, rect.x, rect.y, nameWidth);
-            if ($gameParty.isTryingQuest(quest.id())) {
+            if ($gameParty.isAcceptQuest(quest.id())) {
                 this.changeTextColor(ColorManager.textColor(1));
                 this.drawText(textStatusTrying, rect.x + nameWidth, rect.y, 96, "right");
             }
@@ -1003,7 +1137,7 @@ function Scene_QuestShop() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_QuestShopReportList.prototype.initialize = function(rect) {
-        $gameParty.updateQuests(); // クエストの状態更新
+        $gameParty.refreshQuests(); // クエストの状態更新
         this._quests = $gameParty.quests();
         Window_Selectable.prototype.initialize.call(this, rect);
         this.refresh();
@@ -1024,7 +1158,7 @@ function Scene_QuestShop() {
      * @param {number} index インデックス（未指定の場合には現在のインデックス）
      * @returns {Game_Quest} クエストデータ
      */
-    Window_QuestShopReportList.prototype.item = function(index) {
+    Window_QuestShopReportList.prototype.quest = function(index) {
         if (index === undefined) {
             index = this.index();
         }
@@ -1045,7 +1179,7 @@ function Scene_QuestShop() {
      * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse
      */
     Window_QuestShopReportList.prototype.isEnabled = function(index) {
-        const quest = this.item(index);
+        const quest = this.quest(index);
         return quest.isDone();
     };
 
@@ -1064,7 +1198,7 @@ function Scene_QuestShop() {
      */
     Window_QuestShopReportList.prototype.callUpdateHelp = function() {
         if (this._statusWindow) {
-            const quest = this.item();
+            const quest = this.quest();
             this._statusWindow.setQuest(quest);
         }
     };
@@ -1076,7 +1210,7 @@ function Scene_QuestShop() {
      */
     Window_QuestShopReportList.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
-        const quest = this.item(index);
+        const quest = this.quest(index);
         if (quest) {
             this.changePaintOpacity(this.isEnabled(index));
             const name = quest.name();
@@ -1117,7 +1251,7 @@ function Scene_QuestShop() {
      */
     Window_QuestShopGiveupList.prototype.initialize = function(x, y, width) {
         const height = Graphics.boxHeight;
-        $gameParty.updateQuests(); // クエストの状態更新
+        $gameParty.refreshQuests(); // クエストの状態更新
         this._quests = $gameParty.quests();
         Window_Selectable.prototype.initialize.call(this, x, y, width, height);
         this.refresh();
@@ -1138,7 +1272,7 @@ function Scene_QuestShop() {
      * @param {number} index インデックス（未指定の場合には現在のインデックス）
      * @returns {Game_Quest} クエストデータ
      */
-    Window_QuestShopGiveupList.prototype.item = function(index) {
+    Window_QuestShopGiveupList.prototype.quest = function(index) {
         if (index === undefined) {
             index = this.index();
         }
@@ -1176,7 +1310,7 @@ function Scene_QuestShop() {
      */
     Window_QuestShopGiveupList.prototype.callUpdateHelp = function() {
         if (this._statusWindow) {
-            const quest = this.item();
+            const quest = this.quest();
             this._statusWindow.setQuest(quest);
         }
     };
@@ -1187,7 +1321,7 @@ function Scene_QuestShop() {
      */
     Window_QuestShopGiveupList.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
-        const quest = this.item(index);
+        const quest = this.quest(index);
         if (quest) {
             this.changePaintOpacity(this.isEnabled(index));
             const name = quest.name();
@@ -1662,7 +1796,7 @@ function Scene_QuestShop() {
      * 受託クエストリストウィンドウでOKボタンが押された
      */
     Scene_QuestShop.prototype.onUnderTakeListWindowOk = function() {
-        const quest = this._underTakeListWindow.item();
+        const quest = this._underTakeListWindow.quest();
 
         let msg = "";
         if (quest.guildRank() > $gameParty.guildRank()) {
@@ -1691,8 +1825,8 @@ function Scene_QuestShop() {
      * 受託確認でOK操作された。
      */
     Scene_QuestShop.prototype.onUnderTakeConfirmOk = function() {
-        const quest = this._underTakeListWindow.item();
-        $gameParty.addQuest(new Game_Quest(quest.id())); // 受託クエスト追加
+        const quest = this._underTakeListWindow.quest();
+        QuestManager.acceptQuest(quest.id()); // 受託クエスト追加
         this._underTakeListWindow.refresh();
         this._messageWindow.hide();
         this._confirmWindow.hide();
@@ -1712,14 +1846,14 @@ function Scene_QuestShop() {
      * 報告クエスト選択ウィンドウでOK操作されたときの処理を行う。
      */
     Scene_QuestShop.prototype.onReportListWindowOk = function() {
-        const quest = this._reportListWindow.item();
+        const quest = this._reportListWindow.quest();
         if (successSe.name) {
             AudioManager.playSe(successSe);
         }
 
         // 報酬加算処理
         this._rewardsWindow.setQuest(quest);
-        $gameParty.reportQuest(quest.id(), true, true);
+        QuestManager.reportQuest(quest.id(), true, true);
         this._rewardsWindow.show();
         this._rewardsWindow.activate();
     };
@@ -1749,7 +1883,7 @@ function Scene_QuestShop() {
      * ギブアップリストウィンドウでOK操作されたときの処理を行う。
      */
     Scene_QuestShop.prototype.onGiveupListWindowOk = function() {
-        const quest = this._giveupListWindow.item();
+        const quest = this._giveupListWindow.quest();
 
         let msg = textMessageConfirmGiveup.format(quest.name());
         this._messageWindow.setText(msg);
@@ -1774,13 +1908,13 @@ function Scene_QuestShop() {
      * ギブアップ確認でOK操作された。
      */
     Scene_QuestShop.prototype.onGiveupConfirmOk = function() {
-        const quest = this._giveupListWindow.item();
+        const quest = this._giveupListWindow.quest();
 
         if (failSe.name) {
             AudioManager.playSe(failSe);
         }
 
-        $gameParty.giveupQuest(quest.id());
+        QuestManager.giveupQuest(quest.id(), true);
         this._messageWindow.hide();
         this._confirmWindow.hide();
         this._giveupListWindow.refresh();
@@ -1795,7 +1929,4 @@ function Scene_QuestShop() {
         this._confirmWindow.hide();
         this._giveupListWindow.activate();
     };
-
-
-
 })();
