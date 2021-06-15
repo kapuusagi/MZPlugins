@@ -456,7 +456,7 @@ function Scene_SelectFastTravelPosition() {
      * 
      * @returns {boolean} ファストトラベル可能な場合にはtrue, それ以外はfalse.
      */
-    Game_party.prototype.canPerformFastTravel = function() {
+    Game_Party.prototype.canPerformFastTravel = function() {
         return !$gameParty.inBattle() & $gameMap.canUseFastTravel();
     };
 
