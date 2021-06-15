@@ -24,13 +24,15 @@
  * @text 性別
  * @desc 変更する性別
  * @type select
+ * @default 1
  * @option 男性
  * @value 1
  * @option 女性
  * @value 2
  * @option その他
  * @value 0
- * @default 1
+ * @option その他(両方ヒット)
+ * @value 3
  * 
  * @param textGender
  * @text 性別を表すテキスト
@@ -66,11 +68,12 @@
  *    全員女性の場合にtrue
  * 
  * 本プラグイン自体ではあまり意味を持ちません。
- * 他のプラグインと組み合わせることを想定します。
+ * イベントでの判定処理や他のプラグインと組み合わせることを想定します。
+ * 例) 男性だけ立ち入り禁止のメッセージを出す
+ *     条件判定式で、「!$gameParty.isFemaleOnly()」の時にメッセージを出して通行不可にする。
  * 例） Kapu_EquipConditionと組み合わせる
  *     防具のノートタグに <equipCondition:!a.isMale()> とすると、
  *     男性以外が装備可能になります。
- * 
  * 
  * ■ 使用時の注意
  * 
@@ -99,6 +102,8 @@
  *           性別（男）に設定
  *        "2", "female", 性別（女）を表すテキスト
  *           性別（女）に設定
+ *        "3", "both"
+ *           その他(両方)に設定
  *        上記以外/未指定
  *           その他に設定
  *     プロパティgenderで文字列が取得出来る。
@@ -127,13 +132,17 @@
             return Game_BattlerBase.GENDER_MALE;
         } else if ((str === "female") || (str === textGenderFemale)) {
             return Game_BattlerBase.GENDER_FEMALE;
+        } else if (str === "both") {
+            return Game_BattlerBase.GENDER_BOTH;
         } else {
             const number = Number(str);
-            if (typeof number !== "undefined") {
+            if (number !== undefined) {
                 if (number === Game_BattlerBase.GENDER_MALE) {
                     return Game_BattlerBase.GENDER_MALE;
                 } else if (number === Game_BattlerBase.GENDER_FEMALE) {
                     return Game_BattlerBase.GENDER_FEMALE;
+                } else if (number === Game_BattlerBase.GENDER_BOTH) {
+                    return Game_BattlerBase.GENDER_BOTH;
                 }
             }
         }
@@ -201,6 +210,7 @@
     Game_BattlerBase.GENDER_OTHER = 0;
     Game_BattlerBase.GENDER_MALE = 1;
     Game_BattlerBase.GENDER_FEMALE = 2;
+    Game_BattlerBase.GENDER_BOTH = 3;
 
     const _Game_BattlerBase_initMembers = Game_BattlerBase.prototype.initMembers;
     /**
@@ -222,7 +232,8 @@
      * @returns {boolean} 男性の場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isMale = function() {
-        return this._gender === Game_BattlerBase.GENDER_MALE;
+        // Note : ビット比較の方がパフォーマンスが良いけれど、変更されても良いように一致判定させる。
+        return (this._gender === Game_BattlerBase.GENDER_MALE) || (this._gender === Game_BattlerBase.GENDER_BOTH);
     };
 
     /**
@@ -231,8 +242,10 @@
      * @returns {boolean} 男性の場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.isFemale = function() {
-        return this._gender === Game_BattlerBase.GENDER_FEMALE;
+        // Note : ビット比較の方がパフォーマンスが良いけれど、変更されても良いように一致判定させる。
+        return (this._gender === Game_BattlerBase.GENDER_FEMALE) || (this._gender === Game_BattlerBase.GENDER_BOTH);
     };
+
     //------------------------------------------------------------------------------
     // Game_Actor
     const _Game_Actor_setup = Game_Actor.prototype.setup;
