@@ -1,3 +1,4 @@
+本来はIssueで管理した方がいい。
 
 動作確認が必要なプラグインリスト:
   ☐ Kapu_Trait_RandomEncountRate
@@ -19,6 +20,8 @@
     ☐ 使用効果にファストトラベルを付けると、他の効果を付与できない制限を緩和してみた。
   Kapu_Twld_Shops:
     ☐ 店で操作したときメッセージ表示をプラグインコマンドで指定できるようにしたので確認する。
+  Kapu_UI_Window_SimpleMessage:
+    ☐ シンプルメッセージウィンドウを新規作成
       
 機能拡張予定:
   Kapu_ChoiceByRoulette:

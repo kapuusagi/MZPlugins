@@ -1377,7 +1377,25 @@ function Scene_QuestShop() {
      */
     Window_QuestShopMessage.prototype.initialize = function(rect) {
         Window_Base.prototype.initialize.call(this, rect);
-        this._text = "";
+        this.initMembers();
+        this._clearRequired = false;
+    };
+    /**
+     * メンバを初期化する。
+     */
+    Window_QuestShopMessage.prototype.initMembers = function() {
+        this._textState = null;
+        this._waitCount = 0;
+        this.clearFlags();
+    };
+
+    /**
+     * フラグをクリアする。
+     */
+     Window_QuestShopMessage.prototype.clearFlags = function() {
+        this._showFast = false;
+        this._lineShowFast = false;
+        this._pauseSkip = false;
     };
 
     /**
@@ -1385,23 +1403,256 @@ function Scene_QuestShop() {
      * @param {string} text 表示メッセージ
      */
     Window_QuestShopMessage.prototype.setText = function(text) {
-        this._text = text;
-        this.refresh();
+        if (this._text !== text) {
+            this._text = text;
+            const textState = this.createTextState(text, 0, 0, 0);
+            textState.x = this.newLineX(textState);
+            textState.startX = textState.x;
+            this._textState = textState;
+            this.newPage(this._textState);
+        }
+        this._clearRequired = false;
     };
-
+    /**
+     * メッセージ改ページする。
+     * 
+     * @param {TextState} textState テキストステート
+     */
+    Window_QuestShopMessage.prototype.newPage = function(textState) {
+        this.contents.clear();
+        this.resetFontSettings();
+        this.clearFlags();
+        textState.x = textState.startX;
+        textState.y = 0;
+        textState.height = this.calcTextHeight(textState);
+    };
+    /**
+     * 新しい行の先頭x位置を得る。
+     * 
+     * @param {object} textState テキストステート
+     * @returns {number} x位置
+     */
+    Window_QuestShopMessage.prototype.newLineX = function(textState) {
+        const margin = 4;
+        return textState.rtl ? (this.innerWidth - margin) : margin;
+    };    
     /**
      * テキストをクリアする。
      */
     Window_QuestShopMessage.prototype.clear = function() {
-        this.setText("");
+        this._clearRequired = true;
+    };
+
+    /**
+     * Window_QuestShopMessageを更新する。
+     */
+    Window_QuestShopMessage.prototype.update = function() {
+        Window_Base.prototype.update.call(this);
+        if (this._clearRequired) {
+            this.contents.clear();
+        }
+        while (!this.isOpening() && !this.isClosing()) {
+            if (this.updateWait()) {
+                return ; // ウェイト継続
+            } else if (this.updateMessage()) {
+                return ; // メッセージ表示中
+            } else if (this.canStart()) {
+                this.startMessage();
+            }
+        }
+    };
+    /**
+     * ウェイト指定が0になるまで待機する。
+     * 
+     * @returns {number} ウェイト状態の場合にはtrue, それ以外はfalse.
+     */
+    Window_QuestShopMessage.prototype.updateWait = function() {
+        if (this._waitCount > 0) {
+            this._waitCount--;
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    /**
+     * メッセージを開始する。
+     */
+    Window_QuestShopRewards.prototype.startMessage = function() {
+        const text = $gameMessage.allText();
+        this.setText(text);
+    };
+
+    /**
+     * メッセージ描画を更新する。
+     * 
+     * @return {boolean} メッセージ描画状態を継続する場合にはtrue, それ以外はfalse
+     */
+    Window_QuestShopMessage.prototype.updateMessage = function() {
+        const textState = this._textState;
+        if (textState) {
+            while (!this.isEndOfText(textState)) {
+                if (this.needsNewPage(textState)) {
+                    this.newPage(textState);
+                }
+                this.updateShowFast();
+                this.processCharacter(textState);
+                if (this.shouldBreakHere(textState)) {
+                    break;
+                }
+            }
+            this.flushTextState(textState);
+            if (this.isEndOfText(textState)) {
+                this.onEndOfText();
+            }
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    /**
+     * メッセージ表示が可能かどうかを取得する。
+     * 
+     * @return {boolean} メッセージ表示が可能な場合にはtrue, それ以外はfalse
+     */
+    Window_QuestShopMessage.prototype.canStart = function() {
+        return $gameMessage.hasText() && !$gameMessage.scrollMode();
+    };
+
+    /**
+     * 表示するべきテキストの末尾まで表示したかどうかを取得する。
+     * 
+     * @param {object} textState テキストステート
+     * @returns {boolean} 終端の場合にはtrue, それ以外はfalse
+     */
+    Window_QuestShopMessage.prototype.isEndOfText = function(textState) {
+        return textState.index >= textState.text.length;
+    };
+    /**
+     * 改ページが必要かどうかを得る。
+     * 
+     * @param {object} textState テキストステート
+     * @returns {boolean} 改ページが必要な場合にはtrue, それ以外はfalse
+     */
+    Window_QuestShopMessage.prototype.needsNewPage = function(textState) {
+        return (
+            !this.isEndOfText(textState) &&
+            textState.y + textState.height > this.contents.height
+        );
+    };
+
+    /**
+     * 高速表示する必要があるかどうかを更新する。
+     */
+    Window_QuestShopMessage.prototype.updateShowFast = function() {
+        if (this.isTriggered()) {
+            this._showFast = true;
+        }
+    };
+    /**
+     * トリガーされているかどうかを得る。
+     * 
+     * @returns {boolean} トリガーされていたらtrue, それ以外はfalse.
+     */
+    Window_QuestShopMessage.prototype.isTriggered = function() {
+        if (this.active) {
+            return (
+                Input.isRepeated("ok") ||
+                Input.isRepeated("cancel") ||
+                TouchInput.isRepeated()
+            );
+        } else {
+            return true;
+        }
+    };
+    /**
+     * ブレーク可能かどうかを得る。
+     * 
+     * @param {object} textState テキストステート
+     * @returns {boolean} ブレーク可能な場合にはtrue, それ以外はfalse
+     */
+    Window_QuestShopMessage.prototype.shouldBreakHere = function(textState) {
+        if (this.canBreakHere(textState)) {
+            if (!this._showFast && !this._lineShowFast) {
+                return true;
+            }
+            if (this.pause || this._waitCount > 0) {
+                return true;
+            }
+        }
+        return false;
+    };
+    /**
+     * ブレーク可能な位置かどうかを得る。
+     * 
+     * @param {object} textState テキストステート
+     * @returns {boolean} ブレーク可能な位置の場合にはtrue, それ以外はfalse
+     */
+    Window_QuestShopMessage.prototype.canBreakHere = function(textState) {
+        if (!this.isEndOfText(textState)) {
+            const c = textState.text[textState.index];
+            if (c.charCodeAt(0) >= 0xdc00 && c.charCodeAt(0) <= 0xdfff) {
+                // surrogate pair
+                return false;
+            }
+            if (textState.rtl && c.charCodeAt(0) > 0x20) {
+                return false;
+            }
+        }
+        return true;
+    };
+    /**
+     * テキスト表示が終了したときの処理を行う。
+     */
+    Window_QuestShopMessage.prototype.onEndOfText = function() {
+        this._textState = null;
+    };
+    /**
+     * エスケープキャラクタを処理する。
+     * 
+     * Note: 標準エスケープキャラクタのうち、ウェイトと行を纏めて表示ON/OFFする機能を提供する。
+     * 
+     * @param {string} code 文字
+     * @param {object} textState テキストステート
+     */
+    Window_QuestShopMessage.prototype.processEscapeCharacter = function(code, textState) {
+        switch (code) {
+            case ".":
+                this.startWait(15);
+                break;
+            case "|":
+                this.startWait(60);
+                break;
+            case ">":
+                this._lineShowFast = true;
+                break;
+            case "<":
+                this._lineShowFast = false;
+                break;
+            default:
+                Window_Base.prototype.processEscapeCharacter.call(
+                    this,
+                    code,
+                    textState
+                );
+                break;
+        }
+    };
+    /**
+     * ウェイト処理を開始する。
+     * 
+     * @param {number} count ウェイトフレーム数
+     */
+    Window_QuestShopMessage.prototype.startWait = function(count) {
+        this._waitCount = count;
     };
 
     /**
      * 描画内容を更新する。
      */
     Window_QuestShopMessage.prototype.refresh = function() {
-        this.contents.clear();
-        this.drawTextEx(this._text, this.textPadding(), 0);
+        // 何もしない。
     };
     //------------------------------------------------------------------------------
     // Window_QuestShopConfirm
@@ -1444,45 +1695,54 @@ function Scene_QuestShop() {
      */
     Window_QuestShopRewards.prototype.initialize = function(rect) {
         Window_Selectable.prototype.initialize.call(this,rect);
-        this._quest = null;
+        this._rewards = null;
         this.refresh();
     };
 
     /**
-     * クエストを設定する。
+     * 報酬を設定する。
      * 
-     * @param {Game_Quest} quest クエスト
+     * @param {object} rewards 報酬
      */
-    Window_QuestShopRewards.prototype.setQuest = function(quest) {
-        this._quest = quest;
+    Window_QuestShopRewards.prototype.setRewards = function(rewards) {
+        this._rewards = rewards;
         this.refresh();
     };
+
 
     /**
      * 表示内容を更新する。
      */
     Window_QuestShopRewards.prototype.refresh = function() {
         this.contents.clear();
-        if (this._quest) {
-            // 報酬を記述する。
+        const rewards = this._rewards;
+        if (rewards) {
             const lineHeight = this.lineHeight();
             const x = 0;
             let y = 0;
             const contentsWidth = this.contentsWidth();
-            if (this._quest.rewardGold()) {
-                this.drawText(this._quest.rewardGold() + TextManager.currencyUnit, x + 40, y, contentsWidth - 40, "right");
+            // 報酬を記述する。
+            if (rewards.exp > 0) {
+                this.drawText(TextManager.expA + rewards.exp, x + 40, y, contentsWidth);
+            }
+            if (rewards.gold > 0) {
+                this.drawText(reward.gold + TextManager.currencyUnit, x + 40, y, contentsWidth - 40, "right");
                 y += lineHeight;
             }
+
             // 後は報酬アイテム描画
             const numWidth = 80;
             const nameWidth = contentsWidth - numWidth;
-            this._quest.rewardItems().forEach(function(entry) {
-                const item = entry[0];
-                const numItems = entry[1];
-                this.drawItemName(item, x, y, nameWidth);
-                this.drawText("×" + numItems, x + nameWidth, y, numWidth, "right");
-                y += lineHeight;
-            }, this);
+            const reportedItems = [];
+            for (const item of rewards.items) {
+                if (!reportedItems.includes(item)) {
+                    const count = items.filter(i => i === item).length;
+                    this.drawItemName(item, x, y, nameWidth);
+                    this.drawText("\u00d7" + count, x + nameWidth, y, numWidth, "right");
+                    y += lineHeight;
+                    reportedItems.push(item);
+                }
+            }
         }
     };
 
@@ -1889,8 +2149,8 @@ function Scene_QuestShop() {
         }
 
         // 報酬加算処理
-        this._rewardsWindow.setQuest(quest);
         QuestManager.reportQuest(quest.id(), true, true);
+        this._rewardsWindow.setRewards(QuestManager.lastRewards());
         this._rewardsWindow.show();
         this._rewardsWindow.activate();
     };
