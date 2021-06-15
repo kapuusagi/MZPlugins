@@ -1552,6 +1552,8 @@ function QuestManager() {
             }
             if (getRewards) {
                 this.gainQuestRewards(quest);
+            } else {
+                this._rewards = null;
             }
             quest.onComplete();
             this.removeQuest(id);
@@ -1587,7 +1589,17 @@ function QuestManager() {
             this.gainRewardGold(rewards.gold);
             this.gainRewardExp(rewards.exp);
             this.gainRewardItems(rewards.items);
+            this._rewards = rewards;
         }
+    };
+
+    /**
+     * 報酬オブジェクトを得る。
+     * 
+     * @returns {object} 報酬オブジェクト
+     */
+    QuestManager.lastRewards = function() {
+        return this._rewards;
     };
 
     /**
@@ -1633,7 +1645,7 @@ function QuestManager() {
         for (const item of items) {
             $gameParty.gainItem(item, 1, false);
         }
-};
+    };
 
     /**
      * ギルド経験値の補正値を得る。
