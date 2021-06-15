@@ -206,10 +206,12 @@
          * @returns {boolean} 使用可能な場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.meetsUsableItemConditions = function(item) {
-            if (this.testDungeonEscape(item)
-                    && ($gameParty.inBattle() || !$gameParty.hasDungeonEscapePosition() || !$gameMap.canUseDungeonEscape())) {
+            if (this.testDungeonEscape(item) && !$gameParty.canPerformDungeonEscape()) {
                 // ダンジョンエスケープ効果があって、戦闘中かダンジョンエスケープ出来ないマップにいる。
-                return false;
+                if (item.effects.length === 1) {
+                    // ダンジョンエスケープの機能しかない。
+                    return false;
+                }
             }
             return _Game_Actor_meetsUsableItemConditions.call(this, item);
         };
@@ -236,6 +238,15 @@
     Game_Party.prototype.initialize = function() {
         _Game_Party_initialize.call(this);
         this._escapePosition = [];
+    };
+
+    /**
+     * ダンジョンエスケープが使用できるかを判定する。
+     * 
+     * @returns {boolean} 使用できる場合にはtrue, それ以外はfalse
+     */
+    Game_Party.prototype.canPerformDungeonEscape = function() {
+        return !this.inBattle() && this.hasDungeonEscapePosition() && $gameMap.canUseDungeonEscape();
     };
 
     /**
@@ -345,9 +356,15 @@
          * @returns {boolean} ダンジョンエスケープ効果を持つ場合にはtrue, それ以外はfalse.
          */
         Scene_ItemBase.prototype.testDungeonEscape = function(item) {
-            return item.effects.some(
+            const hasDungeonEscapeEffect = item.effects.some(
                 effect => effect && effect.code === Game_Action.EFFECT_DUNGEONESCAPE
             );
+            if (hasDungeonEscapeEffect) {
+                // 使用可能かを判定する。
+                return $gameParty.canPerformDungeonEscape();
+            } else {
+                return false;
+            }
         };
 
         /**
