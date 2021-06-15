@@ -10,6 +10,7 @@
  * @text 受託クエスト一覧を開く
  * @desc 受託クエスト一覧を表示するシーンを開始します。
  * 
+ * 
  * @command startQuestShop
  * @text クエストショップを開く
  * @desc クエストショップのシーンを開始します。
@@ -20,14 +21,28 @@
  * @type number[]
  * @default []
  * 
- * @arg cleakFileName
+ * @arg clerkFileName
  * @text 店員ファイル名
  * @desc 店員ファイル名
  * @type file
  * @dir img/pictures/
  * @default 
  * 
+ * @arg clerkOffsetX
+ * @text 店員画像表示位置X
+ * @desc 店員画像を表示する位置を移動させる。10を設定すると右に10移動する。
+ * @type number
+ * @default 0
+ * @min -10000
  * 
+ * @arg clerkOffsetY
+ * @text 店員画像表示位置Y
+ * @desc 店員画像を表示する位置を移動させる。10を設定すると下に10移動する。
+ * @type number
+ * @default 0
+ * @min -10000
+ * 
+ *  
  * @param successSe
  * @text 成功時音
  * @desc クエスト達成時に鳴らす音
@@ -187,8 +202,6 @@
  * 
  * 
  * TODO:ギルドランクが上下したときにメッセージを出したい。
- * TODO:複数条件に対応していない。
- * TODO:メッセージ表示に変えたい。
  * TODO:プラグインコマンドでクエスト受注選択したい。クエストIDを変数に格納
  * TODO:クエスト報告選択したい。クエストIDを変数に格納
  * TODO:クエスト破棄選択したい。クエストIDを変数に格納
@@ -374,6 +387,8 @@ function Scene_QuestShop() {
     PluginManager.registerCommand(pluginName, "startQuestShop", args => {
         const ids = JSON.parse(args.questIds).map(str => Number(str) || 0);
         const clerkFileName = args.clerkFileName || "";
+        const clerkOffsetX = Number(args.clerkOffsetX) || 0;
+        const clerkOffsetY = Number(args.clerkOffsetY) || 0;
         const questIds = [];
         for (const id of ids) {
             if ((id > 0) && !questIds.includes(id)) {
@@ -381,7 +396,7 @@ function Scene_QuestShop() {
             }
         }
         SceneManager.push(Scene_QuestShop);
-        SceneManager.prepareNextScene(questIds, clerkFileName);
+        SceneManager.prepareNextScene(questIds, clerkFileName, clerkOffsetX, clerkOffsetY);
     });
     //------------------------------------------------------------------------------
     // Window_MenuQuestList
@@ -1489,8 +1504,10 @@ function Scene_QuestShop() {
      * 
      * @param {Array<Number>} questIds クエストID配列
      * @param {string} clerkFileName 店員画像ファイル名。店員画像が無い場合にはnull
+     * @param {number} clerkOffsetX 店員画像表示オフセットX
+     * @param {number} clerkOffsetY 店員画像表示オフセットY
      */
-    Scene_QuestShop.prototype.prepare = function(questIds, clerkFileName) {
+    Scene_QuestShop.prototype.prepare = function(questIds, clerkFileName, clerkOffsetX, clerkOffsetY) {
         const quests = [];
         for (let i = 0; i < questIds.length; i++) {
             const id = questIds[i];
@@ -1504,6 +1521,8 @@ function Scene_QuestShop() {
 
         this._quests = quests;
         this._clerkFileName = clerkFileName || "";
+        this._clerkOffsetX = clerkOffsetX || 0;
+        this._clerkOffsetY = clerkOffsetY || 0;
     };
 
     /**
@@ -1521,7 +1540,21 @@ function Scene_QuestShop() {
         this.createRewardsWindow();
         this.loadClerkPicture();
     };
+    /**
+     * ウィンドウレイヤーを構築する。
+     */
+    Scene_QuestShop.prototype.createWindowLayer = function() {
+        this.createClerkLayer();
+        Scene_MenuBase.prototype.createWindowLayer.call(this);
+    };
 
+    /**
+     * 店員画像描画用レイヤーを追加する。
+     */
+    Scene_QuestShop.prototype.createClerkLayer = function() {
+        this._clerkLayer = new Sprite();
+        this.addChild(this._clerkLayer);
+    };
     /**
      * ショップコマンドウィンドウを作成する。
      * ショップコマンドウィンドウは右端。
@@ -1748,9 +1781,13 @@ function Scene_QuestShop() {
     Scene_QuestShop.prototype.addClerkSprite = function() {
         this._clerkSprite = new Sprite();
         this._clerkSprite.bitmap = this._clerkBitmap;
-        this._clerkSprite.x = Graphics.boxWidth - this._clerkBitmap.width;
-        this._clerkSprite.y = Graphics.boxHeight - this._clerkBitmap.height;
-        this._backgroundSprite.addChild(this._clerkSprite);
+        this._clerkSprite.anchor.x = 0.5;
+        this._clerkSprite.anchor.y = 1.0;
+        const baseX = Graphics.boxWidth - (this.mainCommandWidth() / 2);
+        const baseY = this.isBottomHelpMode() ? this.helpAreaTop() : Graphics.boxHeight;
+        this._clerkSprite.x = baseX + this._clerkOffsetX;
+        this._clerkSprite.y = baseY + this._clerkOffsetY;
+        this._clerkLayer.addChild(this._clerkSprite);
     };
 
     /**
