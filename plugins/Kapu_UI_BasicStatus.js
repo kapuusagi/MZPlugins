@@ -158,7 +158,7 @@
  */
 
 (() => {
-    const pluginName = "Kapu_BasicStatusUI";
+    const pluginName = "Kapu_UI_BasicStatus";
     const parameters = PluginManager.parameters(pluginName);
     const statusPictureMethod = String(parameters["statusPictureMethod"]) || "";
     const labelClassText = String(parameters["labelClass"]) || "Class";
