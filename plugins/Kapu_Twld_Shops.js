@@ -49,6 +49,18 @@
  * @default 0
  * @min -10000
  * 
+ * @arg textHelpBuy
+ * @text 購入ヘルプテキスト
+ * @type multiline_string
+ * 
+ * @arg textHelpSell
+ * @text 売却ヘルプテキスト
+ * @type multiline_string
+ * 
+ * @arg textHelpCancel
+ * @text キャンセルヘルプテキスト
+ * @type multiline_string
+ * 
  * 
  * 
  * @command updateShop
@@ -197,13 +209,7 @@
  * ============================================
  * ノートタグ
  * ============================================
- * 店データにノートタグを設定できます。
- *   <helpBuy:text>
- *     購入コマンドに対するヘルプ。
- *   <helpSell:text>
- *     売却コマンドに対するヘルプ。
- *   <helpCancel:text>
- *     キャンセルコマンドに対するヘルプ。
+ * なし。
  * 
  * ============================================
  * 変更履歴
@@ -318,8 +324,13 @@ function Scene_TwldShop() {
         const clerkOffsetY = Number(args.clerkOffsetY) || 0;
         const mode = Number(args.mode) || Game_Shop.SHOP_MODE_SELL_AND_PURCHASE;
         if (id && id < $dataShops.length) {
+            const msgs = {
+                textHelpBuy:args.textHelpBuy || defaultTextHelpBuy,
+                textHelpSell:args.textHelpSell || defaultTextHelpSell,
+                textHelpCancel:args.textHelpCancel || defaultTextHelpCancel
+            };
             SceneManager.push(Scene_TwldShop);
-            SceneManager.prepareNextScene(id, mode, clerkFileName, clerkOffsetX, clerkOffsetY);
+            SceneManager.prepareNextScene(id, mode, clerkFileName, clerkOffsetX, clerkOffsetY, msgs);
         }
     });
     
@@ -1092,6 +1103,7 @@ function Scene_TwldShop() {
         this._buyable = true;
         this._sellable = true;
         this._shopData = null;
+        this._msgs = {};
     };
 
     /**
@@ -1121,6 +1133,16 @@ function Scene_TwldShop() {
         this._sellable = enabled;
         this.refresh();
     };
+
+    /**
+     * コマンド選択時のヘルプメッセージを設定する。
+     * 
+     * @param {object} msgs メッセージデータ
+     */
+    Window_TwldShopCommand.prototype.setMessage = function(msgs) {
+        this._msgs = msgs;
+        this.refresh();
+    }
 
     /**
      * 最大カラム数を得る。
@@ -1160,11 +1182,11 @@ function Scene_TwldShop() {
         } else {
             switch (symbol) {
                 case "buy":
-                    return this._shopData.meta.helpBuy || defaultTextHelpBuy;
+                    return this._msgs["textHelpBuy"] || "";
                 case "sell":
-                    return this._shopData.meta.helpSell || defaultTextHelpSell;
+                    return this._msgs["textHelpSell"] || "";
                 case "cancel":
-                    return this._shopData.meta.helpCancel || defaultTextHelpCancel;
+                    return this._msgs["textHelpCancel"] || "";
                 default:
                     return "";
                     
@@ -1275,6 +1297,9 @@ function Scene_TwldShop() {
      */
     Scene_TwldShop.prototype.initialize = function() {
         Scene_MenuBase.prototype.initialize.call(this);
+        this._shop = null;
+        this._mode = 
+        this._msgs = {};
     };
 
     /**
@@ -1285,13 +1310,15 @@ function Scene_TwldShop() {
      * @param {string} clerkFileName 店員画像ファイル名。店員画像が無い場合にはnull
      * @param {number} clerkOffsetX 店員画像表示オフセットX
      * @param {number} clerkOffsetY 店員画像表示オフセットY
+     * @param {object} msgs メッセージテキスト
      */
-    Scene_TwldShop.prototype.prepare = function(id, mode, clerkFileName, clerkOffsetX, clerkOffsetY) {
+    Scene_TwldShop.prototype.prepare = function(id, mode, clerkFileName, clerkOffsetX, clerkOffsetY, msgs) {
         this._shop = $gameShops.shop(id); // Game_Shopオブジェクト
         this._mode = mode;
         this._clerkFileName = clerkFileName || "";
         this._clerkOffsetX = clerkOffsetX || 0;
         this._clerkOffsetY = clerkOffsetY || 0;
+        this._msgs = msgs;
     };
 
     /**
@@ -1366,6 +1393,7 @@ function Scene_TwldShop() {
                 || (this._mode === Game_Shop.SHOP_MODE_SELL_ONLY);
         this._commandWindow.setBuyable(buyable);
         this._commandWindow.setSellable(sellable);
+        this._commandWindow.setMessage(this._msgs);
         this._commandWindow.setHandler("ok",     this.onCommandOk.bind(this));
         this._commandWindow.setHandler("cancel", this.onCommandCancel.bind(this));
         this.addWindow(this._commandWindow);
