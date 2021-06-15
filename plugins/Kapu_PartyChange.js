@@ -192,11 +192,14 @@
  * ============================================
  * ノートタグ
  * ============================================
- * ノートタグはありません。
+ * ステート
+ *   <removeByPartyChange>
+ *      パーティーから外れたときに、このノートタグが付けられたステートを解除する。
  * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 パーティーから外れたときに、指定したステートを解除できるようにした。
  * Version.0.2.0 Window_PartyChangeStatusをWindow_StatusBaseを派生させるように変更した。
  * Version.0.1.0 新規作成。
  */
@@ -1523,6 +1526,7 @@ function Scene_PartyChange() {
      */
     Scene_PartyChange.prototype.initialize = function() {
         Scene_MenuBase.prototype.initialize.call(this);
+        this._prevActorIds = [];
     };
     /**
      * ページボタンを作成する必要があるかどうかを取得する。
@@ -1641,6 +1645,7 @@ function Scene_PartyChange() {
      */
     Scene_PartyChange.prototype.start = function() {
         Scene_MenuBase.prototype.start.call(this);
+        this._prevActorIds = $gameParty.allMembers().map(actor => actor.actorId());
         this._candidateMembersWindow.refresh();
         this._partyMemberWindow.refresh();
         this._partyMemberWindow.activate();
@@ -1789,6 +1794,27 @@ function Scene_PartyChange() {
      */
     Scene_PartyChange.prototype.doAddActor = function(actorId) {
         $gameParty.addActor(actorId);
+    };
+
+    /**
+     * シーンが終了する時の処理を行う。
+     */
+    Scene_PartyChange.prototype.terminate = function() {
+        // 外れたメンバーに対してステート解除する。
+        for (const id of this._prevActorIds) {
+            const actor = $gameActors.actor(id);
+            if (actor && !$gameParty.allMembers().includes(actor)) {
+                // メンバーから外されたアクター
+                const states = actor.states();
+                for (const state of states) {
+                    if (state.meta.removeByPartyChange) {
+                        actor.removeState(state.id);
+                    }
+                }
+            }
+        }
+
+        Scene_MenuBase.prototype.terminate.call(this);
     };
 
     if (menuEnable) {
