@@ -178,7 +178,7 @@
     Game_CharaMakeItem_Gender.prototype.apply = function(windowEntry, actor) {
         const selectWindow = windowEntry.selectWindow;
         const item = selectWindow.item();
-        actor.changeGender(item.name);
+        actor.changeGender(item.value);
     };
     /**
      * アイテム一覧を得る。
@@ -187,9 +187,10 @@
      */
     Game_CharaMakeItem_Gender.prototype.items = function() {
         return [
-            { name:TextManager.genderMale, },
-            { name:TextManager.genderFemale, },
-            { name:TextManager.genderOther }
+            { name:TextManager.genderMale, value:Game_BattlerBase.GENDER_MALE },
+            { name:TextManager.genderFemale, value:Game_BattlerBase.GENDER_FEMALE },
+            { name:TextManager.genderOther, value:Game_BattlerBase.GENDER_OTHER },
+            { name:TextManager.genderOther, value:Game_BattlerBase.GENDER_BOTH },
         ];
     };
 
