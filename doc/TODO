@@ -10,12 +10,6 @@
   ☐ Kapu_TimeRangeAndWeathers_ChangeBySteps
   ☐ Kapu_TimerExtend
   ☐ Kapu_Trait_ParamAdd
-  Kapu_BattlerGender:
-    ☐ 男女両方にヒットする性別を追加したので確認が必要。
-  Kapu_PartyChange:
-    ☐ パーティー離脱時、ステート解除(removeByPartyChangeノートタグが付いているステートが解除される)できるようにしたので確認が必要
-  Kapu_Twld_Shops:
-    ☐ 店で操作したときメッセージ表示をプラグインコマンドで指定できるようにしたので確認する。
   Kapu_UI_Window_SimpleMessage:
     ☐ シンプルメッセージウィンドウを新規作成
       
