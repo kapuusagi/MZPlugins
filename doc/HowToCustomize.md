@@ -1607,3 +1607,26 @@ Javascriptの整数表現最大値(Number.MAX_SAFE_INTEGER)で表現されたと
   Scene_MapとScene_Battleでのみ歩進する。
   ・シーン準備中は歩進しない。
   ・他のシーン(メニューを開いている間など)も歩進しません。
+
+### グローバルオブジェクトへの参照関係調査
+
+
+
+$gameParty 
+
+    <- Game_BattlerBase
+    <- Game_Battler
+    <- Game_Action
+    <- Game_Actor
+    <- Game_Enemy
+    <- Game_Follower
+    <- Game_Followers
+    <- Game_Event
+    <- Game_Interpreter
+
+    <- $gameTroop
+    <- $gamePlayer
+    <- $gameTemp
+    <- $gameScreen
+
+    -> $gameActors
