@@ -84,8 +84,8 @@
  * 
  * 効果をブロックするかどうかは上記メソッドの外で行います。
  * 
- * TPBのコスト支払いは、performActionStart毎にコストを集計し、
- * 全てのアクションを完了(2回以上の行動回数もある)した後に合計値が消費されます。
+ * TPBのコスト支払いは、それまでののアクションの中で最大の値が消費されます。
+ * (当初合計値を減算していたが、合計値を減算すると2回行動の優位性が無くなるためやめました)
  * 
  * ============================================
  * プラグインコマンド
@@ -121,6 +121,8 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.4.0 複数回行動ができると、その分だけ行動後のディレイが大きくなり、
+ *               結果的に1回行動と変わらず不利になる不具合を修正した。
  * Version.0.3.0 Kapu_Base_ParamName に対応
  * Version.0.2.0 行動終了時のTPB減少量を指定できるようにした。
  * Version.0.1.0 作成した。
@@ -395,7 +397,10 @@
      */
     Game_Battler.prototype.performActionStart = function(action) {
         _Game_Battler_performActionStart.call(this, action);
-        this._tpbConsumeTime += this.tpbCost(action.item());
+        const consumeTime = this.tpbCost(action.item());
+        if (consumeTime > this._tpbConsumeTime) {
+            this._tpbConsumeTime = consumeTime;
+        }
     };
 
     /**
