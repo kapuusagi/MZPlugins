@@ -10,8 +10,9 @@
   ☐ Kapu_TimeRangeAndWeathers_ChangeBySteps
   ☐ Kapu_TimerExtend
   ☐ Kapu_Trait_ParamAdd
-  Kapu_UI_Window_SimpleMessage:
-    ☐ シンプルメッセージウィンドウを新規作成
+  ☐ Kapu_Sandbox_Window_SimpleMessage
+  ☐ Kapu_UI_Window_SimpleMessage
+  ☐ Kapu_AffectMemberStates
       
 機能拡張予定:
   Kapu_ChoiceByRoulette:
@@ -30,4 +31,4 @@
 
 その他:
   ☐ Kapu_MapTransferにイメージフェードを追加したい。
-  ☐ パーティー全体に効果を及ぼすステートか何かを実現したい。
+  ☐ 特定のスキルの後にスキルを選択したとき、ウェイト時間とディレイを変化させる。
