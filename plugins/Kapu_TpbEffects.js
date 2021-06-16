@@ -84,6 +84,9 @@
  * 
  * 効果をブロックするかどうかは上記メソッドの外で行います。
  * 
+ * TPBのコスト支払いは、performActionStart毎にコストを集計し、
+ * 全てのアクションを完了(2回以上の行動回数もある)した後に合計値が消費されます。
+ * 
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -252,15 +255,14 @@
     
     
     //------------------------------------------------------------------------------
-    // Game_BattlerBase
-
+    // Game_Battler
     /**
      * スキルのTPBコストを得る。
      * 
      * @param {DataSkill} skill スキル
      * @returns {number} TPBコスト
      */
-    Game_BattlerBase.prototype.skillTpbCost = function(skill) {
+    Game_Battler.prototype.skillTpbCost = function(skill) {
         if (skill.meta.tpbCost) {
             return Math.max(0, (Number(skill.meta.tpbCost) || 0));
         } else {
@@ -273,7 +275,7 @@
      * @param {object} item 
      * @returns {number} TPBコスト(0～1)を得る。
      */
-    Game_BattlerBase.prototype.tpbCost = function(item) {
+    Game_Battler.prototype.tpbCost = function(item) {
         if (DataManager.isSkill(item)) {
             return this.skillTpbCost(item);
         } else if (DataManager.isItem(item)) {
@@ -292,11 +294,10 @@
      * 
      * @returns {number} デフォルトのTPBコスト
      */
-    Game_BattlerBase.prototype.defaultTpbCost = function() {
+    Game_Battler.prototype.defaultTpbCost = function() {
         return defaultTpbCost;
     };
-    //------------------------------------------------------------------------------
-    // Game_Battler
+
     if (Game_BattlerBase.FLAG_ID_BLOCK_TPB_LOSE) {
         /**
          * TPB減少効果を防ぐかどうかを取得する。

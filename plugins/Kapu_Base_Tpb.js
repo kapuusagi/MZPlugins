@@ -33,21 +33,18 @@
     // const pluginName = "Kapu_Base_Tpb";
     // const parameters = PluginManager.parameters(pluginName);
 
+
     //------------------------------------------------------------------------------
-    // Game_BattlerBase
+    // Game_Battler
     /**
      * スキルのキャスト時間を得る。
      * 
      * @param {object} item スキル/アイテム
      * @returns {number} キャスト時間
      */
-    Game_BattlerBase.prototype.tpbSkillCastTime = function(item) {
+    Game_Battler.prototype.tpbSkillCastTime = function(item) {
         return Math.max(0, -item.speed);
     };
-
-    //------------------------------------------------------------------------------
-    // Game_Battler
-
     /**
      * 速度からTPB速度を得る。
      * 

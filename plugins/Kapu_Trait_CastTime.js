@@ -154,7 +154,7 @@
     DataManager.addNotetagParserEnemies(_processNotetag);
 
     //------------------------------------------------------------------------------
-    // Game_BattlerBase
+    // Game_Battler
 
     if (Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE) {
         if (TextManager._xparam) {
@@ -165,7 +165,7 @@
          * 
          * @returns {number} キャストタイム時間レート
          */
-        Game_BattlerBase.prototype.castTimeRate = function() {
+        Game_Battler.prototype.castTimeRate = function() {
             return Math.max(0, 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_CASTTIME_RATE));
         };
     } else {
@@ -174,7 +174,7 @@
          * 
          * @returns {number} キャストタイム時間レート
          */
-        Game_BattlerBase.prototype.castTimeRate = function() {
+        Game_Battler.prototype.castTimeRate = function() {
             return 1;
         };
     }
@@ -188,7 +188,7 @@
          * 
          * @returns {number} 魔法キャストタイム時間レート
          */
-        Game_BattlerBase.prototype.magicCastTimeRate = function() {
+        Game_Battler.prototype.magicCastTimeRate = function() {
             return Math.max(0, 1.0 + this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_MAGIC_CASTTIME_RATE));
         };
     } else {
@@ -197,20 +197,20 @@
          * 
          * @returns {number} 魔法キャストタイム時間レート
          */
-        Game_BattlerBase.prototype.magicCastTimeRate = function() {
+        Game_Battler.prototype.magicCastTimeRate = function() {
             return 1;
         }
     }
 
-    const _Game_BattlerBase_tpbSkillCastTime = Game_BattlerBase.prototype.tpbSkillCastTime;
+    const _Game_Battler_tpbSkillCastTime = Game_Battler.prototype.tpbSkillCastTime;
     /**
      * スキルのキャスト時間を得る。
      * 
      * @param {object} item スキル/アイテム
      * @returns {number} キャスト時間
      */
-    Game_BattlerBase.prototype.tpbSkillCastTime = function(item) {
-        const castTime = _Game_BattlerBase_tpbSkillCastTime.call(this, item);
+    Game_Battler.prototype.tpbSkillCastTime = function(item) {
+        const castTime = _Game_Battler_tpbSkillCastTime.call(this, item);
         if ($dataSystem.magicSkills.includes(item.stypeId)) {
             // 魔法スキルかどうか
             return castTime * this.magicCastTimeRate();
@@ -220,8 +220,11 @@
         }
     };
 
-    const _Game_Action_speed = Game_Action.prototype.speed;
 
+    //------------------------------------------------------------------------------
+    // Game_Action
+    
+    const _Game_Action_speed = Game_Action.prototype.speed;
     /**
      * このアクションの速度を得る。
      * 
