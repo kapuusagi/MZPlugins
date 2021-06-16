@@ -13,6 +13,9 @@
   ☐ Kapu_Sandbox_Window_SimpleMessage
   ☐ Kapu_UI_Window_SimpleMessage
   ☐ Kapu_AffectMemberStates
+  ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
+  ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
+  ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
       
 機能拡張予定:
   Kapu_ChoiceByRoulette:
@@ -28,7 +31,10 @@
     ☐ ユニークアイテム指定。だれかが所持していたらドロップさせない仕組み
 
 リファクタリング:
+  ☐ TPB周りの処理をリファクタリングしたい。
 
 その他:
   ☐ Kapu_MapTransferにイメージフェードを追加したい。
   ☐ 特定のスキルの後にスキルを選択したとき、ウェイト時間とディレイを変化させる。
+バグ:
+  ☐ AttacksOfEachWeaponsとTpbEffectsを組み合わせると、攻撃回数分だけTPBゲージが減って、あんまり意味がない。むしろ不利になる。
