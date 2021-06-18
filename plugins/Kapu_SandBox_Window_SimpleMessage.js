@@ -90,6 +90,8 @@
         const rect = this.messageWindowRect();
         this._messageWindow = new Window_SimpleMessage(rect);
         this._messageWindow.hide();
+        this._messageWindow.deactivate();
+        this._messageWindow.setHandler("ok", this.onMessageWindowOk.bind(this));
         this.addWindow(this._messageWindow);
     };
 
@@ -114,16 +116,14 @@
         if (this._text) {
             $gameMessage.push(this._text);
         }
+        this._messageWindow.activate();
     };
 
     /**
-     * 更新処理を行う。
+     * メッセージウィンドウの表示が完了したときの処理を行う。
      */
-    Scene_SimpleMssageWindowTest.prototype.update = function() {
-        Scene_Base.prototype.update.call(this);
-        if (!$gameMessage.isBusy()) {
-            this.popScene();
-        }
+    Scene_SimpleMssageWindowTest.prototype.onMessageWindowOk = function() {
+        this.popScene();
     };
 
 })();

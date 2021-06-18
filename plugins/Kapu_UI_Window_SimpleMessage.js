@@ -20,6 +20,16 @@
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
+ * 使い方
+ * 1.Window_SimpleMessage(rect:Rectangle) でウィンドウを構築する。
+ * 2.Window_SimpleMessage.setHandler("ok", method:function) でメッセージ表示終了時のコールバックをセットする。
+ * 3.$gameMessage.add(text:string) で表示するメッセージを設定
+ * 4.Window_SimpleMessage.activate()でウィンドウアクティブ化
+ *    : メッセージが表示される。
+ * 5.メッセージ表示が完了すると、setHandlerで登録したハンドラが呼び出されるので、
+ *   Window_SimpleMessage.deactivate()及びWindow_SimpleMessage.close()を呼んでウィンドウを閉じる。
+ *   次のアクティブウィンドウをセットする。
+ *   "ok"ハンドラが呼ばれた時点で、メッセージキュー($gameMessage)のテキストはクリアされている。
  * 
  * ============================================
  * プラグインコマンド
@@ -94,9 +104,8 @@ function Window_SimpleMessage() {
      * メッセージウィンドウを更新する。
      */
     Window_SimpleMessage.prototype.update = function() {
-        this.checkToNotClose();
         Window_Base.prototype.update.call(this);
-        while (!this.isOpening() && !this.isClosing()) {
+        while (this.active && !this.isOpening() && !this.isClosing()) {
             if (this.updateWait()) {
                 return;
             } else if (this.updateInput()) {
@@ -105,18 +114,9 @@ function Window_SimpleMessage() {
                 return;
             } else if (this.canStart()) {
                 this.startMessage();
-            } else {
-                return;
+            } else if ($gameMessage.isBusy()) {
+                this.callHandler("ok");
             }
-        }
-    };
-    
-    /**
-     * 閉じるべきでないかどうかを調べ、処理する。
-     */
-    Window_SimpleMessage.prototype.checkToNotClose = function() {
-        if (this.isOpen() && this.isClosing() && this.doesContinue()) {
-            this.open();
         }
     };
     
@@ -159,8 +159,29 @@ function Window_SimpleMessage() {
      * メッセージ表示を終了する。
      */
     Window_SimpleMessage.prototype.terminateMessage = function() {
-        this.close();
         $gameMessage.clear();
+        this.callHandler("ok");
+    };
+
+    /**
+     * symbolのハンドラをセットする。
+     * 
+     * @param {string} symbool シンボル
+     * @param {function} func メソッド
+     */
+    Window_SimpleMessage.prototype.setHandler = function(symbol, func) {
+        this._handlers[symbol] = func;
+    };
+
+    /**
+     * symbolで指定されたハンドラを呼び出す。
+     * 
+     * @param {string} symbol シンボル
+     */
+    Window_SimpleMessage.prototype.callHandler = function(symbol) {
+        if (this._handlers[symbol]) {
+            this._handlers[symbol]();
+        }
     };
     
     /**
@@ -180,6 +201,11 @@ function Window_SimpleMessage() {
     
     /**
      * 入力を更新する。
+     * 
+     * Note: pause状態(ユーザー入力待ち)状態を更新する。
+     *       メッセージ表示完了後、ボタンを押されるまで待つようなパターン。
+     * 
+     * @returns {boolean} 入力待ちの場合にはtrue, それ以外はfalse.
      */
     Window_SimpleMessage.prototype.updateInput = function() {
         if (this.pause) {
@@ -269,6 +295,7 @@ function Window_SimpleMessage() {
             if (!this._pauseSkip) {
                 this.startPause();
             } else {
+                // \^が指定されており、ウィンドウをすぐに閉じる。
                 this.terminateMessage();
             }
         }
