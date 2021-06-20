@@ -1,7 +1,6 @@
 本来はIssueで管理した方がいい。
 
 動作確認が必要なプラグインリスト:
-  ☐ Kapu_Trait_RandomEncountRate
   ☐ Kapu_MapFilter_CircleFade
   ☐ Kapu_MapTransfer
   ☐ Kapu_QuestSystem
