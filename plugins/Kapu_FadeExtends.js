@@ -22,7 +22,15 @@
  * @type file
  * @dir img/pictures/
  * 
+ * @command setFadeSpeed
+ * @text フェード速度設定
+ * @desc フェード速度を設定する。リセットされるまで継続する。
  * 
+ * @arg duration
+ * @text フェード期間[フレーム数]
+ * @desc フェードに要するフレーム数
+ * @type number
+ * @default 24
  * 
  * 
  * @help 
@@ -51,12 +59,17 @@
 
     PluginManager.registerCommand(pluginName, "setNextFadeOutPattern", args => {
         const pattern = args.pattern;
-        $gameTemp.setSceneFadeOutPattern(pattern);
+        $gameTemp.setFadeOutPattern(pattern);
     });
 
-    PluginManager.registerCommand(pluginName, "setNextFadeoutPattern", args => {
+    PluginManager.registerCommand(pluginName, "setNextFadeInPattern", args => {
         const pattern = args.pattern;
-        $gameTemp.setSceneFadeInPattern(pattern);
+        $gameTemp.setFadeInPattern(pattern);
+    });
+
+    PluginManager.registerCommand(pluginName, "setFadeSpeed", args => {
+        const duration = Number(args.duration) || 0;
+        $gameTemp.setFadeDuration(duration);
     });
 
     // TODO : Scene_Base と Spriteset_Base, Game_Screen,  を拡張する。
@@ -110,9 +123,10 @@
             "uniform float opacity;" +
             "void main() {" +
             "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
-            "  float black_alpha = clamp(1.0 - sample.a + opacity / 255.0, 0.0, 1.0);" +
-            "  vec3 rgb = sample.xyz * black_alpha; " + 
-            "  gl_FragColor = vec4(rgb.x, rgb.y, rgb.z, black_alpha);" +
+            "  float black_alpha = clamp(1.0 - sample.y + opacity / 255.0, 0.0, 1.0);" +
+            // "  float rgb = sample.xyz * black_alpha;" + 
+            "  gl_FragColor = vec4(0.0, 0.0, 0.0, black_alpha);" +
+            // "  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);" +
             "}";
         return src;
     };
@@ -122,7 +136,7 @@
         this.initialize(...arguments);
     }
 
-    Sprite_ImageFade.prototype = Object.create(Sprite.object);
+    Sprite_ImageFade.prototype = Object.create(Sprite.prototype);
     Sprite_ImageFade.prototype.constructor = Sprite_ImageFade;
 
     /**
@@ -130,9 +144,9 @@
      */
     Sprite_ImageFade.prototype.initialize = function() {
         Sprite.prototype.initialize.call(this);
-        this.z = -20;
+        // this.z = -20;
         this._imageFadeFilter = new ImageFadeFilter();
-        this._colorFilter = [ this._imageFadeFilter ];
+        this.filters = [ this._imageFadeFilter ];
     };
 
     /**
@@ -156,15 +170,20 @@
     Sprite_ImageFade.prototype.onPatternLoad = function() {
         if (this.bitmap && this.bitmap.isReady()) {
             // センタリングする。
-            this.x = Graphcis.boxWidth / 2;
+            this.x = Graphics.boxWidth / 2;
             this.y = Graphics.boxHeight / 2;
             this.anchor.x = 0.5;
             this.anchor.y = 0.5;
 
-            var xratio = Graphics.boxWidth / this.bitmap.width;
-            var yratio = Graphics.boxHeight / this.bitmap.height;
-            this.scale.x = xratio;
-            this.scale.y = yratio;
+            if (this.bitmap.width < Graphics.boxWidth) {
+                const xratio = Graphics.boxWidth / this.bitmap.width;
+                this.scale.x = Math.ceil(xratio);
+            }
+            if (this.bitmap.height < Graphics.boxHeight) {
+                const yratio = Graphics.boxHeight / this.bitmap.height;
+                this.scale.y = Math.ceil(yratio);
+            }
+            this.scale.x = 3;
         }
     };
 
@@ -194,8 +213,9 @@
      */
     Game_Temp.prototype.initialize = function() {
         _Game_Temp_initialize.call(this);
-        this.clearSceneFadeInPattern();
-        this.clearSceneFadeOutPattern();
+        this.clearFadeInPattern();
+        this.clearFadeOutPattern();
+        this.clearFadeDuration();
     };
 
     /**
@@ -203,15 +223,15 @@
      * 
      * @param {string} patternFileName パターンファイル名
      */
-    Game_Temp.prototype.setSceneFadeInPattern = function(patternFileName) {
-        this._sceneFadeInPattern = patternFileName || null;
+    Game_Temp.prototype.setFadeInPattern = function(patternFileName) {
+        this._fadeInPattern = patternFileName;
     }
 
     /**
      * フェードインさせるパターンをクリアする。
      */
-    Game_Temp.prototype.clearSceneFadeInPattern = function() {
-        this._sceneFadeInPattern = null;
+    Game_Temp.prototype.clearFadeInPattern = function() {
+        this._fadeInPattern = null;
     };
 
     /**
@@ -219,8 +239,8 @@
      * 
      * @returns {string} フェードインパターン名
      */
-    Game_Temp.prototype.sceneFadeInPattern = function() {
-        return this._sceneFadeInPattern();
+    Game_Temp.prototype.fadeInPattern = function() {
+        return this._fadeInPattern;
     };
 
     /**
@@ -228,15 +248,15 @@
      * 
      * @param {string} patternFileName フェードアウトパターン名
      */
-    Game_Temp.prototype.setSceneFadeOutPattern = function(patternFileName) {
-        this._sceneFadeOutPattern = patternFileName | null;
+    Game_Temp.prototype.setFadeOutPattern = function(patternFileName) {
+        this._fadeOutPattern = patternFileName;
     };
 
     /**
      * フェードアウトさせるパターンをクリアする。
      */
-    Game_Temp.prototype.clearSceneFadeOutPattern = function() {
-        this._sceneFadeOutPattern = null;
+    Game_Temp.prototype.clearFadeOutPattern = function() {
+        this._fadeOutPattern = null;
     };
 
     /**
@@ -244,8 +264,33 @@
      * 
      * @returns {string} フェードアウトパターン名
      */
-    Game_Temp.prototype.sceneFadeOutPattern = function() {
-        return this._sceneFadeOutPattern();
+    Game_Temp.prototype.fadeOutPattern = function() {
+        return this._fadeOutPattern;
+    };
+
+    /**
+     * フェードのフレーム数を設定する。
+     * 
+     * @param {number} duration フレーム数
+     */
+    Game_Temp.prototype.setFadeDuration = function(duration) {
+        this._fadeDuration = duration;
+    };
+
+    /**
+     * フェードのフレーム数をクリアする。
+     */
+    Game_Temp.prototype.clearFadeDuration = function() {
+        this._fadeDuration = 0;
+    };
+
+    /**
+     * フェードのフレーム数を得る。
+     * 
+     * @returns {number} フレーム数
+     */
+    Game_Temp.prototype.fadeDuration = function() {
+        return this._fadeDuration;
     };
 
     //------------------------------------------------------------------------------
@@ -262,12 +307,17 @@
         this.createFadeSprite();
     };
 
+    const _Scene_Base_start = Scene_Base.prototype.start;
+    Scene_Base.prototype.start = function() {
+        this.addChild(this._fadeSprite);
+        _Scene_Base_start.call(this);
+    };
+
     /**
      * フェード用のスプライトを作成する。
      */
     Scene_Base.prototype.createFadeSprite = function() {
         this._fadeSprite = new Sprite_ImageFade();
-        this.addChild(this._fadeSprite);
     };
 
     const _Scene_Base_startFadeIn = Scene_Base.prototype.startFadeIn;
@@ -279,14 +329,14 @@
      * @param {boolean} white 白からのフェードインの場合にはtrue, 黒からのフェードインの場合にはfalse
      */
     Scene_Base.prototype.startFadeIn = function(duration, white) {
-        const patternFileName = $gameTemp.sceneFadeInPattern();
+        const patternFileName = $gameTemp.fadeInPattern();
         if (patternFileName) {
-            $gameTemp.clearSceneFadeInPattern();
+            $gameTemp.clearFadeInPattern();
             this._fadeSprite.setPattern(patternFileName);
             this._patternFadeSign = 1;
             this._patternFadeOpacity = 255;
             this._patternFadeDuration = duration;
-            this.updatePatternFade();
+            this.updatePatternFade(); 
         } else {
             _Scene_Base_startFadeIn.call(this, duration, white);
         }
@@ -300,9 +350,9 @@
      * @param {boolean} white 白へのフェードインの場合にはtrue, 黒からのフェードインの場合にはfalse
      */
     Scene_Base.prototype.startFadeOut = function(duration, white) {
-        const patternFileName = $gameTemp.sceneFadeInPattern();
+        const patternFileName = $gameTemp.fadeOutPattern();
         if (patternFileName) {
-            $gameTemp.clearSceneFadeOutPattern();
+            $gameTemp.clearFadeOutPattern();
             this._fadeSprite.setPattern(patternFileName);
             this._patternFadeSign = -1;
             this._patternFadeOpacity = 0;
@@ -321,8 +371,20 @@
      * @returns {boolean} フェード中の場合にはtrue, それ以外はfalse
      */
     Scene_Base.prototype.isFading = function() {
-        return _Scene_Base_isFading.call(this) && (this._patternFadeDuration > 0);
+        return _Scene_Base_isFading.call(this) || (this._patternFadeDuration > 0);
     };
+
+    const _Scene_Base_fadeSpeed = Scene_Base.prototype.fadeSpeed;
+    /**
+     * フェード速度を得る。
+     * 
+     * @return {number} フェード速度[フレーム数]
+     */
+    Scene_Base.prototype.fadeSpeed = function() {
+        const duration = $gameTemp.fadeDuration();
+        return (duration > 0) ? duration :  _Scene_Base_fadeSpeed.call(this);
+    };
+
     const _Scene_Base_update = Scene_Base.prototype.update;
     /**
      * シーンを更新する。
@@ -334,7 +396,7 @@
     /**
      * フェードを更新する。
      */
-     Scene_Base.prototype.updatePatternFade = function() {
+    Scene_Base.prototype.updatePatternFade = function() {
         if (this._patternFadeDuration > 0) {
             if (this._fadeSprite.bitmap.isReady()) {
                 const d = this._patternFadeDuration;
