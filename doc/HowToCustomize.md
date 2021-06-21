@@ -1529,35 +1529,54 @@ Scene_MessageとGame_Message、Game_Interpreterを使えば独自シーンでコ
 ベーシックシステムでは2つのフェードがある。なんと場所移動によるフェードイン、フェードアウト操作と、
 ユーザーによるフェードイン/フェードアウト操作は異なるのだ。
 
-(a). 場所移動のフェードイン/フェードアウト
+__(a). 場所移動のフェードイン/フェードアウト__
 
-__$gamePlayer__ に __reserveTransfer()__ で指定された場所移動処理によるもの。
-__reserveTransfer()__ が呼ばれると、 __$gamePlayer.isTransferring()__ が __true__ を返すようになる。
-すると、 __Scene_Map__ にて
-__Scene_Map.updateTransferPlayer__ -> __SceneManager.stop__ -> __Scene_Map.stop()__ -> __Scene_Map.fadeOutForTransfer__ となり、フェードアウトする。
-移動すると、
-__Scene_Map.start__ -> __Scene_Map.fadeInForTransfer__ によりフェードインする。
+Game_Interpreter.command201 (マップ移動)により実行されるもの。  
 
-フェード処理自体は __Scene_Base.updateColorFilter__ により更新が行われる。
-__Scene_Base._colorFilter__ の __blendColor__ パラメータを操作することでエフェクトが実現される。
-Sceneのカラーフィルタが対象なので、全ての画面が対象になる。
+Scene_Map.fedeOutForTransfer と Scene_Map.fadeInTransfer により開始制御され、ColorFilter.blendcolor により動作する。Sceneの_colorFilter(カラーフィルタ)が対象になるため、全ての表示物が対象になる。
+
+処理の流れ
+
+(a-1) $gamePlayer.reserveTransfer() により、指定された場所移動処理がセットされる。
+reserveTransfer() が呼ばれると、 $gamePlayer.isTransferring() が true を返すようになる。
+
+(a-2) Scene_Map にて、 Scene_Map.updateTransferPlayer -> SceneManager.stop -> Scene_Map.stop() -> Scene_Map.fadeOutForTransfer -> Scene_Base.startFadeOut となり、フェードアウトがセットされる。
+
+(a-3) フェードアウトするのを待つ。(Scene_Base.isBusy() -> Scene_Base.isFading()により遷移がブロックされる。)。画面をフェードアウトさせる処理は Scene_Base.updateColorFilter により、ColorFilter.blendColorの更新が行われることで実現する。
+
+(a-4) Scene_Map.start -> Scene_Map.fadeInForTransfer によりフェードインする。
 
 
 
-(b). ユーザーによるフェードイン/フェードアウト 
+__(b). ユーザー(インタプリタ)によるフェードイン/フェードアウト__
 
-__Game_Screen__ が処理する。 __Game_Screen.updateFadeIn__ 及び __Game_Screen.updateFadeOut__ によりフェード具合が更新され、それを参照する __Spriteset.updateOverallFilters__ でフェード具合が描画される。 
- __overallFilter.setBrightness()__ が呼ばれ、設定が反映される。
- __Spriteset__ が対象になるため、それ以外（メニューボタンなど）は対象にならない。
-フェードインとフェードアウトの処理が重なった場合、フェードアウトが優先されるが、最終的な結果は終わりが後にきた方が優先される。
+Game_Interpreter.command221 (フェードアウト)及び Game_Interpreter.command222 (フェードイン)により実行されるもの。
+$gameScreen.startFadeOut() 及び $gameScreen.startFadeIn() により開始制御され、 ColorFilter.setBrightness() により動作する。Spritesetが対象になるため、Spritesetに含まれるものだけが対象にになる（メニューボタンなどは対象にならない）。
+尚、戦闘開始時にフェード状態はクリアされる。
 
-(c). 戦闘開始時のフェードイン・フェードアウト
+処理の流れ
 
-__Scene_Map__ で次のシーンが __Scene_Battle__ であることを検出すると、
-__launchBattle__ -> __startEncounterEffect__ -> __updateEncounterEffect__ -> __startFadeOut__ が呼ばれて、フェードアウト処理が行われる。
-その後、 __Scene_Battle.start()__ にて __Scene_Battle.startFadeIn__ が呼び出され、フェードインする。
-※その他のエンカウントエフェクト(フラッシュとズーム)は下記を参照。
-  __Scene_Map.startEncounterEffect__ 及び __SceneMap.updateEncounterEffect__ を参照。
+(b-1) command221/command222から  $gameScreen.startFadeOut/$gameScreen.startFadeInが呼び出される。フェード完了待ち指定が入っている場合、ウェイトで指定フレーム数が実行される。
+
+(b-2) $gameScreen.updateFadeOut/$gameScreen.updateFadeOutにより、フェード値としてのbrightnessが更新される（$gameScreen.brightness()が変わる） 。
+
+(b-3) Spriteset.updateOverallFilters が$gameScreen.brightness() を参照し、Spritesetが持つ _overallColorFilter.setBrightness()が呼び出され、フェード具合が反映される。
+
+
+__(c). 戦闘開始時のフェードイン・フェードアウト__
+
+Scene_Map で次のシーンが Scene_Battle であることを検出されたとき、Scene_Battleへの遷移の一環で実行されるもの。
+Scene_Map.updateEncounterEffectで Scene_Map.startFadeOutによりフェードアウト開始制御される。つまり、フェード具合としては Scene_base..startFadeOutで、(a)と同じ。
+Scene_Battle.startFadeInにより、フェードイン開始制御される。
+そのため、フェードの表示は(a)と同じである。
+
+処理の流れ
+
+(c-1) Scene_Map.launchBattle から SceneMap.startEncounterEffectが呼ばれる。
+(c-2) Scene_Map.updateEncounterEffect にて、エフェクト処理の半分が経過したとき、Scene_Map.startFadeOut が呼ばれて、フェードアウト処理が行われる。
+※その他のエンカウントエフェクト(フラッシュとズーム)は Scene_Map.startEncounterEffect 及び SceneMap.updateEncounterEffect を参照。
+(c-3) フェードアウトが完了するまで待つ。 (Scene_base.isBusy() がtrueを返すので待つ。)
+(c-4) Scene_Battle.start にて Scene_Base.startFadeIn が呼び出され、フェードインする。
 
 
 ### 場所移動処理について
