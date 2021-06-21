@@ -3,6 +3,8 @@
  * @plugindesc マップ移動拡張プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_FadeExtends
+ * @orderAfter Kapu_FadeExtends
  * 
  * @command setupTransferEffect
  * @text 場所移動準備
@@ -18,22 +20,19 @@
  * @option ディゾルブ
  * @value dissolve
  * 
- * @arg fadeOutType
- * @arg フェードアウトタイプ
- * @desc フェードアウトタイプ(表示させるときの形状)
- * @type select
- * @option 通常
- * @value normal
- * @option 丸
- * @value circle
- * 
- * @arg fadeInType
- * @text フェードインタイプ
- * @desc フェードインタイプ(表示させるときの形状)
- * @option 通常
- * @value normal
- * @option 丸
- * @value circle
+ * @arg fadeOutPattern
+ * @text フェードアウトパターン
+ * @desc フェードアウトする画像パターン。未指定時は全体を一律にフェードアウトさせる。
+ * @type file
+ * @dir img/pictures/
+ * @default
+ *
+ * @arg fadeInPattern
+ * @text フェードインパターン
+ * @desc フェードインする画像パターン。魅して維持は全体を一律にフェードインさせる。
+ * @type file
+ * @dir img/pictures/
+ * @default
  * 
  * @param dissolveSpeed
  * @text ディゾルブ速度
@@ -234,7 +233,7 @@
         sprite.y = (Graphics.boxHeight - bitmap.height) / 2
         sprite.anchor.x = 0.5;
         sprite.anchor.y = 0.5;
-        sprite.z = 20;
+        sprite.z = -20; // 手前
         sprite.bitmap = bitmap;
         this.addChild(sprite);
     };
@@ -252,7 +251,7 @@
             sprite.y = (Graphics.boxHeight - bitmap.height) / 2
             sprite.anchor.x = 0.5;
             sprite.anchor.y = 0.5;
-            sprite.z = 20;
+            sprite.z = -20; // 手前
             sprite.bitmap = bitmap;
             this._dissolveSprite = sprite;
             this.addChild(sprite);

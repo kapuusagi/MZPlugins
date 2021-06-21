@@ -1,7 +1,7 @@
 本来はIssueで管理した方がいい。
 
 動作確認が必要なプラグインリスト:
-  ☐ Kapu_MapFilter_CircleFade
+  ☐ Kapu_FadeExtends
   ☐ Kapu_MapTransfer
   ☐ Kapu_QuestSystem
   ☐ Kapu_QuestSystem_UI
@@ -33,5 +33,5 @@
   ☐ クエストUIとクエストショップは分離した方がいいかも。
 
 その他:
-  ☐ Kapu_MapTransferにイメージフェードを追加したい。
+  ☐ Kapu_MapTransferにイメージフェードを追加したい。Spriteset_Baseに全体を覆うSpriteを作り、フィルタをかけるか。
   ☐ 特定のスキルの後にスキルを選択したとき、ウェイト時間とディレイを変化させる。
