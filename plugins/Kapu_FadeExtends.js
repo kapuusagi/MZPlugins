@@ -7,30 +7,45 @@
  * @command setNextFadeOutPattern
  * @text 次の移動/先頭開始時フェードアウト処理パターンを設定する。
  * 
- * @arg pattern
+ * @arg patternFile
  * @text パターン
  * @desc パターンファイル名。未指定で全面一律にフェードアウトさせる。
  * @type file
  * @dir img/pictures/
  * 
+ * @arg duration
+ * @text フェード時間
+ * @desc フェードに要する時間[フレーム数]
+ * @type number
+ * @default 24
+ * 
+ * @arg color
+ * @text フェード色(R,G,B)
+ * @desc フェードアウトさせる色。
+ * @type number[]
+ * @default [0,0,0]
+ * 
+ * 
  * @command setNextFadeInPattern
  * @text 次の移動/戦闘開始時フェードイン処理パターンを設定する。
  * 
- * @arg pattern
+ * @arg patternFile
  * @text パターン
  * @desc パターンファイル名。未指定で全面一律にフェードインさせる。
  * @type file
  * @dir img/pictures/
  * 
- * @command setFadeSpeed
- * @text フェード速度設定
- * @desc フェード速度を設定する。フェードインするまで継続する。
- * 
  * @arg duration
- * @text フェード期間[フレーム数]
- * @desc フェードに要するフレーム数
+ * @text フェード時間
+ * @desc フェードに要する時間[フレーム数]
  * @type number
  * @default 24
+ * 
+ * @arg color
+ * @text フェード色(R,G,B)
+ * @desc フェードアウトさせる色。
+ * @type number[]
+ * @default [0,0,0]
  * 
  * 
  * @param defaultFadeOutPattern
@@ -40,12 +55,24 @@
  * @dir img/pictures/
  * @default
  * 
+ * @param defaultFadeOutDuration
+ * @text 既定のフェードアウト時間
+ * @desc 規定のフェードアウト時間[フレーム数]
+ * @type number
+ * @default 0
+ * 
  * @param defaultFadeInPattern
  * @text 既定のフェードインパターン
  * @desc デフォルトのフェードインパターンを指定する。(指定なしで通常フェード)
  * @type file
  * @dir img/pictures/
  * @default
+ * 
+ * @param defaultFadeInDuration
+ * @text 既定のフェードイン時間
+ * @desc 既定のフェードイン時間[フレーム数]
+ * @type number
+ * @default 0
  * 
  * @help 
  * フェードに画像データパターン指定によるフェードを追加します。
@@ -54,17 +81,30 @@
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
- * $gameTemp.setFadeInPattern(patternFile : string) : void
+ * フェードモード
+ *   Game_Screen.FADE_MODE_NORMAL
+ *     ベーシックシステムで実装されている通常のフェードパターン
+ *   Game_Screen.FADE_MODE_PATTERN
+ *     画像によりフェード具合を指定するパターン
+ * 
+ * $gameTemp.setFadeInPattern(pattern : object) : void
  *     次のフェードインパターンを変更する。
  *     フェードイン要求が出たときにクリアされる。
- * 
- * $gameTemp.setFadeOutPattern(patternFile : string) : void
+ *     patternに指定するオブジェクトは後述
+ * $gameTemp.setFadeOutPattern(pattern : object) : void
  *     次のフェードアウトパターンを変更する。
  *     フェードアウト要求が出たときにクリアされる。
+ *     patternに指定するオブジェクトは後述
+ * patternに指定するオブジェクト
+ *     {
+ *         mode: {string} フェードモード。(Game_Screen.FADE_MODE～を指定する。)
+ *         duration: {number} フェードにかける時間[フレーム数]
+ *         color: {Array<number>} フェードする色。R,G,Bの3要素指定。
+ *         (その他) modeに因る。
+ *     }
  * 
- * $gameTemp.setFadeDuration(duration : number) : void
- *     次のフェードアウト-フェードインのフレーム数を変更する。
- *     フェードインした時にデフェオルトにリセットされる。
+ * フェードパターンを拡張するときにフィールドを追加する場合、
+ * 保存されても問題ないオブジェクト(数値矢文字列)にすること。
  * 
  * ============================================
  * プラグインコマンド
@@ -85,28 +125,127 @@
     const pluginName = "Kapu_FadeExtends";
     const parameters = PluginManager.parameters(pluginName);
 
+    Game_Screen.FADE_MODE_NORMAL = "normal";
+    Game_Screen.FADE_MODE_PATTERN = "pattern";
+
     const defaultFadeOutPattern = parameters["defaultFadeOutPattern"] || "";
+    const defaultFadeOutMode = defaultFadeOutPattern ? Game_Screen.FADE_MODE_PATTERN : Game_Screen.FADE_MODE_NORMAL;
+    const defaultFadeOutDuration = Math.round(Number(parameters["defaultFadeOutDuration"]) || 0);
     const defaultFadeInPattern = parameters["defaultFadeInPattern"] || "";
+    const defaultFadeInMode = defaultFadeInPattern ? Game_Screen.FADE_MODE_PATTERN : Game_Screen.FADE_MODE_NORMAL;
+    const defaultFadeInDuration = Math.round(Number(parameters["defaultFadeInDuration"]) || 0);
+
 
     PluginManager.registerCommand(pluginName, "setNextFadeOutPattern", args => {
-        const pattern = args.pattern;
-        $gameTemp.setFadeOutPattern(pattern);
+        const patternFile = args.patternFile;
+        const mode = (patternFile) ? Game_Screen.FADE_MODE_PATTERN : Game_Screen.FADE_MODE_NORMAL;
+        const duration = Math.round(Number(args.duration) || 0);
+        const color = JSON.parse(args.color).map(token => Number(token) || 0);
+        while (color.length < 3) {
+            color.push(0);
+        }
+
+        $gameTemp.setFadeOutPattern({
+            mode: mode,
+            pattern: patternFile,
+            duration: duration,
+            color:color
+        });
     });
 
     PluginManager.registerCommand(pluginName, "setNextFadeInPattern", args => {
-        const pattern = args.pattern;
-        $gameTemp.setFadeInPattern(pattern);
+        const patternFile = args.patternFile;
+        const mode = (patternFile) ? Game_Screen.FADE_MODE_PATTERN : Game_Screen.FADE_MODE_NORMAL;
+        const duration = Math.round(Number(args.duration) || 0);
+        const color = JSON.parse(args.color).map(token => Number(token) || 0);
+        while (color.length < 3) {
+            color.push(0);
+        }
+        $gameTemp.setFadeInPattern({
+            mode: mode,
+            pattern: patternFile,
+            duration: duration,
+            color:color
+        });
     });
 
-    PluginManager.registerCommand(pluginName, "setFadeSpeed", args => {
-        const duration = Number(args.duration) || 0;
-        $gameTemp.setFadeDuration(duration);
-    });
+    //------------------------------------------------------------------------------
+    // Game_Temp
+    const _Game_Temp_initialize = Game_Temp.prototype.initialize;
+    /**
+     * 初期化する。
+     */
+    Game_Temp.prototype.initialize = function() {
+        _Game_Temp_initialize.call(this);
+        this.clearFadeInPattern();
+        this.clearFadeOutPattern();
+    };
 
-    // TODO : Scene_Base と Spriteset_Base, Game_Screen,  を拡張する。
+    /**
+     * フェードアウトさせるパターンをクリアする。
+     */
+    Game_Temp.prototype.clearFadeOutPattern = function() {
+        this._fadeOutPattern = {
+            mode: defaultFadeOutMode,
+            pattern: defaultFadeOutDuration,
+            duration: defaultFadeOutDuration,
+            color: [0, 0, 0, 255]
+        }
+    };
+
+    /**
+     * フェードインさせるパターンをクリアする。
+     */
+    Game_Temp.prototype.clearFadeInPattern = function() {
+        this._fadeInPattern = {
+            mode: defaultFadeInMode,
+            pattern: defaultFadeInPattern,
+            duration: defaultFadeInDuration,
+            color: [0, 0, 0, 255]
+        }
+    };
+
+    /**
+     * 次のフェードアウト処理に適用するパラメータを設定する。
+     * 
+     * @param {object} pattern フェードアウトパターン
+     */
+    Game_Temp.prototype.setupNextFadeOut = function(pattern) {
+        this._fadeOutPattern = pattern;
+    };
+    /**
+     * 次のフェードイン処理に適用するパラメータを設定する。
+     * 
+     * @param {object} pattern フェードインパターン
+     */
+    Game_Temp.prototype.setupNextFadeIn = function(pattern) {
+        this._fadeInPattern = pattern;
+    };
+
+    /**
+     * フェードインさせるパターンを得る。
+     * 
+     * @returns {object} フェードインパターン
+     */
+    Game_Temp.prototype.fadeInPattern = function() {
+        return this._fadeInPattern;
+    };
+
+    /**
+     * フェードアウトさせるパターンを得る。
+     * 
+     * @returns {string} フェードアウトパターン名
+     */
+    Game_Temp.prototype.fadeOutPattern = function() {
+        return this._fadeOutPattern;
+    };
 
     //------------------------------------------------------------------------------
     // ImageFadeFilter
+    /**
+     * イメージパターンフィルタ
+     * 
+     */
     function ImageFadeFilter() {
         this.initialize(...arguments);
     }
@@ -208,13 +347,21 @@
      */
     Sprite_ImageFade.prototype.setPattern = function(pattern) {
         if (this._patternName != pattern) {
+            if (this.bitmap) {
+                console.log("release bitmap." + this._patternName);
+                this.bitmap.destroy(); // Note:ImageManagerでloadしたやつをdestroy()していいのか？
+            }
             this._patternName = pattern;
-            this.bitmap = ImageManager.loadPicture(pattern);
-            if (!this.bitmap.isReady()) {
-                // キャッシュされていない場合、ロードされるまで待つ。
-                this.bitmap.addLoadListener(this.onPatternLoad.bind(this));
+            if (this._patternName) {
+                this.bitmap = ImageManager.loadPicture(pattern);
+                if (!this.bitmap.isReady()) {
+                    // キャッシュされていない場合、ロードされるまで待つ。
+                    this.bitmap.addLoadListener(this.onPatternLoad.bind(this));
+                } else {
+                    this.onPatternLoad();
+                }
             } else {
-                this.onPatternLoad();
+                this.bitmap = null;
             }
         }
     };
@@ -254,93 +401,6 @@
         return (this.bitmap) ? this.bitmap.isReady() : false;
     };
 
-    //------------------------------------------------------------------------------
-    // Game_Temp
-    const _Game_Temp_initialize = Game_Temp.prototype.initialize;
-    /**
-     * 初期化する。
-     */
-    Game_Temp.prototype.initialize = function() {
-        _Game_Temp_initialize.call(this);
-        this.clearFadeInPattern();
-        this.clearFadeOutPattern();
-        this.clearFadeDuration();
-    };
-
-    /**
-     * フェードインさせるパターンを記述した画像ファイル名を設定する。
-     * 
-     * @param {string} patternFileName パターンファイル名
-     */
-    Game_Temp.prototype.setFadeInPattern = function(patternFileName) {
-        this._fadeInPattern = patternFileName;
-    }
-
-    /**
-     * フェードインさせるパターンをクリアする。
-     */
-    Game_Temp.prototype.clearFadeInPattern = function() {
-        this._fadeInPattern = defaultFadeInPattern;
-    };
-
-    /**
-     * フェードインさせるパターンを記述した画像ファイル名を得る。
-     * 
-     * @returns {string} フェードインパターン名
-     */
-    Game_Temp.prototype.fadeInPattern = function() {
-        return this._fadeInPattern;
-    };
-
-    /**
-     * フェードアウトさせるパターンを記述した画像ファイル名を設定する。
-     * 
-     * @param {string} patternFileName フェードアウトパターン名
-     */
-    Game_Temp.prototype.setFadeOutPattern = function(patternFileName) {
-        this._fadeOutPattern = patternFileName;
-    };
-
-    /**
-     * フェードアウトさせるパターンをクリアする。
-     */
-    Game_Temp.prototype.clearFadeOutPattern = function() {
-        this._fadeOutPattern = defaultFadeOutPattern;
-    };
-
-    /**
-     * フェードアウトさせるパターンを記述した画像ファイル名を得る。
-     * 
-     * @returns {string} フェードアウトパターン名
-     */
-    Game_Temp.prototype.fadeOutPattern = function() {
-        return this._fadeOutPattern;
-    };
-
-    /**
-     * フェードのフレーム数を設定する。
-     * 
-     * @param {number} duration フレーム数
-     */
-    Game_Temp.prototype.setFadeDuration = function(duration) {
-        this._fadeDuration = duration;
-    };
-
-    /**
-     * フェードのフレーム数をクリアする。
-     */
-    Game_Temp.prototype.clearFadeDuration = function() {
-        this._fadeDuration = 0;
-    };
-
-    /**
-     * フェードのフレーム数を得る。
-     * 
-     * @returns {number} フレーム数
-     */
-    Game_Temp.prototype.fadeDuration = function() {
-        return this._fadeDuration;
-    };
 
     //------------------------------------------------------------------------------
     // Scene_Base
@@ -350,13 +410,12 @@
      */
     Scene_Base.prototype.initialize = function() {
         _Scene_Base_initialize.call(this);
-        this._fadeController = {
-            isFading: null,
-            update: null,
-            apply: null
-        }
-        this._fadeProcedure = null;
-        this._isFading = null;
+        this._fadePattern = {
+            mode: Game_Screen.FADE_MODE_NORMAL,
+            pattern: "",
+            duration: 24,
+            color: [0,0,0]
+        };
         this.createFadeLayer();
         this.createFadeSprite();
     };
@@ -387,54 +446,16 @@
      * !!!overwrite!!! Scene_Base.startFadeIn
      *     フェード機能拡張のためオーバーライドする。
      */
+    // eslint-disable-next-line no-unused-vars
     Scene_Base.prototype.startFadeIn = function(duration, white) {
-        const patternFileName = $gameTemp.fadeInPattern();
-        if (patternFileName) {
-            $gameTemp.clearFadeInPattern();
-            this.setupFadePattern(white, patternFileName);
-        } else {
-            this.setupFadeNormal();
-        }
-        $gameTemp.clearFadeDuration();
+        this._fadePattern = $gameTemp.fadeInPattern();
+        $gameTemp.clearFadeInPattern();
         this._fadeSign = 1;
-        this._fadeDuration = duration || 30;
-        this._fadeWhite = white;
+        this._fadeDuration = this._fadePattern.duration || duration || 30;
         this._fadeOpacity = 255;
+        this.setupFade();
         this.updateColorFilter(); // 初期値反映
     };
-
-    /**
-     * 通常フェードをセットアップする。
-     */
-    Scene_Base.prototype.setupFadeNormal = function() {
-        this._fadeController = {
-            isFading: this.isFadingNormal.bind(this),
-            update: this.updateFadeNormal.bind(this),
-            apply: this.applyFadeNormal.bind(this)
-        }
-    };
-    /**
-     * パターンフェードをセットアップする。
-     * 
-     * @param {boolean} white 白からのフェードインまたは白へのフェードアウトの場合にはtrue, それ以外はfalse
-     * @param {string} pattern パターンファイル名
-     */
-    Scene_Base.prototype.setupFadePattern = function(white, pattern) {
-        const childCount = this.children.length;
-        if (this.getChildIndex(this._fadeLayer) < (childCount - 1)) {
-            this.removeChild(this._fadeLayer);
-            this.addChild(this._fadelayer);
-        }
-        const blendColor = (white) ? [ 255, 255, 255, 255] : [0, 0, 0, 255];
-        this._fadeSprite.setBlendColor(blendColor);
-        this._fadeSprite.setPattern(pattern);
-        this._fadeController = {
-            isFading: this.isFadingNormal.bind(this),
-            update: this.updateFadePattern.bind(this),
-            apply: this.applyFadePattern.bind(this)
-        }
-    };
-
 
     /**
      * フェードアウトを開始する。
@@ -444,21 +465,54 @@
      * !!!overwrite!!! Scene_Base.startFadeOut()
      *     フェード機能拡張のためオーバーライドする。
      */
+    // eslint-disable-next-line no-unused-vars
     Scene_Base.prototype.startFadeOut = function(duration, white) {
-        const patternFileName = $gameTemp.fadeOutPattern();
-        if (patternFileName) {
-            $gameTemp.clearFadeOutPattern();
-            this.setupFadePattern(white, patternFileName);
-        } else {
-            this.setupFadeNormal();
-        }
+        this._fadePattern = $gameTemp.fadeOutPattern();
+        $gameTemp.clearFadeOutPattern();
         this._fadeSign = -1;
-        this._fadeDuration = duration || 30;
-        this._fadeWhite = white;
+        this._fadeDuration = this._fadePattern.duration || duration || 30;
         this._fadeOpacity = 0;
+        this.setupFade();
         this.updateColorFilter();
     };
 
+    /**
+     * フェードをセットアップする。
+     */
+    Scene_Base.prototype.setupFade = function() {
+        switch (this._fadePattern.mode) {
+            case Game_Screen.FADE_MODE_NORMAL:
+                this.setupfadeNormal();
+                break;
+            case Game_Screen.FADE_MODE_PATTERN:
+                this.setupFadePattern()
+                break;
+            default:
+                break;
+        }
+    };
+
+    /**
+     * 通常フェードをセットアップする。
+     */
+    Scene_Base.prototype.setupFadeNormal = function() {
+        // Do nothing.
+    };
+
+    /**
+     * パターンフェードをセットアップする。
+     */
+    Scene_Base.prototype.setupFadePattern = function() {
+        const childCount = this.children.length;
+        if (this.getChildIndex(this._fadeLayer) < (childCount - 1)) {
+            this.removeChild(this._fadeLayer);
+            this.addChild(this._fadelayer);
+        }
+        const color = this._fadePattern.color;
+        const blendColor = [ color[0], color[1], color[2], 255 ];
+        this._fadeSprite.setBlendColor(blendColor);
+        this._fadeSprite.setPattern(this._fadePattern.pattern || "");
+    };
 
     /**
      * フェード中かどうかを得る。
@@ -468,7 +522,12 @@
      *     フェード処理を拡張するため、オーバーライドする。
      */
     Scene_Base.prototype.isFading = function() {
-        return (this._fadeController.isFading) ? this._fadeController.isFading() : false;
+        switch (this._fadePattern) {
+            case Game_Screen.FADE_MODE_NORMAL:
+            case Game_Screen.FADE_MODE_PATTERN:
+            default:
+                return this.isFadingNormal();
+        }
     };
 
     /**
@@ -480,28 +539,20 @@
         return (this._fadeDuration > 0);
     };
 
-
-    const _Scene_Base_fadeSpeed = Scene_Base.prototype.fadeSpeed;
-    /**
-     * フェード速度を得る。
-     * 
-     * @return {number} フェード速度[フレーム数]
-     * !!!overwrite!!! Scene_Base.fadeSpeed()
-     *     フェードのフレーム時間を指定できるようにするため、オーバーライドする。
-     */
-    Scene_Base.prototype.fadeSpeed = function() {
-        const duration = $gameTemp.fadeDuration();
-        return (duration > 0) ? duration :  _Scene_Base_fadeSpeed.call(this);
-    };
-
     /**
      * フェードを更新する。
      * !!!overwrite!!! Scene_Base.updateFade()
      *     フェード処理を更新するため、オーバーライドする。
      */
     Scene_Base.prototype.updateFade = function() {
-        if (this._fadeController.update) {
-            this._fadeController.update();
+        switch (this._fadePattern.mode) {
+            case Game_Screen.FADE_MODE_PATTERN:
+                this.updateFadePattern();
+                break;
+            case Game_Screen.FADE_MODE_NORMAL:
+            default:
+                this.updateFadeNormal();
+                break;
         }
     };
 
@@ -511,9 +562,9 @@
     Scene_Base.prototype.updateFadeNormal = function() {
         if (this._fadeDuration > 0) {
             const d = this._fadeDuration;
-            if (this._fadeSign > 0) {
+            if (this._fadeSign > 0) { // フェードイン どんどん0に近づく
                 this._fadeOpacity -= this._fadeOpacity / d;
-            } else {
+            } else { // フェードアウト どんどん255に近づく
                 this._fadeOpacity += (255 - this._fadeOpacity) / d;
             }
             this._fadeDuration--;
@@ -535,8 +586,14 @@
      *     フェードの処理を拡張するためオーバーライドする。
      */
     Scene_Base.prototype.updateColorFilter = function() {
-        if (this._fadecontroller.apply) {
-            this._fadeController.apply();
+        switch (this._fadePattern.mode) {
+            case Game_Screen.FADE_MODE_PATTERN:
+                this.applyFadePattern();
+                break;
+            case Game_Screen.FADE_MODE_NORMAL:
+            default:
+                this.applyFadeNormal();
+                break;
         }
     };
 
@@ -544,18 +601,19 @@
      * 通常のフェード処理を適用する。
      */
     Scene_Base.prototype.applyFadeNormal = function() {
-        const c = this._fadeWhite ? 255 : 0;
-        const blendColor = [c, c, c, this._fadeOpacity];
+        const c = this._fadePattern.color;
+        const blendColor = [c[0], c[1], c[2], this._fadeOpacity];
         this._colorFilter.setBlendColor(blendColor);
+        this._fadeSprite.setPattern("");
     };
 
     /**
      * パターンフェードを適用する。
      */
     Scene_Base.prototype.applyFadePattern = function() {
-        const c = this._fadeWhite ? 255 : 0;
+        const c = this._fadePattern.color;
         const alpha = (this._fadeOpacity >= 255) ? 255 : 0;
-        const blendColor = [c, c, c, alpha];
+        const blendColor = [c[0], c[1], c[2], alpha];
         this._colorFilter.setBlendColor(blendColor);
 
         this._fadeSprite.setFadeOpacity(this._fadeOpacity);
@@ -570,19 +628,12 @@
      */
     Game_Screen.prototype.clearFade = function() {
         _Game_Screen_clearFade.call(this);
-        this._fadePattern = "";
-    };
-
-    /**
-     * パターンでのフェードアウトを開始する。
-     * 
-     * @param {number} duration フェード長さ[フレーム数]
-     * @param {number} pattern パターン
-     */
-    Game_Screen.prototype.startFadeOutWithPattern = function(duration, pattern) {
-        this._fadePattern = pattern;
-        this._fadeInDuration = duration;
-        this._fadeOutDuration = 0;
+        this._fadePattern = {
+            mode: Game_Screen.FADE_MODE_NORMAL,
+            pattern: "",
+            duration: 24,
+            color: [0,0,0]
+        };
     };
 
     /**
@@ -597,39 +648,41 @@
         this._fadeInDuration = 0;
     };
 
-    const _Game_Screen_startFadeOut = Game_Screen.prototype.startFadeOut;
     /**
      * フェードアウトを開始する。
      * 
      * @param {number} duration フレーム数
+     * !!!overwrite!!! Game_Screen.startFadeOut
+     *     フェードアウトを拡張するため、オーバーライドする。
      */
     Game_Screen.prototype.startFadeOut = function(duration) {
-        const pattern = $gameTemp.fadeOutPattern();
-        if (pattern) {
-            $gameTemp.clearFadeOutPattern();
-            this.startFadeOutWithPattern(duration, pattern);
-        } else {
-            _Game_Screen_startFadeOut.call(this, duration);
-            this._fadePattern = null;
-        }
+        this._fadePattern = $gameTemp.fadeOutPattern();
+        $gameTemp.clearFadeOutPattern();
+        this._fadeOutDuration = this._fadePattern.duration || duration;
+        this._fadeInDuration = 0;
+        this.setupFade();
     };
 
-    const _Game_Screen_startFadeIn = Game_Screen.prototype.startFadeIn;
     /**
      * フェードインを開始する。
      * 
      * @param {number} duration フレーム数
+     * !!!overwrite!!! Game_Screen.startFadeIn
+     *     フェードアウトを拡張するため、オーバーライドする。
      */
     Game_Screen.prototype.startFadeIn = function(duration) {
-        const pattern = $gameTemp.fadeInPattern();
-        if (pattern) {
-            $gameTemp.clearFadeInPattern();
-            this.startFadeInWithPattern(duration, pattern);
-        } else {
-            _Game_Screen_startFadeIn.call(this, duration);
-            this._fadePattern = null;
-        }
-        $gameTemp.clearFadeDuration();
+        this._fadePattern = $gameTemp.fadeInPattern();
+        $gameTemp.clearFadeInPattern();
+        this._fadeOutDuration = 0;
+        this._fadeInDuration = this._fadePattern.duration || duration;
+        this.setupFade();
+    };
+
+    /**
+     * フェードを準備する。
+     */
+    Game_Screen.prototype.setupFade = function() {
+
     };
 
     /**
@@ -638,7 +691,7 @@
      * @returns {string} フェードパターン名
      */
     Game_Screen.prototype.fadePattern = function() {
-        return this._fadePattern || "";
+        return this._fadePattern.pattern || "";
     };
 
     const _Game_Screen_updateFadeOut = Game_Screen.prototype.updateFadeOut;
@@ -646,10 +699,16 @@
      * フェードアウト処理を更新する。
      */
     Game_Screen.prototype.updateFadeOut = function() {
-        if (this._fadePattern && !this.isFadePatternLoaded) {
-            return ;
-        } else {
-            _Game_Screen_updateFadeOut.call(this);
+        switch (this._fadePattern.mode) {
+            case Game_Screen.FADE_MODE_PATTERN:
+                if (this.isFadePatternLoaded()) {
+                    _Game_Screen_updateFadeOut.call(this);
+                }
+                break;
+            case Game_Screen.FADE_MODE_NORMAL:
+            default:
+                _Game_Screen_updateFadeOut.call(this);
+                break;
         }
     };
 
@@ -658,10 +717,16 @@
      * フェードイン処理を更新する。
      */
     Game_Screen.prototype.updateFadeIn = function() {
-        if (this._fadePattern && !this.isFadePatternLoaded) {
-            return;
-        } else {
-            _Game_Screen_updateFadeIn.call(this);
+        switch (this._fadePattern.mode) {
+            case Game_Screen.FADE_MODE_PATTERN:
+                if (this.isFadePatternLoaded()) {
+                    _Game_Screen_updateFadeIn.call(this);
+                }
+                break;
+            case Game_Screen.FADE_MODE_NORMAL:
+            default:
+                _Game_Screen_updateFadeIn.call(this);
+                break;
         }
     };
 
@@ -671,8 +736,8 @@
      * @returns {boolean} ロードされている場合にはtrue、ロードされていない場合にはfalse.
      */
     Game_Screen.prototype.isFadePatternLoaded = function() {
-        if (this._fadePattern) {
-            const bitmap = ImageManager.loadPicture(this._fadePattern);
+        if (this._fadePattern.pattern) {
+            const bitmap = ImageManager.loadPicture(this._fadePattern.pattern);
             return bitmap.isReady();
         } else {
             return false;
@@ -685,7 +750,7 @@
      * @returns {boolean} フェードが準備出来ている場合にはtrue, それ以外はfalse.
      */
     Game_Screen.prototype.isFadeReady = function() {
-        if (this._fadePattern) {
+        if (this._fadePattern.mode === Game_Screen.FADE_MODE_PATTERN) {
             return this.isFadePatternLoaded();
         } else {
             return true;
@@ -754,17 +819,6 @@
     Scene_Map.prototype.isReady = function() {
         return _Scene_Map_isReady && ($gameScreen && $gameScreen.isFadeReady());
     };
-    //------------------------------------------------------------------------------
-    // Scene_Interpreter
     
-    const _Game_Interpreter_fadeSpeed = Game_Interpreter.prototype.fadeSpeed;
-    /**
-     * フェードイン/フェードアウトの速度を得る。
-     * 
-     * @returns {number} フレーム数
-     */
-    Game_Interpreter.prototype.fadeSpeed = function() {
-        const duration = $gameTemp.fadeDuration();
-        return (duration > 0) ? duration :  _Game_Interpreter_fadeSpeed.call(this);
-    }
+
 })();
