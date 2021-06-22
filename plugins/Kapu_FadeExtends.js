@@ -24,7 +24,7 @@
  * 
  * @command setFadeSpeed
  * @text フェード速度設定
- * @desc フェード速度を設定する。リセットされるまで継続する。
+ * @desc フェード速度を設定する。フェードインするまで継続する。
  * 
  * @arg duration
  * @text フェード期間[フレーム数]
@@ -33,11 +33,38 @@
  * @default 24
  * 
  * 
+ * @param defaultFadeOutPattern
+ * @text 既定のフェードアウトパターン
+ * @desc デフォルトのフェードアウトパターンを指定する。(指定なしで通常フェード)
+ * @type file
+ * @dir img/pictures/
+ * @default
+ * 
+ * @param defaultFadeInPattern
+ * @text 既定のフェードインパターン
+ * @desc デフォルトのフェードインパターンを指定する。(指定なしで通常フェード)
+ * @type file
+ * @dir img/pictures/
+ * @default
+ * 
  * @help 
+ * フェードに画像データパターン指定によるフェードを追加します。
+ * 
  * 
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
+ * $gameTemp.setFadeInPattern(patternFile : string) : void
+ *     次のフェードインパターンを変更する。
+ *     フェードイン要求が出たときにクリアされる。
+ * 
+ * $gameTemp.setFadeOutPattern(patternFile : string) : void
+ *     次のフェードアウトパターンを変更する。
+ *     フェードアウト要求が出たときにクリアされる。
+ * 
+ * $gameTemp.setFadeDuration(duration : number) : void
+ *     次のフェードアウト-フェードインのフレーム数を変更する。
+ *     フェードインした時にデフェオルトにリセットされる。
  * 
  * ============================================
  * プラグインコマンド
@@ -56,7 +83,10 @@
 
 (() => {
     const pluginName = "Kapu_FadeExtends";
-    // const parameters = PluginManager.parameters(pluginName);
+    const parameters = PluginManager.parameters(pluginName);
+
+    const defaultFadeOutPattern = parameters["defaultFadeOutPattern"] || "";
+    const defaultFadeInPattern = parameters["defaultFadeInPattern"] || "";
 
     PluginManager.registerCommand(pluginName, "setNextFadeOutPattern", args => {
         const pattern = args.pattern;
@@ -250,7 +280,7 @@
      * フェードインさせるパターンをクリアする。
      */
     Game_Temp.prototype.clearFadeInPattern = function() {
-        this._fadeInPattern = null;
+        this._fadeInPattern = defaultFadeInPattern;
     };
 
     /**
@@ -275,7 +305,7 @@
      * フェードアウトさせるパターンをクリアする。
      */
     Game_Temp.prototype.clearFadeOutPattern = function() {
-        this._fadeOutPattern = null;
+        this._fadeOutPattern = defaultFadeOutPattern;
     };
 
     /**
@@ -365,6 +395,7 @@
         } else {
             this.setupFadeNormal();
         }
+        $gameTemp.clearFadeDuration();
         this._fadeSign = 1;
         this._fadeDuration = duration || 30;
         this._fadeWhite = white;
@@ -532,6 +563,16 @@
 
     //------------------------------------------------------------------------------
     // Game_Screen
+
+    const _Game_Screen_clearFade = Game_Screen.prototype.clearFade;
+    /**
+     * フェード状態をクリアする。
+     */
+    Game_Screen.prototype.clearFade = function() {
+        _Game_Screen_clearFade.call(this);
+        this._fadePattern = "";
+    };
+
     /**
      * パターンでのフェードアウトを開始する。
      * 
@@ -588,6 +629,7 @@
             _Game_Screen_startFadeIn.call(this, duration);
             this._fadePattern = null;
         }
+        $gameTemp.clearFadeDuration();
     };
 
     /**
@@ -712,5 +754,17 @@
     Scene_Map.prototype.isReady = function() {
         return _Scene_Map_isReady && ($gameScreen && $gameScreen.isFadeReady());
     };
-
+    //------------------------------------------------------------------------------
+    // Scene_Interpreter
+    
+    const _Game_Interpreter_fadeSpeed = Game_Interpreter.prototype.fadeSpeed;
+    /**
+     * フェードイン/フェードアウトの速度を得る。
+     * 
+     * @returns {number} フレーム数
+     */
+    Game_Interpreter.prototype.fadeSpeed = function() {
+        const duration = $gameTemp.fadeDuration();
+        return (duration > 0) ? duration :  _Game_Interpreter_fadeSpeed.call(this);
+    }
 })();
