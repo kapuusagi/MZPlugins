@@ -89,7 +89,8 @@
      */
     ImageFadeFilter.prototype.initialize = function() {
         PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
-        this.uniforms.opacity = 0; // 黒の割合
+        this.uniforms.opacity = 0; // フェード色の割合
+        this.uniforms.blendColor = [0, 0, 0, 255]; // 黒へのフェード
     };
 
     /**
@@ -97,11 +98,22 @@
      * 
      * @constant {number} 
      */
-     Object.defineProperty(ImageFadeFilter.prototype, "opacity", {
+    Object.defineProperty(ImageFadeFilter.prototype, "opacity", {
         configurable:true,
         enumerable:true,
-        set: function(value) { this.uniforms.opacity = value.clamp(0, 255); },
+        set: function(value) { this.uniforms.opacity = value.clamp(0.0, 255.0); },
         get: function() { return this.uniforms.opacity; }
+    });
+    /**
+     * 影の割合(0-255) 0で影響なし。255で全部黒。
+     * 
+     * @constant {number} 
+     */
+    Object.defineProperty(ImageFadeFilter.prototype, "blendColor", {
+        configurable:true,
+        enumerable:true,
+        set: function(value) { this.uniforms.blendColor = value; },
+        get: function() { return this.uniforms.blendColor; }
     });
 
     /**
@@ -122,12 +134,12 @@
             "varying vec2 vTextureCoord;" +
             "uniform sampler2D uSampler;" +
             "uniform float opacity;" +
+            "uniform vec4 blendColor;" +
             "void main() {" +
             "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
             "  float black_alpha = clamp(1.0 - sample.y + opacity / 255.0, 0.0, 1.0);" +
-            // "  float rgb = sample.xyz * black_alpha;" + 
-            "  gl_FragColor = vec4(0.0, 0.0, 0.0, black_alpha);" +
-            // "  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);" +
+            "  vec3 rgb = blendColor.xyz * blend_alpha;" +
+            "  gl_FragColor = vec4(rgb.x, rgb.y, rgb.z, black_alpha);" +
             "}";
         return src;
     };
@@ -148,6 +160,15 @@
         // this.z = -20;
         this._imageFadeFilter = new ImageFadeFilter();
         this.filters = [ this._imageFadeFilter ];
+    };
+
+    /**
+     * ブレンドカラーを設定する。
+     * 
+     * @param {Array<number>} color カラー([R,G,B,A])
+     */
+    Sprite_ImageFade.prototype.setBlendColor = function(color) {
+        this._imageFadeFilter.blendColor = color;
     };
 
     /**
@@ -296,9 +317,13 @@
      */
     Scene_Base.prototype.initialize = function() {
         _Scene_Base_initialize.call(this);
-        this._patternFadeDuration = 0;
-        this._patternFadeOpacity = 0;
-        this._patternFadeSign = 0;
+        this._fadeController = {
+            isFading: null,
+            update: null,
+            apply: null
+        }
+        this._fadeProcedure = null;
+        this._isFading = null;
         this.createFadeLayer();
         this.createFadeSprite();
     };
@@ -321,105 +346,186 @@
         this._fadeLayer.addChild(this._fadeSprite);
     };
 
-    const _Scene_Base_startFadeIn = Scene_Base.prototype.startFadeIn;
-
     /**
      * フェードインを開始する。
      * 
      * @param {number} duration フェードインにかける時間[フレーム数]
      * @param {boolean} white 白からのフェードインの場合にはtrue, 黒からのフェードインの場合にはfalse
+     * !!!overwrite!!! Scene_Base.startFadeIn
+     *     フェード機能拡張のためオーバーライドする。
      */
     Scene_Base.prototype.startFadeIn = function(duration, white) {
         const patternFileName = $gameTemp.fadeInPattern();
         if (patternFileName) {
-            const childCount = this.children.length;
-            if (this.getChildIndex(this._fadeLayer) < (childCount - 1)) {
-                this.removeChild(this._fadeLayer);
-                this.addChild(this._fadelayer);
-            }
             $gameTemp.clearFadeInPattern();
-            this.removeChild(this._fadeSprite);
-            this.addChild(this._fadeSprite);
-            this._fadeSprite.setPattern(patternFileName);
-            this._patternFadeSign = 1;
-            this._patternFadeOpacity = 255;
-            this._patternFadeDuration = duration;
-            this.updatePatternFade(); 
+            this.setupFadePattern(white, patternFileName);
         } else {
-            _Scene_Base_startFadeIn.call(this, duration, white);
+            this.setupFadeNormal();
+        }
+        this._fadeSign = 1;
+        this._fadeDuration = duration || 30;
+        this._fadeWhite = white;
+        this._fadeOpacity = 255;
+        this.updateColorFilter(); // 初期値反映
+    };
+
+    /**
+     * 通常フェードをセットアップする。
+     */
+    Scene_Base.prototype.setupFadeNormal = function() {
+        this._fadeController = {
+            isFading: this.isFadingNormal.bind(this),
+            update: this.updateFadeNormal.bind(this),
+            apply: this.applyFadeNormal.bind(this)
+        }
+    };
+    /**
+     * パターンフェードをセットアップする。
+     * 
+     * @param {boolean} white 白からのフェードインまたは白へのフェードアウトの場合にはtrue, それ以外はfalse
+     * @param {string} pattern パターンファイル名
+     */
+    Scene_Base.prototype.setupFadePattern = function(white, pattern) {
+        const childCount = this.children.length;
+        if (this.getChildIndex(this._fadeLayer) < (childCount - 1)) {
+            this.removeChild(this._fadeLayer);
+            this.addChild(this._fadelayer);
+        }
+        const blendColor = (white) ? [ 255, 255, 255, 255] : [0, 0, 0, 255];
+        this._fadeSprite.setBlendColor(blendColor);
+        this._fadeSprite.setPattern(pattern);
+        this._fadeController = {
+            isFading: this.isFadingNormal.bind(this),
+            update: this.updateFadePattern.bind(this),
+            apply: this.applyFadePattern.bind(this)
         }
     };
 
-    const _Scene_Base_startFadeout = Scene_Base.prototype.startFadeOut;
+
     /**
      * フェードアウトを開始する。
      * 
      * @param {number} duration フェードアウトにかける時間[フレーム数]
      * @param {boolean} white 白へのフェードインの場合にはtrue, 黒からのフェードインの場合にはfalse
+     * !!!overwrite!!! Scene_Base.startFadeOut()
+     *     フェード機能拡張のためオーバーライドする。
      */
     Scene_Base.prototype.startFadeOut = function(duration, white) {
         const patternFileName = $gameTemp.fadeOutPattern();
         if (patternFileName) {
             $gameTemp.clearFadeOutPattern();
-            this._fadeSprite.setPattern(patternFileName);
-            this._patternFadeSign = -1;
-            this._patternFadeOpacity = 0;
-            this._patternFadeDuration = duration;
-            this.updatePatternFade();
+            this.setupFadePattern(white, patternFileName);
         } else {
-            _Scene_Base_startFadeout.call(this, duration, white);
+            this.setupFadeNormal();
         }
+        this._fadeSign = -1;
+        this._fadeDuration = duration || 30;
+        this._fadeWhite = white;
+        this._fadeOpacity = 0;
+        this.updateColorFilter();
     };
 
 
-    const _Scene_Base_isFading = Scene_Base.prototype.isFading;
     /**
      * フェード中かどうかを得る。
      * 
      * @returns {boolean} フェード中の場合にはtrue, それ以外はfalse
+     * !!!overwrite!!! Scene_Base_isFading()
+     *     フェード処理を拡張するため、オーバーライドする。
      */
     Scene_Base.prototype.isFading = function() {
-        return _Scene_Base_isFading.call(this) || (this._patternFadeDuration > 0);
+        return (this._fadeController.isFading) ? this._fadeController.isFading() : false;
     };
+
+    /**
+     * フェード中かどうかを得る。
+     * 
+     * @returns {boolean} フェード中の場合にはtrue, それ以外はfalse.
+     */
+    Scene_Base.prototype.isFadingNormal = function() {
+        return (this._fadeDuration > 0);
+    };
+
 
     const _Scene_Base_fadeSpeed = Scene_Base.prototype.fadeSpeed;
     /**
      * フェード速度を得る。
      * 
      * @return {number} フェード速度[フレーム数]
+     * !!!overwrite!!! Scene_Base.fadeSpeed()
+     *     フェードのフレーム時間を指定できるようにするため、オーバーライドする。
      */
     Scene_Base.prototype.fadeSpeed = function() {
         const duration = $gameTemp.fadeDuration();
         return (duration > 0) ? duration :  _Scene_Base_fadeSpeed.call(this);
     };
 
-    const _Scene_Base_update = Scene_Base.prototype.update;
     /**
-     * シーンを更新する。
+     * フェードを更新する。
+     * !!!overwrite!!! Scene_Base.updateFade()
+     *     フェード処理を更新するため、オーバーライドする。
      */
-    Scene_Base.prototype.update = function() {
-        _Scene_Base_update.call(this);
-        this.updatePatternFade();
+    Scene_Base.prototype.updateFade = function() {
+        if (this._fadeController.update) {
+            this._fadeController.update();
+        }
     };
+
     /**
      * フェードを更新する。
      */
-    Scene_Base.prototype.updatePatternFade = function() {
-        if (this._patternFadeDuration > 0) {
-            if (this._fadeSprite.bitmap.isReady()) {
-                const d = this._patternFadeDuration;
-                if (this._patternFadeSign > 0) {
-                    this._patternFadeOpacity -= this._patternFadeOpacity / d;
-                } else {
-                    this._patternFadeOpacity += (255 - this._patternFadeOpacity) / d;
-                }
-                this._patternFadeDuration--;
+    Scene_Base.prototype.updateFadeNormal = function() {
+        if (this._fadeDuration > 0) {
+            const d = this._fadeDuration;
+            if (this._fadeSign > 0) {
+                this._fadeOpacity -= this._fadeOpacity / d;
+            } else {
+                this._fadeOpacity += (255 - this._fadeOpacity) / d;
             }
+            this._fadeDuration--;
         }
-        this._fadeSprite.setFadeOpacity(this._patternFadeOpacity);
     };
 
+    /**
+     * パターンフェードを更新する。
+     */
+    Scene_Base.prototype.updateFadePattern = function() {
+        if (this._fadeSprite.isReady()) {
+            this.updateFadeNormal();
+        }
+    };
 
+    /**
+     * カラーフィルタを更新する。
+     * !!!overwrite!!! Scene_Base_updateColorFilter
+     *     フェードの処理を拡張するためオーバーライドする。
+     */
+    Scene_Base.prototype.updateColorFilter = function() {
+        if (this._fadecontroller.apply) {
+            this._fadeController.apply();
+        }
+    };
+
+    /**
+     * 通常のフェード処理を適用する。
+     */
+    Scene_Base.prototype.applyFadeNormal = function() {
+        const c = this._fadeWhite ? 255 : 0;
+        const blendColor = [c, c, c, this._fadeOpacity];
+        this._colorFilter.setBlendColor(blendColor);
+    };
+
+    /**
+     * パターンフェードを適用する。
+     */
+    Scene_Base.prototype.applyFadePattern = function() {
+        const c = this._fadeWhite ? 255 : 0;
+        const alpha = (this._fadeOpacity >= 255) ? 255 : 0;
+        const blendColor = [c, c, c, alpha];
+        this._colorFilter.setBlendColor(blendColor);
+
+        this._fadeSprite.setFadeOpacity(this._fadeOpacity);
+    };
 
 
     //------------------------------------------------------------------------------
