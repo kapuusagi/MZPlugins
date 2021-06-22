@@ -53,6 +53,7 @@
  * ============================================
  * Version.0.1.0 動作未確認。
  */
+
 (() => {
     const pluginName = "Kapu_FadeExtends";
     // const parameters = PluginManager.parameters(pluginName);
@@ -175,15 +176,9 @@
             this.anchor.x = 0.5;
             this.anchor.y = 0.5;
 
-            if (this.bitmap.width < Graphics.boxWidth) {
-                const xratio = Graphics.boxWidth / this.bitmap.width;
-                this.scale.x = Math.ceil(xratio);
-            }
-            if (this.bitmap.height < Graphics.boxHeight) {
-                const yratio = Graphics.boxHeight / this.bitmap.height;
-                this.scale.y = Math.ceil(yratio);
-            }
-            this.scale.x = 3;
+            // 全体を覆うように縮小・拡大する。
+            this.scale.x = Graphics.boxWidth / this.bitmap.width;
+            this.scale.y = Graphics.boxHeight / this.bitmap.height;
         }
     };
 
@@ -304,13 +299,18 @@
         this._patternFadeDuration = 0;
         this._patternFadeOpacity = 0;
         this._patternFadeSign = 0;
+        this.createFadeLayer();
         this.createFadeSprite();
     };
 
-    const _Scene_Base_start = Scene_Base.prototype.start;
-    Scene_Base.prototype.start = function() {
-        this.addChild(this._fadeSprite);
-        _Scene_Base_start.call(this);
+    /**
+     * フェード用スプライトを配置するレイヤーを作成する。
+     */
+    Scene_Base.prototype.createFadeLayer = function() {
+        this._fadeLayer = new Sprite();
+        this._fadeLayer.x = (Graphics.width - Graphics.boxWidth) / 2;
+        this._fadeLayer.y = (Graphics.height - Graphics.boxHeight) / 2;
+    
     };
 
     /**
@@ -318,6 +318,7 @@
      */
     Scene_Base.prototype.createFadeSprite = function() {
         this._fadeSprite = new Sprite_ImageFade();
+        this._fadeLayer.addChild(this._fadeSprite);
     };
 
     const _Scene_Base_startFadeIn = Scene_Base.prototype.startFadeIn;
@@ -331,7 +332,14 @@
     Scene_Base.prototype.startFadeIn = function(duration, white) {
         const patternFileName = $gameTemp.fadeInPattern();
         if (patternFileName) {
+            const childCount = this.children.length;
+            if (this.getChildIndex(this._fadeLayer) < (childCount - 1)) {
+                this.removeChild(this._fadeLayer);
+                this.addChild(this._fadelayer);
+            }
             $gameTemp.clearFadeInPattern();
+            this.removeChild(this._fadeSprite);
+            this.addChild(this._fadeSprite);
             this._fadeSprite.setPattern(patternFileName);
             this._patternFadeSign = 1;
             this._patternFadeOpacity = 255;
@@ -411,12 +419,6 @@
         this._fadeSprite.setFadeOpacity(this._patternFadeOpacity);
     };
 
-    //------------------------------------------------------------------------------
-    // Game_Screen
-
-
-    //------------------------------------------------------------------------------
-    // TODO : メソッドフック・拡張
 
 
 
