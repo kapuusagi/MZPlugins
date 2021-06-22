@@ -416,6 +416,7 @@
             duration: 24,
             color: [0,0,0]
         };
+        this._fadeColor = [0,0,0,255];
         this.createFadeLayer();
         this.createFadeSprite();
     };
@@ -453,6 +454,12 @@
         this._fadeSign = 1;
         this._fadeDuration = this._fadePattern.duration || duration || 30;
         this._fadeOpacity = 255;
+        if (this._fadePattern.color) {
+            const c = this._fadePattern.color;
+            this._fadeColor = [c[0], c[1], c[2], 255];
+        } else {
+            this._fadeColor = (white) ? [255, 255, 255, 255] : [0, 0, 0, 255];
+        }
         this.setupFade();
         this.updateColorFilter(); // 初期値反映
     };
@@ -472,6 +479,12 @@
         this._fadeSign = -1;
         this._fadeDuration = this._fadePattern.duration || duration || 30;
         this._fadeOpacity = 0;
+        if (this._fadePattern.color) {
+            const c = this._fadePattern.color;
+            this._fadeColor = [c[0], c[1], c[2], 255];
+        } else {
+            this._fadeColor = (white) ? [255, 255, 255, 255] : [0, 0, 0, 255];
+        }
         this.setupFade();
         this.updateColorFilter();
     };
@@ -508,9 +521,7 @@
             this.removeChild(this._fadeLayer);
             this.addChild(this._fadelayer);
         }
-        const color = this._fadePattern.color;
-        const blendColor = [ color[0], color[1], color[2], 255 ];
-        this._fadeSprite.setBlendColor(blendColor);
+        this._fadeSprite.setBlendColor(this._fadeColor);
         this._fadeSprite.setPattern(this._fadePattern.pattern || "");
     };
 
@@ -601,7 +612,7 @@
      * 通常のフェード処理を適用する。
      */
     Scene_Base.prototype.applyFadeNormal = function() {
-        const c = this._fadePattern.color;
+        const c = this._fadeColor;
         const blendColor = [c[0], c[1], c[2], this._fadeOpacity];
         this._colorFilter.setBlendColor(blendColor);
         this._fadeSprite.setPattern("");
@@ -611,7 +622,7 @@
      * パターンフェードを適用する。
      */
     Scene_Base.prototype.applyFadePattern = function() {
-        const c = this._fadePattern.color;
+        const c = this._fadeColor;
         const alpha = (this._fadeOpacity >= 255) ? 255 : 0;
         const blendColor = [c[0], c[1], c[2], alpha];
         this._colorFilter.setBlendColor(blendColor);

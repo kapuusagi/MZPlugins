@@ -26,6 +26,12 @@
  * @type file
  * @dir img/pictures/
  * @default
+ * 
+ * @arg fadeOutDuration
+ * @text フェードアウト時間
+ * @desc フェードアウトにかける時間[フレーム数]
+ * @type number
+ * @default 24
  *
  * @arg fadeInPattern
  * @text フェードインパターン
@@ -34,11 +40,11 @@
  * @dir img/pictures/
  * @default
  * 
- * @param dissolveSpeed
- * @text ディゾルブ速度
- * @desc ディゾルブにかける時間[フレーム数]
+ * @param fadeInDuration
+ * @text フェードイン時間
+ * @desc フェードインにかける時間[フレーム数]
  * @type number
- * @default 48
+ * @default 24
  * 
  * 
  * @help 
@@ -100,8 +106,10 @@
 
 
         const effect = args.effect || "fade";
-        const fadeOutType = args.fadeOutType || "normal";
-        const fadeInType = args.fadeInType || "normal";
+        const fadeOutPattern = args.fadeOutPattern || "";
+        const fadeOutDuration = Math.round(Number(args.fadeOutDuration) || 0);
+        const fadeInPattern = args.fadeInPattern || "";
+        const fadeInDuration = Math.round(Number(args.fadeInDuration) || 0);
         const eventId = this.isOnCurrentMap() ? this._eventId : 0;
         const transferProcessList = [];
 
@@ -119,7 +127,8 @@
         }
 
         if (nextIndex < this._list.length) {
-            $gameTemp.setupTransferEffect([ effect, fadeInType, fadeOutType], eventId, transferProcessList);
+            const trasferEffect = [ effect, fadeOutPattern, fadeOutDuration,  fadeInPattern, fadeInDuration];
+            $gameTemp.setupTransferEffect(trasferEffect, eventId, transferProcessList);
             this._index = nextIndex - 1;
         } else {
             // 末尾まで転送要求は無い。
@@ -362,14 +371,19 @@
                 this.setupDissolveIn(dissolveSpeed);
                 break;
             default:
+                if (effect[2]) {
+                    
+                } else {
+                    
+                }
                 switch (effect[2]) {
-                    case "circle":
+                    case "pattern":
                         this.startCircleFadeIn(this.fadeSpeed());
                         break;
                     default:
-                        _Scene_Map_fadeInForTransfer.call(this);
                         break;
                 }
+                _Scene_Map_fadeInForTransfer.call(this);
                 break;
         }
     };
