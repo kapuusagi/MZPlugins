@@ -5,7 +5,7 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
  * @command setNextFadeOutPattern
- * @text 次の移動/先頭開始時フェードアウト処理パターンを設定する。
+ * @text 次のフェードアウト処理パターンを設定する。
  * 
  * @arg patternFile
  * @text パターン
@@ -27,7 +27,7 @@
  * 
  * 
  * @command setNextFadeInPattern
- * @text 次の移動/戦闘開始時フェードイン処理パターンを設定する。
+ * @text 次のフェードイン処理パターンを設定する。
  * 
  * @arg patternFile
  * @text パターン
@@ -87,11 +87,11 @@
  *   Game_Screen.FADE_MODE_PATTERN
  *     画像によりフェード具合を指定するパターン
  * 
- * $gameTemp.setFadeInPattern(pattern : object) : void
+ * $gameTemp.setupNextFadeIn(pattern : object) : void
  *     次のフェードインパターンを変更する。
  *     フェードイン要求が出たときにクリアされる。
  *     patternに指定するオブジェクトは後述
- * $gameTemp.setFadeOutPattern(pattern : object) : void
+ * $gameTemp.setupNextFadeOut(pattern : object) : void
  *     次のフェードアウトパターンを変更する。
  *     フェードアウト要求が出たときにクリアされる。
  *     patternに指定するオブジェクトは後述
@@ -145,7 +145,7 @@
             color.push(0);
         }
 
-        $gameTemp.setFadeOutPattern({
+        $gameTemp.setupNextFadeOut({
             mode: mode,
             pattern: patternFile,
             duration: duration,
@@ -161,7 +161,7 @@
         while (color.length < 3) {
             color.push(0);
         }
-        $gameTemp.setFadeInPattern({
+        $gameTemp.setupNextFadeIn({
             mode: mode,
             pattern: patternFile,
             duration: duration,
@@ -306,9 +306,10 @@
             "uniform vec4 blendColor;" +
             "void main() {" +
             "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
-            "  float black_alpha = clamp(1.0 - sample.y + opacity / 255.0, 0.0, 1.0);" +
-            "  vec3 rgb = blendColor.xyz * blend_alpha;" +
-            "  gl_FragColor = vec4(rgb.x, rgb.y, rgb.z, black_alpha);" +
+            // "  float alpha = clamp((1.0 - sample.y) + ((opacity - 128.0) / 128.0), 0.0, 1.0);" +
+            "  float alpha = clamp(opacity / 255.0 * 2.0 - sample.y, 0.0, 1.0);" +
+            "  vec3 rgb = blendColor.xyz * alpha;" +
+            "  gl_FragColor = vec4(rgb.x, rgb.y, rgb.z, alpha);" +
             "}";
         return src;
     };
@@ -378,8 +379,8 @@
             this.anchor.y = 0.5;
 
             // 全体を覆うように縮小・拡大する。
-            this.scale.x = Graphics.boxWidth / this.bitmap.width;
-            this.scale.y = Graphics.boxHeight / this.bitmap.height;
+            this.scale.x = (Graphics.width + 20) / this.bitmap.width;
+            this.scale.y = (Graphics.height + 20) / this.bitmap.height;
         }
     };
 
@@ -428,7 +429,7 @@
         this._fadeLayer = new Sprite();
         this._fadeLayer.x = (Graphics.width - Graphics.boxWidth) / 2;
         this._fadeLayer.y = (Graphics.height - Graphics.boxHeight) / 2;
-        this.addChild(fadeLayer);
+        this.addChild(this._fadeLayer);
     };
 
     /**
@@ -495,7 +496,7 @@
     Scene_Base.prototype.setupFade = function() {
         switch (this._fadePattern.mode) {
             case Game_Screen.FADE_MODE_NORMAL:
-                this.setupfadeNormal();
+                this.setupFadeNormal();
                 break;
             case Game_Screen.FADE_MODE_PATTERN:
                 this.setupFadePattern()
@@ -519,7 +520,7 @@
         const childCount = this.children.length;
         if (this.getChildIndex(this._fadeLayer) < (childCount - 1)) {
             this.removeChild(this._fadeLayer);
-            this.addChild(this._fadelayer);
+            this.addChild(this._fadeLayer);
         }
         this._fadeSprite.setBlendColor(this._fadeColor);
         this._fadeSprite.setPattern(this._fadePattern.pattern || "");
@@ -645,18 +646,7 @@
             duration: 24,
             color: [0,0,0]
         };
-    };
-
-    /**
-     * パターンでのフェードインを開始する。
-     * 
-     * @param {number} duration フェード長さ[フレーム数]
-     * @param {number} pattern パターン
-     */
-    Game_Screen.prototype.startFadeInWithPattern = function(duration, pattern) {
-        this._fadePattern = pattern;
-        this._fadeOutDuration = duration;
-        this._fadeInDuration = 0;
+        this._fadeColor = [0,0,0,255];
     };
 
     /**
@@ -671,6 +661,12 @@
         $gameTemp.clearFadeOutPattern();
         this._fadeOutDuration = this._fadePattern.duration || duration;
         this._fadeInDuration = 0;
+        if (this._fadePattern.color) {
+            const c = this._fadePattern.color;
+            this._fadeColor = [c[0], c[1], c[2], 255];
+        } else {
+            this._fadeColor = [0,0,0,255];
+        }
         this.setupFade();
     };
 
@@ -686,6 +682,12 @@
         $gameTemp.clearFadeInPattern();
         this._fadeOutDuration = 0;
         this._fadeInDuration = this._fadePattern.duration || duration;
+        if (this._fadePattern.color) {
+            const c = this._fadePattern.color;
+            this._fadeColor = [c[0], c[1], c[2], 255];
+        } else {
+            this._fadeColor = [0,0,0,255];
+        }
         this.setupFade();
     };
 
@@ -703,6 +705,15 @@
      */
     Game_Screen.prototype.fadePattern = function() {
         return this._fadePattern.pattern || "";
+    };
+
+    /**
+     * フェードカラーを取得する。
+     * 
+     * @returns {Array<number>} フェードカラー
+     */
+    Game_Screen.prototype.fadeColor = function() {
+        return this._fadeColor;
     };
 
     const _Game_Screen_updateFadeOut = Game_Screen.prototype.updateFadeOut;
@@ -781,7 +792,7 @@
     /**
      * フェード用スプライトを配置するレイヤーを作成する。
      */
-     Scene_Base.prototype.createFadeLayer = function() {
+    Spriteset_Base.prototype.createFadeLayer = function() {
         this._fadeLayer = new Sprite();
         this.addChild(this._fadeLayer);
     };
@@ -804,7 +815,7 @@
         const filter = this._overallColorFilter;
         filter.setBlendColor($gameScreen.flashColor());
 
-        const pattern = $gameScreen.fadePattern;
+        const pattern = $gameScreen.fadePattern();
         if (pattern) {
             filter.setBrightness(255);
         } else {
@@ -812,8 +823,9 @@
         }
 
         this._fadeSprite.setPattern(pattern);
+        this._fadeSprite.setBlendColor($gameScreen.fadeColor());
         if (pattern) {
-            this._fadeSprite.setFadeOpacity(255 - $gameScreen.brightness); // フェードパターンを描画する。
+            this._fadeSprite.setFadeOpacity(255 - $gameScreen.brightness()); // フェードパターンを描画する。
         } else {
             this._fadeSprite.setFadeOpacity(0); // 完全透過して表示させない。
         }
@@ -828,8 +840,46 @@
      * @returns {boolean} シーンの準備が出来ている場合にはtrue, それ以外はfalse.
      */
     Scene_Map.prototype.isReady = function() {
-        return _Scene_Map_isReady && ($gameScreen && $gameScreen.isFadeReady());
+        return _Scene_Map_isReady.call(this) && ($gameScreen && $gameScreen.isFadeReady());
     };
+   
+    //------------------------------------------------------------------------------
+    // Game_Interpreter
     
+    /**
+     * 画面をフェードアウトさせる。
+     * 
+     * @returns {boolean} コマンドを処理した場合にはtrue, それ以外はfalse.
+     * !!!overwrite!!! Game_Interpreter.command221
+     *     フェード機能拡張のためオーバーライドする。
+     */
+    Game_Interpreter.prototype.command221 = function() {
+        if ($gameMessage.isBusy()) {
+            return false;
+        }
+        const fadePattern = $gameTemp.fadeOutPattern();
+        const duration = fadePattern.duration;
+        $gameScreen.startFadeOut(duration);
+        this.wait(duration);
+        return true;
+    };
 
+    // Fadein Screen
+    /**
+     * 画面をフェードインさせる。
+     * 
+     * @returns {boolean} コマンドを処理した場合にはtrue, それ以外はfalse.
+     * !!!overwrite!!! Game_Interpreter.command221
+     *     フェード機能拡張のためオーバーライドする。
+     */
+    Game_Interpreter.prototype.command222 = function() {
+        if ($gameMessage.isBusy()) {
+            return false;
+        }
+        const fadePattern = $gameTemp.fadeInPattern();
+        const duration = fadePattern.duration;
+        $gameScreen.startFadeIn(duration);
+        this.wait(duration);
+        return true;
+    };
 })();
