@@ -371,19 +371,22 @@
                 this.setupDissolveIn(dissolveSpeed);
                 break;
             default:
-                if (effect[2]) {
-                    
-                } else {
-                    
+                {
+                    const fadeType = $gamePlayer.fadeType();
+                    if ((fadeType === 0) || (fadeType === 1)) {
+                        const pattern = effect[1];
+                        const mode = (pattern) ? Game_Screen.FADE_MODE_PATTERN : Game_Screen.FADE_MODE_NORMAL;
+                        const duration = effect[2];
+                        const color = (fadeType === 1) ? [255,255,255,255] : [0,0,0,255];
+                        gameTemp.setupNextFadeIn({
+                            mode:mode,
+                            pattern:pattern,
+                            duration:duration,
+                            color:color
+                        });
+                    }
+                    _Scene_Map_fadeInForTransfer.call(this);
                 }
-                switch (effect[2]) {
-                    case "pattern":
-                        this.startCircleFadeIn(this.fadeSpeed());
-                        break;
-                    default:
-                        break;
-                }
-                _Scene_Map_fadeInForTransfer.call(this);
                 break;
         }
     };
@@ -401,13 +404,21 @@
                 this.setupDissolveOut();
                 break;
             default:
-                switch (effect[1]) {
-                    case "circle":
-                        this.startCircleFadeOut(this.fadeSpeed());
-                        break;
-                    default:
-                        _Scene_Map_fadeOutForTransfer.call(this);
-                        break;
+                {
+                    const fadeType = $gamePlayer.fadeType();
+                    if ((fadeType === 0) || (fadeType === 1)) {
+                        const pattern = effect[3];
+                        const mode = (pattern) ? Game_Screen.FADE_MODE_PATTERN : Game_Screen.FADE_MODE_NORMAL;
+                        const duration = effect[4];
+                        const color = (fadeType === 1) ? [255,255,255,255] : [0,0,0,255];
+                        gameTemp.setupNextFadeOut({
+                            mode:mode,
+                            pattern:pattern,
+                            duration:duration,
+                            color:color
+                        });
+                    }
+                    _Scene_Map_fadeOutForTransfer.call(this);
                 }
                 break;
         }
