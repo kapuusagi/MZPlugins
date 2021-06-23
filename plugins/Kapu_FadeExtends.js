@@ -422,6 +422,7 @@
         this.createFadeSprite();
     };
 
+
     /**
      * フェード用スプライトを配置するレイヤーを作成する。
      */
@@ -631,6 +632,8 @@
         this._fadeSprite.setFadeOpacity(this._fadeOpacity);
     };
 
+
+
     //------------------------------------------------------------------------------
     // Game_Screen
 
@@ -646,6 +649,7 @@
             duration: 24,
             color: [0,0,0]
         };
+        this._fadeOpacity = 0; // 0でスプライトセット表示、255でfadeColorにフェードアウト
         this._fadeColor = [0,0,0,255];
     };
 
@@ -723,15 +727,32 @@
     Game_Screen.prototype.updateFadeOut = function() {
         switch (this._fadePattern.mode) {
             case Game_Screen.FADE_MODE_PATTERN:
-                if (this.isFadePatternLoaded()) {
-                    _Game_Screen_updateFadeOut.call(this);
-                }
+                this.updateFadeOutPattern();
                 break;
             case Game_Screen.FADE_MODE_NORMAL:
             default:
-                _Game_Screen_updateFadeOut.call(this);
+                this.updateFadeOutNormal();
                 break;
         }
+    };
+
+    /**
+     * 通常のフェードアウト処理を更新する。
+     */
+    Game_Screen.prototype.updateFadeOutNormal = function() {
+        _Game_Screen_updateFadeOut.call(this);
+    };
+
+    /**
+     * パターンでのフェードイン/アウト処理を更新する。
+     */
+    Game_Screen.prototype.updateFadeOutPattern = function() {
+        if ((this._fadeOutDuration > 0) && this.isFadePatternLoaded()) {
+            const d = this._fadeOutDuration;
+            this._fadeOpacity = (this._fadeOpacity * (d - 1)) / d;
+            this._fadeOutDuration--;
+        }
+        this._brightness = 255; // overallフィルタに対する輝度設定値はそのまま。
     };
 
     const _Game_Screen_updateFadeIn = Game_Screen.prototype.updateFadeIn;
@@ -741,15 +762,32 @@
     Game_Screen.prototype.updateFadeIn = function() {
         switch (this._fadePattern.mode) {
             case Game_Screen.FADE_MODE_PATTERN:
-                if (this.isFadePatternLoaded()) {
-                    _Game_Screen_updateFadeIn.call(this);
-                }
+                this.updateFadeInPattern();
                 break;
             case Game_Screen.FADE_MODE_NORMAL:
             default:
-                _Game_Screen_updateFadeIn.call(this);
+                this.updateFadeInNormal();
                 break;
         }
+    };
+
+    /**
+     * 通常のフェードイン/アウト処理を更新する。
+     */
+    Game_Screen.prototype.updateFadeInNormal = function() {
+        _Game_Screen_updateFadeIn.call(this);
+    };
+
+    /**
+     * パターンでのフェードイン/アウト処理を更新する。
+     */
+    Game_Screen.prototype.updateFadeInPattern = function() {
+        if ((this._fadeInDuration > 0) && this.isFadePatternLoaded()) {
+            const d = this._fadeInDuration;
+            this._fadeOpacity = (this._fadeOpacity * (d - 1) + 255) / d;
+            this._fadeInDuration--;
+        }
+        this._brightness = 255; // overallフィルタに対する輝度設定値はそのまま。
     };
 
     /**
@@ -778,57 +816,58 @@
             return true;
         }
     };
-    //------------------------------------------------------------------------------
-    // Spriteset_Base
-    const _Spriteset_Base_createUpperLayer = Spriteset_Base.prototype.createUpperLayer;
-    /**
-     * 上位レイヤーを構築する。
-     */
-    Spriteset_Base.prototype.createUpperLayer = function() {
-        _Spriteset_Base_createUpperLayer.call(this);
-        this.createFadeLayer();
-        this.createFadeSprite();
-    };
-    /**
-     * フェード用スプライトを配置するレイヤーを作成する。
-     */
-    Spriteset_Base.prototype.createFadeLayer = function() {
-        this._fadeLayer = new Sprite();
-        this.addChild(this._fadeLayer);
-    };
 
     /**
-     * フェードスプライトを生成する。
-     */
-    Spriteset_Base.prototype.createFadeSprite = function() {
-        this._fadeSprite = new Sprite_ImageFade();
-        this._fadeLayer.addChild(this._fadeSprite);
-    };
-
-    /**
-     * オーバーオールフィルタを更新する。
+     * フェードモードを得る。
      * 
-     * !!!overwrite!!! Spriteset_Base.updateOverallFilters
-     *     パターンフェード時の処理を分岐させるため、オーバーライドする。
+     * @returns {string} フェードモード。(Game_Screen.FADE_MODE_～)
      */
-    Spriteset_Base.prototype.updateOverallFilters = function() {
-        const filter = this._overallColorFilter;
-        filter.setBlendColor($gameScreen.flashColor());
+    Game_Screen.prototype.fadeMode = function() {
+        return this._fadePattern.mode;
+    };
 
-        const pattern = $gameScreen.fadePattern();
-        if (pattern) {
-            filter.setBrightness(255);
-        } else {
-            filter.setBrightness($gameScreen.brightness());
-        }
 
-        this._fadeSprite.setPattern(pattern);
-        this._fadeSprite.setBlendColor($gameScreen.fadeColor());
-        if (pattern) {
-            this._fadeSprite.setFadeOpacity(255 - $gameScreen.brightness()); // フェードパターンを描画する。
-        } else {
-            this._fadeSprite.setFadeOpacity(0); // 完全透過して表示させない。
-        }
+    //------------------------------------------------------------------------------
+    // Scene_Message
+    const _Scene_Message_createWindowLayer = Scene_Message.prototype.createWindowLayer;
+    /**
+     * ウィンドウレイヤーを作成する。
+     */
+    Scene_Message.prototype.createWindowLayer = function() {
+        this.createSpritesetFadeLayer();
+        _Scene_Message_createWindowLayer.call(this);
+    };
+
+    /**
+     * スプライトセット用のフェードレイヤーを作成する。
+     * 
+     * Note：このレイヤーはWindowLayerの下に配置されるため、
+     *       フェードした状態でもウィンドウは表示される。
+     */
+    Scene_Message.prototype.createSpritesetFadeLayer = function() {
+        this._spritesetFadeLayer = new Sprite();
+        this.addChild(this._spritesetFadeLayer);
+        this._spritesetFadeSprite = new Sprite_ImageFade();
+        this._spritesetFadeLayer.addChild(this._spritesetFadeSprite);
+    };
+
+    const _Scene_Message_update = Scene_Message.prototype.update;
+
+    /**
+     * Scene_Messageを更新する。
+     */
+    Scene_Message.prototype.update = function() {
+        _Scene_Message_update.call(this);
+        this.updateSpritesetFade();
+    };
+
+    /**
+     * Spriteset用フェードを更新する。
+     */
+    Scene_Message.prototype.updateSpritesetFade = function() {
+        this._spritesetFadeSprite.setPattern($gameScreen.fadePattern());
+        this._spritesetFadeSprite.setFadeOpacity($gameScreen.fadeOpacity());
+        this._spritesetFadeSprite.setBlendColor($gameScreen.fadeColor());
     };
 
     //------------------------------------------------------------------------------
@@ -842,7 +881,7 @@
     Scene_Map.prototype.isReady = function() {
         return _Scene_Map_isReady.call(this) && ($gameScreen && $gameScreen.isFadeReady());
     };
-   
+
     //------------------------------------------------------------------------------
     // Game_Interpreter
     
@@ -851,7 +890,7 @@
      * 
      * @returns {boolean} コマンドを処理した場合にはtrue, それ以外はfalse.
      * !!!overwrite!!! Game_Interpreter.command221
-     *     フェード機能拡張のためオーバーライドする。
+     *     フェード完了まで待つフレーム数が変更になるためオーバーライドする。
      */
     Game_Interpreter.prototype.command221 = function() {
         if ($gameMessage.isBusy()) {
@@ -870,7 +909,7 @@
      * 
      * @returns {boolean} コマンドを処理した場合にはtrue, それ以外はfalse.
      * !!!overwrite!!! Game_Interpreter.command221
-     *     フェード機能拡張のためオーバーライドする。
+     *     フェード完了まで待つフレーム数が変更になるためオーバーライドする。
      */
     Game_Interpreter.prototype.command222 = function() {
         if ($gameMessage.isBusy()) {
