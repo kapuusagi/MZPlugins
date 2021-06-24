@@ -118,7 +118,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 初版作成。
  */
 
 (() => {
@@ -187,7 +187,7 @@
     Game_Temp.prototype.clearFadeOutPattern = function() {
         this._fadeOutPattern = {
             mode: defaultFadeOutMode,
-            pattern: defaultFadeOutDuration,
+            pattern: defaultFadeOutPattern,
             duration: defaultFadeOutDuration,
             color: [0, 0, 0, 255]
         }
@@ -306,9 +306,8 @@
             "uniform vec4 blendColor;" +
             "void main() {" +
             "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
-            // "  float alpha = clamp((1.0 - sample.y) + ((opacity - 128.0) / 128.0), 0.0, 1.0);" +
             "  float alpha = clamp(opacity / 255.0 * 2.0 - sample.y, 0.0, 1.0);" +
-            "  vec3 rgb = blendColor.xyz * alpha;" +
+            "  vec3 rgb = blendColor.xyz / 255.0 * alpha;" +
             "  gl_FragColor = vec4(rgb.x, rgb.y, rgb.z, alpha);" +
             "}";
         return src;
@@ -348,13 +347,13 @@
      */
     Sprite_ImageFade.prototype.setPattern = function(pattern) {
         if (this._patternName != pattern) {
-            if (this.bitmap) {
-                console.log("release bitmap." + this._patternName);
-                this.bitmap.destroy(); // Note:ImageManagerでloadしたやつをdestroy()していいのか？
-            }
+            // loadPictureでロードしたBitmapを勝手にdestroyするとおかしくなる。
+            // if (this.bitmap) {
+            //     this.bitmap.destroy();
+            // }
             this._patternName = pattern;
             if (this._patternName) {
-                this.bitmap = ImageManager.loadPicture(pattern);
+                this.bitmap = ImageManager.loadPicture(this._patternName);
                 if (!this.bitmap.isReady()) {
                     // キャッシュされていない場合、ロードされるまで待つ。
                     this.bitmap.addLoadListener(this.onPatternLoad.bind(this));
@@ -720,6 +719,15 @@
         return this._fadeColor;
     };
 
+    /**
+     * フェードの輝度を取得する。
+     * 
+     * @returns {number} フェードの輝度
+     */
+    Game_Screen.prototype.fadeOpacity = function() {
+        return this._fadeOpacity;
+    };
+
     const _Game_Screen_updateFadeOut = Game_Screen.prototype.updateFadeOut;
     /**
      * フェードアウト処理を更新する。
@@ -741,18 +749,25 @@
      */
     Game_Screen.prototype.updateFadeOutNormal = function() {
         _Game_Screen_updateFadeOut.call(this);
+        // if (this._fadeOutDuration > 0) {
+        //     const d = this._fadeOutDuration;
+        //     this._brightness = (this._brightness * (d - 1)) / d;
+        //     this._fadeOutDuration--;
+        // }
     };
 
     /**
      * パターンでのフェードイン/アウト処理を更新する。
      */
     Game_Screen.prototype.updateFadeOutPattern = function() {
-        if ((this._fadeOutDuration > 0) && this.isFadePatternLoaded()) {
-            const d = this._fadeOutDuration;
-            this._fadeOpacity = (this._fadeOpacity * (d - 1)) / d;
-            this._fadeOutDuration--;
+        if (this._fadeOutDuration > 0) {
+            if (this.isFadePatternLoaded()) {
+                const d = this._fadeOutDuration;
+                this._fadeOpacity = (this._fadeOpacity * (d - 1) + 255) / d;
+                this._fadeOutDuration--;
+            }
+            this._brightness = 255; // overallフィルタに対する輝度設定値はそのまま。
         }
-        this._brightness = 255; // overallフィルタに対する輝度設定値はそのまま。
     };
 
     const _Game_Screen_updateFadeIn = Game_Screen.prototype.updateFadeIn;
@@ -776,18 +791,26 @@
      */
     Game_Screen.prototype.updateFadeInNormal = function() {
         _Game_Screen_updateFadeIn.call(this);
+        // if (this._fadeInDuration > 0) {
+        //     const d = this._fadeInDuration;
+        //     this._brightness = (this._brightness * (d - 1) + 255) / d;
+        //     this._fadeInDuration--;
+        //     console.log(this._brightness);
+        // }
     };
 
     /**
      * パターンでのフェードイン/アウト処理を更新する。
      */
     Game_Screen.prototype.updateFadeInPattern = function() {
-        if ((this._fadeInDuration > 0) && this.isFadePatternLoaded()) {
-            const d = this._fadeInDuration;
-            this._fadeOpacity = (this._fadeOpacity * (d - 1) + 255) / d;
-            this._fadeInDuration--;
+        if (this._fadeInDuration > 0) {
+            if (this.isFadePatternLoaded()) {
+                const d = this._fadeInDuration;
+                this._fadeOpacity = (this._fadeOpacity * (d - 1)) / d;
+                this._fadeInDuration--;
+            }
+            this._brightness = 255; // overallフィルタに対する輝度設定値はそのまま。
         }
-        this._brightness = 255; // overallフィルタに対する輝度設定値はそのまま。
     };
 
     /**
@@ -868,6 +891,9 @@
         this._spritesetFadeSprite.setPattern($gameScreen.fadePattern());
         this._spritesetFadeSprite.setFadeOpacity($gameScreen.fadeOpacity());
         this._spritesetFadeSprite.setBlendColor($gameScreen.fadeColor());
+        // this._spritesetFadeSprite.setPattern("fadePattern01");
+        // this._spritesetFadeSprite.setFadeOpacity(180);
+        // this._spritesetFadeSprite.setBlendColor([255,255,255,255]);
     };
 
     //------------------------------------------------------------------------------
@@ -897,7 +923,7 @@
             return false;
         }
         const fadePattern = $gameTemp.fadeOutPattern();
-        const duration = fadePattern.duration;
+        const duration = fadePattern.duration || this.fadeSpeed();
         $gameScreen.startFadeOut(duration);
         this.wait(duration);
         return true;
@@ -916,7 +942,7 @@
             return false;
         }
         const fadePattern = $gameTemp.fadeInPattern();
-        const duration = fadePattern.duration;
+        const duration = fadePattern.duration || this.fadeSpeed();
         $gameScreen.startFadeIn(duration);
         this.wait(duration);
         return true;
