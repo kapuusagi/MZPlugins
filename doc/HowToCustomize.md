@@ -725,6 +725,15 @@ Scene_Battle.prototype.onSelectAction = function() {
 
     リソースを破棄（たぶん）
 
+SceneManager.pop (Scene_Base.popScene()) を呼ぶと、スタックから呼び出したScnee_Classに対してSceneManager.goto()が呼ばれる。
+インスタンス化されているシーンは常に1つだけということに注意。
+push()後、pop()したからといって、 __同じインスタンスに戻ってくることはない__ 。
+だからシーンのメンバに状態を記録しておくことはできない！！！
+prepareが必要なシーンに戻るとprepareはコールされないはずなので、問題が発生するかもしれない。
+シーンからシーンの呼び出しをやろうとしていたら、この点に留意すること。
+場合によっては $gameTemp などを介してデータの受け渡しをしなければならない。
+
+
 ### ■ 色
 
 MZではColorManagerが色の管理をしている。文字の描画色などで使うのもこれ。
