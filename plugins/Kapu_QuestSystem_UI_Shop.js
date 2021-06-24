@@ -39,6 +39,42 @@
  * @default 0
  * @min -10000
  * 
+ * @command selectAcceptableQuest
+ * @text 受託可能クエストを選択する
+ * @desc 受託可能クエストを選択します。
+ * 
+ * @arg questIds
+ * @text 受託可能クエストリスト
+ * @desc 受託可能クエストリスト
+ * @type number[]
+ * @default []
+ * 
+ * @arg variableId 
+ * @text 変数ID
+ * @desc 選択したクエストIDを格納する変数ID。未選択時は0が格納される。
+ * @type variable
+ * @default 0
+ * 
+ * @command selectReportQuest
+ * @text 報告するクエストを選択
+ * @desc 報告するクエストを選択する。
+ * 
+ * @arg variableId 
+ * @text 変数ID
+ * @desc 選択したクエストIDを格納する変数ID。未選択時は0が格納される。
+ * @type variable
+ * @default 0
+ * 
+ * @command selectGiveupQuest
+ * @text ギブアップするクエストを選択
+ * @desc ギブアップするクエストを選択する。
+ * 
+ * @arg variableId 
+ * @text 変数ID
+ * @desc 選択したクエストIDを格納する変数ID。未選択時は0が格納される。
+ * @type variable
+ * @default 0
+ * 
  *  
  * @param successSe
  * @text 成功時音
@@ -126,10 +162,6 @@
  * @type string
  * @default %1%2失った！
  * 
- * 
- * TODO:プラグインコマンドでクエスト受注選択したい。クエストIDを変数に格納
- * TODO:クエスト報告選択したい。クエストIDを変数に格納
- * TODO:クエスト破棄選択したい。クエストIDを変数に格納
  * 
  * @help 
  * 
@@ -238,6 +270,27 @@ function Window_QuestShopRewards() {
 function Scene_QuestShop() {
     this.initialize(...arguments);
 }
+
+/**
+ * 受託可能クエストを選択する。
+ */
+function Scene_SelectAcceptableQuest() {
+    this.initialize(...arguments);
+}
+
+/**
+ * 報告可能クエストを選択する。
+ */
+function Scene_SelectReportQuest() {
+    this.initialize(...arguments);
+}
+
+/**
+ * ギブアップするクエストを選択する。
+ */
+function Scene_SelectGiveupQuest() {
+    this.initialize(...arguments);
+}
 (() => {
     const pluginName = "Kapu_QuestSystem_UI";
     const parameters = PluginManager.parameters(pluginName);
@@ -274,7 +327,66 @@ function Scene_QuestShop() {
         SceneManager.prepareNextScene(questIds, clerkFileName, clerkOffsetX, clerkOffsetY);
     });
 
+    PluginManager.registerCommand(pluginName, "selectAcceptableQuest", args => {
+        const ids = JSON.parse(args.questIds).map(str => Number(str) || 0);
+        const questIds = [];
+        const variableId = Math.round(Number(args.variableId) || 0);
+        for (const id of ids) {
+            if ((id > 0) && !questIds.includes(id)) {
+                questIds.push(id);
+            }
+        }
+        SceneManager.push(Scene_SelectAcceptableQuest);
+        SceneManager.prepareNextScene(questIds, variableId);
+    });
 
+    PluginManager.registerCommand(pluginName, "selectReportQuest", args => {
+        const variableId = Math.round(Number(args.variableId) || 0);
+        SceneManager.push(Scene_SelectReportQuest);
+        SceneManager.prepareNextScene(variableId);
+    });
+
+    PluginManager.registerCommand(pluginName, "selectGiveupQuest", args => {
+        const variableId = Math.round(Number(args.variableId) || 0);
+        SceneManager.push(Scene_SelectGiveupQuest);
+        SceneManager.prepareNextScene(variableId);
+    });
+
+    //------------------------------------------------------------------------------
+    // Game_Temp
+    const _Game_Temp_initialize = Game_Temp.prototype.initialize;
+    /**
+     * 初期化する。
+     */
+    Game_Temp.prototype.initialize = function() {
+        _Game_Temp_initialize.call(this);
+        this.clearSelectedQuestId();
+    };
+
+    /**
+     * 選択されたクエストをクリアする。
+     */
+    Game_Temp.clearSelectedQuestId = function() {
+        this._selectedQuestId = 0;
+    };
+
+    /**
+     * 選択されたクエストIDを設定する。
+     * 
+     * @param {number} id クエストID。未選択時は0
+     */
+    Game_Temp.prototype.setSelectedQuestId = function(id) {
+        this._selectedQuestId = id;
+    };
+
+    /**
+     * 選択されたクエストIDを取得する。
+     * 
+     * @returns {number} クエストID。未選択時は0
+     */
+    Game_Temp.prototype.selectedQuestId = function() {
+        return this._selectedQuestId;
+    };
 
     //------------------------------------------------------------------------------
     // Window_QuestShopCommand
@@ -764,6 +876,7 @@ function Scene_QuestShop() {
      */
     Scene_QuestShop.prototype.initialize = function() {
         Scene_MenuBase.prototype.initialize.call(this);
+        this._quests = [];
     };
     
     /**
@@ -1316,5 +1429,343 @@ function Scene_QuestShop() {
         this._messageWindow.hide();
         this._confirmWindow.hide();
         this._giveupListWindow.activate();
+    };
+
+    //------------------------------------------------------------------------------
+    // Scene_SelectAcceptableQuest
+    Scene_SelectAcceptableQuest.prototype = Object.create(Scene_MenuBase.prototype);
+    Scene_SelectAcceptableQuest.prototype.constructor = Scene_SelectAcceptableQuest;
+
+    /**
+     * シーンを初期化する。
+     */
+    Scene_SelectAcceptableQuest.prototype.initialize = function() {
+        Scene_MenuBase.prototype.initialize.call(this);
+        this._quests = [];
+        this._variableId = 0;
+    };
+
+    /**
+     * シーンの準備をする。
+     * 
+     * @param {Array<number>} questIds クエストID
+     * @param {number} variableId 選択されたIDを格納する変数ID
+     */
+    Scene_SelectAcceptableQuest.prototype.prepare = function(questIds, variableId) {
+        const quests = [];
+        for (let i = 0; i < questIds.length; i++) {
+            const id = questIds[i];
+            const quest = quests.find(function(q) {
+                return q.id() === id;
+            });
+            if (!quest) {
+                quests.push(new Game_Quest(id));
+            }
+        }
+
+        this._quests = quests;
+        this._variableId = variableId;
+    };
+
+    /**
+     * シーンに必要なリソースを作成する。
+     */
+    Scene_SelectAcceptableQuest.prototype.create = function() {
+        Scene_MenuBase.prototype.create.call(this);
+        this._backgroundSprite.filters = []; // 背景をぼかさない。
+        this.setBackgroundOpacity(255); // 背景を暗くしない。
+        this.createQuestListWindow();
+        this.createStatusWindow();
+    };
+    /**
+     * 受託クエストリストウィンドウを作成する。
+     */
+    Scene_SelectAcceptableQuest.prototype.createQuestListWindow = function() {
+        const rect = this.questListWindowRect();
+        this._listWindow = new Window_QuestShopUnderTakeList(rect);
+        this._listWindow.setQuests(this._quests);
+        this._listWindow.setHandler("ok", this.onListWindowOk.bind(this));
+        this._listWindow.setHandler("cancel", this.popScene.bind(this));
+        this._listWindow.deactivate();
+        this._listWindow.hide();
+        this.addWindow(this._listWindow);
+    };
+    
+    /**
+     * 受託可能クエストリストのウィンドウ矩形領域を得る。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_SelectAcceptableQuest.prototype.questListWindowRect = function() {
+        const wx = 0;
+        const wy = 0;
+        const ww = 320;
+        const wh = this.mainAreaHeight();
+        return new Rectangle(wx, wy, ww, wh);
+    };
+    /**
+     * ステータスウィンドウを作成する。
+     */
+    Scene_SelectAcceptableQuest.prototype.createStatusWindow = function() {
+        const rect = this.statusWindowRect();
+        this._statusWindow = new Window_QuestStatus(rect);
+        this._statusWindow.hide();
+        this.addWindow(this._statusWindow);
+        this._listWindow.setStatusWindow(this._statusWindow);
+    };
+    /**
+     * ステータスウィンドウの矩形領域を得る。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_SelectAcceptableQuest.prototype.statusWindowRect = function() {
+        const rect = this.questListWindowRect();
+        const wx = rect.width;
+        const wy = 0;
+        const ww = (Graphics.boxWidth - wx);
+        const wh = Graphics.boxHeight;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * シーンを開始する。
+     */
+    Scene_SelectAcceptableQuest.prototype.start = function() {
+        Scene_MenuBase.prototype.start.call(this);
+        if (this._variableId > 0) {
+            $gameVariables.setValue(this._variableId, 0);
+        }
+        $gameTemp.clearSelectedQuestId();
+        this._statusWindow.show();
+        this._listWindow.activate();
+        this._listWindow.show();
+    };
+
+    /**
+     * クエストリストウィンドウでOK操作されたときの処理を行う。
+     */
+    Scene_SelectAcceptableQuest.prototype.onListWindowOk = function() {
+        const quest = this._listWindow.quest();
+        const id = quest.id();
+        if (this._variableId > 0) {
+            $gameVariables.setValue(this._variableId, id);
+        }
+        $gameTemp.setSelectedQuestId(id);
+
+        this.popScene();
+    };
+
+    //------------------------------------------------------------------------------
+    // Scene_SelectReportQuest
+    Scene_SelectReportQuest.prototype = Object.create(Scene_MenuBase.prototype);
+    Scene_SelectReportQuest.prototype.constructor = Scene_SelectReportQuest;
+
+    /**
+     * シーンを初期化する。
+     */
+    Scene_SelectReportQuest.prototype.initialize = function() {
+        Scene_MenuBase.prototype.initialize.call(this);
+        this._variableId = 0;
+    };
+
+    /**
+     * シーンの準備をする。
+     * 
+     * @param {number} variableId 変数ID
+     */
+    Scene_SelectReportQuest.prototype.prepare = function(variableId) {
+        this._variableId = variableId;
+    };
+
+    /**
+     * シーンに必要なリソースを作成する。
+     */
+    Scene_SelectReportQuest.prototype.create = function() {
+        Scene_MenuBase.prototype.create.call(this);
+        this._backgroundSprite.filters = []; // 背景をぼかさない。
+        this.setBackgroundOpacity(255); // 背景を暗くしない。
+        this.createQuestListWindow();
+        this.createStatusWindow();
+    };
+
+    /**
+     * クエスト選択ウィンドウを作成する。
+     */
+    Scene_SelectReportQuest.prototype.createQuestListWindow = function() {
+        const rect = this.questListWindowRect();
+        this._listWindow = new Window_QuestShopReportList(rect);
+        this._listWindow.setHandler("ok", this.onListWindowOk.bind(this));
+        this._listWindow.setHandler("cancel", this.popScene.bind(this));
+        this._listWindow.deactivate();
+        this._listWindow.hide();
+        this.addWindow(this._listWindow);
+    };
+    /**
+     * 受託可能クエストリストのウィンドウ矩形領域を得る。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_SelectReportQuest.prototype.questListWindowRect = function() {
+        const wx = 0;
+        const wy = 0;
+        const ww = 320;
+        const wh = this.mainAreaHeight();
+        return new Rectangle(wx, wy, ww, wh);
+    };
+    /**
+     * ステータスウィンドウを作成する。
+     */
+    Scene_SelectReportQuest.prototype.createStatusWindow = function() {
+        const rect = this.statusWindowRect();
+        this._statusWindow = new Window_QuestStatus(rect);
+        this._statusWindow.hide();
+        this.addWindow(this._statusWindow);
+        this._listWindow.setStatusWindow(this._statusWindow);
+    };
+    /**
+     * ステータスウィンドウの矩形領域を得る。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_SelectReportQuest.prototype.statusWindowRect = function() {
+        const rect = this.questListWindowRect();
+        const wx = rect.width;
+        const wy = 0;
+        const ww = (Graphics.boxWidth - wx);
+        const wh = Graphics.boxHeight;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+    /**
+     * シーンを開始する。
+     */
+    Scene_SelectReportQuest.prototype.start = function() {
+        Scene_MenuBase.prototype.start.call(this);
+        if (this._variableId > 0) {
+            $gameVariables.setValue(this._variableId, 0);
+        }
+        $gameTemp.clearSelectedQuestId();
+        this._listWindow.show();
+        this._statusWindow.show();
+        this._listWindow.actiate();
+    };
+
+    /**
+     * リストウィンドウでOK操作されたときの処理を行う。
+     */
+    Scene_SelectReportQuest.prototype.onListWindowOk = function() {
+        const quest = this._listWindow.quest();
+        const id = quest.id();
+        if (this._variableId > 0) {
+            $gameVariables.setValue(this._variableId, id);
+        }
+        $gameTemp.setSelectedQuestId(id);
+        this.popScene();
+    };
+    //------------------------------------------------------------------------------
+    // Scene_SelectGiveupQuest
+    Scene_SelectGiveupQuest.prototype = Object.create(Scene_MenuBase.prototype);
+    Scene_SelectGiveupQuest.prototype.constructor = Scene_SelectGiveupQuest;
+
+    /**
+     * シーンを初期化する。
+     */
+    Scene_SelectGiveupQuest.prototype.initialize = function() {
+        Scene_MenuBase.prototype.initialize.call(this);
+        this._variableId = 0;
+    };
+
+    /**
+     * シーンの準備をする。
+     * 
+     * @param {number} variableId 変数ID
+     */
+    Scene_SelectGiveupQuest.prototype.prepare = function(variableId) {
+        this._variableId = variableId;
+    };
+
+    /**
+     * シーンに必要なリソースを作成する。
+     */
+    Scene_SelectGiveupQuest.prototype.create = function() {
+        Scene_MenuBase.prototype.create.call(this);
+        this._backgroundSprite.filters = []; // 背景をぼかさない。
+        this.setBackgroundOpacity(255); // 背景を暗くしない。
+        this.createQuestListWindow();
+        this.createStatusWindow();
+    };
+
+    /**
+     * クエスト選択ウィンドウを作成する。
+     */
+    Scene_SelectGiveupQuest.prototype.createQuestListWindow = function() {
+        const rect = this.questListWindowRect();
+        this._listWindow = new Window_QuestShopGiveupList(rect);
+        this._listWindow.setHandler("ok", this.onListWindowOk.bind(this));
+        this._listWindow.setHandler("cancel", this.popScene.bind(this));
+        this._listWindow.deactivate();
+        this._listWindow.hide();
+        this.addWindow(this._listWindow);
+    };
+    /**
+     * 受託可能クエストリストのウィンドウ矩形領域を得る。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_SelectGiveupQuest.prototype.questListWindowRect = function() {
+        const wx = 0;
+        const wy = 0;
+        const ww = 320;
+        const wh = this.mainAreaHeight();
+        return new Rectangle(wx, wy, ww, wh);
+    };
+    /**
+     * ステータスウィンドウを作成する。
+     */
+    Scene_SelectGiveupQuest.prototype.createStatusWindow = function() {
+        const rect = this.statusWindowRect();
+        this._statusWindow = new Window_QuestStatus(rect);
+        this._statusWindow.hide();
+        this.addWindow(this._statusWindow);
+
+        this._listWindow.setStatusWindow(this._statusWindow);
+    };
+    /**
+     * ステータスウィンドウの矩形領域を得る。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_SelectGiveupQuest.prototype.statusWindowRect = function() {
+        const rect = this.questListWindowRect();
+        const wx = rect.width;
+        const wy = 0;
+        const ww = (Graphics.boxWidth - wx);
+        const wh = Graphics.boxHeight;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+    /**
+     * シーンを開始する。
+     */
+    Scene_SelectGiveupQuest.prototype.start = function() {
+        Scene_MenuBase.prototype.start.call(this);
+        if (this._variableId > 0) {
+            $gameVariables.setValue(this._variableId, 0);
+        }
+        $gameTemp.clearSelectedQuestId();
+        this._listWindow.show();
+        this._statusWindow.show();
+        this._listWindow.actiate();
+    };
+
+    /**
+     * リストウィンドウでOK操作されたときの処理を行う。
+     */
+    Scene_SelectGiveupQuest.prototype.onListWindowOk = function() {
+        const quest = this._reportListWindow.quest();
+        const id = quest.id();
+        if (this._variableId > 0) {
+            $gameVariables.setValue(this._variableId, id);
+        }
+        $gameTemp.setSelectedQuestId(id);
+        this.popScene();
     };
 })();
