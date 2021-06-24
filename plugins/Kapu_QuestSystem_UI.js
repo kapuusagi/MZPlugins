@@ -184,6 +184,25 @@
  * @type string
  * @default %1をギブアップしますか？
  * 
+ * @param textMessageRankUp
+ * @text ランクアップメッセージ
+ * @desc ランクアップしたときのメッセージ。%1にアクター名、%2に前のランク、%3に現在のランクが入る。
+ * @type string
+ * @default %1のギルドランクが%2から%3に上がった！
+ * 
+ * @param textMessageRankDown
+ * @text ランクダウンメッセージ
+ * @desc ランクダウンしたときのメッセージ。%1にアクター名、%2に前のランク、%3に現在のランクが入る。
+ * @type string
+ * @default %1のギルドランクが%2から%3に下がってしまった．．。
+ * 
+ * @param textMessageLostGold
+ * @text ゴールド失ったメッセージ
+ * @desc ゴールドを失ったときのメッセージ。%1にゴールド、%2に単位が入る。
+ * @type string
+ * @default %1%2失った！
+ * 
+ * 
  * @param colorAchieveDone
  * @text 達成したクエストの色
  * @desc 達成したクエストの色
@@ -203,7 +222,6 @@
  * @default rgb(255,0,0)
  * 
  * 
- * TODO:ギルドランクが上下したときにメッセージを出したい。
  * TODO:プラグインコマンドでクエスト受注選択したい。クエストIDを変数に格納
  * TODO:クエスト報告選択したい。クエストIDを変数に格納
  * TODO:クエスト破棄選択したい。クエストIDを変数に格納
@@ -368,6 +386,9 @@ function Scene_QuestShop() {
     const textMessageConfirmRank1 = parameters["textMessageConfirmRank1"] || "This is difficult for this party.";
     const textMessageConfirmRank2 = parameters["textMessageConfirmRank2"] || "Do you accept %1?";
     const textMessageConfirmGiveup = parameters["textMessageConfirmGiveup"] || "Giveup %1?";
+    const textMessageLostGold = parameters["textMessageLostGold"] || "Lose %1%2.";
+    const textMessageRankUp = parameters["textMessageRankUp"] || "%1's rank up %2 to %3!";
+    const textMessageRankDown = parameters["textMessageRankDown"] || "%1's rank down %2 to %3.";
 
     const colorAchieveDone = parameters["colorAchieveDone"] || "rgb(128,255,255)";
     const colorQuestDone = parameters["colorQuestDone"] || "rgb(128,255,255)";
@@ -1859,8 +1880,23 @@ function Scene_QuestShop() {
             AudioManager.playSe(successSe);
         }
 
+        const partyMembers = $gameParty.allMembers();
+        const lastState = {
+            guildranks: partyMembers.map(member => member.guildRankName())
+        };
+
         // 報酬加算処理
         QuestManager.reportQuest(quest.id(), true, true);
+
+        for (let i = 0; i < partyMembers.length; i++) {
+            const member = partyMembers[i];
+            const lastRankName = lastState.guildRanks[i];
+            const rankName = member.guildRankName();
+            if (rankName !== lastRankName) {
+                $gameMessage.add(textMessageRankUp.format(member.name(), lastRankName, rankName));
+            }
+        }
+
         this._rewardsWindow.setRewards(QuestManager.lastRewards());
         this._rewardsWindow.show();
         this._rewardsWindow.activate();
@@ -1881,6 +1917,23 @@ function Scene_QuestShop() {
     Scene_QuestShop.prototype.onRewardsOk = function() {
         this._rewardsWindow.hide();
         this._rewardsWindow.deactivate();
+
+        if ($gameMessage.isBusy()) {
+            this._messageWindow.setHandler("ok", this.onReportMessageOk.bind());
+            this._messageWindow.show();
+            this._messageWindow.activate();
+        } else {
+            this._reportListWindow.refresh();
+            this._reportListWindow.activate();
+        }
+    };
+
+    /**
+     * 報告時のメッセージウィンドウでメッセージ表示が完了したときの処理を行う。
+     */
+    Scene_QuestShop.prototype.onReportMessageOk = function() {
+        this._messageWindow.deactivate();
+        this._messageWindow.hide();
         this._reportListWindow.refresh();
         this._reportListWindow.activate();
     };
@@ -1930,7 +1983,43 @@ function Scene_QuestShop() {
             AudioManager.playSe(failSe);
         }
 
+        const partyMembers = $gameParty.allMembers();
+        const lastState = {
+            gold:$gameParty.gold(),
+            memberRanks: partyMembers.map(member => member.guildRankName())
+        };
         QuestManager.giveupQuest(quest.id(), true);
+        this._messageWindow.hide();
+        this._confirmWindow.hide();
+
+        if ($gameParty.gold() < lastState.gold) {
+            const lostGold = lastState.gold() - $gameParty.gold();
+            $gameMessage.push(textMessageLostGold.format(lostGold, TextManager.currencyUnit));
+        }
+        for (let i = 0; i < partyMembers.length; i++) {
+            const member = partyMembers[i];
+            const rankName = member.guildRankName();
+            const lastRankName = lastState.memberRanks[i];
+            if (rankName !== lastRankName) {
+                $gameMessage.push(textMessageRankDown.format(member.name(), lastRankName, rankName))
+            }
+        }
+
+        if ($gameMessage.isBusy()) {
+            this._messageWindow.setHandler("ok", this.onGiveupResultMessageOk.bind(this));
+            this._messageWindow.show();
+            this._messageWindow.activate();
+        } else {
+            this._giveupListWindow.refresh();
+            this._giveupListWindow.activate();
+        }
+    };
+
+    /**
+     * ギブアップ後のメッセージ表示が完了したときに通知を受け取る。
+     */
+    Scene_QuestShop.prototype.onGiveupResultMessageOk = function() {
+        this._messageWindow.deactivate();
         this._messageWindow.hide();
         this._confirmWindow.hide();
         this._giveupListWindow.refresh();
