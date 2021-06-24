@@ -11,7 +11,7 @@
  * @text パターン
  * @desc パターンファイル名。未指定で全面一律にフェードアウトさせる。
  * @type file
- * @dir img/pictures/
+ * @dir img/fadepatterns/
  * 
  * @arg duration
  * @text フェード時間
@@ -33,7 +33,7 @@
  * @text パターン
  * @desc パターンファイル名。未指定で全面一律にフェードインさせる。
  * @type file
- * @dir img/pictures/
+ * @dir img/fadepatterns/
  * 
  * @arg duration
  * @text フェード時間
@@ -52,7 +52,7 @@
  * @text 既定のフェードアウトパターン
  * @desc デフォルトのフェードアウトパターンを指定する。(指定なしで通常フェード)
  * @type file
- * @dir img/pictures/
+ * @dir img/fadepatterns/
  * @default
  * 
  * @param defaultFadeOutDuration
@@ -65,7 +65,7 @@
  * @text 既定のフェードインパターン
  * @desc デフォルトのフェードインパターンを指定する。(指定なしで通常フェード)
  * @type file
- * @dir img/pictures/
+ * @dir img/fadepatterns/
  * @default
  * 
  * @param defaultFadeInDuration
@@ -73,6 +73,8 @@
  * @desc 既定のフェードイン時間[フレーム数]
  * @type number
  * @default 0
+ * 
+ * @noteDir img/fadepatterns/
  * 
  * @help 
  * フェードに画像データパターン指定によるフェードを追加します。
@@ -168,6 +170,17 @@
             color:color
         });
     });
+    //------------------------------------------------------------------------------
+    // ImageManager
+    /**
+     * フェードパターンをロードする。
+     * 
+     * @param {string} filename ディレクトリ、拡張子を除いたファイル名
+     * @returns {Bitmap} Bitmapオブジェクト
+     */
+    ImageManager.loadFadePattern = function(filename) {
+        return this.loadBitmap("img/fadepatterns/", filename);
+    };
 
     //------------------------------------------------------------------------------
     // Game_Temp
@@ -347,13 +360,9 @@
      */
     Sprite_ImageFade.prototype.setPattern = function(pattern) {
         if (this._patternName != pattern) {
-            // loadPictureでロードしたBitmapを勝手にdestroyするとおかしくなる。
-            // if (this.bitmap) {
-            //     this.bitmap.destroy();
-            // }
             this._patternName = pattern;
             if (this._patternName) {
-                this.bitmap = ImageManager.loadPicture(this._patternName);
+                this.bitmap = ImageManager.loadFadePattern(this._patternName);
                 if (!this.bitmap.isReady()) {
                     // キャッシュされていない場合、ロードされるまで待つ。
                     this.bitmap.addLoadListener(this.onPatternLoad.bind(this));
@@ -820,7 +829,7 @@
      */
     Game_Screen.prototype.isFadePatternLoaded = function() {
         if (this._fadePattern.pattern) {
-            const bitmap = ImageManager.loadPicture(this._fadePattern.pattern);
+            const bitmap = ImageManager.loadFadePattern(this._fadePattern.pattern);
             return bitmap.isReady();
         } else {
             return false;

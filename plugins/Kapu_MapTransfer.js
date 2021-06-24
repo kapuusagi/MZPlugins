@@ -24,7 +24,7 @@
  * @text フェードアウトパターン
  * @desc フェードアウトする画像パターン。未指定時は全体を一律にフェードアウトさせる。
  * @type file
- * @dir img/pictures/
+ * @dir img/fadepatterns/
  * @default
  * 
  * @arg fadeOutDuration
@@ -37,7 +37,7 @@
  * @text フェードインパターン
  * @desc フェードインする画像パターン。魅して維持は全体を一律にフェードインさせる。
  * @type file
- * @dir img/pictures/
+ * @dir img/fadepatterns/
  * @default
  * 
  * @param fadeInDuration

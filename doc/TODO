@@ -15,6 +15,8 @@
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
+  Kapu_FadeExtends:
+    ☐ フェードパターンを入れるフォルダをimg/fadepatternsに変更した。
       
 機能拡張予定:
   Kapu_ChoiceByRoulette:
@@ -28,8 +30,6 @@
       ☐ プラグインコマンドでクエスト破棄選択したい。クエストIDを変数に格納
   Kapu_Trait_MultipleDrop:
     ☐ ユニークアイテム指定。だれかが所持していたらドロップさせない仕組み
-  Kapu_FadeExtends:
-    ☐ フェードパターンを入れるフォルダはimg/picturesじゃない方が良い。
   Kapu_MapTransfer:
     ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど。
     ☐ モザイクを追加したい。いけるかなあ。PIXIのPixelarateFilterが使えれば、パターンフェードよりは簡単そう。
