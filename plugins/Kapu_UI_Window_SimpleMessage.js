@@ -6,8 +6,9 @@
  * 
  * 
  * @help 
- * シンプルなメッセージウィンドウを提供する。
- * 本プラグイン単独では意味が無い。
+ * シンプルなメッセージウィンドウを提供します。
+ * UIを提供するプラグイン
+ * 本プラグイン単独では意味はありません。
  * 
  * ベーシックシステムで提供されるWindow_SimpleMessageは非常に高機能であるが、
  * マップイベントなどで使用するため、使用する側で大量のウィンドウを作成する必要がある。
@@ -77,6 +78,7 @@ function Window_SimpleMessage() {
     Window_SimpleMessage.prototype.initialize = function(rect) {
         Window_Base.prototype.initialize.call(this, rect);
         this.openness = 0;
+        this._handlers = {};
         this.initMembers();
     };
     /**
@@ -114,7 +116,7 @@ function Window_SimpleMessage() {
                 return;
             } else if (this.canStart()) {
                 this.startMessage();
-            } else if ($gameMessage.isBusy()) {
+            } else if (!$gameMessage.isBusy()) {
                 this.callHandler("ok");
             }
         }
@@ -139,7 +141,6 @@ function Window_SimpleMessage() {
         this._textState = textState;
         this.newPage(this._textState);
         this.open();
-        this._nameBoxWindow.start();
     };
     /**
      * 新しい行の先頭x位置を得る。
@@ -291,13 +292,11 @@ function Window_SimpleMessage() {
      * テキスト表示が終了したときの処理を行う。
      */
     Window_SimpleMessage.prototype.onEndOfText = function() {
-        if (!this.startInput()) {
-            if (!this._pauseSkip) {
-                this.startPause();
-            } else {
-                // \^が指定されており、ウィンドウをすぐに閉じる。
-                this.terminateMessage();
-            }
+        if (!this._pauseSkip) {
+            this.startPause();
+        } else {
+            // \^が指定されており、ウィンドウをすぐに閉じる。
+            this.terminateMessage();
         }
         this._textState = null;
     };

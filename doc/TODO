@@ -9,8 +9,6 @@
   ☐ Kapu_TimeRangeAndWeathers_ChangeBySteps
   ☐ Kapu_TimerExtend
   ☐ Kapu_Trait_ParamAdd
-  ☐ Kapu_Sandbox_Window_SimpleMessage
-  ☐ Kapu_UI_Window_SimpleMessage
   ☐ Kapu_AffectMemberStates
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）

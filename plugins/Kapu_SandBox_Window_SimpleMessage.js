@@ -16,7 +16,7 @@
  * @default ハロー・ワールド\nこれはテストメッセージです。
  * 
  * @help 
- * 
+ * UI_Window_SimpleMessageの動作を確認するためのテストスクリプト。
  * 
  * ■ 使用時の注意
  * 
@@ -34,7 +34,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 新規作成。
  */
 (() => {
     const pluginName = "Kapu_SandBox_Window_SimpleMessage";
@@ -55,14 +55,14 @@
 
     //------------------------------------------------------------------------------
     // Scene_SimpleMssageWindowTest
-    Scene_SimpleMssageWindowTest.prototype = Object.create(Scene_Base.prototype);
+    Scene_SimpleMssageWindowTest.prototype = Object.create(Scene_MenuBase.prototype);
     Scene_SimpleMssageWindowTest.prototype.constructor = Scene_SimpleMssageWindowTest;
 
     /**
      * Scene_SimpleMssageWindowTestを初期化する。
      */
     Scene_SimpleMssageWindowTest.prototype.initialize = function() {
-        Scene_Base.prototype.initialize.call(this);
+        Scene_MenuBase.prototype.initialize.call(this);
         this._text = "";
     };
 
@@ -79,7 +79,7 @@
      * シーンのリソースを作成する。
      */
     Scene_SimpleMssageWindowTest.prototype.create = function() {
-        Scene_Base.prototype.create.call(this);
+        Scene_MenuBase.prototype.create.call(this);
         this.createMessageWindow();
     };
 
@@ -112,10 +112,11 @@
      * シーンを開始する。
      */
     Scene_SimpleMssageWindowTest.prototype.start = function() {
-        Scene_Base.prototype.start.call(this);
+        Scene_MenuBase.prototype.start.call(this);
         if (this._text) {
-            $gameMessage.push(this._text);
+            $gameMessage.add(this._text);
         }
+        this._messageWindow.show();
         this._messageWindow.activate();
     };
 
@@ -123,6 +124,8 @@
      * メッセージウィンドウの表示が完了したときの処理を行う。
      */
     Scene_SimpleMssageWindowTest.prototype.onMessageWindowOk = function() {
+        this._messageWindow.deactivate();
+        this._messageWindow.hide();
         this.popScene();
     };
 
