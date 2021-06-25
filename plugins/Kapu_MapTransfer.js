@@ -235,7 +235,13 @@
      * Note: 画面全面にキャプチャした画像を表示する。
      */
     Scene_Base.prototype.setupDissolveOut = function() {
+        if (this._windowLayer) {
+            this._windowLayer.visible = false;
+        }
         SceneManager.snapForDissolve();
+        if (this._windowLayer) {
+            this._windowLayer.visible = true;
+        }
         const bitmap = SceneManager.dissolveBitmap();
         const sprite = new Sprite();
         sprite.x = (Graphics.boxWidth - bitmap.width) / 2;
