@@ -17,6 +17,8 @@
  * @value pattern
  * @option ピクセレート
  * @value pixelate
+ * @option ディゾルブ
+ * @value dissolve
  * 
  * @arg patternFile
  * @text パターン
@@ -50,6 +52,8 @@
  * @value pattern
  * @option ピクセレート
  * @value pixelate
+ * @option ディゾルブ
+ * @value dissolve
  * 
  * @arg patternFile
  * @text パターン
@@ -106,13 +110,21 @@
  * https://github.com/pixijs/filters/tree/main/filters/pixelate/src
  * 
  * ■ 使用時の注意
+ * ディゾルブ指定時は、フェードイン前、フェードアウト後共にディゾルブ指定してください。
+ * ディゾルブ時の遷移時間はフェードアウト時の遷移時間が使用されます。
  * 
  * ■ プラグイン開発者向け
+ * 現在の構造だと、フェードパターンを増やす毎に Game_Screen 及び Scene_Message (マップと戦闘) の処理が重くなっていく。
+ * これはあまりよろしくない。
  * フェードモード
  *   Game_Screen.FADE_MODE_NORMAL
  *     ベーシックシステムで実装されている通常のフェードパターン
  *   Game_Screen.FADE_MODE_PATTERN
  *     画像によりフェード具合を指定するパターン
+ *   Game_Screen.FADE_MODE_PIXELATE
+ *     ピクセレート(モザイクみたいなの)による遷移パターン
+ *   Game_Screen.FADE_MODE_DISSOLVE
+ *     ディゾルブによる遷移パターン
  * 
  * $gameTemp.setupNextFadeIn(pattern : object) : void
  *     次のフェードインパターンを変更する。
@@ -155,6 +167,7 @@
     Game_Screen.FADE_MODE_NORMAL = "normal";
     Game_Screen.FADE_MODE_PATTERN = "pattern";
     Game_Screen.FADE_MODE_PIXELATE = "pixelate";
+    Game_Screen.FADE_MODE_DISSOLVE = "dissolve";
 
     const defaultFadeOutPattern = parameters["defaultFadeOutPattern"] || "";
     const defaultFadeOutMode = defaultFadeOutPattern ? Game_Screen.FADE_MODE_PATTERN : Game_Screen.FADE_MODE_NORMAL;
@@ -206,6 +219,36 @@
      */
     ImageManager.loadFadePattern = function(filename) {
         return this.loadBitmap("img/fadepatterns/", filename);
+    };
+    //------------------------------------------------------------------------------
+    // SceneManager
+    /**
+     * ディゾルブ用画像用のスナップショットを更新する。
+     */
+    SceneManager.snapForDissolve = function() {
+        if (this._dissolveBitmap) {
+            this._dissolveBitmap.destroy();
+        }
+        this._dissolveBitmap = this.snap();
+    };
+
+    /**
+     * ディゾルブ用画像を得る。
+     * 
+     * @returns {Bitmap} Bitmapオブジェクト
+     */
+    SceneManager.dissolveBitmap = function() {
+        return this._dissolveBitmap;
+    };
+
+    /**
+     * ディゾルブ用画像を開放する。
+     */
+    SceneManager.releaseDissolveBitmap = function() {
+        if (this._dissolveBitmap) {
+            this._dissolveBitmap.destroy();
+        }
+        this._dissolveBitmap = null;
     };
 
     //------------------------------------------------------------------------------
@@ -611,6 +654,9 @@
             case Game_Screen.FADE_MODE_PATTERN:
                 this.setupFadePattern()
                 break;
+            case Game_Screen.FADE_MODE_DISSOLVE:
+                this.setupDissolve();
+                break;
             case Game_Screen.FADE_MODE_NORMAL:
             default:
                 this.setupFadeNormal();
@@ -639,6 +685,37 @@
     };
 
     /**
+     * ディゾルブをセットアップする。
+     */
+    Scene_Base.prototype.setupDissolve = function() {
+        const childCount = this.children.length;
+        if (this.getChildIndex(this._fadeLayer) < (childCount - 1)) {
+            this.removeChild(this._fadeLayer);
+            this.addChild(this._fadeLayer);
+        }
+        if (this._fadeSign < 0) {
+            // フェードアウト
+            if (this._windowLayer) {
+                this._windowLayer.visible = false;
+            }
+            SceneManager.snapForDissolve();
+            if (this._windowLayer) {
+                this._windowLayer.visible = true;
+            }
+        }
+        const bitmap = SceneManager.dissolveBitmap();
+        const sprite = new Sprite();
+        sprite.x = (Graphics.boxWidth - bitmap.width) / 2;
+        sprite.y = (Graphics.boxHeight - bitmap.height) / 2
+        sprite.anchor.x = 0.5;
+        sprite.anchor.y = 0.5;
+        sprite.z = -20; // 手前
+        sprite.bitmap = bitmap;
+        this._dissolveSprite = sprite;
+        this._fadeLayer.addChild(this._dissolveSprite);
+    };
+
+    /**
      * フェード中かどうかを得る。
      * 
      * @returns {boolean} フェード中の場合にはtrue, それ以外はfalse
@@ -650,6 +727,7 @@
             case Game_Screen.FADE_MODE_NORMAL:
             case Game_Screen.FADE_MODE_PATTERN:
             case Game_Screen.FADE_MODE_PIXELATE:
+            case Game_Screen.FADE_MODE_DISSOLVE:
             default:
                 return this.isFadingNormal();
         }
@@ -673,6 +751,9 @@
         switch (this._fadePattern.mode) {
             case Game_Screen.FADE_MODE_PATTERN:
                 this.updateFadePattern();
+                break;
+            case Game_Screen.FADE_MODE_DISSOLVE:
+                this.updateDissolve();
                 break;
             case Game_Screen.FADE_MODE_NORMAL:
             case Game_Screen.FADE_MODE_PIXELATE:
@@ -707,6 +788,26 @@
     };
 
     /**
+     * ディゾルブを更新する。
+     */
+    Scene_Base.prototype.updateDissolve = function() {
+        if (this._fadeDuration > 0) {
+            if (this._fadeSign > 0) { // フェードイン
+                this._fadeOpacity -= this._fadeOpacity / d;
+                if (this._fadeOpacity <= 0) {
+                    this._fadeLayer.removeChild(this._dissolveSprite);
+                    this._dissolveSprite.destroy();
+                    delete this._dissolveSprite;
+                    SceneManager.releaseDissolveBitmap();
+                }
+            } else {
+                this._fadeOpacity = 255;
+            }
+            this._fadeDuration--;
+        }
+    };
+
+    /**
      * カラーフィルタを更新する。
      * !!!overwrite!!! Scene_Base_updateColorFilter
      *     フェードの処理を拡張するためオーバーライドする。
@@ -718,6 +819,9 @@
                 break;
             case Game_Screen.FADE_MODE_PIXELATE:
                 this.applyFadePixelate();
+                break;
+            case Game_Screen.FADE_MODE_DISSOLVE:
+                this.applyDissolve();
                 break;
             case Game_Screen.FADE_MODE_NORMAL:
             default:
@@ -759,6 +863,15 @@
         this._pixelateFilter.setSize((this._fadeOpacity / 10).clamp(1, 10));
     };
 
+    /**
+     * Dissolveを適用する。
+     */
+    Scene_Base.prototype.applyDissolve = function() {
+        if (this._dissolveSprite) {
+            this._dissolveSprite.opacity = this._fadeOpacity;
+        }
+    };
+
     //------------------------------------------------------------------------------
     // Game_Screen
 
@@ -776,6 +889,7 @@
         };
         this._fadeOpacity = 0; // 0でスプライトセット表示、255でfadeColorにフェードアウト
         this._fadeColor = [0,0,0,255];
+        this._dissolveOpacity = 255;
     };
 
     /**
@@ -824,7 +938,21 @@
      * フェードを準備する。
      */
     Game_Screen.prototype.setupFade = function() {
+        switch (this._fadePattern.mode) {
+            case Game_Screen.FADE_MODE_DISSOLVE:
+                this.setupDissolve();
+                break;
+        }
+    };
 
+    /**
+     * ディゾルブを準備する。
+     */
+    Game_Screen.prototype.setupDissolve = function() {
+        if (this._fadeOutDuration > 0) {
+            SceneManager.snapForDissolve();
+            this._dissolveOpacity = 255;
+        }
     };
 
     /**
@@ -863,6 +991,9 @@
             case Game_Screen.FADE_MODE_PATTERN:
                 this.updateFadeOutPattern();
                 break;
+            case Game_Screen.FADE_MODE_DISSOLVE:
+                this.updateDissolveOut();
+                break;
             case Game_Screen.FADE_MODE_PIXELATE:
             case Game_Screen.FADE_MODE_NORMAL:
             default:
@@ -876,6 +1007,15 @@
      */
     Game_Screen.prototype.updateFadeOutNormal = function() {
         _Game_Screen_updateFadeOut.call(this);
+    };
+
+    /**
+     * ディゾルブアウトを更新する。
+     */
+    Game_Screen.prototype.updateDissolveOut = function() {
+        if (this._fadeDuration > 0) {
+            this._fadeDuration--;
+        }
     };
 
     /**
@@ -900,6 +1040,9 @@
         switch (this._fadePattern.mode) {
             case Game_Screen.FADE_MODE_PATTERN:
                 this.updateFadeInPattern();
+                break;
+            case Game_Screen.FADE_MODE_DISSOLVE:
+                this.updateDissolveIn();
                 break;
             case Game_Screen.FADE_MODE_PIXELATE:
             case Game_Screen.FADE_MODE_NORMAL:
@@ -927,6 +1070,17 @@
                 this._fadeInDuration--;
             }
             this._brightness = 255; // overallフィルタに対する輝度設定値はそのまま。
+        }
+    };
+
+    /**
+     * ディゾルブインを更新する。
+     */
+    Game_Screen.prototype.updateDissolveIn = function() {
+        if (this._fadeInDuration > 0) {
+            const d = this._fadeInDuration;
+            this._dissolveOpacity = (this._dissolveOpacity * (d - 1)) / d;
+            this._fadeInDuration--;
         }
     };
 
@@ -977,6 +1131,15 @@
         } else {
             return 1;
         }
+    };
+
+    /**
+     * ディゾルブのの割合を得る。
+     * 
+     * @returns {number} ディゾルブの割合(0～255, 0で次の画像、255は前の画像)
+     */
+    Game_Screen.prototype.dissolveOpacity = function() {
+        this._dissolveOpacity;
     };
     //------------------------------------------------------------------------------
     // Spriteset_Base
@@ -1031,6 +1194,7 @@
     Scene_Message.prototype.update = function() {
         _Scene_Message_update.call(this);
         this.updateSpritesetFade();
+        this.updateDissolve();
     };
 
     /**
@@ -1040,6 +1204,44 @@
         this._spritesetFadeSprite.setPattern($gameScreen.fadePattern());
         this._spritesetFadeSprite.setFadeOpacity($gameScreen.fadeOpacity());
         this._spritesetFadeSprite.setBlendColor($gameScreen.fadeColor());
+    };
+
+    /**
+     * ディゾルブを更新する。
+     */
+    Scene_Message.prototype.updateDissolve = function() {
+        const dissolveOpacity = $gameScreen.dissolveOpacity();
+        if (dissolveOpacity > 0) {
+            if (!this._dissolveSprite) {
+                this._dissolveSprite = this.createDissolveSprite();
+                this._spritesetFadeLayer.addChild(this._dissolveSprite);
+            }
+            this._dissolveSprite.opacity = dissolveOpacity;
+        } else {
+            if (this._dissolveSprite) {
+                this._spritesetFadeLayer.removeChild(this._dissolveSprite);
+                this._dissolveSprite.destroy();
+                delete this._dissolveSprite;
+                SceneManager.releaseDissolveBitmap();
+            }
+        }
+    };
+
+    /**
+     * ディゾルブ用のスプライトを作成する。
+     * 
+     * @returns {Sprite} スプライト
+     */
+    Scene_Message.prototype.createDissolveSprite = function() {
+        const bitmap = SceneManager.dissolveBitmap();
+        const sprite = new Sprite();
+        sprite.x = (Graphics.boxWidth - bitmap.width) / 2;
+        sprite.y = (Graphics.boxHeight - bitmap.height) / 2
+        sprite.anchor.x = 0.5;
+        sprite.anchor.y = 0.5;
+        sprite.z = -20; // 手前
+        sprite.bitmap = bitmap;
+        return sprite;
     };
 
     //------------------------------------------------------------------------------

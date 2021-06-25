@@ -194,36 +194,6 @@
     Game_Temp.prototype.onTransferProcessList = function() {
         return this._onTransferProcessList;
     };
-    //------------------------------------------------------------------------------
-    // SceneManager
-    /**
-     * ディゾルブ用画像用のスナップショットを更新する。
-     */
-    SceneManager.snapForDissolve = function() {
-        if (this._dissolveBitmap) {
-            this._dissolveBitmap.destroy();
-        }
-        this._dissolveBitmap = this.snap();
-    };
-
-    /**
-     * ディゾルブ用画像を得る。
-     * 
-     * @returns {Bitmap} Bitmapオブジェクト
-     */
-    SceneManager.dissolveBitmap = function() {
-        return this._dissolveBitmap;
-    };
-
-    /**
-     * ディゾルブ用画像を開放する。
-     */
-    SceneManager.releaseDissolveBitmap = function() {
-        if (this._dissolveBitmap) {
-            this._dissolveBitmap.destroy();
-        }
-        this._dissolveBitmap = null;
-    };
 
 
     //------------------------------------------------------------------------------
