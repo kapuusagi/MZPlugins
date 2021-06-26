@@ -8,7 +8,6 @@
   ☐ Kapu_TimeRangeAndWeather
   ☐ Kapu_TimeRangeAndWeathers_ChangeBySteps
   ☐ Kapu_TimerExtend
-  ☐ Kapu_Trait_ParamAdd
   ☐ Kapu_AffectMemberStates
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
@@ -31,6 +30,8 @@
   Kapu_MapTransfer:
     ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど。
     ☐ モザイクを追加したい。いけるかなあ。PIXIのPixelarateFilterが使えれば、パターンフェードよりは簡単そう。
+  Kapu_Timer_Extend:
+    ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
 
 リファクタリング:
   ☐ クエストUIとクエストショップは分離した方がいいかも。
