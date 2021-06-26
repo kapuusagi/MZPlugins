@@ -310,9 +310,11 @@
 
     /**
      * 天候をランダムに変更する。
+     * 
+     * @param {number} regionId リージョンID
      */
-    Game_Map.prototype.changeWeatherRandom = function() {
-        const weathers = this.weathersOfRegion();
+    Game_Map.prototype.changeWeatherRandom = function(regionId) {
+        const weathers = this.weathersOfRegion(regionId);
         if (weathers.length > 0) {
             // 天候が変更しうる
             let weightSum = 0;
@@ -337,10 +339,10 @@
     /**
      * 現在の位置に対応する天候リストを得る。
      * 
+     * @param {number} regionId
      * @return {Array<object>} 天候リスト
      */
-    Game_Map.prototype.weathersOfRegion = function() {
-        const regionId = $gamePlayer.regionId();
+    Game_Map.prototype.weathersOfRegion = function(regionId) {
         const weathers = [];
         if (this._regionWeathers[regionId]) {
             for (const weather of this._regionWeathers[regionId]) {
@@ -367,11 +369,12 @@
     /**
      * リージョン変更による天候変更が必要かどうかを判定する。
      * 
+     * @param {number} regionId リージョンID
      * @returns {boolean} 天候変更が必要な場合にはtrue, それ以外はfalse.
      */
-    Game_Map.prototype.isNeedChangeWeatherAtReagion = function() {
+    Game_Map.prototype.isNeedChangeWeatherAtReagion = function(regionId) {
         if (this.isChangeWeatherMap()) {
-            const weatherIds = this.weathersOfRegion().map(weather => weather.id);
+            const weatherIds = this.weathersOfRegion(regionId).map(weather => weather.id);
             if (!weatherIds.includes(this._weather)) {
                 return true;
             }
@@ -421,17 +424,34 @@
                 this._stepCounterOfTimeRange += appendCount;
                 if (this._stepCounterOfTimeRange >= $gameMap.stepCountOfTimeRange()) {
                     $gameMap.changeNextTimeRange(effectDuration);
-                    this._stepCounterOfTimeRange = 0;
                 }
             }
             if ($gameMap.isChangeWeatherMap()) {
                 this._stepCounterOfWeather += appendCount;
                 if (this._stepCounterOfWeather >= $gameMap.stepCountOfWeather()) {
-                    $gameMap.changeWeatherRandom();
-                    this._stepCounterOfWeather = 0;
+                    $gameMap.changeWeatherRandom(this.regionId());
                 }
             }
         }
+    };
+
+    const _Game_Map_onTimeRangeChanged = Game_Map.prototype.onTimeRangeChanged;
+    /**
+     * 時間帯が変更されたときの処理を行う。
+     */
+    Game_Map.prototype.onTimeRangeChanged = function() {
+        _Game_Map_onTimeRangeChanged.call(this);
+        this._stepCounterOfTimeRange = 0;
+    };
+
+
+    const _Game_Map_onWeatherChanged = Game_Map.prototype.onWeatherChanged;
+    /**
+     * 天候が変わったとき野処理を行う。
+     */
+    Game_Map.prototype.onWeatherChanged = function() {
+        _Game_Map_onWeatherChanged.call(this);
+        this._stepCounterOfWeather = 0;
     };
 
     const _Game_Player_onRegionChanged = Game_Player.prototype.onRegionChanged;
@@ -440,7 +460,7 @@
      */
     Game_Player.prototype.onRegionChanged = function() {
         _Game_Player_onRegionChanged.call(this);
-        if ($gameMap.isNeedChangeWeatherAtReagion()) {
+        if ($gameMap.isNeedChangeWeatherAtReagion(this.regionId())) {
             this._stepCounterOfWeather = 0;
             $gameMap.changeWeatherRandom();
         }

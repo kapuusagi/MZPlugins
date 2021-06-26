@@ -703,12 +703,21 @@ $dataWeathers = [];
     Game_Map.prototype.changeTimeRange = function(timeRange, duration) {
         if ($dataTimeRanges[timeRange]) {
             if (this._timeRange !== timeRange) {
+                console.log("change time range : " + timeRange);
                 this.onTimeRangeLeave()
                 this._timeRange = timeRange;
                 this.onTimeRangeEnter();
                 this.applyTimeRangeAndWeatherEffects(duration);
+                this.onTimeRangeChanged();
             }
         }
+    };
+
+    /**
+     * 時間帯が変更されたときの処理を行う。
+     */
+    Game_Map.prototype.onTimeRangeChanged = function() {
+
     };
 
     /**
@@ -733,13 +742,22 @@ $dataWeathers = [];
                 power = 1;
             }
             if ((this._weather !== weather) || (this._weatherPower !== power)) {
+                console.log("change weather : " + weather + " power=" + power);
                 this.onWeatherLeave();
                 this._weather = weather;
                 this._weatherPower = power;
                 this.onWeatherEnter();
                 this.applyTimeRangeAndWeatherEffects(duration);
+                this.onWeatherChanged();
             }
         }
+    };
+
+    /**
+     * 天候が変わったとき野処理を行う。
+     */
+    Game_Map.prototype.onWeatherChanged = function() {
+
     };
 
     /**
