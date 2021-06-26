@@ -365,6 +365,21 @@
     };
 
     /**
+     * リージョン変更による天候変更が必要かどうかを判定する。
+     * 
+     * @returns {boolean} 天候変更が必要な場合にはtrue, それ以外はfalse.
+     */
+    Game_Map.prototype.isNeedChangeWeatherAtReagion = function() {
+        if (this.isChangeWeatherMap()) {
+            const weatherIds = this.weathersOfRegion().map(weather => weather.id);
+            if (!weatherIds.includes(this._weather)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 天候を維持する歩数を得る。
      * 
      * @returns {number} 歩数
@@ -425,7 +440,7 @@
      */
     Game_Player.prototype.onRegionChanged = function() {
         _Game_Player_onRegionChanged.call(this);
-        if ($gameMap.isChangeWeatherMap()) {
+        if ($gameMap.isNeedChangeWeatherAtReagion()) {
             this._stepCounterOfWeather = 0;
             $gameMap.changeWeatherRandom();
         }
