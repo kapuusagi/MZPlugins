@@ -32,7 +32,7 @@
  * 
  * @arg id
  * @text イベントID
- * @desc 消去するイベントID
+ * @desc 割り当てるイベントID
  * @type number
  * @default 0
  * 
@@ -112,7 +112,7 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    const pluginName = "Kapu_timerExtend";
+    const pluginName = "Kapu_TimerExtend";
     // const parameters = PluginManager.parameters(pluginName);
 
     PluginManager.registerCommand(pluginName, "getActiveTimeInFrames", args => {
@@ -174,12 +174,12 @@
             event.isOnce = isOnce;
             event.stopInEvents = stopInEvents;
         } else {
-            const initialFarmeCount = seconds * 60;
+            const initialFrameCount = seconds * 60;
             this._timerEvents.push({
                 id : id,
                 commonEventId : commonEventId,
-                initialFrameCount : initialFarmeCount,
-                frameCount : initialFarmeCount,
+                initialFrameCount : initialFrameCount,
+                frameCount : initialFrameCount,
                 isOnce : isOnce,
                 stopInEvents : stopInEvents
             });
@@ -226,11 +226,11 @@
                 timerEvent.frameCount--;
                 if (timerEvent.frameCount === 0) {
                     if (timerEvent.commonEventId > 0) {
-                        reserveCommonEvent(timerEvent.commonEventId);
+                        $gameTemp.reserveCommonEvent(timerEvent.commonEventId);
                     }
                     if (!timerEvent.isOnce) {
                         // 再カウントする。
-                        timerEvent.frameCount = timerEvent.initialFarmeCount;
+                        timerEvent.frameCount = timerEvent.initialFrameCount;
                     }
                 }
             }
