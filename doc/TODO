@@ -5,10 +5,6 @@
   ☐ Kapu_MapTransfer
   ☐ Kapu_QuestSystem
   ☐ Kapu_QuestSystem_UI
-  ☐ Kapu_TimeRangeAndWeather
-  ☐ Kapu_TimeRangeAndWeathers_ChangeBySteps
-  ☐ Kapu_TimerExtend
-  ☐ Kapu_AffectMemberStates
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）

@@ -61,6 +61,11 @@
  * @type boolean
  * @default false
  * 
+ * @arg stopInBattle
+ * @text 戦闘中は歩進しない
+ * @desc 戦闘中はカウンタを歩進させない場合にはtrue
+ * @type boolean
+ * @default false
  * 
  * @command removeTimerEvent
  * @text タイマーイベント削除
@@ -134,8 +139,9 @@
         const seconds = Math.max(1, Math.round(Number(args.seconds) || 1));
         const isOnce = (args.isOnce === undefined) ? false : (args.isOnce === "true");
         const stopInEvents = (args.stopInEvents === undefined) ? false : (args.stopInEvents === "true");
+        const stopInBattle = (args.stopInBattle === undefined) ? false : (args.stopInBattle === "true");
         if ((id > 0) && (commonEventId > 0)) {
-            $gameTimer.addTimerEvent(id, commonEventId, seconds, isOnce, stopInEvents);
+            $gameTimer.addTimerEvent(id, commonEventId, seconds, isOnce, stopInEvents, stopInBattle);
         }
     });
     PluginManager.registerCommand(pluginName, "removeTimerEvent", args => {
@@ -163,9 +169,10 @@
      * @param {number} commonEventId コモンイベントID
      * @param {number} seconds インターバル時間
      * @param {number} isOnce 1回のみ呼び出すかどうか
-     * @param {number} stopInEvents イベント実行中は歩進させない場合はtrue
+     * @param {boolean} stopInEvents イベント実行中は歩進させない場合はtrue
+     * @param {boolean} stopInBattle 戦闘中は歩進させない場合はtrue
      */
-    Game_Timer.prototype.addTimerEvent = function(id, commonEventId, seconds, isOnce, stopInEvents) {
+    Game_Timer.prototype.addTimerEvent = function(id, commonEventId, seconds, isOnce, stopInEvents, stopInBattle) {
         const event = this._timerEvents.find(e => e.id === id);
         if (event) {
             event.commonEventId = commonEventId;
@@ -173,6 +180,7 @@
             event.frameCount = event.initialFrameCount;
             event.isOnce = isOnce;
             event.stopInEvents = stopInEvents;
+            event.stopInBattle = stopInBattle;
         } else {
             const initialFrameCount = seconds * 60;
             this._timerEvents.push({
@@ -181,7 +189,8 @@
                 initialFrameCount : initialFrameCount,
                 frameCount : initialFrameCount,
                 isOnce : isOnce,
-                stopInEvents : stopInEvents
+                stopInEvents : stopInEvents,
+                stopInBattle : stopInBattle
             });
         }
     };
@@ -220,9 +229,8 @@
      * タイマーイベントを更新する。
      */
     Game_Timer.prototype.updateTimerEvents = function() {
-        const isEventRunning = $gameMap.isEventRunning() || $gameTroop.isEventRunning();
         for (const timerEvent of this._timerEvents) {
-            if ((timerEvent.frameCount > 0) && (!timerEvent.stopInEvents || !isEventRunning)) {
+            if ((timerEvent.frameCount > 0) && this.isTimerCountTiming(timerEvent)) {
                 timerEvent.frameCount--;
                 if (timerEvent.frameCount === 0) {
                     if (timerEvent.commonEventId > 0) {
@@ -237,6 +245,35 @@
         }
 
         // アクティブでないタイマーイベントは削除
+        this.removeTerminatedTimers();
+    };
+
+    /**
+     * タイマーカウントタイミングかどうかを判定する。
+     * 
+     * @param {object} timerEvent タイマーイベントオブジェクト
+     * @returns {boolean} カウントするタイミングが必要な場合にはtrue, それ以外はfalse.
+     */
+    Game_Timer.prototype.isTimerCountTiming = function(timerEvent) {
+        if (timerEvent.stopInEvents) {
+            const isEventRunning = $gameMap.isEventRunning() || $gameTroop.isEventRunning();
+            if (isEventRunning) {
+                return false;
+            }
+        }
+        if (timerEvent.stopInBattle) {
+            if ($gameParty.inBattle()) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    /**
+     * 動作終了したタイマーを削除する。
+     */
+    Game_Timer.prototype.removeTerminatedTimers = function() {
         for (let i = this._timerEvents.length - 1; i >= 0; i--) {
             const timerEvent = this._timerEvents[i];
             if ((timerEvent.frameCount === 0) || (timerEvent.commonEventId === 0)) {
@@ -245,7 +282,6 @@
             }
         }
     };
-
 
     /**
      * アクティブ時間[フレーム]を得る。
