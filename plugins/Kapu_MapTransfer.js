@@ -24,7 +24,7 @@
  * @text フェードアウトパターン
  * @desc フェードアウトする画像パターン。未指定時は全体を一律にフェードアウトさせる。
  * @type file
- * @dir img/pictures/
+ * @dir img/fadepatterns/
  * @default
  * 
  * @arg fadeOutDuration
@@ -37,7 +37,7 @@
  * @text フェードインパターン
  * @desc フェードインする画像パターン。魅して維持は全体を一律にフェードインさせる。
  * @type file
- * @dir img/pictures/
+ * @dir img/fadepatterns/
  * @default
  * 
  * @param fadeInDuration
@@ -194,36 +194,6 @@
     Game_Temp.prototype.onTransferProcessList = function() {
         return this._onTransferProcessList;
     };
-    //------------------------------------------------------------------------------
-    // SceneManager
-    /**
-     * ディゾルブ用画像用のスナップショットを更新する。
-     */
-    SceneManager.snapForDissolve = function() {
-        if (this._dissolveBitmap) {
-            this._dissolveBitmap.destroy();
-        }
-        this._dissolveBitmap = this.snap();
-    };
-
-    /**
-     * ディゾルブ用画像を得る。
-     * 
-     * @returns {Bitmap} Bitmapオブジェクト
-     */
-    SceneManager.dissolveBitmap = function() {
-        return this._dissolveBitmap;
-    };
-
-    /**
-     * ディゾルブ用画像を開放する。
-     */
-    SceneManager.releaseDissolveBitmap = function() {
-        if (this._dissolveBitmap) {
-            this._dissolveBitmap.destroy();
-        }
-        this._dissolveBitmap = null;
-    };
 
 
     //------------------------------------------------------------------------------
@@ -235,7 +205,13 @@
      * Note: 画面全面にキャプチャした画像を表示する。
      */
     Scene_Base.prototype.setupDissolveOut = function() {
+        if (this._windowLayer) {
+            this._windowLayer.visible = false;
+        }
         SceneManager.snapForDissolve();
+        if (this._windowLayer) {
+            this._windowLayer.visible = true;
+        }
         const bitmap = SceneManager.dissolveBitmap();
         const sprite = new Sprite();
         sprite.x = (Graphics.boxWidth - bitmap.width) / 2;
