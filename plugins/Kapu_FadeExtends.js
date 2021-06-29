@@ -74,6 +74,19 @@
  * @default [0,0,0]
  * 
  * 
+ * @param defaultFadeOutMode
+ * @text 既定のフェードアウト処理パターン
+ * @desc 既定のフェードアウトパターン
+ * @type select
+ * @option 通常
+ * @value normal
+ * @option パターン
+ * @value pattern
+ * @option ピクセレート
+ * @value pixelate
+ * @option ディゾルブ
+ * @value dissolve
+ * 
  * @param defaultFadeOutPattern
  * @text 既定のフェードアウトパターン
  * @desc デフォルトのフェードアウトパターンを指定する。(指定なしで通常フェード)
@@ -86,6 +99,19 @@
  * @desc 規定のフェードアウト時間[フレーム数]
  * @type number
  * @default 0
+ * 
+ * @param defaultFadeInMode
+ * @text 既定のフェードイン処理パターン
+ * @desc 既定のフェードインパターン
+ * @type select
+ * @option 通常
+ * @value normal
+ * @option パターン
+ * @value pattern
+ * @option ピクセレート
+ * @value pixelate
+ * @option ディゾルブ
+ * @value dissolve
  * 
  * @param defaultFadeInPattern
  * @text 既定のフェードインパターン
@@ -169,11 +195,12 @@
     Game_Screen.FADE_MODE_PIXELATE = "pixelate";
     Game_Screen.FADE_MODE_DISSOLVE = "dissolve";
 
+    const defaultFadeOutMode = parameters["defaultFadeOutMode"] || Game_Screen.FADE_MODE_NORMAL;
     const defaultFadeOutPattern = parameters["defaultFadeOutPattern"] || "";
-    const defaultFadeOutMode = defaultFadeOutPattern ? Game_Screen.FADE_MODE_PATTERN : Game_Screen.FADE_MODE_NORMAL;
     const defaultFadeOutDuration = Math.round(Number(parameters["defaultFadeOutDuration"]) || 0);
+
+    const defaultFadeInMode = parameters["defaultFadeInMode"] || Game_Screen.FADE_MODE_NORMAL;
     const defaultFadeInPattern = parameters["defaultFadeInPattern"] || "";
-    const defaultFadeInMode = defaultFadeInPattern ? Game_Screen.FADE_MODE_PATTERN : Game_Screen.FADE_MODE_NORMAL;
     const defaultFadeInDuration = Math.round(Number(parameters["defaultFadeInDuration"]) || 0);
 
 
@@ -324,51 +351,40 @@
 
     //------------------------------------------------------------------------------
     // PixelateFilter
-    function PixelateFilter() {
+    function PixelateFadeFilter() {
         this.initialize(...arguments);
     }
 
-    PixelateFilter.prototype = Object.create(PIXI.Filter.prototype);
-    PixelateFilter.prototype.constructor = PixelateFilter;
+    PixelateFadeFilter.prototype = Object.create(PIXI.Filter.prototype);
+    PixelateFadeFilter.prototype.constructor = PixelateFadeFilter;
 
     /**
-     * PixelateFilterを初期化する。
+     * PixelateFadeFilterを初期化する。
      */
-    PixelateFilter.prototype.initialize = function() {
+    PixelateFadeFilter.prototype.initialize = function() {
         PIXI.Filter.call(this, this._vertexSrc(), this._fragmentSrc());
-        this.uniforms.size = [1, 1];
-        this.uniforms.areaSize = [1, 1]; // dummy.
+        this.uniforms.size = 1.0;
+        this.uniforms.areaSize = [ 1, 1 ]; // dummy.
     };
 
     /**
      * サイズ [x,y]
      * 
-     * @constant {Array[number]}  
+     * @constant {number}  
      */
-    Object.defineProperty(PixelateFilter.prototype, "size", {
+    Object.defineProperty(PixelateFadeFilter.prototype, "size", {
         configurable:true,
         enumerable:true,
-        set: function(value) { this.uniforms.size = value; },
+        set: function(value) {  this.uniforms.size = value; },
         get: function() { return this.uniforms.size; }
     });
-
-    /**
-     * 領域の幅と高さを設定する。
-     * 
-     * @param {number} width 幅
-     * @param {number} height 高さ
-     */
-    PixelateFilter.prototype.setAreaSize = function(width, height) {
-        this.uniforms.areaSize = [width, height];
-    };
-
 
     /**
      * バーテックスシェーダーのソースを得る。
      * 
      * @returns {string} バーテックシェーダーのソース。バーテックスシェーダーがない場合にはnull.
      */
-    PixelateFilter.prototype._vertexSrc = function() {
+    PixelateFadeFilter.prototype._vertexSrc = function() {
         return null;
     };
     /**
@@ -376,20 +392,48 @@
      * 
      * @returns {string} フラグメントシェーダーのソース。フラグメントシェーダーがない場合にはnull
      */
-    PixelateFilter.prototype._fragmentSrc = function() {
+    PixelateFadeFilter.prototype._fragmentSrc = function() {
         const src =
             "varying vec2 vTextureCoord;" +
             "uniform sampler2D uSampler;" +
-            "uniform vec2 size;" +
-            "uniform vec4 areaSize;" +
+            "uniform float size;" +
+            "uniform vec2 areaSize;" +
             "" +
             "void main(void) {" +
-            "    vec2 coord = vTextureCoord.xy * areaSize.xy;" +
-            "    coord = floor( coord / size ) * size;" +
-            "    coord /= areaSize.xy;" +
-            "    gl_FragColor = texture2D(uSampler, coord);" +
+            "    if (size > 1.0) {" +
+            "        vec2 coord = vTextureCoord.xy * areaSize.xy;" +
+            "        coord = floor( coord / size ) * size;" +
+            "        coord /= areaSize.xy;" +
+            "        gl_FragColor = texture2D(uSampler, coord);" +
+            "    } else {" +
+            "        gl_FragColor = texture2D(uSampler, vTextureCoord);" +
+            "    }" +
             "}";
         return src;
+    };
+
+    /**
+     * このフィルタの描画対象サイズを設定する。
+     * 
+     * @param {number} width 幅
+     * @param {number} height 高さ
+     */
+    PixelateFadeFilter.prototype.setAreaSize = function(width, height) {
+        const curSize = this.uniforms.areaSize;
+        if ((curSize[0] !== width) || (curSize[1] !== height)) {
+            this.uniforms.areaSize = [ width, height];
+        }
+    };
+
+    /**
+     * フィルタを適用する。
+     * 
+     * @param {PIXI.FilterManager} filterManager 
+     * @param {PIXI.RenderTexture} input 入力レンダリングターゲット
+     * @param {PIXI.RenderTexture} output 出力レンダリングターゲット
+     */
+    PixelateFadeFilter.prototype.apply = function(filterManager, input, output) {
+        PIXI.Filter.prototype.apply.call(this, filterManager, input, output);
     };
     //------------------------------------------------------------------------------
     // ImageFadeFilter
@@ -574,8 +618,7 @@
      */
     Scene_Base.prototype.createColorFilter = function() {
         _Scene_Base_createColorFilter.call(this);
-        this._pixelateFilter = new PixelateFilter();
-        this._pixelateFilter.setAreaSize(Graphics.boxWidth, Graphics.boxHeight);
+        this._pixelateFilter = new PixelateFadeFilter();
         this.filters.push(this._pixelateFilter);
     };
     /**
@@ -813,6 +856,7 @@
      *     フェードの処理を拡張するためオーバーライドする。
      */
     Scene_Base.prototype.updateColorFilter = function() {
+        this._pixelateFilter.setAreaSize(Graphics.boxWidth, Graphics.boxHeight);
         switch (this._fadePattern.mode) {
             case Game_Screen.FADE_MODE_PATTERN:
                 this.applyFadePattern();
@@ -860,7 +904,8 @@
         const blendColor = [c[0], c[1], c[2], this._fadeOpacity];
         this._colorFilter.setBlendColor(blendColor);
         this._fadeSprite.setPattern("");
-        this._pixelateFilter.setSize((this._fadeOpacity / 10).clamp(1, 10));
+        const value = (this._fadeOpacity / 10).clamp(1, 25);
+        this._pixelateFilter.size = value;
     };
 
     /**
@@ -1127,7 +1172,7 @@
      */
     Game_Screen.prototype.fadePixelateSize = function() {
         if (this._fadePattern.mode === Game_Screen.FADE_MODE_PIXELATE) {
-            return ((255 - this._brightness) / 10).clamp(1, 10)
+            return ((255 - this._brightness) / 10).clamp(1, 25)
         } else {
             return 1;
         }
@@ -1149,8 +1194,7 @@
      */
     Spriteset_Base.prototype.createOverallFilters = function() {
         _Spriteset_Base_createOverallFilters.call(this);
-        this._pixelateFilter = new PixelateFilter();
-        this._pixelateFilter.setAreaSize(Graphics.boxWidth, Graphics.boxHeight);
+        this._pixelateFilter = new PixelateFadeFilter();
         this.filters.push(this._pixelateFilter);
     };
 
@@ -1160,7 +1204,9 @@
      */
     Spriteset_Base.prototype.updateOverallFilters = function() {
         _Spriteset_updateOverallFilters.call(this);
-        this._pixelateFilter.setSize($gameScreen.fadePixelateSize());
+        const fadePixelSize = $gameScreen.fadePixelateSize();
+        this._pixelateFilter.setAreaSize(Graphics.boxWidth, Graphics.boxHeight);
+        this._pixelateFilter.size = fadePixelSize;
     };
     //------------------------------------------------------------------------------
     // Scene_Message

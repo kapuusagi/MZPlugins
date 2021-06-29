@@ -1,7 +1,6 @@
 本来はIssueで管理した方がいい。
 
 動作確認が必要なプラグインリスト:
-  ☐ Kapu_FadeExtends
   ☐ Kapu_MapTransfer
   ☐ Kapu_QuestSystem
   ☐ Kapu_QuestSystem_UI
@@ -9,7 +8,9 @@
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
   Kapu_FadeExtends:
-    ☐ フェードパターンを入れるフォルダをimg/fadepatternsに変更した。
+    ☐ シーンに対するピクセレートフェード動作
+    ☐ スプライトセットに対するディゾルブ
+    ☐ シーンに対するディゾルブ
       
 機能拡張予定:
   Kapu_ChoiceByRoulette:
