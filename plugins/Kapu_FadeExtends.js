@@ -3,6 +3,7 @@
  * @plugindesc フェードエフェクトの拡張
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Base_Scene
  * 
  * @command setNextFadeOutPattern
  * @text 次のフェードアウト処理パターンを設定する。
@@ -738,13 +739,9 @@
         }
         if (this._fadeSign < 0) {
             // フェードアウト
-            if (this._windowLayer) {
-                this._windowLayer.visible = false;
-            }
+            SceneManager.hideWindowLayer();
             SceneManager.snapForDissolve();
-            if (this._windowLayer) {
-                this._windowLayer.visible = true;
-            }
+            SceneManager.showWindowLayer();
         }
         const bitmap = SceneManager.dissolveBitmap();
         const sprite = new Sprite();
@@ -995,7 +992,9 @@
      */
     Game_Screen.prototype.setupDissolve = function() {
         if (this._fadeOutDuration > 0) {
+            SceneManager.hideWindowLayer();
             SceneManager.snapForDissolve();
+            SceneManager.showWindowLayer();
             this._dissolveOpacity = 255;
         }
     };

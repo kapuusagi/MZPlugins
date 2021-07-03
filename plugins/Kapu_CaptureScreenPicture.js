@@ -3,6 +3,7 @@
  * @plugindesc スクリーンキャプチャしてピクチャとして扱うようにする機能
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Base_Scene
  * 
  * @command saveScreen
  * @text キャプチャする
@@ -37,6 +38,12 @@
  * @option JPEG
  * @value image/jpeg
  * @parent isSave
+ * 
+ * @arg hideWindows
+ * @text ウィンドウは除外する
+ * @desc キャプチャ画像からメッセージなどのウィンドウを除外する場合にはtrueにする。
+ * @type boolean
+ * @default true
  * 
  * @command releaseCapture
  * @text キャプチャデータを解放する。
@@ -143,6 +150,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.1.1.0 キャプチャ時にウィンドウを隠せるように変更した。
  * Version.1.0.0 新規作成
  */
 (() => {
@@ -154,10 +162,17 @@
         const no = Number(args.captureId) || 0;
         const scale = (Number(args.scale) || 100).clamp(0, 100);
         const format = args.format || "image/png";
-        const isSave = (typeof args.isSave === "undefined") ? false : (args.isSave === "true");
+        const isSave = (args.isSave === undefined) ? false : (args.isSave === "true");
+        const hideWindows = (args.hideWindows === undefined) ? true : (args.hideWindows === "true");
         if (no > 0) {
             let bitmap = null;
+            if (hideWindows) {
+                SceneManager.hideWindowLayer();
+            }
             const snapBitmap = SceneManager.snap();
+            if (hideWindows) {
+                SceneManager.showWindowLayer();
+            }
             if (scale !== 100) {
                 const resizedBitmap = new Bitmap(snapBitmap.width * scale / 100, snapBitmap.height * scale / 100);
                 resizedBitmap.blt(snapBitmap, 0, 0, snapBitmap.width, snapBitmap.height, 0 ,0, resizedBitmap.width, resizedBitmap.height);
