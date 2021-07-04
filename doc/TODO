@@ -7,14 +7,7 @@
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
-  Kapu_FadeExtends:
-    ☐ シーンに対するピクセレートフェード動作
-    ☐ スプライトセットに対するディゾルブ
-    ☐ シーンに対するディゾルブ
-    ☐ フェードパターンを入れるフォルダをimg/fadepatternsに変更した。
-    ☐ Dissolveでウィンドウレイヤーを隠すように変更した。
-  Kapu_CaptureScreenPicture:
-    ☐ キャプチャ時にウィンドウレイヤーを含めるかどうかを選択できるようにした。
+
       
 機能拡張予定:
   Kapu_ChoiceByRoulette:
@@ -25,7 +18,6 @@
     ☐ ユニークアイテム指定。だれかが所持していたらドロップさせない仕組み
   Kapu_MapTransfer:
     ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど。
-    ☐ モザイクを追加したい。いけるかなあ。PIXIのPixelarateFilterが使えれば、パターンフェードよりは簡単そう。
   Kapu_Timer_Extend:
     ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
 

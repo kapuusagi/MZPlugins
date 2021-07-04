@@ -745,8 +745,8 @@
         }
         const bitmap = SceneManager.dissolveBitmap();
         const sprite = new Sprite();
-        sprite.x = (Graphics.boxWidth - bitmap.width) / 2;
-        sprite.y = (Graphics.boxHeight - bitmap.height) / 2
+        sprite.x = Graphics.boxWidth / 2;
+        sprite.y = Graphics.boxHeight / 2;
         sprite.anchor.x = 0.5;
         sprite.anchor.y = 0.5;
         sprite.z = -20; // 手前
@@ -833,6 +833,7 @@
     Scene_Base.prototype.updateDissolve = function() {
         if (this._fadeDuration > 0) {
             if (this._fadeSign > 0) { // フェードイン
+                const d = this._fadeDuration;
                 this._fadeOpacity -= this._fadeOpacity / d;
                 if (this._fadeOpacity <= 0) {
                     this._fadeLayer.removeChild(this._dissolveSprite);
@@ -931,7 +932,7 @@
         };
         this._fadeOpacity = 0; // 0でスプライトセット表示、255でfadeColorにフェードアウト
         this._fadeColor = [0,0,0,255];
-        this._dissolveOpacity = 255;
+        this._dissolveOpacity = 0; // ディゾルブ画像の不透明度(255で表示、0で表示完了)
     };
 
     /**
@@ -1057,8 +1058,8 @@
      * ディゾルブアウトを更新する。
      */
     Game_Screen.prototype.updateDissolveOut = function() {
-        if (this._fadeDuration > 0) {
-            this._fadeDuration--;
+        if (this._fadeOutDuration > 0) {
+            this._fadeOutDuration--;
         }
     };
 
@@ -1183,7 +1184,7 @@
      * @returns {number} ディゾルブの割合(0～255, 0で次の画像、255は前の画像)
      */
     Game_Screen.prototype.dissolveOpacity = function() {
-        this._dissolveOpacity;
+        return this._dissolveOpacity;
     };
     //------------------------------------------------------------------------------
     // Spriteset_Base
@@ -1226,6 +1227,8 @@
      */
     Scene_Message.prototype.createSpritesetFadeLayer = function() {
         this._spritesetFadeLayer = new Sprite();
+        this._spritesetFadeLayer.x = (Graphics.width - Graphics.boxWidth) / 2;
+        this._spritesetFadeLayer.y = (Graphics.height - Graphics.boxHeight) / 2;
         this.addChild(this._spritesetFadeLayer);
         this._spritesetFadeSprite = new Sprite_ImageFade();
         this._spritesetFadeLayer.addChild(this._spritesetFadeSprite);
@@ -1239,7 +1242,7 @@
     Scene_Message.prototype.update = function() {
         _Scene_Message_update.call(this);
         this.updateSpritesetFade();
-        this.updateDissolve();
+        this.updateSpritesetDissolve();
     };
 
     /**
@@ -1252,21 +1255,23 @@
     };
 
     /**
-     * ディゾルブを更新する。
+     * Spriteset用ディゾルブを更新する。
      */
-    Scene_Message.prototype.updateDissolve = function() {
+    Scene_Message.prototype.updateSpritesetDissolve = function() {
         const dissolveOpacity = $gameScreen.dissolveOpacity();
         if (dissolveOpacity > 0) {
-            if (!this._dissolveSprite) {
-                this._dissolveSprite = this.createDissolveSprite();
-                this._spritesetFadeLayer.addChild(this._dissolveSprite);
+            if (!this._ssetDissolveSprite) {
+                this._ssetDissolveSprite = this.createDissolveSprite();
+                this._spritesetFadeLayer.addChild(this._ssetDissolveSprite);
+                this._ssetDissolveSprite.x = Graphics.boxWidth / 2;
+                this._ssetDissolveSprite.y = Graphics.boxHeight / 2;
             }
-            this._dissolveSprite.opacity = dissolveOpacity;
+            this._ssetDissolveSprite.opacity = dissolveOpacity;
         } else {
-            if (this._dissolveSprite) {
-                this._spritesetFadeLayer.removeChild(this._dissolveSprite);
-                this._dissolveSprite.destroy();
-                delete this._dissolveSprite;
+            if (this._ssetDissolveSprite) {
+                this._spritesetFadeLayer.removeChild(this._ssetDissolveSprite);
+                this._ssetDissolveSprite.destroy();
+                delete this._ssetDissolveSprite;
                 SceneManager.releaseDissolveBitmap();
             }
         }
@@ -1280,8 +1285,6 @@
     Scene_Message.prototype.createDissolveSprite = function() {
         const bitmap = SceneManager.dissolveBitmap();
         const sprite = new Sprite();
-        sprite.x = (Graphics.boxWidth - bitmap.width) / 2;
-        sprite.y = (Graphics.boxHeight - bitmap.height) / 2
         sprite.anchor.x = 0.5;
         sprite.anchor.y = 0.5;
         sprite.z = -20; // 手前
