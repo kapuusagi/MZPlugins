@@ -7,6 +7,8 @@
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
+  ☐ Kapu_BattleMusicManager
+  ☐ Kapu_EncounterEffectManager
 
       
 機能拡張予定:
