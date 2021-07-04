@@ -75,7 +75,7 @@
     /**
      * ウィンドウレイヤーを表示させる。
      */
-    SceneManager.showWindowlayer = function() {
+    SceneManager.showWindowLayer = function() {
         if (this._scene) {
             this._scene.showWindowLayer();
         }
