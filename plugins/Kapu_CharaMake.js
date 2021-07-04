@@ -329,9 +329,9 @@ function Scene_UnregisterActor() {
     const _parseRegistableIds = function(text) {
         const ids = [];
         if (text) {
-            const tokens = text.split(',');
+            const tokens = text.split(",");
             for (const token of tokens) {
-                nums = token.split('-');
+                nums = token.split("-");
                 if (nums.length == 1) {
                     const actorId = Number(token) || 0;
                     if ((actorId > 0) && !ids.includes(actorId)) {

@@ -123,7 +123,7 @@
             for (const token of tokens) {
                 let equipType = 0;
                 let name = "";
-                const index = token.indexOf(':');
+                const index = token.indexOf(":");
                 if (index > 0) {
                     equipType = Number(token.substr(0, index));
                     name = token.substr(index + 1).trim();

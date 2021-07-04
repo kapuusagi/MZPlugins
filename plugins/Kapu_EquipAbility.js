@@ -214,7 +214,7 @@
             for (;;) {
                 const match = regExp.exec(obj.note);
                 if (match) {
-                    const ids = match[1].split(',').map(token => Number(token) || 0);
+                    const ids = match[1].split(",").map(token => Number(token) || 0);
                     if ((ids.length >= 2) && (ids[0] > 0)) {
                         const level = ids[0];
                         for (let i = 1; i < ids.length; i++) {

@@ -793,7 +793,7 @@ function Window_BattleRewards() {
         const width = this.bitmapWidth();
         const height = this.bitmapHeight();
         this.setupValueFont();
-        this.bitmap.drawText('+' + currentValue, 0, 0, width, height, "right");
+        this.bitmap.drawText("+" + currentValue, 0, 0, width, height, "right");
     };
     
     /**

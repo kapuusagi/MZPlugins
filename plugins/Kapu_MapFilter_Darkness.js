@@ -758,7 +758,7 @@
             this._searchLevel = Math.floor(Number(event.meta.searchLevel) || 9999);
         }
         if (event.meta.lightSourceColor) {
-            const array = event.meta.lightSourceColor.split(',').map(str => Number(str));
+            const array = event.meta.lightSourceColor.split(",").map(str => Number(str));
             const r = Number(array[0] || 255).clamp(0, 255);
             const g = Number(array[1] || 255).clamp(0, 255);
             const b = Number(array[2] || 255).clamp(0, 255);

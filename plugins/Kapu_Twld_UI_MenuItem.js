@@ -169,7 +169,7 @@
  * 
  * アイテム
  *   <effectsString:effectsString$>
- *      カンマ('<')で区切られた文字列。
+ *      カンマ("<")で区切られた文字列。
  *      情報画面の効果欄に表示される。
  * ============================================
  * 変更履歴
@@ -627,7 +627,7 @@ function Window_ItemInfo() {
             let y = rect.y;
             this.resetTextColor();
             const effectsString = item.meta.effectsString || "";
-            const effectStrings = effectsString.split(',').map(s => s.trim());
+            const effectStrings = effectsString.split(",").map(s => s.trim());
             for (const effectText of effectStrings) {
                 const textWidth = this.textWidth(effectText);
                 if ((x + textWidth) > rect.width) {

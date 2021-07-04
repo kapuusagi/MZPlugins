@@ -352,7 +352,7 @@ function Simple_TextInput() {
      * 位置を更新する。
      */
     Simple_TextInput.prototype.updatePlace = function() {
-        const _canvas = document.getElementById('UpperCanvas') || document.getElementById('gameCanvas');
+        const _canvas = document.getElementById("UpperCanvas") || document.getElementById("gameCanvas");
         const rect = _canvas.getBoundingClientRect();
         const screenX = rect.left;
         const screenY = rect.top;

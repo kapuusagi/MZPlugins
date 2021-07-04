@@ -900,7 +900,7 @@
         const choices = $gameMessage.choices();
         const enables = $gameMessage._choiceEnables;
         for (let i = 0; i < choices.length; i++) {
-            this.addCommand(choices[i], 'choice', enables[i]);
+            this.addCommand(choices[i], "choice", enables[i]);
         }
     };
 

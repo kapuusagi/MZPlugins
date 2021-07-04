@@ -1222,7 +1222,7 @@
                     break;
                 } else if (eventData.parameters[0].startsWith("#")) {
                     const note = eventData.parameters[0].substr(1).trim();
-                    const preprocessParamLists = note.split(',').map(token => token.split(/ +/));
+                    const preprocessParamLists = note.split(",").map(token => token.split(/ +/));
                     for (const preprocessParams of preprocessParamLists) {
                         this.doPreprocessSetting(preprocessParams)
                     }

@@ -152,7 +152,7 @@
     });
 
     PluginManager.registerCommand(pluginName, "config", args => {
-        // Note: 未指定の場合には、undefinedではなく、''になる点に注意。Number('')=0である。
+        // Note: 未指定の場合には、undefinedではなく、""になる点に注意。Number("")=0である。
         const angle = (args.angle) ? Number(args.angle) : undefined;
         const gain = (args.gain) ? Number(args.gain) : undefined;
         const lacunarity = (args.lacunarity) ? Number(args.lacunarity) : undefined;
