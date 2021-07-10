@@ -1,7 +1,6 @@
 本来はIssueで管理した方がいい。
 
 動作確認が必要なプラグインリスト:
-  ☐ Kapu_MapTransfer
   ☐ Kapu_QuestSystem
   ☐ Kapu_QuestSystem_UI
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
@@ -22,10 +21,11 @@
     ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど。
   Kapu_Timer_Extend:
     ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
+  Kapu_FadeExtends:
+    ☐ ズームイン/ズームアウトを併用できるようにしたい。
 
 リファクタリング:
-  ☐ クエストUIとクエストショップは分離した方がいいかも。
-  ☐ MapTransferに、移動時のディゾルブ処理を入れているけれど、Fade_Extendsに入れた方が美しそう。
+
 
 
 その他:
