@@ -390,6 +390,24 @@
     Game_Map.prototype.stepCountOfWeather = function() {
         return stepsOfWether;
     };
+    const _Game_Map_onTimeRangeChanged = Game_Map.prototype.onTimeRangeChanged;
+    /**
+     * 時間帯が変更されたときの処理を行う。
+     */
+    Game_Map.prototype.onTimeRangeChanged = function() {
+        _Game_Map_onTimeRangeChanged.call(this);
+        $gamePlayer.clearStepCountOfTimeRange();
+    };
+
+
+    const _Game_Map_onWeatherChanged = Game_Map.prototype.onWeatherChanged;
+    /**
+     * 天候が変わったとき野処理を行う。
+     */
+    Game_Map.prototype.onWeatherChanged = function() {
+        _Game_Map_onWeatherChanged.call(this);
+        $gamePlayer.clearStepCountOfWeather();
+    };
 
     //------------------------------------------------------------------------------
     // Game_Player
@@ -401,7 +419,21 @@
      */
     Game_Player.prototype.initMembers = function() {
         _Game_Player_initMembers.call(this);
+        this.clearStepCountOfTimeRange();
+        this.clearStepCountOfWeather();
+    };
+
+    /**
+     * 時間変更ステップカウントをクリアする。
+     */
+    Game_Player.prototype.clearStepCountOfTimeRange = function() {
         this._stepCounterOfTimeRange = 0;
+    };
+
+    /**
+     * 天候変更ステップカウントをクリアする。
+     */
+    Game_Player.prototype.clearStepCountOfWeather = function() {
         this._stepCounterOfWeather = 0;
     };
 
@@ -433,25 +465,6 @@
                 }
             }
         }
-    };
-
-    const _Game_Map_onTimeRangeChanged = Game_Map.prototype.onTimeRangeChanged;
-    /**
-     * 時間帯が変更されたときの処理を行う。
-     */
-    Game_Map.prototype.onTimeRangeChanged = function() {
-        _Game_Map_onTimeRangeChanged.call(this);
-        this._stepCounterOfTimeRange = 0;
-    };
-
-
-    const _Game_Map_onWeatherChanged = Game_Map.prototype.onWeatherChanged;
-    /**
-     * 天候が変わったとき野処理を行う。
-     */
-    Game_Map.prototype.onWeatherChanged = function() {
-        _Game_Map_onWeatherChanged.call(this);
-        this._stepCounterOfWeather = 0;
     };
 
     const _Game_Player_onRegionChanged = Game_Player.prototype.onRegionChanged;
