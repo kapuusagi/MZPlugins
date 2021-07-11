@@ -246,17 +246,6 @@ function EncounterEffectManager() {
     //------------------------------------------------------------------------------
     // Game_Map
 
-    const _Game_Map_setup = Game_Map.prototype.setup;
-    /**
-     * マップをセットアップする。
-     * 
-     * @param {number} mapId マップID
-     */
-    Game_Map.prototype.setup = function(mapId) {
-        _Game_Map_setup.call(this, mapId);
-        this.setupEncounterEffects();
-    };
-
     /**
      * エンカウントエフェクトリストをセットアップする。
      */
@@ -279,6 +268,9 @@ function EncounterEffectManager() {
      * @returns {string} エンカウントエフェクト名。
      */
     Game_Map.prototype.encounterEffect = function() {
+        if (!$dataMap.encounterEffects) {
+            this.setupEncounterEffects();
+        }
         if ($dataMap.encounterEffects.length > 0) {
             const index = Math.randomInt($dataMap.encounterEffects.length);
             return $dataMap.encounterEffects[index];
