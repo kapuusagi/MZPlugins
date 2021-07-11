@@ -29,6 +29,21 @@
  * @desc 削除時に使用する識別名
  * @type string
  * 
+ * @command randomizeBattleBgm
+ * @text 戦闘BGMランダム機能設定
+ * 
+ * @arg enabled
+ * @text 有効
+ * @desc 有効にするかどうか
+ * @type boolean
+ * @default true
+ * 
+ * 
+ * @param randomizeBattleBgm
+ * @text 戦闘BGMランダマイズ状態初期値
+ * @desc 戦闘BGMランダマイズ状態初期値（NewGame時の初期値）
+ * @type boolean
+ * @default true
  * 
  * @param battleBgms
  * @text 戦闘BGM（ランダム）
@@ -104,14 +119,17 @@
     const pluginName = "Kapu_BattleMusicManager";
     const parameters = PluginManager.parameters(pluginName);
 
+    const randomizeBattleBgm = (typeof parameters["randomizeBattleBgm"] === undefined)
+            ? false : parameters["randomizeBattleBgm"] === "true";
+
     const battleBgms = [];
     try {
-        const entries = Json.parse(parameters["battleBgms"]).map(str => JSON.parse(str));
+        const entries = JSON.parse(parameters["battleBgms"]).map(str => JSON.parse(str));
         for (const entry of entries) {
             if (entry.name) {
                 entry.volume = (Number(entry.volume) || 90).clamp(0, 100);
                 entry.pitch = (Number(entry.pitch) || 100).clamp(50, 150);
-                entry.pane = (Number(entry.pane) || 0).clamp(-100, 100);
+                entry.pan = (Number(entry.pan) || 0).clamp(-100, 100);
                 battleBgms.push(entry);
             }
         }
@@ -150,19 +168,13 @@
         }
     });
 
+    PluginManager.registerCommand(pluginName, "randomizeBattleBgm", args => {
+        const enabled = (args.enabled === undefined) ? true : args.enabled === "true";
+        $gameSystem.setRandomizeBattleBgm(enabled);
+    });
+
     //------------------------------------------------------------------------------
     // Game_Map
-
-    const _Game_Map_setup = Game_Map.prototype.setup;
-    /**
-     * マップをセットアップする。
-     * 
-     * @param {number} mapId マップID
-     */
-    Game_Map.prototype.setup = function(mapId) {
-        _Game_Map_setup.call(this, mapId);
-        this.setupBattleBgms();
-    };
 
     /**
      * マップでのBGM初期化
@@ -191,7 +203,6 @@
                 break;
             }
         }
-
     };
 
     /**
@@ -200,6 +211,9 @@
      * @returns {object} BGMエントリ
      */
     Game_Map.prototype.battleBgm = function() {
+        if (!$dataMap.battleBgms) {
+            this.setupBattleBgms();
+        }
         const bgms = $dataMap.battleBgms;
         if (bgms.length > 0) {
             const index = Math.randomInt(bgms.length);
@@ -217,63 +231,72 @@
      */
     Game_System.prototype.initialize = function() {
         _Game_System_initialize.call(this);
+        this._isRandomizeBattleBgm = randomizeBattleBgm;
         this._randomBattleBgms = {};
         for (let i = 0; i < battleBgms.length; i++) {
             this._randomBattleBgms[String(i)] = battleBgms[i];
         }
+        this.clearNextBattleBgm();
     };
 
     /**
-     * 戦闘BGM指定を解除する。
-     */
-    Game_System.prototype.clearBattleBgm = function() {
-        this._battleBgm = null;
-    };
-
-    /**
-     * 戦闘BGMを設定する。
+     * 戦闘BGMランダマイズを設定する。
      * 
-     * @param {string} name BGMファイル名
-     * @param {number} volume ボリューム
-     * @param {number} pitch ピッチ
-     * @param {number} pan パン
+     * @param {boolean} enabled ランダマイズを有効にする場合にはtrue, それ以外はfalse.
      */
-    Game_System.prototype.setBattleBgm = function(name, volume, pitch, pan) {
-        if (name) {
-            this._battleBgm = {
-                name:name,
-                volume:volume,
-                pitch:pitch,
-                pan:pan
-            }
-        } else {
-            this._battleBgm = null;
-        }
+    Game_System.prototype.setRandomizeBattleBgm = function(enabled) {
+        this._isRandomizeBattleBgm = enabled;
     };
 
     /**
-     * 戦闘BGMを得る。
+     * 戦闘BGMランダマイズが有効かどうかを得る。
      * 
-     * @returns {object} BGMデータ。未指定時はnull
-     * !!!overwrite!!! Game_System.battleBgm()
-     *     戦闘BGMエントリの取得方法を変更するため、オーバーライドする。
+     * @returns {boolean} ランダマイズを有効にする場合にはtrue, それ以外はfalse.
      */
-    Game_System.prototype.battleBgm = function() {
-        if (this._battleBgm) {
-            return this._battleBgm;
-        } else {
+    Game_System.prototype.isRandomizeBattleBgm = function() {
+        return this._isRandomizeBattleBgm;
+    };
+
+    /**
+     * 次の戦闘BGMをクリアする。
+     */
+    Game_System.prototype.clearNextBattleBgm = function() {
+        this._nextBattleBgm = null;
+    };
+
+    /**
+     * 戦闘BGMをセットアップする。
+     */
+    Game_System.prototype.setupNextBattleBgm = function() {
+        if (this._isRandomizeBattleBgm) {
             const bgm = $gameMap.battleBgm();
             if (bgm) {
-                return bgm;
+                this._nextBattleBgm = bgm;
             } else {
                 const randomBattleBgms = this.randomBattleBgms();
                 if (randomBattleBgms.length > 0) {
                     const index = Math.randomInt(randomBattleBgms.length);
-                    return randomBattleBgms[index];
+                    this._nextBattleBgm = randomBattleBgms[index];
                 } else {
-                    return $dataSystem.battleBgm;
+                    this._nextBattleBgm = this._battleBgm ?? $dataSystem.battleBgm;
                 }
             }
+        } else {
+            this._nextBattleBgm = null;
+        }
+    };
+
+    const _Game_System_battleBgm = Game_System.prototype.battleBgm;
+    /**
+     * 戦闘BGMを得る。
+     * 
+     * @returns {object} BGMデータ。未指定時はnull
+     */
+    Game_System.prototype.battleBgm = function() {
+        if (this._nextBattleBgm) {
+            return this._nextBattleBgm;
+        } else {
+            return _Game_System_battleBgm.call(this);
         }
     };
 
@@ -308,4 +331,32 @@
     Game_System.prototype.randomBattleBgms = function() {
         return Object.values(this._randomBattleBgms);
     };
+
+    //------------------------------------------------------------------------------
+    // BattleManager
+    const _BattleManager_setup = BattleManager.setup;
+    /**
+     * 戦闘シーンを開始するための準備を行う。
+     * 
+     * @param {number} troopId エネミーグループID
+     * @param {boolean} canEscape 逃走可能な場合にtrue 
+     * @param {boolean} canLose 敗北できる場合にtrue
+     */
+    BattleManager.setup = function(troopId, canEscape, canLose) {
+        $gameSystem.setupNextBattleBgm();
+        _BattleManager_setup.call(this, troopId, canEscape, canLose);
+    };
+
+    const _BattleManager_endBattle = BattleManager.endBattle;
+    /**
+     * 戦闘を終了させる。
+     * 本メソッドを呼ぶと、フェーズが"battleEnd"に遷移し、次のupdate()でSceneManager.pop()がコールされる。
+     * 
+     * @param {number} result 戦闘結果(0:勝利 , 1:中断(逃走を含む), 2:敗北)
+     */
+    BattleManager.endBattle = function(result) {
+        _BattleManager_endBattle.call(this, result);
+        $gameSystem.clearNextBattleBgm();
+    };
+
 })();
