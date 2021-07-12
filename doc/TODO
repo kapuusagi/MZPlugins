@@ -9,7 +9,8 @@
   ☐ Kapu_BattleMusicManager
   ☐ Kapu_EncounterEffectManager
   ☐ Kapu_GrowupSystem_Skills (レベルアップでのGP習得可能スキル追加)
-
+  Kapu_FadeExtends:
+    ☐ ズームイン/ズームアウトを併用できるようにしたい。
       
 機能拡張予定:
   Kapu_ChoiceByRoulette:
@@ -22,8 +23,7 @@
     ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど。
   Kapu_Timer_Extend:
     ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
-  Kapu_FadeExtends:
-    ☐ ズームイン/ズームアウトを併用できるようにしたい。
+
 
 リファクタリング:
 
