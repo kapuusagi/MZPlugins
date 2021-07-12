@@ -8,6 +8,7 @@
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
   ☐ Kapu_BattleMusicManager
   ☐ Kapu_EncounterEffectManager
+  ☐ Kapu_GrowupSystem_Skills (レベルアップでのGP習得可能スキル追加)
 
       
 機能拡張予定:
@@ -31,6 +32,8 @@
 その他:
   ☐ PIXI.Filter.Disなんちゃらフィルタは水中表現に使えそう。
   ☐ ランダムエンカウント時に適用するフェード処理(複数からランダム)を指定するようにしたい。 → これはエンカウントエフェクトプラグインとして別にしたい。
+  ☐ ダメージポップアップで、「効果有り！」な場合と「効果なし！」の場合にポップアップさせたい。
+
   
 
 
