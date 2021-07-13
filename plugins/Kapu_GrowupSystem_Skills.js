@@ -150,6 +150,8 @@
                         obj.gpLearnableSkills.push({ level:level, skillId:id });
                     }
                 }
+            } else {
+                break;
             }
         }
 
