@@ -7,6 +7,16 @@
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
 
+  ☐ Kapu_BattleMusicManager
+  ☐ Kapu_EncounterEffectManager
+  ☐ Kapu_GrowupSystem_Skills (レベルアップでのGP習得可能スキル追加)
+  Kapu_FadeExtends:
+    ☐ ズームイン/ズームアウトを併用できるようにしたい。
+  Kapu_Base_DamageCalculation:
+    ☐ 属性レートをresultに格納するようにした。
+  Kapu_Twld_DamageEffect:
+    ☐ ダメージポップアップを変更した。
+    ☐ ダメージポップアップで、「効果有り！」な場合と「効果なし！」の場合にポップアップさせたい。
       
 機能拡張予定:
   Kapu_ChoiceByRoulette:
@@ -26,6 +36,7 @@
   Kapu_GrowupSystem_Skills:
     ☐ レベルアップでGP習得可能スキル追加できるようにする。
 
+
 リファクタリング:
 
 
@@ -33,6 +44,7 @@
 その他:
   ☐ PIXI.Filter.Disなんちゃらフィルタは水中表現に使えそう。
   ☐ ランダムエンカウント時に適用するフェード処理(複数からランダム)を指定するようにしたい。 → これはエンカウントエフェクトプラグインとして別にしたい。
+
   
 
 

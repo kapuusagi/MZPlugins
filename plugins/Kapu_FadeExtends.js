@@ -20,6 +20,7 @@
  * @value pixelate
  * @option ディゾルブ
  * @value dissolve
+ * @default normal
  * 
  * @arg patternFile
  * @text パターン
@@ -39,6 +40,13 @@
  * @type number[]
  * @default [0,0,0]
  * 
+ * @arg zoom
+ * @text ズーム倍率
+ * @desc ズーム倍率
+ * @type number
+ * @decimals 2
+ * @default 1.00
+ * 
  * 
  * @command setNextFadeInPattern
  * @text 次のフェードイン処理パターンを設定する。
@@ -55,6 +63,7 @@
  * @value pixelate
  * @option ディゾルブ
  * @value dissolve
+ * @default normal
  * 
  * @arg patternFile
  * @text パターン
@@ -74,6 +83,11 @@
  * @type number[]
  * @default [0,0,0]
  * 
+ * @arg zoom
+ * @text ズーム倍率
+ * @type number
+ * @decimals 2
+ * @default 1.00
  * 
  * @param defaultFadeOutMode
  * @text 既定のフェードアウト処理パターン
@@ -213,12 +227,14 @@
         while (color.length < 3) {
             color.push(0);
         }
+        const zoom = (args.zoom === undefined) ? Number(args.zoom) : 1.0;
 
         $gameTemp.setupNextFadeOut({
             mode: mode,
             pattern: patternFile,
             duration: duration,
-            color:color
+            color:color,
+            zoom:zoom
         });
     });
 
@@ -227,6 +243,7 @@
         const mode = args.mode || Game_Screen.FADE_MODE_NORMAL;
         const duration = Math.round(Number(args.duration) || 0);
         const color = JSON.parse(args.color).map(token => Number(token) || 0);
+        const zoom = (args.zoom === undefined) ? Number(args.zoom) : 1.0;
         while (color.length < 3) {
             color.push(0);
         }
@@ -234,7 +251,8 @@
             mode: mode,
             pattern: patternFile,
             duration: duration,
-            color:color
+            color:color,
+            zoom:zoom
         });
     });
     //------------------------------------------------------------------------------
@@ -299,7 +317,8 @@
             mode: defaultFadeOutMode,
             pattern: defaultFadeOutPattern,
             duration: defaultFadeOutDuration,
-            color: [0, 0, 0, 255]
+            color: [0, 0, 0, 255],
+            zoom:1
         }
     };
 
@@ -311,7 +330,8 @@
             mode: defaultFadeInMode,
             pattern: defaultFadeInPattern,
             duration: defaultFadeInDuration,
-            color: [0, 0, 0, 255]
+            color: [0, 0, 0, 255],
+            zoom:1
         }
     };
 
@@ -606,7 +626,8 @@
             mode: Game_Screen.FADE_MODE_NORMAL,
             pattern: "",
             duration: 24,
-            color: [0,0,0]
+            color: [0,0,0],
+            zoom:1
         };
         this._fadeColor = [0,0,0,255];
         this.createFadeLayer();
@@ -655,6 +676,7 @@
         this._fadeSign = 1;
         this._fadeDuration = this._fadePattern.duration || duration || 30;
         this._fadeOpacity = 255;
+        this._fadeZoomTarget = this._fadePattern.zoom || 1;
         if (this._fadePattern.color) {
             const c = this._fadePattern.color;
             this._fadeColor = [c[0], c[1], c[2], 255];
@@ -680,6 +702,7 @@
         this._fadeSign = -1;
         this._fadeDuration = this._fadePattern.duration || duration || 30;
         this._fadeOpacity = 0;
+        this._fadeZoomTarget = this._fadePattern.zoom || 1;
         if (this._fadePattern.color) {
             const c = this._fadePattern.color;
             this._fadeColor = [c[0], c[1], c[2], 255];
@@ -809,10 +832,10 @@
     Scene_Base.prototype.updateFadeNormal = function() {
         if (this._fadeDuration > 0) {
             const d = this._fadeDuration;
-            if (this._fadeSign > 0) { // フェードイン どんどん0に近づく
-                this._fadeOpacity -= this._fadeOpacity / d;
-            } else { // フェードアウト どんどん255に近づく
-                this._fadeOpacity += (255 - this._fadeOpacity) / d;
+            if (this._fadeSign > 0) { // フェードイン
+                this._fadeOpacity -= this._fadeOpacity / d; // どんどん0に近づく
+            } else {
+                this._fadeOpacity += (255 - this._fadeOpacity) / d; // どんどん255に近づく
             }
             this._fadeDuration--;
         }
@@ -880,6 +903,13 @@
         const blendColor = [c[0], c[1], c[2], this._fadeOpacity];
         this._colorFilter.setBlendColor(blendColor);
         this._fadeSprite.setPattern("");
+
+        if (this._fadeZoomTarget !== 1) {
+            const zoomX = $gamePlayer.screenX();
+            const zoomY = $gamePlayer.screenY() - 24;
+            const scale = 1.0 + (this._fadeZoomTarget - 1.0) * this._fadeOpacity / 255.0;
+            $gameScreen.setZoom(zoomX, zoomY, scale);
+        }
     };
 
     /**
@@ -890,8 +920,13 @@
         const alpha = (this._fadeOpacity >= 255) ? 255 : 0;
         const blendColor = [c[0], c[1], c[2], alpha];
         this._colorFilter.setBlendColor(blendColor);
-
         this._fadeSprite.setFadeOpacity(this._fadeOpacity);
+        if (this._fadeZoomTarget !== 1) {
+            const zoomX = $gamePlayer.screenX();
+            const zoomY = $gamePlayer.screenY() - 24;
+            const scale = 1.0 + (this._fadeZoomTarget - 1.0) * this._fadeOpacity / 255.0;
+            $gameScreen.setZoom(zoomX, zoomY, scale);
+        }
     };
 
     /**
@@ -904,6 +939,12 @@
         this._fadeSprite.setPattern("");
         const value = (this._fadeOpacity / 10).clamp(1, 25);
         this._pixelateFilter.size = value;
+        if (this._fadeZoomTarget !== 1) {
+            const zoomX = $gamePlayer.screenX();
+            const zoomY = $gamePlayer.screenY() - 24;
+            const scale = 1.0 + (this._fadeZoomTarget - 1.0) * this._fadeOpacity / 255.0;
+            $gameScreen.setZoom(zoomX, zoomY, scale);
+        }
     };
 
     /**
@@ -912,6 +953,18 @@
     Scene_Base.prototype.applyDissolve = function() {
         if (this._dissolveSprite) {
             this._dissolveSprite.opacity = this._fadeOpacity;
+
+            if (this._fadeZoomTarget !== 1) {
+                const scale = 1.0 + (this._fadeZoomTarget - 1.0) * (255 - this._fadeOpacity) / 255.0;
+                this._dissolveSprite.scale.x = scale;
+                this._dissolveSprite.scale.y = scale;
+    
+                // プレイヤー中心に倍率変更するため、ズームした分だけスプライトの表示位置をずらす。
+                const zoomX = $gamePlayer.screenX() - Graphics.boxWidth / 2;
+                const zoomY = $gamePlayer.screenY() - 24 - Graphics.boxHeight / 2;
+                this._dissolveSprite.x = Graphics.boxWidth / 2 + Math.round(-zoomX * (scale - 1));
+                this._dissolveSprite.y = Graphics.boxHeight / 2 + Math.round(-zoomY * (scale - 1));            
+            }
         }
     };
 
@@ -928,11 +981,13 @@
             mode: Game_Screen.FADE_MODE_NORMAL,
             pattern: "",
             duration: 24,
-            color: [0,0,0]
+            color: [0,0,0],
+            zoom:1
         };
         this._fadeOpacity = 0; // 0でスプライトセット表示、255でfadeColorにフェードアウト
         this._fadeColor = [0,0,0,255];
         this._dissolveOpacity = 0; // ディゾルブ画像の不透明度(255で表示、0で表示完了)
+        this._dissolveZoom = 1.0; // ディゾルブ画像のズーム倍率
     };
 
     /**
@@ -997,6 +1052,7 @@
             SceneManager.snapForDissolve();
             SceneManager.showWindowLayer();
             this._dissolveOpacity = 255;
+            this._dissolveZoom = 1.0;
         }
     };
 
@@ -1051,7 +1107,13 @@
      * 通常のフェードアウト処理を更新する。
      */
     Game_Screen.prototype.updateFadeOutNormal = function() {
+        const changeZoom = (this._fadeOutDuration > 0) && (this._fadePattern.zoom !== 1);
         _Game_Screen_updateFadeOut.call(this);
+        if (changeZoom) {
+            this._zoomX = $gamePlayer.screenX();
+            this._zoomY = $gamePlayer.screenY() - 24;
+            this._zoom = 1.0 + (this._fadePattern.zoom - 1.0) * (255 - this._brightness) / 255;
+        }
     };
 
     /**
@@ -1074,6 +1136,11 @@
                 this._fadeOutDuration--;
             }
             this._brightness = 255; // overallフィルタに対する輝度設定値はそのまま。
+            if (this._fadePattern.zoom !== 1) {
+                this._zoomX = $gamePlayer.screenX();
+                this._zoomY = $gamePlayer.screenY();
+                this._zoom = 1.0 + (this._fadePattern.zoom - 1.0) * this._fadeOpacity / 255;
+            }
         }
     };
 
@@ -1101,7 +1168,13 @@
      * 通常のフェードイン/アウト処理を更新する。
      */
     Game_Screen.prototype.updateFadeInNormal = function() {
+        const changeZoom = (this._fadeInDuration > 0) && (this._fadePattern.zoom !== 1);
         _Game_Screen_updateFadeIn.call(this);
+        if (changeZoom) {
+            this._zoomX = $gamePlayer.screenX();
+            this._zoomY = $gamePlayer.screenY() - 24;
+            this._zoom = 1.0 + (this._fadePattern.zoom - 1.0) * (255 - this._brightness) / 255;
+        }
     };
 
     /**
@@ -1115,6 +1188,11 @@
                 this._fadeInDuration--;
             }
             this._brightness = 255; // overallフィルタに対する輝度設定値はそのまま。
+            if (this._fadePattern.zoom !== 1) {
+                this._zoomX = $gamePlayer.screenX();
+                this._zoomY = $gamePlayer.screenY();
+                this._zoom = 1.0 + (this._fadePattern.zoom - 1.0) * this._fadeOpacity / 255;
+            }
         }
     };
 
@@ -1125,6 +1203,7 @@
         if (this._fadeInDuration > 0) {
             const d = this._fadeInDuration;
             this._dissolveOpacity = (this._dissolveOpacity * (d - 1)) / d;
+            this._dissolveZoom = 1.0 + (this._fadePattern.zoom - 1) * (255 - this._dissolveOpacity) / 255;
             this._fadeInDuration--;
         }
     };
@@ -1185,6 +1264,15 @@
      */
     Game_Screen.prototype.dissolveOpacity = function() {
         return this._dissolveOpacity;
+    };
+
+    /**
+     * ディゾルブ用のズーム倍率を得る。
+     * 
+     * @returns {number} ズーム倍率
+     */
+    Game_Screen.prototype.dissolveZoom = function() {
+        return this._dissolveZoom;
     };
     //------------------------------------------------------------------------------
     // Spriteset_Base
@@ -1274,6 +1362,16 @@
                 delete this._ssetDissolveSprite;
                 SceneManager.releaseDissolveBitmap();
             }
+        }
+        if (this._ssetDissolveSprite) {
+            const scale = $gameScreen.dissolveZoom();
+            this._ssetDissolveSprite.scale.x = scale;
+            this._ssetDissolveSprite.scale.y = scale;
+            // プレイヤー中心に倍率変更するため、ズームした分だけスプライトの表示位置をずらす。
+            const zoomX = $gamePlayer.screenX() - Graphics.boxWidth / 2;
+            const zoomY = $gamePlayer.screenY() - 24 - Graphics.boxHeight / 2;
+            this._ssetDissolveSprite.x = Graphics.boxWidth / 2 + Math.round(-zoomX * (scale - 1));
+            this._ssetDissolveSprite.y = Graphics.boxHeight / 2 + Math.round(-zoomY * (scale - 1));            
         }
     };
 

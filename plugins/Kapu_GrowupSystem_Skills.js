@@ -57,32 +57,40 @@
  * ノートタグ
  * ============================================
  * アクター
- *     <gpLearnedSkills:id1#,id2$,...>
- *         初期状態でgpにより習得しているスキルのID列を指定する。
- *     <gpLearnableSkills:id1#,id2#,...>
- *         初期状態でgpにより習得可能なスキルのID列を指定する。
+ *   <gpLearnedSkills:id1#,id2$,...>
+ *       初期状態でgpにより習得しているスキルのID列を指定する。
+ *   <gpLearnableSkills:id1#,id2#,...>
+ *       初期状態でgpにより習得可能なスキルのID列を指定する。
  * 
+ * クラス
+ *   <addGpLearn:level#,abilityId#,abilityId#,...>
+ *      level#に達したとき、abilityId#のアビリティを習得する。
+ *      複数指定可。詳細な習得可能条件は設定できない。
+ *  
  * スキル
- *     <gpLearnable:condition$>
- *         習得条件評価式。アクターとして"a"が使用できる。
- *         他、以下のメソッドが使用可能。
- *         hasSkillType(id) : スキルタイプ id# が使用可能かどうか
- *         isLearned(id) : id#のスキルを習得しているかどうか
- *         hasItem(id) : アイテム id# を持っているかどうか。
- *                       習得しても消費されはしない。
- *         hasWeapon(id) : 武器 id# を持っているかどうか。
- *         hasArmor(id) : 防具 id# を持っているかどうか。
- *     <gpCost>
- *         習得に必要なGPコスト
- *     <keepOnResetGrown>
- *         育成リセット時に習得可能スキルとして維持するかどうか。
+ *   <gpLearnable:condition$>
+ *       習得条件評価式。アクターとして"a"が使用できる。
+ *       他、以下のメソッドが使用可能。
+ *       hasSkillType(id) : スキルタイプ id# が使用可能かどうか
+ *       isLearned(id) : id#のスキルを習得しているかどうか
+ *       hasItem(id) : アイテム id# を持っているかどうか。
+ *                     習得しても消費されはしない。
+ *       hasWeapon(id) : 武器 id# を持っているかどうか。
+ *       hasArmor(id) : 防具 id# を持っているかどうか。
+ *       1つのスキルに複数指定可で、複数指定した場合、どれか1つを満たした場合に習得可能スキルに追加される。
+ *   <gpCost>
+ *       習得に必要なGPコスト
+ *   <keepOnResetGrown>
+ *       育成リセット時に習得可能スキルとして維持するかどうか。
  * スキル/アイテム
- *     <addGpLearn:id1#,id2#,...>
- *          使用するとGP習得可能スキルにid#で指定したスキルが追加される。
+ *   <addGpLearn:id1#,id2#,...>
+ *        使用するとGP習得可能スキルにid#で指定したスキルが追加される。
  * 
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 クラスに<addGpLearn>ノートタグを追加し、
+ *               単純にレベルアップでGP習得可能スキルを登録する仕組みを用意した。
  * Version.0.2.0 GrowupSystem Version.0.3.0に対応した。
  *               ノートタグで習得済みスキルが正しく処理されていない不具合を修正した。
  * Version.0.1.0 TWLD向けに作成したものをベースに作成。
@@ -122,6 +130,32 @@
     });
     //------------------------------------------------------------------------------
     // DataManager
+
+    /**
+     * クラスのノートタグを処理する。
+     * 
+     * @param {object} obj データオブジェクト
+     */
+    const _processClassNotetag = function(obj) {
+        const regExp = /<addGpLearn:([^>]*)>/g;
+        obj.gpLearnableSkills = [];
+        for (;;) {
+            const match = regExp.exec(obj.note);
+            if (match) {
+                const ids = match[1].split(",").map(token => Number(token) || 0);
+                if ((ids.length >= 2) && (ids[0] > 0)) {
+                    const level = ids[0];
+                    for (let i = 1; i < ids.length; i++) {
+                        const id = ids[i];
+                        obj.gpLearnableSkills.push({ level:level, skillId:id });
+                    }
+                }
+            }
+        }
+
+    };
+
+    DataManager.addNotetagParserClasses(_processClassNotetag);
 
     /**
      * GP習得スキル追加効果を追加する。
@@ -254,6 +288,11 @@
      */
     Game_Actor.prototype.levelUp = function() {
         _Game_Actor_levelUp.call(this);
+        for (const learningSkill of this.currentClass().gpLearnableSkills) {
+            if (learningSkill.level === this._level) {
+                this.addGpLearnableSkill(learningSkill.skillId);
+            }
+        }
         this.updateGpLearnableSkills();
     };
     /**
