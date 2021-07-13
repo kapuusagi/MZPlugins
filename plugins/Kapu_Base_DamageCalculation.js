@@ -84,6 +84,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.5.0 Game_ActionResultに属性レートを設定するようにした。
  * Version.0.4.0 デバッグ用にログにデータを出力するようにした。
  *               calcBaseDamageValueメソッドを用意した。
  * Version.0.3.0 最大ダメージをmaxDamageメソッドで制限できるようにした。
@@ -150,7 +151,16 @@
     Game_Battler.prototype.additionalTargetTraits = function() {
         return [];
     };
-
+    //------------------------------------------------------------------------------
+    // Game_ActionResult
+    const _Game_ActionResult_clear = Game_ActionResult.prototype.clear;
+    /**
+     * Game_ActionResultをリセットする。
+     */
+    Game_ActionResult.prototype.clear = function() {
+        _Game_ActionResult_clear.call(this);
+        this.elementRate = 1.0;
+    };
     //------------------------------------------------------------------------------
     // Game_Action
     if (isDebug) {
@@ -163,6 +173,8 @@
          * !!!overwrite!!! Game_Action.makeDamageValue
          */
         Game_Action.prototype.makeDamageValue = function(target, critical) {
+            const result = target.result();
+
             const subjectAddtionalTraits = this.additionalSubjectTraits(target);
             const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
             this.subject().setTempTraits(subjectAddtionalTraits);
@@ -171,6 +183,7 @@
             const item = this.item();
             const baseValue = this.calcBaseDamageValue(target);
             const elementRate = this.calcElementRate(target);
+            result.elementRate = elementRate;
             let value = baseValue * elementRate;
 
             console.log(this.subject().name() + " --(" + item.name + ")--> " + target.name());
@@ -195,9 +208,9 @@
             target.clearTempTraits();
             this.subject().clearTempTraits();
             const maxDamage = this.maxDamage(target);
-            const result = value.clamp(-maxDamage, maxDamage)
-            console.log("  -> result = " + result);
-            return result;
+            const clampedValue = value.clamp(-maxDamage, maxDamage)
+            console.log("  -> result = " + clampedValue);
+            return clampedValue;
         };
     } else {
         /**
@@ -209,6 +222,7 @@
          * !!!overwrite!!! Game_Action.makeDamageValue
          */
         Game_Action.prototype.makeDamageValue = function(target, critical) {
+            const result = target.result();
             const subjectAddtionalTraits = this.additionalSubjectTraits(target);
             const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
             this.subject().setTempTraits(subjectAddtionalTraits);
@@ -216,7 +230,9 @@
 
             const item = this.item();
             const baseValue = this.calcBaseDamageValue(target);
-            let value = baseValue * this.calcElementRate(target);
+            const elementRate = this.calcElementRate(target);
+            result.elementRate = elementRate;
+            let value = baseValue * elementRate;
             value = this.applyDamageRate(value, target, critical);
             value = this.applyRecoveryRate(value, target);
             if (critical) {
