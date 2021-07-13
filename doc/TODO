@@ -6,13 +6,13 @@
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
-  ☐ Kapu_BattleMusicManager
-  ☐ Kapu_EncounterEffectManager
 
       
 機能拡張予定:
   Kapu_ChoiceByRoulette:
     ☐ 戦闘中にルーレット選択させたい。
+  Kapu_QuestSystem:
+    ☐ 討伐条件で、複数エネミーのORを取りたい。AまたはBまたはCをX体討伐
   Kapu_QuestSystem_UI:
     ☐ 店で操作したときメッセージ表示。各店に個性を持たせたい。
   Kapu_Trait_MultipleDrop:
@@ -23,6 +23,8 @@
     ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
   Kapu_FadeExtends:
     ☐ ズームイン/ズームアウトを併用できるようにしたい。
+  Kapu_GrowupSystem_Skills:
+    ☐ レベルアップでGP習得可能スキル追加できるようにする。
 
 リファクタリング:
 
