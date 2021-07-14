@@ -186,7 +186,7 @@
      * @returns {boolean} ビジーの場合にはtrue, それ以外はfalse.
      */
     Scene_Map.prototype.isBusy = function() {
-        return _Scene_Map_isBusy.call(this) && this.isTransferProcessRuning();
+        return _Scene_Map_isBusy.call(this) || this.isTransferProcessRuning();
     };
 
     /**

@@ -227,7 +227,7 @@
         while (color.length < 3) {
             color.push(0);
         }
-        const zoom = (args.zoom === undefined) ? Number(args.zoom) : 1.0;
+        const zoom = (args.zoom === undefined) ? 1.0 : Number(args.zoom);
 
         $gameTemp.setupNextFadeOut({
             mode: mode,
@@ -243,7 +243,7 @@
         const mode = args.mode || Game_Screen.FADE_MODE_NORMAL;
         const duration = Math.round(Number(args.duration) || 0);
         const color = JSON.parse(args.color).map(token => Number(token) || 0);
-        const zoom = (args.zoom === undefined) ? Number(args.zoom) : 1.0;
+        const zoom = (args.zoom === undefined) ? 1.0 : Number(args.zoom);
         while (color.length < 3) {
             color.push(0);
         }
@@ -630,6 +630,7 @@
             zoom:1
         };
         this._fadeColor = [0,0,0,255];
+        this._fadeZoomTarget = 1;
         this.createFadeLayer();
         this.createFadeSprite();
     };
