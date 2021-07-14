@@ -10,8 +10,6 @@
   ☐ Kapu_BattleMusicManager
   ☐ Kapu_EncounterEffectManager
   ☐ Kapu_GrowupSystem_Skills (レベルアップでのGP習得可能スキル追加)
-  Kapu_FadeExtends:
-    ☐ ズームイン/ズームアウトを併用できるようにしたい。
   Kapu_Base_DamageCalculation:
     ☐ 属性レートをresultに格納するようにした。
   Kapu_Twld_DamageEffect:

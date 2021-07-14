@@ -1113,7 +1113,7 @@
         if (changeZoom) {
             this._zoomX = $gamePlayer.screenX();
             this._zoomY = $gamePlayer.screenY() - 24;
-            this._zoom = 1.0 + (this._fadePattern.zoom - 1.0) * (255 - this._brightness) / 255;
+            this._zoomScale = 1.0 + (this._fadePattern.zoom - 1.0) * (255 - this._brightness) / 255;
         }
     };
 
@@ -1140,7 +1140,7 @@
             if (this._fadePattern.zoom !== 1) {
                 this._zoomX = $gamePlayer.screenX();
                 this._zoomY = $gamePlayer.screenY();
-                this._zoom = 1.0 + (this._fadePattern.zoom - 1.0) * this._fadeOpacity / 255;
+                this._zoomScale = 1.0 + (this._fadePattern.zoom - 1.0) * this._fadeOpacity / 255;
             }
         }
     };
@@ -1174,7 +1174,7 @@
         if (changeZoom) {
             this._zoomX = $gamePlayer.screenX();
             this._zoomY = $gamePlayer.screenY() - 24;
-            this._zoom = 1.0 + (this._fadePattern.zoom - 1.0) * (255 - this._brightness) / 255;
+            this._zoomScale = 1.0 + (this._fadePattern.zoom - 1.0) * (255 - this._brightness) / 255;
         }
     };
 
@@ -1192,7 +1192,7 @@
             if (this._fadePattern.zoom !== 1) {
                 this._zoomX = $gamePlayer.screenX();
                 this._zoomY = $gamePlayer.screenY();
-                this._zoom = 1.0 + (this._fadePattern.zoom - 1.0) * this._fadeOpacity / 255;
+                this._zoomScale = 1.0 + (this._fadePattern.zoom - 1.0) * this._fadeOpacity / 255;
             }
         }
     };
