@@ -265,10 +265,10 @@
      * @param {number} max 補正最大値(省略可) 省略時はmin+10の値
      */
     Game_BattlerBase.prototype.updateLuk = function(min, max) {
-        if ((typeof(min) === "undefined") || isNaN(min)) {
+        if ((min === undefined) || isNaN(min)) {
             min = (-5 - Math.floor(this._luk.variance / 10));
         }
-        if ((typeof(max) === "undefined") || isNaN(max)) {
+        if ((max === undefined) || isNaN(max)) {
             max = min + 10;
         }
         const variance = max - min;
@@ -333,17 +333,9 @@
             const variance = Math.floor((Number(enemy.meta.lukVariance) || 0));
             this._luk.variance = Math.randomInt(variance * 2 + 1) - variance;
         }
+        this.updateLuk();
     };
 
-
-    /**
-     * LUK値を得る。
-     * 
-     * @returns {number} LUK値
-     */
-    Game_Enemy.prototype.getLuk = function() {
-        return this._luk;
-    };
     //------------------------------------------------------------------------------
     // Game_Action
     /**
@@ -352,7 +344,7 @@
      * 
      * @param {Game_Battler} target 対象
      * @returns {number} 確率上昇効果
-     * !!!overwrite!!!
+     * !!!overwrite!!! Game_Action.lukEffectRate
      */
     Game_Action.prototype.lukEffectRate = function(target) {
         return Math.max(0.0, 1.0 + (this.subject().luk - target.luk) * 0.005);
