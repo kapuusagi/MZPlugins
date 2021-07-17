@@ -150,6 +150,11 @@
  * @type struct<WeatherData>
  * @default {"name":"雪","onSwitchId":"0","offSwitchId":"0","brightness":"255","colorTone":"[-64,-64,-32,0]","encountRate":"1.00","surpriseRate":"1.25"}
  * 
+ * @param enableWeatherEffectOnBattle
+ * @text 戦闘中天候エフェクト有効
+ * @desc 戦闘中に天候エフェクトをかける場合にはtrueにする。
+ * @type boolean
+ * @default true
  * 
  * @param storeTimeRangeVariableId
  * @text 時間帯変数ID
@@ -439,6 +444,9 @@ $dataWeathers = [];
             ? false : (parameters["startWeatherEnable"] === "true");
     const initialWeather = Number(parameters["initialWeather"]) || Game_Map.WEATHER_SUNNY;
     const weatherEffectDuration = Number(parameters["weatherEffectDuration"]) || 30;
+
+    const enableWeatherEffectOnBattle = (parameters["enableWeatherEffectOnBattle"] === undefined)
+            ? true : (parameters["enableWeatherEffectOnBattle"] === "true");
 
     /**
      * 時間帯データを分析する。
@@ -970,6 +978,7 @@ $dataWeathers = [];
                     weatherPower = this._weatherPower;
                     if (colorTone) {
                         for (let i = 0; i < 3; i++) {
+                            //colorTone[i] = Math.min(colorTone[i], weather.colorTone[i]);
                             colorTone[i] = (colorTone[i] + 255) * (weather.colorTone[i] + 255) / 255 - 255;
                         }
                         colorTone[3] = ((colorTone[3] + weather.colorTone[3]) / 2).clamp(0, 255);
@@ -1192,4 +1201,44 @@ $dataWeathers = [];
             this.hide();
         }
     };
+
+    //------------------------------------------------------------------------------
+    // Spriteset_Battle
+    if (enableWeatherEffectOnBattle) {
+        const _Spriteset_Battle_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer
+        /**
+         * 下層レイヤーを構築する。
+         */
+        Spriteset_Battle.prototype.createLowerLayer = function() {
+            _Spriteset_Battle_createLowerLayer.call(this);
+            this.createWeather();
+        };
+
+        /**
+         * 天候スプライトを構築する。
+         */
+        Spriteset_Battle.prototype.createWeather = function() {
+            this._weather = new Weather();
+            this.addChild(this._weather);
+        };
+
+        const _Spriteset_Battle_update = Spriteset_Battle.prototype.update;
+
+        /**
+         * Spriteset_Battleを更新する。
+         */
+        Spriteset_Battle.prototype.update = function() {
+            _Spriteset_Battle_update.call(this);
+            this.updateWeather();
+        };
+        /**
+         * 天候を更新する。
+         */
+        Spriteset_Battle.prototype.updateWeather = function() {
+            this._weather.type = $gameScreen.weatherType();
+            this._weather.power = $gameScreen.weatherPower();
+            this._weather.origin.x = $gameMap.displayX() * $gameMap.tileWidth();
+            this._weather.origin.y = $gameMap.displayY() * $gameMap.tileHeight();
+        };
+    }
 })();
