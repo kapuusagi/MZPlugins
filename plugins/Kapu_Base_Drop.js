@@ -12,6 +12,15 @@
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
+ * $gameTemp.addAdditionalRewardItem(item:object):void
+ *   次の戦闘で得られる報酬にitemを追加する。
+ *   item のメンバーは次の通り
+ *   item = {
+ *     kind, // {number} アイテム種別(1:通常アイテム, 2:武器, 3:防具)
+ *     dataId, // {number} アイテムID
+ *     denominator, // {number} ドロップ率分母。2とすると、1/2となり、50%になる。
+ *   }
+ *   
  * 
  * ============================================
  * プラグインコマンド
@@ -98,7 +107,7 @@
      * 
      * @param {object} 報酬アイテムエントリ(kind, dataId, denominatorを持つオブジェクト)
      */
-    Game_Temp.prototype.addAdditionalRewardItems = function(item) {
+    Game_Temp.prototype.addAdditionalRewardItem = function(item) {
         this._additionalDropItems.push(item);
     };
 
