@@ -564,25 +564,38 @@
      * Note: Game_Unit.randomTarget()をコールする代わりに、
      *       Game_Action.randomTargets(unit)等をコールするように変更するため、
      *       オーバーライドする。
-     * @returns {Array<Game_Battler} アクション対象オブジェクトの配列
+     * @returns {Game_Battler} アクション対象オブジェクトの配列
      * !!!overwrite!!! Game_Action.confusionTarget
      */
     Game_Action.prototype.confusionTarget = function() {
+        var targets = [];
         switch (this.subject().confusionLevel()) {
             case 1:
-                return this.randomTargets(this.opponentsUnit());
+                targets = this.randomTargets(this.opponentsUnit());
+                break;
             case 2:
                 if (Math.randomInt(2) === 0) {
-                    return this.randomTargets(this.opponentsUnit());
+                    targets = this.randomTargets(this.opponentsUnit());
                 } else {
-                    return this.randomTargets(this.friendsUnit());
+                    targets = this.randomTargets(this.friendsUnit());
                 }
+                break;
             default:
-                return this.randomTargets(this.friendsUnit());
+                targets = this.randomTargets(this.friendsUnit());
+                break;
+        }
+
+        if (targets.length > 0) {
+            const index = Math.randomInt(targets.length);
+            return targets[index];
+        } else {
+            console.log("confusionTarget: bug? target is empty.");
+            return this.subject();
         }
     };
-    const _Game_Action_targetsForFriends = Game_Action.prototype.targetsForFriends;
 
+
+    const _Game_Action_targetsForFriends = Game_Action.prototype.targetsForFriends;
     /**
      * 味方に対するアクション対象を得る。
      * 
@@ -634,7 +647,8 @@
     Game_Action.prototype.randomTargets = function(unit) {
         const targets = [];
         const rangeDistance = this.rangeDistanceForUnit(unit);
-        for (let i = 0; i < this.numTargets(); i++) {
+        const targetCount = this.numTargets() || 1;
+        for (let i = 0; i < targetCount; i++) {
             targets.push(unit.randomTargetWithRange(rangeDistance));
         }
         return targets;
