@@ -255,9 +255,9 @@
  * ■ 使用時の注意
  * Kapu_MapFilter及びKapu_MapFilter_Darknessを使用します。
  * MapFilter_DarknessはON/OFFしないこと。OFFすると、暗闇状態が正常に反映されなくなります。
- * 画面の天候エフェクト/画面のトーンを使用します。
- * イベント等で天候・カラートーンを操作したい場合には、
- * (1)エフェクトON/OFF変更でOFFにする。
+ * 画面の天候エフェクトを使用します。
+ * イベント等で天候を操作したい場合には、
+ * (1)プラグインコマンド「エフェクトON/OFF変更」でOFFにする。
  * (2)イベントで使用するエフェクトを適用する。
  *    :
  * (3)イベントが完了したらエフェクトをONにする。
@@ -1002,7 +1002,7 @@ $dataWeathers = [];
             $gameScreen.changeDarknessFilterBrightness(brightness, duration);
         }
         if (colorTone) {
-            $gameScreen.startTint(colorTone, duration);
+            $gameScreen.startChangeTRW(colorTone, duration);
         }
     };
 
@@ -1174,6 +1174,73 @@ $dataWeathers = [];
             return true;
         }
     };
+
+    //------------------------------------------------------------------------------
+    // Game_Screen
+    const _Game_Screen_clear = Game_Screen.prototype.clear;
+    /**
+     * 各種パラメータを初期化する。
+     */
+    Game_Screen.prototype.clear = function() {
+        _Game_Screen_clear.call(this);
+        this.clearToneTRW();
+    };
+
+    /**
+     * 時間帯・天候用トーンをクリアする。
+     */
+    Game_Screen.prototype.clearToneTRW = function() {
+        this._toneTRW = [0, 0, 0, 0];
+        this._toneTRWTarget = [0, 0, 0, 0]
+        this._toneTRWDuration = 0;
+    };
+
+    /**
+     * 時間・天候用トーンを得る。
+     * 
+     * @returns {Array<number>} トーン
+     */
+    Game_Screen.prototype.toneTRW = function() {
+        return this._toneTRW;
+    };
+
+    /**
+     * 時間/天候用トーン変更を開始する。
+     * 
+     * @param {Array<number>} tone 色合い
+     * @param {number} duration 変化に要するフレーム数
+     */
+    Game_Screen.prototype.startChangeTRW = function(tone, duration) {
+        this._toneTRWTarget = tone.clone();
+        this._toneTRWDuration = duration;
+        if (this._toneTRWDuration === 0) {
+            this._toneTRW = this._toneTRWTarget.clone();
+        }
+    };
+
+    const _Game_Screen_update = Game_Screen.prototype.update;
+    /**
+     * Game_Screenを更新する。
+     * 
+     * Note: 画面エフェクトの遷移などを処理する。
+     */
+    Game_Screen.prototype.update = function() {
+        _Game_Screen_update.call(this);
+        this.updateToneTRW();
+    };
+    
+    /**
+     * 時間・天候用の色合いを更新する。
+     */
+    Game_Screen.prototype.updateToneTRW = function() {
+        if (this._toneTRWDuration > 0) {
+            const d = this._toneTRWDuration;
+            for (let i = 0; i < 4; i++) {
+                this._toneTRW[i] = (this._toneTRW[i] * (d - 1) + this._toneTRWTarget[i]) / d;
+            }
+            this._toneTRWDuration--;
+        }
+    };
     //------------------------------------------------------------------------------
     // Game_Player
     const _Game_Player_onRegionChanged = Game_Player.prototype.onRegionChanged;
@@ -1203,7 +1270,92 @@ $dataWeathers = [];
     };
 
     //------------------------------------------------------------------------------
+    // Spriteset_Base
+    const _Spriteset_Base_createBaseFilters = Spriteset_Base.prototype.createBaseFilters;
+    /**
+     * ベースフィルタを作成する。
+     */
+    Spriteset_Base.prototype.createBaseFilters = function() {
+        _Spriteset_Base_createBaseFilters.call(this);
+        this._colorFilterTRW = new ColorFilter();
+    };
+    const _Spriteset_Base_updateBaseFilters = Spriteset_Base.prototype.updateBaseFilters;
+    /**
+     * ベースフィルタを更新する。
+     * 
+     * Note: ベーシックシステムではカラートーンの適用のみ
+     */
+    Spriteset_Base.prototype.updateBaseFilters = function() {
+        _Spriteset_Base_updateBaseFilters.call(this);
+        this._colorFilterTRW.setColorTone($gameScreen.toneTRW());
+    };
+    
+    //------------------------------------------------------------------------------
+    // Spriteset_Map
+
+    const _Spriteset_Map_createBaseFilters = Spriteset_Map.prototype.createBaseFilters;
+    /**
+     * ベースフィルタを作成する。
+     */
+    Spriteset_Map.prototype.createBaseFilters = function() {
+        _Spriteset_Map_createBaseFilters.call(this);
+        this._baseSprite.filters.push(this._colorFilterTRW);
+    };
+
+    //------------------------------------------------------------------------------
     // Spriteset_Battle
+    const _Spriteset_Battle_createBackground = Spriteset_Battle.prototype.createBackground;
+    /**
+     * 背景を作成する。
+     */
+    Spriteset_Battle.prototype.createBackground = function() {
+        _Spriteset_Battle_createBackground.call(this);
+        this._backgroundSprite.filters.push(this._colorFilterTRW);
+    };
+
+    const _Spriteset_Battle_createBattleback = Spriteset_Battle.prototype.createBattleback;
+    /**
+     * 戦闘拝啓用のスプライトを作成する。
+     */
+    Spriteset_Battle.prototype.createBattleback = function() {
+        _Spriteset_Battle_createBattleback.call(this);
+        if (!this._back1Sprite.filters) {
+            this._back1Sprite.filters = [];
+        }
+        if (!this._back2Sprite.filters) {
+            this._back2Sprite.filters = [];
+        }
+        this._back1Sprite.filters.push(this._colorFilterTRW);
+        this._back2Sprite.filters.push(this._colorFilterTRW);
+    };
+
+    const _Spriteset_Battle_createEnemies = Spriteset_Battle.prototype.createEnemies;
+    /**
+     * エネミースプライトを作成する。
+     */
+    Spriteset_Battle.prototype.createEnemies = function() {
+        _Spriteset_Battle_createEnemies.call(this);
+        for (const sprite of this._enemySprites) {
+            if (!sprite.filters) {
+                sprite.filters = [];
+            }
+            sprite.filters.push(this._colorFilterTRW);
+        }
+    };
+
+    const _Spriteset_Battle_createActors = Spriteset_Battle.prototype.createActors;
+    /**
+     * アクターのスプライトを作成する。
+     */
+    Spriteset_Battle.prototype.createActors = function() {
+        _Spriteset_Battle_createActors.call(this);
+        for (const sprite of this._actorSprites) {
+            if (!sprite.filters) {
+                sprite.filters = [];
+            }
+            sprite.filters.push(this._colorFilterTRW);
+        }
+    }; 
     if (enableWeatherEffectOnBattle) {
         const _Spriteset_Battle_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer
         /**
