@@ -165,7 +165,7 @@
                 const itemId = Number(entry.itemId);
                 const weaponId = Number(entry.weaponId);
                 const armorId = Number(entry.armorId);
-                if (ItemId > 0) {
+                if (itemId > 0) {
                     kind = 1;
                     id = itemId;
                 } else if (weaponId > 0) {
