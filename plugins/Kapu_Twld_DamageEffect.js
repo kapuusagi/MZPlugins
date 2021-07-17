@@ -4,12 +4,26 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
+ * @param damageMoveXRandom
+ * @text ダメージポップアップ方向ランダム
+ * @desc ダメージポップアップX方向移動をランダムにする。
+ * @type boolean
+ * @default false
+ * 
  * @param damageMoveX
  * @text ダメージポップアップX方向移動距離
  * @desc ダメージポップさせたとき、垂直方向の移動が止まるまで、毎フレームこの値だけ水平方向に移動する。
  * @type number
  * @decimals 2
- * @default 0.50
+ * @default 0.00
+ * @min -5.00
+ * @max 5.00
+ * 
+ * @param noDispStateIds
+ * @text 付与/解除を表示させないステートID
+ * @desc 付与/解除を表示させないステートID
+ * @type state[]
+ * @default ["1"]
  * 
  * @param fadeInDuration
  * @text フェードイン期間
@@ -260,7 +274,23 @@
     const textCritical = parameters["textCritical"] || "";
     const colorCritical = parameters["colorCritical"] || "#ffffff";
 
+    const damageMoveXRandom = (parameters["damageMoveXRandom"] === undefined)
+            ? false : (parameters["damageMoveXRandom"] === "true");
     const damageMoveX = Number(parameters["damageMoveX"]) || 0.0;
+
+    const noDispStateIds = [];
+    try {
+        const ids = JSON.parse(parameters["noDispStateIds"] || "[]").map(token => Number(token));
+        for (const id of ids) {
+            if (!noDispStateIds.includes(id)) {
+                noDispStateIds.push(id);
+            }
+        }
+
+    }
+    catch (e) {
+        console.error(e);
+    }
 
     const baseY = 40;
 
@@ -293,7 +323,7 @@
                                  // 設定される。
             this.createCritical();
         }
-        this._damageXMove = this.damageXMove(target);
+        this._damageXMove = this.damageXMove(result);
         if ((result.missed || result.evaded) && textMiss) {
             this._colorType = 0;
             this.createMiss();
@@ -338,17 +368,20 @@
     /**
      * X方向移動量を得る。
      * 
-     * @param {Game_Battler} target ポップアップ対象
+     * @param {object} result 結果
      * @returns {number} X方向移動量。
      */
-    Sprite_Damage.prototype.damageXMove = function(target) {
-        const result = target.result();
+    Sprite_Damage.prototype.damageXMove = function(result) {
         // Note: 動かそうかと思ったけれど、
         //       なんか判定が上手くいかない。
         //       たぶん target.isAlive() && result.mpDamage に引っかかってる。
         if ((result.hpAffected && (result.hpDamage >= 0))
-                /* || (target.isAlive() && result.mpDamage >= 0) */) {
-            return damageMoveX;
+                || (target.isAlive() && result.mpDamage >= 0)) {
+            if (damageMoveXRandom) {
+                return Math.random() * damageMoveX * 2 - damageMoveX;
+            } else {
+                return damageMoveX;
+            }
         } else {
             return 0;
         }
@@ -450,7 +483,7 @@
      */
     Sprite_Damage.prototype.createAddRemoveState = function(stateId, isAdded) {
         const state = $dataStates[stateId];
-        if (!state || !state.message1 || state.meta.noPopup) {
+        if (noDispStateIds.includes(stateId) || !state || !state.message1 || state.meta.noPopup) {
             return ;
         }
         const text = isAdded ? textAddedState.format(state.name) : textRemovedState.format(state.name);
