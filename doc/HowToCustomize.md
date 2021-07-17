@@ -1661,3 +1661,24 @@ $gameParty
     <- $gameScreen
 
     -> $gameActors
+
+# Spriteset_Battleの中身
+
+  Spriteset_Base
+    +- createLowerLayer()
+    |   +- createBaseSprite
+    +- createUpperLayer()
+        +- createPictures
+        +- createTimer
+        +- createOverallFilters
+
+  Spriteset_Battle
+    +- _baseSprite
+       +- _backgroundSprite 前のシーン（普通はMap)のキャプチャ画像
+       +- _back1Sprite 背景1スプライト
+       +- _back2Sprite 背景2スプライト
+       +- _battleField === _effectsContainer
+           +- Sprite_Enemy エネミー画像スプライト
+           +- Sprite_Actor (SideViewのみ)サイドビューアクター
+           +- Sprite_Animation アニメーション描画スプライト（アニメーション開始毎に追加）
+    +- _backScreen
