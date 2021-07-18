@@ -8,6 +8,24 @@
  * @base Kapu_Base_Hit
  * @orderAfter Kapu_Base_Hit
  * 
+ * @param relativeDiffRateMax
+ * @text 相対補正値最大
+ * @desc 命中/クリティカル率の補正値最大値
+ * @type number
+ * @decimals 2
+ * @default 1.00
+ * @min 0.00
+ * @max 5.00
+ * 
+ * @param relativeDiffRateMin
+ * @text 相対補正値最小
+ * @desc 命中/クリティカル率の補正値最小値
+ * @type number
+ * @decimals 2
+ * @default -1.00
+ * @min -5.00
+ * @max 0.00
+ * 
  * 
  * @help 
  * TWLDの基本パラメータを命中判定に適用するプラグイン。
@@ -34,8 +52,11 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    //const pluginName = "Kapu_Twld_BasicParams_Hit";
-    //const parameters = PluginManager.parameters(pluginName);
+    const pluginName = "Kapu_Twld_BasicParams_Hit";
+    const parameters = PluginManager.parameters(pluginName);
+
+    const relativeDiffRateMax = (Number(parameters["relativeDiffRateMax"]) || 1.00).clamp(0, 5);
+    const relativeDiffRateMin = (Number(parameters["relativeDiffRateMin"]) || -1.00).clamp(-5, 0);
 
     //------------------------------------------------------------------------------
     // Game_Action
@@ -124,7 +145,7 @@
             // この計算式だと、対象より技量が2倍以上あると確率が100％になってしまうので
             // clampにより加算値が0.0～0.5の範囲に収まるようにする。
             const subject = this.subject();
-            const addRate = this.relativeDiffRate(subject.dex, target.dex).clamp(0, 0.5);
+            const addRate = this.relativeDiffRate(target.dex, subject.dex).clamp(0, 0.5);
             return rate + addRate;
         } else {
             return rate;
@@ -146,7 +167,7 @@
      *     使用者 82 ターゲット92 -> 補正値 (92 - 82) / 82 = 0.12
      * 
      * 小さい側の値が大きくなるほど、差分によるレートの差が出にくくなるようにした。
-     * あと使用者より2倍速い相手にそう簡単に当てられないでしょ？という考えによる。
+     * あと使用者より2倍速い相手に基本的に当てられないでしょ？という考えに基づく。
      * 
      * @param {number} targetVal ターゲットの値
      * @param {number} subjectVal 使用者の値
@@ -154,9 +175,9 @@
      */
 
     Game_Action.prototype.relativeDiffRate = function(targetVal, subjectVal) {
-        const diff = targetVal - subjectVal;
+        const diff = subjectVal - targetVal;
         const min = Math.max(1, Math.min(targetVal, subjectVal)); // 1以上の値になるように。ゼロ除算防止
-        return (diff / min);
+        return (diff / min).clamp(relativeDiffRateMin, relativeDiffRateMax);
     };
 
 
