@@ -70,6 +70,12 @@
  * @default #ffffff
  * @parent textRemovedState
  * 
+ * @param statePopupDuration
+ * @text ステートポップアップ長
+ * @desc ステート追加/解除をポップアップさせる時間[フレーム数]
+ * @type number
+ * @default 80
+ * 
  * @param textEffective
  * @text 効果的メッセージ
  * @desc 効果が増加したときにポップアップさせるメッセージ。ポップアップさせない場合には空文字列
@@ -261,6 +267,7 @@
     const colorAddedState = parameters["colorAddedState"] || "#ffffff";
     const textRemovedState = parameters["textRemovedState"] || "";
     const colorRemovedState = parameters["colorRemovedState"] || "";
+    const statePopupDuration = Math.max(0, Number("statePopupDuration") || 90);
     const textEffective = parameters["textEffective"] || "";
     const colorEffective = parameters["colorEffective"] || "#ff8000";
     const effectiveRate = Math.max((Number(parameters["effectiveRate"]) || 1.3), 1);
@@ -323,7 +330,7 @@
                                  // 設定される。
             this.createCritical();
         }
-        this._damageXMove = this.damageXMove(result);
+        this._damageXMove = this.damageXMove(target.isAlive(), result);
         if ((result.missed || result.evaded) && textMiss) {
             this._colorType = 0;
             this.createMiss();
@@ -350,33 +357,39 @@
                 this.setupNormalEffect();
             }
         }
-        if (textAddedState) {
-            for (const state of result.addedStates) {
-                // state : ステートID
-                this.createAddRemoveState(state, true);
+        var stateWaitOffset = popupDuration - fadeInDuration;
+        const statePopupOffset = statePopupDuration - 10;
+        if (textRemovedState && (statePopupDuration > 0)) {
+            for (const stateId of result.removedStates) {
+                if (!target.isStateAffected(stateId)) {
+                    this.createAddRemoveState(stateId, false, stateWaitOffset);
+                    stateWaitOffset += statePopupOffset;
+                }
             }
         }
-        if (textRemovedState) {
-            for (const state of result.removedStates) {
-                // state : ステートID
-                this.createAddRemoveState(state, false);
+        if (textAddedState && (statePopupDuration > 0)) {
+            for (const stateId of result.addedStates) {
+                if (target.isStateAffected(stateId)) {
+                    this.createAddRemoveState(stateId, true, stateWaitOffset);
+                    stateWaitOffset += statePopupOffset;
+                }
             }
         }
-
     };
 
     /**
      * X方向移動量を得る。
      * 
+     * @param {boolean} isAlive ターゲットが生存しているかどうか。
      * @param {object} result 結果
      * @returns {number} X方向移動量。
      */
-    Sprite_Damage.prototype.damageXMove = function(result) {
+    Sprite_Damage.prototype.damageXMove = function(isAlive, result) {
         // Note: 動かそうかと思ったけれど、
         //       なんか判定が上手くいかない。
         //       たぶん target.isAlive() && result.mpDamage に引っかかってる。
         if ((result.hpAffected && (result.hpDamage >= 0))
-                || (target.isAlive() && result.mpDamage >= 0)) {
+                || (isAlive && result.mpDamage >= 0)) {
             if (damageMoveXRandom) {
                 return Math.random() * damageMoveX * 2 - damageMoveX;
             } else {
@@ -475,36 +488,7 @@
         sprite.updatePosition = this.updateEffective.bind(this);
     };
 
-    /**
-     * 追加または解除されたステートのポップアップを作成する。
-     * 
-     * @param {number} stateId ステートID
-     * @param {boolean} isAdded 追加された場合にはtrue, 解除された場合にはfalse
-     */
-    Sprite_Damage.prototype.createAddRemoveState = function(stateId, isAdded) {
-        const state = $dataStates[stateId];
-        if (noDispStateIds.includes(stateId) || !state || !state.message1 || state.meta.noPopup) {
-            return ;
-        }
-        const text = isAdded ? textAddedState.format(state.name) : textRemovedState.format(state.name);
-        if (text.length == 0) {
-            return ;
-        }
-        const h = this.fontSize();
-        const w = Math.floor(h * text.length);
-        const sprite = this.createChildSprite(w, h);
-        sprite.bitmap.textColor = isAdded ? colorAddedState : colorRemovedState;
-        sprite.bitmap.drawText(text, 0, 0, w, h, "center");
-        sprite.anchor.y = 0;
-        sprite.x = 0;
-        sprite.y = -60;
-        sprite.opacity = 0;
-        sprite.dy = 0;
-        sprite.wait = this._duration - fadeOutDuration;
-        sprite.updatePosition = this.updateAddRemoveState.bind(this);
 
-        this._duration += fadeOutDuration;
-    };
 
     /**
      * 数値スプライトを作成する。
@@ -702,6 +686,39 @@
     };
 
     /**
+     * 追加または解除されたステートのポップアップを作成する。
+     * 
+     * @param {number} stateId ステートID
+     * @param {boolean} isAdded 追加された場合にはtrue, 解除された場合にはfalse
+     * @param {number} stateWaitOffset ステート表示するオフセットフレーム数
+     */
+    Sprite_Damage.prototype.createAddRemoveState = function(stateId, isAdded, stateWaitOffset) {
+        const state = $dataStates[stateId];
+        if (noDispStateIds.includes(stateId) || !state || !state.message1 || state.meta.noPopup) {
+            return ;
+        }
+        const text = isAdded ? textAddedState.format(state.name) : textRemovedState.format(state.name);
+        if (text.length == 0) {
+            return ;
+        }
+        const h = this.fontSize();
+        const w = Math.floor(h * text.length);
+        const sprite = this.createChildSprite(w, h);
+        sprite.bitmap.textColor = isAdded ? colorAddedState : colorRemovedState;
+        sprite.bitmap.drawText(text, 0, 0, w, h, "center");
+        sprite.anchor.y = 0;
+        sprite.x = 0;
+        sprite.y = -80;
+        sprite.opacity = 0;
+        sprite.ry = sprite.y;
+        sprite.dy = -0.5;
+        sprite.wait = stateWaitOffset;
+        sprite.updatePosition = this.updateAddRemoveState.bind(this);
+        sprite.frameCount = 0;
+
+        this._duration += Math.max(0, statePopupDuration - fadeInDuration); // 表示長さだけ延長
+    };
+    /**
      * ステート付与/解除ポップアップ表示Spriteを更新する。
      * Y=-60から上に移動する。
      * 
@@ -712,13 +729,15 @@
             sprite.wait--;
             return;
         }
-        sprite.y -= 1;
-        const moveFrameCount = -60 - sprite.y;
+        sprite.ry += sprite.dy;
+        sprite.y = Math.round(sprite.ry);
+        const frameCount = sprite.frameCount;
+        sprite.frameCount++;
 
         // 上に移動
-        if (moveFrameCount < 10) {
+        if (frameCount < 10) {
             sprite.opacity = Math.min(255, sprite.opacity + 25);
-        } else if (moveFrameCount > 50) { // 消す
+        } else if (frameCount > (statePopupDuration - 10)) { // 消す
             sprite.opacity = Math.max(0, sprite.opacity - 25);
         }
     };
