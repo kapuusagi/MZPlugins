@@ -134,7 +134,50 @@
  * @desc trueにするとエネミーのHP/TPBゲージを表示するようになります。
  * @type boolean
  * @default true
+ *
+ * @param useBattlePicture
+ * @text アクターHUDにBattlePictureを使用する。
+ * @desc アクターHUDにBattlePictureを使用する。falseにすると顔グラフィックを使用する。
+ * @type boolean
+ * @default false
  * 
+ * @param pictureYOffset
+ * @text Yオフセット
+ * @desc アクターHUDに表示するBattlePicture上端からのオフセット。
+ * @type number
+ * @default 0
+ * @parent useBattlePicture
+ * 
+ * @param pictureDisplayHeight
+ * @text Y表示高
+ * @desc アクターHUDに表示するBattlePictureの表示する高さ。
+ * @type number
+ * @default 400
+ * @parent useBattlePicture
+ * 
+ * @param pictureZoom
+ * @text 表示倍率
+ * @desc アクターHUDに表示するBattlePicutureの表示倍率
+ * @type number
+ * @decimals 2
+ * @default 1.00
+ * @parent useBattlePicture
+ * 
+ * @param pictureMethod
+ * @text メソッド名
+ * @desc 画像データ名をactorから取得するためのメソッド/プロパティ名
+ * @type string
+ * @default battlePicture
+ * @parent useBattlePicture
+ * 
+ * 
+ * @param enableInputtingZoom
+ * @text 入力中ズーム動作
+ * @desc コマンド入力中、対象アクターをズーム表示させる。
+ * @type boolean
+ * @default false
+ *  
+ *  
  * @requiredAssets img/hud/ActiveHud
  * 
  * @help 
@@ -267,6 +310,14 @@ function Sprite_BattleHudPicture() {
     const statusAreaHeight = Number(parameters["statusAreaHeight"]) || 220;
     const statusAreaOffsetX = Number(parameters["statusAreaOffsetX"]) || 192;
     const enemyAreaOffsetX = Number(parameters["enemyAreaOffsetX"]) || 162;
+    const useBattlePicture = (parameters["useBattlePicture"] === undefined)
+            ? false : (parameters["useBattlePicture"] === "true");
+    const pictureYOffset = Number(parameters["pictureYOffset"]) || 0;
+    const pictureDisplayHeight = Number(parameters["pictureDisplayHeight"]) || 400;
+    const pictureZoom = Number(parameters["pictureZoom"]) || 1;
+    const pictureMethod = parameters["pictureMethod"] || "battlePicture";
+    const enableInputtingZoom = (parameters["enableInputtingZoom"] === undefined)
+            ? false : (parameters["enableInputtingZoom"] === "true");
 
     /**
      * アクターIDを得る。
@@ -1225,6 +1276,7 @@ function Sprite_BattleHudPicture() {
 
     //------------------------------------------------------------------------------
     // Sprite_BattleHudActor
+    // アクター情報を表示するHUD。
     Sprite_BattleHudActor.prototype = Object.create(Sprite_Battler.prototype);
     Sprite_BattleHudActor.prototype.constructor = Sprite_BattleHudActor;
     
@@ -1237,10 +1289,13 @@ function Sprite_BattleHudPicture() {
     Sprite_BattleHudActor.prototype.initialize = function(battler) {
         Sprite_Battler.prototype.initialize.call(this, battler);
         this._actor = null;
-        this._faceName = null;
+        this._faceName = "";
         this._faceIndex = -1;
+        this._battlePictureName = "";
         this._activeSelAdd = 2;
         this._brightness = 255;
+        this._scale = 1000; // 0.1%単位
+        this._targetScale  = 1000; // 0.1%単位
         this.setFrame(0, 0, this.statusAreaWidth(), this.statusAreaHeight());
     };
     /**
@@ -1301,6 +1356,7 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudActor.prototype.createMainSprite = function() {
         this._mainSprite = new Sprite();
+        this._mainSprite.baseScale = 1;
         this._mainSprite.anchor.x = 0.5; // 原点XはSprite中央
         this._mainSprite.anchor.y = 1; // 原点YはSprite下端
         if (!this._mainSprite.filters) {
@@ -1483,6 +1539,28 @@ function Sprite_BattleHudPicture() {
             this._activeSelCount = 0;
             this._activeSelSprite.opacity = 0;
         }
+
+        if (enableInputtingZoom) {
+            if (this._scale < this._targetScale) {
+                this._scale = Math.min(this._targetScale, this._scale + 2);
+            } else if (this._scale > this._targetScale) {
+                this._scale = Math.max(this._targetScale, this._scale - 2);
+            }
+            if (this._scale === this._targetScale) {
+                if (this._battler && (this._battler.isInputting() || this._battler.isSelected())) {
+                    this._targetScale = (this._targetScale !== 1000) ? 1000 : 1100;
+                } else {
+                    this._targetScale = 1000;
+                }
+            }
+            const scale = this._mainSprite.baseScale * this._scale / 1000.0;
+            this._mainSprite.scale.x = scale;
+            this._mainSprite.scale.y = scale;
+        } else {
+            const scale = this._mainSprite.baseScale * this._scale / 1000.0;
+            this._mainSprite.scale.x = scale;
+            this._mainSprite.scale.y = scale;
+        }
     };
 
     /**
@@ -1576,12 +1654,56 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudActor.prototype.updateBitmap = function() {
         Sprite_Battler.prototype.updateBitmap.call(this);
-        const faceName = this._actor.faceName();
-        const faceIndex = this._actor.faceIndex();
-        if ((faceName !== this._faceName) || (faceIndex !== this._faceIndex)) {
-            this.loadMainSpriteBitmapFace(faceName, faceIndex);
+        if (useBattlePicture) {
+            const battlePictureName = (typeof this._actor[pictureMethod] === "function") 
+                    ? this._actor[pictureMethod]() : this._actor[pictureMethod];
+            if (battlePictureName !== this._battlePictureName) {
+                this.loadMainSpriteBitmapBattlePicture(battlePictureName);
+            }
+        } else {
+            const faceName = this._actor.faceName();
+            const faceIndex = this._actor.faceIndex();
+            if ((faceName !== this._faceName) || (faceIndex !== this._faceIndex)) {
+                this.loadMainSpriteBitmapFace(faceName, faceIndex);
+            }
         }
     };
+
+    /**
+     * 戦闘ピクチャをメインスプライト画像として読み出す。
+     * 
+     * @param {string} battlePictureName 戦闘ピクチャ名
+     */
+    Sprite_BattleHudActor.prototype.loadMainSpriteBitmapBattlePicture = function(battlePictureName) {
+        const bitmap = ImageManager.loadPicture(battlePictureName);
+        this._mainSprite.bitmap = bitmap;
+        if (bitmap.isReady()) {
+            this.onBattlePictureLoaded();
+        } else {
+            bitmap.addLoadListener(this.onBattlePictureLoaded.bind(this));
+        }
+        this._battlePictureName = battlePictureName;
+    }
+
+    /**
+     * 戦闘画像がロードされたときの処理を行う。
+     */
+    Sprite_BattleHudActor.prototype.onBattlePictureLoaded = function() {
+        const pw = this._mainSprite.bitmap.width;
+
+        // 表示可能最大幅
+        const maxWidth = (statusAreaWidth + statusAreaPadding) / pictureZoom;
+
+        const displayWidth = Math.min(pw, maxWidth);
+        const displayOffsetX = (pw - displayWidth) / 2;
+        this._mainSprite.setFrame(displayOffsetX, pictureYOffset, displayWidth, pictureDisplayHeight);
+        this._mainSprite.baseScale = pictureZoom;
+
+        const pos = this.mainSpritePosition();
+        this._mainSprite.x = pos.x;
+        this._mainSprite.y = pos.y;
+    };
+
 
     /**
      * Faceをメインスプライト画像として読み出す。
@@ -1595,16 +1717,17 @@ function Sprite_BattleHudPicture() {
         const ph = ImageManager.faceHeight;
         const cw = Math.min(pw, this.statusAreaWidth());
         const ch = Math.min(ph, this.statusAreaHeight());
-        const cx = (faceIndex % 4) * pw + Math.min(0, (this.statusAreaWidth() - cw) / 2) + 1;
+        const cx = (faceIndex % 4) * pw + Math.min(0, (this.statusAreaWidth() - cw) / 2);
         const cy = Math.floor(faceIndex / 4) * ph + Math.min(0, (this.statusAreaHeight() - ch) / 2);
-
-        const pos = this.mainSpritePosition();
-        this._mainSprite.x = pos.x;
-        this._mainSprite.y = pos.y;
 
         this._mainSprite.setFrame(cx, cy, cw, ch);
         this._faceName = faceName;
         this._faceIndex = faceIndex;
+        this._mainSprite.baseScale = 1;
+
+        const pos = this.mainSpritePosition();
+        this._mainSprite.x = pos.x;
+        this._mainSprite.y = pos.y;
     };
 
 
@@ -1615,7 +1738,15 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudActor.prototype.mainSpritePosition = function() {
         const x = 0;
-        const y = -(this.statusAreaHeight() - ImageManager.faceHeight);
+        let y = -this.statusAreaHeight();
+
+        if (useBattlePicture && this._mainSprite.bitmap) {
+            const displayHeight = pictureDisplayHeight * pictureZoom;
+            y += Math.round(displayHeight).clamp(200, 400) - 60;
+        } else {
+            y += ImageManager.faceHeight;
+        }
+
         return new Point(x, y);
     };
 
