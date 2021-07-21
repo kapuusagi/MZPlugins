@@ -281,6 +281,21 @@
         this.drawStateIcons(actor, x, y, width);
         y += lineHeight * 2;
     };
+    /**
+     * アクター名を描画する。
+     * 
+     * @param {Game_Actor} actor Game_Actorオブジェクト
+     * @param {number} x X位置
+     * @param {number} y Y位置
+     * @param {number} width 幅
+     */
+    Window_MenuStatus.prototype.drawActorName = function(actor, x, y, width) {
+        width = width || 168;
+        if (actor.isDead() || actor.isDying()) {
+            this.changeTextColor(ColorManager.hpColor(actor));
+        }
+        this.drawText(actor.name(), x, y, width);
+    };
 
     /**
      * クラス名と通り名を描画する。
