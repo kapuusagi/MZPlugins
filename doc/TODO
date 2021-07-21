@@ -6,20 +6,15 @@
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも）
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
-
   ☐ Kapu_BattleMusicManager
   ☐ Kapu_EncounterEffectManager
   ☐ Kapu_GrowupSystem_Skills (レベルアップでのGP習得可能スキル追加)
-  Kapu_Twld_DamageEffect:
-    ☐ ダメージポップアップを変更した。
-    ☐ ダメージポップアップで、「効果有り！」な場合と「効果なし！」の場合にポップアップさせたい。
       
 機能拡張予定:
-  Kapu_Twld_BasicParams_Hit:
-    ☐ relativeDiffRateの計算式見直し。 差分が低いときは殆ど変動なしになるように計算を変えた方がいいかも。
   Kapu_Twld_DamageEffect:
-    ☐ ダメージエフェクトを見直し。
-    ☐ ステートの付与・解除の表示を見直し。（早すぎ）
+    ☐ ステートの付与・解除の表示を見直し。下からポップアップで表示しているけれど、Y軸を調整して複数のステートを左から右に流すほうがいいかも。
+  Kapu_Twld_BattleSystem:
+    ☐ MP/TPの数値表示が小さいので大きくする。動作確認は顔表示とBattlePicutreの両方で行う必要がある。
   Kapu_ChoiceByRoulette:
     ☐ 戦闘中にルーレット選択させたい。
   Kapu_QuestSystem:
