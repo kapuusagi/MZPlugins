@@ -1046,6 +1046,19 @@ function Sprite_BattleHudPicture() {
         return 16;
     };
 
+    /**
+     * テキスト描画色を取得する。
+     * 
+     * @returns {string} 描画色
+     */
+    Sprite_BattleHudActorName.prototype.textColor = function() {
+        if (this._battler && (this._battler.isDead() || this._battler.isDying())) {
+            return ColorManager.hpColor(this._battler);
+        } else {
+            return ColorManager.normalColor();
+        }
+    };
+
     //------------------------------------------------------------------------------
     // Sprite_HudStateIcons
     
