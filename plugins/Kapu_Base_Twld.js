@@ -130,6 +130,67 @@
  * @default 999
  * @parent enemyParameter
  * 
+ * @param colorHpDead
+ * @text HP色(死亡時)
+ * @desc HPの色(死亡時)
+ * @type string
+ * @default #FF3333
+ * 
+ * @param colorHpDying
+ * @text HP色(瀕死時)
+ * @desc HPの色(瀕死時)
+ * @type string
+ * @default #FF8080
+ * 
+ * @param colorHpFull
+ * @text HP色(全快時)
+ * @desc HPの色(全快時)
+ * @type string
+ * @default #FFFFA0
+ * 
+ * @param colorHpNormal
+ * @text HP色(全快時以外)
+ * @desc HPの色(全快時以外)
+ * @type string
+ * @default #FFFFFF
+ * 
+ * @param colorMpDead
+ * @text MP色(死亡時)
+ * @desc MPの色(死亡時)
+ * @type string
+ * @default #646464
+ * 
+ * @param colorMpFull
+ * @text MP色(全快時)
+ * @desc MPの色(全快時)
+ * @type string
+ * @default #C880FF
+ * 
+ * @param colorMpNormal
+ * @text MP色
+ * @desc MPの色
+ * @type string
+ * @default #FFFFFF
+ * 
+ * @param colorTpDead
+ * @text TP色(死亡時)
+ * @desc TPの色(死亡時)
+ * @type string
+ * @default #646464
+ * 
+ * @param colorTpFull
+ * @text TP色(全快時)
+ * @desc TPの色(全快時)
+ * @type string
+ * @default #80FF80
+ * 
+ * @param colorTpNormal
+ * @text TP色
+ * @desc TPの色
+ * @type string
+ * @default #FFFFFF
+ * 
+ * 
  * @help 
  * ベーシックシステムのTWLD向け変更を行うプラグインです。
  * 各Trait系プラグインによる変更前に適用するものを全て入れます。
@@ -191,6 +252,72 @@
         enemyParamMax[i] = Number(parameters["enemyParamMax" + i]) || ((i === 0) ? 999999 : 9999);
     }
 
+    const colorHpDead = parameters["colorHpDead"] || "#FF8000";
+    const colorHpDying = parameters["colorHpDying"] || "#FF8040";
+    const colorHpFull = parameters["colorHpFull"] || "#FFFFA0";
+    const colorHpNormal = parameters["colorHpNormal"] || "#FFFFFF";
+    const colorMpDead = parameters["colorMpDead"] || "#646464";
+    const colorMpFull = parameters["colorMpFull"] || "#80C8FF";
+    const colorMpNormal = parameters["colorMpNormal"] || "#FFFFFF";
+    const colorTpDead = parameters["colorTpDead"] || "#646464";
+    const colorTpFull = parameters["colorTpFull"] || "#80FF80";
+    const colorTpNormal = parameters["colorTpNormal"] || "#FFFFFF";
+
+    /**
+     * HP数値描画色を得る。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @returns {string} 色
+     */
+    ColorManager.hpColor = function(actor) {
+        if (!actor) {
+            return colorHpNormal;
+        } else if (actor.isDead()) {
+            return colorHpDead;
+        } else if (actor.isDying()) {
+            return colorHpDying; // 瀕死時文字カラー
+        } else if (actor.hp >= actor.mhp) {
+            return colorHpFull;
+        } else {
+            return colorHpNormal;
+        }
+    };
+
+    /**
+     * MP数値描画色を得る。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @returns {string} 色
+     */
+    ColorManager.mpColor = function(actor) {
+        if (!actor) {
+            return colorMpNormal;
+        } else if (actor.isDead()) {
+            return colorMpDead;
+        } else if (actor.mp >= actor.mmp) {
+            return colorMpFull;
+        } else {
+            return colorMpNormal;
+        }
+    };
+
+    /**
+     * TP数値色を得る。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @return {string} TP色
+     */
+    ColorManager.tpColor = function(actor) {
+        if (!actor) {
+            return colorTpNormal;
+        } else if (actor.isDead()) {
+            return colorTpDead;
+        } else if (actor.tp >= actor.maxTp()) {
+            return colorTpFull;
+        } else {
+            return colorTpNormal;
+        }
+    };
     //------------------------------------------------------------------------------
     // Game_Battler
     /**
