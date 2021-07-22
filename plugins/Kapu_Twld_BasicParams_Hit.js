@@ -108,10 +108,10 @@
         pev += (1.0 - this.itemHit(target));// 命中率分の補正。1.0超えた分は回避しにくくなる。
         if (this.isLongRangeItem(target) > 1) {
             // 長距離の場合には相手の素早さと使用者の器用さを比較する。
-            pev += this.relativeDiffRate(target.agi, subject.dex);
+            pev -= this.relativeDiffRate(target.agi, subject.dex);
         } else {
             // 接近戦の場合にはDEXとAGIの合計値を比較する。
-            pev += this.relativeDiffRate((target.dex + target.agi), (subject.dex + subject.agi));
+            pev -= this.relativeDiffRate((target.dex + target.agi), (subject.dex + subject.agi));
         }
         return Math.random() <= pev;
     };
