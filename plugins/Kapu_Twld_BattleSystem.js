@@ -70,6 +70,13 @@
  * @type number
  * @parent ui
  * 
+ * @param displayMaxValue
+ * @text MP/TP最大値表示
+ * @desc trueにするとMP/TP数値で最大値を表示する。
+ * @type boolean
+ * @default true
+ * @parent ui
+ * 
  * @param layout
  * @text レイアウト設定
  * 
@@ -299,7 +306,10 @@ function Sprite_BattleHudPicture() {
     const gaugeValueHpFontSize = Number(parameters["valueHpFontSize"]) || 24;
     const gaugeLabelFontSize = Number(parameters["labelFontSize"]) || 12;
     const gaugeValueFontSize = Number(parameters["valueFontSize"]) || 12;
-    const displayEnemyGauge = (typeof parameters["displayEnemyGauge"] === "undefined")
+    const displayMaxValue = (parameters["displayMaxValue"] === undefined)
+            ? true : (parameters["displayMaxValue"] === "true");
+
+    const displayEnemyGauge = (parameters["displayEnemyGauge"] === undefined)
             ? false : (parameters["displayEnemyGauge"] === "true");
 
     const listWindowWidth = Number(parameters["listWindowWidth"]) || 816;
@@ -672,21 +682,40 @@ function Sprite_BattleHudPicture() {
     };
 
     /**
+     * ラベルを描画する。
+     */
+    Sprite_BattleHudHpGauge.prototype.drawLabel = function() {
+        const label = this.label();
+        const x = this.labelOutlineWidth() / 2;
+        const y = this.labelY();
+        const labelWidth = (this.bitmapWidth() - 16) * 0.2; // 最大で20%を使用する。
+        const height = this.bitmapHeight();
+        this.setupLabelFont();
+        this.bitmap.paintOpacity = this.labelOpacity();
+        this.bitmap.drawText(label, x, y, labelWidth, height, "left");
+        this.bitmap.paintOpacity = 255;
+    };
+
+    /**
      * 値を描画する。
      */
     Sprite_BattleHudHpGauge.prototype.drawValue = function() {
         const currentValue = this.currentValue();
         const maxValue = this.currentMaxValue();
         const width = this.bitmapWidth();
+        let x = Math.round((width - 16) * 0.2);
+        const valueWidth = Math.round((width - 16 - x) * 0.7);
+        const maxValueWidth = Math.round((width - 16 - x) * 0.3);
         const height = this.bitmapHeight();
         this.setupValueFont();
-        const maxValueWidth = 48;
-        this.bitmap.drawText(String(currentValue).padStart(4),
-                0, 0, width - maxValueWidth, height, "right");
+        this.bitmap.drawText(currentValue,
+                x, 0, valueWidth, height, "right");
+        x += valueWidth;
         this.setupMaxValueFont();
         const maxValueY = this.labelY();
-        this.bitmap.drawText("/" + String(maxValue).padStart(4), 
-                width - maxValueWidth, maxValueY, maxValueWidth, height, "right");
+        this.bitmap.drawText("/", x, maxValueY, 16, height, "center");
+        x += 16;
+        this.bitmap.drawText(maxValue, x, maxValueY, maxValueWidth, height, "right");
     };
 
     /**
@@ -741,7 +770,7 @@ function Sprite_BattleHudPicture() {
      * @returns {number} Bitmapの高さ。
      */
     Sprite_BattleHudMpTpGauge.prototype.bitmapHeight = function() {
-        return 12;
+        return 18;
     };
 
     /**
@@ -779,18 +808,43 @@ function Sprite_BattleHudPicture() {
     Sprite_BattleHudMpTpGauge.prototype.gaugeX = function() {
         return 16;
     };
+    /**
+     * ラベルを描画する。
+     */
+    Sprite_BattleHudMpTpGauge.prototype.drawLabel = function() {
+        const label = this.label();
+        const x = this.labelOutlineWidth() / 2;
+        const y = this.labelY();
+        const labelWidth = (this.bitmapWidth() - 16) * 0.2; // 最大で20%を使用する。
+        const height = this.bitmapHeight();
+        this.setupLabelFont();
+        this.bitmap.paintOpacity = this.labelOpacity();
+        this.bitmap.drawText(label, x, y, labelWidth, height, "left");
+        this.bitmap.paintOpacity = 255;
+    };
+
 
     /**
      * 値を描画する。
      */
     Sprite_BattleHudMpTpGauge.prototype.drawValue = function() {
         const currentValue = this.currentValue();
-        const maxValue = this.currentMaxValue();
         const width = this.bitmapWidth();
+        let x = Math.round((this.width - 16) * 0.2);
         const height = this.bitmapHeight();
         this.setupValueFont();
-        const txt = String(currentValue).padStart(4) + "/" + String(maxValue).padStart(4);
-        this.bitmap.drawText(txt, 0, 0, width, height, "right");
+        if (displayMaxValue) {
+            const maxValue = this.currentMaxValue();
+            const valueWidth = (width - x - 16) / 2;
+            this.bitmap.drawText(currentValue, x, 0, valueWidth, height, "right");
+            x += valueWidth;
+            this.bitmap.drawText("/", x, 0, 16, height, "center");
+            x += 16;
+            this.bitmap.drawText(maxValue, x, 0, valueWidth, height, "right");
+        } else{
+            const valueWidth = width - x;
+            this.bitmap.drawText(currentValue, x, 0, valueWidth, height, "right");
+        }
     };
 
     //------------------------------------------------------------------------------
