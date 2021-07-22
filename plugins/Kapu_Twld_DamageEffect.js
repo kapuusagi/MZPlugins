@@ -357,21 +357,20 @@
                 this.setupNormalEffect();
             }
         }
-        var stateWaitOffset = popupDuration - fadeInDuration;
-        const statePopupOffset = statePopupDuration - 10;
+        let displayNo = 0;
         if (textRemovedState && (statePopupDuration > 0)) {
             for (const stateId of result.removedStates) {
                 if (!target.isStateAffected(stateId)) {
-                    this.createAddRemoveState(stateId, false, stateWaitOffset);
-                    stateWaitOffset += statePopupOffset;
+                    this.createAddRemoveState(stateId, false, displayNo);
+                    displayNo++;
                 }
             }
         }
         if (textAddedState && (statePopupDuration > 0)) {
             for (const stateId of result.addedStates) {
                 if (target.isStateAffected(stateId)) {
-                    this.createAddRemoveState(stateId, true, stateWaitOffset);
-                    stateWaitOffset += statePopupOffset;
+                    this.createAddRemoveState(stateId, true, displayNo);
+                    displayNo++;
                 }
             }
         }
@@ -690,9 +689,12 @@
      * 
      * @param {number} stateId ステートID
      * @param {boolean} isAdded 追加された場合にはtrue, 解除された場合にはfalse
-     * @param {number} stateWaitOffset ステート表示するオフセットフレーム数
+     * @param {number} displayNo 表示番号
      */
-    Sprite_Damage.prototype.createAddRemoveState = function(stateId, isAdded, stateWaitOffset) {
+    Sprite_Damage.prototype.createAddRemoveState = function(stateId, isAdded, displayNo) {
+        const fontSize = $gameSystem.mainFontSize();
+        const displayableCount = Math.max(1, Math.floor(140 / (fontSize + 8)));
+        const stateWaitOffset = popupDuration - fadeInDuration + Math.floor(displayNo / displayableCount) * (statePopupDuration - 10) + (displayNo % 4) * 10;
         const state = $dataStates[stateId];
         if (noDispStateIds.includes(stateId) || !state || !state.message1 || state.meta.noPopup) {
             return ;
@@ -701,17 +703,19 @@
         if (text.length == 0) {
             return ;
         }
-        const h = this.fontSize();
+
+        const h = fontSize;
         const w = Math.floor(h * text.length);
         const sprite = this.createChildSprite(w, h);
         sprite.bitmap.textColor = isAdded ? colorAddedState : colorRemovedState;
+        sprite.bitmap.fontSize = fontSize;
         sprite.bitmap.drawText(text, 0, 0, w, h, "center");
         sprite.anchor.y = 0;
-        sprite.x = 0;
-        sprite.y = -80;
+        sprite.x = -10 + displayNo % displayableCount * 5;
+        sprite.y = -140 + displayNo % displayableCount * (fontSize + 8);
         sprite.opacity = 0;
         sprite.ry = sprite.y;
-        sprite.dy = -0.5;
+        sprite.dy = 0;
         sprite.wait = stateWaitOffset;
         sprite.updatePosition = this.updateAddRemoveState.bind(this);
         sprite.frameCount = 0;
@@ -729,16 +733,17 @@
             sprite.wait--;
             return;
         }
-        sprite.ry += sprite.dy;
-        sprite.y = Math.round(sprite.ry);
+
         const frameCount = sprite.frameCount;
         sprite.frameCount++;
 
         // 上に移動
         if (frameCount < 10) {
             sprite.opacity = Math.min(255, sprite.opacity + 25);
+            sprite.x += 1;
         } else if (frameCount > (statePopupDuration - 10)) { // 消す
             sprite.opacity = Math.max(0, sprite.opacity - 25);
+            sprite.x += 1;
         }
     };
 
