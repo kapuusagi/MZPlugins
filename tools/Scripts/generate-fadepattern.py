@@ -101,8 +101,10 @@ def export_fade_pattern1(image_buf, path):
     height = len(image_buf)
     for x in range(0, width):
         d = round((x + 1) / width * 255)
-        for y in range(0, height):
-            image_buf[y, x] = d
+        image_buf[0, x] = d
+
+    for y in range(1, height):
+        numpy.copyto(image_buf[y], image_buf[0])
     image = Image.fromarray(image_buf)
     image.save(path)
     del image
@@ -119,8 +121,9 @@ def export_fade_pattern2(image_buf, path):
     height = len(image_buf)
     for x in range(0, width):
         d = round((width - x - 1) / width * 255)
-        for y in range(0, height):
-            image_buf[y, x] = d
+        image_buf[0, x] = d
+    for y in range(1, height):
+        numpy.copyto(image_buf[y], image_buf[0])
     image = Image.fromarray(image_buf)
     image.save(path)
     del image
