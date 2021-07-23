@@ -96,6 +96,8 @@ def export_fade_pattern1(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -116,6 +118,8 @@ def export_fade_pattern2(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -135,6 +139,8 @@ def export_fade_pattern3(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -153,6 +159,8 @@ def export_fade_pattern4(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -171,6 +179,8 @@ def export_fade_pattern5(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -190,6 +200,8 @@ def export_fade_pattern6(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -209,6 +221,8 @@ def export_fade_pattern7(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -228,6 +242,8 @@ def export_fade_pattern8(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -247,6 +263,8 @@ def export_fade_pattern9(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -271,6 +289,8 @@ def export_fade_pattern10(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -295,34 +315,34 @@ def export_fade_pattern11(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
 
-    x_center = width / 2
-    y_center = height / 2
+    x_center = math.ceil(width / 2)
+    y_center = math.ceil(height / 2)
 
     # 半径計算
     r = numpy.sqrt(numpy.power(width / 2, 2) + numpy.power(height / 2, 2))
 
     # 超計算が重いので、1/4だけ計算して後は複製するロジックを流す
-    for y in range(0, height):
+    for y in range(0, y_center + 1):
         for x in range(0, width):
-            if (x <= x_center) and (y <= y_center):
+            if (x <= x_center):
                 distance = numpy.sqrt(numpy.power(x_center - x, 2) + numpy.power(y_center - y, 2))
                 image_buf[y, x] = round(distance / r * 255)
-            elif (x <= x_center):
-                src_x = x
-                src_y = height - y - 1
-                image_buf[y, x] = image_buf[src_y, src_x]
-            elif (y <= y_center):
+            else:
                 src_x = width - x - 1
                 src_y = y
                 image_buf[y, x] = image_buf[src_y, src_x]
-            else:
-                src_x = width - x - 1
-                src_y = height - y - 1
-                image_buf[y, x] = image_buf[src_y, src_x]
+
+    # 下半分は上半分をコピー
+    for y in range(y_center + 1, height):
+        src_y = height - y - 1
+        numpy.copyto(image_buf[y], image_buf[src_y])
+
     image = Image.fromarray(image_buf)
     image.save(path)
     del image
@@ -334,34 +354,33 @@ def export_fade_pattern12(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
 
-    x_center = width / 2
-    y_center = height / 2
+    x_center = math.ceil(width / 2)
+    y_center = math.ceil(height / 2)
 
     # 半径計算
     r = numpy.sqrt(numpy.power(width / 2, 2) + numpy.power(height / 2, 2))
 
     # 超計算が重いので、1/4だけ計算して後は複製するロジックを流す
-    for y in range(0, height):
+    for y in range(0, y_center + 1):
         for x in range(0, width):
             if (x <= x_center) and (y <= y_center):
                 distance = numpy.sqrt(numpy.power(x_center - x, 2) + numpy.power(y_center - y, 2))
                 image_buf[y, x] = round((r - distance) / r * 255)
-            elif (x <= x_center):
-                src_x = x
-                src_y = height - y - 1
-                image_buf[y, x] = image_buf[src_y, src_x]
-            elif (y <= y_center):
+            else:
                 src_x = width - x - 1
                 src_y = y
                 image_buf[y, x] = image_buf[src_y, src_x]
-            else:
-                src_x = width - x - 1 
-                src_y = height - y - 1
-                image_buf[y, x] = image_buf[src_y, src_x]
+
+    for y in range(y_center + 1, height):
+        src_y = height - y - 1
+        numpy.copyto(image_buf[y], image_buf[src_y])
+
     image = Image.fromarray(image_buf)
     image.save(path)
     del image
@@ -373,6 +392,8 @@ def export_fade_pattern13(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -402,6 +423,8 @@ def export_fade_pattern14(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -431,20 +454,23 @@ def export_fade_pattern15(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
 
     x_center = width / 2
 
-    for y in range(0, height):
-        for x in range(0, width):
-            if (x <= x_center):
-                d = round((x_center - x) / x_center * 255)
-                image_buf[y, x] = d
-            else:
-                d = round((x + 1 - x_center) / x_center * 255)
-                image_buf[y, x] = d
+    for x in range(0, width):
+        if (x <= x_center):
+            d = round((x_center - x) / x_center * 255)
+            image_buf[0, x] = d
+        else:
+            d = round((x + 1 - x_center) / x_center * 255)
+            image_buf[0, x] = d
+    for y in range(1, height):
+        numpy.copyto(image_buf[y], image_buf[0])
 
     image = Image.fromarray(image_buf)
     image.save(path)
@@ -457,20 +483,25 @@ def export_fade_pattern16(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
 
     x_center = width / 2
 
+    for x in range(0, width):
+        if (x <= x_center):
+            d = round(x / x_center * 255)
+            image_buf[0, x] = d
+        else:
+            d = round((width - x - 1) / x_center * 255)
+            image_buf[0, x] = d
+
     for y in range(0, height):
-        for x in range(0, width):
-            if (x <= x_center):
-                d = round(x / x_center * 255)
-                image_buf[y, x] = d
-            else:
-                d = round((width - x - 1) / x_center * 255)
-                image_buf[y, x] = d
+        numpy.copyto(image_buf[y], image_buf[0])
+
     image = Image.fromarray(image_buf)
     image.save(path)
     del image
@@ -482,6 +513,8 @@ def export_fade_pattern17(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -508,6 +541,8 @@ def export_fade_pattern18(image_buf, path):
     ----------
     image_buf : numpy.array
         画像バッファ
+    path : string
+        ファイルパス
     """
     width = len(image_buf[0])
     height = len(image_buf)
@@ -527,7 +562,149 @@ def export_fade_pattern18(image_buf, path):
     image.save(path)
     del image
 
+def fill_rect(image_buf, x, y, width, height, value):
+    """
+    指定した矩形領域を塗りつぶす。
 
+    Parameters
+    ----------
+    image_buf : numpy.array
+        画像バッファ
+    x : number
+        x 位置
+    y : number
+        y 位置
+    width : number
+        塗りつぶし幅
+    height : number
+        塗りつぶし高さ
+    value : number
+        値
+    """
+    image_width = len(image_buf[0])
+    image_height = len(image_buf)
+    for dst_y in range(y, y + height):
+        for dst_x in range(x, x + width):
+            if (dst_x < image_width) and (dst_y < image_height):
+                image_buf[dst_y, dst_x] = value
+
+
+def export_fade_pattern19(image_buf, path, column_count, row_count):
+    """フェードパターン19(四角が時計回りに外側から中央へ)を出力する
+
+    Parameters
+    ----------
+    image_buf : numpy.array
+        画像バッファ
+    path : string
+        ファイルパス
+    column_count : number
+        カラム数
+    row_count : number
+        行数
+    """
+    width = len(image_buf[0])
+    height = len(image_buf)
+
+    cell_width = math.ceil(width / column_count)
+    cell_height = math.ceil(height / row_count)
+
+    y_top = 0
+    y_bottom = column_count - 1
+    x_left = 0
+    x_right = row_count - 1
+
+    tilt = 256 / (column_count * row_count)
+
+    x = 0
+    y = 0
+    count = 0
+    while count < (8 * 8):
+        for x in range(x_left, x_right + 1, 1):
+            value = min(math.ceil(count * tilt), 255)
+            fill_rect(image_buf, x * cell_width, y * cell_height, cell_width, cell_height, value)
+            count += 1
+        y_top += 1
+
+        for y in range(y_top, y_bottom + 1, 1):
+            value = min(math.ceil(count * tilt), 255)
+            fill_rect(image_buf, x * cell_width, y * cell_height, cell_width, cell_height, value)
+            count += 1
+        x_right -= 1
+
+        for x in range(x_right, x_left - 1, -1):
+            value = min(math.ceil(count * tilt), 255)
+            fill_rect(image_buf, x * cell_width, y * cell_height, cell_width, cell_height, value)
+            count += 1
+        y_bottom -= 1
+
+        for y in range(y_bottom, y_top - 1, -1):
+            value = min(math.ceil(count * tilt), 255)
+            fill_rect(image_buf, x * cell_width, y * cell_height, cell_width, cell_height, value)
+            count += 1
+        x_left += 1
+    image = Image.fromarray(image_buf)
+    image.save(path)
+    del image
+
+def export_fade_pattern20(image_buf, path, column_count, row_count):
+    """フェードパターン20(四角が中央から時計回りに外側へ)を出力する
+
+    Parameters
+    ----------
+    image_buf : numpy.array
+        画像バッファ
+    path : string
+        ファイルパス
+    column_count : number
+        カラム数
+    row_count : number
+        行数
+    """
+    width = len(image_buf[0])
+    height = len(image_buf)
+
+    cell_width = math.ceil(width / column_count)
+    cell_height = math.ceil(height / row_count)
+
+    y_top = 0
+    y_bottom = column_count - 1
+    x_left = 0
+    x_right = row_count - 1
+
+    tilt = 256 / (column_count * row_count)
+
+    x = 0
+    y = 0
+    count = 0
+    while count < (8 * 8):
+        for x in range(x_left, x_right + 1, 1):
+            value = max(math.ceil(255 - count * tilt), 0)
+            fill_rect(image_buf, x * cell_width, y * cell_height, cell_width, cell_height, value)
+            count += 1
+        y_top += 1
+
+        for y in range(y_top, y_bottom + 1, 1):
+            value = max(math.ceil(255 - count * tilt), 0)
+            fill_rect(image_buf, x * cell_width, y * cell_height, cell_width, cell_height, value)
+            count += 1
+        x_right -= 1
+
+        for x in range(x_right, x_left - 1, -1):
+            value = max(math.ceil(255 - count * tilt), 0)
+            fill_rect(image_buf, x * cell_width, y * cell_height, cell_width, cell_height, value)
+            count += 1
+        y_bottom -= 1
+
+        for y in range(y_bottom, y_top - 1, -1):
+            value = max(math.ceil(255 - count * tilt), 0)
+            fill_rect(image_buf, x * cell_width, y * cell_height, cell_width, cell_height, value)
+            count += 1
+        x_left += 1
+
+    image = Image.fromarray(image_buf)
+    image.save(path)
+    del image
 
 root = tkinter.Tk()
 app = Application(master=root)
@@ -558,6 +735,8 @@ export_fade_pattern15(image_buf, "fade_15.png")
 export_fade_pattern16(image_buf, "fade_16.png")
 export_fade_pattern17(image_buf, "fade_17.png")
 export_fade_pattern18(image_buf, "fade_18.png")
+export_fade_pattern19(image_buf, "fade_19.png", 8, 8)
+export_fade_pattern20(image_buf, "fade_20.png", 8, 8)
 
 
 
