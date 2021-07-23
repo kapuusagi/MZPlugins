@@ -26,6 +26,12 @@
  * @min -5.00
  * @max 0.00
  * 
+ * @param debug
+ * @text デバッグモード
+ * @desc trueにするとデバッグ出力をする。
+ * @type boolean
+ * @default false
+ * 
  * 
  * @help 
  * TWLDの基本パラメータを命中判定に適用するプラグイン。
@@ -57,6 +63,7 @@
 
     const relativeDiffRateMax = (Number(parameters["relativeDiffRateMax"]) || 1.00).clamp(0, 5);
     const relativeDiffRateMin = (Number(parameters["relativeDiffRateMin"]) || -1.00).clamp(-5, 0);
+    const enableDebug = (parameters["debug"] === undefined) ? false : (parameters["debug"] === "true");
 
     //------------------------------------------------------------------------------
     // Game_Action
@@ -95,40 +102,87 @@
         return this.item().meta.longRange;
     };
 
+    if (enableDebug) {
+        /**
+         * 物理攻撃時の回避判定を行う。
+         * 
+         * @param {Game_Battler} target 対象
+         * @returns {boolean} 命中した場合にはtrue, それ以外はfalse
+         */
+         Game_Action.prototype.testEvaPhysical = function(target) {
+            const subject = this.subject();
+            console.log(subject.name() + "--(物理)-->" + target.name())
+            let pev = target.eva; // 回避率は純粋に効いてくる
+            console.log("  target.PEV=" + target.eva);
+            const itempev = (1.0 - this.itemHit(target));// 命中率分の補正。1.0超えた分は回避しにくくなる。
+            console.log("  item.PEV=" + itempev);
+            pev += itempev;
+            if (this.isLongRangeItem(target) > 1) {
+                // 長距離の場合には相手の素早さと使用者の器用さを比較する。
+                const pevadd = this.relativeDiffRate(target.agi, subject.dex);
+                console.log("  long.PEV=" + pevadd + " : DEX=" + subject.dex + " -> AGI=" + target.agi);
+                pev -= pevadd;
+            } else {
+                // 接近戦の場合にはDEXとAGIの合計値を比較する。
+                const pevadd = this.relativeDiffRate(target.dex + target.agi, subject.dex + subject.agi);
+                console.log("  short.PEV=" + pevadd + " : DEX=" + subject.dex + ",AGI=" + subject.agi + " -> DEX=" + target.dex + ",AGI=" + target.agi);
+                pev -= pevadd;
+            }
+            console.log("  total.PEV=" + pev);
+            return Math.random() <= pev;
+        };
+        /**
+         * 魔法攻撃時の回避判定を行う。
+         * 
+         * @param {Game_Battler} target 対象
+         * @returns {boolean} 命中した場合にはtrue, それ以外はfalse
+         */
+         Game_Action.prototype.testEvaMagical = function(target) {
+            const subject = this.subject();
+            let mev = target.mev; // 魔法回避率は純粋に効いてくる。
+            console.log("  target.MEV=" + target.mev);
+            const itemMev = (1.0 - this.itemHit(target)); // 命中率の1.0超えると回避しにくくなる。
+            mev += itemMev;
+            const mevadd = (this.relativeDiffRate(target.men, subject.men + subject.int) / 2);
+            console.log("  magic.MEV=" + mevadd + " : MEN=" + subject.men + ",INT=" + subject.int + " -> MEN=" + target.men);
+            mev -= mevadd;
+            return Math.random() <= mev;
+        };
+    } else {
+        /**
+         * 物理攻撃時の回避判定を行う。
+         * 
+         * @param {Game_Battler} target 対象
+         * @returns {boolean} 命中した場合にはtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testEvaPhysical = function(target) {
+            const subject = this.subject();
+            let pev = target.eva; // 回避率は純粋に効いてくる
+            pev += (1.0 - this.itemHit(target));// 命中率分の補正。1.0超えた分は回避しにくくなる。
+            if (this.isLongRangeItem(target) > 1) {
+                // 長距離の場合には相手の素早さと使用者の器用さを比較する。
+                pev -= this.relativeDiffRate(target.agi, subject.dex);
+            } else {
+                // 接近戦の場合にはDEXとAGIの合計値を比較する。
+                pev -= this.relativeDiffRate((target.dex + target.agi), (subject.dex + subject.agi));
+            }
+            return Math.random() <= pev;
+        };
+        /**
+         * 魔法攻撃時の回避判定を行う。
+         * 
+         * @param {Game_Battler} target 対象
+         * @returns {boolean} 命中した場合にはtrue, それ以外はfalse
+         */
+        Game_Action.prototype.testEvaMagical = function(target) {
+            const subject = this.subject();
+            let mev = target.mev; // 魔法回避率は純粋に効いてくる。
+            mev += (1.0 - this.itemHit(target)); // 命中率の1.0超えると回避しにくくなる。
+            mev -= (this.relativeDiffRate(target.men, subject.men) / 2);
+            return Math.random() <= mev;
+        };
+    }
 
-    /**
-     * 物理攻撃時の回避判定を行う。
-     * 
-     * @param {Game_Battler} target 対象
-     * @returns {boolean} 命中した場合にはtrue, それ以外はfalse
-     */
-    Game_Action.prototype.testEvaPhysical = function(target) {
-        const subject = this.subject();
-        let pev = target.eva; // 回避率は純粋に効いてくる
-        pev += (1.0 - this.itemHit(target));// 命中率分の補正。1.0超えた分は回避しにくくなる。
-        if (this.isLongRangeItem(target) > 1) {
-            // 長距離の場合には相手の素早さと使用者の器用さを比較する。
-            pev -= this.relativeDiffRate(target.agi, subject.dex);
-        } else {
-            // 接近戦の場合にはDEXとAGIの合計値を比較する。
-            pev -= this.relativeDiffRate((target.dex + target.agi), (subject.dex + subject.agi));
-        }
-        return Math.random() <= pev;
-    };
-
-    /**
-     * 魔法攻撃時の回避判定を行う。
-     * 
-     * @param {Game_Battler} target 対象
-     * @returns {boolean} 命中した場合にはtrue, それ以外はfalse
-     */
-    Game_Action.prototype.testEvaMagical = function(target) {
-        const subject = this.subject();
-        let mev = target.mev; // 魔法回避率は純粋に効いてくる。
-        mev += (1.0 - this.itemHit(target)); // 命中率の1.0超えると回避しにくくなる。
-        mev += (this.relativeDiffRate(target.men, subject.men) / 2);
-        return Math.random() <= mev;
-    };
 
     const _Game_Action_itemCri = Game_Action.prototype.itemCri;
 
