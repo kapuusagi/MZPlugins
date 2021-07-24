@@ -80,14 +80,14 @@
  * @text AGI初期値
  * @desc 振り分け前AGI初期値
  * @type struct<ParamEntry>
- * @default { "min":"5", "max":"15" }
+ * @default {"min":"5","max":"15"}
  * @parent initialValue
  * 
  * @param initialLuk
  * @text LUK初期値
  * @desc 振り分け前LUK初期値
  * @type struct<ParamEntry>
- * @default { "min":"5", "max":"15" }
+ * @default {"min":"5","max":"15"}
  * @parent initialValue
  * 
  * @param isLukEditable
@@ -137,7 +137,7 @@
  * @desc 最小値
  * @type number
  * 
- * @paam max
+ * @param max
  * @text 最大値
  * @desc 最大値
  * @type number
