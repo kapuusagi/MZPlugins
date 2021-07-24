@@ -92,9 +92,14 @@
         switch (paramId) {
             case 0: // MaxHP
                 {
-                    // 最大HP = (VIT * 4) + FLOOR(VIT / 5) * 7
-                    const vit = Math.max(0, this.vit - 20);
-                    return value + (vit * 4) + Math.floor(vit / 5) * 7;
+                    const vit = this.vit - 20
+                    if (vit >= 0) {
+                        // 最大HP = (ベース値) + (VIT * 4) + FLOOR(VIT / 5) * 7
+                        return value + (vit * 4) + Math.floor(vit / 5) * 7;
+                    } else {
+                        // 最大HP = (ベース値) + (VIT / 3)
+                        return value - Math.floor(vit / 3);
+                    }
                 }
             case 1: // MaxMP
                 {
