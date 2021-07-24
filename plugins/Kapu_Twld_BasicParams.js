@@ -673,7 +673,7 @@
         const actor = $dataActors[actorId];
         if (actor.meta.basicParams) {
             const tokens = actor.meta.basicParams.split(",");
-            const count = Math.min(actor.basicParams.length, tokens.length);
+            const count = Math.min(actor.meta.basicParams.length, tokens.length);
             for (let i = 0; i < count; i++) {
                 const value = Number(tokens[i]);
                 if (value > 0) {
