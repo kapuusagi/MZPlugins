@@ -681,6 +681,8 @@
                 }
             }
         }
+
+        this.recoverAll();
     };
 
     /**
@@ -744,6 +746,7 @@
                 }
             }
         }
+        this.recoverAll();
     };
 
 

@@ -315,6 +315,8 @@
         this._growPoint.max = Math.max(usedGrowPoint + growPoint, calcGrowPoint).clamp(0, Game_Actor.MAX_GROW_POINT);
         this._growPoint.current = Math.max(0, this._growPoint.max - usedGrowPoint);
         this._gotGpLevel = this._level;
+
+        this.recoverAll();
     };
 
     /**
