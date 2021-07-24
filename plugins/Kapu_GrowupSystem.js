@@ -309,7 +309,9 @@
         this.initGrows();
 
         const actor = $dataActors[actorId];
-        const growPoint = Math.floor(Number(actor.meta.growPoint)) || initialGrowPoint;
+        const growPoint = (actor.meta.growPoint !== undefined)
+                ? Math.floor(Number(actor.meta.growPoint) || 0)
+                : initialGrowPoint;
         const usedGrowPoint = this.usedGrowupPoint();
         const calcGrowPoint = this.growPointOfLevel();
         this._growPoint.max = Math.max(usedGrowPoint + growPoint, calcGrowPoint).clamp(0, Game_Actor.MAX_GROW_POINT);
