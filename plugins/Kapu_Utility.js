@@ -322,7 +322,7 @@
         const objs = [];
         for (const member of this.aliveMembers()) {
             for (const traitObject of member.traitObjects()) {
-                if (!(traitObject.meta.traitsUnduplicatable && objs.includes(traitObject))) {
+                if (!(traitObject.meta && traitObject.meta.traitsUnduplicatable && objs.includes(traitObject))) {
                     // traitsUnduplicatable指定が無いか、objsに含まれていない。
                     objs.push(traitObject);
                 }
