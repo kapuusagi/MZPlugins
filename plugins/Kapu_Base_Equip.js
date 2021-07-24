@@ -56,9 +56,12 @@
         // 装備品オブジェクト配列を作成する。
         // データベース上での指定は、$dataSystem.equipTypes準拠だからだ。
         const equipItems = this.initialEquipments(equips);
+        this.refreshEquipSlots();
+
+        const slots = this.equipSlots();
 
         this._equips = [];
-        const equipSlotCount = this.equipSlots().length;
+        const equipSlotCount = slots.length;
         for (let i = 0; i < equipSlotCount; i++) {
             this._equips[i] = new Game_Item();
         }
@@ -151,31 +154,6 @@
             }
         }
         return -1;
-    };
-
-    /**
-     * 装備を初期化する。
-     * 
-     * @param {Array<Number>} equips 装備品ID配列
-     * !!!overwrite!!! Game_Actor.initEquips
-     *   装備初期化処理を拡張できるようにするため、オーバーライドする。
-     */
-    Game_Actor.prototype.initEquips = function(equips) {
-        this.refreshEquipSlots();
-
-        const slots = this.equipSlots();
-        const maxSlots = slots.length;
-        this._equips = [];
-        for (let i = 0; i < maxSlots; i++) {
-            this._equips[i] = new Game_Item();
-        }
-        for (let j = 0; j < equips.length; j++) {
-            if (j < maxSlots) {
-                this._equips[j].setEquip(slots[j] === 1, equips[j]);
-            }
-        }
-        this.releaseUnequippableItems(true);
-        this.refresh();
     };
 
     /**

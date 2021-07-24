@@ -211,12 +211,12 @@
                 if ((re = token.match(/weapon\((\d+)\)/)) !== null) {
                     const id = Number(re[1]);
                     if ((id > 0) && (id < $dataWeapons.length)) {
-                        equipItems.push($dataWeapons[id]);
+                        items.push($dataWeapons[id]);
                     }
                 } else if ((re = token.match(/armor\((\d+)\)/)) !== null) {
                     const id = Number(re[1]);
                     if ((id > 0) && (id < $dataArmors.length)) {
-                        equipItems.push($dataArmors[id]);
+                        items.push($dataArmors[id]);
                     }
                 }
             }
