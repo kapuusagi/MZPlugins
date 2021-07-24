@@ -67,7 +67,7 @@
  * 
  * @command deleteActor
  * @text 指定アクターのデータを削除する。
- * @desc 指定したアクターのデータを削除します。削除可能なIDとして指定したものだけが対象です。
+ * @desc 指定したアクターのデータを削除します。
  * 
  * @arg actorId
  * @text アクターID
@@ -80,6 +80,12 @@
  * @desc アクターIDを格納した変数のIDを指定する。変数での指定をしない場合には0とする。
  * @type variable
  * @default 0
+ * 
+ * @arg forceDelete
+ * @text 強制削除
+ * @desc 登録/削除可能なID以外も削除できるようにする場合
+ * @type boolean
+ * @default false
  * 
  * 
  * @command setCharaMakeItemNameEnabled
@@ -461,9 +467,11 @@ function Scene_UnregisterActor() {
         }
 
         const actorId = _getTargetActorId(args);
-        if ($gameActors.isDeletableActor(actorId)) {
+        const forceDelete = (args.forceDelete === undefined)
+                ? false : (args.forceDelete === "true");
+        if (forceDelete || $gameActors.isDeletableActor(actorId)) {
             // 有効なアクターID
-            $gameActors.deleteActorData(actorId);
+            $gameActors.deleteActorData(actorId, forceDelete);
         }
     });
 
@@ -1071,9 +1079,10 @@ function Scene_UnregisterActor() {
      * アクターデータを消去する。
      * 
      * @param {number} actorId アクターID
+     * @param {boolean} forceDelete 強制削除する場合はtrue, それ以外はfalse
      */
-    Game_Actors.prototype.deleteActorData = function(actorId) {
-        if (this.isActorDataExists(actorId) && this.registableIds().includes(actorId)) {
+    Game_Actors.prototype.deleteActorData = function(actorId, forceDelete) {
+        if (forceDelete || (this.isActorDataExists(actorId) && this.registableIds().includes(actorId))) {
             const actor = this.actor(actorId);
             if ($gameParty.allMembers().includes(actor)) {
                 /* このIDのメンバーを外す。 */
@@ -1867,7 +1876,7 @@ function Scene_UnregisterActor() {
             if (!this._isModify) {
                 /* 新規登録でキャンセルされた場合
                  * 一時的に作成したデータを消去する。 */
-                $gameActors.deleteActorData(this._actorId);
+                $gameActors.deleteActorData(this._actorId, true);
             }
         }
         if (this._storeVariableId > 0) {
