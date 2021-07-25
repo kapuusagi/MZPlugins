@@ -222,6 +222,18 @@
  * @type number
  * @default 30
  * 
+ * @param timeRangeChangeCommonEventId
+ * @text 時間帯変更コモンイベント
+ * @desc 時間帯が変わったときに呼び出すコモンイベント
+ * @type common_event
+ * @default 0
+ * 
+ * @param weatherChangeCommonEventId
+ * @text 天候変更コモンイベント
+ * @desc 天候が変わったときに呼び出すコモンイベント
+ * @type common_event
+ * @default 0
+ * 
  * @help 
  * 昼と夜機能を実現するためのプラグイン。
  * 以下の機能を提供する。
@@ -447,6 +459,8 @@ $dataWeathers = [];
 
     const enableWeatherEffectOnBattle = (parameters["enableWeatherEffectOnBattle"] === undefined)
             ? true : (parameters["enableWeatherEffectOnBattle"] === "true");
+    const timeRangeChangeCommonEventId = Number(parameters["timeRangeChangeCommonEventId"]) || 0;
+    const weatherChangeCommonEventId = Number(parameters["weatherChangeCommonEventId"]) || 0;
 
     /**
      * 時間帯データを分析する。
@@ -725,7 +739,9 @@ $dataWeathers = [];
      * 時間帯が変更されたときの処理を行う。
      */
     Game_Map.prototype.onTimeRangeChanged = function() {
-
+        if (timeRangeChangeCommonEventId > 0) {
+            $gameTemp.reserveCommonEvent(timeRangeChangeCommonEventId);
+        }
     };
 
     /**
@@ -740,8 +756,8 @@ $dataWeathers = [];
     /**
      * 天候を変更する。
      * 
-     * @param {number} weather 
-     * @param {number} power 
+     * @param {number} weather 天候番号
+     * @param {number} power 天候の強さ
      * @param {boolean} duration 変化にかける時間[フレーム数]。0にすると即座に適用
      */
     Game_Map.prototype.changeWeather = function(weather, power, duration) {
@@ -762,10 +778,12 @@ $dataWeathers = [];
     };
 
     /**
-     * 天候が変わったとき野処理を行う。
+     * 天候が変わったときの処理を行う。
      */
     Game_Map.prototype.onWeatherChanged = function() {
-
+        if (weatherChangeCommonEventId > 0) {
+            $gameTemp.reserveCommonEvent(weatherChangeCommonEventId);
+        }
     };
 
     /**
