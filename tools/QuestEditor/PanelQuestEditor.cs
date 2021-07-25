@@ -75,7 +75,7 @@ namespace QEditor
         /// </summary>
         private void InitializeRewardItemDataTable()
         {
-            DataTable dt = new DataTable();
+            var dt = new DataTable();
             dt.Columns.Add(new DataColumn()
             {
                 DataType = typeof(string),
@@ -117,6 +117,31 @@ namespace QEditor
         /// </summary>
         private void UpdateView()
         {
+            if (comboBoxGuildRank.Items.Count == 0)
+            {
+                var settingStr = Properties.Settings.Default.GuildRanks;
+                if (!string.IsNullOrEmpty(settingStr))
+                {
+                    var items = settingStr.Split(',').Select(str => str.Trim());
+                    foreach (var item in items)
+                    {
+                        comboBoxGuildRank.Items.Add(item);
+                    }
+                }
+                if (comboBoxGuildRank.Items.Count == 0)
+                {
+                    var defaultItems = new string[]
+                    {
+                    "-", "G", "F", "E", "D", "C", "B", "A", "S", "SS", "SSS"
+                    };
+                    foreach (var item in defaultItems)
+                    {
+                        comboBoxGuildRank.Items.Add(item);
+                    }
+                }
+            }
+
+
             updatingModelToUI = true;
             try
             {
@@ -799,6 +824,68 @@ namespace QEditor
             if (control is TextBox textBox)
             {
                 textBox.Text = textBox.Text + "\n$gameVariables.setValue(SwId,true);";
+            }
+        }
+
+        /// <summary>
+        /// GuildRank編集ボタンがクリックされた
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnButtonEditGuildRank(object sender, EventArgs e)
+        {
+            var form = new FormEditGuildRank();
+
+            string[] items = new string[comboBoxGuildRank.Items.Count];
+            for (int i = 0; i < items.Length; i++)
+            {
+                items[i] = comboBoxGuildRank.Items[i].ToString();
+            }
+
+            form.Items = items;
+            if (form.ShowDialog(FindForm()) != DialogResult.OK)
+            {
+                return;
+            }
+
+            var editItems = form.Items;
+            updatingModelToUI = true;
+            try
+            {
+                int current = comboBoxGuildRank.SelectedIndex;
+                comboBoxGuildRank.Items.Clear();
+                for (int i = 0; i < editItems.Length; i++)
+                {
+                    comboBoxGuildRank.Items.Add(editItems[i]);
+                }
+                if (current < comboBoxGuildRank.Items.Count)
+                {
+                    comboBoxGuildRank.SelectedIndex = current;
+                }
+            }
+            finally
+            {
+                updatingModelToUI = false;
+            }
+
+            // 設定保存
+            var sb = new StringBuilder();
+            foreach (var item in editItems)
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append(',');
+                }
+                sb.Append(item);
+            }
+            Properties.Settings.Default.GuildRanks = sb.ToString();
+            try
+            {
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
             }
         }
     }

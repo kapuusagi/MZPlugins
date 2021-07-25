@@ -47,6 +47,8 @@ namespace QEditor
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.numericUpDownRewardGold = new System.Windows.Forms.NumericUpDown();
+            this.label17 = new System.Windows.Forms.Label();
+            this.numericUpDownRewardExp = new System.Windows.Forms.NumericUpDown();
             this.label11 = new System.Windows.Forms.Label();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.textBoxOnCancel = new System.Windows.Forms.TextBox();
@@ -64,8 +66,7 @@ namespace QEditor
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.textBoxNote = new System.Windows.Forms.TextBox();
-            this.label17 = new System.Windows.Forms.Label();
-            this.numericUpDownRewardExp = new System.Windows.Forms.NumericUpDown();
+            this.buttonEditGuildRanks = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -78,11 +79,11 @@ namespace QEditor
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewRewardItems)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownGuildExp)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardGold)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardExp)).BeginInit();
             this.tableLayoutPanel6.SuspendLayout();
             this.contextMenuStripScript.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardExp)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -98,18 +99,19 @@ namespace QEditor
             // 
             // tableLayoutPanel3
             // 
-            this.tableLayoutPanel3.ColumnCount = 4;
+            this.tableLayoutPanel3.ColumnCount = 5;
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel3.Controls.Add(this.textBoxName, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.textBoxDescription, 1, 1);
             this.tableLayoutPanel3.Controls.Add(this.label3, 0, 1);
             this.tableLayoutPanel3.Controls.Add(this.label2, 2, 0);
             this.tableLayoutPanel3.Controls.Add(this.comboBoxGuildRank, 3, 0);
+            this.tableLayoutPanel3.Controls.Add(this.buttonEditGuildRanks, 4, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 15);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
@@ -125,7 +127,7 @@ namespace QEditor
             this.textBoxName.ContextMenuStrip = this.contextMenuStrip1;
             this.textBoxName.Location = new System.Drawing.Point(72, 4);
             this.textBoxName.Name = "textBoxName";
-            this.textBoxName.Size = new System.Drawing.Size(332, 19);
+            this.textBoxName.Size = new System.Drawing.Size(306, 19);
             this.textBoxName.TabIndex = 1;
             this.textBoxName.TextChanged += new System.EventHandler(this.OnTextBoxNameChanged);
             // 
@@ -155,7 +157,7 @@ namespace QEditor
             // 
             // textBoxDescription
             // 
-            this.tableLayoutPanel3.SetColumnSpan(this.textBoxDescription, 3);
+            this.tableLayoutPanel3.SetColumnSpan(this.textBoxDescription, 4);
             this.textBoxDescription.ContextMenuStrip = this.contextMenuStrip1;
             this.textBoxDescription.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxDescription.Location = new System.Drawing.Point(72, 30);
@@ -178,7 +180,7 @@ namespace QEditor
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(410, 7);
+            this.label2.Location = new System.Drawing.Point(384, 7);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(98, 12);
             this.label2.TabIndex = 0;
@@ -189,18 +191,7 @@ namespace QEditor
             this.comboBoxGuildRank.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.comboBoxGuildRank.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxGuildRank.FormattingEnabled = true;
-            this.comboBoxGuildRank.Items.AddRange(new object[] {
-            "Not specified",
-            "F",
-            "E",
-            "D",
-            "C",
-            "B",
-            "A",
-            "S",
-            "SS",
-            "SSS"});
-            this.comboBoxGuildRank.Location = new System.Drawing.Point(514, 3);
+            this.comboBoxGuildRank.Location = new System.Drawing.Point(488, 3);
             this.comboBoxGuildRank.Name = "comboBoxGuildRank";
             this.comboBoxGuildRank.Size = new System.Drawing.Size(84, 20);
             this.comboBoxGuildRank.TabIndex = 1;
@@ -458,6 +449,31 @@ namespace QEditor
             this.numericUpDownRewardGold.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numericUpDownRewardGold.ValueChanged += new System.EventHandler(this.OnNumericUpDownRewardGoldValueChanged);
             // 
+            // label17
+            // 
+            this.label17.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(3, 64);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(24, 12);
+            this.label17.TabIndex = 10;
+            this.label17.Text = "Exp";
+            // 
+            // numericUpDownRewardExp
+            // 
+            this.numericUpDownRewardExp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.numericUpDownRewardExp.Location = new System.Drawing.Point(63, 60);
+            this.numericUpDownRewardExp.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+            this.numericUpDownRewardExp.Name = "numericUpDownRewardExp";
+            this.numericUpDownRewardExp.Size = new System.Drawing.Size(120, 19);
+            this.numericUpDownRewardExp.TabIndex = 11;
+            this.numericUpDownRewardExp.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.numericUpDownRewardExp.ValueChanged += new System.EventHandler(this.OnNumericUpDownRewardExpValueChanged);
+            // 
             // label11
             // 
             this.label11.AutoSize = true;
@@ -640,30 +656,15 @@ namespace QEditor
             this.textBoxNote.TabIndex = 0;
             this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
             // 
-            // label17
+            // buttonEditGuildRanks
             // 
-            this.label17.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(3, 64);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(24, 12);
-            this.label17.TabIndex = 10;
-            this.label17.Text = "Exp";
-            // 
-            // numericUpDownExp
-            // 
-            this.numericUpDownRewardExp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.numericUpDownRewardExp.Location = new System.Drawing.Point(63, 60);
-            this.numericUpDownRewardExp.Maximum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            0});
-            this.numericUpDownRewardExp.Name = "numericUpDownExp";
-            this.numericUpDownRewardExp.Size = new System.Drawing.Size(120, 19);
-            this.numericUpDownRewardExp.TabIndex = 11;
-            this.numericUpDownRewardExp.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.numericUpDownRewardExp.ValueChanged += new System.EventHandler(this.OnNumericUpDownRewardExpValueChanged);
+            this.buttonEditGuildRanks.Location = new System.Drawing.Point(578, 3);
+            this.buttonEditGuildRanks.Name = "buttonEditGuildRanks";
+            this.buttonEditGuildRanks.Size = new System.Drawing.Size(20, 21);
+            this.buttonEditGuildRanks.TabIndex = 3;
+            this.buttonEditGuildRanks.Text = "...";
+            this.buttonEditGuildRanks.UseVisualStyleBackColor = true;
+            this.buttonEditGuildRanks.Click += new System.EventHandler(this.OnButtonEditGuildRank);
             // 
             // PanelQuestEditor
             // 
@@ -691,6 +692,7 @@ namespace QEditor
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewRewardItems)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownGuildExp)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardGold)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardExp)).EndInit();
             this.tableLayoutPanel6.ResumeLayout(false);
             this.tableLayoutPanel6.PerformLayout();
             this.contextMenuStripScript.ResumeLayout(false);
@@ -698,7 +700,6 @@ namespace QEditor
             this.tableLayoutPanel7.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRewardExp)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -752,5 +753,6 @@ namespace QEditor
         private System.Windows.Forms.ToolStripMenuItem insertVariableControlToolStripMenuItem;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.NumericUpDown numericUpDownRewardExp;
+        private System.Windows.Forms.Button buttonEditGuildRanks;
     }
 }

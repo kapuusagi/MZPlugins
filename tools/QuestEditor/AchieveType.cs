@@ -11,9 +11,9 @@ namespace QEditor
     /// </summary>
     public enum AchieveType
     {
-        Subjugation = 0,
-        Collection = 1,
-        Event = 2
+        Subjugation = 1,
+        Collection = 2,
+        Event = 3
     };
 
 }

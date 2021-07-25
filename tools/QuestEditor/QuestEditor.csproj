@@ -61,6 +61,12 @@
     <Compile Include="FormAddAchieve.Designer.cs">
       <DependentUpon>FormAddAchieve.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormEditGuildRank.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormEditGuildRank.Designer.cs">
+      <DependentUpon>FormEditGuildRank.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,6 +99,9 @@
     <Compile Include="Settings.cs" />
     <EmbeddedResource Include="FormAddAchieve.resx">
       <DependentUpon>FormAddAchieve.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormEditGuildRank.resx">
+      <DependentUpon>FormEditGuildRank.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
