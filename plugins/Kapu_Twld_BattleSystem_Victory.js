@@ -1279,7 +1279,7 @@ function Window_BattleRewards() {
      */
     Scene_Battle.prototype.isRewardsPopupBusy = function() {
         if (this._battleRewardsWindow.isBusy()) {
-            return false;
+            return true;
         }
         for (const actor of $gameParty.battleMembers()) {
             if (actor.isExpPopupRuning()) {
