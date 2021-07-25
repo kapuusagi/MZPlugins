@@ -12,11 +12,12 @@ namespace QEditor
     /// </summary>
     public class AchieveCollection : IAchieve
     {
+        // データ
         private DataAchieve data;
         /// <summary>
-        /// 
+        /// 新しいインスタンスを構築する。
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="data">データ</param>
         public AchieveCollection(DataAchieve data)
         {
             this.data = data;
@@ -54,6 +55,22 @@ namespace QEditor
             get => data.Value3;
             set => data.Value3 = value;
         }
+
+        /// <summary>
+        /// オブジェクトを複製する。
+        /// </summary>
+        /// <returns>オブジェクト</returns>
+        public IAchieve Clone()
+        {
+            var achieve = new AchieveCollection(data.Clone());
+            return achieve;
+        }
+
+        /// <summary>
+        /// オブジェクトを複製する。
+        /// </summary>
+        /// <returns>オブジェクト</returns>
+        object ICloneable.Clone() => Clone();
 
         /// <summary>
         /// このオブジェクトの文字列表現を得る。

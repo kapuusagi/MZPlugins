@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace QEditor
 {
+    /// <summary>
+    /// 討伐条件
+    /// </summary>
     public class AchieveSubjugation : IAchieve
     {
+        // データ
         private DataAchieve data;
 
         /// <summary>
@@ -39,6 +43,22 @@ namespace QEditor
         /// エネミー数
         /// </summary>
         public int EnemyCount { get => data.Value3; set => data.Value3 = value; }
+
+        /// <summary>
+        /// このオブジェクトの複製を作成する。
+        /// </summary>
+        /// <returns>複製</returns>
+        public IAchieve Clone()
+        {
+            var achieve = new AchieveSubjugation(data.Clone());
+            return achieve;
+        }
+
+        /// <summary>
+        /// このオブジェクトの複製を作成する。
+        /// </summary>
+        /// <returns>複製</returns>
+        object ICloneable.Clone() => Clone();
 
         /// <summary>
         /// このオブジェクトの文字列表現を得る。

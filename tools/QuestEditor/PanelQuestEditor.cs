@@ -19,6 +19,8 @@ namespace QEditor
         private FormSelectableItemList itemListForm;
         // 達成条件追加フォーム
         private FormAddAchieve addAchieveForm;
+        // モデルからUI表示への設定処理中かどうか。
+        private bool updatingModelToUI = false;
 
         // クエストデータ
         private DataQuest quest;
@@ -45,12 +47,10 @@ namespace QEditor
             if (disposing && (itemListForm != null))
             {
                 itemListForm.Close();
-                itemListForm.Dispose();
             }
             if (disposing && (addAchieveForm != null))
             {
                 addAchieveForm.Close();
-                addAchieveForm.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -117,25 +117,33 @@ namespace QEditor
         /// </summary>
         private void UpdateView()
         {
-            textBoxName.Text = quest?.Name ?? string.Empty;
-            comboBoxGuildRank.SelectedIndex = quest?.GuildRank ?? 0;
-            textBoxDescription.Text = quest?.Description ?? string.Empty;
-            textBoxAchieveMsg.Text = quest?.AchieveMessage ?? string.Empty;
-            textBoxRewardMsg.Text = quest?.RewardsMessage ?? string.Empty;
-            textBoxEntrustCondition.Text = quest?.EntrustCondition ?? string.Empty;
-            textBoxOnAccept.Text = quest?.OnAcceptScript ?? string.Empty;
-            textBoxOnComplete.Text = quest?.OnCompleteScript ?? string.Empty;
-            textBoxOnCancel.Text = quest?.OnCancelScript ?? string.Empty;
+            updatingModelToUI = true;
+            try
+            {
+                textBoxName.Text = quest?.Name ?? string.Empty;
+                comboBoxGuildRank.SelectedIndex = quest?.GuildRank ?? 0;
+                textBoxDescription.Text = quest?.Description ?? string.Empty;
+                textBoxAchieveMsg.Text = quest?.AchieveMessage ?? string.Empty;
+                textBoxRewardMsg.Text = quest?.RewardsMessage ?? string.Empty;
+                textBoxEntrustCondition.Text = quest?.EntrustCondition ?? string.Empty;
+                textBoxOnAccept.Text = quest?.OnAcceptScript ?? string.Empty;
+                textBoxOnComplete.Text = quest?.OnCompleteScript ?? string.Empty;
+                textBoxOnCancel.Text = quest?.OnCancelScript ?? string.Empty;
 
-            int guildExp = quest?.GuildExp ?? 0;
-            numericUpDownGuildExp.Value = Math.Max(numericUpDownGuildExp.Minimum, Math.Min(numericUpDownGuildExp.Maximum, guildExp));
-            int rewardGold = quest?.RewardGold ?? 0;
-            numericUpDownRewardGold.Value = Math.Max(numericUpDownRewardGold.Minimum, Math.Min(numericUpDownRewardGold.Maximum, rewardGold));
-            int rewardExp = quest?.RewardExp ?? 0;
-            numericUpDownRewardExp.Value = Math.Max(numericUpDownRewardExp.Minimum, Math.Min(numericUpDownRewardExp.Maximum, rewardExp));
-            ApplyAchievesToDataTable(quest);
-            ApplyRewardItemToDataTable(quest);
-            textBoxNote.Text = quest?.Note ?? string.Empty;
+                int guildExp = quest?.GuildExp ?? 0;
+                numericUpDownGuildExp.Value = Math.Max(numericUpDownGuildExp.Minimum, Math.Min(numericUpDownGuildExp.Maximum, guildExp));
+                int rewardGold = quest?.RewardGold ?? 0;
+                numericUpDownRewardGold.Value = Math.Max(numericUpDownRewardGold.Minimum, Math.Min(numericUpDownRewardGold.Maximum, rewardGold));
+                int rewardExp = quest?.RewardExp ?? 0;
+                numericUpDownRewardExp.Value = Math.Max(numericUpDownRewardExp.Minimum, Math.Min(numericUpDownRewardExp.Maximum, rewardExp));
+                ApplyAchievesToDataTable(quest);
+                ApplyRewardItemToDataTable(quest);
+                textBoxNote.Text = quest?.Note ?? string.Empty;
+            }
+            finally
+            {
+                updatingModelToUI = false;
+            }
         }
         /// <summary>
         /// クエストのデータを達成条件データテーブルに反映する。
@@ -143,7 +151,7 @@ namespace QEditor
         /// <param name="quest">クエストデータ</param>
         private void ApplyAchievesToDataTable(DataQuest quest)
         {
-            DataTable dt = (DataTable)(dataGridViewAchieves.DataSource);
+            var dt = (DataTable)(dataGridViewAchieves.DataSource);
             dt.Rows.Clear();
             if (quest != null)
             {
@@ -203,6 +211,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxNameChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.Name = textBoxName.Text;
@@ -217,6 +229,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnComboBoxGuildRankSelectedValueChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             var index = comboBoxGuildRank.SelectedIndex;
             if ((quest != null) && (index >= 0))
             {
@@ -230,6 +246,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxDescriptionTextChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.Description = textBoxDescription.Text;
@@ -243,6 +263,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxAchieveMessageTextChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.AchieveMessage = textBoxAchieveMsg.Text;
@@ -256,6 +280,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxRewardMessageTextChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.RewardsMessage = textBoxRewardMsg.Text;
@@ -269,6 +297,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxEntrusConditionTextChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.EntrustCondition = textBoxEntrustCondition.Text;
@@ -282,6 +314,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnNumericUpDownGuildExpValueChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.GuildExp = (int)(numericUpDownGuildExp.Value);
@@ -295,6 +331,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnNumericUpDownRewardGoldValueChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.RewardGold = (int)(numericUpDownRewardGold.Value);
@@ -308,6 +348,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnNumericUpDownRewardExpValueChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.RewardExp = (int)(numericUpDownRewardExp.Value);
@@ -352,10 +396,11 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnButtonAddAchiveOkClick(object sender, EventArgs e)
         {
-            var achieve = addAchieveForm.Achieve;
-            if ((quest != null) && (achieve != null))
+            var selectedAchieve = addAchieveForm.Achieve;
+            if ((quest != null) && (selectedAchieve != null))
             {
-                quest.Achieves.Add(achieve);
+                var achieve = selectedAchieve.Clone();
+                quest.Achieves.Add(achieve.Clone());
 
                 DataTable dt = (DataTable)(dataGridViewAchieves.DataSource);
                 var row = dt.NewRow();
@@ -366,10 +411,14 @@ namespace QEditor
         /// <summary>
         /// 達成条件の行が削除されたときの処理を行う。
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
         private void OnDataGridViewAchievesRowRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 int index = e.RowIndex;
@@ -427,13 +476,13 @@ namespace QEditor
             var item = itemListForm.SelectedItem;
             if ((item != null) && (quest != null))
             {
-                RewardItem rewardItem = new RewardItem();
+                var rewardItem = new RewardItem();
                 rewardItem.DataId = item.Id;
                 rewardItem.Kind = (int)(item.Kind);
                 rewardItem.Value = 1;
                 quest.RewardItems.Add(rewardItem);
 
-                DataTable dt = (DataTable)(dataGridViewRewardItems.DataSource);
+                var dt = (DataTable)(dataGridViewRewardItems.DataSource);
                 var row = dt.NewRow();
                 SetRewardItemRow(row, rewardItem);
                 dt.Rows.Add(row);
@@ -447,6 +496,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnDataGridViewRewardItemsRowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 int index = e.RowIndex;
@@ -466,6 +519,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnDataGridViewRewardItemsCellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             var index = e.RowIndex;
             if ((quest != null) && (index >= 0) && (index < quest.RewardItems.Count))
             {
@@ -524,10 +581,10 @@ namespace QEditor
         }
 
         /// <summary>
-        /// 
+        /// 達成条件概要を得る。
         /// </summary>
-        /// <param name="achieve"></param>
-        /// <returns></returns>
+        /// <param name="achieve">達成条件</param>
+        /// <returns>達成条件概要文字列</returns>
         private string GetAchieveOverview(IAchieve achieve)
         {
             if (achieve is AchieveSubjugation achieveSubjugation)
@@ -656,6 +713,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxNoteTextChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.Note = textBoxNote.Text;
@@ -669,6 +730,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxOnAcceptTextChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.OnAcceptScript = textBoxOnAccept.Text;
@@ -682,6 +747,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxOnCompleteTextChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.OnCompleteScript = textBoxOnComplete.Text;
@@ -695,6 +764,10 @@ namespace QEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxOnCancelTextChanged(object sender, EventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return;
+            }
             if (quest != null)
             {
                 quest.OnCancelScript = textBoxOnCancel.Text;

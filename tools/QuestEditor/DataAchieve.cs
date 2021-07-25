@@ -10,7 +10,7 @@ namespace QEditor
     /// <summary>
     /// 達成条件モデル
     /// </summary>
-    public class DataAchieve : List<int>
+    public class DataAchieve : ICloneable
     {
         /// <summary>
         /// DataAchieve
@@ -35,6 +35,27 @@ namespace QEditor
         /// 値3
         /// </summary>
         public int Value3 { get; set; } = 0;
+
+        /// <summary>
+        /// オブジェクトを複製する。
+        /// </summary>
+        /// <returns>データ</returns>
+        public DataAchieve Clone()
+        {
+            var achieve = new DataAchieve();
+            achieve.Type = Type;
+            achieve.Value1 = Value1;
+            achieve.Value2 = Value2;
+            achieve.Value3 = Value3;
+            return achieve;
+        }
+
+        /// <summary>
+        /// オブジェクトを複製する。
+        /// </summary>
+        /// <returns>データ</returns>
+        object ICloneable.Clone() => Clone();
+
         /// <summary>
         /// 値を設定する。
         /// </summary>

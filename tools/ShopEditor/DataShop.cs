@@ -61,7 +61,13 @@ namespace SEditor
                     break;
                 case "itemList":
                     ItemList.Clear();
-                    ItemList.AddRange((List<ItemEntry>)(value));
+                    foreach (var itemEntry in (List<ItemEntry>)(value))
+                    {
+                        if (itemEntry != null)
+                        {
+                            ItemList.Add(itemEntry);
+                        }
+                    }
                     break;
                 case "buyingPriceRate":
                     BuyingPriceRate = (double)(value);

@@ -46,6 +46,22 @@ namespace QEditor
         }
 
         /// <summary>
+        /// このオブジェクトの複製を作成する。
+        /// </summary>
+        /// <returns>複製</returns>
+        public IAchieve Clone()
+        {
+            var achieve = new AchieveEvent(data.Clone());
+            return achieve;
+        }
+
+        /// <summary>
+        /// このオブジェクトの複製を作成する。
+        /// </summary>
+        /// <returns>複製</returns>
+        object ICloneable.Clone() => Clone();
+
+        /// <summary>
         /// このオブジェクトの文字列表現を得る。
         /// </summary>
         /// <returns>文字列表現</returns>

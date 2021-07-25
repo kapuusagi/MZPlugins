@@ -11,6 +11,9 @@ using System.Windows.Forms;
 
 namespace SEditor
 {
+    /// <summary>
+    /// メイン画面
+    /// </summary>
     public partial class FormMain : Form
     {
         // アイテムリスト画面
@@ -34,8 +37,12 @@ namespace SEditor
 
         // フォルダ選択ダイアログ
         private FolderSelectDialog folderSelectDialog;
+        // モデルのデータをUIに反映する処理中かどうか
+        private bool updatingModelToUI = false;
 
-
+        /// <summary>
+        /// 新しいインスタンスを構築する。
+        /// </summary>
         public FormMain()
         {
             InitializeComponent();
@@ -43,7 +50,9 @@ namespace SEditor
             InitializeItemListDataTable();
         }
 
-
+        /// <summary>
+        /// ショップデータテーブルを初期化する。
+        /// </summary>
         private void InitializeShopDataTable()
         {
             DataTable dt = new DataTable();
@@ -58,6 +67,9 @@ namespace SEditor
             Shops.Add(new DataShop() { Id = 1 });
         }
 
+        /// <summary>
+        /// アイテムリストデータテーブルを初期化する。
+        /// </summary>
         private void InitializeItemListDataTable()
         {
             DataTable dt = new DataTable();
@@ -151,7 +163,7 @@ namespace SEditor
             }
             else
             {
-                ModelToUI();
+                RefreshShopList();
             }
         }
 
@@ -176,30 +188,37 @@ namespace SEditor
                 itemListForm.SetItemList(selectableItemList);
             }
 
-            ModelToUI();
+            RefreshShopList();
         }
 
         /// <summary>
-        /// モデルをUIに反映させる。
+        /// Shopsのデータをリストに反映させる。
         /// </summary>
-        private void ModelToUI()
+        private void RefreshShopList()
         {
-            DataTable dt = (DataTable)(dataGridViewShops.DataSource);
-            dt.Clear();
-
-            for (int i = 1; i < Shops.Count; i++)
+            updatingModelToUI = true;
+            try
             {
-                var row = dt.NewRow();
-                var shop = Shops[i];
-                row[0] = string.Format("{0,4:D}:{1}", shop.Id, shop.Name);
-                dt.Rows.Add(row);
+                var dt = (DataTable)(dataGridViewShops.DataSource);
+                dt.Clear();
+
+                for (int i = 1; i < Shops.Count; i++)
+                {
+                    var row = dt.NewRow();
+                    var shop = Shops[i];
+                    row[0] = string.Format("{0,4:D}:{1}", shop.Id, shop.Name);
+                    dt.Rows.Add(row);
+                }
+            }
+            finally
+            {
+                updatingModelToUI = false;
             }
 
         }
 
         /// <summary>
         /// データファイルを読み込む。
-        /// 
         /// </summary>
         /// <param name="dir">フォルダ</param>
         private void ReadDataFiles(string dir) { 
@@ -361,7 +380,7 @@ namespace SEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnButtonChangeShopCountClick(object sender, EventArgs e)
         {
-            FormNumberInput form = new FormNumberInput();
+            var form = new FormNumberInput();
             form.Number = Shops.Count - 1;
             if (form.ShowDialog(this) != DialogResult.OK)
             {
@@ -385,17 +404,33 @@ namespace SEditor
                 }
             }
 
-            ModelToUI();
+            RefreshShopList();
         }
 
         /// <summary>
-        /// 店選択リストで選択が変更されアタ時の処理を行う。
+        /// 店選択リストで選択が変更された時の処理を行う。
         /// </summary>
         /// <param name="sender">送信元オブジェクト</param>
         /// <param name="e">イベントオブジェクト</param>
         private void OnDataGridViewShopsSelectionChanged(object sender, EventArgs e)
         {
-            DataShop shop = GetSelectedShop();
+            updatingModelToUI = true;
+            try
+            {
+                UpdateSelectedDataShopToUI();
+            }
+            finally
+            {
+                updatingModelToUI = false;
+            }
+        }
+
+        /// <summary>
+        /// 選択されている店データをUIに反映させる。
+        /// </summary>
+        private void UpdateSelectedDataShopToUI()
+        {
+            var shop = GetSelectedShop();
             if (shop == null)
             {
                 textBoxShopName.Text = string.Empty;
@@ -431,8 +466,8 @@ namespace SEditor
         /// </summary>
         private void UpdateDataGridViewItems()
         {
-            DataShop shop = GetSelectedShop();
-            DataTable dt = (DataTable)(dataGridViewItems.DataSource);
+            var shop = GetSelectedShop();
+            var dt = (DataTable)(dataGridViewItems.DataSource);
             dt.Rows.Clear();
             if (shop != null)
             {
@@ -488,7 +523,7 @@ namespace SEditor
         /// 例外でちゃうのを防ぐ。
         /// <param name="items">アイテムリスト</param>
         /// <param name="id">ID</param>
-        /// <returns></returns>
+        /// <returns>アイテム名</returns>
         private static string GetItemName(System.Collections.IList items, int id)
         {
             if ((id >= 0) && (id < items.Count))
@@ -530,7 +565,11 @@ namespace SEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxShopNameTextChanged(object sender, EventArgs e)
         {
-            DataShop shop = GetSelectedShop();
+            if (updatingModelToUI)
+            {
+                return;
+            }
+            var shop = GetSelectedShop();
             if (shop == null)
             {
                 return;
@@ -540,7 +579,7 @@ namespace SEditor
             var rows = dataGridViewShops.SelectedRows;
             int index = rows[0].Index;
 
-            DataTable dt = (DataTable)(dataGridViewShops.DataSource);
+            var dt = (DataTable)(dataGridViewShops.DataSource);
             var row = dt.Rows[index];
             row.SetField(0, string.Format("{0,4:D}:{1}", shop.Id, shop.Name));
         }
@@ -552,6 +591,14 @@ namespace SEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnButtonAddItemClick(object sender, EventArgs e)
         {
+            ShowItemListForm();
+        }
+
+        /// <summary>
+        /// アイテム追加ウィンドウを表示する。
+        /// </summary>
+        private void ShowItemListForm()
+        {
             if (itemListForm == null)
             {
                 itemListForm = new FormSelectableItemList();
@@ -559,7 +606,10 @@ namespace SEditor
                 itemListForm.ItemSelected += OnItemListItemSelected;
                 itemListForm.SetItemList(selectableItemList);
             }
-            itemListForm.Show(this);
+            if (!itemListForm.Visible) 
+            {
+                itemListForm.Show(this);
+            }
         }
 
         /// <summary>
@@ -569,6 +619,7 @@ namespace SEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnItemListFormClosed(object sender, FormClosedEventArgs e)
         {
+            itemListForm.Dispose();
             itemListForm = null;
         }
 
@@ -580,7 +631,7 @@ namespace SEditor
         private void OnItemListItemSelected(object sender, EventArgs e)
         {
             IItem item = itemListForm.SelectedItem;
-            DataShop shop = GetSelectedShop();
+            var shop = GetSelectedShop();
             if (shop == null)
             {
                 return;
@@ -593,7 +644,7 @@ namespace SEditor
             itemEntry.MaxCount = 1;
             shop.ItemList.Add(itemEntry);
 
-            DataTable dt = (DataTable)(dataGridViewItems.DataSource);
+            var dt = (DataTable)(dataGridViewItems.DataSource);
             var row = dt.NewRow();
             SetRowData(row, itemEntry);
             dt.Rows.Add(row);
@@ -606,7 +657,11 @@ namespace SEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnNumericUpDownShopLevelValueChanged(object sender, EventArgs e)
         {
-            DataShop shop = GetSelectedShop();
+            if (updatingModelToUI)
+            {
+                return ;
+            }
+            var shop = GetSelectedShop();
             if (shop == null)
             {
                 return;
@@ -622,16 +677,21 @@ namespace SEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnDataGridViewCellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
+            if (updatingModelToUI)
+            {
+                return ;
+            }
+            var shop = GetSelectedShop();
+            if (shop == null)
+            {
+                return;
+            }
+
             try
             {
-                DataShop shop = GetSelectedShop();
-                if (shop == null)
-                {
-                    return;
-                }
-                DataTable dt = (DataTable)(dataGridViewItems.DataSource);
-                ItemEntry entry = shop.ItemList[e.RowIndex];
-                DataRow row = dt.Rows[e.RowIndex];
+                var dt = (DataTable)(dataGridViewItems.DataSource);
+                var entry = shop.ItemList[e.RowIndex];
+                var row = dt.Rows[e.RowIndex];
                 switch (e.ColumnIndex)
                 {
                     case 1:
@@ -692,7 +752,11 @@ namespace SEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnNumericUpDownPriceRateChanged(object sender, EventArgs e)
         {
-            DataShop shop = GetSelectedShop();
+            if (updatingModelToUI)
+            {
+                return;
+            }
+            var shop = GetSelectedShop();
             if (shop == null)
             {
                 return;
@@ -716,12 +780,51 @@ namespace SEditor
         /// <param name="e">イベントオブジェクト</param>
         private void OnTextBoxNoteTextChanged(object sender, EventArgs e)
         {
-            DataShop shop = GetSelectedShop();
+            if (updatingModelToUI)
+            {
+                return;
+            }
+            var shop = GetSelectedShop();
             if (shop == null)
             {
                 return;
             }
             shop.Note = textBoxNote.Text;
+        }
+
+        /// <summary>
+        /// アイテムリストで行が削除されたときに通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnDataGridViewItemsRowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
+        {
+            if (updatingModelToUI)
+            {
+                return;
+            }
+            var shop = GetSelectedShop();
+            if (shop != null)
+            {
+                int index = e.RowIndex;
+                for (int count = 0; count < e.RowCount; count++)
+                {
+                    if (index < shop.ItemList.Count)
+                    {
+                        shop.ItemList.RemoveAt(index);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// アイテムリスト表示欄でマウスがクリックされたときに通知を受け取る。
+        /// </summary>
+        /// <param name="sender">送信元オブジェクト</param>
+        /// <param name="e">イベントオブジェクト</param>
+        private void OnDataGridViewItemsMouseClick(object sender, MouseEventArgs e)
+        {
+            ShowItemListForm();
         }
     }
 }

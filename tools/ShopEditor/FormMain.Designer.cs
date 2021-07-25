@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemOpen = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,13 +49,13 @@
             this.label4 = new System.Windows.Forms.Label();
             this.numericUpDownBuyingPriceRate = new System.Windows.Forms.NumericUpDown();
             this.numericUpDownSellingPriceRate = new System.Windows.Forms.NumericUpDown();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.textBoxNote = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.dataGridViewItems = new System.Windows.Forms.DataGridView();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonAddItem = new System.Windows.Forms.Button();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.label5 = new System.Windows.Forms.Label();
-            this.textBoxNote = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewShops)).BeginInit();
@@ -65,10 +65,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownShopLevel)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBuyingPriceRate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSellingPriceRate)).BeginInit();
+            this.panel3.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewItems)).BeginInit();
             this.flowLayoutPanel2.SuspendLayout();
-            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -137,8 +137,8 @@
             this.dataGridViewShops.AllowUserToDeleteRows = false;
             this.dataGridViewShops.AllowUserToResizeColumns = false;
             this.dataGridViewShops.AllowUserToResizeRows = false;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.dataGridViewShops.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dataGridViewShops.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewShops.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewShops.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewShops.Location = new System.Drawing.Point(4, 4);
@@ -329,6 +329,36 @@
             0});
             this.numericUpDownSellingPriceRate.Click += new System.EventHandler(this.OnNumericUpDownPriceRateChanged);
             // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.textBoxNote);
+            this.panel3.Controls.Add(this.label5);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel3.Location = new System.Drawing.Point(534, 0);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(200, 100);
+            this.panel3.TabIndex = 1;
+            // 
+            // textBoxNote
+            // 
+            this.textBoxNote.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxNote.Location = new System.Drawing.Point(0, 12);
+            this.textBoxNote.Multiline = true;
+            this.textBoxNote.Name = "textBoxNote";
+            this.textBoxNote.Size = new System.Drawing.Size(200, 88);
+            this.textBoxNote.TabIndex = 1;
+            this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Dock = System.Windows.Forms.DockStyle.Top;
+            this.label5.Location = new System.Drawing.Point(0, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(29, 12);
+            this.label5.TabIndex = 0;
+            this.label5.Text = "Note";
+            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.dataGridViewItems);
@@ -355,6 +385,8 @@
             this.dataGridViewItems.Size = new System.Drawing.Size(728, 279);
             this.dataGridViewItems.TabIndex = 0;
             this.dataGridViewItems.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnDataGridViewCellValueChanged);
+            this.dataGridViewItems.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.OnDataGridViewItemsRowsRemoved);
+            this.dataGridViewItems.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnDataGridViewItemsMouseClick);
             // 
             // flowLayoutPanel2
             // 
@@ -375,36 +407,6 @@
             this.buttonAddItem.Text = "Add";
             this.buttonAddItem.UseVisualStyleBackColor = true;
             this.buttonAddItem.Click += new System.EventHandler(this.OnButtonAddItemClick);
-            // 
-            // panel3
-            // 
-            this.panel3.Controls.Add(this.textBoxNote);
-            this.panel3.Controls.Add(this.label5);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel3.Location = new System.Drawing.Point(534, 0);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(200, 100);
-            this.panel3.TabIndex = 1;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Dock = System.Windows.Forms.DockStyle.Top;
-            this.label5.Location = new System.Drawing.Point(0, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(29, 12);
-            this.label5.TabIndex = 0;
-            this.label5.Text = "Note";
-            // 
-            // textBoxNote
-            // 
-            this.textBoxNote.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxNote.Location = new System.Drawing.Point(0, 12);
-            this.textBoxNote.Multiline = true;
-            this.textBoxNote.Name = "textBoxNote";
-            this.textBoxNote.Size = new System.Drawing.Size(200, 88);
-            this.textBoxNote.TabIndex = 1;
-            this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
             // 
             // FormMain
             // 
@@ -432,12 +434,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownShopLevel)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBuyingPriceRate)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSellingPriceRate)).EndInit();
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewItems)).EndInit();
             this.flowLayoutPanel2.ResumeLayout(false);
-            this.panel3.ResumeLayout(false);
-            this.panel3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
