@@ -80,6 +80,7 @@ function Window_SimpleMessage() {
         this.openness = 0;
         this._handlers = {};
         this.initMembers();
+        this.deactivate();
     };
     /**
      * Window_SimpleMessageのメンバを初期化する。
