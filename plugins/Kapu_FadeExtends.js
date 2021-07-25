@@ -766,17 +766,19 @@
             SceneManager.hideWindowLayer();
             SceneManager.snapForDissolve();
             SceneManager.showWindowLayer();
+        } else {
+            // フェードイン
+            const bitmap = SceneManager.dissolveBitmap();
+            const sprite = new Sprite();
+            sprite.x = Graphics.boxWidth / 2;
+            sprite.y = Graphics.boxHeight / 2;
+            sprite.anchor.x = 0.5;
+            sprite.anchor.y = 0.5;
+            sprite.z = -20; // 手前
+            sprite.bitmap = bitmap;
+            this._dissolveSprite = sprite;
+            this._fadeLayer.addChild(this._dissolveSprite);
         }
-        const bitmap = SceneManager.dissolveBitmap();
-        const sprite = new Sprite();
-        sprite.x = Graphics.boxWidth / 2;
-        sprite.y = Graphics.boxHeight / 2;
-        sprite.anchor.x = 0.5;
-        sprite.anchor.y = 0.5;
-        sprite.z = -20; // 手前
-        sprite.bitmap = bitmap;
-        this._dissolveSprite = sprite;
-        this._fadeLayer.addChild(this._dissolveSprite);
     };
 
     /**
