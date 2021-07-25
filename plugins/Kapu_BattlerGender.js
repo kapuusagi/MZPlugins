@@ -248,20 +248,21 @@
 
     //------------------------------------------------------------------------------
     // Game_Actor
-    const _Game_Actor_setup = Game_Actor.prototype.setup;
+    const _Game_Actor_initEquips = Game_Actor.prototype.initEquips;
     /**
-     * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
+     * 装備を初期化する。
      * 
-     * @param {number} actorId アクターID
+     * @param {Array<Number>} equips 装備品ID配列
+     * 
+     * Note: Game_Actor.setup()で実装する方がわかりやすいが、
+     *       装備条件に含まれることを考慮してinitEquipsの前に行うようにした。
      */
-    Game_Actor.prototype.setup = function(actorId) {
-        _Game_Actor_setup.call(this, actorId);
-
+    Game_Actor.prototype.initEquips = function(equips) {
         const dataActor = this.actor();
         if (dataActor.meta.gender) {
             this._gender = _parseGender(dataActor.meta.gender);
         }
-        this.refresh();
+        _Game_Actor_initEquips.call(this, equips);
     };
 
     /**
