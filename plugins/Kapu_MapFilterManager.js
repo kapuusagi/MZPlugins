@@ -413,7 +413,6 @@ function MapFilterManager() {
      */
     const _parseNotetag = function(dataMap) {
         if (dataMap.meta.mapFilters) {
-            MapFilterManager.clear();
             const entries = dataMap.meta.mapFilters.split(",");
             for (const entry of entries) {
                 const tokens = entry.split("=");
