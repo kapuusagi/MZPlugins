@@ -20,6 +20,7 @@ namespace QEditor
         public AchieveEvent(DataAchieve data)
         {
             this.data = data;
+            data.Type = (int)(AchieveType.Event);
         }
 
         /// <summary>
