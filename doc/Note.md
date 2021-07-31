@@ -109,3 +109,13 @@ MapFilter_Darknessを実現する際は、
 gl_FragColor に色を設定しない場合、下の画像の色が出力される。
 これを使ってフェードができるよ、やったね。
 
+
+## ブラウザ版セーブデータの場所
+
+    イメージリソースを変更して起動に失敗するようになったとき用
+
+    http://ktnhmv.jugem.jp/?eid=42
+
+    Chrome（Windows10）
+    (ユーザフォルダ)¥AppData¥Local¥Google¥Chrome¥User Data¥Default¥Local Storage
+
