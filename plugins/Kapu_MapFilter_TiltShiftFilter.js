@@ -24,16 +24,19 @@
  * @text ぼかし強度
  * @desc ぼかしの強度。大きくするとぼけ具合が強くなる。
  * @type number
+ * @default 30
  * 
  * @arg gradientBlur
  * @text ぼかしの勾配
  * @desc ぼかしの勾配。大きくすると中心からのぼけ具合が緩やかになる。
  * @type number
+ * @default 800
  * 
  * @arg playerCenter
  * @text プレイヤーに追従させるかどうか
  * @desc trueにすると追従する。falseにすると画面中央を基準にする。
  * @type boolean
+ * @default true
  * 
  * @param defaultBlur
  * @text デフォルトのぼかし強度
