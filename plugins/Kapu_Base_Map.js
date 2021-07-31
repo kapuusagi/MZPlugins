@@ -73,6 +73,9 @@
  * ============================================
  * ノートタグ
  * ============================================
+ * マップ
+ *   <disableBuildingShadow>
+ *     建物の影を無効にする。
  * 
  * ============================================
  * 変更履歴
@@ -90,7 +93,24 @@
     const encounterProgressValueBush = Number(parameters["encounterProgressValueBush"]) || 0;
     //------------------------------------------------------------------------------
     // Game_Map
-
+    const _Game_Map_initialize = Game_Map.prototype.initialize;
+    /**
+     * Game_Mapを初期化する。
+     */
+    Game_Map.prototype.initialize = function() {
+        this._disableBuildingShadow = false;
+        _Game_Map_initialize.call(this);
+    };
+    const _Game_Map_setup = Game_Map.prototype.setup;
+    /**
+     * マップをセットアップする。
+     * 
+     * @param {number} mapId マップID
+     */
+    Game_Map.prototype.setup = function(mapId) {
+        _Game_Map_setup.call(this, mapId);
+        this.updateBuildingShadowCondition();
+    };
     /**
      * マップの基本不意打ち率を得る。
      * 
@@ -160,6 +180,37 @@
         return true;
     };
 
+    /**
+     * マップの影を無効にするかどうかを得る。
+     * 
+     * Note: タイルセット配置時、自動的にセットされる影のこと。
+     *       レイヤーで明示的に指定した影はレンダリングされる。
+     * 
+     * @returns {boolean} マップの影をレンダリングする場合にはtrue, それ以外はfalse.
+     */
+    Game_Map.prototype.disableBuildingShadow = function() {
+        return this._disableBuildingShadow;
+    };
+
+    /**
+     * マップで建物の影を有効/無効にするかどうかを更新する。
+     * 
+     * Note: プラグインで、建物の影表示状態を更新したい場合に呼び出す。
+     */
+    Game_Map.prototype.updateBuildingShadowCondition = function() {
+        this._disableBuildingShadow = this.isDisableBuildingShadow();
+    };
+
+    /**
+     * マップで建物の影を表示するかどうかを得る。
+     * 
+     * Note: プラグインで、建物の影表示状態を提供したい場合にフックする。
+     * 
+     * @returns {boolean} 建物の影を表示する場合にはtrue, それ以外はfalse.
+     */
+    Game_Map.prototype.isDisableBuildingShadow = function() {
+        return $dataMap && $dataMap.meta.disableBuildingShadow;  
+    };
 
 
 
@@ -285,5 +336,22 @@
      */
     Game_Party.prototype.ratePreemptiveOfParty = function() {
         return 0;
+    };
+
+    //------------------------------------------------------------------------------
+    // Tilemap
+    const _Timemap__addShadow = Tilemap.prototype._addShadow;
+    /**
+     * 建物の影を追加する。
+     * 
+     * @param {AudioTimestamp.Layer} layer 対象のレイヤー
+     * @param {number} shadowBits 影フラグ
+     * @param {number} dx x位置
+     * @param {number} dy y位置
+     */
+    Tilemap.prototype._addShadow = function(layer, shadowBits, dx, dy) {
+        if (!$gameMap.disableBuildingShadow()) {
+            _Timemap__addShadow.call(this, layer, shadowBits, dx, dy);
+        }
     };
 })();

@@ -234,6 +234,7 @@
  * @type common_event
  * @default 0
  * 
+ * 
  * @help 
  * 昼と夜機能を実現するためのプラグイン。
  * 以下の機能を提供する。
@@ -320,6 +321,8 @@
  *   <weatherEffect:id#,id#,...>
  *     このマップのid#で指定された領域にいるとき、天候状態を表す画面効果を有効にする。
  *     領域指定されていないところはidが0になる。
+ *   <hideMapShadowInNight>
+ *     このマップは、夜間に建物の影を表示しません。
  * 
  * エネミー
  *   <encountTimeRanges:id#,id#,...>
@@ -461,6 +464,7 @@ $dataWeathers = [];
             ? true : (parameters["enableWeatherEffectOnBattle"] === "true");
     const timeRangeChangeCommonEventId = Number(parameters["timeRangeChangeCommonEventId"]) || 0;
     const weatherChangeCommonEventId = Number(parameters["weatherChangeCommonEventId"]) || 0;
+
 
     /**
      * 時間帯データを分析する。
@@ -1022,6 +1026,7 @@ $dataWeathers = [];
         if (colorTone) {
             $gameScreen.startChangeTRW(colorTone, duration);
         }
+        this.updateBuildingShadowCondition();
     };
 
     /**
@@ -1193,6 +1198,36 @@ $dataWeathers = [];
         }
     };
 
+    /**
+     * マップの影をレンダリングするかどうかを取得する。
+     * 
+     * Note: タイルセット配置時、自動的にセットされる影のこと。
+     *       レイヤーで明示的に指定した影はレンダリングされる。
+     * 
+     * @returns {boolean} マップの影をレンダリングする場合にはtrue, それ以外はfalse.
+     */
+    Game_Map.prototype.showMapShadow = function() {
+        return ($dataMap
+            && (!$dataMap.meta.hideMapShadowInNight || (this.timeRange() < Game_Map.TIMERANGE_NIGHT)));
+    }
+
+    const _Game_Map_isDisableBuildingShadow = Game_Map.prototype.isDisableBuildingShadow;
+    /**
+     * マップで建物の影を表示するかどうかを得る。
+     * 
+     * Note: プラグインで、建物の影表示状態を提供したい場合にフックする。
+     * 
+     * @returns {boolean} 建物の影を表示する場合にはtrue, それ以外はfalse.
+     */
+    Game_Map.prototype.isDisableBuildingShadow = function() {
+        if ($dataMap
+                && $dataMap.meta.hideMapShadowInNight
+                && (this.timeRange() >= Game_Map.TIMERANGE_NIGHT)) {
+            return true;
+        } else {
+            return _Game_Map_isDisableBuildingShadow.call(this);
+        }
+    };
     //------------------------------------------------------------------------------
     // Game_Screen
     const _Game_Screen_clear = Game_Screen.prototype.clear;
