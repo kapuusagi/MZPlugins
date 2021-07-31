@@ -398,7 +398,10 @@ namespace QEditor
                     addAchieveForm.OkClick += OnButtonAddAchiveOkClick;
                     addAchieveForm.FormClosed += OnFormAddAchieveClosed;
                 }
-                addAchieveForm.Show();
+                if (!addAchieveForm.Visible)
+                {
+                    addAchieveForm.Show();
+                }
             }
         }
         /// <summary>
@@ -475,7 +478,10 @@ namespace QEditor
                     itemListForm.ItemSelected += OnItemListItemSelected;
                     itemListForm.SetItemList(ProjectData.SelectableItemList);
                 }
-                itemListForm.Show(this);
+                if (!itemListForm.Visible)
+                {
+                    itemListForm.Show(this);
+                }
             }
         }
         /// <summary>

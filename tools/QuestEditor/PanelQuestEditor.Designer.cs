@@ -29,6 +29,7 @@ namespace QEditor
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.comboBoxGuildRank = new System.Windows.Forms.ComboBox();
+            this.buttonEditGuildRanks = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.textBoxRewardMsg = new System.Windows.Forms.TextBox();
@@ -66,7 +67,6 @@ namespace QEditor
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.textBoxNote = new System.Windows.Forms.TextBox();
-            this.buttonEditGuildRanks = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -196,6 +196,16 @@ namespace QEditor
             this.comboBoxGuildRank.Size = new System.Drawing.Size(84, 20);
             this.comboBoxGuildRank.TabIndex = 1;
             this.comboBoxGuildRank.SelectedValueChanged += new System.EventHandler(this.OnComboBoxGuildRankSelectedValueChanged);
+            // 
+            // buttonEditGuildRanks
+            // 
+            this.buttonEditGuildRanks.Location = new System.Drawing.Point(578, 3);
+            this.buttonEditGuildRanks.Name = "buttonEditGuildRanks";
+            this.buttonEditGuildRanks.Size = new System.Drawing.Size(20, 21);
+            this.buttonEditGuildRanks.TabIndex = 3;
+            this.buttonEditGuildRanks.Text = "...";
+            this.buttonEditGuildRanks.UseVisualStyleBackColor = true;
+            this.buttonEditGuildRanks.Click += new System.EventHandler(this.OnButtonEditGuildRank);
             // 
             // groupBox2
             // 
@@ -378,6 +388,7 @@ namespace QEditor
             this.dataGridViewRewardItems.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridViewRewardItems.Size = new System.Drawing.Size(264, 78);
             this.dataGridViewRewardItems.TabIndex = 9;
+            this.dataGridViewRewardItems.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnDataGridViewRewardItemsCellValueChanged);
             this.dataGridViewRewardItems.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.OnDataGridViewRewardItemsRowsRemoved);
             this.dataGridViewRewardItems.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnDataGridViewRewardItemsMouseClick);
             // 
@@ -655,16 +666,6 @@ namespace QEditor
             this.textBoxNote.Size = new System.Drawing.Size(601, 68);
             this.textBoxNote.TabIndex = 0;
             this.textBoxNote.TextChanged += new System.EventHandler(this.OnTextBoxNoteTextChanged);
-            // 
-            // buttonEditGuildRanks
-            // 
-            this.buttonEditGuildRanks.Location = new System.Drawing.Point(578, 3);
-            this.buttonEditGuildRanks.Name = "buttonEditGuildRanks";
-            this.buttonEditGuildRanks.Size = new System.Drawing.Size(20, 21);
-            this.buttonEditGuildRanks.TabIndex = 3;
-            this.buttonEditGuildRanks.Text = "...";
-            this.buttonEditGuildRanks.UseVisualStyleBackColor = true;
-            this.buttonEditGuildRanks.Click += new System.EventHandler(this.OnButtonEditGuildRank);
             // 
             // PanelQuestEditor
             // 
