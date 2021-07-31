@@ -906,12 +906,19 @@ function Window_StatusProfile() {
      * @param {number} width 幅
      */
     Window_Status.prototype.drawActorGuildRank = function(actor, x, y, width) {
+        if (!("guildRankName" in actor)) {
+            return;
+        }
+        const name = actor.guildRankName();
+        if (!name) {
+            return ;
+        }
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());
         this.drawText(textGuildRank, x, y, statusLabelWidth);
         this.resetTextColor();
         const valueWidth = Math.min(this.textWidth("000"), width - statusLabelWidth);
-        this.drawText("-", x + statusLabelWidth, y, valueWidth, "right");
+        this.drawText(name, x + statusLabelWidth, y, valueWidth, "right");
     };
     /**
      * EXPを描画する。
