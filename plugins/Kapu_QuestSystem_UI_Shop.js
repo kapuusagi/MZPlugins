@@ -162,6 +162,12 @@
  * @type string
  * @default %1%2失った！
  * 
+ * @param textLabelRewards
+ * @text 報酬ラベルテキスト
+ * @desc 報酬ラベルとして使用される文字列
+ * @type string
+ * @default 報酬
+ * 
  * 
  * @help 
  * 
@@ -292,7 +298,7 @@ function Scene_SelectGiveupQuest() {
     this.initialize(...arguments);
 }
 (() => {
-    const pluginName = "Kapu_QuestSystem_UI";
+    const pluginName = "Kapu_QuestSystem_UI_Shop";
     const parameters = PluginManager.parameters(pluginName);
     const failSe = JSON.parse(parameters["failSe"] || "{}");
     const successSe = JSON.parse(parameters["successSe"] || "{}");
@@ -310,6 +316,7 @@ function Scene_SelectGiveupQuest() {
     const textMessageLostGold = parameters["textMessageLostGold"] || "Lose %1%2.";
     const textMessageRankUp = parameters["textMessageRankUp"] || "%1's rank up %2 to %3!";
     const textMessageRankDown = parameters["textMessageRankDown"] || "%1's rank down %2 to %3.";
+    const textLabelRewards = parameters["textLabelRewards"] || "Rewards";
 
 
     PluginManager.registerCommand(pluginName, "startQuestShop", args => {
@@ -366,7 +373,7 @@ function Scene_SelectGiveupQuest() {
     /**
      * 選択されたクエストをクリアする。
      */
-    Game_Temp.clearSelectedQuestId = function() {
+    Game_Temp.prototype.clearSelectedQuestId = function() {
         this._selectedQuestId = 0;
     };
 
@@ -430,7 +437,7 @@ function Scene_SelectGiveupQuest() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_QuestShopUnderTakeList.prototype.initialize = function(rect) {
-        $gameParty.updateQuests(); // クエストの状態更新
+        $gameParty.refreshQuests(); // クエストの状態更新
         this._quests = [];
         Window_Selectable.prototype.initialize.call(this, rect);
         this.refresh();
@@ -532,7 +539,7 @@ function Scene_SelectGiveupQuest() {
      */
     Window_QuestShopUnderTakeList.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
-        const quest = this.item(index);
+        const quest = this.quest(index);
         if (quest) {
             this.changePaintOpacity(this.isEnabled(index));
             const name = quest.name();
@@ -750,7 +757,7 @@ function Scene_SelectGiveupQuest() {
             this.changePaintOpacity(this.isEnabled(index));
             const name = quest.name();
             if (quest.isDone()) {
-                this.changeTextColor(this.textColor(1));
+                this.changeTextColor(ColorManager.textColor(1));
             } else {
                 this.resetTextColor();
             }
@@ -758,7 +765,7 @@ function Scene_SelectGiveupQuest() {
             this.drawText(name, rect.x, rect.y, nameWidth);
 
             if (quest.isDone()) {
-                this.changeTextColor(this.textColor(1));
+                this.changeTextColor(ColorManager.textColor(1));
                 this.drawText(textStatusDone, rect.x + nameWidth, rect.y, 96, "right");
             }
             this.changePaintOpacity(false);
@@ -828,7 +835,13 @@ function Scene_SelectGiveupQuest() {
         this.refresh();
     };
 
-
+    /**
+     * タッチされたときの処理を行う。
+     */
+    Window_QuestShopRewards.prototype.onTouchOk = function() {
+        // 項目選択状態によらず、完了させるためにprocessOkを呼び出す。
+        this.processOk();
+    };    
     /**
      * 表示内容を更新する。
      */
@@ -837,15 +850,21 @@ function Scene_SelectGiveupQuest() {
         const rewards = this._rewards;
         if (rewards) {
             const lineHeight = this.lineHeight();
-            const x = 0;
+            const x = 16;
             let y = 0;
-            const contentsWidth = this.contentsWidth();
+            const contentsWidth = this.contentsWidth() - 32;
+
+            this.changeTextColor(ColorManager.systemColor());
+            this.drawText(textLabelRewards + ":", x, y, contentsWidth);
+            this.resetTextColor();
+
+            y += lineHeight;
             // 報酬を記述する。
             if (rewards.exp > 0) {
                 this.drawText(TextManager.expA + rewards.exp, x + 40, y, contentsWidth);
             }
             if (rewards.gold > 0) {
-                this.drawText(reward.gold + TextManager.currencyUnit, x + 40, y, contentsWidth - 40, "right");
+                this.drawText(rewards.gold + TextManager.currencyUnit, x + 40, y, contentsWidth - 40, "right");
                 y += lineHeight;
             }
 
@@ -855,7 +874,7 @@ function Scene_SelectGiveupQuest() {
             const reportedItems = [];
             for (const item of rewards.items) {
                 if (!reportedItems.includes(item)) {
-                    const count = items.filter(i => i === item).length;
+                    const count = rewards.items.filter(i => i === item).length;
                     this.drawItemName(item, x, y, nameWidth);
                     this.drawText("\u00d7" + count, x + nameWidth, y, numWidth, "right");
                     y += lineHeight;
@@ -985,7 +1004,7 @@ function Scene_SelectGiveupQuest() {
      */
     Scene_QuestShop.prototype.underTakeListWindowRect = function() {
         const wx = 0;
-        const wy = 0;
+        const wy = this.mainAreaTop();
         const ww = 320;
         const wh = this.mainAreaHeight();
         return new Rectangle(wx, wy, ww, wh);
@@ -1056,9 +1075,9 @@ function Scene_SelectGiveupQuest() {
     Scene_QuestShop.prototype.statusWindowRect = function() {
         const rect = this.underTakeListWindowRect();
         const wx = rect.width;
-        const wy = 0;
+        const wy = this.mainAreaTop();
         const ww = (Graphics.boxWidth - wx);
-        const wh = Graphics.boxHeight;
+        const wh = Graphics.boxHeight - wy;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -1092,9 +1111,8 @@ function Scene_SelectGiveupQuest() {
      * 確認ウィンドウを作成する。
      */
     Scene_QuestShop.prototype.createConfirmWindow = function() {
-        const x = Graphics.boxWidth - 240;
-        const y = this._messageWindow.y + this._messageWindow.height;
-        this._confirmWindow = new Window_QuestShopConfirm(x, y);
+        const rect = this.confirmWindowRect();
+        this._confirmWindow = new Window_QuestShopConfirm(rect);
         this._confirmWindow.hide();
         this._confirmWindow.deactivate();
         this.addWindow(this._confirmWindow);
@@ -1133,9 +1151,9 @@ function Scene_SelectGiveupQuest() {
      */
     Scene_QuestShop.prototype.questRewardWindowRect = function() {
         const ww = Graphics.boxWidth / 2;
-        const wh = Graphics.boxHeight - this.mainAreaTop() - 100;
+        const wh = this.calcWindowHeight(6, false);
         const wx = (Graphics.boxWidth - ww) / 2;
-        const wy = this.mainAreaTop();
+        const wy = (Graphics.boxHeight - wh) / 2;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -1177,6 +1195,13 @@ function Scene_SelectGiveupQuest() {
         Scene_MenuBase.prototype.start.call(this);
         this._commandWindow.show();
         this._commandWindow.activate();
+    };
+
+    /**
+     * シーンを更新する。
+     */
+    Scene_QuestShop.prototype.update = function() {
+        Scene_MenuBase.prototype.update.call(this);
     };
 
     /**
@@ -1222,11 +1247,10 @@ function Scene_SelectGiveupQuest() {
 
         this._messageWindow.setHandler("ok", this.onUnderTakeMessageOk.bind(this));
         this._messageWindow.show();
-        this._messageWindow.actiate();
+        this._messageWindow.activate();
         this._messageWindow.show();
         this._confirmWindow.setHandler("ok", this.onUnderTakeConfirmOk.bind(this));
         this._confirmWindow.setHandler("cancel", this.onUnderTakeConfirmCancel.bind(this));
-        this._confirmWindow.show();
     };
 
     /**
@@ -1234,6 +1258,7 @@ function Scene_SelectGiveupQuest() {
      */
     Scene_QuestShop.prototype.onUnderTakeMessageOk = function() {
         this._messageWindow.deactivate();
+        this._confirmWindow.show();
         this._confirmWindow.activate();
     };
 
@@ -1278,7 +1303,7 @@ function Scene_SelectGiveupQuest() {
 
         const partyMembers = $gameParty.allMembers();
         const lastState = {
-            guildranks: partyMembers.map(member => member.guildRankName())
+            guildRanks: partyMembers.map(member => member.guildRankName())
         };
 
         // 報酬加算処理
@@ -1315,7 +1340,7 @@ function Scene_SelectGiveupQuest() {
         this._rewardsWindow.deactivate();
 
         if ($gameMessage.isBusy()) {
-            this._messageWindow.setHandler("ok", this.onReportMessageOk.bind());
+            this._messageWindow.setHandler("ok", this.onReportMessageOk.bind(this));
             this._messageWindow.show();
             this._messageWindow.activate();
         } else {
@@ -1348,7 +1373,6 @@ function Scene_SelectGiveupQuest() {
         this._messageWindow.show();
         this._confirmWindow.setHandler("ok", this.onGiveupConfirmOk.bind(this));
         this._confirmWindow.setHandler("cancel", this.onGiveupConfirmCancel.bind(this));
-        this._confirmWindow.show();
     };
 
     /**
@@ -1356,6 +1380,7 @@ function Scene_SelectGiveupQuest() {
      */
     Scene_QuestShop.prototype.onGiveupConfirmMessageOk = function() {
         this._messageWindow.deactivate();
+        this._confirmWindow.show();
         this._confirmWindow.activate();
     };
 

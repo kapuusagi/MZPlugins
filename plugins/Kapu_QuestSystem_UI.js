@@ -51,7 +51,7 @@
  * @type string
  * @default 依頼内容
  * 
- * @param textLabelAchive
+ * @param textLabelAchieve
  * @text 達成条件ラベルテキスト
  * @desc 達成条件ラベルとして使用される文字列
  * @type string
@@ -169,7 +169,7 @@ function Window_QuestStatus() {
     const textLabelDeadline = parameters["textLabelDeadline"] || "Deadline";
     const textNoDeadline = parameters["textNoDeadline"] || "None";
     const textLabelDesc = parameters["textLabelDesc"] || "Description";
-    const textLabelAchive = parameters["textLabelAchive"] || "Achive";
+    const textLabelAchieve = parameters["textLabelAchieve"] || "Achive";
     const textLabelRewards = parameters["textLabelRewards"] || "Rewards";
     const enableMenuList = (parameters["enableMenuList"] === undefined)
             ? true : (parameters["enableMenuList"] === "true");
@@ -198,7 +198,7 @@ function Window_QuestStatus() {
      * @param {Rectangle} rect
      */
     Window_MenuQuestList.prototype.initialize = function(rect) {
-        $gameParty.updateQuests(); // クエストの状態更新
+        $gameParty.refreshQuests(); // クエストの状態更新
         this._quests = $gameParty.quests();
         Window_Selectable.prototype.initialize.call(this, rect);
         this.refresh();
@@ -256,6 +256,14 @@ function Window_QuestStatus() {
         this._statusWindow = window;
         this.callUpdateHelp();
     };
+    /**
+     * 現在選択中の項目が選択可能かどうかを得る。
+     * 
+     * @returns {boolean} 選択可能な場合にはtrue, 選択不可の場合にはfalse
+     */
+    Window_MenuQuestList.prototype.isCurrentItemEnabled = function() {
+        return true;
+    };
 
     /**
      * 選択項目の説明を更新する。
@@ -266,7 +274,14 @@ function Window_QuestStatus() {
             if (quest) {
                 quest.refresh();
             }
+
+            const prevQuest = this._statusWindow.quest();
+            const prevQuestId = prevQuest ? prevQuest.id() : 0;
+            const newQuestId = quest ? quest.id() : 0;
             this._statusWindow.setQuest(quest);
+            if (prevQuestId !== newQuestId) {
+                this._statusWindow.setPage(1);
+            }
         }
     };
     //------------------------------------------------------------------------------
@@ -291,9 +306,23 @@ function Window_QuestStatus() {
      * @param {Game_Quest} quest クエストデータ
      */
     Window_QuestStatus.prototype.setQuest = function(quest) {
+        const prevQuestId = (this._quest) ? this._quest.id() : 0;
+        const newQuestId = (quest) ? quest.id() : 0;
+        if (prevQuestId !== newQuestId) {
+            // 異なるクエストを表示するのでペジインデックスをリセットする。
+            this._pageIndex = 0;
+        }
         this._quest = quest;
-        this._pageIndex = 0;
         this.refresh();
+    };
+
+    /**
+     * クエストデータを取得する。
+     * 
+     * @returns {Game_Quest} クエストデータ
+     */
+    Window_QuestStatus.prototype.quest = function() {
+        return this._quest;
     };
 
     /**
@@ -303,6 +332,26 @@ function Window_QuestStatus() {
      */
     Window_QuestStatus.prototype.pageIndex = function() {
         return this._pageIndex;
+    };
+
+    /**
+     * ページインデックスをリセットする。
+     */
+    Window_QuestStatus.prototype.resetPage = function() {
+        this._pageIndex = 0;
+        this.refresh();
+    };
+
+    /**
+     * ページインデックスを設定する。
+     * 
+     * @param {number} pageIndex ページ番号
+     */
+    Window_QuestStatus.prototype.setPage = function(pageIndex) {
+        if (this._pageIndex !== pageIndex) {
+            this._pageIndex = pageIndex;
+            this.refresh();
+        }
     };
 
     /**
@@ -352,7 +401,7 @@ function Window_QuestStatus() {
         y += 8;
 
         const height = this.contentsHeight() - y;
-        this.drawPage(quest, x, y, contentsWidth, height);
+        this.drawPage(this._pageIndex, quest, x, y, contentsWidth, height);
     };
 
 
@@ -386,7 +435,7 @@ function Window_QuestStatus() {
         const deadLineX = x + rankWidth + padding;
         const deadLineY = rankY;
         const deadLineWidth = rankWidth;
-        this.drawQuestDeadline(this._pageIndex, quest, deadLineX, deadLineY, deadLineWidth);
+        this.drawQuestDeadline(quest, deadLineX, deadLineY, deadLineWidth);
     };
 
     /**
@@ -445,11 +494,24 @@ function Window_QuestStatus() {
      */
     // eslint-disable-next-line no-unused-vars
     Window_QuestStatus.prototype.drawPage1 = function(quest, x, y, width, height) {
-        // 達成条件を詳細に書く
         const lineHeight = this.lineHeight();
+
+        // 概要(2行)
+        this.drawQuestDescription(quest, x, y, width);
+        y += lineHeight * 2;
+        this.drawHorzLine(y + 4);
+        y += 8;
+
+        // 報酬(3行)
+        this.drawQuestRewardsMsg(quest, x, y);
+        y += lineHeight * 3;
+        this.drawHorzLine(y + 4);
+        y += 8;
+
+        // 達成条件(状態)を詳細に書く
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText(textLabelAchive, x, y, width);
-        y += this.lineHeight;
+        this.drawText(textLabelAchieve + ":", x, y, width);
+        y += lineHeight;
         for (let no = 0; no < quest.achieveCount(); no++) {
             const achieveStatus = quest.achieveStatus(no);
             if (achieveStatus) {
@@ -557,7 +619,7 @@ function Window_QuestStatus() {
         const labelWidth = this.labelWidth();
         const padding = this.itemPadding();
         this.changeTextColor(ColorManager.systemColor());
-        const text = textLabelAchive + ":";
+        const text = textLabelAchieve + ":";
         this.drawText(text, x, y, labelWidth, "right");
         this.resetTextColor();
         const msgWidth = width - labelWidth - padding;

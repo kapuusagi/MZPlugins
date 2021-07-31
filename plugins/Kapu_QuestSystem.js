@@ -110,7 +110,7 @@
  * @text ギルドランク
  * @desc ギルドランクテーブル
  * @type struct<GuildRankInfo>[]
- * @default [{"name":"-","iconIndex":"0","exp":"0"},{"name":"G","iconIndex":"0","exp":"1"},{"name":"F","iconIndex":"0","exp":"100"},{"name":"E","iconIndex":"0","exp":"300"},{"name":"D","iconIndex":"0","exp":"600"},{"name":"C","iconIndex":"0","exp":"1000"},{"name":"B","iconIndex":"0","exp":"2000"},{"name":"A","iconIndex":"0","exp":"5000"},{"name":"S","iconIndex":"0","exp":"10000"},{"name":"SS","iconIndex":"0","exp":"30000"},{"name":"SSS","iconIndex":"0","exp":"50000"},]
+ * @default ["{\"name\":\"\",\"iconIndex\":\"0\",\"exp\":\"0\",\"note\":\"\"}","{\"name\":\"G\",\"iconIndex\":\"0\",\"exp\":\"1\",\"note\":\"\"}","{\"name\":\"F\",\"iconIndex\":\"0\",\"exp\":\"100\",\"note\":\"\"}","{\"name\":\"E\",\"iconIndex\":\"0\",\"exp\":\"300\",\"note\":\"\"}","{\"name\":\"D\",\"iconIndex\":\"0\",\"exp\":\"600\",\"note\":\"\"}","{\"name\":\"C\",\"iconIndex\":\"0\",\"exp\":\"1000\",\"note\":\"\"}","{\"name\":\"B\",\"iconIndex\":\"0\",\"exp\":\"2000\",\"note\":\"\"}","{\"name\":\"A\",\"iconIndex\":\"0\",\"exp\":\"5000\",\"note\":\"\"}","{\"name\":\"S\",\"iconIndex\":\"0\",\"exp\":\"10000\",\"note\":\"\"}","{\"name\":\"SS\",\"iconIndex\":\"0\",\"exp\":\"30000\",\"note\":\"\"}","{\"name\":\"SSS\",\"iconIndex\":\"0\",\"exp\":\"80000\",\"note\":\"\"}"]
  * 
  * @param maxGuildExp
  * @text 最大ギルドEXP
@@ -168,6 +168,13 @@
  * @type number
  * @decimals 2
  * @default 0.50
+ * 
+ * @param penaltyGuildExpRate
+ * @text ペナルティギルドEXPレート
+ * @desc キャンセル時に損なうギルドEXPレート。報酬ギルドEXPにこの値が乗算された値が適用される。
+ * @type number
+ * @decimals 2
+ * @default 1.00
  * 
  * @param penaltyGoldRate
  * @text ペナルティゴールドレート
@@ -332,6 +339,7 @@ function QuestManager() {
     const textDeadlineNone = parameters["textDeadlineNone"] || "No deadline";
     const guildExpCoefDifficult = Math.max(0, (Number(parameters["guildExpCoefDifficult"]) || 0));
     const guildExpCoefEasy = (Number(parameters["guildExpCoefEasy"]) || 0).clamp(0, 1.0);
+    const penaltyGuildExpRate = (Number(parameters["penaltyGuildExpRate"]) || 0.5)
     const penaltyGoldRate = (Number(parameters["penaltyGoldRate"]) || 0.3).clamp(0.01, 1.0);
 
     Game_Quest.STATUS_TRYING = 0;
@@ -418,14 +426,14 @@ function QuestManager() {
         }
     });
 
-    PluginManager.prototype.registerCommand(pluginName, "setQuestDone", args => {
+    PluginManager.registerCommand(pluginName, "setQuestDone", args => {
         const id = _getQuestId(args);
         if (id > 0) {
             QuestManager.setQuestDone(id);
         }
     });
 
-    PluginManager.prototype.registerCommand(pluginName, "setQuestFail", args => {
+    PluginManager.registerCommand(pluginName, "setQuestFail", args => {
         const id = _getQuestId(args);
         if (id > 0) {
             QuestManager.setQuestFail(id);
@@ -487,11 +495,11 @@ function QuestManager() {
     const _targetItem = function(kind, id) {
         switch (kind) {
             case 1:
-                return $gameItems[id] || null;
+                return $dataItems[id] || null;
             case 2:
-                return $gameWeapons[id] || null;
+                return $dataWeapons[id] || null;
             case 3:
-                return $gameArmors[id] || null;
+                return $dataArmors[id] || null;
             default:
                 return null;
         }
@@ -506,7 +514,7 @@ function QuestManager() {
      */
     const _targetItemName = function(kind, id) {
         const item = _targetItem(kind, id);
-        return (item) ? item.name : "";
+        return (item) ? item.name : "???";
     };
 
     /**
@@ -518,7 +526,11 @@ function QuestManager() {
     const _getAchieveOverviewText = function(achieve) {
         switch (achieve.type) {
             case Game_Quest.ACHIEVE_SUBJUGATION:
-                return textQuestTitleSubjugation.format($dataEnemies[achieve.value2]);
+                {
+                    const enemy = $dataEnemies[achieve.value2];
+                    const enemyName = (enemy) ? enemy.name : "???";
+                    return textQuestTitleSubjugation.format(enemyName);
+                }
             case Game_Quest.ACHIEVE_COLLECTION:
                 return textQuestTitleCollection.format(_targetItemName(achieve.value1, achieve.value2));
             case Game_Quest.ACHIEVE_EVENT:
@@ -557,9 +569,16 @@ function QuestManager() {
     const _getAchieveText = function(achieve) {
         switch (achieve.type) {
             case Game_Quest.ACHIEVE_SUBJUGATION:
-                return textQuestAchieveSubjugation.format($dataEnemies[achieve.value2]);
+                {
+                    const enemy = $dataEnemies[achieve.value2];
+                    const enemyName = (enemy) ? enemy.name : "???";
+                    return textQuestAchieveSubjugation.format(enemyName, achieve.value3);
+                }
             case Game_Quest.ACHIEVE_COLLECTION:
-                return textQuestAchieveCollection.format(_targetItemName(achieve.value1, achieve.value2));
+                {
+                    const targetItemName = _targetItemName(achieve.value1, achieve.value2);
+                    return textQuestAchieveCollection.format(targetItemName, achieve.value3);
+                }
             case Game_Quest.ACHIEVE_EVENT:
                 return $dataSystem.switches[achieve.value1] || "";
             default:
@@ -713,7 +732,7 @@ function QuestManager() {
      * @returns {string} ギルドランク名
      */
     Game_Actor.prototype.guildRankName = function() {
-        const rankInfo = DataManager.getGuildRankEntryByExp(this._guildExp);
+        const rankInfo = DataManager.guildRankByExp(this._guildExp);
         return rankInfo.name;
     };
     //------------------------------------------------------------------------------
@@ -865,10 +884,10 @@ function QuestManager() {
     Game_Quest.prototype.achieveText = function() {
         const dataQuest = this.dataQuest();
         if (dataQuest) {
-            if (!dataQuest.achieveMsg && (questdata.achieves.length > 0)) {
+            if (!dataQuest.achieveMsg && (dataQuest.achieves.length > 0)) {
                 dataQuest.achieveMsg = _generateAchieveMessage(dataQuest.achieves);
             }
-            return questdata.achieveMsg;
+            return dataQuest.achieveMsg;
         }
         return "";
     };
@@ -897,7 +916,6 @@ function QuestManager() {
         const dataQuest = this.dataQuest();
         return (dataQuest) ? dataQuest.guildRank : 0;
     };
-
 
     /**
      * クエストの状態を取得する。
@@ -1097,9 +1115,9 @@ function QuestManager() {
         const items = [];
         const dataQuest = this.dataQuest();
         if (dataQuest) {
-            dataQuest.rewardItems.forEach(function(entry) {
-                const item = this.getRewardItem(entry);
-                const num = entry.value;
+            dataQuest.rewardItems.forEach(function(itemEntry) {
+                const item = _targetItem(itemEntry.kind, itemEntry.dataId);
+                const num = itemEntry.value;
                 if ((items != null) && (num > 0)) {
                     items.push([item, num]);
                 }
@@ -1163,9 +1181,9 @@ function QuestManager() {
         const items = [];
         const dataQuest = this.dataQuest();
         if (dataQuest) {
-            for (const rewardItem of dataQuest.rewardItems) {
-                const item = _targetItemName(rewardItem.kind, rewardItem.dataId);
-                for (let i = 0; i < rewardItem.value; i++) {
+            for (const itemEntry of dataQuest.rewardItems) {
+                const item = _targetItem(itemEntry.kind, itemEntry.dataId);
+                for (let i = 0; i < itemEntry.value; i++) {
                     items.push(item);
                 }
             }
@@ -1262,11 +1280,38 @@ function QuestManager() {
         if (dataQuest) {
             const rankInfo = DataManager.guildRank(dataQuest.guildRank);
             if (rankInfo) {
-                return rankInof.name;
+                return rankInfo.name;
             }
         }
         return "";
     };
+
+    /**
+     * キャンセル時のペナルティ経験値を得る。
+     * 
+     * @return {number} ペナルティ金額
+     */
+    Game_Quest.prototype.penaltyGuildExp = function() {
+        const dataQuest = this.dataQuest();
+        if (dataQuest) {
+            if (dataQuest.rewardExp) {
+                return Math.max(1, Math.round(dataQuest.rewardExp * this.penaltyGuildExpRate()));
+            } else {
+                const rankInfo = DataManager.guildRank(dataQuest.guildRank);
+                return rankInfo.rank;
+            }
+        }
+        return 0;
+    };
+
+    /**
+     * ペナルティとして減算するギルドEXPレート
+     * 
+     * @returns {number} ギルドEXPレート
+     */
+    Game_Quest.prototype.penaltyGuildExpRate = function() {
+        return penaltyGuildExpRate;
+    }
 
     /**
      * キャンセル時のペナルティ金額を得る。
@@ -1281,7 +1326,7 @@ function QuestManager() {
                 return Math.round(dataQuest.rewardGold * this.penaltyGoldRate());
             } else if (dataQuest.guildRank) {
                 // ギルドランクが指定されている。
-                const rankInfo = DataManager.guildrank(dataQuest.guildRank);
+                const rankInfo = DataManager.guildRank(dataQuest.guildRank);
                 return Math.floor(rankInfo.exp * this.penaltyGoldRate());
             }
         }
@@ -1495,10 +1540,10 @@ function QuestManager() {
      * @returns {boolean} 受託可能ならばtrue, 受託できないならばfalse.
      */
     QuestManager.testEntrustCondition = function(dataQuest) {
-        const condition = dataQuest.entrustCondition();
+        const condition = dataQuest.entrustCondition;
         if (condition) {
             const quest = dataQuest; // eslint-disable-line no-unused-vars
-            const guildRank = this.guildRank(); // eslint-disable-line no-unused-vars
+            const guildRank = $gameParty.guildRank(); // eslint-disable-line no-unused-vars
             try {
                 return eval(condition);
             }
@@ -1556,7 +1601,7 @@ function QuestManager() {
                 this._rewards = null;
             }
             quest.onComplete();
-            this.removeQuest(id);
+            $gameParty.removeQuest(id);
         }
     };
 
@@ -1729,7 +1774,7 @@ function QuestManager() {
             // 所持金以上のものは撮られない
             this.payPenaltyGold(quest.penaltyGold());
             // ギルドEXPを減らす
-            this.payPenaltyGuildExp(quest.guildRank(), quest.guildExp());
+            this.payPenaltyGuildExp(quest.guildRank(), quest.penaltyGuildExp());
         }
     };
 
