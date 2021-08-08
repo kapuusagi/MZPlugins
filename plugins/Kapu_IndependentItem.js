@@ -15,7 +15,7 @@
  * @parent independentItemSetting
  * 
  * @param independentItemStartIndex
- * @text 個別アイテム開始インデックス。
+ * @text 個別アイテム開始インfデックス。
  * @desc 個別アイテム開始ID番号。通常アイテムの種類数より大きな値とする。この値が変わると、セーブデータが化ける。
  * @default 1000
  * @type number
@@ -185,6 +185,7 @@
  * 変更履歴
  * ============================================
  * Version.0.5.1 インタプリタから装備変更操作をしたとき、装備スロットが動的に変わっていると動作しない不具合を修正した。
+ *               複数の個別アイテム装備を初期装備に指定した時、武器1、防具1以外は有効にならない不具合を修正した。
  * Version.0.5.0 武器/防具のソートメソッドを変更し、IDの前に種別でソートするようにした。
  * Version.0.4.5 アイテム一覧で、個別アイテムを複数持っていた場合の表示がおかしい不具合を修正した。
  * Version.0.4.4 各カテゴリの既定の個別アイテム設定でtrueを設定しても効果がない不具合を修正した。
@@ -227,6 +228,9 @@
     const independentArmorDefault = (typeof parameters["independentArmorDefault"] === "undefined")
             ? false : (parameters["independentArmorDefault"] === "true");
     const gainFailureEventId = Number(parameters["gainFailureEventId"]) || 0;
+
+    // アクターイニシャル時の一時保存用
+    const equipTemps = [];
 
     //-------------------------------------------------------------------------
     // Scene_Boot
@@ -643,6 +647,9 @@
         if ($gameParty.numItems(independentItem) > 0) {
             return true;
         }
+        if (equipTemps.includes(independentItem)) {
+            return true;
+        }
 
         // 装備しているかどうかをチェックする。
         for (let id = 1; id < $dataActors.length; id++) {
@@ -784,7 +791,16 @@
 
     //-------------------------------------------------------------------------
     // Game_Actor
-
+    const _Game_Actor_setup = Game_Actor.prototype.setup;
+    /**
+     * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
+     * 
+     * @param {number} actorId アクターID
+     */
+    Game_Actor.prototype.setup = function(actorId) {
+        _Game_Actor_setup.call(this, actorId);
+        equipTemps.splice(0, equipTemps.length);
+    };
     const _Game_Actor_isEquipped = Game_Actor.prototype.isEquipped;
     /**
      * アクターが指定された装備を装備中かどうかを判定する。
@@ -887,11 +903,13 @@
         if (isWeapon && (itemId < independentWeaponStartIndex)
                 && DataManager.isIndependent($dataWeapons[itemId])) {
             const independentWeapon = DataManager.registerNewIndependentWeapon($dataWeapons[itemId]);
+            equipTemps.push(independentWeapon);
             const newItemId = independentWeapon ? independentWeapon.id : 0;
             _GameItem_setEquip.call(this, isWeapon, newItemId);
         } else if (!isWeapon && (itemId < independentArmorStartIndex)
                 && DataManager.isIndependent($dataArmors[itemId])) {
             const independentArmor = DataManager.registerNewIndependentArmor($dataArmors[itemId]);
+            equipTemps.push(independentArmor);
             const newItemId = independentArmor ? independentArmor.id : 0;
             _GameItem_setEquip.call(this, isWeapon, newItemId);
         } else {
