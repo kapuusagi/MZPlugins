@@ -8,6 +8,8 @@
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
  * @orderAfter Kapu_Base_ParamName
+ * @base Kapu_base_Hit
+ * @orderAfter Kapu_Base_Hit
  * 
  * @param fixedBuffEffectCode
  * @text 固定バフエフェクトコード
@@ -212,6 +214,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 確率計算部分を、Kapu_Base_Hitを使用するように変更した。
  * Version.0.2.0 固定量バフ計算が誤っていた不具合を修正
  *               Kapu_Base_ParamNameに対応。
  * Version.0.1.0 新規作成。
@@ -1107,8 +1110,8 @@ function Game_Buff() {
      *     バフ構造変更のため、オーバーライドする。
      */
     Game_Action.prototype.itemEffectAddDebuff = function(target, effect) {
-        let chance = target.debuffRate(effect.dataId) * this.lukEffectRate(target);
-        if (Math.random() < chance) {
+        const successRate = this.debuffAddSuccessRate(target, effect.dataId, 1);
+        if (Math.random() < successRate) {
             const turns = this.itemDebuffTurns(target, effect.value1);
             const rate = effect.value2 || 0.25; // 0.25はベーシックシステムのデフォルト
             target.addRateDebuff(effect.dataId, rate, turns);
@@ -1160,8 +1163,8 @@ function Game_Buff() {
      * @param {Effect} effect エフェクトデータ
      */
     Game_Action.prototype.itemEffectAddDebuffFixed = function(target, effect) {
-        let chance = target.debuffRate(effect.dataId) * this.lukEffectRate(target);
-        if (Math.random() < chance) {
+        const successRate = this.debuffAddSuccessRate(target, effect.dataId, 1);
+        if (Math.random() < successRate) {
             const turns = this.itemDebuffTurns(target, effect.value1);
             const buffValue = this.itemDebuffValue(target, effect.dataId, effect.value2)
             target.addFixedDebuff(effect.dataId, buffValue, turns);
