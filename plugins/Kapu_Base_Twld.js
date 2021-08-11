@@ -620,11 +620,11 @@
      */
     Game_Action.prototype.testHit = function(target) {
         const result = target.result();
-        if (this.isCertainlyEvad(target)) {
+        if (this.testCertainEvad(target)) {
             result.missed = false;
             result.evaded = true;
             result.critical = false;
-        } else if (this.isCertainlyHit(target)) {
+        } else if (this.testCertainHit(target)) {
             result.missed = false;
             result.evaded = false;
             result.critical = false;

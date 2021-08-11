@@ -18,7 +18,7 @@
  * Game_Action.applyを overwrite するメソッドとは競合します。
  * 
  * ■ プラグイン開発者向け
- * Game_Action.isCertainlyHit() が追加されます。
+ * Game_Action.testCertainHit() Game_Action.testCertainEva() が追加されます。
  * itemHit, itemEvaのメソッドは変わりません。
  * (命中率/回避率に補正を入れる系統のプラグインはそのままいけます)
  * 
@@ -35,6 +35,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Game_Action.isCertainHitというメソッドが既存にあるため、そちらをうまく使うように変更
  * Version.0.1.0 Trait_Certianly_HitEvaとTwld_Baseを実現するために作成。
  */
 (() => {
@@ -117,8 +118,8 @@
      * @returns {boolean} 確実にヒットする場合にはtrue, それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
-    Game_Action.prototype.isCertainlyHit = function(target) {
-        return false;
+    Game_Action.prototype.testCertainHit = function(target) {
+        return this.isCertainHit();
     };
 
     /**
@@ -128,7 +129,7 @@
      * @returns {boolean} 確実に回避する場合にはtrue, それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
-    Game_Action.prototype.isCertainlyEvad = function(target) {
+    Game_Action.prototype.testCertainEvad = function(target) {
         return false;
     };
 
@@ -140,10 +141,10 @@
      */
     Game_Action.prototype.testHit = function(target) {
         const result = target.result();
-        if (this.isCertainlyEvad(target)) {
+        if (this.testCertainEvad(target)) {
             result.missed = false;
             result.evaded = true;
-        } else if (this.isCertainlyHit(target)) {
+        } else if (this.testCertainHit(target)) {
             result.missed = false;
             result.evaded = false;
         } else if (this.testMissed(target)) {

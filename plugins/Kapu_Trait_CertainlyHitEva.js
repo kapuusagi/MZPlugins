@@ -98,6 +98,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 Game_ActionにはisCertainHitというメソッドがあるため、メソッド名を変更した。
  * Version.0.1.0 新規追加。
  */
 (() => {
@@ -190,7 +191,7 @@
          * 
          * @returns {boolean} 確実にヒットする場合にはtrue, それ以外はfalse
          */
-        Game_BattlerBase.prototype.isCertainlyPhyHit = function() {
+        Game_BattlerBase.prototype.testCertainPhyHit = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_PHY);
         };
     } else {
@@ -199,7 +200,7 @@
          * 
          * @returns {boolean} 確実にヒットする場合にはtrue, それ以外はfalse
          */
-        Game_BattlerBase.prototype.isCertainlyPhyHit = function() {
+        Game_BattlerBase.prototype.testCertainPhyHit = function() {
             return false;
         };
     }
@@ -210,7 +211,7 @@
          * 
          * @returns {boolean} 確実にヒットする場合にはtrue, それ以外はfalse.
          */
-        Game_BattlerBase.prototype.isCertainlyMagHit = function() {
+        Game_BattlerBase.prototype.testCertainMagHit = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_HIT_MAG);
         };
 
@@ -220,7 +221,7 @@
          * 
          * @returns {boolean} 確実にヒットする場合にはtrue, それ以外はfalse.
          */
-        Game_BattlerBase.prototype.isCertainlyMagHit = function() {
+        Game_BattlerBase.prototype.testCertainMagHit = function() {
             return false;
         };
     }
@@ -231,7 +232,7 @@
          * 
          * @returns {boolean} 確実に回避する場合にはtrue, それ以外はfalse.
          */
-        Game_BattlerBase.prototype.isCertainlyPhyEvad = function() {
+        Game_BattlerBase.prototype.testCertainPhyEvad = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY);
         };
     } else {
@@ -240,7 +241,7 @@
          * 
          * @returns {boolean} 確実に回避する場合にはtrue, それ以外はfalse.
          */
-        Game_BattlerBase.prototype.isCertainlyPhyEvad = function() {
+        Game_BattlerBase.prototype.testCertainPhyEvad = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_PHY);
         };
     }
@@ -251,7 +252,7 @@
          * 
          * @returns {boolean} 確実に回避する場合にはtrue, それ以外はfalse.
          */
-        Game_BattlerBase.prototype.isCertainlyMagEvad = function() {
+        Game_BattlerBase.prototype.testCertainMagEvad = function() {
             return this.specialFlag(Game_BattlerBase.FLAG_ID_CERTAINLY_EVA_MAG);
         };
     } else {
@@ -260,7 +261,7 @@
          * 
          * @returns {boolean} 確実に回避する場合にはtrue, それ以外はfalse.
          */
-        Game_BattlerBase.prototype.isCertainlyMagEvad = function() {
+        Game_BattlerBase.prototype.testCertainMagEvad = function() {
             return false;
         };
     }
@@ -268,17 +269,17 @@
 
     //------------------------------------------------------------------------------
     // Game_Action
-    const _Game_Action_isCertainlyHit = Game_Action.prototype.isCertainlyHit;
+    const _Game_Action_testCertainHit = Game_Action.prototype.testCertainHit;
     /**
      * 確実にヒットできるかどうかを取得する。
      * 
      * @param {Game_Battler} target 対象
      * @returns {boolean} 確実にヒットする場合にはtrue, それ以外はfalse
      */
-    Game_Action.prototype.isCertainlyHit = function(target) {
-        return (this.isPhysical() && this.subject().isCertainlyPhyHit())
-                || (this.isMagical() && this.subject().isCertainlyMagHit())
-                || _Game_Action_isCertainlyHit.call(this, target);
+    Game_Action.prototype.testCertainHit = function(target) {
+        return (this.isPhysical() && this.subject().testCertainPhyHit())
+                || (this.isMagical() && this.subject().testCertainMagHit())
+                || _Game_Action_testCertainHit.call(this, target);
     };
 
     /**
@@ -287,15 +288,15 @@
      * @param {Game_Battler} target 対象
      * @returns {boolean} 確実に回避する場合にはtrue, それ以外はfalse
      */
-    Game_Action.prototype.isCertainlyEvad = function(target) {
+    Game_Action.prototype.testCertainEvad = function(target) {
         if (this.isDamage()) {
-            if (this.isPhysical() && target.isCertainlyPhyEvad()) {
+            if (this.isPhysical() && target.testCertainPhyEvad()) {
                 return true;
-            } else if (this.isMagical() && target.isCertainlyMagEvad()) {
+            } else if (this.isMagical() && target.testCertainMagEvad()) {
                 return true;
             }
 
-            return _Game_Action_isCertainlyHit.call(this, target);
+            return _Game_Action_testCertainHit.call(this, target);
         }
     };
 })();
