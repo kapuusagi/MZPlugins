@@ -18,6 +18,7 @@
 ||||
 |1001|__TRAIT_BASIC_PARAM__|基本パラメータを加算する特性|
 |1002|__TRAIT_BASIC_PARAM_RATE__|基本パラメータ乗算レート特性|
+|1003|__TRAIT_PARAM_RATE_ALL__|パラメータ乗算レート（装備品含む全体にかかる）|
 ||||
 
 ### XPARAM
