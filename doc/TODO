@@ -9,6 +9,9 @@
   ☐ Kapu_BattleMusicManager
   ☐ Kapu_EncounterEffectManager
   ☐ Kapu_GrowupSystem_Skills (レベルアップでのGP習得可能スキル追加)
+  ☐ Kapu_Base_Hit (必中/必ず回避判定メソッド名を変えた)
+  ☐ Kapu_Base_Twld (必中/必ず回避判定メソッド名を変えた)
+  ☐ Kapu_Trait_CertainlyHitEva (必中/必ず回避判定メソッド名を変えた)
   Kapu_BattleMusicManager :
     ☐ 不利戦闘時固定曲鳴らす＆有利戦闘時固定曲鳴らすを追加してみた。
   Kapu_Base_Twld:
