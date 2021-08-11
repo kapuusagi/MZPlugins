@@ -11,6 +11,8 @@
   ☐ Kapu_GrowupSystem_Skills (レベルアップでのGP習得可能スキル追加)
   Kapu_BattleMusicManager :
     ☐ 不利戦闘時固定曲鳴らす＆有利戦闘時固定曲鳴らすを追加してみた。
+  Kapu_Base_Twld:
+    ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
       
 機能拡張予定:
   Kapu_Twld_BattleSystem:

@@ -3,12 +3,19 @@
  * @plugindesc TWLD向け改変
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
  * @base Kapu_Base_Tpb
  * @orderAfter Kapu_Base_Tpb
  * @orderAfter Kapu_Base_Hit
  * @orderAfter Kapu_Base_DamageCalculation
+ * 
+ * @param traitCode
+ * @text 特性コード
+ * @type number
+ * @default 1003
  * 
  * @param actorParameter
  * @text アクターパラメータ
@@ -230,7 +237,25 @@
  * ============================================
  * ノートタグ
  * ============================================
- * ノートタグはありません。
+ * アクター/クラス/ステート/武器/防具
+ *   <rateMHP:rate>
+ *   <rateMMP:rate>
+ *   <rateATK:rate>
+ *   <rateMAT:rate>
+ *   <rateDEF:rate>
+ *   <rateMDF:rate>
+ *   <rateAGI:rate>
+ *   <rateLUK:rate>
+ *     装備品も含めて割合上昇させる特性を追加する。乗算で合成されるため、1.0が基準値。
+ *   <rateMHP:rate%>
+ *   <rateMMP:rate%>
+ *   <rateATK:rate%>
+ *   <rateMAT:rate%>
+ *   <rateDEF:rate%>
+ *   <rateMDF:rate%>
+ *   <rateAGI:rate%>
+ *   <rateLUK:rate%>
+ *     装備品も含めて割合上昇させる特性を追加する。乗算で合成されるため、100が基準値。
  * 
  * ============================================
  * 変更履歴
@@ -252,6 +277,11 @@
         enemyParamMax[i] = Number(parameters["enemyParamMax" + i]) || ((i === 0) ? 999999 : 9999);
     }
 
+    Game_BattlerBase.TRAIT_PARAM_RATE_ALL = Number(parameters["traitCode"]) || 0;
+    if (!Game_BattlerBase.TRAIT_PARAM_RATE_ALL) {
+        console.error(pluginName + " TRAIT_PARAM_RATE_ALL is not valid.");
+    }
+
     const colorHpDead = parameters["colorHpDead"] || "#FF8000";
     const colorHpDying = parameters["colorHpDying"] || "#FF8040";
     const colorHpFull = parameters["colorHpFull"] || "#FFFFA0";
@@ -262,7 +292,52 @@
     const colorTpDead = parameters["colorTpDead"] || "#646464";
     const colorTpFull = parameters["colorTpFull"] || "#80FF80";
     const colorTpNormal = parameters["colorTpNormal"] || "#FFFFFF";
+    //------------------------------------------------------------------------------
+    // DataManager
+    if (Game_BattlerBase.TRAIT_PARAM_RATE_ALL) {
+        /**
+         * 割合を得る。
+         * 
+         * @param {string} str 文字列
+         * @returns {number} 割合を得る。
+         */
+        const _getRate = function(str) {
+            if (str.slice(-1) === "%") {
+                return Number(str.slice(0, str.length - 1)) / 100.0;
+            } else {
+                return Number(str);
+            }
+        };
+        /**
+         * ノートタグを処理する。
+         * @param {object} obj データ
+         */
+        const _processNoteTag = function(obj) {
+            const noteTags = [ "rateMHP", "rateMMP", "rateATK", "rateMAT", "rateDEF", "rateMDF", "rateAGI", "rateLUK" ];
+            for (let paramId = 0; paramId < noteTags.length; paramId++) {
+                const noteTag = noteTags[paramId];
+                if (obj.meta[noteTag] !== undefined) {
+                    const rate = _getRate(Number(obj.meta[noteTag]));
+                    if (rate >= 0) {
+                        obj.traits.push({
+                            code:Game_BattlerBase.TRAIT_PARAM_RATE_ALL,
+                            dataId:paramId,
+                            value:rate
+                        })
+                    }
+                }
+            }
+        };
 
+        DataManager.addNotetagParserActors(_processNoteTag);
+        DataManager.addNotetagParserClasses(_processNoteTag);
+        DataManager.addNotetagParserWeapons(_processNoteTag);
+        DataManager.addNotetagParserArmors(_processNoteTag);
+        DataManager.addNotetagParserStates(_processNoteTag);
+    }
+
+    //------------------------------------------------------------------------------
+    // ColorManager
     /**
      * HP数値描画色を得る。
      * 
@@ -432,8 +507,31 @@
      *     装備品増加分にはTraitによるレートボーナスを適用外とするため、オーバーライドする。
      */
     Game_Actor.prototype.paramWithoutBuff = function(paramId) {
-        return this.paramBasePlus(paramId) * this.paramRate(paramId) + this.paramEquip(paramId);
+        return (this.paramBasePlus(paramId) * this.paramRate(paramId) + this.paramEquip(paramId)) * this.paramRateAll(paramId);
     };
+
+    if (Game_BattlerBase.TRAIT_PARAM_RATE_ALL) {
+        /**
+         * パラメータレート2を得る。
+         * 
+         * @param {number} paramId パラメータ番号
+         * @returns {number} 全体パラメータレート
+         */
+        Game_Actor.prototype.paramRateAll = function(paramId) {
+            return 1 + this.traitPi(Game_BattlerBase.TRAIT_PARAM_RATE_ALL, paramId);
+        };
+    } else {
+        /**
+         * パラメータレート2を得る。
+         * 
+         * @param {number} paramId パラメータ番号
+         * @returns {number} 全体パラメータレート
+         */
+        // eslint-disable-next-line no-unused-vars
+        Game_Actor.prototype.paramRateAll = function(paramId) {
+            return 1;
+        };
+    }
 
     /**
      * 基本パラメータ加算値を得る。
