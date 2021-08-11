@@ -1682,3 +1682,35 @@ $gameParty
            +- Sprite_Actor (SideViewのみ)サイドビューアクター
            +- Sprite_Animation アニメーション描画スプライト（アニメーション開始毎に追加）
     +- _backScreen
+
+# ダメージポップアップの仕組みは？
+
+    BattleManager.invoke～() // 通常攻撃、カウンター、魔法反射
+        ↓
+    Window_BattleLog.displayActionResults() // 行動結果を表示
+        ↓
+    Window_BattleLog.prototype.popupDamage()
+        ↓
+    Game_Battler.prototype.startDamagePopup() // ダメージポップアップ要求
+
+        
+    Sprite_Battler.updateDamagePopup()
+    Game_Battler.isDamagePopupRequested() // trueを返すと、ポップアップ処理開始
+        ↓
+    Sprite_Battler.setupDamagePopup() // ダメージポップアップ準備する。
+        ↓
+    Sprite_Damage.create()
+    Sprite_Damage.setup() // ダメージポップアップの準備
+    Game_Battler.clearDamagePopup() // ダメージポップアップ要求クリア
+
+    以後、
+    Sprite_Damage.update() // 更新
+
+    ダメージポップアップ要求を出すだけならば、Game_Battler.startDamagePopup()を呼べば良い。
+ 
+    
+    ターン終了・アクション終了時
+    BattleManager.displayBattlerStatus()
+        ↓
+    Window_BattleLog.prototype.displayRegeneration()
+        
