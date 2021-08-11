@@ -5,8 +5,6 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
- * @base Kapu_Base_DamageCalculation
- * @orderAfter Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Twld_Base
  * @orderAfter Kapu_Base_Params
  * 
@@ -467,44 +465,6 @@
             }
         };
     }
-
-    //------------------------------------------------------------------------------
-    // Game_Action
-    const _Game_Action_additionalSubjectTraits = Game_Action.prototype.additionalSubjectTraits;
-    /**
-     * ダメージ計算時、使用者に追加で付与する特性を取得する。
-     * 
-     * @param {Game_Battler} target ターゲット
-     * @param {Array<Trait>} trait 特性オブジェクト配列
-     */
-    Game_Action.prototype.additionalSubjectTraits = function(target) {
-        const traits = _Game_Action_additionalSubjectTraits.call(this, target);
-        const item = this.item();
-        if (DataManager.isSkill(item)) {
-            const wmTypeId = this.itemWmTypeId(item);
-            const subject = this.subject();
-            const wmLevel = subject.wmLevel(wmTypeId);
-            if (wmLevel > 0) {
-                traits.push({
-                    code: Game_BattlerBase.TRAIT_PARAM,
-                    dataId: 2, // 2 is ATK
-                    value: (1 + wmLevel) / 100
-                });
-                traits.push({
-                    code: Game_BattlerBase.TRAIT_PARAM,
-                    dataId: 4, // 4 is MAT
-                    value: (1 + wmLevel) / 100
-                });
-                traits.push({
-                    code: Game_BattlerBase.TRAIT_XPARAM,
-                    dataId: 0, // 0 is hit.
-                    value: (1 + wmLevel) / 400
-                });
-            }
-        }
-
-        return traits;
-    };
 
     /**
      * スキルのウェポンマスタリータイプIDを得る。
