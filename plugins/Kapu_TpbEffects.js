@@ -6,6 +6,8 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * @orderAfter Kapu_Base_ParamName
+ * @base Kapu_Base_Hit
+ * @orderAfter Kapu_Base_hit
  * 
  * @param chargeTimeGainEffectCode
  * @text チャージタイム加減算効果コード
@@ -463,14 +465,26 @@
         if ((effect.value2 < 0) && target.blockTpbLose()) {
             return;
         }
-        let chance = effect.value1;
-        if (!this.isCertainHit()) {
-            chance *= this.lukEffectRate(target);
-        }
-        if (Math.random() < chance) {
+        const successRate = this.gainTpbChargeTimeSuccessRate(target, effect.value1);
+        if (Math.random() < successRate) {
             target.gainTpbChargeTime(effect.value2);
             this.makeSuccess(target);
         }
+    };
+    /**
+     * TPBチャージ効果の成功率を得る。
+     * 
+     * @param {Game_Battler} target 対象
+     * @param {number} baseRate 基本成功率
+     * @returns {number} 成功率が返る。
+     */
+    Game_Action.prototype.gainTpbChargeTimeSuccessRate = function(target, baseRate) {
+        let rate = baseRate;
+        if (this.isCertainHit()) {
+            rate *= this.lukEffectRate(target);
+        }
+        rate *= this.itemCorrectSuccessRate(target);
+        return rate;
     };
     /**
      * 効果を適用する。
@@ -482,17 +496,30 @@
         if ((effect.value2 < 0) && target.blockTpbLose()) {
             return;
         }
-        let chance = effect.value1;
-        if (!this.isCertainHit()) {
-            chance *= this.lukEffectRate(target);
-        }
-        if (Math.random() < chance) {
+        const successRate = this.gainTpbCastTimeSuccessRate(target, effect.value1);
+        if (Math.random() < successRate) {
             target.gainTpbCastTime(effect.value2);
             this.makeSuccess(target);
         }
     };
+
     /**
-     * 効果を適用する。
+     * キャスト時間チャージ成功率を得る。
+     * 
+     * @param {Game_Battler} target 対象
+     * @param {number} baseRate 基本成功率
+     * @returns {number} 成功率が返る。
+     */
+    Game_Action.prototype.gainTpbCastTimeSuccessRate = function(target, baseRate) {
+        let rate = baseRate;
+        if (!this.isCertainHit()) {
+            rate *= this.lukEffectRate(target);
+        }
+        rate *= this.itemCorrectSuccessRate(target);
+        return rate;
+    }
+    /**
+     * キャストブレーク効果を適用する。
      * 
      * @param {Game_Battler} target ターゲット
      * @param {DataEffect} effect エフェクトデータ
@@ -501,14 +528,27 @@
         if (target.blockTpbCastBreak()) {
             return;
         }
-        let chance = effect.value1;
-        if (!this.isCertainHit()) {
-            chance *= this.lukEffectRate(target);
-        }
-        if (Math.random() < chance) {
+        const successRate = this.breakTpbCastingSuccessRate(target, effect.value1);
+        if (Math.random() < successRate) {
             target.breakTpbCast(effect.value2);
             this.makeSuccess(target);
         }
+    };
+
+    /**
+     * キャストブレークの成功率を得る。
+     * 
+     * @param {Game_Battler} target 
+     * @param {number} baseRate 基本成功率
+     * @returns {number} 成功率が返る。
+     */
+    Game_Action.prototype.breakTpbCastingSuccessRate = function(target, baseRate) {
+        let rate = baseRate;
+        if (!this.isCertainHit()) {
+            rate *= this.lukEffectRate(target);
+        }
+        rate *= this.itemCorrectSuccessRate(target);
+        return rate;
     };
 
 

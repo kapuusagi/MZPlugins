@@ -38,6 +38,33 @@
  * @type boolean
  * @default true
  * 
+ * @command setPreemptiveBattleBgm
+ * @text 戦闘BGM指定（有利状況）
+ * 
+ * @arg enabled
+ * @text 固定のBGMを鳴らす
+ * @type boolean
+ * @default false
+ * 
+ * @arg bgm
+ * @text BGMデータ
+ * @desc BGMデータ
+ * @type struct<BgmEntry>
+ * @default {"name":"","volume":"90","pitch":"100","pan":"0"}
+ * 
+ * @command setSurpriseBattleBgm
+ * @text 戦闘BGM指定（不利状況）
+ * 
+ * @arg enabled
+ * @text 固定のBGMを鳴らす。
+ * @type boolean
+ * @default false
+ * 
+ * @arg bgm
+ * @text BGMデータ
+ * @desc BGMデータ
+ * @type struct<BgmEntry>
+ * @default {"name":"","volume":"90","pitch":"100","pan":"0"}
  * 
  * @param randomizeBattleBgm
  * @text 戦闘BGMランダマイズ状態初期値
@@ -47,10 +74,32 @@
  * 
  * @param battleBgms
  * @text 戦闘BGM（ランダム）
- * @desc 戦闘BGM未指定時に演奏する戦闘BGM。識別子は"0","1",...と割り振られる。
+ * @desc 戦闘BGM未指定時に演奏する戦闘BGM初期値。識別子は"0","1",...と割り振られる。
  * @type struct<BgmEntry>[]
  * @default []
  * 
+ * @param useBattleBgmPreemptive
+ * @text 有利な状態の戦闘BGMを指定する
+ * @type boolean
+ * @default false
+ * 
+ * @param battleBgmPreemptive
+ * @text 戦闘BGM（有利）
+ * @desc 戦闘BGM未指定時、有利状態で演奏する戦闘BGM初期値。
+ * @type struct<BgmEntry>
+ * @default {"name"="","volume"="100","pitch"="90","pan"="100"}
+ * 
+ * @param useBattleBgmSurprise
+ * @text 不利な状態の戦闘BGMを指定する
+ * @type boolean
+ * @default false
+ * 
+ * @param battleBgmSurprise
+ * @text 戦闘BGM（不利）
+ * @desc 戦闘BGM未指定時、不利状態で演奏する戦闘BGM初期値。
+ * @type struct<BgmEntry>
+ * @default {"name"="","volume"="100","pitch"="90","pan"="100"}
+ * @parent useBattleBgmSurprise
  * 
  * @help 
  * 
@@ -119,8 +168,18 @@
     const pluginName = "Kapu_BattleMusicManager";
     const parameters = PluginManager.parameters(pluginName);
 
-    const randomizeBattleBgm = (typeof parameters["randomizeBattleBgm"] === undefined)
-            ? false : parameters["randomizeBattleBgm"] === "true";
+    const randomizeBattleBgm = (parameters["randomizeBattleBgm"] === undefined)
+            ? false : (parameters["randomizeBattleBgm"] === "true");
+
+    const useBattleBgmPreemptive = (parameters["useBattleBgmPreemptive"] === undefined)
+            ? false : (parameters["useBattleBgmPreemptive"] === "true");
+    const battleBgmPreemptive = JSON.parse(parameters["battleBgmPreemptive"]);
+
+    const useBattleBgmSurprise = (parameters["useBattleBgmSurprise"] === undefined)
+            ? false : (parameters["useBattleBgmSurprise"] === "true");
+    const battleBgmSurprise = (parameters["battleBgmSurprise"])
+            ? JSON.parse(parameters["battleBgmSurprise"])
+            : { name:"", volume:100, pitch:90, pan:100 };
 
     const battleBgms = [];
     try {
@@ -171,6 +230,32 @@
     PluginManager.registerCommand(pluginName, "randomizeBattleBgm", args => {
         const enabled = (args.enabled === undefined) ? true : args.enabled === "true";
         $gameSystem.setRandomizeBattleBgm(enabled);
+    });
+
+    PluginManager.registerCommand(pluginName, "setPreemptiveBattleBgm", args => {
+        const enabled = (args.enabled === undefined) ? false : (args.enabled === "true");
+        try {
+            const bgm = (enabled) ? JSON.parse(args.bgm) : null;
+            if (enabled && bgm.name) {
+                $dataSystem.setBattleBgmPreemptive(bgm)
+            }
+        }
+        catch (e) {
+            console.error(e);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, "setSurpriseBattleBgm", args => {
+        const enabled = (args.enabled === undefined) ? false : (args.enabled === "true");
+        try {
+            const bgm = (enabled) ? JSON.parse(args.bgm) : null;
+            if (enabled && bgm.name) {
+                $dataSystem.setBattleBgmSurprise(bgm)
+            }
+        }
+        catch (e) {
+            console.error(e);
+        }
     });
 
     //------------------------------------------------------------------------------
@@ -228,15 +313,29 @@
     const _Game_System_initialize = Game_System.prototype.initialize;
     /**
      * Game_Systemを初期化する。
+     * 
+     * Note : ベーシックシステムで用意されている、戦闘時の曲設定は _battleBgm フィールドになる。
+     *        これは初期値nullで、プラグインコマンドで設定されるたものが保持される。
      */
     Game_System.prototype.initialize = function() {
         _Game_System_initialize.call(this);
+        this._battleBgmPreemptive = (useBattleBgmPreemptive) ? battleBgmPreemptive : null;
+        this._battleBgmSurprise = (useBattleBgmSurprise) ? battleBgmSurprise : null;
+
         this._isRandomizeBattleBgm = randomizeBattleBgm;
         this._randomBattleBgms = {};
         for (let i = 0; i < battleBgms.length; i++) {
             this._randomBattleBgms[String(i)] = battleBgms[i];
         }
         this.clearNextBattleBgm();
+    };
+
+    Game_System.prototype.setBattleBgmPreemptive = function(bgm) {
+        this._battleBgmPreemptive = bgm;
+    };
+
+    Game_System.prototype.setBattleBgmSurprise = function(bgm) {
+        this._battleBgmSurprise = bgm;
     };
 
     /**
@@ -264,8 +363,13 @@
         this._nextBattleBgm = null;
     };
 
+
+
     /**
      * 戦闘BGMをセットアップする。
+     * 
+     * Note: BattleManager.setup()からコールされるので、
+     *       この時点では有利状態・不利状態は分からない。
      */
     Game_System.prototype.setupNextBattleBgm = function() {
         if (this._isRandomizeBattleBgm) {
@@ -293,9 +397,16 @@
      * @returns {object} BGMデータ。未指定時はnull
      */
     Game_System.prototype.battleBgm = function() {
-        if (this._nextBattleBgm) {
+        if (BattleManager.isPreemptive() &&  this._battleBgmPreemptive) {
+            // 有利戦闘で曲設定あり。
+            return this._battleBgmPreemptive;
+        } else if (BattleManager.isSurprise() && this._useBattleBgmSurprise) {
+            // 不利戦闘で曲設定有り
+            return this._useBattleBgmSurprise;
+        } else if (this._nextBattleBgm) {
             return this._nextBattleBgm;
         } else {
+            // スクリプトで設定されたBGMなどが返る。
             return _Game_System_battleBgm.call(this);
         }
     };
@@ -345,6 +456,23 @@
     BattleManager.setup = function(troopId, canEscape, canLose) {
         $gameSystem.setupNextBattleBgm();
         _BattleManager_setup.call(this, troopId, canEscape, canLose);
+    };
+
+    /**
+     * 戦闘が有利な状態で開始されているかどうかを得る。
+     * 
+     * @returns {boolean] 有利な状態で開始されている場合にはtrue, それ以外はfalse
+     */
+    BattleManager.isPreemptive = function() {
+        return this._preemptive;
+    };
+    /**
+     * 戦闘が不利な状態で開始されているかどうかを得る。
+     * 
+     * @returns {boolean} 不利な状態で開始されている場合にはtrue, それ以外はfalse.
+     */
+    BattleManager.isSurprise = function() {
+        return this._surprise;
     };
 
     const _BattleManager_endBattle = BattleManager.endBattle;

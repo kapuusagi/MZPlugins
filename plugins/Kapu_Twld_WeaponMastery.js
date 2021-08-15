@@ -5,8 +5,6 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
- * @base Kapu_Base_DamageCalculation
- * @orderAfter Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Twld_Base
  * @orderAfter Kapu_Base_Params
  * 
@@ -134,7 +132,7 @@
     const pluginName = "Kapu_Twld_WeaponMastery";
     const parameters = PluginManager.parameters(pluginName);
     const maxWmLevel = Number(parameters["maxWmLevel"]) || 99;
-    const bareHandsWmTypeId = Number(parameters["bareHandsWmTypeId"]) || 0;
+    Game_BattlerBase.WM_BARE_HANDS = Number(parameters["bareHandsWmTypeId"]) || 0;
     const debugEnable = (typeof parameters["debugEnable"] === "undefined")
             ? false : (parameters["debugEnable"] === "true");
 
@@ -254,6 +252,17 @@
         return 0;
     };
 
+    /**
+     * itemのウェポンマスタリタイプ番号を得る。
+     * 
+     * @param {object} item DataItem / DataSkill
+     * @returns {number} ウェポンマスタリタイプ番号。該当するものが無い場合には0
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_BattlerBase.prototype.itemWmTypeId = function(item) {
+        return 0;
+    };
+
     //------------------------------------------------------------------------------
     // Game_Actor
     const _Game_Actor_initMembers = Game_Actor.prototype.initMembers;
@@ -309,6 +318,31 @@
         return wmTypeIds;
     };
 
+    /**
+     * itemのウェポンマスタリタイプ番号を得る。
+     * 
+     * @param {object} item DataItem / DataSkill
+     * @returns {number} ウェポンマスタリタイプ番号。該当するものが無い場合には0
+     */
+    Game_Actor.prototype.itemWmTypeId = function(item) {
+        const wmType = Number(item.meta.wmType) || 0;
+        if ((wmType > 0) || (wmType < $dataSystem.weaponTypes.length)) {
+            return wmType;
+        } else {
+            const weapons = subject.weapons();
+            if ((item.requiredWtypeId1 > 0)
+                    && weapons.some(w => w.wtypeId === item.requiredWtypeId1)) {
+                return item.requiredWtypeId1;
+            } else if ((item.requiredWtypeId2 > 0)
+                    && weapons.some(w => w.wtypeId === item.requiredWtypeId2)) {
+                return item.requiredWtypeId2;
+            } else if (weapons.length > 0) {
+                return weapons[0].wtypeId;
+            } else {
+                return Game_BattlerBase.WM_BARE_HANDS;
+            }
+        }
+    };
 
     /**
      * typeIdで指定された武器タイプのマスタリーレベルを得る。
@@ -439,6 +473,24 @@
         }
     };
     /**
+     * itemのウェポンマスタリタイプ番号を得る。
+     * 
+     * @param {object} item DataItem / DataSkill
+     * @returns {number} ウェポンマスタリタイプ番号。該当するものが無い場合には0
+     */
+    Game_Enemy.prototype.itemWmTypeId = function(item) {
+        if (DataManager.isSkill(item)) {
+            const wmType = Number(item.meta.wmType) || 0;
+            if ((wmType > 0) || (wmType < $dataSystem.weaponTypes.length)) {
+                return wmType;
+            } else {
+                return Game_BattlerBase.WM_BARE_HANDS;
+            }
+        } else {
+            return 0;
+        }
+    };    
+    /**
      * typeIdで指定された武器タイプのマスタリーレベルを得る。
      * 
      * @param {number} typeId タイプID
@@ -449,91 +501,14 @@
         return this._wmLevel;
     };
 
-    if ("paramEquip" in Game_Actor.prototype) {
-        const _Game_Actor_paramEquip = Game_Actor.prototype.paramEquip;
-        /**
-         * 装備品のパラメータ値合計を得る。
-         * 
-         * @param {number} paramId パラメータID
-         * @returns {number} 全装備品のパラメータ値合計
-         */
-        Game_Actor.prototype.paramEquip = function(paramId) {
-            const value = _Game_Actor_paramEquip.call(this, paramId);
-            if ((paramId === 2) && (bareHandsWmTypeId > 0) && this.hasNoWeapons()) {
-                const wmLevel = this.wmLevel(bareHandsWmTypeId);
-                return value + Math.floor(wmLevel * this.str * 0.02);
-            } else {
-                return value;
-            }
-        };
-    }
-
-    //------------------------------------------------------------------------------
-    // Game_Action
-    const _Game_Action_additionalSubjectTraits = Game_Action.prototype.additionalSubjectTraits;
-    /**
-     * ダメージ計算時、使用者に追加で付与する特性を取得する。
-     * 
-     * @param {Game_Battler} target ターゲット
-     * @param {Array<Trait>} trait 特性オブジェクト配列
-     */
-    Game_Action.prototype.additionalSubjectTraits = function(target) {
-        const traits = _Game_Action_additionalSubjectTraits.call(this, target);
-        const item = this.item();
-        if (DataManager.isSkill(item)) {
-            const wmTypeId = this.itemWmTypeId(item);
-            const subject = this.subject();
-            const wmLevel = subject.wmLevel(wmTypeId);
-            if (wmLevel > 0) {
-                traits.push({
-                    code: Game_BattlerBase.TRAIT_PARAM,
-                    dataId: 2, // 2 is ATK
-                    value: (1 + wmLevel) / 100
-                });
-                traits.push({
-                    code: Game_BattlerBase.TRAIT_PARAM,
-                    dataId: 4, // 4 is MAT
-                    value: (1 + wmLevel) / 100
-                });
-                traits.push({
-                    code: Game_BattlerBase.TRAIT_XPARAM,
-                    dataId: 0, // 0 is hit.
-                    value: (1 + wmLevel) / 400
-                });
-            }
-        }
-
-        return traits;
-    };
-
     /**
      * スキルのウェポンマスタリータイプIDを得る。
      * 
      * @param {object} item スキル
      */
     Game_Action.prototype.itemWmTypeId = function(item) {
-        const wmType = Number(item.meta.wmType) || 0;
-        if ((wmType > 0) || (wmType < $dataSystem.weaponTypes.length)) {
-            return wmType;
-        } else {
-            const subject = this.subject();
-            if (subject.isActor()) {
-                const weapons = subject.weapons();
-                if ((item.requiredWtypeId1 > 0)
-                        && weapons.some(w => w.wtypeId === item.requiredWtypeId1)) {
-                    return item.requiredWtypeId1;
-                } else if ((item.requiredWtypeId2 > 0)
-                        && weapons.some(w => w.wtypeId === item.requiredWtypeId2)) {
-                    return item.requiredWtypeId2;
-                } else if (weapons.length > 0) {
-                    return weapons[0].wtypeId;
-                } else {
-                    return bareHandsWmTypeId;
-                }
-            } else {
-                return bareHandsWmTypeId;
-            }
-        }
+        const subject = this.subject();
+        return subject.itemWmTypeId(item);
     };
 
     if (Game_Action.EFFECT_GAIN_WM_EXP) {
