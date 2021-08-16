@@ -65,10 +65,10 @@
     const maxReductionRate = Math.max(0, Number(parameters["maxReductionRate"]) || 0);
     const reductionRate = Math.max(0, Number(parameters["reductionRate"]) || 0);
 
-    PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-        // TODO : コマンドの処理。
-        // パラメータメンバは @argで指定した名前でアクセスできる。
-    });
+    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
+    //     // TODO : コマンドの処理。
+    //     // パラメータメンバは @argで指定した名前でアクセスできる。
+    // });
 
     //------------------------------------------------------------------------------
     // Game_Battler
