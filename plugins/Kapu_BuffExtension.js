@@ -8,7 +8,7 @@
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
  * @orderAfter Kapu_Base_ParamName
- * @base Kapu_base_Hit
+ * @base Kapu_Base_Hit
  * @orderAfter Kapu_Base_Hit
  * 
  * @param fixedBuffEffectCode
