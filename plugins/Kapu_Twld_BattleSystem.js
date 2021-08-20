@@ -743,6 +743,31 @@ function Sprite_BattleHudPicture() {
             }
         }
     };
+    /**
+     * ターゲット値を更新する。
+     * 
+     * @param {number} value 現在値
+     * @param {number} maxValue 最大値
+     */
+     Sprite_BattleHudHpGauge.prototype.updateTargetValue = function(value, maxValue) {
+        this._targetValue = value;
+        this._targetMaxValue = maxValue;
+        if (isNaN(this._value)) {
+            this._value = value;
+            this._maxValue = maxValue;
+            this.redraw();
+        }
+    };
+    /**
+     * アニメーションを開始する。
+     */
+    Sprite_BattleHudHpGauge.prototype.startAnimation = function() {
+        // ゲージアニメーションの更新は、_duration が0より大きい値にセットされているときだけである。
+        // ダメージポップアップ要求が出ているときだけ更新してみる。
+        this._duration = this.smoothness();
+    };
+
+
     //------------------------------------------------------------------------------
     // Sprite_BattleHudMpTpGauge
     Sprite_BattleHudMpTpGauge.prototype = Object.create(Sprite_Gauge.prototype);
@@ -1341,6 +1366,16 @@ function Sprite_BattleHudPicture() {
                 && BattleManager.isInputting();
     };
 
+    const _Sprite_Enemy_createDamageSprite = Sprite_Enemy.prototype.createDamageSprite;
+    /**
+     * ダメージスプライトを作成する。
+     */
+    Sprite_Enemy.prototype.createDamageSprite = function() {
+        _Sprite_Enemy_createDamageSprite.call(this);
+        if (this.isGaugeVisible()) {
+            this._hpGaugeSprite.startAnimation();
+        }
+    };
     //------------------------------------------------------------------------------
     // Sprite_BattleHudActor
     // アクター情報を表示するHUD。
@@ -1831,6 +1866,18 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudActor.prototype.damageOffsetY = function() {
         return ImageManager.faceHeight - this.statusAreaHeight() - 60;
+    };
+
+    const _Sprite_BattleHudActor_createDamageSprite = Sprite_BattleHudActor.prototype.createDamageSprite;
+    /**
+     * ダメージスプライトを構築する。
+     */
+    Sprite_BattleHudActor.prototype.createDamageSprite = function() {
+        _Sprite_BattleHudActor_createDamageSprite.call(this);
+
+        if (this._hpGaugeSprite.visible) {
+            this._hpGaugeSprite.startAnimation();
+        }
     };
     //------------------------------------------------------------------------------
     // DisplayBattlePictureFilter
