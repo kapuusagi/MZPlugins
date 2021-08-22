@@ -37,6 +37,9 @@
  *            特に減算処理をする必要はない。
  *     update: {function(void)}
  *            エンカウントエフェクトの更新処理。
+ *     end: {function(void)}
+ *            エンカウントエフェクトの終了処理
+ *            (リソースの開放などが必要な場合に使用する)
  *   }
  *   start, updateともに Scene_Mapからapply(this)で呼び出される。
  *   そのため、Scene_Mapのメンバとメソッドを使用/変更することができる。
@@ -121,13 +124,21 @@ function EncounterEffectManager() {
         }
     };
 
+    /**
+     * エンカウントエフェクトを完了する。
+     */
+    const _onEncountEffectEndDefault = function() {
+        /* do nohting */
+    };
+
     //------------------------------------------------------------------------------
     // EncounterEffectManager
     EncounterEffectManager.ENCOUNTEFFECT_DEFAULT = "default";
     EncounterEffectManager._encounterEffects = {};
     EncounterEffectManager._encounterEffects[EncounterEffectManager.ENCOUNTEFFECT_DEFAULT] = {
         start: _onEncountEffectStartDefault,
-        update: _onEncountEffectUpdateDefault
+        update: _onEncountEffectUpdateDefault,
+        end: _onEncountEffectEndDefault
     };
 
     /**
@@ -333,6 +344,9 @@ function EncounterEffectManager() {
         if (this._encounterEffectDuration > 0) {
             this._encounterEffectDuration--;
             effect.update.apply(this);
+            if ((this._encounterEffectDuration <= 0) && effect.end) {
+                effect.end.apply(this);
+            }
         }
     };
 

@@ -92,6 +92,16 @@
  * @type struct<SoundEffect>
  * @default {}
  * 
+ * @param seDurationChargeExp
+ * @text EXP充填SE鳴動間隔
+ * @desc EXP充填アニメーション時にならすSEとその間隔[フレーム数]
+ * @type number
+ * @default 10
+ * 
+ * @param seChargeExp
+ * @text EXP充填SE
+ * @desc EXP充填SE
+ * @type struct<SoundEffect>
  * 
  * @help 
  * 戦闘勝利時の勝利画面をTWLD向けに変更します。
@@ -190,10 +200,14 @@ function Window_BattleRewards() {
     const levelUpColor = parameters["levelUpColor"] || "#ffff80ff";
     const levelUpOutlineColor = parameters["levelUpOutlineColor"] || "#808000c8";
     const textLevelUp = parameters["textLevelUp"] || "Level UP!";
-    const soundLevelUp = JSON.parse(parameters["soundLevelUp"] || "{}") || null;
+    const soundLevelUp = JSON.parse(parameters["soundLevelUp"] || "{}") || {};
     const textExp = parameters["textExp"] || "Exp";
     const textGold = parameters["textGold"] || "Money";
     const textTreasures = parameters["textTreasures"] || "Treasures";
+
+    const seDurationChargeExp = Number(parameters["seDurationChargeExp"]) || 0;
+    const seChargeExp = JSON.parse(parameters["seChargeExp"] || "{}") || {};
+
 
     // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
     //     // TODO : コマンドの処理。
@@ -1000,6 +1014,7 @@ function Window_BattleRewards() {
         this._targetGold = this._currentGold;
         this._duration = 0;
         this._animationFrameCount = 0;
+        this._seCount = 0;
         this._updateWait = 0;
         this._rewards = null;
     };
@@ -1043,6 +1058,15 @@ function Window_BattleRewards() {
             if (this._updateWait > 0) {
                 this._updateWait--;
             } else if (this._duration > 0) {
+                // _duration > 0 の間、EXPゲージがアニメーションする。
+                this._seCount--;
+                if (this._seCount <= 0) {
+                    this._seCount = seDurationChargeExp;
+                    if(expChargeSe.name) {
+                        AudioManager.playSe(seChargeExp);
+                    }
+                }
+
                 // SoundManager.playCursor();
                 this._duration--;
                 this.refresh();
