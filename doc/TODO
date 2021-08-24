@@ -12,8 +12,6 @@
   ☐ Kapu_Base_Twld (必中/必ず回避判定メソッド名を変えた)
   ☐ Kapu_Trait_CertainlyHitEva (必中/必ず回避判定メソッド名を変えた)
   ☐ Kapu_Trait_BuffExtension (Kapu_Base_Hitでのメソッド名変更に対応)
-  Kapu_BattleMusicManager :
-    ☐ 不利戦闘時固定曲鳴らす＆有利戦闘時固定曲鳴らすを追加してみた。
   Kapu_Base_Twld:
     ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
       
@@ -35,12 +33,6 @@
     ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど。
   Kapu_Timer_Extend:
     ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
-  Kapu_Twld_WeaponMastery:
-    ☐ 素手時のウェポンマスタリー増加が発生しないので修正する。
-  Kapu_BattleMusicManager:
-    ☐ 急襲時、及び有利戦闘時に曲を変えるような機能を付けたい
-    ☐ 素手時のウェポンマスタリー増加が発生しないので修正する。⇒ 素手に対応するスキルのWMTypeが指定されていない。
-       
 
 
 リファクタリング:
