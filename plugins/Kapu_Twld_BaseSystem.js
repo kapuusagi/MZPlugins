@@ -346,7 +346,7 @@
     }
     const magicalElementIds = [];
     {
-        const ids = parseIds(parameters["magicalElementIds"]);
+        const ids = _parseIds(parameters["magicalElementIds"]);
         for (const id of ids) {
             if (!physicalElementIds.includes(id)) {
                 magicalElementIds.push(id);
@@ -600,7 +600,7 @@
          * @returns {number} 全体パラメータレート
          */
         Game_Actor.prototype.paramRateAll = function(paramId) {
-            return 1 + this.traitPi(Game_BattlerBase.TRAIT_PARAM_RATE_ALL, paramId);
+            return 1 + this.traitsPi(Game_BattlerBase.TRAIT_PARAM_RATE_ALL, paramId);
         };
     } else {
         /**
@@ -750,7 +750,7 @@
         const elementIds = this.elementIds();
         const phyElementIds = elementIds.filter(id => DataManager.isPhysicalElement(id));
         const magElementIds = elementIds.filter(id => DataManager.isMagicalElement(id));
-        const otherElementIds = elementIds.filter(id => !DataManager.isPhysicalElement(id) && DataManager.isMagicalElement(id));
+        const otherElementIds = elementIds.filter(id => !DataManager.isPhysicalElement(id) && !DataManager.isMagicalElement(id));
 
         const phyElementRate = this.elementsMaxRate(target, phyElementIds);
         const magElementRate = this.elementsMaxRate(target, magElementIds);
@@ -758,7 +758,7 @@
 
         const phyBaseDamageValue = (phyElementIds.length > 0) ? this.calcPhysicalDamageValue(target) : 0;
         const magBaseDamageValue = (magElementIds.length > 0) ? this.calcMagicalDamageValue(target) : 0;
-        const otherBaseDamageValue = ((elementIds.length == 0) || (otherElementIds.length > 0)) ?  this.calcOtherDamagevalue(target) : 0;
+        const otherBaseDamageValue = ((elementIds.length === 0) || (otherElementIds.length > 0)) ?  this.calcOtherDamageValue(target) : 0;
 
         const phyDamageValue = this.applyPhysicalDamageRate((phyBaseDamageValue * phyElementRate), target, critical);
         const magDamageValue = this.applyMagicalDamageRate((magBaseDamageValue * magElementRate), target, critical);
@@ -834,7 +834,7 @@
                 return this.calcMagicalDamageValue(target) * subElementDamageRate;
             } else {
                 // 10%とする。
-                return this.calcOtherDamagevalue(target) * subElementDamageRate;
+                return this.calcOtherDamageValue(target) * subElementDamageRate;
             }
         }
     };
@@ -858,7 +858,7 @@
             if (this.isPhysical()) {
                 return this.calcPhysicalDamageValue(target) * subElementDamageRate;
             } else {
-                return this.calcOtherDamagevalue(target) * subElementDamageRate;
+                return this.calcOtherDamageValue(target) * subElementDamageRate;
             }
         }
     };
@@ -869,7 +869,7 @@
      * @param {Game_Battler} target ターゲット
      * @returns {number} ダメージ値
      */
-    Game_Action.prototype.calcOtherDamagevalue = function(target) {
+    Game_Action.prototype.calcOtherDamageValue = function(target) {
         const item = this.item();
         if (item.meta.otherDamageFormula) {
             return this.evalDamageFormulaWithFormula(target, item.meta.otherDamageFormula);
@@ -880,7 +880,7 @@
             if (this.isPhysical()) {
                 return this.calcPhysicalDamageValue(target) * subElementDamageRate;
             } else if (this.isMagical()) {
-                return this.calcOtherDamagevalue(target) * subElementDamageRate;
+                return this.calcMagicalDamageValue(target) * subElementDamageRate;
             }
         }
     };
