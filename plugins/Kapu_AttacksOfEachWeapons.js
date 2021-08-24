@@ -323,7 +323,6 @@
      * @param {Game_BattlerBase} target 対象
      * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
      * @returns {number} ダメージ値
-     * !!!overwrite!!! Game_Action.makeDamageValue
      */
     Game_Action.prototype.makeDamageValue = function(target, critical) {
         const subject = this.subject();
