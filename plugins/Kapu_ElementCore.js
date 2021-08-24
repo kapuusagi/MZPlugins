@@ -49,6 +49,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.1.1.0 Game_Actionにて、複合属性ID配列を取得するメソッドを分離した。
  * Version.1.0.0 新規作成。
  */
 (() => {
@@ -100,6 +101,16 @@
      * !!!overwrite!!! Game_Action.calcElementRate
      */
     Game_Action.prototype.calcElementRate = function(target) {
+        const elements = this.elementIds();
+        return this.elementsMaxRate(target, elements);
+    };
+
+    /**
+     * このアクションの属性IDを得る。
+     * 
+     * @returns {Array<number>} 属性ID
+     */
+    Game_Action.prototype.elementIds = function() {
         const item = this.item();
         const elements = [];
         for (const elementId of item.damage.elementIds) {
@@ -110,7 +121,7 @@
                 elements.push(elementId);
             }
         }
-        return this.elementsMaxRate(target, elements);
+        return elements;
     };
 
     /**

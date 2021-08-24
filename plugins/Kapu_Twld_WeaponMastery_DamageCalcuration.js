@@ -3,8 +3,6 @@
  * @plugindesc ウェポンマスタリの攻撃力補正プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_Base_Twld
- * @orderAfter Kapu_Base_Twld
  * @base Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Base_DamageCalculation
  * @base Kapu_Base_Hit

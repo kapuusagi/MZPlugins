@@ -3,8 +3,8 @@
  * @plugindesc TWLD向けステータス画面UIプラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_Base_Twld
- * @orderAfter Kapu_Base_Twld
+ * @base Kapu_Twld_BaseSystem
+ * @orderAfter Kapu_Twld_BaseSystem
  * @orderAfter Kapu_UserSkillOrder
  * @base Kapu_Twld_WeaponMastery
  * @base Kapu_GrowupSystem

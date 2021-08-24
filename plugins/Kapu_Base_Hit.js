@@ -39,7 +39,7 @@
  * 変更履歴
  * ============================================
  * Version.0.2.0 Game_Action.isCertainHitというメソッドが既存にあるため、そちらをうまく使うように変更
- * Version.0.1.0 Trait_Certianly_HitEvaとTwld_Baseを実現するために作成。
+ * Version.0.1.0 Trait_Certianly_HitEvaとTwld_BaseSystemを実現するために作成。
  */
 (() => {
     const pluginName = "Kapu_Base_Hit";

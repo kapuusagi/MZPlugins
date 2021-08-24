@@ -34,6 +34,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.2.0 evalDamageFormulaをフックするのではなく、applyをフックするように変更した。
  * Version.0.1.0 新規作成。
  */
 (() => {
@@ -111,20 +112,20 @@
         this._subjectTp = subject.tp;
     };
 
-    const _Game_Action_evalDamageFormula = Game_Action.prototype.evalDamageFormula;
+    const _Game_Action_apply = Game_Action.prototype.apply;
     /**
-     * ダメージ計算をする。
-     * アクションに設定された計算式が不正な場合、結果は0になる。
+     * このアクションをtargetに適用する。
+     * 命中判定とダメージ算出、効果適用を行う。
      * 
      * @param {Game_BattlerBase} target 対象
-     * @returns {number} ダメージ値。
      */
-    Game_Action.prototype.evalDamageFormula = function(target) {
+    Game_Action.prototype.apply = function(target) {
         const subject = this.subject();
         subject.setJustHp(this._subjectHp);
         subject.setJustMp(this._subjectMp);
         subject.setJustTp(this._subjectTp);
-        return _Game_Action_evalDamageFormula.call(this, target);
+        _Game_Action_apply.call(this, target);
     };
+
 
 })();
