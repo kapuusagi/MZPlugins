@@ -194,6 +194,7 @@
     // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.itemCorrectSuccessRate = function(target) {
         let rate = _Game_Action_itemCorrectSuccessRate.call(this, target);
+        const item = this.item();
         if (DataManager.isSkill(item)) {
             const wmTypeId = this.itemWmTypeId(item);
             const subject = this.subject();
