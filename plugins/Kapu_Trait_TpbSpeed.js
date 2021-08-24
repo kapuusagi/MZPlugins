@@ -7,7 +7,7 @@
  * @orderAfter Kapu_Utility
  * @orderAfter Kapu_Base_ParamName
  * @orderAfter Kapu_Base_Tpb
- * @orderAfter Kapu_Base_Twld
+ * @orderAfter Kapu_Twld_BaseSystem
  * 
  * @param traitXParamDid
  * @text TPB速度倍率-特性ID

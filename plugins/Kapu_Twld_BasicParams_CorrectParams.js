@@ -3,8 +3,8 @@
  * @plugindesc TWLD向け基本パラメータによるパラメータ補正適用プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base Kapu_Base_Twld
- * @orderAfter Kapu_Base_Twld
+ * @base Kapu_Twld_BaseSystem
+ * @orderAfter Kapu_Twld_BaseSystem
  * @base Kapu_Twld_BasicParams
  * @orderAfter Kapu_Twld_BasicParams
  * 
