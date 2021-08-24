@@ -9,6 +9,8 @@
  * @orderAfter Kapu_Base_Params
  * @base Kapu_Base_Tpb
  * @orderAfter Kapu_Base_Tpb
+ * @base Kapu_ElementCore
+ * @orderAfter Kapu_ElementCore
  * @orderAfter Kapu_Base_Hit
  * @orderAfter Kapu_Base_DamageCalculation
  * 
@@ -197,6 +199,24 @@
  * @type string
  * @default #FFFFFF
  * 
+ * @param physicalElementIds
+ * @text 物理属性ID
+ * @desc 物理属性として扱う属性のID
+ * @type number[]
+ * @default [1,2,3]
+ * 
+ * @param magicalElementIds
+ * @text 魔法属性ID
+ * @desc 魔法属性として扱う属性のID
+ * @type number[]
+ * @default [4,5,6,7,8,9]
+ * 
+ * @param subElementDamageRate
+ * @text 補助属性ダメージレート
+ * @desc 主属性じゃない場合のダメージ計算に使用する補正係数。
+ * @type number
+ * @decimals 2
+ * @default 0.50
  * 
  * @help 
  * ベーシックシステムのTWLD向け変更を行うプラグインです。
@@ -220,6 +240,9 @@
  *    ターゲット毎に加算されていた。
  *    TWLDではアクションを行った際に、無条件でスキル毎に設定した値を
  *    加算するように変更した。
+ * 
+ * 6. ダメージ計算の変更
+ *    物理属性、魔法属性、その他属性のそれぞれに対して計算し、PDR,MDRを適用するように変更する。
  * 
  * ■ 使用時の注意
  * なし。
@@ -292,6 +315,45 @@
     const colorTpDead = parameters["colorTpDead"] || "#646464";
     const colorTpFull = parameters["colorTpFull"] || "#80FF80";
     const colorTpNormal = parameters["colorTpNormal"] || "#FFFFFF";
+
+    const _parseIds = function(str) {
+        try {
+            if (str) {
+                const ids = [];
+                const numbers = JSON.parse(str).map(token => Number(token) || 0);
+                for (const n of numbers) {
+                    if (!ids.includes(n)) {
+                        ids.push(n);
+                    }
+                }
+                return ids;
+            } else {
+                return [];
+            }
+        }
+        catch (e) {
+            console.error("parseIds() : " + e);
+        }
+
+    };
+
+    const physicalElementIds = [];
+    {
+        const ids = _parseIds(parameters["physicalElementIds"]);
+        for (const id of ids) {
+            physicalElementIds.push(id);
+        }
+    }
+    const magicalElementIds = [];
+    {
+        const ids = parseIds(parameters["magicalElementIds"]);
+        for (const id of ids) {
+            if (!physicalElementIds.includes(id)) {
+                magicalElementIds.push(id);
+            }
+        }
+    }
+    const subElementDamageRate = Number(parameters["subElementDamageRate"]) || 0.50;
     //------------------------------------------------------------------------------
     // DataManager
     if (Game_BattlerBase.TRAIT_PARAM_RATE_ALL) {
@@ -335,6 +397,26 @@
         DataManager.addNotetagParserArmors(_processNoteTag);
         DataManager.addNotetagParserStates(_processNoteTag);
     }
+
+    /**
+     * 物理属性かどうかを得る。
+     * 
+     * @param {number} elementId 属性ID
+     * @returns {boolean} 物理属性の場合にはtrue, それ以外はfalse.
+     */
+    DataManager.isPhysicalElement = function(elementId) {
+        return physicalElementIds.includes(elementId);
+    };
+
+    /**
+     * 魔法属性かどうかを得る。
+     * 
+     * @param {number} elementId 属性ID
+     * @returns {boolean} 魔法属性の場合にはtrue, それ以外はfalse.
+     */
+    DataManager.isMagicalElement = function(elementId) {
+        return magicalElementIds.includes(elementId);
+    };
 
     //------------------------------------------------------------------------------
     // ColorManager
@@ -646,6 +728,164 @@
             result.critical = false;
         }
     };
+
+    /**
+     * ダメージ値を計算する。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} ダメージ値
+     * !!!overwrite!!! Game_Action.makeDamageValue
+     *     PDR,MDRと属性レートの計算変更のため、オーバーライドする
+     */
+    Game_Action.prototype.makeDamageValue = function(target, critical) {
+        const result = target.result();
+        const subjectAddtionalTraits = this.additionalSubjectTraits(target);
+        const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
+        this.subject().setTempTraits(subjectAddtionalTraits);
+        target.setTempTraits(targetAdditionalTraits);
+
+        const item = this.item();
+
+        const elementIds = this.elementIds();
+        const phyElementIds = elementIds.filter(id => DataManager.isPhysicalElement(id));
+        const magElementIds = elementIds.filter(id => DataManager.isMagicalElement(id));
+        const otherElementIds = elementIds.filter(id => !DataManager.isPhysicalElement(id) && DataManager.isMagicalElement(id));
+
+        const phyElementRate = this.elementsMaxRate(target, phyElementIds);
+        const magElementRate = this.elementsMaxRate(target, magElementIds);
+        const otherElementRate = this.elementsMaxRate(target, otherElementIds);
+
+        const phyBaseDamageValue = (phyElementIds.length > 0) ? this.calcPhysicalDamageValue(target) : 0;
+        const magBaseDamageValue = (magElementIds.length > 0) ? this.calcMagicalDamageValue(target) : 0;
+        const otherBaseDamageValue = ((elementIds.length == 0) || (otherElementIds.length > 0)) ?  this.calcOtherDamagevalue(target) : 0;
+
+        const phyDamageValue = this.applyPhysicalDamageRate((phyBaseDamageValue * phyElementRate), target, critical);
+        const magDamageValue = this.applyMagicalDamageRate((magBaseDamageValue * magElementRate), target, critical);
+        const otherDamageValue = otherBaseDamageValue * otherElementRate;               
+        
+        const pureDamageValue = phyDamageValue + magDamageValue + otherDamageValue;
+        let value = phyDamageValue + magDamageValue + otherDamageValue;
+        result.elementRate = (pureDamageValue !== 0) ? (value / pureDamageValue) : 1;
+        value = this.applyDamageRate(value, target, critical);
+        value = this.applyRecoveryRate(value, target);
+        if (critical) {
+            value = this.applyCritical(value);
+        }
+        value = this.applyVariance(value, item.damage.variance);
+        value = this.applyGuard(value, target);
+        value = Math.round(value);
+
+        target.clearTempTraits();
+        this.subject().clearTempTraits();
+        const maxDamage = this.maxDamage(target);
+        return value.clamp(-maxDamage, maxDamage)
+    };
+
+    /**
+     * 乗算ボーナスを得る。
+     * 
+     * @param {number} value 基本ダメージ値
+     * @param {Game_Battler} target ターゲット。
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} 乗算ボーナス適用後の値
+     * !!!overwrite!!! Game_Action.applyDamageRate()
+     *     PDR, MDRは物理属性分ダメージ、魔法属性分ダメージに対してかけるようにするため、オーバーライドする。
+     */
+    Game_Action.prototype.applyDamageRate = function(value, target, critical) {
+        return value * this.multiplyDamageRate(target, critical);
+    };    
+
+    /**
+     * 式を評価してダメージを計算する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {string} formula 計算式
+     */
+    Game_Action.prototype.evalDamageFormulaWithFormula = function(target, formula) {
+        try {
+            const item = this.item();
+            const a = this.subject(); // eslint-disable-line no-unused-vars
+            const b = target; // eslint-disable-line no-unused-vars
+            const v = $gameVariables._data; // eslint-disable-line no-unused-vars
+            const sign = [3, 4].includes(item.damage.type) ? -1 : 1;
+            const value = Math.max(eval(formula), 0) * sign;
+            return isNaN(value) ? 0 : value;
+        } catch (e) {
+            return 0;
+        }
+    };
+
+    /**
+     * 物理属性ダメージを計算する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @returns {number} ダメージ値
+     */
+    Game_Action.prototype.calcPhysicalDamageValue = function(target) {
+        const item = this.item();
+        if (item.meta.physicalDamageFormula) {
+            return this.evalDamageFormulaWithFormula(target, item.meta.physicalDamageFormula);
+        } else if (this.isPhysical()) {
+            return this.evalDamageFormula(target);
+        } else {
+            // 補助攻撃属性の計算式が与えられていない。
+            if (this.isMagical()) {
+                return this.calcMagicalDamageValue(target) * subElementDamageRate;
+            } else {
+                // 10%とする。
+                return this.calcOtherDamagevalue(target) * subElementDamageRate;
+            }
+        }
+    };
+
+
+
+    /**
+     * 魔法属性ダメージを計算する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @returns {number} ダメージ値
+     */
+    Game_Action.prototype.calcMagicalDamageValue = function(target) {
+        const item = this.item();
+        if (item.meta.magicalDamageFormula) {
+            return this.evalDamageFormulaWithFormula(target, item.meta.magicalDamageFormula);
+        } else if (this.isMagical()) {
+            return this.evalDamageFormula(target);
+        } else {
+            // 補助攻撃属性の計算式が与えられていない。 -> 他属性での計算式を適用し、係数をかける
+            if (this.isPhysical()) {
+                return this.calcPhysicalDamageValue(target) * subElementDamageRate;
+            } else {
+                return this.calcOtherDamagevalue(target) * subElementDamageRate;
+            }
+        }
+    };
+
+    /**
+     * その他の属性ダメージを計算する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @returns {number} ダメージ値
+     */
+    Game_Action.prototype.calcOtherDamagevalue = function(target) {
+        const item = this.item();
+        if (item.meta.otherDamageFormula) {
+            return this.evalDamageFormulaWithFormula(target, item.meta.otherDamageFormula);
+        } else if (!this.isPhysical() && !this.isMagical()) {
+            return this.evalDamageFormula(target);
+        } else {
+            // 補助攻撃属性の計算式が与えられていない。 -> 他属性での計算式を適用し、係数をかける
+            if (this.isPhysical()) {
+                return this.calcPhysicalDamageValue(target) * subElementDamageRate;
+            } else if (this.isMagical()) {
+                return this.calcOtherDamagevalue(target) * subElementDamageRate;
+            }
+        }
+    };
+
+
     /**
      * 回復レートを得る。
      * 
