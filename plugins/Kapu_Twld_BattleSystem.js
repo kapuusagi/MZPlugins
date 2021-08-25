@@ -644,6 +644,17 @@ function Sprite_BattleHudPicture() {
     };
 
     /**
+     * このSprite_Gaugeが表示するステータスをセットアップする。
+     * 
+     * @param {Game_Battler} battler Game_Battlerオブジェクト
+     * @param {string} statusType 表示するステータスタイプ。(既定の実装では'hp', 'mp', 'tp', 'time'のいずれか)
+     */
+    Sprite_BattleHudHpGauge.prototype.setup = function(battler, statusType) {
+        Sprite_Gauge.prototype.setup.call(this, battler, statusType);
+        this.startAnimation();
+    };
+
+    /**
      * 値を描画するかどうかを設定する。
      * 
      * @param {boolean} isDraw 値を描画するかどうか
@@ -756,6 +767,8 @@ function Sprite_BattleHudPicture() {
             this._value = value;
             this._maxValue = maxValue;
             this.redraw();
+        } else {
+            this._duration = this.smoothness();
         }
     };
     /**
