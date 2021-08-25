@@ -1,6 +1,6 @@
 /*:ja
  * @target MZ 
- * @plugindesc hogehoge
+ * @plugindesc ウェポンマスタリのスキルコスト反映プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Twld_WeaponMastery
@@ -10,6 +10,11 @@
  * 
  * 
  * @help 
+ * ウェポンマスタリをスキルコストに反映させるプラグイン。
+ * スキル使用時のHP/MP/TPコストを
+ *     ウェポンマスタリレベル x コスト削減レート
+ * だけ削減します。
+ * 削減量はノートタグにて指定します。
  * 
  * ■ 使用時の注意
  * 

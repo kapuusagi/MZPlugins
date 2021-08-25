@@ -1062,7 +1062,7 @@ function Window_BattleRewards() {
                 this._seCount--;
                 if (this._seCount <= 0) {
                     this._seCount = seDurationChargeExp;
-                    if(expChargeSe.name) {
+                    if(seChargeExp.name) {
                         AudioManager.playSe(seChargeExp);
                     }
                 }

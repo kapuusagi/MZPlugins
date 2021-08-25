@@ -26,8 +26,14 @@
  * 
  * 
  * @help 
- * ウェポンマスタリのレベルが上がる毎に、キャストタイムを短縮する機能を提供する。
- * 
+ * ウェポンマスタリのレベルが上がる毎に、キャストタイムを短縮する機能を提供します。
+ * スキルのキャストタイムを
+ *     ウェポンマスタリーレベル x 削減レート
+ * だけ削減します。
+ * 但し、最大削減量を超えて削減されることはありません。
+ * 削減量は、スキル個別指定（ノートタグ）とデフォルト指定（プラグインパラメータ）の
+ * 2つで指定できます。
+ * ノートタグが指定されている場合には、そちらが優先されます。
  * 
  * ■ 使用時の注意
  * 
@@ -59,10 +65,10 @@
     const maxReductionRate = Math.max(0, Number(parameters["maxReductionRate"]) || 0);
     const reductionRate = Math.max(0, Number(parameters["reductionRate"]) || 0);
 
-    PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-        // TODO : コマンドの処理。
-        // パラメータメンバは @argで指定した名前でアクセスできる。
-    });
+    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
+    //     // TODO : コマンドの処理。
+    //     // パラメータメンバは @argで指定した名前でアクセスできる。
+    // });
 
     //------------------------------------------------------------------------------
     // Game_Battler

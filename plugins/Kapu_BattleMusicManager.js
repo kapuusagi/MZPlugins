@@ -87,7 +87,7 @@
  * @text 戦闘BGM（有利）
  * @desc 戦闘BGM未指定時、有利状態で演奏する戦闘BGM初期値。
  * @type struct<BgmEntry>
- * @default {"name"="","volume"="100","pitch"="90","pan"="100"}
+ * @default {"name":"","volume":"90","pitch":"100","pan":"0"}
  * 
  * @param useBattleBgmSurprise
  * @text 不利な状態の戦闘BGMを指定する
@@ -98,7 +98,7 @@
  * @text 戦闘BGM（不利）
  * @desc 戦闘BGM未指定時、不利状態で演奏する戦闘BGM初期値。
  * @type struct<BgmEntry>
- * @default {"name"="","volume"="100","pitch"="90","pan"="100"}
+ * @default {"name"="","volume"="100","pitch"="90","pan"="0"}
  * @parent useBattleBgmSurprise
  * 
  * @help 
@@ -171,24 +171,35 @@
     const randomizeBattleBgm = (parameters["randomizeBattleBgm"] === undefined)
             ? false : (parameters["randomizeBattleBgm"] === "true");
 
+    const _fixBattleBgmObject = function(obj) {
+        if (obj) {
+            if (!obj.name) {
+                obj.name = "";
+            }
+            obj.volume = (Number(obj.volume) || 90).clamp(0, 100);
+            obj.pitch = (Number(obj.pitch) || 100).clamp(50, 150);
+            obj.pan = (Number(obj.pan) || 0).clamp(-100, 100);
+        }
+    };
+
     const useBattleBgmPreemptive = (parameters["useBattleBgmPreemptive"] === undefined)
             ? false : (parameters["useBattleBgmPreemptive"] === "true");
     const battleBgmPreemptive = JSON.parse(parameters["battleBgmPreemptive"]);
+    _fixBattleBgmObject(battleBgmPreemptive);
 
     const useBattleBgmSurprise = (parameters["useBattleBgmSurprise"] === undefined)
             ? false : (parameters["useBattleBgmSurprise"] === "true");
     const battleBgmSurprise = (parameters["battleBgmSurprise"])
             ? JSON.parse(parameters["battleBgmSurprise"])
             : { name:"", volume:100, pitch:90, pan:100 };
+    _fixBattleBgmObject(battleBgmSurprise);
 
     const battleBgms = [];
     try {
         const entries = JSON.parse(parameters["battleBgms"]).map(str => JSON.parse(str));
         for (const entry of entries) {
             if (entry.name) {
-                entry.volume = (Number(entry.volume) || 90).clamp(0, 100);
-                entry.pitch = (Number(entry.pitch) || 100).clamp(50, 150);
-                entry.pan = (Number(entry.pan) || 0).clamp(-100, 100);
+                _fixBattleBgmObject(entry);
                 battleBgms.push(entry);
             }
         }
@@ -400,9 +411,9 @@
         if (BattleManager.isPreemptive() &&  this._battleBgmPreemptive) {
             // 有利戦闘で曲設定あり。
             return this._battleBgmPreemptive;
-        } else if (BattleManager.isSurprise() && this._useBattleBgmSurprise) {
+        } else if (BattleManager.isSurprise() && this._battleBgmSurprise) {
             // 不利戦闘で曲設定有り
-            return this._useBattleBgmSurprise;
+            return this._battleBgmSurprise;
         } else if (this._nextBattleBgm) {
             return this._nextBattleBgm;
         } else {

@@ -19,9 +19,9 @@
  * @option 有利確定
  * @value preemptive
  * @option 不利確定
- * @option surprise
+ * @value surprise
  * @option ランダム
- * @option random
+ * @value random
  * 
  * @arg additionalRewardItems
  * @text 追加の報酬
@@ -216,6 +216,15 @@
      */
     Game_Temp.prototype.clearNextBattleSettings = function() {
         this._nextBattlePreemptiveMode = "none";
+    };
+
+    /**
+     * 次の戦闘の有利/不利モードを設定する。
+     * 
+     * @param {string} mode 動作モード
+     */
+    Game_Temp.prototype.setNextBattlePreemptiveMode = function(mode) {
+        this._nextBattlePreemptiveMode = mode;
     };
 
 

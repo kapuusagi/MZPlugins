@@ -6,19 +6,18 @@
   ☐ Kapu_Base_Tpb（リファクタリング後がいいかも）
   ☐ Kapu_TpbEffects（リファクタリング後がいいかも/ステート・デバフ成功率拡張メソッドを用意した）
   ☐ Kapu_Trait_CastTime（リファクタリング後がいいかも）
-  ☐ Kapu_BattleMusicManager
   ☐ Kapu_EncounterEffectManager
   ☐ Kapu_GrowupSystem_Skills (レベルアップでのGP習得可能スキル追加)
   ☐ Kapu_Base_Hit (必中/必ず回避判定メソッド名を変えた/ステート・デバフ成功率拡張メソッドを用意した)
   ☐ Kapu_Base_Twld (必中/必ず回避判定メソッド名を変えた)
   ☐ Kapu_Trait_CertainlyHitEva (必中/必ず回避判定メソッド名を変えた)
   ☐ Kapu_Trait_BuffExtension (Kapu_Base_Hitでのメソッド名変更に対応)
-  Kapu_BattleMusicManager :
-    ☐ 不利戦闘時固定曲鳴らす＆有利戦闘時固定曲鳴らすを追加してみた。
   Kapu_Base_Twld:
     ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
       
 機能拡張予定:
+  Kapu_Twld_DamageEffect:
+    ☐ ターン経過などによるステート解除をポップアップさせたいなあ。
   Kapu_Twld_BattleSystem:
     ☐ MP/TPの数値表示が小さいので大きくする。動作確認は顔表示とBattlePicutreの両方で行う必要がある。
   Kapu_ChoiceByRoulette:
@@ -34,9 +33,6 @@
     ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど。
   Kapu_Timer_Extend:
     ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
-  Kapu_Twld_WeaponMastery:
-    ☐ 素手時のウェポンマスタリー増加が発生しないので修正する。⇒ 素手に対応するスキルのWMTypeが指定されていない。
-       
 
 
 リファクタリング:
@@ -53,6 +49,7 @@
   ☐ アイテム取得時に簡易ポップアップさせるようにしたい。
   ☐ パーティーにステートを与えたい。たいまつ使用とかね。
   ☐ 設置スキルやりたい。
+  ☐ Kapu_CharaMakeで名前入力orプロフィールのどちらかが原因で、カーソルが効かない。
 
 
   
