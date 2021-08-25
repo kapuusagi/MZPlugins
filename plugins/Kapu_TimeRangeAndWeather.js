@@ -95,6 +95,11 @@
  * @type number
  * @default 120
  * 
+ * @param debugEnable
+ * @text デバッグ出力
+ * @desc デバッグ出力を行う。
+ * @type boolean
+ * @default false
  * 
  * @param morning
  * @text 朝データ
@@ -449,6 +454,8 @@ $dataWeathers = [];
     Game_Map.WEATHER_SNOW = 4; // 雪(天候エフェクト"snow"")
 
     const parameters = PluginManager.parameters(pluginName);
+    const debugEnable = (parameters["debugEnable"] === undefined)
+            ? false : (parameters["debugEnable"] === "true");
     const storeTimeRangeVariableId = Number(parameters["storeTimeRangeVariableId"]) || 0;
     const storeWeatherVariableId = Number(parameters["storeWeatherVariableId"]) || 0;
     const storeWeatherPowerVariableId = Number(parameters["storeWeatherPowerVariableId"]) || 0;
@@ -729,7 +736,9 @@ $dataWeathers = [];
     Game_Map.prototype.changeTimeRange = function(timeRange, duration) {
         if ($dataTimeRanges[timeRange]) {
             if (this._timeRange !== timeRange) {
-                console.log("change time range : " + timeRange);
+                if (debugEnable) {
+                    console.log("change time range : " + timeRange);
+                }
                 this.onTimeRangeLeave()
                 this._timeRange = timeRange;
                 this.onTimeRangeEnter();
@@ -743,6 +752,9 @@ $dataWeathers = [];
      * 時間帯が変更されたときの処理を行う。
      */
     Game_Map.prototype.onTimeRangeChanged = function() {
+        for (const member of $gameParty.allMembers()) {
+            member.refresh();
+        }
         if (timeRangeChangeCommonEventId > 0) {
             $gameTemp.reserveCommonEvent(timeRangeChangeCommonEventId);
         }
@@ -770,7 +782,9 @@ $dataWeathers = [];
                 power = 1;
             }
             if ((this._weather !== weather) || (this._weatherPower !== power)) {
-                console.log("change weather : " + weather + " power=" + power);
+                if (debugEnable) {
+                    console.log("change weather : " + weather + " power=" + power);
+                }
                 this.onWeatherLeave();
                 this._weather = weather;
                 this._weatherPower = power;
@@ -785,6 +799,9 @@ $dataWeathers = [];
      * 天候が変わったときの処理を行う。
      */
     Game_Map.prototype.onWeatherChanged = function() {
+        for (const member of $gameParty.allMembers()) {
+            member.refresh();
+        }
         if (weatherChangeCommonEventId > 0) {
             $gameTemp.reserveCommonEvent(weatherChangeCommonEventId);
         }
