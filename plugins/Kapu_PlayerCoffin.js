@@ -162,7 +162,7 @@
      * @return {string} 歩行グラフィックファイル名
      */
     Game_Actor.prototype.characterName = function() {
-        if (this.isDead() && this.coffinCharacterName()) {
+        if (this.isDead() && this._coffinCharacterName) {
             return this._coffinCharacterName;
         } else {
             return _Game_Actor_characterName.call(this);
@@ -176,7 +176,7 @@
      * @return {number} 歩行グラフィックのインデックス番号。
      */
     Game_Actor.prototype.characterIndex = function() {
-        if (this.isDead() && this.coffinCharacterName()) {
+        if (this.isDead() && this._coffinCharacterName) {
             return this._coffinCharacterIndex;
         } else {
             return _Game_Actor_characterIndex.call(this);
@@ -193,9 +193,6 @@
         this._coffinCharacterName = characterName;
         this._coffinCharacterIndex = characterIndex;
     };
-
-    // キャラクターグラフィックは
-    // Game_Player/Game_Flowerが参照している
 
     const _Game_Actor_die =  Game_Actor.prototype.die;
     /**
@@ -229,17 +226,19 @@
         }
     };
 
-    const _Game_Actor_clearStates = Game_Actor.prototype.clearStates;
+
+    const _Game_Actor_recoverAll = Game_Actor.prototype.recoverAll;
     /**
-     * ステートを全てクリアする。
+     * 全状態を回復させる。
      */
-    Game_Actor.prototype.clearStates = function() {
+    Game_Actor.prototype.recoverAll = function() {
         const prevCanMove = this.canMove();
-        _Game_Actor_clearStates.call(this, stateId);
+        _Game_Actor_recoverAll.call(this);
         if (prevCanMove !== this.canMove()) {
             $gamePlayer.refresh(); // 動く状態が変わったので表示キャラクターを更新するため、refresh()をコールする。
         }
     };
+
 
     const _Game_Actor_eraseState = Game_Actor.prototype.eraseState;
     /**
@@ -370,7 +369,9 @@
     Game_Follower.prototype.refresh = function() {
         _Game_Follower_refresh.call(this);
         const actor = this.actor();
-        this._canWalkAnim = actor.canMove();
+        if (actor) {
+            this._canWalkAnim = actor.canMove();
+        }
     };
 
     const _Game_Follower_updatePattern = Game_Follower.prototype.updatePattern;
