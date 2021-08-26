@@ -598,6 +598,7 @@ function Simple_TextInput() {
      */
     Window_NameInput.prototype.deactivate = function() {
         Window_Selectable.prototype.deactivate.call(this);
+        Input.form_mode = false;
     };
 
     /**
