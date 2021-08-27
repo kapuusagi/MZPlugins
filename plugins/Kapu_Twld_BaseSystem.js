@@ -280,6 +280,12 @@
  *   <rateLUK:rate%>
  *     装備品も含めて割合上昇させる特性を追加する。乗算で合成されるため、100が基準値。
  * 
+ * ステート
+ *   <displayMapOnly>
+ *     マップでのみステートアイコンを表示する。
+ *   <displayBattleOnly>
+ *     戦闘中のみステートアイコンを表示する。
+ * 
  * ============================================
  * 変更履歴
  * ============================================
@@ -473,6 +479,29 @@
             return colorTpFull;
         } else {
             return colorTpNormal;
+        }
+    };
+
+
+    //------------------------------------------------------------------------------
+    // Game_BattlerBase
+    /**
+     * ステートのアイコンIDを得る。
+     * 
+     * @return {Array<Number>} ステートのアイコンID配列
+     */
+    Game_BattlerBase.prototype.stateIcons = function() {
+        if ($gameParty.inBattle()) {
+                return this.states()
+                .filter(state => !state.meta.displayMapOnly)
+                .map(state => state.iconIndex)
+                .filter(iconIndex => iconIndex > 0);
+            } else {
+                return this.states()
+                .filter(state => state.meta.displayBattleOnly)
+                .map(state => state.iconIndex)
+                .filter(iconIndex => iconIndex > 0);
+            }
         }
     };
     //------------------------------------------------------------------------------
