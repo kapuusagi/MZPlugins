@@ -80,6 +80,26 @@
  * @decimals 0.5
  * @default 1.0
  * 
+ * @param playerPositionOffsetY
+ * @text プレイヤー表示オフセットY
+ * @desc プレイヤー位置に表示する場合の垂直オフセット
+ * @type number
+ * @default 120
+ * 
+ * @param backgroundOpacity
+ * @text 背景透過度
+ * @desc 透明(0)-不透明(255)で指定する。
+ * @type number
+ * @min 0
+ * @max 255
+ * @default 128
+ * 
+ * @param frameVisible
+ * @text フレームを表示する
+ * @desc フレームを表示する
+ * @type boolean
+ * @default true
+ * 
  * @help 
  * マップ上で所定の位置に、①行のメッセージウィンドウをポップアップさせるプラグインです。
  * ちょっとしたアイテムの入手などでの使用を想定します。
@@ -119,9 +139,13 @@ function Window_QuickPopupMessage() {
     const displayDuration = Math.max(0, (Number(parameters["displayDuration"]) || 0));
     const fadeOutDuration = Math.max(0, (Number(parameters["fadeOutDuration"]) || 0));
     const popupTotalDuration = fadeInDuration + displayDuration + fadeOutDuration;
+    const playerPositionOffsetY = Number(parameters["playerPositionOffsetY"]) || 0;
 
     // const speedX = Math.max(0, (Number(parameters["speedX"]) || 0));
     const speedY = Math.max(0, (Number(parameters["speedY"]) || 0));
+    const backgroundOpacity = (Number(parameters["backgroundOpacity"]) || 0).clamp(0, 255);
+    const frameVisible = (parameters["frameVisible"] === undefined)
+            ? true : (parameters["frameVisible"] === "true");
 
     PluginManager.registerCommand(pluginName, "popupMessage", args => {
         const text = args.text;
@@ -178,13 +202,13 @@ function Window_QuickPopupMessage() {
         this._messageEntry = messageEntry;
         const rect = new Rectangle(0, 0, Graphics.boxWidth, height);
         Window_Base.prototype.initialize.call(this, rect);
-        const width = this.textWidth(text) + 32;
+        const width = this.textWidth(messageEntry.text) + 32;
         let initialX = 0;
         let initialY = 0;
         switch (messageEntry.position) {
             case "player":
-                initialX = $gamePlayer.x;
-                initialY = $gamePlayer.y;
+                initialX = $gamePlayer.screenX() - (width / 2);
+                initialY = $gamePlayer.screenY() - playerPositionOffsetY;
                 break;
             case "left":
                 initialX = 0;
@@ -217,7 +241,8 @@ function Window_QuickPopupMessage() {
         this._initialY = initialY;
         this._duration = 0;
 
-        this.frameVisible = false; // フレーム無し
+        this.frameVisible = frameVisible; 
+        this.backOpacity = backgroundOpacity; // 背景色
         this.opacity = 0; // 非表示
         this.visible = true;
         this.active = false;
@@ -231,7 +256,7 @@ function Window_QuickPopupMessage() {
     Window_QuickPopupMessage.prototype.refresh = function() {
         const rect = this.baseTextRect();
         this.contents.clear();
-        this.drawTextEx(this._text, rect.x, rect.y, rect.width);
+        this.drawTextEx(this._messageEntry.text, rect.x, rect.y, rect.width);
     };
 
     /**
