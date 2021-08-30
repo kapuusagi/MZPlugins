@@ -33,6 +33,14 @@
  * コアプラグインの競合で実現できなかったりとかねぇ...。
  * 
  * ■ プラグイン開発者向け
+ * Game_Action.isElementRateApplicable(target:Game_Battler) : boolean
+ * Game_Action.isDamageRateApplicable(target:Game_Battler) : boolean
+ * Game_Action.isRecoveryRateApplicable(target:Game_Battler) : boolean
+ * Game_Action.isCriticalApplicable(target:Game_Battler) : boolean
+ * Game_Action.isVarianceApplicable(target:Game_Battler) : boolean
+ * Game_Action.isGuardApplicable(target:Game_Battler) : booolean
+ *     それぞれ、属性レート/ダメージレート/リカバリーレート/クリティカル/ばｒつき/ガードを適用するかどうかを判定する。
+ *     スキルのダメージ計算で、余計な倍率補正をかけたくない場合にフックする。
  * Game_Action.calcBaseDamageValue(target:Game_Battler) : number
  *     アイテム/スキルを元にダメージ計算する。
  *     evalDamageFormulaは設定された式を元に計算するものなので、
@@ -42,10 +50,10 @@
  *     ダメージ倍率の処理を行う。
  *     プラグインで定義されたTraitで、
  *     ダメージ倍率に変更を与えたい場合にフックすることを想定します。
- * Game_Action.prototype.additionalSubjectTraits(target:Game_Battler) : Array<Taraits>
+ * Game_Action.additionalSubjectTraits(target:Game_Battler) : Array<Taraits>
  *     ダメージ計算時、使用者に一時的に付与する特性を返す。
  *     使用者に相手の攻撃力を自動で減衰させるような特性を持たせる場合に使用する。
- * Game_Action.prototype.additionalTargetTraits(target:Game_Battler, critical:Boolean) : Array<Traits>
+ * Game_Action.additionalTargetTraits(target:Game_Battler, critical:Boolean) : Array<Traits>
  *     ダメージ計算時、対象に一時的に付与する特性を返す。
  *     使用者に相手の防御力を自動で減衰させるような特性を持たせる場合に使用する。
  * Game_Action.multiplyDamageRate(target:Game_Battler, critical:Boolean) : number
@@ -85,6 +93,8 @@
  * 変更履歴
  * ============================================
  * Version.0.5.0 Game_ActionResultに属性レートを設定するようにした。
+ *               属性･倍率・リカバリーレート・クリティカル・ばらつき・ガードの演算を適用するかどうかを
+ *               拡張できるようにした。
  * Version.0.4.0 デバッグ用にログにデータを出力するようにした。
  *               calcBaseDamageValueメソッドを用意した。
  * Version.0.3.0 最大ダメージをmaxDamageメソッドで制限できるようにした。
@@ -182,27 +192,39 @@
 
             const item = this.item();
             const baseValue = this.calcBaseDamageValue(target);
-            const elementRate = this.calcElementRate(target);
-            result.elementRate = elementRate;
-            let value = baseValue * elementRate;
-
+            let value = baseValue;
             console.log(this.subject().name() + " --(" + item.name + ")--> " + target.name());
             console.log("  eval:" + item.damage.formula + "=" + baseValue);
-            console.log("  elementRate:" + elementRate);
+            if (this.isElementRateApplicable(target)) {
+                value = value * elementRate;
+                const elementRate = this.calcElementRate(target);
+                result.elementRate = elementRate;
+                    console.log("  elementRate:" + elementRate);
+            } else {
+                result.elementRate = 1;
+            }
 
-            value = this.applyDamageRate(value, target, critical);
-            console.log("  -> applyDamageRate() = " + value);
+            if (this.isDamageRateApplicable(target)) {
+                value = this.applyDamageRate(value, target, critical);
+                console.log("  -> applyDamageRate() = " + value);
+            }
 
-            value = this.applyRecoveryRate(value, target);
-            console.log("  -> applyRecoveryRate() = " + value);
-            if (critical) {
+            if (this.isRecoveryRateApplicable(target)) {
+                value = this.applyRecoveryRate(value, target);
+                console.log("  -> applyRecoveryRate() = " + value);
+            }
+            if (critical && this.isCriticalApplicable(target)) {
                 value = this.applyCritical(value);
                 console.log("  -> applyCritical() = " + value);
             }
-            value = this.applyVariance(value, item.damage.variance);
-            console.log("  -> applyVariance() = " + value);
-            value = this.applyGuard(value, target);
-            console.log("  -> applyGuard() = " + value);
+            if (this.isVarianceApplicable(target)) {
+                value = this.applyVariance(value, item.damage.variance);
+                console.log("  -> applyVariance() = " + value);
+            }
+            if (this.isGuardApplicable(target)) {
+                value = this.applyGuard(value, target);
+                console.log("  -> applyGuard() = " + value);
+            }
             value = Math.round(value);
 
             target.clearTempTraits();
@@ -230,16 +252,28 @@
 
             const item = this.item();
             const baseValue = this.calcBaseDamageValue(target);
-            const elementRate = this.calcElementRate(target);
-            result.elementRate = elementRate;
+            if (this.isElementRateApplicable(target)) {
+                const elementRate = this.calcElementRate(target);
+                result.elementRate = elementRate;
+            } else {
+                result.elementRate = 1;
+            }
             let value = baseValue * elementRate;
-            value = this.applyDamageRate(value, target, critical);
-            value = this.applyRecoveryRate(value, target);
-            if (critical) {
+            if (this.isDamageRateApplicable(target)) {
+                value = this.applyDamageRate(value, target, critical);
+            }
+            if (this.isRecoveryRateApplicable(target)) {
+                value = this.applyRecoveryRate(value, target);
+            }
+            if (critical && this.isCriticalApplicable(target)) {
                 value = this.applyCritical(value);
             }
-            value = this.applyVariance(value, item.damage.variance);
-            value = this.applyGuard(value, target);
+            if (this.isVarianceApplicable(target)) {
+                value = this.applyVariance(value, item.damage.variance);
+            }
+            if (this.isGuardApplicable(target)) {
+                value = this.applyGuard(value, target);
+            }
             value = Math.round(value);
 
             target.clearTempTraits();
@@ -248,6 +282,70 @@
             return value.clamp(-maxDamage, maxDamage)
         };
     }
+
+    /**
+     * 属性レートを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isElementRateApplicable = function(target) {
+        return true;
+    };
+
+    /**
+     * ダメージレートを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isDamageRateApplicable = function(target) {
+        return true;
+    };
+    /**
+     * リカバリーレートを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isRecoveryRateApplicable = function(target) {
+        return true;
+    };
+
+    /**
+     * クリティカルを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isCriticalApplicable = function(target) {
+        return true;
+    };
+    /**
+     * ばらつきを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isVarianceApplicable = function(target) {
+        return true;
+    };
+
+    /**
+     * ガードを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isGuardApplicable = function(target) {
+        return true;
+    };
 
     /**
      * ベースとなるダメージ値を計算する。

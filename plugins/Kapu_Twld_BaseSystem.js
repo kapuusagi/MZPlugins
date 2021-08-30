@@ -286,6 +286,26 @@
  *   <displayBattleOnly>
  *     戦闘中のみステートアイコンを表示する。
  * 
+ * スキル・アイテム
+ *   <ignoreElementRate>
+ *     ダメージ計算時、属性レートは反映しない。
+ *   <ignoreDamageRate>
+ *     ダメージ計算時、ダメージレート(PDR/MDR他、プラグインによるダメージレート)は反映しない。
+ *   <ignoreRecoveryRate>
+ *     ダメージ計算時、リカバリーレートを反映しない。
+ *   <ignoreCriticalRate>
+ *     ダメージ計算時、クリティカル倍率を反映しない。
+ *   <ignoreVariance>
+ *     ダメージ計算時、ばらつきを反映しない。
+ *   <ignoreGuard>
+ *     ダメージ計算時、ガードを反映しない。
+ *   <physicalDamageFormula:formula$>
+ *     物理ダメージ計算式として、formula$を適用する。
+ *     攻撃属性に物理属性が含まれる場合に使用される。
+ *   <magicalDamageFormula:formula$>
+ *     魔法ダメージ計算式として、formula$を適用する。
+ *     攻撃属性に魔法属性が含まれる場合に使用される。
+ * 
  * ============================================
  * 変更履歴
  * ============================================
@@ -767,7 +787,6 @@
      *     PDR,MDRと属性レートの計算変更のため、オーバーライドする
      */
     Game_Action.prototype.makeDamageValue = function(target, critical) {
-        const result = target.result();
         const subjectAddtionalTraits = this.additionalSubjectTraits(target);
         const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
         this.subject().setTempTraits(subjectAddtionalTraits);
@@ -775,6 +794,43 @@
 
         const item = this.item();
 
+        let value = 0;
+        if (this.isElementRateApplicable(target)) {
+            value = this.makeDamageValueWithElements(target, critical);
+        } else {
+            value = this.makeDamageValueWithoutElements(target, critical);
+        }
+        if (this.isDamageRateApplicable(target)) {
+            value = this.applyDamageRate(value, target, critical);
+        }
+        if (this.isRecoveryRateApplicable(target)) {
+            value = this.applyRecoveryRate(value, target);
+        }
+        if (critical && this.isCriticalApplicable(target)) {
+            value = this.applyCritical(value);
+        }
+        if (this.isVarianceApplicable(target)) {
+            value = this.applyVariance(value, item.damage.variance);
+        }
+        if (this.isGuardApplicable(target)) {
+            value = this.applyGuard(value, target);
+        }
+        value = Math.round(value);
+
+        target.clearTempTraits();
+        this.subject().clearTempTraits();
+        const maxDamage = this.maxDamage(target);
+        return value.clamp(-maxDamage, maxDamage)
+    };
+
+    /**
+     * 属性計算有効時の基本ダメージを計算する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {boolean} critical クリティカルかどうか
+     * @returns {number} ダメージ
+     */
+    Game_Action.prototype.makeDamageValueWithElements = function(target, critical) {
         const elementIds = this.elementIds();
         const phyElementIds = elementIds.filter(id => DataManager.isPhysicalElement(id));
         const magElementIds = elementIds.filter(id => DataManager.isMagicalElement(id));
@@ -788,26 +844,155 @@
         const magBaseDamageValue = (magElementIds.length > 0) ? this.calcMagicalDamageValue(target) : 0;
         const otherBaseDamageValue = ((elementIds.length === 0) || (otherElementIds.length > 0)) ?  this.calcOtherDamageValue(target) : 0;
 
-        const phyDamageValue = this.applyPhysicalDamageRate((phyBaseDamageValue * phyElementRate), target, critical);
-        const magDamageValue = this.applyMagicalDamageRate((magBaseDamageValue * magElementRate), target, critical);
-        const otherDamageValue = otherBaseDamageValue * otherElementRate;               
+        let phyDamageValue = phyBaseDamageValue * phyElementRate;
+        let magDamageValue = magBaseDamageValue * magElementRate;
+        let otherDamageValue = otherBaseDamageValue * otherElementRate;
+        if (this.isDamageRateApplicable(target)) {
+            phyDamageValue = this.applyPhysicalDamageRate(phyDamageValue, target, critical);
+            magDamageValue = this.applyMagicalDamageRate(magDamageValue, target, critical);
+        }
         
         const pureDamageValue = phyDamageValue + magDamageValue + otherDamageValue;
-        let value = phyDamageValue + magDamageValue + otherDamageValue;
+        const value = phyDamageValue + magDamageValue + otherDamageValue;
+        const result = target.result();
         result.elementRate = (pureDamageValue !== 0) ? (value / pureDamageValue) : 1;
-        value = this.applyDamageRate(value, target, critical);
-        value = this.applyRecoveryRate(value, target);
-        if (critical) {
-            value = this.applyCritical(value);
-        }
-        value = this.applyVariance(value, item.damage.variance);
-        value = this.applyGuard(value, target);
-        value = Math.round(value);
+        return value;
+    };
 
-        target.clearTempTraits();
-        this.subject().clearTempTraits();
-        const maxDamage = this.maxDamage(target);
-        return value.clamp(-maxDamage, maxDamage)
+    /**
+     * 属性計算無効時の基本ダメージを計算する
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {boolean} critical クリティカルかどうか
+     * @returns {number} ダメージ
+     */
+    Game_Action.prototype.makeDamageValueWithoutElements = function(target, critical) {
+        let value = this.evalDamageFormula(target);
+        const result = target.result();
+        result.elementRate = 1;
+        if (this.isDamageRateApplicable(target)) {
+            if (this.isPhysical()) {
+                value = this.applyPhysicalDamageRate(value, target, critical);
+            } else if (this.isMagical()) {
+                value = this.applyMagicalDamageRate(value, target, critical);
+            }
+        }
+        return value;
+    };
+
+    /**
+     * 属性レートを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     * !!!overwrite!!! Game_Action.isElementRateApplicable
+     *     メタデータにより適用・不適用を設定できるようにするためオーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isElementRateApplicable = function(target) {
+        const item = this.item();
+        if (item.meta.ignoreElementRate) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    /**
+     * ダメージレートを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     * !!!overwrite!!! Game_Action.isDamageRateApplicable
+     *     メタデータにより適用・不適用を設定できるようにするためオーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isDamageRateApplicable = function(target) {
+        const item = this.item();
+        if (item.meta.ignoreDamageRate) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+    /**
+     * リカバリーレートを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     * !!!overwrite!!! Game_Action.isRecoveryRateApplicable
+     *     メタデータにより適用・不適用を設定できるようにするためオーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isRecoveryRateApplicable = function(target) {
+        const item = this.item();
+        if (item.meta.ignoreRecoveryRate) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    /**
+     * クリティカルを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     * !!!overwrite!!! Game_Action.isCriticalApplicable
+     *     メタデータにより適用・不適用を設定できるようにするためオーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isCriticalApplicable = function(target) {
+        const item = this.item();
+        if (item.meta.ignoreCriticalRate) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+    /**
+     * ばらつきを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     * !!!overwrite!!! Game_Action.isVarianceApplicable
+     *     メタデータにより適用・不適用を設定できるようにするためオーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isVarianceApplicable = function(target) {
+        const item = this.item();
+        if (item.meta.ignoreVariance) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    /**
+     * ガードを適用するかどうかを得る。
+     * 
+     * @param {Game_Battler} ターゲット
+     * @return {boolean} 適用する場合にはtrue, 適用しない場合にはfalse.
+     * !!!overwrite!!! Game_Action.isGuardApplicable
+     *     メタデータにより適用・不適用を設定できるようにするためオーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_Action.prototype.isGuardApplicable = function(target) {
+        const item = this.item();
+        if (item.meta.ignoreGuard) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    /**
+     * ベースとなるダメージ値を計算する。
+     * 
+     * @param {Game_Battler} target 対象
+     */
+    Game_Action.prototype.calcBaseDamageValue = function(target) {
+        return this.evalDamageFormula(target);
     };
 
     /**
