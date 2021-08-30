@@ -493,6 +493,62 @@ Note:
     プレイヤーによる入力操作で、makeActions()で作成されたアクションに対して、選択された行動がセットされる。
 
 
+## ■ 戦闘行動対象の決定
+
+1. ユーザーの選択時
+
+    ランダムまたは全体対象のアクションの場合、アイテム･スキルを選択した時点で選択操作は終わる。(Game_Action.setTarget()はコールされない。)
+    Game_Action.needsSelection()により、選択が必要かどうかが判断され、選択が必要な場合にはsetTarget()で
+    フィールドが更新されるので問題はない。
+    Scene_Battle.onEnemyOk, Scene_Battle.onActorOk にて Game_Action.setTarget()がコールされる。
+    コマンドキャンセル時に Game_Action._target フィールドが更新されることはない。
+
+2. アクター(自動戦闘時)
+
+    非TPB時はターンの開始時、TPB時はTPBゲージがチャージされたときに行動が決定される。
+
+    非TPB時
+        BattleManager.startInput()にて、Game_Party.makeActions()から
+        全メンバーに対してGame_Battler.makeActionsが呼び出される。
+    TPB時
+        Game_Battler.updateTpbAutoBattle() にてTPBゲージチャージを検出し、
+        Game_Battler.makeTpbActions() から Game_Battler.makeActions()が呼び出される。
+        
+    Game_Actor.makeActions() では、Game_Battler.makeActions()でGame_Actionオブジェクトを
+    行動回数分作成し、makeAutoBattleActions()により中身が設定される。
+    (コマンド入力の場合、makeAutoBattleActions()ではなくプレイヤーが選択したアクションがセットされる)
+    Game_Actor.makeAutoBattleActions()では、Game_Actor.makeActionList() で取得したアクションリストに対して、個別に Game_Action.evaluate() により効果が評価され、最も評価結果が高いものがセットされる。
+
+3. エネミーの行動選択
+
+    非TPB時はターンの開始時、TPB時はTPBゲージがチャージされたときに行動が決定される。
+
+    非TPB時
+        BattleManager.startInput()にて、Game_Party.makeActions()から
+        全メンバーに対してGame_Battler.makeActionsが呼び出される。
+    TPB時
+        Game_Battler.updateTpbAutoBattle() にてTPBゲージチャージを検出し、
+        Game_Battler.makeTpbActions() から Game_Battler.makeActions()が呼び出される。
+
+    Game_Enemy.makeActions()にて、以下の処理が行われる。
+    (1) データベース上のエネミーデータから実行可能なアクションがリストされる。
+         実行可能なアクションは、データベース上で設定した「ターン条件」や「HP条件」(Game_Enemy.meetsCondition)、それから「使用可能かどうか」(Game_BattlerBase.canUse())による。
+    (2) Game_Enemy.selectAllActions()にてデータベースにて指定した行動レートが評価され、
+         行動が決定する。
+         evaluate()が呼び出されたりはしない。
+
+    ベーシックシステムでは、エネミーの行動選択時、行動対象や被害評価は考慮されない。
+
+4. 行動実行時(BattleManager.startAction)
+
+    行動実行時の選択は選択されている対象に実行可能かどうかを調べ、対象がいない場合には、別のターゲットにするという処理になる。
+    ベーシックシステムでは対象がなくてもスキルは発動されて、効果なし、コスト消費、という結果になるようだ。
+
+    Game_Action.makeTargets()にて、実行時の状況（使用者の混乱状態やターゲットの有無)を反映し、
+    アクションの対象が決定されて返される。
+    以後、BattleManager._targets に格納され、invokeAction()が1つずつ実行される。
+
+
 
 
 
