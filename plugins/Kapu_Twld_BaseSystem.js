@@ -244,6 +244,9 @@
  * 6. ダメージ計算の変更
  *    物理属性、魔法属性、その他属性のそれぞれに対して計算し、PDR,MDRを適用するように変更する。
  * 
+ * 7. 戦闘中行動時、アイテム･スキル対象が無い場合には何もしないようにする。
+ *    (単体対象の自動切り替えは有効。射程とか入ってきた場合用)
+ * 
  * ■ 使用時の注意
  * なし。
  * 
@@ -501,7 +504,29 @@
             return colorTpNormal;
         }
     };
-
+    //------------------------------------------------------------------------------
+    // BattleManager
+    /**
+     * アクターまたはエネミーのアクションを開始する。
+     * !!!overwrite!!! BattleManager.startAction()
+     *     行動対象がいなかった場合、何もしない(ターン時) or 行動再選択(TPB時)とするように変更する。
+     */
+    BattleManager.startAction = function() {
+        const subject = this._subject;
+        const action = subject.currentAction();
+        const targets = action.makeTargets();
+        if (targets.length == 0) {
+            // アクション対象がない。
+            this.endAction();
+        } else {
+            this._phase = "action";
+            this._action = action;
+            this._targets = targets;
+            subject.useItem(action.item());
+            this._action.applyGlobal();
+            this._logWindow.startAction(subject, action, targets);
+        }
+    };
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
