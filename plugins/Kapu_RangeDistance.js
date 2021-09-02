@@ -614,6 +614,7 @@
      * ランダムに対象を決める。
      * イベントコマンドによりランダムに対象選択する場合に呼ばれる。
      * !!!overwrite!!! Game_Action.decideRandomTarget
+     *     ランダムターゲット選定時、距離を考慮して処理するためオーバーライドする。
      */
     Game_Action.prototype.decideRandomTarget = function() {
         let target;
@@ -643,6 +644,7 @@
      * @param {Game_Unit} unit 対象のグループ
      * @returns {Array<Game_Battler>} 対象
      * !!!overwrite!!! Game_Action.randomTargets
+     *     距離による対象の制約を加えるため、オーバーライドする。
      */
     Game_Action.prototype.randomTargets = function(unit) {
         const targets = [];
@@ -660,6 +662,7 @@
      * @param {Game_Unit} unit 対象のグループ
      * @returns {Array<Game_Battler>} 対象
      * !!!overwrite!!! Game_Action.targetsForDead
+     *     列に対する対象制約のため、オーバーライドする。
      */
     Game_Action.prototype.targetsForDead = function(unit) {
         if (this.isForOne()) {
