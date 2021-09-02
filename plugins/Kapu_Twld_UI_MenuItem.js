@@ -418,7 +418,7 @@ function Window_ItemInfo() {
      */
     Window_ItemList.prototype.isEnabled = function (item) {
         // 基本的にアイテムコマンドで操作するので、nullじゃなければオッケー。
-        return (item !== null);
+        return !!item;
     };
 
     //------------------------------------------------------------------------------
