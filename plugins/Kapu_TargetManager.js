@@ -196,6 +196,7 @@ $dataItemScopes = null;
     const textAlivedFriend = parameters["textAlivedFriend"] || "One friend";
     const textAllAlivedFriend = parameters["textAllAlivedFriend"] || "All friend";
     const textDeadFriend = parameters["textDeadFriend"] || "One friend";
+    const textAllDeadFriend = parameters["textAllDeadFriend"] || "All friend";
     const textUser = parameters["textUser"] || "User";
     const textFriend = parameters["textFriend"] || "One friend";
     const textAllFriends = parameters["textAllFriends"] || "All friends";
@@ -385,8 +386,8 @@ $dataItemScopes = null;
      */
     TargetManager.opponentMembers = function(subject, item) {
         const scopeInfo = this.scopeInfo(item.scope);
-        const isAlive = scopeInfo.isAlive;
-        const isDead = scopeInfo.isDead;
+        const isAlive = !!scopeInfo.forAlive;
+        const isDead = !!scopeInfo.forDead;
         return subject.opponentsUnit().members().filter(
             member => ((member.isAlive() && isAlive) || (member.isDead() && isDead))
                 && TargetManager.isTargetable(subject, member, item));
@@ -400,8 +401,8 @@ $dataItemScopes = null;
      */
     TargetManager.friendMembers = function(subject, item) {
         const scopeInfo = this.scopeInfo(item.scope);
-        const isAlive = scopeInfo.isAlive;
-        const isDead = scopeInfo.isDead;
+        const isAlive = !!scopeInfo.forAlive;
+        const isDead = !!scopeInfo.forDead;
         return subject.friendsUnit().members().filter(
             member => ((member.isAlive() && isAlive) || (member.isDead() && isDead))
                 && TargetManager.isTargetable(subject, member, item));
@@ -421,7 +422,7 @@ $dataItemScopes = null;
         let targetIndex = 0;
         const opponentMembers = this.opponentMembers(subject, item);
         for (const member of opponentMembers) {
-            const effectiveMembers = this.itemEffectiveMembers(member);
+            const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
             selectable.push(new Game_ActionTargetGroup(targetIndex, member.name(), [ member ], effectiveMembers));
             targetIndex++;
         }
@@ -431,7 +432,7 @@ $dataItemScopes = null;
             // 混乱しているときは味方も対象
             const friendMembers = this.friendMembers(subject, item);
             for (const member of friendMembers) {
-                const effectiveMembers = this.itemEffectiveMembers(member);
+                const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
                 selectable.push(new Game_ActionTargetGroup(targetIndex, member.name, [ member ], effectiveMembers));
                 targetIndex++;
             }
@@ -652,9 +653,11 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item DataItem/DataSkill
+     * @param {number} targetIndex ターゲットインデックス
+     * @param {boolean} isForce 強制行動かどうか
      * @returns {Array<Game_Battler>} 対象
      */
-    TargetManager.makeActionTargetsNormal = function(subject, targetIndex, item) {
+    TargetManager.makeActionTargetsNormal = function(subject, item, targetIndex, isForce) {
         const selectableGroups = this.makeSelectableActionTargets(subject, item, false);
         let selectedGroup = selectableGroups.find(selectableTarget => selectableTarget.targetIndex() === targetIndex);
         if (!selectedGroup) {
@@ -885,7 +888,7 @@ $dataItemScopes = null;
     //------------------------------------------------------------------------------
     // Window_ActionTarget
     // アクションターゲット選択ウィンドウ
-    Window_ActionTarget.prototype = Object.create(Window_Selectable);
+    Window_ActionTarget.prototype = Object.create(Window_Selectable.prototype);
     Window_ActionTarget.prototype.constructor = Window_ActionTarget;
 
     /**
@@ -894,7 +897,7 @@ $dataItemScopes = null;
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_ActionTarget.prototype.initialize = function(rect) {
-        Window_Selectable.prototype.initialize.call(rect);
+        Window_Selectable.prototype.initialize.call(this, rect);
         this._targetGroups = [];
     };
 
@@ -934,7 +937,7 @@ $dataItemScopes = null;
         Window_Selectable.prototype.callUpdateHelp.call(this);
         // 現在の選択状態をUIに反映させる。
         $gameParty.select(null);
-        $gameEnemy.select(null);
+        $gameTroop.select(null);
         const group = this.item();
         if (group) {
             for (const member of group.members()) {
@@ -968,7 +971,7 @@ $dataItemScopes = null;
     Window_ActionTarget.prototype.hide = function() {
         Window_Selectable.prototype.hide.call(this);
         $gameParty.select(null);
-        $gameEnemy.select(null);
+        $gameTroop.select(null);
     };
 
     /**
@@ -1027,7 +1030,7 @@ $dataItemScopes = null;
                     // 選択されているグループのメンバーでない。 
                     for (let i = 0; i < this._targetGroups.length; i++) {
                         const group = this._targetGroups[i];
-                        if (group.members().isMainTarget(target)) {
+                        if (group.isMainTarget(target)) {
                             this.select(i);
                             if ($gameTemp.touchState() === "click") {
                                 this.processOk();
@@ -1251,6 +1254,16 @@ $dataItemScopes = null;
         // なにかあれば
     };
 
+    const _Scene_Battle_isAnyInputWindowActive = Scene_Battle.prototype.isAnyInputWindowActive;
+    /**
+     * いずれかの入力ウィンドウがアクティブ（選択中）かどうかを判定する。
+     * 
+     * @return {boolean} いずれかの入力ウィンドウがアクティブな場合にはtrue, それ以外はfalse
+     */
+    Scene_Battle.prototype.isAnyInputWindowActive = function() {
+        return _Scene_Battle_isAnyInputWindowActive.call(this)
+            || this._actionTargetWindow.active;
+    };
     //------------------------------------------------------------------------------
     // Window_MenuStatus
     /**
@@ -1296,7 +1309,49 @@ $dataItemScopes = null;
             this.changePaintOpacity(true);
         }
     };
+    //------------------------------------------------------------------------------
+    // Window_BattleActor
+    /**
+     * 効果対象のインデックスを設定する。
+     * 
+     * @param {Array<number>} indics 対象のインデックス
+     */
+    Window_BattleActor.prototype.setEffectiveTargets = function(indics) {
+        this._effectiveIndics = indics;
+        this.refresh();
+    };
 
+    /**
+     * 効果対象のインデクスをクリアする。
+     */
+    Window_BattleActor.prototype.clearEffectiveTargets = function() {
+        this._effectiveIndics = null;
+        this.refresh();
+    };    
+    const _Window_BattleActor_drawItem = Window_BattleActor.prototype.drawItem;
+    /**
+     * 項目を描画する。
+     * 
+     * @param {number} index インデックス
+     */
+    Window_BattleActor.prototype.drawItem = function(index) {
+        this.drawEffectiveBackground(index);
+        _Window_BattleActor_drawItem.call(this, index);
+    };
+    /**
+     * 効果対象バックグラウンドを設定する。
+     * 
+     * @param {number} index 描画対象インデックス
+     */
+    Window_BattleActor.prototype.drawEffectiveBackground = function(index) {
+        if (this._effectiveIndics && this._effectiveIndics.includes(index)) {
+            const rect = this.itemRect(index);
+            const color = ColorManager.effectiveColor();
+            this.changePaintOpacity(false);
+            this.contents.fillRect(rect.x, rect.y, rect.width, rect.height, color);
+            this.changePaintOpacity(true);
+        }
+    };
     //------------------------------------------------------------------------------
     // Window_MenuItemName
     Window_MenuItemName.prototype = Object.create(Window_Base.prototype);
