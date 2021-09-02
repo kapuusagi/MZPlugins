@@ -538,6 +538,8 @@ Note:
          evaluate()が呼び出されたりはしない。
 
     ベーシックシステムでは、エネミーの行動選択時、行動対象や被害評価は考慮されない。
+    また、エネミーのアクションでは、Game_Action._target フィールドは設定されない。
+    Game_Action._targetが設定されないため、makeTargets() でランダムなターゲットが選択される。
 
 4. 行動実行時(BattleManager.startAction)
 

@@ -234,6 +234,8 @@
  */
 /**
  * Sprite_BattleHudHpGauge
+ * 
+ * @class
  * HPゲージ。
  */
 function Sprite_BattleHudHpGauge() {
@@ -243,6 +245,7 @@ function Sprite_BattleHudHpGauge() {
 
 /**
  * Sprite_BattleHudMpTpGauge。
+ * @class
  * MP/TPゲージ
  */
 function Sprite_BattleHudMpTpGauge() {
@@ -252,6 +255,7 @@ function Sprite_BattleHudMpTpGauge() {
 
 /**
  * Sprite_BattleHudTpbGauge。
+ * @class
  * TPBゲージ
  */
 function Sprite_BattleHudTpbGauge() {
@@ -262,6 +266,7 @@ function Sprite_BattleHudTpbGauge() {
 
 /**
  * Sprite_BattleHudActorName。
+ * @class
  * Sprite_Nameから表示を変更するために派生して使う。
  */
 function Sprite_BattleHudActorName() {
@@ -271,6 +276,7 @@ function Sprite_BattleHudActorName() {
 
 /**
  * Sprite_HudStateIcons。
+ * @class
  * ステートアイコンを表示するためのスプライト。
  * 一度に4つずつ表示するために用意したが、
  * Sprite_StateIconを複数並べる方式の方がリソース節約になるかもしれない。
@@ -282,7 +288,7 @@ function Sprite_HudStateIcons() {
 
 /**
  * Sprite_BattleHudActor
- * 
+ * @class
  * アクター情報を表示するHUD。
  */
 function Sprite_BattleHudActor() {
@@ -291,6 +297,7 @@ function Sprite_BattleHudActor() {
 
 /**
  * Sprite_BattleHudPicture。
+ * @class
  * コマンド入力ウィンドウの脇に、でっかく表示するアクター画像のスプライト。
  */
 function Sprite_BattleHudPicture() {
@@ -471,6 +478,8 @@ function Sprite_BattleHudPicture() {
     // Window_HudItemName
     /**
      * Window_HudItemName。
+     * 
+     * @class
      * スキル/アイテム名表示用ウィンドウ。
      * 用意しないと何の対象を選択しているのかわからん。
      */
@@ -2314,6 +2323,20 @@ function Sprite_BattleHudPicture() {
         this.createHudItemNameWindow();
     };
 
+    const _Scene_Battle_destroy = Scene_Battle.prototype.destroy;
+    /**
+     * シーンを破棄する。
+     * 
+     * Note: _statusWindowのインスタンスは Container.childrenから切り離しているため、
+     *       個別に開放する。
+     */
+    Scene_Battle.prototype.destroy = function() {
+        _Scene_Battle_destroy.call(this);
+        if (this._statusWindow) {
+            this._statusWindow.destroy();
+        }
+    };
+
     /**
      * アイテム名表示ウィンドウを作成する。
      */
@@ -2329,6 +2352,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {Rectangle} ヘルプウィンドウの表示領域を表すRectangle.
      * !!!overwrite!!! Game_Battle_helpWindowRect
+     *     レイアウト変更のため、オーバーライドする。
      */
     Scene_Battle.prototype.helpWindowRect = function() {
         const ww = Math.min(816, Graphics.boxWidth);
@@ -2356,6 +2380,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!! Game_Battle.statusWindowRect
+     *     レイアウト変更のため、オーバーライドする。
      */
     Scene_Battle.prototype.statusWindowRect = function() {
         const extra = 10;
@@ -2371,6 +2396,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!! Scene_Battle.partyCommandWindowRect
+     *     レイアウト変更のため、オーバーライドする。
      */
     Scene_Battle.prototype.partyCommandWindowRect = function() {
         const itemNameRect = this.itemNameWindowRect();
@@ -2386,6 +2412,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!! Scene_Battle.actorCommandWindowRect
+     *     レイアウト変更のため、オーバーライドする。
      */
     Scene_Battle.prototype.actorCommandWindowRect = function() {
         const itemWindowRect = this.itemNameWindowRect();
@@ -2401,7 +2428,7 @@ function Sprite_BattleHudPicture() {
      * アクターコマンドウィンドウ(_actorCommandWindow)を作成する。
      * 
      * Note: ベーシックシステムでは、ウィンドウ作成時にyが上書きされているため、
-     *       レイアウトを変えるためにフックする必要がある。
+     *       レイアウトを変えるためにフックする。
      */
     Scene_Battle.prototype.createActorCommandWindow = function() {
         _Scene_Base_createActorCommandWindow.call(this);
@@ -2414,6 +2441,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!! Scene_Battle.skillWindowRect
+     *     レイアウト変更のため、オーバーライドする。
      */
     Scene_Battle.prototype.skillWindowRect = function() {
         const itemNameRect = this.itemNameWindowRect();
@@ -2429,6 +2457,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!! Scene_Battle.logWindowRect
+     *     レイアウト変更のため、オーバーライドする。
      */
     Scene_Battle.prototype.logWindowRect = function() {
         const ww = Math.min(816, Graphics.boxWidth);
@@ -2443,6 +2472,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!! Scene_Battle.itemNameWindowRect
+     *     レイアウト変更のため、オーバーライドする。
      */
     Scene_Battle.prototype.itemNameWindowRect = function() {
         const width = 240;
@@ -2457,8 +2487,15 @@ function Sprite_BattleHudPicture() {
      * 
      * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!! Scene_Battle.createStatusWindow
+     *     ステータスウィンドウを表示しないようにするため、オーバーライドする。
+     *     _statusWindowエントリを無くすとオーバーライドする箇所が増えるので
+     *     作成だけして更新しないようにした。
      */
     Scene_Battle.prototype.createStatusWindow = function() {
+        const rect = this.statusWindowRect();
+        const statusWindow = new Window_BattleStatus(rect);
+        //this.addWindow(statusWindow);
+        this._statusWindow = statusWindow;
     };
 
     /**
@@ -2466,6 +2503,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {Rectangle} ウィンドウ矩形領域。
      * !!!overwrite!!! Scene_Battle.actorWindowRect
+     *     レイアウト変更のため、オーバーライドする。
      */
     Scene_Battle.prototype.actorWindowRect = function() {
         const itemNameWindowRect = this.itemNameWindowRect();
@@ -2481,6 +2519,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {Rectangle} エネミーウィンドウの矩形領域。
      * !!!overwrite!!! Scene_Battle.enemyWindowRect
+     *     レイアウト変更のため、オーバーライドする。
      */
     Scene_Battle.prototype.enemyWindowRect = function() {
         const itemNameWindowRect = this.itemNameWindowRect();
@@ -2491,192 +2530,38 @@ function Sprite_BattleHudPicture() {
         return new Rectangle(wx, wy, ww, wh);
     };
 
-    /**
-     * Scene_Battleを開始する。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!! Scene_Battle.start
-     */
-    Scene_Battle.prototype.start = function() {
-        Scene_Message.prototype.start.call(this);
-        BattleManager.playBattleBgm();
-        BattleManager.startBattle();
-        this.startFadeIn(this.fadeSpeed(), false);
-    };
-    /**
-     * Scene_Battleを一時停止する
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!! Scene_Battle.stop
-     */
-    Scene_Battle.prototype.stop = function() {
-        Scene_Message.prototype.stop.call(this);
-        if (this.needsSlowFadeOut()) {
-            this.startFadeOut(this.slowFadeSpeed(), false);
-        } else {
-            this.startFadeOut(this.fadeSpeed(), false);
-        }
-        this._partyCommandWindow.close();
-        this._actorCommandWindow.close();
-    };
 
     const _Scene_Battle_update = Scene_Battle.prototype.update;
-
     /**
      * Scene_Battle の更新処理を行う。
      */
     Scene_Battle.prototype.update = function() {
         _Scene_Battle_update.call(this);
+        // Note: 何かしら更新処理が必要であればここでやる。
     };
 
     /**
      * ステータスウィンドウの表示状態を更新する。
      * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
      * !!!overwrite!!! Scene_Battle.updateStatusWindowVisibility
+     *     _statusWindowは使用しないため、負荷低減のためオーバーライドする。
      */
     Scene_Battle.prototype.updateStatusWindowVisibility = function() {
     };
 
 
 
-    /**
-     * パーティーコマンド選択を開始する。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!!Scene_Battle.startPartyCommandSelection
-     */
-    Scene_Battle.prototype.startPartyCommandSelection = function() {
-        this._actorCommandWindow.setup(null);
-        this._actorCommandWindow.close();
-        this._partyCommandWindow.setup();
-    };
-    
-    /**
-     * アクターコマンド選択を開始する。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!! Scene_Battle.startActorCommandSelection
-     */
-    Scene_Battle.prototype.startActorCommandSelection = function() {
-        this._partyCommandWindow.close();
-        this._actorCommandWindow.show();
-        this._actorCommandWindow.setup(BattleManager.actor());
-    };
-
-    /**
-     * スキルが選択されたときの処理を行う。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!! Scene_Battle.commandSkill
-     */
-    Scene_Battle.prototype.commandSkill = function() {
-        this._skillWindow.setActor(BattleManager.actor());
-        this._skillWindow.setStypeId(this._actorCommandWindow.currentExt());
-        this._skillWindow.refresh();
-        this._skillWindow.show();
-        this._skillWindow.activate();
-        this._actorCommandWindow.hide();
-    };
-    /**
-     * アイテムが選択されたときの処理を行う。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!! Scene_Battle.commandItem
-     */
-    Scene_Battle.prototype.commandItem = function() {
-        this._itemWindow.refresh();
-        this._itemWindow.show();
-        this._itemWindow.activate();
-        this._actorCommandWindow.hide();
-    };
-
-    /**
-     * エネミー選択を開始する。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     *      他、対象を視認しやすいよう、アイテムウィンドウ/スキルウィンドウを非表示にする。
-     *        
-     * !!!overwrite!!! Scene_Battle.startEnemySelection
-     */
-    Scene_Battle.prototype.startEnemySelection = function() {
-        this._itemWindow.hide();
-        this._skillWindow.hide();
-        this._enemyWindow.refresh();
-        this._enemyWindow.show();
-        this._enemyWindow.select(0);
-        this._enemyWindow.activate();
-    };
-    /**
-     * エネミー選択/スキル選択/アイテム選択でキャンセル操作されたときの処理を行う。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!! Scene_Battle.onEnemyCancel
-     */
-    Scene_Battle.prototype.onEnemyCancel = function() {
-        this._enemyWindow.hide();
-        switch (this._actorCommandWindow.currentSymbol()) {
-            case "attack":
-                this._actorCommandWindow.activate();
-                break;
-            case "skill":
-                this._skillWindow.show();
-                this._skillWindow.activate();
-                break;
-            case "item":
-                this._itemWindow.show();
-                this._itemWindow.activate();
-                break;
-        }
-    };
-
-
-    /**
-     * スキル選択でキャンセル操作された時の処理を行う。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!! Scene_Battle.onSkilLCancel
-     */
-    Scene_Battle.prototype.onSkillCancel = function() {
-        this._skillWindow.hide();
-        this._actorCommandWindow.show();
-        this._actorCommandWindow.activate();
-    };
-
-    /**
-     * アイテム選択ウィンドウでキャンセル操作されたときの処理を行う。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!! Scene_Battle.onItemCancel
-     */
-    Scene_Battle.prototype.onItemCancel = function() {
-        this._itemWindow.hide();
-        this._actorCommandWindow.show();
-        this._actorCommandWindow.activate();
-    };
-    /**
-     * コマンド選択が完了したときの処理を行う。
-     * 
-     * Note: _statusWindowにアクセスしないようにするためにオーバーライドする。
-     * !!!overwrite!!! Scene_Battle.endCommandSelection
-     */
-    Scene_Battle.prototype.endCommandSelection = function() {
-        this.closeCommandWindows();
-        this.hideSubInputWindows();
-    };
-
     const _Scene_Battle_hideSubInputWindows = Scene_Battle.prototype.hideSubInputWindows;
-
     /**
      * サブ入力ウィンドウを非表示にする。
      */
     Scene_Battle.prototype.hideSubInputWindows = function() {
         _Scene_Battle_hideSubInputWindows.call(this);
+        // アイテム名ウィンドウを隠す
         this._itemNameWindow.hide();
     };
 
     const _Scene_Battle_startEnemySelection = Scene_Battle.prototype.startEnemySelection;
-
     /**
      * エネミー選択を開始する。
      */
@@ -2691,7 +2576,6 @@ function Sprite_BattleHudPicture() {
     };
 
     const _Scene_Battle_onEnemyOk = Scene_Battle.prototype.onEnemyOk;
-
     /**
      * エネミー選択でOKされたときの処理を行う。
      */
@@ -2727,7 +2611,6 @@ function Sprite_BattleHudPicture() {
     };
 
     const _Scene_Battle_onActorOk = Scene_Battle.prototype.onActorOk;
-
     /**
      * アクター選択でOKが選択されたときの処理を行う。
      */
@@ -2739,7 +2622,6 @@ function Sprite_BattleHudPicture() {
     };
 
     const _Scene_Battle_onActorCancel = Scene_Battle.prototype.onActorCancel;
-    
     /**
      * アクター選択でキャンセルされたときの処理を行う。
      */
