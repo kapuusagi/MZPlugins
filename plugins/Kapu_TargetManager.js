@@ -994,6 +994,28 @@ $dataItemScopes = null;
             this._targetIndex = -1;
         }
     };
+
+    /**
+     * ターゲット条件を得る。
+     * 
+     * @returns {Array<Game_Battler>} 効果対象
+     * !!!overwrite!!! Game_Action.itemTargetCandiates()
+     *     ターゲット置き換えのため、オーバーライドする。
+     */
+    Game_Action.prototype.itemTargetCandidates = function() {
+        if (!this.isValid()) {
+            return [];
+        } else {
+            const actionTargets = this.makeSelectableActionTargets();
+            if (actionTargets && (actionTargets.length > 0)) {
+                return actionTargets[0].members();
+            } else {
+                // 対象なし。
+                return [];                
+            }
+        }
+    };
+
     //------------------------------------------------------------------------------
     // Window_ActionTarget
     // アクションターゲット選択ウィンドウ
@@ -1767,6 +1789,7 @@ $dataItemScopes = null;
         }
         action.applyGlobal();
     };
+
     //------------------------------------------------------------------------------
     // Game_Enemy
 
