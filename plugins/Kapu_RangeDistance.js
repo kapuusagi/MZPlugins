@@ -4,7 +4,11 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @orderAfter Kapu_Base_ParamName
- *
+ * @base Kapu_Utility
+ * @orderAfter Kapu_Utility
+ * @base Kapu_TargetManager
+ * @orderAfter Kapu_TargetManager
+ * 
  * @command setEnemyBattlePosition
  * @text エネミー戦闘位置設定
  * @desc エネミーの戦闘位置を設定する。戦闘中以外は無効。
@@ -43,6 +47,121 @@
  * @option 後衛
  * @value 1
  * @default 1
+ * 
+ * @param scopeIdSelectedRowOpponents
+ * @text 敵1列を表すスコープID
+ * @type number
+ * @min 100
+ * @default 101
+ * 
+ * @param textScopeSelectedRowOpponents
+ * @text 敵1列を表すテキスト
+ * @type string
+ * @default 敵1列
+ * @parent scopeIdSelectedRowOpponents
+ * 
+ * @param scopeIdFrontRowOpponents
+ * @text 敵前衛を表すスコープID
+ * @type number
+ * @min 100
+ * @default 102
+ * 
+ * @param textScopeFrontRowOpponents
+ * @text 敵前衛を表す文字列
+ * @type string
+ * @default 敵前衛
+ * @parent scopeIdFrontRowOpponents
+ * 
+ * @param scopeIdBackRowOpponents
+ * @text 敵後衛を表すスコープID
+ * @type number
+ * @min 100
+ * @default 103
+ * 
+ * @param textScopeBackRowOpponents
+ * @text 敵後衛を表す文字列
+ * @type string
+ * @default 敵後衛
+ * @parent scopeIdBackRowOpponents
+ * 
+ * @param scopeIdSelectedAlivedRowFriends
+ * @text 生存している味方1列を表すスコープID
+ * @type number
+ * @min 100
+ * @default 104
+ * 
+ * @param textScopeSelectedAlivedRowFriends
+ * @text 生存している味方1列を表す文字列
+ * @type string
+ * @default 味方1列
+ * @parent scopeIdSelectedAlivedRowFriends
+ * 
+ * @param scopeIdFrontAlivedRowFriends
+ * @text 生存している味方前衛を表すスコープID
+ * @type number
+ * @min 100
+ * @default 105
+ * 
+ * @param textScopeFrontAlivedRowFriends
+ * @text 生存している味方前衛を表す文字列
+ * @type string
+ * @default 味方前衛
+ * @parent scopeIdFrontAlivedRowFriends
+ * 
+ * @param scopeIdBackAlivedRowFriends
+ * @text 生存している味方後衛を表すスコープID
+ * @type number
+ * @min 100
+ * @default 106
+ * 
+ * @param textScopeBackAlivedRowFriends
+ * @text 生存している味方後衛を表す文字列
+ * @type string
+ * @default 味方後衛
+ * @parent scopeIdBackAlivedRowFriends
+ * 
+ * @param scopeIdSelectedDeadRowFriends
+ * @text 死亡している味方1列を表すスコープID
+ * @type number
+ * @min 100
+ * @default 107
+ * 
+ * @param textScopeSelectedDeadRowFriends
+ * @text 死亡しているる味方1列を表す文字列
+ * @type string
+ * @default 味方1列
+ * @parent scopeIdSelectedDeadRowFriends
+ * 
+ * @param scopeIdSelectedRowFriends
+ * @text 味方1列を表すスコープID
+ * @type number
+ * @min 100
+ * @default 108
+ * 
+ * @param textScopeSelectedRowFriends
+ * @text る味方1列を表す文字列
+ * @type string
+ * @default 味方1列
+ * @parent scopeIdSelectedRowFriends
+ * 
+ * 
+ * @param scopeIdSelfAlivedRowFriends
+ * @text 生存している自分と同じ列を表すスコープID
+ * @type number
+ * @min 100
+ * @default 109
+ * 
+ * @param textScopeSelfAlivedRowFriends
+ * @text 自分と同じ列を表す文字列
+ * @type string
+ * @default 同列
+ * @parent scopeIdSelfAlivedRowFriends
+ * 
+ * @param textTargetRow
+ * @text 列を対象としたターゲット名。
+ * @desc 列を対象としたターゲット名。%1に列番号(1,2,..)が入る
+ * @type string
+ * @default %1列目
  * 
  * @param blockMoveFlagId
  * @text 戦闘位置変更効果フラグID
@@ -153,6 +272,13 @@
  * 
  *   <rangeRow>
  *      効果範囲が列であることを指定します。
+ *      元々のスコープは単体にしておく必要があります。
+ *   <rangeRow:front>
+ *      効果範囲が前衛のみであることを指定します。
+ *      元々のスコープは単体にしておく必要があります。
+ *   <rangeRow:back>
+ *      効果範囲が後衛のみであることを指定します。
+ *      元々のスコープは単体にしておく必要があります。
  * 武器
  *   <range:range#>
  *      アイテム/スキルの射程を指定する。
@@ -213,10 +339,125 @@
         console.error(pluginName + ":EFFECT_MOVE_BATTLE_POSITION is not valid.");
     }
 
+    const textTargetRow = parameters["textTargetRow"] || "%1";
+
     Game_Action.RANGE_SHORT = 0;
     Game_Action.RANGE_MIDDLE = 1;
     Game_Action.RANGE_LONG = 2;
     Game_Action.RANGE_DEPENDS = -1;
+
+    {
+        let scopeId = 0;
+
+        scopeId = Math.round(Number(parameters["scopeIdSelectedRowOpponents"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_SELECTED_ROW_OPPONENTS = scopeId;
+            const text = parameters["textScopeSelectedRowOpponents"] || "One row enemies";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:true, targetCount:TargetManager.TARGET_COUNT_ALL,
+                forOpponent:true, forAlive:true, 
+            };
+        } else {
+            console.log("SCOPE_SELECTED_ROW_OPPONENTS not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdFrontRowOpponents"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_FRONT_OPPONENTS = scopeId;
+            const text = parameters["textScopeFrontRowOpponents"] || "Front enemies";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+                forOpponent:true, forAlive:true, 
+            };
+        } else {
+            console.log("SCOPE_FRONT_OPPONENTS not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdBackRowOpponents"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_BACK_OPPONENTS = scopeId;
+            const text = parameters["textScopeBackRowOpponents"] || "Back enemies";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+                forOpponent:true, forAlive:true, 
+            };
+        } else {
+            console.log("SCOPE_BACK_OPPONENTS not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdSelectedAlivedRowFriends"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_ALIVED_ROW_FRIENDS = scopeId;
+            const text = parameters["textScopeSelectedAlivedRowFriends"] || "Row friends";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:true, targetCount:TargetManager.TARGET_COUNT_ALL,
+                forFriend:true, forAlive:true, 
+            };
+        } else {
+            console.log("SCOPE_ALIVED_ROW_FRIENDS not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdFrontAlivedRowFriends"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_ALIVED_FRONT_FRIENDS = scopeId;
+            const text = parameters["textScopeFrontAlivedRowFriends"] || "Front friends";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+                forFriend:true, forAlive:true, 
+            };
+        } else {
+            console.log("SCOPE_ALIVED_FRONT_FRIENDS not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdBackAlivedRowFriends"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_ALIVED_BACK_FRIENDS = scopeId;
+            const text = parameters["textScopeBackAlivedRowFriends"] || "Back friends";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+                forFriend:true, forAlive:true, 
+            };
+        } else {
+            console.log("SCOPE_ALIVED_BACK_FRIENDS not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdSelectedDeadRowFriends"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_DEAD_ROW_FRIENDS = scopeId;
+            const text = parameters["textScopeSelectedDeadRowFriends"] || "Row friends";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:true, targetCount:TargetManager.TARGET_COUNT_ALL,
+                forFriend:true, forDead:true, 
+            };
+        } else {
+            console.log("SCOPE_DEAD_ROW_FRIENDS not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdSelectedRowFriends"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_ROW_FRIENDS = scopeId;
+            const text = parameters["textScopeSelectedRowFriends"] || "Row friends";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:true, targetCount:TargetManager.TARGET_COUNT_ALL,
+                forFriend:true, forAlive:true, forDead:true, 
+            };
+        } else {
+            console.log("SCOPE_ROW_FRIENDS not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdSelfAlivedRowFriends"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_ALIVED_SAME_ROW_FRIENDS = scopeId;
+            const text = parameters["textScopeSelfAlivedRowFriends"] || "Same row friends";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+                forFriend:true, forAlive:true, 
+            };
+        } else {
+            console.log("SCOPE_ALIVED_SAME_ROW_FRIENDS not valid.");
+        }
+    }
+
 
     PluginManager.registerCommand(pluginName, "setEnemyBattlePosition", args => {
         const no = Number(args.no) || 1;
@@ -237,19 +478,9 @@
         }
     });
 
-    //------------------------------------------------------------------------------
-    // Scene_Boot
-    const _Scene_Boot_start = Scene_Boot.prototype.start;
-    /**
-     * Scene_Bootを開始する。
-     */
-    Scene_Boot.prototype.start = function () {
-        DataManager.processRangeDistance();
-        _Scene_Boot_start.call(this);
-    };
+
     //------------------------------------------------------------------------------
     // DataManager
-
     /**
      * 戦闘位置移動効果をeffectsに追加する。
      * 
@@ -257,7 +488,7 @@
      * @param {number} dataId データID
      * @param {number} rate 発生確率
      */
-    const _addEffectMoveBattlePosition = function(obj, dataId, rate) {
+     const _addEffectMoveBattlePosition = function(obj, dataId, rate) {
         if (Game_Action.EFFECT_MOVE_BATTLE_POSITION) {
             obj.effects.push({
                 code: Game_Action.EFFECT_MOVE_BATTLE_POSITION,
@@ -295,48 +526,55 @@
     };
 
     /**
-     * DataSkillのノートタグを処理する。
+     * scopeに関係するノートタグを処理する。
      * 
-     * @param {Array<DataSkill>} dataArray DataSkill配列
+     * @param {object} obj DataItem/DataSkill
      */
-    const _processRangeDistanceSkillNotetag = function(dataArray) {
-        for (let i = 1; i < dataArray.length; i++) {
-            const obj = dataArray[i];
-            if (!obj) {
-                continue;
-            }
-            obj.range = Game_Action.RANGE_DEPENDS;
-
-            if ((i != moveToFrontSkillId) && (i != moveToRearSkillId)) {
-                if (obj.meta.moveToFront) {
-                    const rate = Number(obj.meta.moveToFront) || 1.0;
-                    _addEffectMoveBattlePosition(obj, 0, rate);
-                } else if (obj.meta.moveToRear) {
-                    const rate = Number(obj.meta.moveToRear) || 1.0;
-                    _addEffectMoveBattlePosition(obj, 1, rate);
-                }
-            }
-            if (obj.meta.range) {
-                obj.range = _getRange(obj.meta.range).clamp(-1, 2);
+    const _processScopeNoteTag = function(obj) {
+        if (obj.meta.rangeRow) {
+            // RAW指定があったとき、元のスコープ設定に合わせて切り替える。
+            switch (obj.scope) {
+                case TargetManager.SCOPE_ONE_OPPONENTS: // selected opponent one.
+                    if (obj.meta.rangeRow === "front") {
+                        obj.scope = TargetManager.SCOPE_FRONT_OPPONENTS;
+                    } else if (obj.meta.rangeRow === "back") {
+                        obj.scope = TargetManager.SCOPE_BACK_OPPONENTS;
+                    } else {
+                        obj.scope = TargetManager.SCOPE_SELECTED_ROW_OPPONENTS;
+                    }
+                    break;
+                case TargetManager.SCOPE_ALIVED_FRIEND: // selected alived friend
+                    if (obj.meta.rangeRow === "front") {
+                        obj.scope = TargetManager.SCOPE_ALIVED_FRONT_FRIENDS;
+                    } else if (obj.meta.rangeRow === "back") {
+                        obj.scope = TargetManager.SCOPE_ALIVED_BACK_FRIENDS;
+                    } else {
+                        obj.scope = TargetManager.SCOPE_ALIVED_ROW_FRIENDS;
+                    }
+                    break;
+                case TargetManager.SCOPE_DEAD_FRIEND: // selected dead friend
+                    obj.scope = TargetManager.SCOPE_DEAD_ROW_FRIENDS;
+                    break;
+                case TargetManager.SCOPE_FRIEND: // selected friend
+                    obj.scope = TargetManager.SCOPE_ROW_FRIENDS;
+                    break;
+                case TargetManager.SCOPE_USER_ONLY: // user
+                    obj.scope = TargetManager.SCOPE_ALIVED_SAME_ROW_FRIENDS;
+                    break;
             }
         }
     };
 
-    /**
-     * $dataItemsのノートタグを処理する。
-     * 
-     * @param {Array<DataItem>} dataArray DataItem配列
-     */
-    const _processRangeDistanceItemNotetag = function(dataArray) {
-        for (const obj of dataArray) {
-            if (!obj) {
-                continue;
-            }
-            obj.range = 0;
-            if (obj.meta.range) {
-                obj.range = _getRange(obj.meta.range).clamp(-1, 2);
-            }
 
+    /**
+     * objのノートタグを処理する。
+     * 
+     * @param {obj} obj DataSkill
+     */
+    const _processSkillNoteTag = function(obj) {
+        obj.range = Game_Action.RANGE_DEPENDS;
+
+        if ((i != moveToFrontSkillId) && (i != moveToRearSkillId)) {
             if (obj.meta.moveToFront) {
                 const rate = Number(obj.meta.moveToFront) || 1.0;
                 _addEffectMoveBattlePosition(obj, 0, rate);
@@ -345,13 +583,44 @@
                 _addEffectMoveBattlePosition(obj, 1, rate);
             }
         }
+        if (obj.meta.range) {
+            obj.range = _getRange(obj.meta.range).clamp(-1, 2);
+        }
+
+        _processScopeNoteTag(obj);
     };
+    DataManager.addNotetagParserSkills(_processSkillNoteTag);
+
+    /**
+     * $dataItemsのノートタグを処理する。
+     * 
+     * @param {object} obj DataItem
+     */
+     const _processItemNoteTag = function(obj) {
+        obj.range = 0;
+        if (obj.meta.range) {
+            obj.range = _getRange(obj.meta.range).clamp(-1, 2);
+        }
+
+        if (obj.meta.moveToFront) {
+            const rate = Number(obj.meta.moveToFront) || 1.0;
+            _addEffectMoveBattlePosition(obj, 0, rate);
+        } else if (obj.meta.moveToRear) {
+            const rate = Number(obj.meta.moveToRear) || 1.0;
+            _addEffectMoveBattlePosition(obj, 1, rate);
+        }
+        _processScopeNoteTag(obj);
+    };
+    DataManager.addNotetagParserItems(_processItemNoteTag);
+
+
+
     /**
      * 特性ノートタグを処理する。
      * 
      * @param {TraitObject} obj 特性(traits)を持ったオブジェクト。
      */
-    const _processTraitsNoteTag = function(obj) {
+     const _processTraitsNoteTag = function(obj) {
         if (obj.meta.blockMovePosition && Game_BattlerBase.FLAG_ID_BLOCK_MOVE_BATTLEPOSITION) {
             obj.traits.push({ 
                 code:Game_BattlerBase.TRAIT_SPECIAL_FLAG, 
@@ -368,76 +637,54 @@
 
         }
     };
+    DataManager.addNotetagParserActors(_processTraitsNoteTag);
+    DataManager.addNotetagParserClasses(_processTraitsNoteTag);
+    DataManager.addNotetagParserArmors(_processTraitsNoteTag);
+    DataManager.addNotetagParserStates(_processTraitsNoteTag);
 
+    
     /**
      * $dataWeaponsのノートタグを処理する。
      * 
-     * @param {Array<DataWeapon>} dataArray DataWeapon配列
+     * @param {object} obj DataWeapon
      */
-    const _processRangeDistanceWeaponNotetag = function(dataArray) {
-        for (const obj of dataArray) {
-            if (!obj) {
-                continue;
-            }
-            obj.range = 0;
-            if (obj.meta.range) {
-                obj.range = _getRange(obj.meta.range).clamp(-1, 2);
-            }
-            
-            _processTraitsNoteTag(obj);
+     const _processWeaponNotetag = function(obj) {
+        obj.range = 0;
+        if (obj.meta.range) {
+            obj.range = _getRange(obj.meta.range).clamp(-1, 2);
         }
+        
+        _processTraitsNoteTag(obj);
     };
+    DataManager.addNotetagParserWeapons(_processWeaponNotetag);
 
-    /**
-     * 特性のノートタグを処理する。
-     * 
-     * @param {Array<Object>} dataArray データ配列 
-     */
-    const _processRangeDistanceTraitNotetag = function(dataArray) {
-        for (const obj of dataArray) {
-            if (!obj) {
-                continue;
-            }
-            _processTraitsNoteTag(obj);
-        }
-    };
     /**
      * $dataEnemyのノートタグを処理する。
      * 
-     * @param {Array<Object>} dataArray データ配列 
+     * @param {object} obj DataEnemy
      */
-    const _processRangeDistanceEnemyNotetag = function(dataArray) {
-        for (const obj of dataArray) {
-            if (!obj) {
-                continue;
-            }
-            obj.defaultRange = Game_Action.RANGE_SHORT;
-            _processTraitsNoteTag(obj);
-            if (obj.meta.defaultRange) {
-                obj.defaultRange = _getRange(obj.meta.defaultRange).clamp(0, 1);
-            }
-
+     const _processEnemyNotetag = function(obj) {
+        obj.defaultRange = Game_Action.RANGE_SHORT;
+        _processTraitsNoteTag(obj);
+        if (obj.meta.defaultRange) {
+            obj.defaultRange = _getRange(obj.meta.defaultRange).clamp(0, 1);
         }
     };
-    /**
-     * 射程データ及び移動スキルを処理する。
-     */
-    DataManager.processRangeDistance = function() {
-        _processRangeDistanceSkillNotetag($dataSkills);
-        _processRangeDistanceItemNotetag($dataItems);
-        _processRangeDistanceWeaponNotetag($dataWeapons);
-        _processRangeDistanceTraitNotetag($dataActors);
-        _processRangeDistanceTraitNotetag($dataClasses);
-        _processRangeDistanceTraitNotetag($dataStates);
-        _processRangeDistanceTraitNotetag($dataArmors);
-        _processRangeDistanceEnemyNotetag($dataEnemies);
+    DataManager.addNotetagParserEnemies(_processEnemyNotetag);
+    //------------------------------------------------------------------------------
+    // Scene_Boot
 
+    const _Scene_Boot_start = Scene_Boot.prototype.start;
+    /**
+     * Scene_Bootを開始する。
+     */
+    Scene_Boot.prototype.start = function () {
         if (moveToFrontSkillId) {
             // エフェクト追加
             const skill = $dataSkills[moveToFrontSkillId];
-            if (skill.scope !== 11) {
+            if (skill.scope !== TargetManager.SCOPE_) {
                 console.error("skill: + " + skill.name + " scope is not for self.");
-                skill.scope = 11; // 対象を自分自身に変更
+                skill.scope = SCOPE_USER_ONLY; // 対象を自分自身に変更
             }
             _addEffectMoveBattlePosition(skill, 0, 1.0);
         }
@@ -446,10 +693,11 @@
             const skill = $dataSkills[moveToRearSkillId];
             if (skill.scope !== 11) {
                 console.error("skill: + " + skill.name + " scope is not for self.");
-                skill.scope = 11;
+                skill.scope = SCOPE_USER_ONLY;
             }
             _addEffectMoveBattlePosition(skill, 1, 1.0);
         }
+        _Scene_Boot_start.call(this);
     };
     //------------------------------------------------------------------------------
     // TextManager
@@ -459,7 +707,267 @@
     if (TextManager._specialFlags && Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE) {
         TextManager._specialFlags[Game_BattlerBase.FLAG_ID_IGNORE_RANGEDISTANCE] = parameters["textTraitIgnoreRangeDistance"] || "";
     }
-    
+    //------------------------------------------------------------------------------
+    // TargetManager
+    const _TargetManager_isTargetable = TargetManager.isTargetable;
+
+    /**
+     * subjectがitemを使用する際、targetを対象にできるかどうかを判定する。
+     * 
+     * @param {Game_Battler} subject 使用者
+     * @param {Game_Battler} target 判定対象
+     * @param {object} item DataItem/DataSkill
+     * @return {boolean] itemの対象に出来る場合にはtrue, それ以外はfalse.
+     */
+    // eslint-disable-next-line no-unused-vars
+    TargetManager.isTargetable = function(subject, target, item) {
+        return _TargetManager_isTargetable.call(this, subject, target, item)
+                && this.isReachTarget(subject, target, item);
+    };
+
+    /**
+     * スキルまたはアイテムが相手に届くかどうかを得る。
+     * 
+     * @param {Game_Battler} subject 使用者
+     * @param {Game_Battler} target 判定対象
+     * @param {object} item DataItem/DataSkill
+     * @return {boolean] itemの対象に出来る場合にはtrue, それ以外はfalse.
+     */
+    TargetManager.isReachTarget = function(subject, target, item) {
+        if ((subject.isActor() && target.isActor())
+                || (subject.isEnemy() && target.isEnemy())) {
+            // 同じパーティー内なら射程距離の判定はしない。
+            return true;
+        } else {
+            // 敵対者の場合のみ判定する。
+            const rangeDistance = subject.itemRangeDistance(item) - subject.battlePosition();
+            return (target.battlePosition() <= rangeDistance);
+        }
+    };
+
+    const _TargetManager_makeSelectableActionTargets = TargetManager.makeSelectableActionTargets;
+    /**
+     * subjectがitem を使用する時の、選択可能な対象を得る。
+     * 
+     * @param {Game_Battelr} subject 使用者
+     * @param {object} item アイテムまたはスキル
+     * @param {boolean} isConfused 混乱しているかどうか
+     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
+     */
+    TargetManager.makeSelectableActionTargets = function(subject, item, isConfused) {
+        switch (item.scope) {
+            case TargetManager.SCOPE_SELECTED_ROW_OPPONENTS:
+                return this.makeSelectableActionTargetsRowOpponents(subject, item, isConfused);
+            case TargetManager.SCOPE_FRONT_OPPONENTS:
+                return this.makeSelectableActionTargetsFrontOpponents(subject, item, isConfused);
+            case TargetManager.SCOPE_BACK_OPPONENTS:
+                return this.makeSelectableActionTargetsBackOpponents(subject, item, isConfused);
+            case TargetManager.SCOPE_ALIVED_ROW_FRIENDS:
+            case TargetManager.SCOPE_DEAD_ROW_FRIENDS:
+            case TargetManager.SCOPE_ROW_FRIENDS:
+                return this.makeSelectableActionTargetsRowFriends(subject, item, isConfused);
+            case TargetManager.SCOPE_ALIVED_FRONT_FRIENDS:
+                return this.makeSelectableActionTargetsFrontFriends(subject, item, isConfused);
+            case TargetManager.SCOPE_ALIVED_BACK_FRIENDS:
+                return this.makeSelectableActionTargetsFrontFriends(subject, item, isConfused);
+            case TargetManager.SCOPE_ALIVED_SAME_ROW_FRIENDS:
+                return this.makeSelectableActionTargetsSameRowFriends(subject, item, isConfused);
+            default:
+                return _TargetManager_makeSelectableActionTargets.call(this, subject, item, isConfused);
+        }
+    };
+
+    /**
+     * 敵1列を対象とする場合の選択可能な対象を得る。
+     * 
+     * @param {Game_Battelr} subject 使用者
+     * @param {object} item アイテムまたはスキル
+     * @param {boolean} isConfused 混乱しているかどうか
+     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
+     */
+    TargetManager.makeSelectableActionTargetsRowOpponents = function(subject, item, isConfused) {
+        const selectable = [];
+
+        const opponentMembers = this.opponentMembers(subject, item);
+        for (let row = 0; row < 12; row++) {
+            const rowMembers = opponentMembers.filter(member => member.battlePosition() === row);
+            if (rowMembers.length === 0) {
+                break;
+            }
+            const name = textTargetRow.format(row + 1);
+            selectable.push(new Game_ActionTargetGroup(row, name, rowMembers, rowMembers));
+        }
+        if (isConfused) {
+            const friendMembers = this.friendMembers(subject, item);
+            for (let row = 0; row < 12; row++) {
+                const rowMembers = friendMembers.filter(member => member.battlePosition() === row);
+                if (rowMembers.length === 0) {
+                    break;
+                }
+                const name = textTargetRow.format(row + 1);
+                selectable.push(new Game_ActionTargetGroup(row + 1000, name, rowMembers, rowMembers));
+            }
+        }
+        return selectable;
+    };
+    /**
+     * 敵前衛を対象とする場合の選択可能な対象を得る。
+     * 
+     * @param {Game_Battelr} subject 使用者
+     * @param {object} item アイテムまたはスキル
+     * @param {boolean} isConfused 混乱しているかどうか
+     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
+     */
+    TargetManager.makeSelectableActionTargetsFrontOpponents = function(subject, item, isConfused) {
+        const selectable = [];
+        const scopeInfo = item.scopeInfo(item.scope);
+
+        const opponentMembers = this.opponentMembers(subject, item);
+        const rowMembers = opponentMembers.filter(member => member.battlePosition() === 0);
+        if (rowMembers.length > 0) {
+            selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
+        }
+        if (isConfused) {
+            const friendMembers = this.friendMembers(subject, item);
+            const rowMembers = friendMembers.filter(member => member.battlePosition() === 0);
+            if (rowMembers.length > 0) {
+                selectable.push(new Game_ActionTargetGroup(row + 1000, scopeInfo.name, rowMembers, rowMembers));
+            }
+        }
+        return selectable;
+    };
+    /**
+     * 敵後衛を対象とする場合の選択可能な対象を得る。
+     * 
+     * @param {Game_Battelr} subject 使用者
+     * @param {object} item アイテムまたはスキル
+     * @param {boolean} isConfused 混乱しているかどうか
+     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
+     */
+    TargetManager.makeSelectableActionTargetsBackOpponents = function(subject, item, isConfused) {
+        const selectable = [];
+        const scopeInfo = item.scopeInfo(item.scope);
+
+        const opponentMembers = this.opponentMembers(subject, item);
+        const rowMembers = opponentMembers.filter(member => member.battlePosition() !== 0);
+        if (rowMembers.length > 0) {
+            selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
+        }
+        if (isConfused) {
+            const friendMembers = this.friendMembers(subject, item);
+            const rowMembers = friendMembers.filter(member => member.battlePosition() !== 0);
+            if (rowMembers.length > 0) {
+                selectable.push(new Game_ActionTargetGroup(row + 1000, scopeInfo.name, rowMembers, rowMembers));
+            }
+        }
+        return selectable;
+    };
+
+    /**
+     * 味方1列を対象とする場合の選択可能な対象を得る。
+     * 
+     * @param {Game_Battelr} subject 使用者
+     * @param {object} item アイテムまたはスキル
+     * @param {boolean} isConfused 混乱しているかどうか
+     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
+     */
+    TargetManager.makeSelectableActionTargetsRowFriends = function(subject, item, isConfused) {
+        const selectable = [];
+
+        const friendMembers = this.friendMembers(subject, item);
+        for (let row = 0; row < 12; row++) {
+            const rowMembers = friendMembers.filter(member => member.battlePosition() === row);
+            if (rowMembers.length === 0) {
+                break;
+            }
+            const name = textTargetRow.format(row + 1);
+            selectable.push(new Game_ActionTargetGroup(row, name, rowMembers, rowMembers));
+        }
+        if (isConfused) {
+            const opponentMembers = this.opponentMembers(subject, item);
+            for (let row = 0; row < 12; row++) {
+                const rowMembers = opponentMembers.filter(member => member.battlePosition() === row);
+                if (rowMembers.length === 0) {
+                    break;
+                }
+                const name = textTargetRow.format(row + 1);
+                selectable.push(new Game_ActionTargetGroup(row + 1000, name, rowMembers, rowMembers));
+            }
+        }
+        return selectable;
+    };
+
+    /**
+     * 味方前衛を対象とする場合の選択可能な対象を得る。
+     * 
+     * @param {Game_Battelr} subject 使用者
+     * @param {object} item アイテムまたはスキル
+     * @param {boolean} isConfused 混乱しているかどうか
+     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
+     */
+    TargetManager.makeSelectableActionTargetsFrontFriends = function(subject, item, isConfused) {
+        const selectable = [];
+        const scopeInfo = item.scopeInfo(item.scope);
+
+        const friendMembers = this.friendMembers(subject, item);
+        const rowMembers = friendMembers.filter(member => member.battlePosition() === 0);
+        if (rowMembers.length > 0) {
+            selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
+        }
+        if (isConfused) {
+            const opponentMembers = this.opponentMembers(subject, item);
+            const rowMembers = opponentMembers.filter(member => member.battlePosition() === 0);
+            if (rowMembers.length > 0) {
+                selectable.push(new Game_ActionTargetGroup(row + 1000, scopeInfo.name, rowMembers, rowMembers));
+            }
+        }
+        return selectable;
+    };
+    /**
+     * 味方後衛を対象とする場合の選択可能な対象を得る。
+     * 
+     * @param {Game_Battelr} subject 使用者
+     * @param {object} item アイテムまたはスキル
+     * @param {boolean} isConfused 混乱しているかどうか
+     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
+     */
+    TargetManager.makeSelectableActionTargetsFrontFriends = function(subject, item, isConfused) {
+        const selectable = [];
+        const scopeInfo = item.scopeInfo(item.scope);
+
+        const friendMembers = this.friendMembers(subject, item);
+        const rowMembers = friendMembers.filter(member => member.battlePosition() !== 0);
+        if (rowMembers.length > 0) {
+            selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
+        }
+        if (isConfused) {
+            const opponentMembers = this.opponentMembers(subject, item);
+            const rowMembers = opponentMembers.filter(member => member.battlePosition() !== 0);
+            if (rowMembers.length > 0) {
+                selectable.push(new Game_ActionTargetGroup(row + 1000, scopeInfo.name, rowMembers, rowMembers));
+            }
+        }
+        return selectable;
+    };
+    /**
+     * 味方同列を対象とする場合の選択可能な対象を得る。
+     * 
+     * @param {Game_Battelr} subject 使用者
+     * @param {object} item アイテムまたはスキル
+     * @param {boolean} isConfused 混乱しているかどうか
+     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
+     */
+    // eslint-disable-next-line no-unused-vars
+    TargetManager.makeSelectableActionTargetsSameRowFriends = function(subject, item, isConfused) {
+        const selectable = [];
+        const scopeInfo = item.scopeInfo(item.scope);
+
+        const friendMembers = this.friendMembers(subject, item);
+        const rowMembers = friendMembers.filter(member => member.battlePosition() === subject.battlePosition());
+        selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
+        return selectable;
+    };
+
     //------------------------------------------------------------------------------
     // Game_Action
 
@@ -489,7 +997,6 @@
         };
 
         const _Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
-
         /**
          * 効果を適用する。
          * 
@@ -520,16 +1027,6 @@
     }
 
     /**
-     * 列を対象にしたアクションかどうかを取得する。
-     * 
-     * @returns {boolean} 列を対象にしたアクションの場合にはtrue, それ以外はfalse
-     */
-    Game_Action.prototype.isForRow = function() {
-        const item = this.item();
-        return item && item.meta.rangeRow;
-    };
-
-    /**
      * このアクションの射程距離を得る。
      * 
      * @returns {number} 射程距離
@@ -543,202 +1040,6 @@
         }
     };
 
-    /**
-     * 指定したユニットに適用する射程距離を得る。
-     * 
-     * @param {Game_Unit} unit ユニット
-     * @returns {number} 射程距離
-     */
-    Game_Action.prototype.rangeDistanceForUnit = function(unit) {
-        const subject = this.subject();
-        if (unit.members().includes(subject)) {
-            return Game_Action.RANGE_MIDDLE; // To firendの場合には1（全員対象）
-        } else {
-            return this.itemRangeDistance() - subject.battlePosition();
-        }
-    };
-
-    /**
-     * 混乱時のアクション対象を得る。
-     * 
-     * Note: Game_Unit.randomTarget()をコールする代わりに、
-     *       Game_Action.randomTargets(unit)等をコールするように変更するため、
-     *       オーバーライドする。
-     * @returns {Game_Battler} アクション対象オブジェクトの配列
-     * !!!overwrite!!! Game_Action.confusionTarget
-     */
-    Game_Action.prototype.confusionTarget = function() {
-        var targets = [];
-        switch (this.subject().confusionLevel()) {
-            case 1:
-                targets = this.randomTargets(this.opponentsUnit());
-                break;
-            case 2:
-                if (Math.randomInt(2) === 0) {
-                    targets = this.randomTargets(this.opponentsUnit());
-                } else {
-                    targets = this.randomTargets(this.friendsUnit());
-                }
-                break;
-            default:
-                targets = this.randomTargets(this.friendsUnit());
-                break;
-        }
-
-        if (targets.length > 0) {
-            const index = Math.randomInt(targets.length);
-            return targets[index];
-        } else {
-            console.log("confusionTarget: bug? target is empty.");
-            return this.subject();
-        }
-    };
-
-
-    const _Game_Action_targetsForFriends = Game_Action.prototype.targetsForFriends;
-    /**
-     * 味方に対するアクション対象を得る。
-     * 
-     * @returns {Array<Game_Battler} アクション対象オブジェクトの配列
-     */
-    Game_Action.prototype.targetsForFriends = function() {
-        if (this.isForUser() && this.isForRow()) {
-            const unit = this.friendsUnit();
-            let row = this.subject().battlePosition();
-            return (row === 0) ? unit.frontAliveMembers() : unit.rearAliveMembers();
-        } else {
-            return _Game_Action_targetsForFriends.call(this);
-        }
-    };
-    /**
-     * ランダムに対象を決める。
-     * イベントコマンドによりランダムに対象選択する場合に呼ばれる。
-     * !!!overwrite!!! Game_Action.decideRandomTarget
-     *     ランダムターゲット選定時、距離を考慮して処理するためオーバーライドする。
-     */
-    Game_Action.prototype.decideRandomTarget = function() {
-        let target;
-        if (this.isForDeadFriend()) {
-            const unit = this.friendsUnit();
-            const range = this.rangeDistanceForUnit(unit);
-            target = unit.randomDeadTargetWithRange(range);
-        } else if (this.isForFriend()) {
-            const unit = this.friendsUnit();
-            const range = this.rangeDistanceForUnit(unit);
-            target = unit.randomTargetWithRange(range);
-        } else {
-            const unit = this.opponentsUnit()
-            const range = this.rangeDistanceForUnit(unit);
-            target = unit.randomTargetWithRange(range);
-        }
-        if (target) {
-            this._targetIndex = target.index();
-        } else {
-            this.clear();
-        }
-    };
-
-    /**
-     * グループからランダムな対象を得る。
-     * 
-     * @param {Game_Unit} unit 対象のグループ
-     * @returns {Array<Game_Battler>} 対象
-     * !!!overwrite!!! Game_Action.randomTargets
-     *     距離による対象の制約を加えるため、オーバーライドする。
-     */
-    Game_Action.prototype.randomTargets = function(unit) {
-        const targets = [];
-        const rangeDistance = this.rangeDistanceForUnit(unit);
-        const targetCount = this.numTargets() || 1;
-        for (let i = 0; i < targetCount; i++) {
-            targets.push(unit.randomTargetWithRange(rangeDistance));
-        }
-        return targets;
-    };
-
-    /**
-     * グループから死亡対象を得る。
-     * 
-     * @param {Game_Unit} unit 対象のグループ
-     * @returns {Array<Game_Battler>} 対象
-     * !!!overwrite!!! Game_Action.targetsForDead
-     *     列に対する対象制約のため、オーバーライドする。
-     */
-    Game_Action.prototype.targetsForDead = function(unit) {
-        if (this.isForOne()) {
-            const rangeDistance = this.rangeDistanceForUnit(unit);
-            if (this.isForRow()) {
-                let row = unit.members()[this._targetIndex].battlePosition();
-                if ((row > 0) && (unit.rearDeadMembers().length === 0)) {
-                    row = 0;
-                } else if ((row === 0) && (unit.frontDeadMembers().length === 0)) {
-                    row = 1;
-                }
-                return (row === 0) ? unit.frontAliveMembers() : unit.rearAliveMembers();
-            } else {
-                return [unit.smoothDeadTargetWithRange(this._targetIndex, rangeDistance)];
-            }
-        } else {
-            return unit.deadMembers();
-        }
-    };
-
-    /**
-     * グループから生存している対象を得る。
-     * 
-     * @param {Game_Unit} unit 対象のグループ
-     * @returns {Array<Game_Battler>} 対象
-     * !!!overwrite!!! Game_Action.targetsForAlive
-     */
-    Game_Action.prototype.targetsForAlive = function(unit) {
-        if (this.isForOne()) {
-            const rangeDistance = this.rangeDistanceForUnit(unit);
-            if (this.isForRow()) {
-                let row;
-                if (this._targetIndex < 0) {
-                    row = Math.randomInt(2);
-                } else {
-                    row = unit.members()[this._targetIndex].battlePosition();
-                }
-                if ((row > 0) && unit.rearAliveMembers().length === 0) {
-                    row = 0; // 後衛に誰も生存者がいない。-> 対象を前列にする。
-                }
-                return (row === 0) ? unit.frontAliveMembers() : unit.rearAliveMembers();
-            } else {
-                if (this._targetIndex < 0) {
-                    return [unit.randomTargetWithRange(rangeDistance)];
-                } else {
-                    return [unit.smoothTargetWithRange(this._targetIndex, rangeDistance)];
-                }
-            }
-        } else {
-            return unit.aliveMembers();
-        }
-    };
-
-    /**
-     * グループから生存または死亡している対象を得る。
-     * 
-     * @param {Game_Unit} unit 対象のグループ
-     * @returns {Array<Game_Battler>} 対象
-     * !!!overwrite!!! Game_Action.targetsForDeadAndAlive
-     */
-    Game_Action.prototype.targetsForDeadAndAlive = function(unit) {
-        if (this.isForOne()) {
-            if (this.isForRow()) {
-                let row = unit.members()[this._targetIndex].battlePosition();
-                if ((row > 0) && unit.rearMembers().length === 0) {
-                    row = 0; // 後衛に誰も生存者がいない。-> 対象を前列にする。
-                }
-                return (row === 0) ? unit.frontMembers() : unit.rearMembers();
-            } else {
-                const rangeDistance = this.rangeDistanceForUnit(unit);
-                return unit.smoothDeadAndAliveTarget(this._targetIndex, this.subject(), rangeDistance);
-            }
-        } else {
-            return unit.members();
-        }
-    };
     const _Game_Action_itemCnt = Game_Action.prototype.itemCnt;
     /**
      * このアクションに対するtargetのカウンター率を得る。
@@ -859,41 +1160,6 @@
 
     //------------------------------------------------------------------------------
     // Game_Enemy
-    const _Game_Enemy_isActionValid = Game_Enemy.prototype.isActionValid;
-    /**
-     * actionが実行対象かどうかを判定する。
-     * 
-     * @param {DataEnemyAction} action エネミーアクションデータ
-     */
-    Game_Enemy.prototype.isActionValid = function(action) {
-        return _Game_Enemy_isActionValid.call(this, action)
-                && this.isActionValidRange(action);
-    };
-
-    /**
-     * 指定されたアクションが実行可能な射程かどうかを取得する。
-     * 後列なのに射程1スキルが選択されないようにする。
-     * 
-     * @param {DataEnemyAction} action エネミーアクションデータ 
-     */
-    Game_Enemy.prototype.isActionValidRange = function(action) {
-        const skill = $dataSkills[action.skillId];
-        const opponentScopes = [7, 8, 9, 10, 11, 12, 13, 14];
-        if (opponentScopes.includes(skill.scope)) {
-            // 味方に対するスキルであれば無条件で発動。
-            return true;
-        } else {
-            if (this.battlePosition() === 0) {
-                // 前衛にいるなら、対象が存在しないスキルはないので不要。
-                return true;
-            } else {
-                // 後衛にいるなら、射程0のスキルは対象がいないので使用しない。
-                const rangeDistance = this.itemRangeDistance(skill);
-                return (rangeDistance > 0); // 中射程以上のスキルはtrue
-            }
-        }
-    };
-
     /**
      * デフォルトレンジを得る。
      * 
@@ -936,20 +1202,6 @@
 
     //------------------------------------------------------------------------------
     // Game_Unit
-    /**
-     * メンバーを選択する
-     * 
-     * @param {number} battlePosition 戦闘位置 
-     */
-    Game_Unit.prototype.selectRow = function(battlePosition) {
-        for (const member of this.members()) {
-            if (member.battlePosition() === battlePosition) {
-                member.select();
-            } else {
-                member.deselect();
-            }
-        }
-    };
     /**
      * 指定されたインデックスのBattlerの戦闘ポジションを変更する。
      * 
@@ -1109,118 +1361,6 @@
         return this.deadMembers().filter(member => member.battlePosition() !== 0);
     };
 
-    /**
-     * 射程距離内のメンバーを得る。
-     * 
-     * @param {number} range 射程距離
-     * @returns {Array<Game_Battler>} メンバーの配列
-     */
-    Game_Unit.prototype.membersWithRange = function(range) {
-        return this.members().filter(member => member.battlePosition() <= range);
-    };
-
-    /**
-     * 射程距離内の生存メンバーを得る。
-     * 
-     * @param {number} range 射程距離。
-     * @returns {Array<Game_Battler>} メンバーの配列
-     */
-    Game_Unit.prototype.aliveMembersWithRange = function(range) {
-        return this.aliveMembers().filter(member => member.battlePosition() <= range);
-    };
-
-    /**
-     * 射程距離内の死亡メンバーを得る。
-     * 
-     * @param {number} range 射程距離。
-     * @returns {Array<Game_Battler>} メンバーの配列
-     */
-    Game_Unit.prototype.deadMembersWithRange = function(range) {
-        return this.deadMembers().filter(member => member.battlePosition() <= range);
-    };
-    /**
-     * 射程距離内メンバーの、ターゲット率の合計を得る。
-     * 
-     * @returns {number} ターゲット率合計
-     */
-    Game_Unit.prototype.tgrSumWithRange = function(range) {
-        return this.aliveMembersWithRange(range).reduce((r, member) => r + member.tgr, 0);
-    };
-
-    /**
-     * 射程距離を加味した、ランダムなターゲットを得る。
-     * 
-     * @param {number} range 射程距離
-     * @returns {Game_Battler} ランダムなターゲット
-     */
-    Game_Unit.prototype.randomTargetWithRange = function(range) {
-        let tgrRand = Math.random() * this.tgrSumWithRange(range);
-        let target = null;
-        for (const member of this.aliveMembersWithRange(range)) {
-            tgrRand -= member.tgr;
-            if (tgrRand <= 0 && !target) {
-                target = member;
-            }
-        }
-        return target;
-    };
-
-    /**
-     * 射程距離を加味したランダムな死亡ターゲットを得る。
-     * 
-     * @param {number} range 射程距離
-     * @returns {Game_Battler} ランダムな死亡ターゲット
-     */
-    Game_Unit.prototype.randomDeadTargetWithRange = function(range) {
-        const members = this.deadMembersWithRange(range);
-        return members.length ? members[Math.randomInt(members.length)] : null;
-    };
-
-    /**
-     * 射程距離を加味したターゲットを得る。
-     * 実際にアクションを起こそうとした際、
-     * 対象が死亡していたら切り替えて使用するための対象を得るためのインタフェース。
-     * 
-     * @param {number} index インデックス番号
-     * @param {number} range 射程距離
-     * @returns {Game_Battler} indexで指定したメンバーが生存していれば、そのメンバーが返る。
-     *                        生存していなければ、生存メンバーの先頭が返る。
-     */
-    Game_Unit.prototype.smoothTargetWithRange = function(index, range) {
-        const member = this.membersWithRange(range)[Math.max(0, index)];
-        return member && member.isAlive() ? member : this.aliveMembersWithRange(range)[0];
-    };
-
-    /**
-     * 指定された死亡対象を取得する。
-     * 
-     * @param {number} インデックス番号
-     * @param {number} 射程距離
-     * @returns {Game_Battler} Game_Battlerオブジェクト。
-     *         indexで指定した対象が死亡していない場合、deadMembers()の先頭が返る。
-     */
-    Game_Unit.prototype.smoothDeadTargetWithRange = function(index, range) {
-        const member = this.membersWithRange(range)[Math.max(0, index)];
-        return member && member.isDead() ? member : this.deadMembersWithRange(range)[0];
-    };
-
-    /**
-     * 射程距離を加味した、生存または死亡対象を得る。
-     * 
-     * @param {number} インデックス番号
-     * @param {number} 射程距離
-     * @returns {Game_Battler} Game_Battlerオブジェクト。
-     *         indexで指定した対象が射程距離外の場合、射程距離内の先頭メンバーを得る。
-     */
-    Game_Unit.prototype.smoothDeadAndAliveTarget = function(index, range) {
-        const member = this.membersWithRange(range)[Math.max(0, index)];
-        if (member && (member.battlePosition() <= range)) {
-            return member;
-        } else {
-            this.membersWithRange(range)[0];
-        }
-    };
-
     //------------------------------------------------------------------------------
     // Game_Troop
     const _Game_Troop_setup = Game_Troop.prototype.setup;
@@ -1342,127 +1482,7 @@
             }
         }
     };
-    //------------------------------------------------------------------------------
-    // Window_BattleEnemy
 
-    const _Window_BattleEnemy_initialize = Window_BattleEnemy.prototype.initialize;
-
-    /**
-     * Window_BattleEnemyを構築する。
-     * 
-     * @param {Rectangle} rect ウィンドウ矩形領域
-     */
-    // eslint-disable-next-line no-unused-vars
-    Window_BattleEnemy.prototype.initialize = function(rect) {
-        _Window_BattleEnemy_initialize.call(this, ...arguments);
-        this._actionRangeDistance = 0;
-    };
-
-    /**
-     * 現在の選択が選択可能かどうかを取得する。
-     * 
-     * @returns {boolean} 選択可能な場合にtrue, それ以外はfalse
-     * !!!overwrite!!! Window_BattleEnemy_isCurrentItemEnabled
-     */
-    Window_BattleEnemy.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.enemy());
-    };
-
-    // Note: isEnabledが定義されているかはわからないが、
-    //       定義されていたら呼び出すようにする。
-    const _Window_BattleEnemy_isEnabled = Window_BattleEnemy.prototype.isEnabled;
-
-    /**
-     * 項目が選択可能かどうかを取得する。
-     * 
-     * @param {Game_Enemy} enemy 選択可否判定するエネミー
-     */
-    Window_BattleEnemy.prototype.isEnabled = function(enemy) {
-        let enabled = this.inSubectRangeDistance(enemy);
-        if (enabled && _Window_BattleEnemy_isEnabled) {
-            return _Window_BattleEnemy_isEnabled.call(this, enemy);
-        } else {
-            return enabled;
-        }
-    };
-
-    /**
-     * 項目がスキルの射程内かどうかを判定する。
-     * 
-     * @param {Game_Enemy} enemy 選択可否判定するエネミー
-     */
-    Window_BattleEnemy.prototype.inSubectRangeDistance = function(enemy) {
-        return enemy && (enemy.battlePosition() <= this._actionRangeDistance);
-    };
-
-    const _Window_BattleEnemy_drawItem = Window_BattleEnemy.prototype.drawItem;
-    /**
-     * 項目を描画する。
-     * 
-     * @param {number} index インデックス番号
-     */
-    Window_BattleEnemy.prototype.drawItem = function(index) {
-        const enemy = this._enemies[index];
-        this.changePaintOpacity(this.isEnabled(enemy));
-        _Window_BattleEnemy_drawItem.call(this, index);
-    };
-
-    const _Window_BattleEnemy_refresh = Window_BattleEnemy.prototype.refresh;
-    /**
-     * ウィンドウを更新する。
-     */
-    Window_BattleEnemy.prototype.refresh = function() {
-        _Window_BattleEnemy_refresh.call(this);
-        const action = BattleManager.inputtingAction();
-        this._actionRangeDistance
-                = (action) ? action.rangeDistanceForUnit($gameTroop) : -1;
-    };
-
-    const _Window_BattleEnemy_select = Window_BattleEnemy.prototype.select;
-
-    /**
-     * 対象のエネミーを選択する。
-     * 
-     * @param {number} index インデックス番号
-     * !!!overwrite!!! Window_BattleEnemy_select
-     */
-    Window_BattleEnemy.prototype.select = function(index) {
-        _Window_BattleEnemy_select.call(this, index);
-
-        const action = BattleManager.inputtingAction();
-        if (action) {
-            if (action.isForRow()) {
-                $gameTroop.selectRow(this.enemy().battlePosition());
-            } else {
-                $gameTroop.select(this.enemy());
-            }
-        } else {
-            $gameTroop.select(null);
-        }
-    };
-
-    //------------------------------------------------------------------------------
-    // Scene_BattleActor
-    /**
-     * 選択インデックスを設定する。
-     * 
-     * @param {number} index インデックス番号
-     * !!!overwrite!!! Window_BattleActor_select
-     */
-    Window_BattleActor.prototype.select = function(index) {
-        Window_BattleStatus.prototype.select.call(this, index);
-        const action = BattleManager.inputtingAction();
-        const actor = this.actor(index);
-        if (action && actor) {
-            if (action.isForRow()) {
-                $gameParty.selectRow(actor.battlePosition());
-            } else {
-                $gameParty.select(this.actor(index));
-            }
-        } else {
-            $gameParty.select(null);
-        }
-    };
     //------------------------------------------------------------------------------
     // Scene_Battle
 
