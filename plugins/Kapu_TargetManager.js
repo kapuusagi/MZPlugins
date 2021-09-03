@@ -219,45 +219,70 @@ $dataItemScopes = null;
     //     // パラメータメンバは @argで指定した名前でアクセスできる。
     // });
 
+
     /**
      * スコープエントリ配列。
      * needsSelectionとtargetCountだけ定義し、
      * それ以外はtrueを返す項目だけ定義する。
      * falseの項目はundefinedとすることで拡張しても互換性が維持されるようにする。 */
-    $dataItemScopes = [
-        null,
-        { id:1, name:textSelectedEnemy, needsSelection:true, targetCount:1,
-            forOpponent:true, forAlive:true },
-        { id:2, name:textAllEnemies, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
-            forOpponent:true, forAlive:true, forAll:true },
-        { id:3, name:textRandom1Enemy, needsSelection:false, targetCount:1,
-            forOpponent:true, forAlive:true, random:true },
-        { id:4, name:textRandom2Enemy, needsSelection:false, targetCount:2,
-            forOpponent:true, forAlive:true, random:true },
-        { id:5, name:textRandom3Enemy, needsSelection:false, targetCount:3,
-            forOpponent:true, forAlive:true, random:true },
-        { id:6, name:textRandom4Enemy, needsSelection:false, targetCount:4,
-            forOpponent:true, forAlive:true, random:true },
-        { id:7, name:textAlivedFriend, needsSelection:true, targetCount:1,
-            forFriend:true, forAlive:true },
-        { id:8, name:textAllAlivedFriend, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
-            forFriend:true, forAlive:true, forAll:true },
-        { id:9, name:textDeadFriend, needsSelection:true, targetCount:1,
-            forFriend:true, forDead:true },
-        { id:10, name:textAllDeadFriend, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
-            forFriend:true, forDead:true, forAll:true },
-        { id:11, name:textUser, needsSelection:false, targetCount:1,
-            forFriend:true, forAlive:true, forUserOnly:true, },
-        { id:12, name:textFriend, needsSelection:true, targetCount:1,
-            forFriend:true, forAlive:true, forDead:true },
-        { id:13, name:textAllFriends, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
-            forFriend:true, forAlive:true, forDead:true, forAll:true },
-        { id:14, name:textAllAlives, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
-            forOpponent:true, forFriend:true,forEveryone:true, forAlive:true, forAll:true },
-    ];
+    $dataItemScopes = [ null ];
+    TargetManager.SCOPE_ONE_OPPONENTS = 1; // 敵単体
+    $dataItemScopes[TargetManager.SCOPE_ONE_OPPONENTS] = { id:TargetManager.SCOPE_ONE_OPPONENTS,
+        name:textSelectedEnemy, needsSelection:true, targetCount:1,
+        forOpponent:true, forAlive:true };
+    TargetManager.SCOPE_ALL_OPPONENTS = 2; // 敵全体
+        $dataItemScopes[TargetManager.SCOPE_ALL_OPPONENTS] = { id:TargetManager.SCOPE_ALL_OPPONENTS,
+        name:textAllEnemies, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+        forOpponent:true, forAlive:true, forAll:true };
+    TargetManager.SCOPE_RANDOME_1_OPPONENT = 3; // ランダムな敵1体
+    $dataItemScopes[TargetManager.SCOPE_RANDOME_1_OPPONENT] = { id:TargetManager.SCOPE_RANDOME_1_OPPONENT,
+        name:textRandom1Enemy, needsSelection:false, targetCount:1,
+        forOpponent:true, forAlive:true, random:true };
+    TargetManager.SCOPE_RANDOME_2_OPPONENTS = 4; // ランダムな敵2体
+    $dataItemScopes[TargetManager.SCOPE_RANDOME_2_OPPONENTS] = { id:TargetManager.SCOPE_RANDOME_2_OPPONENTS,
+        name:textRandom2Enemy, needsSelection:false, targetCount:2,
+        forOpponent:true, forAlive:true, random:true };
+    TargetManager.SCOPE_RANDOME_3_OPPONENTS = 5; // ランダムな敵3体
+    $dataItemScopes[TargetManager.SCOPE_RANDOME_3_OPPONENTS] = { id:TargetManager.SCOPE_RANDOME_3_OPPONENTS,
+        name:textRandom3Enemy, needsSelection:false, targetCount:3,
+        forOpponent:true, forAlive:true, random:true };
+    TargetManager.SCOPE_RANDOME_4_OPPONENTS = 6; // ランダムな敵4体
+    $dataItemScopes[TargetManager.SCOPE_RANDOME_4_OPPONENTS] = { id:TargetManager.SCOPE_RANDOME_4_OPPONENTS,
+        name:textRandom4Enemy, needsSelection:false, targetCount:4,
+       forOpponent:true, forAlive:true, random:true };
+    TargetManager.SCOPE_ALIVED_FRIEND = 7;
+    $dataItemScopes[TargetManager.SCOPE_ALIVED_FRIEND] = { id:TargetManager.SCOPE_ALIVED_FRIEND,
+        name:textAlivedFriend, needsSelection:true, targetCount:1,
+       forFriend:true, forAlive:true };
+    TargetManager.SCOPE_ALL_ALIVED_FRIENDS = 8;
+    $dataItemScopes[TargetManager.SCOPE_ALL_ALIVED_FRIENDS] = { id:TargetManager.SCOPE_ALL_ALIVED_FRIENDS,
+        name:textAllAlivedFriend, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+        forFriend:true, forAlive:true, forAll:true };
+    TargetManager.SCOPE_DEAD_FRIEND = 9;
+    $dataItemScopes[TargetManager.SCOPE_DEAD_FRIEND] = { id:TargetManager.SCOPE_DEAD_FRIEND,
+        name:textDeadFriend, needsSelection:true, targetCount:1,
+        forFriend:true, forDead:true };
+    TargetManager.SCOPE_ALL_DEAD_FRIENDS = 10;
+    $dataItemScopes[TargetManager.SCOPE_ALL_DEAD_FRIENDS] = { id:TargetManager.SCOPE_ALL_DEAD_FRIENDS,
+        name:textAllDeadFriend, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+        forFriend:true, forDead:true, forAll:true };
+    TargetManager.SCOPE_USER_ONLY = 11;
+    $dataItemScopes[TargetManager.SCOPE_USER_ONLY] = { id:TargetManager.SCOPE_USER_ONLY,
+        name:textUser, needsSelection:false, targetCount:1,
+        forFriend:true, forAlive:true, forUserOnly:true, };
+    TargetManager.SCOPE_FRIEND = 12;
+    $dataItemScopes[TargetManager.SCOPE_FRIEND] = { id:TargetManager.SCOPE_FRIEND,
+        name:textFriend, needsSelection:true, targetCount:1,
+        forFriend:true, forAlive:true, forDead:true };
+    TargetManager.SCOPE_ALL_FRIENDS = 13;
+    $dataItemScopes[TargetManager.SCOPE_ALL_FRIENDS] = { id:TargetManager.SCOPE_ALL_FRIENDS,
+        name:textAllFriends, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+        forFriend:true, forAlive:true, forDead:true, forAll:true };
+    TargetManager.SCOPE_EVERYONE = 14;
+    $dataItemScopes[TargetManager.SCOPE_EVERYONE] = { id:TargetManager.SCOPE_EVERYONE,
+        name:textAllAlives, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
+       forOpponent:true, forFriend:true,forEveryone:true, forAlive:true, forAll:true };
 
-    // アクションには、「効果範囲」と「対象」がある。
-    // 更に周囲に対するもの、という考え方もある。
 
     //------------------------------------------------------------------------------
     // ColorManager
@@ -382,30 +407,28 @@ $dataItemScopes = null;
      */
     TargetManager.makeSelectableActionTargets = function(subject, item, isConfused) {
         switch (item.scope) {
-            case 1: // selected opponent one.
+            case TargetManager.SCOPE_ONE_OPPONENTS: // selected opponent one.
                 return this.makeSelectableActionTargetsSelectedOpponent(subject, item, isConfused);
-            case 2: // all opponents.
+            case TargetManager.SCOPE_ALL_OPPONENTS: // all opponents.
                 return this.makeSelectableActionTargetsAllOpponents(subject, item, isConfused);
-            case 3: // random one opponent
-            case 4: // random two opponents
-            case 5: // random three opponents
-            case 6: // random four opponents
+            case TargetManager.SCOPE_RANDOME_1_OPPONENT: // random one opponent
+            case TargetManager.SCOPE_RANDOME_2_OPPONENTS: // random two opponents
+            case TargetManager.SCOPE_RANDOME_3_OPPONENTS: // random three opponents
+            case TargetManager.SCOPE_RANDOME_4_OPPONENTS: // random four opponents
                 return this.makeSelectableActionTargetsRandomOpponents(subject, item, isConfused);
-            case 7: // selected alived friend
-            case 9: // selected dead friend
-            case 12: // selected friend
+            case TargetManager.SCOPE_ALIVED_FRIEND: // selected alived friend
+            case TargetManager.SCOPE_DEAD_FRIEND: // selected dead friend
+            case TargetManager.SCOPE_FRIEND: // selected friend
                 return this.makeSelectableActionTargetsOneFriend(subject, item, isConfused);
-            case 8: // all alived friends
-            case 10: // all dead friend
-            case 13: // all friends
+            case TargetManager.SCOPE_ALL_ALIVED_FRIENDS: // all alived friends
+            case TargetManager.SCOPE_ALL_DEAD_FRIENDS: // all dead friend
+            case TargetManager.SCOPE_ALL_FRIENDS: // all friends
                 return this.makeSelectableActionTargetsAllFriends(subject, item, isConfused);
-            case 11: // user
+            case TargetManager.SCOPE_USER_ONLY: // user
                 return this.makeSelectableActionTargetsUser(subject, item, isConfused);
-            case 14: // all alived
+            case TargetManager.SCOPE_EVERYONE: // all alived
                 return this.makeSelectableActionTargetsAll(subject, item, isConfused);
         }
-
-
     };
 
     /**
