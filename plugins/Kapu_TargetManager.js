@@ -281,7 +281,7 @@ $dataItemScopes = null;
     TargetManager.SCOPE_EVERYONE = 14;
     $dataItemScopes[TargetManager.SCOPE_EVERYONE] = { id:TargetManager.SCOPE_EVERYONE,
         name:textAllAlives, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
-       forOpponent:true, forFriend:true,forEveryone:true, forAlive:true, forAll:true };
+        forOpponent:true, forFriend:true,forEveryone:true, forAlive:true, forAll:true };
 
 
     //------------------------------------------------------------------------------
