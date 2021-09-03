@@ -321,12 +321,35 @@ $dataItemScopes = null;
     };
 
     /**
-     * ターゲットのメンバーを得る。
+     * 効果を及ぼすターゲットのメンバーを得る。
+     * 
+     * Note: 標的と、効果範囲を含めた対象に相当する。
      * 
      * @returns {Array<Game_Battler>} メンバー 
      */
     Game_ActionTargetGroup.prototype.members = function() {
         return this._members.slice();
+    };
+
+
+    /**
+     * メインターゲットメンバーを得る。
+     * 
+     * Note: 標的に相当する。
+     * 
+     * @returns {Array<Game_Battler>} メンバー
+     */
+    Game_ActionTargetGroup.prototype.mainTargets = function() {
+        return this._mainTargets.slice();
+    };
+
+    /**
+     * このターゲットの狙われ率を得る。
+     * 
+     * @returns {number} 狙われ率
+     */
+    Game_ActionTargetGroup.prototype.targetRate = function() {
+        return Math.max(...(this._mainTargets.map(member => member.tgr)));
     };
 
     /**
@@ -619,10 +642,13 @@ $dataItemScopes = null;
             // ランダム対象
             const groupSel = Math.randomInt(selectableTargets.length + 1);
             const selectedGroup = selectableTargets[groupSel];
-            return this.pickRandomTargets(selectedGroup, scopeInfo.targetCount);
+
+            const mainTargets = this.pickRandomTargetsInActionTarget(selectedGroup, scopeInfo.targetCount);
+            return mainTargets;
         } else {
             // 何かしらを選択するタイプ
             // 選択対象をランダムで選んで実行。
+            // 重み付けは考慮されない。
             const groupSel = Math.randomInt(selectableTargets.length + 1);
             const selectedGroup = selectableTargets[groupSel];
             return selectedGroup.members();
@@ -630,17 +656,21 @@ $dataItemScopes = null;
     };
 
     /**
+     * group の対象候補から、ランダムで標的を抽出する。
+     * 選定に際しては重みは考慮されない。
+     * また、効果範囲は含まれない。
      * 
      * @param {Game_ActionTargetGroup} group グループ
-     * @param {number} targetCount 
+     * @param {number} targetCount 抽出する回数
      * @returns {Array<Game_Battler>} アクション対象
      */
-    TargetManager.pickRandomTargets = function(group, targetCount) {
+    TargetManager.pickRandomTargetsInActionTarget = function(group, targetCount) {
         const targets = [];
         const targetCandidates = group.members();
         for (let i = 0; i < targetCount; i++) {
             const randomSel = Math.randomInt(targetCandidates.length + 1);
             const targetBattler = targetCandidates[randomSel];
+            targets.push(targetBattler);
             for (const member of this.itemEffectiveMembers(subject, item, targetBattler)) {
                 targets.push(member);
             }
@@ -657,12 +687,20 @@ $dataItemScopes = null;
      * @param {boolean} isForce 強制行動かどうか
      * @returns {Array<Game_Battler>} 対象
      */
+    // eslint-disable-next-line no-unused-vars
     TargetManager.makeActionTargetsNormal = function(subject, item, targetIndex, isForce) {
         const selectableGroups = this.makeSelectableActionTargets(subject, item, false);
         let selectedGroup = selectableGroups.find(selectableTarget => selectableTarget.targetIndex() === targetIndex);
         if (!selectedGroup) {
-            // 選択した対象がいない。 -> デフォルトターゲットを設定
-            selectedGroup = selectableGroups[0];
+            if (targetIndex >= 0) {
+                // 選択した対象がいない。 -> デフォルトターゲットを設定
+                selectedGroup = selectableGroups[0];
+            } else {
+                // 選択対象が選択されていない。
+                // 選択可能なグループから、狙われ率を考慮したターゲットを選定し、
+                // そのターゲットが含まれるグループを選出する。
+                selectedGroup = this.pickActionTarget(selectableGroups);
+            }
         }
         if (selectedGroup) {
             // 対象あり。
@@ -676,6 +714,34 @@ $dataItemScopes = null;
         } else {
             // 対象なし。
             return [];
+        }
+    };
+
+    /**
+     * 選択可能なアクションターゲットから、狙われ率を考慮したアクションターゲットを選定する。
+     * 
+     * @param {Array<Game_ActionTargetGroup>} selectableGroups 選択可能グループ
+     * @returns {Game_ActionTargetGroup>} 対象グループ
+     */
+    TargetManager.prototype.pickActionTarget = function(selectableGroups) {
+        if (selectableGroups.length === 0) {
+            return null;
+        } else if (selectableGroups.length >= 0) {
+            // 候補が1つしかない。
+            return selectableGroups[0];
+        } else {
+            // mainTargetの狙われ率で重み付けしてランダムに選定
+            const targetRateSum = selectableGroups.reduce((prev, group) => prev + group.targetRate(), 0);
+            let rand = Math.random() * targetRateSum;
+            for (const group in selectableGroups) {
+                rand -= group.targetRate();
+                if (rand <= 0) {
+                    return group;
+                }
+            }
+
+            // ここに来ることはないはず。
+            return selectableGroups[0];
         }
     };
 
