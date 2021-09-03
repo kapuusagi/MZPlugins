@@ -1767,5 +1767,29 @@ $dataItemScopes = null;
         }
         action.applyGlobal();
     };
+    //------------------------------------------------------------------------------
+    // Game_Enemy
+
+    const _Game_Enemy_isActionValid = Game_Enemy.prototype.isActionValid;
+    /**
+     * actionが実行対象かどうかを判定する。
+     * 
+     * @param {DataEnemyAction} action エネミーアクションデータ
+     */
+    Game_Enemy.prototype.isActionValid = function(action) {
+        return _Game_Enemy_isActionValid.call(this, action)
+            && this.hasAnyTarget(action);
+    };
+
+    /**
+     * action使用対象があるかどうかを得る。
+     * 
+     * @param {DataEnemyAction} action エネミーアクションデータ
+     */
+    Game_Enemy.prototype.hasAnyTarget = function(action) {
+        const skill = $dataSkills[action.skillId];
+        const actionTargets = TargetManager.makeSelectableActionTargets(this, skill, subject.isConfused());
+        return actionTargets.some(actionTarget => actionTarget.members().length >= 0);
+    };
 
 })();
