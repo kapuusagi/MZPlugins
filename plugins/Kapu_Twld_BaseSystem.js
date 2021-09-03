@@ -505,30 +505,6 @@
         }
     };
     //------------------------------------------------------------------------------
-    // BattleManager
-    /**
-     * アクターまたはエネミーのアクションを開始する。
-     * !!!overwrite!!! BattleManager.startAction()
-     *     行動対象がいなかった場合、何もしない(ターン時) or 行動再選択(TPB時)とするように変更する。
-     */
-    BattleManager.startAction = function() {
-        const subject = this._subject;
-        const action = subject.currentAction();
-        const targets = action.makeTargets();
-        if (targets.length == 0) {
-            // アクション対象がない。
-            this.endAction();
-        } else {
-            this._phase = "action";
-            this._action = action;
-            this._targets = targets;
-            subject.useItem(action.item());
-            this._action.applyGlobal();
-            this._logWindow.startAction(subject, action, targets);
-        }
-    };
-
-    //------------------------------------------------------------------------------
     // Game_BattlerBase
     /**
      * ステートのアイコンIDを得る。
