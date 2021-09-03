@@ -1256,7 +1256,8 @@ $dataItemScopes = null;
      * @returns {Rectangle} ウィンドウ矩形領域
      */
     Scene_Battle.prototype.actionTargetWindowRect = function() {
-        return this.enemyWindowRect();
+        // 既定のデザインでは、アクターコマンドウィンドウに重ねる形にする。
+        return this.actorCommandWindowRect();
     };
 
     const _Scene_Battle_hideSubInputWindows = Scene_Battle.prototype.hideSubInputWindows;
