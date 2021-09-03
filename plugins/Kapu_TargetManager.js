@@ -10,6 +10,12 @@
  * @type boolean
  * @default true
  * 
+ * @param cancelActionWhenNoTargets
+ * @text アクション対象がいないとき、行動をキャンセルする
+ * @desc アクション実行時、アクション対象がいなかった場合にキャンセルする。
+ * @type boolean
+ * @default false
+ * 
  * @param effectiveColor
  * @text 効果範囲色
  * @desc メニューなどでアイテム・スキル使用対象を強調表示する色
@@ -186,6 +192,8 @@ $dataItemScopes = null;
     const alwaysSelectTarget = (parameters["alwaysSelectTarget"] === undefined)
             ? true : parameters["alwaysSelectTarget"] === "true";
     const effectiveColor = parameters["effectiveColor"] || "rgb(255,255,128)";
+    const cancelActionWhenNoTargets = (parameters["cancelActionWhenNoTargets"] === undefined)
+            ? false : (parameters["cancelActionWhenNoTargets"] === "true");
 
     const textSelectedEnemy = parameters["textSelectedEnemy"] || "One enemy";
     const textAllEnemies = parameters["textAllEnemies"] || "All enemies";
@@ -442,22 +450,18 @@ $dataItemScopes = null;
      */
     TargetManager.makeSelectableActionTargetsSelectedOpponent = function(subject, item, isConfused) {
         const selectable = [];
-        let targetIndex = 0;
         const opponentMembers = this.opponentMembers(subject, item);
         for (const member of opponentMembers) {
             const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
-            selectable.push(new Game_ActionTargetGroup(targetIndex, member.name(), [ member ], effectiveMembers));
-            targetIndex++;
+            selectable.push(new Game_ActionTargetGroup(member.index(), member.name(), [ member ], effectiveMembers));
         }
 
-        targetIndex = 1000;
         if (isConfused) {
             // 混乱しているときは味方も対象
             const friendMembers = this.friendMembers(subject, item);
             for (const member of friendMembers) {
                 const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
-                selectable.push(new Game_ActionTargetGroup(targetIndex, member.name, [ member ], effectiveMembers));
-                targetIndex++;
+                selectable.push(new Game_ActionTargetGroup(member.index() + 1000, member.name, [ member ], effectiveMembers));
             }
         }
         return selectable;
@@ -606,7 +610,7 @@ $dataItemScopes = null;
     };
 
     /**
-     * ターゲットを得る。
+     * アクションのメインターゲットを得る。
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
@@ -651,7 +655,7 @@ $dataItemScopes = null;
             // 重み付けは考慮されない。
             const groupSel = Math.randomInt(selectableTargets.length + 1);
             const selectedGroup = selectableTargets[groupSel];
-            return selectedGroup.members();
+            return selectedGroup.mainTargets();
         }
     };
 
@@ -676,7 +680,7 @@ $dataItemScopes = null;
             }
         }
         return targets;
-    }
+    };
 
     /**
      * アクションターゲットを得る。
@@ -709,7 +713,7 @@ $dataItemScopes = null;
                 // ランダムなのを選出して返す。
                 return this.pickRandomTargets(selectedGroup, scopeInfo.targetCount);
             } else {
-                return selectedGroup.members();
+                return selectedGroup.mainTargets();
             }
         } else {
             // 対象なし。
@@ -787,6 +791,14 @@ $dataItemScopes = null;
             return [];
         }
     };
+
+    /**
+     * このアクションをクリアする。
+     */
+    Game_Action.prototype.clear = function() {
+        return this._targets = null;
+    };
+
     /**
      * 設定された対象と現在の状態を踏まえた、実際のアクションの対象を作成する。
      * 
@@ -796,9 +808,40 @@ $dataItemScopes = null;
      *     ターゲット部分の扱いを変更するため、オーバーライドする。 
      */
     Game_Action.prototype.makeTargets = function() {
-        const targets = TargetManager.makeActionTargets(this.subject(), this.item(), this._targetIndex, this._forcing);
+        if (!this._targets) {
+            this._targets = TargetManager.makeActionTargets(this.subject(), this.item(), this._targetIndex, this._forcing);
+        }
+        return this._targets.slice();
+    };
+
+    /**
+     * 効果を及ぼすターゲットを作成する。
+     * Note: 効果範囲と回数を考慮した、apply()をコールするべき対象を返す。
+     * 
+     * @returns {Array<Game_Battler>} 対象
+     */
+    Game_Action.prototype.makeEffectiveTargets = function() {
+        if (!this._targets) {
+            // アクション対象のメインターゲットを構築する。
+            this.makeTargets();
+        }
+        const subject = this.subject();
+        const item = this.item();
+        const effectiveTargets = [];
+        const scopeInfo = TargetManager.scopeInfo(item.scope);
+        for (const target of this._targets) {
+            const effectiveMembers = this.itemEffectiveMembers(subject, item, target);
+            for (const member of effectiveMembers) {
+                if (!effectiveTargets.includes(member) || scopeInfo.random) {
+                    // 効果対象メンバーに含まれていない場合に追加。
+                    // ランダム選定の場合には常に追加。
+                    effectiveTargets.push(member);
+                }
+            }
+        }
+
         // 繰返し実行分だけ加算。(1つの対象に複数回適用する場合に使用する)
-        return this.repeatTargets(targets);
+        return this.repeatTargets(effectiveTargets);
     };
     /**
      * このアクションが敵対者を対象に対するものかどうかを判定する。
@@ -1123,7 +1166,29 @@ $dataItemScopes = null;
             this.changePaintOpacity(1);
         }
     };
-
+    //------------------------------------------------------------------------------
+    // BattleManager
+    /**
+     * アクターまたはエネミーのアクションを開始する。
+     * 
+     * !!!overwrite!!! BattleManager.startAction()
+     *     アニメーション表示対象と、効果対象を分離するためオーバーライドする。
+     */
+    BattleManager.startAction = function() {
+        const subject = this._subject;
+        const action = subject.currentAction();
+        const targets = action.makeTargets();
+        if ((targets.length === 0) && cancelActionWhenNoTargets) {
+            this.endAction();
+        } else {
+            this._phase = "action";
+            this._action = action;
+            this._targets = action.makeEffectiveTargets(); // 効果対象
+            subject.useItem(action.item());
+            this._action.applyGlobal(); // グローバルな使用効果を適用。(コモンイベントを準備するとか、最後のアクションを保存とか)
+            this._logWindow.startAction(subject, action, targets);
+        }
+    };
     //------------------------------------------------------------------------------
     // Scene_Battleの変更
 
@@ -1690,7 +1755,11 @@ $dataItemScopes = null;
 
         const action = new Game_Action(user);
         action.setItemObject(item);
-        for (const target of this.itemTargetActors()) {
+        const selectedGroup = _actionTargetWindow.item();
+        if (selectedGroup) {
+            action.setTarget(selectedGroup.targetIndex());
+        }
+        for (const target of this.action.makeEffectiveTargets()) {
             for (let i = 0; i < action.numRepeats(); i++) {
                 action.apply(target);
             }
