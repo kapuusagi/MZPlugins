@@ -780,7 +780,7 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     TargetManager.makeActionTargetsNormal = function(subject, item, targetIndex, isForce) {
-        const includesConfusionTarget = !isForce || (subject.isActor() && !subject.isAutoBattle() && allowSelectConfusionTarget);
+        const includesConfusionTarget = !isForce && (subject.isActor() && !subject.isAutoBattle() && allowSelectConfusionTarget);
         const selectableGroups = this.makeSelectableActionTargets(subject, item, includesConfusionTarget);
         let selectedGroup = selectableGroups.find(selectableTarget => selectableTarget.targetIndex() === targetIndex);
         if (!selectedGroup) {
@@ -818,14 +818,14 @@ $dataItemScopes = null;
     TargetManager.pickActionTarget = function(selectableGroups) {
         if (selectableGroups.length === 0) {
             return null;
-        } else if (selectableGroups.length >= 0) {
+        } else if (selectableGroups.length === 1) {
             // 候補が1つしかない。
             return selectableGroups[0];
         } else {
             // mainTargetの狙われ率で重み付けしてランダムに選定
             const targetRateSum = selectableGroups.reduce((prev, group) => prev + group.targetRate(), 0);
             let rand = Math.random() * targetRateSum;
-            for (const group in selectableGroups) {
+            for (const group of selectableGroups) {
                 rand -= group.targetRate();
                 if (rand <= 0) {
                     return group;
