@@ -677,6 +677,33 @@
     };
 
     /**
+     * スコープによりレンジを設定する。
+     * 
+     * @param {number} scope スコープ
+     * @param {number} defaultRange デフォルトレンジ
+     * @returns {number} レンジ
+     */
+    const _getRangeByScope = function(scope, defaultRange) {
+        switch (scope) {
+            case TargetManager.SCOPE_ALL_OPPONENTS:
+            case TargetManager.SCOPE_SELECTED_ROW_OPPONENTS:
+            case TargetManager.SCOPE_RANDOME_1_OPPONENT:
+            case TargetManager.SCOPE_RANDOME_2_OPPONENTS:
+            case TargetManager.SCOPE_RANDOME_3_OPPONENTS:
+            case TargetManager.SCOPE_RANDOME_4_OPPONENTS:
+                return Game_Action.RANGE_LONG;
+            case TargetManager.SCOPE_FRONT_OPPONENTS:
+            case TargetManager.SCOPE_RANDOME_1_OPPONENT_IN_FRONT_ROW:
+            case TargetManager.SCOPE_RANDOME_2_OPPONENTS_IN_FRONT_ROW:
+            case TargetManager.SCOPE_RANDOME_3_OPPONENTS_IN_FRONT_ROW:
+            case TargetManager.SCOPE_RANDOME_4_OPPONENTS_IN_FRONT_ROW:
+                return Game_Action.RANGE_MIDDLE;
+            default:
+                return defaultRange;
+        }
+    }
+
+    /**
      * scopeに関係するノートタグを処理する。
      * 
      * @param {object} obj DataItem/DataSkill
@@ -747,8 +774,9 @@
      * @param {obj} obj DataSkill
      */
     const _processSkillNoteTag = function(obj) {
-        obj.range = Game_Action.RANGE_DEPENDS;
+        _processScopeNoteTag(obj);
 
+        obj.range = Game_Action.RANGE_DEPENDS;
         if ((obj.id != moveToFrontSkillId) && (obj.id != moveToRearSkillId)) {
             if (obj.meta.moveToFront) {
                 const rate = Number(obj.meta.moveToFront) || 1.0;
@@ -760,9 +788,10 @@
         }
         if (obj.meta.range) {
             obj.range = _getRange(obj.meta.range).clamp(-1, 2);
+        } else {
+            // スコープによりデフォルトを決める。
+            obj.range = _getRangeByScope(obj.scope, obj.range);
         }
-
-        _processScopeNoteTag(obj);
     };
     DataManager.addNotetagParserSkills(_processSkillNoteTag);
 
@@ -772,9 +801,13 @@
      * @param {object} obj DataItem
      */
      const _processItemNoteTag = function(obj) {
-        obj.range = 0;
+        _processScopeNoteTag(obj);
+        obj.range = Game_Action.RANGE_SHORT;
         if (obj.meta.range) {
             obj.range = _getRange(obj.meta.range).clamp(-1, 2);
+        } else {
+            // スコープによりデフォルトを決める。
+            obj.range = _getRangeByScope(obj.scope, obj.range);
         }
 
         if (obj.meta.moveToFront) {
@@ -784,7 +817,6 @@
             const rate = Number(obj.meta.moveToRear) || 1.0;
             _addEffectMoveBattlePosition(obj, 1, rate);
         }
-        _processScopeNoteTag(obj);
     };
     DataManager.addNotetagParserItems(_processItemNoteTag);
 
