@@ -72,23 +72,11 @@
  * @default 敵前衛
  * @parent scopeIdFrontRowOpponents
  * 
- * @param scopeIdBackRowOpponents
- * @text 敵後衛を表すスコープID
- * @type number
- * @min 100
- * @default 103
- * 
- * @param textScopeBackRowOpponents
- * @text 敵後衛を表す文字列
- * @type string
- * @default 敵後衛
- * @parent scopeIdBackRowOpponents
- * 
  * @param scopeIdSelectedAlivedRowFriends
  * @text 生存している味方1列を表すスコープID
  * @type number
  * @min 100
- * @default 104
+ * @default 103
  * 
  * @param textScopeSelectedAlivedRowFriends
  * @text 生存している味方1列を表す文字列
@@ -100,7 +88,7 @@
  * @text 生存している味方前衛を表すスコープID
  * @type number
  * @min 100
- * @default 105
+ * @default 104
  * 
  * @param textScopeFrontAlivedRowFriends
  * @text 生存している味方前衛を表す文字列
@@ -108,23 +96,11 @@
  * @default 味方前衛
  * @parent scopeIdFrontAlivedRowFriends
  * 
- * @param scopeIdBackAlivedRowFriends
- * @text 生存している味方後衛を表すスコープID
- * @type number
- * @min 100
- * @default 106
- * 
- * @param textScopeBackAlivedRowFriends
- * @text 生存している味方後衛を表す文字列
- * @type string
- * @default 味方後衛
- * @parent scopeIdBackAlivedRowFriends
- * 
  * @param scopeIdSelectedDeadRowFriends
  * @text 死亡している味方1列を表すスコープID
  * @type number
  * @min 100
- * @default 107
+ * @default 105
  * 
  * @param textScopeSelectedDeadRowFriends
  * @text 死亡しているる味方1列を表す文字列
@@ -136,7 +112,7 @@
  * @text 味方1列を表すスコープID
  * @type number
  * @min 100
- * @default 108
+ * @default 106
  * 
  * @param textScopeSelectedRowFriends
  * @text る味方1列を表す文字列
@@ -144,12 +120,11 @@
  * @default 味方1列
  * @parent scopeIdSelectedRowFriends
  * 
- * 
  * @param scopeIdSelfAlivedRowFriends
  * @text 生存している自分と同じ列を表すスコープID
  * @type number
  * @min 100
- * @default 109
+ * @default 107
  * 
  * @param textScopeSelfAlivedRowFriends
  * @text 自分と同じ列を表す文字列
@@ -157,11 +132,114 @@
  * @default 同列
  * @parent scopeIdSelfAlivedRowFriends
  * 
- * @param textTargetRow
- * @text 列を対象としたターゲット名。
- * @desc 列を対象としたターゲット名。%1に列番号(1,2,..)が入る
+ * @param scopeIdRandomOpponent
+ * @text 指定列のランダムな敵対者1体を対象にするスコープID
+ * @type number
+ * @min 100
+ * @default 108
+ * 
+ * @param textScopeRandomOpponent
+ * @text 指定列のランダムな敵対者を表す文字列
+ * @type text
+ * @default ランダムな敵1体
+ * @parent scopeIdRandomOpponent
+ * 
+ * @param scopeIdRandom2Opponents
+ * @text 指定列のランダムな敵対者2体を対象にするスコープID
+ * @type number
+ * @min 100
+ * @default 109
+ * 
+ * @param textScopeRandom2Opponents
+ * @text 指定列のランダムな敵対者2体を表す文字列
+ * @type text
+ * @default ランダムな敵2体
+ * @parent scopeIdRandom2Opponents
+ * 
+ * @param scopeIdRandom3Opponents
+ * @text 指定列のランダムな敵対者3体を対象にするスコープID
+ * @type number
+ * @min 100
+ * @default 110
+ * 
+ * @param textScopeRandom3Opponents
+ * @text 指定列のランダムな敵対者3体を表す文字列
+ * @type text
+ * @default ランダムな敵3体
+ * @parent scopeIdRandom3Opponents
+ * 
+ * @param scopeIdRandom4Opponents
+ * @text 指定列のランダムな敵対者4体を対象にするスコープID
+ * @type number
+ * @min 100
+ * @default 111
+ * 
+ * @param textScopeRandom4Opponents
+ * @text 指定列のランダムな敵対者4体を表す文字列
+ * @type text
+ * @default ランダムな敵4体
+ * @parent scopeIdRandom4Opponents
+ * 
+ * @param scopeIdRandomOpponentAtFront
+ * @text 前列のランダムな敵対者1体を対象にするスコープID
+ * @type number
+ * @min 100
+ * @default 112
+ * 
+ * @param textScopeRandomOpponentAtFront
+ * @text 前列のランダムな敵対者を表す文字列
+ * @type text
+ * @default 前列のランダムな敵1体
+ * @parent scopeIdRandomOpponentAtFront
+ * 
+ * @param scopeIdRandom2OpponentsAtFront
+ * @text 前列のランダムな敵対者2体を対象にするスコープID
+ * @type number
+ * @min 100
+ * @default 113
+ * 
+ * @param textScopeRandom2OpponentsAtFront
+ * @text 前列のランダムな敵対者2体を表す文字列
+ * @type text
+ * @default 前列のランダムな敵2体
+ * @parent scopeIdRandom2OpponentsAtFront
+ * 
+ * @param scopeIdRandom3OpponentsAtFront
+ * @text 前列のランダムな敵対者3体を対象にするスコープID
+ * @type number
+ * @min 100
+ * @default 114
+ * 
+ * @param textScopeRandom3OpponentsAtFront
+ * @text 前列のランダムな敵対者3体を表す文字列
+ * @type text
+ * @default 前列のランダムな敵3体
+ * @parent scopeIdRandom3OpponentsAtFront
+ * 
+ * @param scopeIdRandom4OpponentsAtFront
+ * @text 前列のランダムな敵対者4体を対象にするスコープID
+ * @type number
+ * @min 100
+ * @default 115
+ * 
+ * @param textScopeRandom4OpponentsAtFront
+ * @text 前列のランダムな敵対者4体を表す文字列
+ * @type text
+ * @default 前列のランダムな敵4体
+ * @parent scopeIdRandom4OpponentsAtFront
+ * 
+ * 
+ * @param textTargetRowOpponents
+ * @text 敵対者列を対象としたターゲット名。
+ * @desc 敵対者列列を対象としたターゲット名。%1に列番号(1,2,..)が入る
  * @type string
- * @default %1列目
+ * @default 敵%1列目
+ * 
+ * @param textTargetRowFriends
+ * @text 味方列を対象としたターゲット名。
+ * @desc 味方列列を対象としたターゲット名。%1に列番号(1,2,..)が入る
+ * @type string
+ * @default 味方%1列目
  * 
  * @param blockMoveFlagId
  * @text 戦闘位置変更効果フラグID
@@ -223,7 +301,9 @@
  * ・効果範囲・列の追加
  *   ノートタグにrangeRowを付与すると、元からのスコープに併せて以下のように振る舞いが変わります。
  *   対象が使用者 -> 使用者＋同列
+ *   対象が味方1体 -> 味方1列
  *   対象が単体選択 -> 味方1列 or エネミー1列
+ *   対象がランダム1~4体 -> 指定した列のランダム1~4体
  * 
  * 
  * ■ 使用時の注意
@@ -276,9 +356,6 @@
  *   <rangeRow:front>
  *      効果範囲が前衛のみであることを指定します。
  *      元々のスコープは単体にしておく必要があります。
- *   <rangeRow:back>
- *      効果範囲が後衛のみであることを指定します。
- *      元々のスコープは単体にしておく必要があります。
  * 武器
  *   <range:range#>
  *      アイテム/スキルの射程を指定する。
@@ -313,6 +390,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.6.0 Kapu_TargetManagerを使用するように変更。
  * Version.0.5.0 Kapu_Base_ParamNameに対応
  * Version.0.4.0 エネミーグループのターン0イベントにコメントを記述することで、戦闘位置を設定できるようにした。
  * Version.0.3.0 ステータス表示用に、Game_BattlerBaseに通常攻撃射程を得るインタフェースを追加した。
@@ -339,7 +417,8 @@
         console.error(pluginName + ":EFFECT_MOVE_BATTLE_POSITION is not valid.");
     }
 
-    const textTargetRow = parameters["textTargetRow"] || "%1";
+    const textTargetRowOpponents = parameters["textTargetRowOpponents"] || "Enemies at %1 row";
+    const textTargetRowFriends = parameters["textTargetRowFriends"] || "Friends at %1 row";
 
     Game_Action.RANGE_SHORT = 0;
     Game_Action.RANGE_MIDDLE = 1;
@@ -358,7 +437,7 @@
                 forOpponent:true, forAlive:true, 
             };
         } else {
-            console.log("SCOPE_SELECTED_ROW_OPPONENTS not valid.");
+            throw new Error("SCOPE_SELECTED_ROW_OPPONENTS not valid.");
         }
 
         scopeId = Math.round(Number(parameters["scopeIdFrontRowOpponents"]) || 0);
@@ -370,19 +449,7 @@
                 forOpponent:true, forAlive:true, 
             };
         } else {
-            console.log("SCOPE_FRONT_OPPONENTS not valid.");
-        }
-
-        scopeId = Math.round(Number(parameters["scopeIdBackRowOpponents"]) || 0);
-        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
-            TargetManager.SCOPE_BACK_OPPONENTS = scopeId;
-            const text = parameters["textScopeBackRowOpponents"] || "Back enemies";
-            $dataItemScopes[scopeId] = {
-                id:scopeId, name:text, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
-                forOpponent:true, forAlive:true, 
-            };
-        } else {
-            console.log("SCOPE_BACK_OPPONENTS not valid.");
+            throw new Error("SCOPE_FRONT_OPPONENTS not valid.");
         }
 
         scopeId = Math.round(Number(parameters["scopeIdSelectedAlivedRowFriends"]) || 0);
@@ -394,7 +461,7 @@
                 forFriend:true, forAlive:true, 
             };
         } else {
-            console.log("SCOPE_ALIVED_ROW_FRIENDS not valid.");
+            throw new Error("SCOPE_ALIVED_ROW_FRIENDS not valid.");
         }
 
         scopeId = Math.round(Number(parameters["scopeIdFrontAlivedRowFriends"]) || 0);
@@ -406,19 +473,7 @@
                 forFriend:true, forAlive:true, 
             };
         } else {
-            console.log("SCOPE_ALIVED_FRONT_FRIENDS not valid.");
-        }
-
-        scopeId = Math.round(Number(parameters["scopeIdBackAlivedRowFriends"]) || 0);
-        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
-            TargetManager.SCOPE_ALIVED_BACK_FRIENDS = scopeId;
-            const text = parameters["textScopeBackAlivedRowFriends"] || "Back friends";
-            $dataItemScopes[scopeId] = {
-                id:scopeId, name:text, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
-                forFriend:true, forAlive:true, 
-            };
-        } else {
-            console.log("SCOPE_ALIVED_BACK_FRIENDS not valid.");
+            throw new Error("SCOPE_ALIVED_FRONT_FRIENDS not valid.");
         }
 
         scopeId = Math.round(Number(parameters["scopeIdSelectedDeadRowFriends"]) || 0);
@@ -430,7 +485,7 @@
                 forFriend:true, forDead:true, 
             };
         } else {
-            console.log("SCOPE_DEAD_ROW_FRIENDS not valid.");
+            throw new Error("SCOPE_DEAD_ROW_FRIENDS not valid.");
         }
 
         scopeId = Math.round(Number(parameters["scopeIdSelectedRowFriends"]) || 0);
@@ -442,7 +497,7 @@
                 forFriend:true, forAlive:true, forDead:true, 
             };
         } else {
-            console.log("SCOPE_ROW_FRIENDS not valid.");
+            throw new Error("SCOPE_ROW_FRIENDS not valid.");
         }
 
         scopeId = Math.round(Number(parameters["scopeIdSelfAlivedRowFriends"]) || 0);
@@ -454,7 +509,103 @@
                 forFriend:true, forAlive:true, 
             };
         } else {
-            console.log("SCOPE_ALIVED_SAME_ROW_FRIENDS not valid.");
+            throw new Error("SCOPE_ALIVED_SAME_ROW_FRIENDS not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdRandomOpponent"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_RANDOME_1_OPPONENT_IN_ROW = scopeId;
+            const text = parameters["textScopeRandomOpponent"] || "Random 1 opponent";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:true, targetCount:1,
+                forOpponent:true, forAlive:true, random:true
+            };
+        } else {
+            throw new Error("SCOPE_RANDOME_1_OPPONENT_IN_ROW not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdRandom2Opponents"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_RANDOME_2_OPPONENTS_IN_ROW = scopeId;
+            const text = parameters["textScopeRandom2Opponents"] || "Random 2 opponents";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:true, targetCount:2,
+                forOpponent:true, forAlive:true, random:true,
+            };
+        } else {
+            throw new Error("SCOPE_RANDOME_2_OPPONENTS_IN_ROW not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdRandom3Opponents"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_RANDOME_3_OPPONENTS_IN_ROW = scopeId;
+            const text = parameters["textScopeRandom3Opponents"] || "Random 3 opponents";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:true, targetCount:3,
+                forOpponent:true, forAlive:true, random:true,
+            };
+        } else {
+            throw new Error("SCOPE_RANDOME_3_OPPONENTS_IN_ROW not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdRandom4Opponents"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_RANDOME_4_OPPONENTS_IN_ROW = scopeId;
+            const text = parameters["textScopeRandom4Opponents"] || "Random 4 opponents";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:true, targetCount:4,
+                forOpponent:true, forAlive:true, random:true,
+            };
+        } else {
+            throw new Error("SCOPE_RANDOME_4_OPPONENTS_IN_ROW not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdRandomOpponentAtFront"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_RANDOME_1_OPPONENT_IN_FRONT_ROW = scopeId;
+            const text = parameters["textScopeRandomOpponentAtFront"] || "Random 1 opponent";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:false, targetCount:1,
+                forOpponent:true, forAlive:true, random:true
+            };
+        } else {
+            throw new Error("SCOPE_RANDOME_1_OPPONENT_IN_FRONT_ROW not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdRandom2OpponentsAtFront"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_RANDOME_2_OPPONENTS_IN_FRONT_ROW = scopeId;
+            const text = parameters["textScopeRandom2OpponentsAtFront"] || "Random 2 opponents";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:false, targetCount:2,
+                forOpponent:true, forAlive:true, random:true,
+            };
+        } else {
+            throw new Error("SCOPE_RANDOME_2_OPPONENTS_IN_FRONT_ROW not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdRandom3OpponentsAtFront"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_RANDOME_3_OPPONENTS_IN_FRONT_ROW = scopeId;
+            const text = parameters["textScopeRandom3OpponentsAtFront"] || "Random 3 opponents";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:false, targetCount:3,
+                forOpponent:true, forAlive:true, random:true,
+            };
+        } else {
+            throw new Error("SCOPE_RANDOME_2_OPPONENTS_IN_FRONT_ROW not valid.");
+        }
+
+        scopeId = Math.round(Number(parameters["scopeIdRandom4OpponentsAtFront"]) || 0);
+        if ((scopeId > 100) && !$dataItemScopes[scopeId]) {
+            TargetManager.SCOPE_RANDOME_4_OPPONENTS_IN_FRONT_ROW = scopeId;
+            const text = parameters["textScopeRandom4OpponentsAtFront"] || "Random 4 opponents";
+            $dataItemScopes[scopeId] = {
+                id:scopeId, name:text, needsSelection:false, targetCount:4,
+                forOpponent:true, forAlive:true, random:true,
+            };
+        } else {
+            throw new Error("SCOPE_RANDOME_2_OPPONENTS_IN_FRONT_ROW not valid.");
         }
     }
 
@@ -537,17 +688,41 @@
                 case TargetManager.SCOPE_ONE_OPPONENTS: // selected opponent one.
                     if (obj.meta.rangeRow === "front") {
                         obj.scope = TargetManager.SCOPE_FRONT_OPPONENTS;
-                    } else if (obj.meta.rangeRow === "back") {
-                        obj.scope = TargetManager.SCOPE_BACK_OPPONENTS;
                     } else {
                         obj.scope = TargetManager.SCOPE_SELECTED_ROW_OPPONENTS;
+                    }
+                    break;
+                case TargetManager.SCOPE_RANDOME_1_OPPONENT: // random one opponent
+                    if (obj.meta.rangeRow === "front") {
+                        obj.scope = TargetManager.SCOPE_RANDOME_1_OPPONENT_IN_FRONT_ROW;
+                    } else {
+                        obj.scope = TargetManager.SCOPE_RANDOME_1_OPPONENT_IN_ROW;
+                    }
+                    break;
+                case TargetManager.SCOPE_RANDOME_2_OPPONENTS: // random two opponents
+                    if (obj.meta.rangeRow === "front") {
+                        obj.scope = TargetManager.SCOPE_RANDOME_2_OPPONENTS_IN_FRONT_ROW;
+                    } else {
+                        obj.scope = TargetManager.SCOPE_RANDOME_2_OPPONENTS_IN_ROW;
+                    }
+                    break;
+                case TargetManager.SCOPE_RANDOME_3_OPPONENTS: // random three opponents
+                    if (obj.meta.rangeRow === "front") {
+                        obj.scope = TargetManager.SCOPE_RANDOME_3_OPPONENTS_IN_FRONT_ROW;
+                    } else {
+                        obj.scope = TargetManager.SCOPE_RANDOME_3_OPPONENTS_IN_ROW;
+                    }
+                    break;
+                case TargetManager.SCOPE_RANDOME_4_OPPONENTS: // random four opponents
+                    if (obj.meta.rangeRow === "front") {
+                        obj.scope = TargetManager.SCOPE_RANDOME_4_OPPONENTS_IN_FRONT_ROW;
+                    } else {
+                        obj.scope = TargetManager.SCOPE_RANDOME_4_OPPONENTS_IN_ROW;
                     }
                     break;
                 case TargetManager.SCOPE_ALIVED_FRIEND: // selected alived friend
                     if (obj.meta.rangeRow === "front") {
                         obj.scope = TargetManager.SCOPE_ALIVED_FRONT_FRIENDS;
-                    } else if (obj.meta.rangeRow === "back") {
-                        obj.scope = TargetManager.SCOPE_ALIVED_BACK_FRIENDS;
                     } else {
                         obj.scope = TargetManager.SCOPE_ALIVED_ROW_FRIENDS;
                     }
@@ -574,7 +749,7 @@
     const _processSkillNoteTag = function(obj) {
         obj.range = Game_Action.RANGE_DEPENDS;
 
-        if ((i != moveToFrontSkillId) && (i != moveToRearSkillId)) {
+        if ((obj.id != moveToFrontSkillId) && (obj.id != moveToRearSkillId)) {
             if (obj.meta.moveToFront) {
                 const rate = Number(obj.meta.moveToFront) || 1.0;
                 _addEffectMoveBattlePosition(obj, 0, rate);
@@ -682,9 +857,9 @@
         if (moveToFrontSkillId) {
             // エフェクト追加
             const skill = $dataSkills[moveToFrontSkillId];
-            if (skill.scope !== TargetManager.SCOPE_) {
+            if (skill.scope !== TargetManager.SCOPE_USER_ONLY) {
                 console.error("skill: + " + skill.name + " scope is not for self.");
-                skill.scope = SCOPE_USER_ONLY; // 対象を自分自身に変更
+                skill.scope = TargetManager.SCOPE_USER_ONLY; // 対象を自分自身に変更
             }
             _addEffectMoveBattlePosition(skill, 0, 1.0);
         }
@@ -693,7 +868,7 @@
             const skill = $dataSkills[moveToRearSkillId];
             if (skill.scope !== 11) {
                 console.error("skill: + " + skill.name + " scope is not for self.");
-                skill.scope = SCOPE_USER_ONLY;
+                skill.scope = TargetManager.SCOPE_USER_ONLY;
             }
             _addEffectMoveBattlePosition(skill, 1, 1.0);
         }
@@ -751,29 +926,33 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargets = function(subject, item, isConfused) {
-        switch (item.scope) {
+    TargetManager.makeSelectableActionTargets = function(subject, item, includesConfusionTarget) {
+        switch (subject.itemScope(item)) {
             case TargetManager.SCOPE_SELECTED_ROW_OPPONENTS:
-                return this.makeSelectableActionTargetsRowOpponents(subject, item, isConfused);
+            case TargetManager.SCOPE_RANDOME_1_OPPONENT_IN_ROW:
+            case TargetManager.SCOPE_RANDOME_2_OPPONENTS_IN_ROW:
+            case TargetManager.SCOPE_RANDOME_3_OPPONENTS_IN_ROW:
+            case TargetManager.SCOPE_RANDOME_4_OPPONENTS_IN_ROW:
+                return this.makeSelectableActionTargetsRowOpponents(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_FRONT_OPPONENTS:
-                return this.makeSelectableActionTargetsFrontOpponents(subject, item, isConfused);
-            case TargetManager.SCOPE_BACK_OPPONENTS:
-                return this.makeSelectableActionTargetsBackOpponents(subject, item, isConfused);
+            case TargetManager.SCOPE_RANDOME_1_OPPONENT_IN_FRONT_ROW:
+            case TargetManager.SCOPE_RANDOME_2_OPPONENTS_IN_FRONT_ROW:
+            case TargetManager.SCOPE_RANDOME_3_OPPONENTS_IN_FRONT_ROW:
+            case TargetManager.SCOPE_RANDOME_4_OPPONENTS_IN_FRONT_ROW:
+                return this.makeSelectableActionTargetsFrontOpponents(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_ALIVED_ROW_FRIENDS:
             case TargetManager.SCOPE_DEAD_ROW_FRIENDS:
             case TargetManager.SCOPE_ROW_FRIENDS:
-                return this.makeSelectableActionTargetsRowFriends(subject, item, isConfused);
+                return this.makeSelectableActionTargetsRowFriends(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_ALIVED_FRONT_FRIENDS:
-                return this.makeSelectableActionTargetsFrontFriends(subject, item, isConfused);
-            case TargetManager.SCOPE_ALIVED_BACK_FRIENDS:
-                return this.makeSelectableActionTargetsFrontFriends(subject, item, isConfused);
+                return this.makeSelectableActionTargetsFrontFriends(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_ALIVED_SAME_ROW_FRIENDS:
-                return this.makeSelectableActionTargetsSameRowFriends(subject, item, isConfused);
+                return this.makeSelectableActionTargetsSameRowFriends(subject, item, includesConfusionTarget);
             default:
-                return _TargetManager_makeSelectableActionTargets.call(this, subject, item, isConfused);
+                return _TargetManager_makeSelectableActionTargets.call(this, subject, item, includesConfusionTarget);
         }
     };
 
@@ -782,30 +961,32 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargetsRowOpponents = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsRowOpponents = function(subject, item, includesConfusionTarget) {
         const selectable = [];
 
-        const opponentMembers = this.opponentMembers(subject, item);
+        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         for (let row = 0; row < 12; row++) {
             const rowMembers = opponentMembers.filter(member => member.battlePosition() === row);
             if (rowMembers.length === 0) {
                 break;
             }
-            const name = textTargetRow.format(row + 1);
+            const name = textTargetRowOpponents.format(row + 1);
             selectable.push(new Game_ActionTargetGroup(row, name, rowMembers, rowMembers));
         }
-        if (isConfused) {
-            const friendMembers = this.friendMembers(subject, item);
+        if (includesConfusionTarget) {
+            const friendMembers = this.friendMembers(subject);
             for (let row = 0; row < 12; row++) {
                 const rowMembers = friendMembers.filter(member => member.battlePosition() === row);
                 if (rowMembers.length === 0) {
                     break;
                 }
-                const name = textTargetRow.format(row + 1);
-                selectable.push(new Game_ActionTargetGroup(row + 1000, name, rowMembers, rowMembers));
+
+                const targetMembers = rowMembers.filter(member => TargetManager.isTargetable(subject, member, item));
+                const name = textTargetRowFriends.format(row + 1);
+                selectable.push(new Game_ActionTargetGroup(row + 1000, name, targetMembers, targetMembers));
             }
         }
         return selectable;
@@ -815,82 +996,56 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargetsFrontOpponents = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsFrontOpponents = function(subject, item, includesConfusionTarget) {
         const selectable = [];
-        const scopeInfo = item.scopeInfo(item.scope);
+        const scopeInfo = TargetManager.scopeInfo(subject.itemScope(item));
 
-        const opponentMembers = this.opponentMembers(subject, item);
+        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const rowMembers = opponentMembers.filter(member => member.battlePosition() === 0);
         if (rowMembers.length > 0) {
-            selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
+            selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers));
         }
-        if (isConfused) {
-            const friendMembers = this.friendMembers(subject, item);
+        if (includesConfusionTarget) {
+            const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             const rowMembers = friendMembers.filter(member => member.battlePosition() === 0);
             if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(row + 1000, scopeInfo.name, rowMembers, rowMembers));
+                selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, rowMembers, rowMembers));
             }
         }
         return selectable;
     };
-    /**
-     * 敵後衛を対象とする場合の選択可能な対象を得る。
-     * 
-     * @param {Game_Battelr} subject 使用者
-     * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか
-     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
-     */
-    TargetManager.makeSelectableActionTargetsBackOpponents = function(subject, item, isConfused) {
-        const selectable = [];
-        const scopeInfo = item.scopeInfo(item.scope);
-
-        const opponentMembers = this.opponentMembers(subject, item);
-        const rowMembers = opponentMembers.filter(member => member.battlePosition() !== 0);
-        if (rowMembers.length > 0) {
-            selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
-        }
-        if (isConfused) {
-            const friendMembers = this.friendMembers(subject, item);
-            const rowMembers = friendMembers.filter(member => member.battlePosition() !== 0);
-            if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(row + 1000, scopeInfo.name, rowMembers, rowMembers));
-            }
-        }
-        return selectable;
-    };
-
     /**
      * 味方1列を対象とする場合の選択可能な対象を得る。
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargetsRowFriends = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsRowFriends = function(subject, item, includesConfusionTarget) {
         const selectable = [];
 
-        const friendMembers = this.friendMembers(subject, item);
+        const friendMembers = this.friendMembers(subject);
         for (let row = 0; row < 12; row++) {
             const rowMembers = friendMembers.filter(member => member.battlePosition() === row);
             if (rowMembers.length === 0) {
                 break;
             }
-            const name = textTargetRow.format(row + 1);
-            selectable.push(new Game_ActionTargetGroup(row, name, rowMembers, rowMembers));
+            const targetMembers = rowMembers.filter(member => TargetManager.isTargetable(subject, member, item));
+            const name = textTargetRowFriends.format(row + 1);
+            selectable.push(new Game_ActionTargetGroup(row, name, targetMembers, targetMembers));
         }
-        if (isConfused) {
-            const opponentMembers = this.opponentMembers(subject, item);
+        if (includesConfusionTarget) {
+            const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             for (let row = 0; row < 12; row++) {
                 const rowMembers = opponentMembers.filter(member => member.battlePosition() === row);
                 if (rowMembers.length === 0) {
                     break;
                 }
-                const name = textTargetRow.format(row + 1);
+                const name = textTargetRowOpponents.format(row + 1);
                 selectable.push(new Game_ActionTargetGroup(row + 1000, name, rowMembers, rowMembers));
             }
         }
@@ -902,49 +1057,23 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargetsFrontFriends = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsFrontFriends = function(subject, item, includesConfusionTarget) {
         const selectable = [];
-        const scopeInfo = item.scopeInfo(item.scope);
+        const scopeInfo = TargetManager.scopeInfo(subject.itemScope(item));
 
-        const friendMembers = this.friendMembers(subject, item);
+        const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const rowMembers = friendMembers.filter(member => member.battlePosition() === 0);
         if (rowMembers.length > 0) {
-            selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
+            selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers));
         }
-        if (isConfused) {
-            const opponentMembers = this.opponentMembers(subject, item);
+        if (includesConfusionTarget) {
+            const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             const rowMembers = opponentMembers.filter(member => member.battlePosition() === 0);
             if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(row + 1000, scopeInfo.name, rowMembers, rowMembers));
-            }
-        }
-        return selectable;
-    };
-    /**
-     * 味方後衛を対象とする場合の選択可能な対象を得る。
-     * 
-     * @param {Game_Battelr} subject 使用者
-     * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか
-     * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
-     */
-    TargetManager.makeSelectableActionTargetsFrontFriends = function(subject, item, isConfused) {
-        const selectable = [];
-        const scopeInfo = item.scopeInfo(item.scope);
-
-        const friendMembers = this.friendMembers(subject, item);
-        const rowMembers = friendMembers.filter(member => member.battlePosition() !== 0);
-        if (rowMembers.length > 0) {
-            selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
-        }
-        if (isConfused) {
-            const opponentMembers = this.opponentMembers(subject, item);
-            const rowMembers = opponentMembers.filter(member => member.battlePosition() !== 0);
-            if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(row + 1000, scopeInfo.name, rowMembers, rowMembers));
+                selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, rowMembers, rowMembers));
             }
         }
         return selectable;
@@ -954,17 +1083,17 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
     // eslint-disable-next-line no-unused-vars
-    TargetManager.makeSelectableActionTargetsSameRowFriends = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsSameRowFriends = function(subject, item, includesConfusionTarget) {
         const selectable = [];
-        const scopeInfo = item.scopeInfo(item.scope);
+        const scopeInfo = TargetManager.scopeInfo(subject.itemScope(item));
 
-        const friendMembers = this.friendMembers(subject, item);
+        const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const rowMembers = friendMembers.filter(member => member.battlePosition() === subject.battlePosition());
-        selectable.push(new Game_ActionTargetGroup(row, scopeInfo.name, rowMembers, rowMembers));
+        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers));
         return selectable;
     };
 
