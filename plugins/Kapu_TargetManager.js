@@ -277,8 +277,6 @@ $dataItemScopes = null;
     const textAllFriends = parameters["textAllFriends"] || "All friends";
     const textAllAlives = parameters["textAllAlives"] || "All";
 
-
-
     TargetManager.TARGET_COUNT_ALL = -1;
 
     // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
@@ -381,6 +379,17 @@ $dataItemScopes = null;
             return "";
         }
     };
+    //------------------------------------------------------------------------------
+    // Game_BattlerBase
+    /**
+     * アイテム・スキル使用の範囲を得る。
+     * 
+     * @param {object} item DataItem/DataSkill
+     * @returns {number} スコープ番号
+     */
+    Game_Battler.prototype.itemScope = function(item) {
+        return item.scope;
+    };
     
     //------------------------------------------------------------------------------
     // Game_ActionTargetGroup
@@ -473,7 +482,7 @@ $dataItemScopes = null;
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
     TargetManager.makeSelectableActionTargets = function(subject, item, includesConfusionTarget) {
-        switch (item.scope) {
+        switch (subject.itemScope(item)) {
             case TargetManager.SCOPE_ONE_OPPONENTS: // selected opponent one.
                 return this.makeSelectableActionTargetsSelectedOpponent(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_ALL_OPPONENTS: // all opponents.
@@ -558,7 +567,7 @@ $dataItemScopes = null;
      */
     TargetManager.makeSelectableActionTargetsRandomOpponents = function(subject, item, includesConfusionTarget) {
         const selectable = [];
-        const scopeInfo = this.scopeInfo(item.scope);
+        const scopeInfo = this.scopeInfo(subject.itemScope(item));
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers));
 
@@ -578,7 +587,7 @@ $dataItemScopes = null;
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
     TargetManager.makeSelectableActionTargetsAllOpponents = function(subject, item, includesConfusionTarget) {
-        const scopeInfo = this.scopeInfo(item.scope);
+        const scopeInfo = this.scopeInfo(subject.itemScope(item));
         const selectable = [];
 
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
@@ -630,7 +639,7 @@ $dataItemScopes = null;
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
     TargetManager.makeSelectableActionTargetsAllFriends = function(subject, item, includesConfusionTarget) {
-        const scopeInfo = this.scopeInfo(item.scope);
+        const scopeInfo = this.scopeInfo(subject.itemScope(item));
         const selectable = [];
 
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
@@ -666,7 +675,7 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     TargetManager.makeSelectableActionTargetsAll = function(subject, item , includesConfusionTarget) {
-        const scopeInfo = this.scopeInfo(item.scope);
+        const scopeInfo = this.scopeInfo(subject.itemScope(item));
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const allMembers = friendMembers.concat(opponentMembers);
@@ -685,7 +694,7 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     TargetManager.isTargetable = function(subject, target, item) {
-        const scopeInfo = this.scopeInfo(item.scope);
+        const scopeInfo = this.scopeInfo(subject.itemScope(item));
         return (target.isAlive() && !!scopeInfo.forAlive)
                 || (target.isDead() && !!scopeInfo.forDead);
     };
@@ -722,7 +731,7 @@ $dataItemScopes = null;
             // アクション可能な対象なし。
             return [];
         }
-        const scopeInfo = this.scopeInfo(item.scope);
+        const scopeInfo = this.scopeInfo(subject.itemScope(item.scope));
         if (scopeInfo.random) {
             // ランダム対象
             const groupSel = Math.randomInt(selectableTargets.length);
@@ -787,7 +796,7 @@ $dataItemScopes = null;
         }
         if (selectedGroup) {
             // 対象あり。
-            const scopeInfo = this.scopeInfo(item.scope);
+            const scopeInfo = this.scopeInfo(subject.itemScope(item));
             if (scopeInfo.random) {
                 // ランダムなのを選出して返す。
                 return this.pickRandomTargetsInActionTarget(selectedGroup, scopeInfo.targetCount);
@@ -910,7 +919,7 @@ $dataItemScopes = null;
         const subject = this.subject();
         const item = this.item();
         const effectiveTargets = [];
-        const scopeInfo = TargetManager.scopeInfo(item.scope);
+        const scopeInfo = TargetManager.scopeInfo(subject.itemScope(item));
         for (const target of this._targets) {
             const effectiveMembers = TargetManager.itemEffectiveMembers(subject, item, target);
             for (const member of effectiveMembers) {
