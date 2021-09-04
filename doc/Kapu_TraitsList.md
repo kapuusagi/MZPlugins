@@ -138,4 +138,4 @@ Game_Party.ABILITY_～で定義される。
 
 |scope|説明|
 |0-14|ベーシックシステムで使用|
-|101-109|RangeDistanceのデフォルト値で使用|
+|101-115|RangeDistanceのデフォルト値で使用|
