@@ -780,7 +780,7 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     TargetManager.makeActionTargetsNormal = function(subject, item, targetIndex, isForce) {
-        const includesConfusionTarget = !isForce || allowSelectConfusionTarget;
+        const includesConfusionTarget = !isForce || (subject.isActor() && !subject.isAutoBattle() && allowSelectConfusionTarget);
         const selectableGroups = this.makeSelectableActionTargets(subject, item, includesConfusionTarget);
         let selectedGroup = selectableGroups.find(selectableTarget => selectableTarget.targetIndex() === targetIndex);
         if (!selectedGroup) {
@@ -874,7 +874,7 @@ $dataItemScopes = null;
         const subject = this.subject();
         const item = this.item();
         if (item && subject) {
-            const includesConfusionTarget = subject.isActor() ? allowSelectConfusionTarget : false;
+            const includesConfusionTarget = subject.isActor() && !subject.isAutoBattle() &&  allowSelectConfusionTarget;
             return TargetManager.makeSelectableActionTargets(subject, item, includesConfusionTarget);
         } else {
             return [];
@@ -1176,7 +1176,6 @@ $dataItemScopes = null;
             }
             // 効果対象アクターを選択状態にする。
             this._actorWindow.setEffectiveTargets(indics);
-            this._actorWindow.deselect();
         }
     };
     /**
@@ -1567,6 +1566,17 @@ $dataItemScopes = null;
         this.refresh();
     };
 
+    const _Window_MenuStatus_refresh = Window_MenuStatus.prototype.refresh;
+    /**
+     * 画面を再描画する。
+     */
+    Window_MenuStatus.prototype.refresh = function() {
+        _Window_MenuStatus_refresh.call(this);
+        if (this._effectiveIndics) {
+            this.cursorVisible = false;
+        }
+    };
+
     const _Window_MenuStatus_drawItem = Window_MenuStatus.prototype.drawItem;
     /**
      * 項目を描画する。
@@ -1594,6 +1604,7 @@ $dataItemScopes = null;
     };
     //------------------------------------------------------------------------------
     // Window_BattleActor
+
     /**
      * 効果対象のインデックスを設定する。
      * 
@@ -1610,7 +1621,20 @@ $dataItemScopes = null;
     Window_BattleActor.prototype.clearEffectiveTargets = function() {
         this._effectiveIndics = null;
         this.refresh();
-    };    
+    };
+
+    const _Window_BattleActor_refresh = Window_BattleActor.prototype.refresh;
+
+    /**
+     * ウィンドウを再描画する。
+     */
+    Window_BattleActor.prototype.refresh = function() {
+        _Window_BattleActor_refresh.call(this);
+        if (this._effectiveIndics) {
+            this.cursorVisible = false;
+        }
+    };
+
     const _Window_BattleActor_drawItem = Window_BattleActor.prototype.drawItem;
     /**
      * 項目を描画する。
@@ -1621,6 +1645,7 @@ $dataItemScopes = null;
         this.drawEffectiveBackground(index);
         _Window_BattleActor_drawItem.call(this, index);
     };
+
     /**
      * 効果対象バックグラウンドを設定する。
      * 
