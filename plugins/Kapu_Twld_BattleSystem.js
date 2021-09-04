@@ -101,6 +101,13 @@
  * @type number
  * @parent layout
  * 
+ * @param commandWindowRowCount
+ * @text コマンドウィンドウの行数
+ * @desc コマンドウィンドウの行数。画面を超えるようなサイズを指定した場合、表示可能範囲に制限される。
+ * @type number
+ * @default 4
+ * @parent layout
+ * 
  * @param statusAreaWidth
  * @text ステータスエリア幅
  * @desc 1アクターのステータスエリアの幅
@@ -322,6 +329,7 @@ function Sprite_BattleHudPicture() {
     const listWindowWidth = Number(parameters["listWindowWidth"]) || 816;
     const commandWindowX = Number(parameters["commandWindowX"]) || 1068;
     const commandWindowWidth = Number(parameters["commandWindowWidth"]) || 192;
+    const commandWindowRowCount = Number(parameters["commandWindowRowCount"]) || 4;
     const statusAreaWidth = Number(parameters["statusAreaWidth"]) || 160;
     const statusAreaPadding = Number(parameters["statusAreaPadding"]) || 16;
     const statusAreaHeight = Number(parameters["statusAreaHeight"]) || 220;
@@ -2431,10 +2439,12 @@ function Sprite_BattleHudPicture() {
      */
     Scene_Battle.prototype.actorCommandWindowRect = function() {
         const itemWindowRect = this.itemNameWindowRect();
-        const ww = commandWindowWidth;
-        const wh = this.windowAreaHeight();
         const wx = commandWindowX;
         const wy = itemWindowRect.y + itemWindowRect.height;
+        const ww = commandWindowWidth;
+        const needsHeight = this.calcWindowHeight(commandWindowRowCount, true);
+        const allowHeight = Graphics.boxHeight - wy;
+        const wh = Math.min(needsHeight, allowHeight);
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -2449,7 +2459,6 @@ function Sprite_BattleHudPicture() {
         _Scene_Base_createActorCommandWindow.call(this);
         this._actorCommandWindow.y = this.actorCommandWindowRect().y;
     };
-
 
     /**
      * スキルウィンドウの矩形領域を得る。
