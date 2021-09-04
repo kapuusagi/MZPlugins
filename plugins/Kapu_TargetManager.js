@@ -10,9 +10,33 @@
  * @type boolean
  * @default true
  * 
+ * @param allowSelectConfusionTarget
+ * @text 混乱時のみ対象にできるメンバーも選択可能にする
+ * @desc 混乱時のみ対象にできるメンバーも選択可能にする。普通に味方に攻撃できるようにするなら有効にする。
+ * @type boolean
+ * @default false
+ * 
+ * @param allowSelectDeadOpponents
+ * @text 死者対象スキルを死亡した敵対者も選択できる。
+ * @desc 死者対象スキルを死亡した敵対者を選択できるようにする。(エネミーを復活させたりとかできるようになる)
+ * @type boolean
+ * @default false
+ * 
+ * @param allowSelectNonEffectiveMembers
+ * @text 効果対象がない場合も選択対象にする
+ * @desc 効果対象が無い場合でも選択できるようにする。発動までにディレイがある場合などに使用する
+ * @type boolean
+ * @default false
+ * 
  * @param cancelActionWhenNoTargets
  * @text アクション対象がいないとき、行動をキャンセルする
  * @desc アクション実行時、アクション対象がいなかった場合にキャンセルする。
+ * @type boolean
+ * @default false
+ * 
+ * @param cancelActionWhenNoEffectiveTargets
+ * @text 効果対象がいないとき、行動をキャンセルする。
+ * @desc アクション実行時、効果対象がいなかった場合にキャンセルする。
  * @type boolean
  * @default false
  * 
@@ -131,7 +155,7 @@
  *   forAll: {boolean} // 対象は敵味方全体が対象
  * }
  * 
- * TargetManager.makeSelectableActionTargets(subject:Game_Battler, item:object, isConfused:boolean) : Array<Game_ActionTargetGroup>
+ * TargetManager.makeSelectableActionTargets(subject:Game_Battler, item:object, includesConfusionTarget:boolean) : Array<Game_ActionTargetGroup>
  *     subjectがitemを使用する時の選択可能な対象を得る。
  *     scopeを追加する場合にはこのメソッドを派生させる。
  * 
@@ -189,14 +213,35 @@ function Window_MenuItemName() {
 }
 
 /**
- * Window_ActionTarget
+ * Window_ActionTargetBase
  * 
  * @class
- * アクションターゲット選択ウィンドウ
+ * アクションターゲット選択ウィンドウのベースクラス
  */
-function Window_ActionTarget() {
+function Window_ActionTargetBase() {
     this.initialize(...arguments);
 }
+
+/**
+ * Window_BattleActionTarget
+ * 
+ * @class
+ * 戦闘でのアクションターゲット選択ウィンドウ
+ */
+function Window_BattleActionTarget() {
+    this.initialize(...arguments);
+}
+
+/**
+ * Window_MenuActionTarget
+ * 
+ * @class
+ * メニューでのアクションターゲット選択ウィンドウ
+ */
+ function Window_MenuActionTarget() {
+    this.initialize(...arguments);
+}
+
 
 $dataItemScopes = null;
 
@@ -205,9 +250,17 @@ $dataItemScopes = null;
     const parameters = PluginManager.parameters(pluginName);
     const alwaysSelectTarget = (parameters["alwaysSelectTarget"] === undefined)
             ? true : parameters["alwaysSelectTarget"] === "true";
+    const allowSelectDeadOpponents = (parameters["allowSelectDeadOpponents"] === undefined)
+            ? false : (parameters["allowSelectDeadOpponents"] === "true");
     const effectiveColor = parameters["effectiveColor"] || "rgb(255,255,128)";
     const cancelActionWhenNoTargets = (parameters["cancelActionWhenNoTargets"] === undefined)
             ? false : (parameters["cancelActionWhenNoTargets"] === "true");
+    const cancelActionWhenNoEffectiveTargets = (parameters["cancelActionWhenNoEffectiveTargets"] === undefined)
+            ? false : (parameters["cancelActionWhenNoEffectiveTargets"] === "true");
+    const allowSelectNonEffectiveMembers = (parameters["allowSelectNonEffectiveMembers"] === undefined)
+            ? false : (parameters["allowSelectNonEffectiveMembers"] === "true");
+    const allowSelectConfusionTarget = (parameters["allowSelectConfusionTarget"] === undefined)
+            ? false : (parameters["allowSelectConfusionTarget"] === "true");
 
     const textSelectedEnemy = parameters["textSelectedEnemy"] || "One enemy";
     const textAllEnemies = parameters["textAllEnemies"] || "All enemies";
@@ -416,32 +469,32 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battelr} subject 
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isconfused 混乱しているかどうか
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargets = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargets = function(subject, item, includesConfusionTarget) {
         switch (item.scope) {
             case TargetManager.SCOPE_ONE_OPPONENTS: // selected opponent one.
-                return this.makeSelectableActionTargetsSelectedOpponent(subject, item, isConfused);
+                return this.makeSelectableActionTargetsSelectedOpponent(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_ALL_OPPONENTS: // all opponents.
-                return this.makeSelectableActionTargetsAllOpponents(subject, item, isConfused);
+                return this.makeSelectableActionTargetsAllOpponents(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_RANDOME_1_OPPONENT: // random one opponent
             case TargetManager.SCOPE_RANDOME_2_OPPONENTS: // random two opponents
             case TargetManager.SCOPE_RANDOME_3_OPPONENTS: // random three opponents
             case TargetManager.SCOPE_RANDOME_4_OPPONENTS: // random four opponents
-                return this.makeSelectableActionTargetsRandomOpponents(subject, item, isConfused);
+                return this.makeSelectableActionTargetsRandomOpponents(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_ALIVED_FRIEND: // selected alived friend
             case TargetManager.SCOPE_DEAD_FRIEND: // selected dead friend
             case TargetManager.SCOPE_FRIEND: // selected friend
-                return this.makeSelectableActionTargetsOneFriend(subject, item, isConfused);
+                return this.makeSelectableActionTargetsOneFriend(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_ALL_ALIVED_FRIENDS: // all alived friends
             case TargetManager.SCOPE_ALL_DEAD_FRIENDS: // all dead friend
             case TargetManager.SCOPE_ALL_FRIENDS: // all friends
-                return this.makeSelectableActionTargetsAllFriends(subject, item, isConfused);
+                return this.makeSelectableActionTargetsAllFriends(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_USER_ONLY: // user
-                return this.makeSelectableActionTargetsUser(subject, item, isConfused);
+                return this.makeSelectableActionTargetsUser(subject, item, includesConfusionTarget);
             case TargetManager.SCOPE_EVERYONE: // all alived
-                return this.makeSelectableActionTargetsAll(subject, item, isConfused);
+                return this.makeSelectableActionTargetsAll(subject, item, includesConfusionTarget);
         }
     };
 
@@ -449,56 +502,47 @@ $dataItemScopes = null;
      * subjectがitem()を使用する時の、ターゲット可能なメンバーリストを得る。
      * 
      * @param {Game_Battler} subject 使用者
-     * @param {object} item アイテムまたはスキル
      * @returns {Array<Game_Battler>} メンバー
      */
-    TargetManager.opponentMembers = function(subject, item) {
-        const scopeInfo = this.scopeInfo(item.scope);
-        const isAlive = !!scopeInfo.forAlive;
-        const isDead = !!scopeInfo.forDead;
-        return subject.opponentsUnit().members().filter(
-            member => ((member.isAlive() && isAlive) || (member.isDead() && isDead))
-                && TargetManager.isTargetable(subject, member, item));
+    TargetManager.opponentMembers = function(subject) {
+        if (allowSelectDeadOpponents) {
+            return subject.opponentsUnit().members();
+        } else {
+            // 敵対者は生存しているメンバーのみ対象とする。
+            return subject.opponentsUnit().aliveMembers();
+        }
     };
     /**
      * subjectがitemを使用する時の、ターゲット可能な味方メンバーリストを得る。
      * 
      * @param {Game_Battler} subject 使用者
-     * @param {object} item アイテムまたはスキル
      * @returns {Array<Game_Battler>} メンバー
      */
-    TargetManager.friendMembers = function(subject, item) {
-        const scopeInfo = this.scopeInfo(item.scope);
-        const isAlive = !!scopeInfo.forAlive;
-        const isDead = !!scopeInfo.forDead;
-        return subject.friendsUnit().members().filter(
-            member => ((member.isAlive() && isAlive) || (member.isDead() && isDead))
-                && TargetManager.isTargetable(subject, member, item));
+    TargetManager.friendMembers = function(subject) {
+        return subject.friendsUnit().members();
     };
-
 
     /**
      * 選択した敵対者1体の場合の、選択可能な対象を得る。
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか。
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsSelectedOpponent = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsSelectedOpponent = function(subject, item, includesConfusionTarget) {
         const selectable = [];
-        const opponentMembers = this.opponentMembers(subject, item);
+        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         for (const member of opponentMembers) {
             const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
             selectable.push(new Game_ActionTargetGroup(member.index(), member.name(), [ member ], effectiveMembers));
         }
 
-        if (isConfused) {
-            // 混乱しているときは味方も対象
-            const friendMembers = this.friendMembers(subject, item);
+        if (includesConfusionTarget) {
+            const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             for (const member of friendMembers) {
                 const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
-                selectable.push(new Game_ActionTargetGroup(member.index() + 1000, member.name, [ member ], effectiveMembers));
+                selectable.push(new Game_ActionTargetGroup(member.index() + 1000, member.name(), [ member ], effectiveMembers));
             }
         }
         return selectable;
@@ -509,19 +553,18 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか。
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsRandomOpponents = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsRandomOpponents = function(subject, item, includesConfusionTarget) {
         const selectable = [];
         const scopeInfo = this.scopeInfo(item.scope);
-        const opponentMembers = this.opponentMembers(subject, item);
-        if (isConfused) {
-            const friendMembers = this.friendMembers(subject, item);
-            const targetMembers = opponentMembers.concat(friendMembers);
-            selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, targetMembers, targetMembers));
-        } else {
-            selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers));
+        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers));
+
+        if (includesConfusionTarget) {
+            const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+            selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers));
         }
         return selectable;
     };
@@ -531,18 +574,18 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか。
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsAllOpponents = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsAllOpponents = function(subject, item, includesConfusionTarget) {
         const scopeInfo = this.scopeInfo(item.scope);
         const selectable = [];
 
-        const opponentMembers = this.opponentMembers(subject, item);
+        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers));
-        if (isConfused) {
-            const friendMembers = this.friendMembers(subject, item).filter(member => member !== subject);
-            selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, friendMembers, friendMembers));
+        if (includesConfusionTarget) {
+            const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+            selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers));
         }
 
         return selectable;
@@ -553,26 +596,26 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか。
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsOneFriend = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsOneFriend = function(subject, item, includesConfusionTarget) {
         const selectable = [];
-        let targetIndex = 0;
-        const friendMembers = this.friendMembers(subject, item);
+        const friendMembers = this.friendMembers(subject);
         for (const friend of friendMembers) {
-            const effectiveTargets = this.itemEffectiveMembers(subject, item, friend);
-            selectable.push(new Game_ActionTargetGroup(targetIndex, friend.name(), [ friend ], effectiveTargets));
-            targetIndex++;
+            if (this.isTargetable(subject, friend, item)) {
+                const effectiveTargets = this.itemEffectiveMembers(subject, item, friend);
+                selectable.push(new Game_ActionTargetGroup(friend.index(), friend.name(), [ friend ], effectiveTargets));
+            } else {
+                selectable.push(new Game_ActionTargetGroup(friend.index(), friend.name(), [], []));
+            }
         }
 
-        targetIndex = 1000;
-        if (isConfused) {
-            const opponentMembers = this.opponentMembers(subject, item);
+        if (includesConfusionTarget) {
+            const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             for (const opponent of opponentMembers) {
                 const effectiveTargets = this.itemEffectiveMembers(subject, item, opponent);
-                selectable.push(new Game_ActionTargetGroup(targetIndex, opponent.name(), [ opponent ], effectiveTargets));
-                targetIndex++;
+                selectable.push(new Game_ActionTargetGroup(opponent.index() + 1000, opponent.name(), [ opponent ], effectiveTargets));
             }
         }
         return selectable;
@@ -583,18 +626,18 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか。
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsAllFriends = function(subject, item, isConfused) {
+    TargetManager.makeSelectableActionTargetsAllFriends = function(subject, item, includesConfusionTarget) {
         const scopeInfo = this.scopeInfo(item.scope);
         const selectable = [];
 
-        const friendMembers = this.friendMembers(subject, item);
+        const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, friendMembers, friendMembers));
-        if (isConfused) {
-            const opponentMembers = this.opponentMembers(subject, item);
-            selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, opponentMembers, opponentMembers));
+        if (includesConfusionTarget) {
+            const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+            selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_OPPONENTS), opponentMembers, opponentMembers));
         }
 
         return selectable;
@@ -605,13 +648,12 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか。
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
     // eslint-disable-next-line no-unused-vars
-    TargetManager.makeSelectableActionTargetsUser = function(subject, item, isConfused) {
-        const scopeInfo = this.scopeInfo(item.scope);
-        return [ new Game_ActionTargetGroup(-1, scopeInfo.name, [ subject ], [ subject ])];
+    TargetManager.makeSelectableActionTargetsUser = function(subject, item, includesConfusionTarget) {
+        return [ new Game_ActionTargetGroup(-1, subject.name(), [ subject ], [ subject ])];
     };
 
     /**
@@ -619,14 +661,14 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} isConfused 混乱しているかどうか。
+     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
     // eslint-disable-next-line no-unused-vars
-    TargetManager.makeSelectableActionTargetsAll = function(subject, item , isConfused) {
+    TargetManager.makeSelectableActionTargetsAll = function(subject, item , includesConfusionTarget) {
         const scopeInfo = this.scopeInfo(item.scope);
-        const friendMembers = this.friendMembers(subject, item);
-        const opponentMembers = this.opponentMembers(subject, item);
+        const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const allMembers = friendMembers.concat(opponentMembers);
 
         return [ new Game_ActionTargetGroup(-1, scopeInfo.name, allMembers, allMembers)];
@@ -643,7 +685,9 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     TargetManager.isTargetable = function(subject, target, item) {
-        return true;
+        const scopeInfo = this.scopeInfo(item.scope);
+        return (target.isAlive() && !!scopeInfo.forAlive)
+                || (target.isDead() && !!scopeInfo.forDead);
     };
 
     /**
@@ -681,7 +725,7 @@ $dataItemScopes = null;
         const scopeInfo = this.scopeInfo(item.scope);
         if (scopeInfo.random) {
             // ランダム対象
-            const groupSel = Math.randomInt(selectableTargets.length + 1);
+            const groupSel = Math.randomInt(selectableTargets.length);
             const selectedGroup = selectableTargets[groupSel];
 
             const mainTargets = this.pickRandomTargetsInActionTarget(selectedGroup, scopeInfo.targetCount);
@@ -690,7 +734,7 @@ $dataItemScopes = null;
             // 何かしらを選択するタイプ
             // 選択対象をランダムで選んで実行。
             // 重み付けは考慮されない。
-            const groupSel = Math.randomInt(selectableTargets.length + 1);
+            const groupSel = Math.randomInt(selectableTargets.length);
             const selectedGroup = selectableTargets[groupSel];
             return selectedGroup.mainTargets();
         }
@@ -709,12 +753,9 @@ $dataItemScopes = null;
         const targets = [];
         const targetCandidates = group.members();
         for (let i = 0; i < targetCount; i++) {
-            const randomSel = Math.randomInt(targetCandidates.length + 1);
+            const randomSel = Math.randomInt(targetCandidates.length);
             const targetBattler = targetCandidates[randomSel];
             targets.push(targetBattler);
-            for (const member of this.itemEffectiveMembers(subject, item, targetBattler)) {
-                targets.push(member);
-            }
         }
         return targets;
     };
@@ -730,7 +771,8 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     TargetManager.makeActionTargetsNormal = function(subject, item, targetIndex, isForce) {
-        const selectableGroups = this.makeSelectableActionTargets(subject, item, false);
+        const includesConfusionTarget = !isForce || allowSelectConfusionTarget;
+        const selectableGroups = this.makeSelectableActionTargets(subject, item, includesConfusionTarget);
         let selectedGroup = selectableGroups.find(selectableTarget => selectableTarget.targetIndex() === targetIndex);
         if (!selectedGroup) {
             if (targetIndex >= 0) {
@@ -748,7 +790,7 @@ $dataItemScopes = null;
             const scopeInfo = this.scopeInfo(item.scope);
             if (scopeInfo.random) {
                 // ランダムなのを選出して返す。
-                return this.pickRandomTargets(selectedGroup, scopeInfo.targetCount);
+                return this.pickRandomTargetsInActionTarget(selectedGroup, scopeInfo.targetCount);
             } else {
                 return selectedGroup.mainTargets();
             }
@@ -764,7 +806,7 @@ $dataItemScopes = null;
      * @param {Array<Game_ActionTargetGroup>} selectableGroups 選択可能グループ
      * @returns {Game_ActionTargetGroup>} 対象グループ
      */
-    TargetManager.prototype.pickActionTarget = function(selectableGroups) {
+    TargetManager.pickActionTarget = function(selectableGroups) {
         if (selectableGroups.length === 0) {
             return null;
         } else if (selectableGroups.length >= 0) {
@@ -823,17 +865,20 @@ $dataItemScopes = null;
         const subject = this.subject();
         const item = this.item();
         if (item && subject) {
-            return TargetManager.makeSelectableActionTargets(subject, item, false);
+            const includesConfusionTarget = subject.isActor() ? allowSelectConfusionTarget : false;
+            return TargetManager.makeSelectableActionTargets(subject, item, includesConfusionTarget);
         } else {
             return [];
         }
     };
 
+    const _Game_Action_clear = Game_Action.prototype.clear;
     /**
      * このアクションをクリアする。
      */
     Game_Action.prototype.clear = function() {
-        return this._targets = null;
+        _Game_Action_clear.call(this);
+        this._targets = null;
     };
 
     /**
@@ -867,7 +912,7 @@ $dataItemScopes = null;
         const effectiveTargets = [];
         const scopeInfo = TargetManager.scopeInfo(item.scope);
         for (const target of this._targets) {
-            const effectiveMembers = this.itemEffectiveMembers(subject, item, target);
+            const effectiveMembers = TargetManager.itemEffectiveMembers(subject, item, target);
             for (const member of effectiveMembers) {
                 if (!effectiveTargets.includes(member) || scopeInfo.random) {
                     // 効果対象メンバーに含まれていない場合に追加。
@@ -1023,7 +1068,7 @@ $dataItemScopes = null;
      */
     Game_Action.prototype.decideRandomTarget = function() {
         const selectableGroups = TargetManager.makeSelectableActionTargets(this.subject(), this.item(), false);
-        const groupSel = Math.randomInt(selectableGroups.length + 1);
+        const groupSel = Math.randomInt(selectableGroups.length);
         const selectedGroup = selectableGroups[groupSel];
         if (selectedGroup) {
             this._targetIndex = selectedGroup.targetIndex();
@@ -1054,17 +1099,17 @@ $dataItemScopes = null;
     };
 
     //------------------------------------------------------------------------------
-    // Window_ActionTarget
+    // Window_ActionTargetBase
     // アクションターゲット選択ウィンドウ
-    Window_ActionTarget.prototype = Object.create(Window_Selectable.prototype);
-    Window_ActionTarget.prototype.constructor = Window_ActionTarget;
+    Window_ActionTargetBase.prototype = Object.create(Window_Selectable.prototype);
+    Window_ActionTargetBase.prototype.constructor = Window_ActionTargetBase;
 
     /**
-     * Window_ActionTargetを初期化する。
+     * Window_ActionTargetBase を初期化する。
      * 
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
-    Window_ActionTarget.prototype.initialize = function(rect) {
+    Window_ActionTargetBase.prototype.initialize = function(rect) {
         Window_Selectable.prototype.initialize.call(this, rect);
         this._targetGroups = [];
     };
@@ -1074,7 +1119,7 @@ $dataItemScopes = null;
      * 
      * @param {Array<Game_ActionTargetGroup>} targetGroups ターゲットグループ選択リスト
      */
-    Window_ActionTarget.prototype.setTargetGroups = function(targetGroups) {
+    Window_ActionTargetBase.prototype.setTargetGroups = function(targetGroups) {
         this._targetGroups = targetGroups || [];
         this.refresh();
     };
@@ -1084,7 +1129,7 @@ $dataItemScopes = null;
      * 
      * @param {Window_MenuStatus} actorWindow アクターウィンドウ
      */
-    Window_ActionTarget.prototype.setActorWindow = function(actorWindow) {
+    Window_ActionTargetBase.prototype.setActorWindow = function(actorWindow) {
         this._actorWindow = actorWindow;
         this.callUpdateHelp();
     };
@@ -1094,14 +1139,14 @@ $dataItemScopes = null;
      * 
      * @return {number} 項目数。
      */
-    Window_ActionTarget.prototype.maxItems = function() {
+    Window_ActionTargetBase.prototype.maxItems = function() {
         return this._targetGroups.length;
     };
 
     /**
      * ヘルプの更新処理を呼び出す。
      */
-    Window_ActionTarget.prototype.callUpdateHelp = function() {
+    Window_ActionTargetBase.prototype.callUpdateHelp = function() {
         Window_Selectable.prototype.callUpdateHelp.call(this);
         // 現在の選択状態をUIに反映させる。
         $gameParty.select(null);
@@ -1122,12 +1167,13 @@ $dataItemScopes = null;
             }
             // 効果対象アクターを選択状態にする。
             this._actorWindow.setEffectiveTargets(indics);
+            this._actorWindow.deselect();
         }
     };
     /**
      * ウィンドウを表示状態にする。
      */
-    Window_ActionTarget.prototype.show = function() {
+    Window_ActionTargetBase.prototype.show = function() {
         this.refresh();
         this.forceSelect(0);
         $gameTemp.clearTouchState();
@@ -1136,7 +1182,7 @@ $dataItemScopes = null;
     /**
      * ウィンドウを非表示にする。
      */
-    Window_ActionTarget.prototype.hide = function() {
+    Window_ActionTargetBase.prototype.hide = function() {
         Window_Selectable.prototype.hide.call(this);
         $gameParty.select(null);
         $gameTroop.select(null);
@@ -1147,9 +1193,9 @@ $dataItemScopes = null;
      * 
      * @returns {Game_ActionTargetGroup} 選択対象
      */
-    Window_ActionTarget.prototype.item = function() {
+    Window_ActionTargetBase.prototype.item = function() {
         return this.itemAt(this.index());
-    }
+    };
 
     /**
      * indexの位置にある選択対象を得る。
@@ -1157,7 +1203,7 @@ $dataItemScopes = null;
      * @param {number} index インデックス
      * @returns {Game_ActionTargetGroup} 選択対象
      */
-    Window_ActionTarget.prototype.itemAt = function(index) {
+    Window_ActionTargetBase.prototype.itemAt = function(index) {
         return ((index >= 0) && (index < this._targetGroups.length))
                 ? this._targetGroups[index] : null;
     };
@@ -1168,8 +1214,13 @@ $dataItemScopes = null;
      * TODO: 選択出来ない項目も表示する場合に使用する。
      * @return {boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
-    Window_ActionTarget.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.itemAt(this.index()));
+    Window_ActionTargetBase.prototype.isCurrentItemEnabled = function() {
+        const item = this.itemAt(this.index());
+        if (item) {
+            return allowSelectNonEffectiveMembers || this.isEnabled(item);
+        } else {
+            return false;
+        }
     };
 
     /**
@@ -1178,13 +1229,13 @@ $dataItemScopes = null;
      * @param {Game_ActionTargetGroup} group 
      * @returns {boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
-    Window_ActionTarget.prototype.isEnabled = function(group) {
+    Window_ActionTargetBase.prototype.isEnabled = function(group) {
         return (group.members().length > 0);
     };
     /**
      * タッチ操作を処理する
      */
-    Window_ActionTarget.prototype.processTouch = function() {
+    Window_ActionTargetBase.prototype.processTouch = function() {
         Window_Selectable.prototype.processTouch.call(this);
         if (this.isOpenAndActive()) {
             // 画面上のSprite_Battlerをタッチすると、$gameTemp.touchTarget()がセットされる。
@@ -1216,7 +1267,7 @@ $dataItemScopes = null;
      * 
      * @param {number} index インデックス番号
      */
-    Window_ActionTarget.prototype.drawItem = function(index) {
+    Window_ActionTargetBase.prototype.drawItem = function(index) {
         const group = this.itemAt(index);
         if (group) {
             const rect = this.itemRect(index);
@@ -1224,6 +1275,44 @@ $dataItemScopes = null;
             this.drawText(group.name(), rect.x, rect.y, rect.width);
             this.changePaintOpacity(1);
         }
+    };
+
+    //------------------------------------------------------------------------------
+    // Window_BattleActionTarget
+    // アクションターゲット選択ウィンドウ
+    Window_BattleActionTarget.prototype = Object.create(Window_ActionTargetBase.prototype);
+    Window_BattleActionTarget.prototype.constructor = Window_BattleActionTarget;
+
+    /**
+     * Window_BattleActionTargetを初期化する。
+     * 
+     * @param {Rectangle} rect ウィンドウ矩形領域
+     */
+    Window_BattleActionTarget.prototype.initialize = function(rect) {
+        Window_ActionTargetBase.prototype.initialize.call(this, rect);
+    };
+    //------------------------------------------------------------------------------
+    // Window_MenuActionTarget
+    // アクションターゲット選択ウィンドウ
+    Window_MenuActionTarget.prototype = Object.create(Window_ActionTargetBase.prototype);
+    Window_MenuActionTarget.prototype.constructor = Window_MenuActionTarget;
+
+    /**
+     * Window_MenuActionTargetを初期化する。
+     * 
+     * @param {Rectangle} rect ウィンドウ矩形領域
+     */
+    Window_MenuActionTarget.prototype.initialize = function(rect) {
+        Window_ActionTargetBase.prototype.initialize.call(this, rect);
+    };
+
+    /**
+     * OK時の処理を行う。
+     * 
+     * Note: アクター選択ウィンドウは自動的にdeactivate()はしない。
+     */
+    Window_MenuActionTarget.prototype.processOk = function() {
+        this.callOkHandler();
     };
     //------------------------------------------------------------------------------
     // BattleManager
@@ -1237,12 +1326,15 @@ $dataItemScopes = null;
         const subject = this._subject;
         const action = subject.currentAction();
         const targets = action.makeTargets();
+        const effectiveTargets = action.makeEffectiveTargets(); // 効果対象
         if ((targets.length === 0) && cancelActionWhenNoTargets) {
+            this.endAction();
+        } else if ((effectiveTargets.length === 0) && cancelActionWhenNoEffectiveTargets) {
             this.endAction();
         } else {
             this._phase = "action";
             this._action = action;
-            this._targets = action.makeEffectiveTargets(); // 効果対象
+            this._targets = effectiveTargets;
             subject.useItem(action.item());
             this._action.applyGlobal(); // グローバルな使用効果を適用。(コモンイベントを準備するとか、最後のアクションを保存とか)
             this._logWindow.startAction(subject, action, targets);
@@ -1260,31 +1352,16 @@ $dataItemScopes = null;
      */
     Scene_Battle.prototype.destroy = function() {
         _Scene_Battle_destroy.call(this);
-        if (this._actorWindow) {
-            this._actorWindow.destroy();
-        }
         if(this._enemyWindow) {
             this._enemyWindow.destroy();
         }
     };
 
-    /**
-     * スキル使用対象選択用のアクター選択ウィンドウを作成する。
-     * 
-     * !!!overwrite!!! Scene_Battle.createActorWindow()
-     *     アイテム・スキル使用対象のアクターウィンドウを表示させないようにするため、オーバーライドする。
-     */
-    Scene_Battle.prototype.createActorWindow = function() {
-        const rect = this.actorWindowRect();
-        this._actorWindow = new Window_BattleActor(rect);
-        this._actorWindow.setHandler("ok", this.onActorOk.bind(this));
-        this._actorWindow.setHandler("cancel", this.onActorCancel.bind(this));
-        //this.addWindow(this._actorWindow);
-    };
+
     /**
      * エネミー選択ウィンドウを作成する。
      * 
-     * !!!overwrite!!! Scene_Battle.createActorWindow()
+     * !!!overwrite!!! Scene_Battle.createEnemyWindow()
      *     アイテム・スキル使用対象のアクターウィンドウを表示させないようにするため、オーバーライドする。
      */
     Scene_Battle.prototype.createEnemyWindow = function() {
@@ -1301,8 +1378,8 @@ $dataItemScopes = null;
      * アクションターゲットウィンドウを作成する。
      */
     Scene_Battle.prototype.createActionTargetWindow = function() {
-        const rect = this.enemyWindowRect();
-        this._actionTargetWindow = new Window_ActionTarget(rect);
+        const rect = this.actionTargetWindowRect();
+        this._actionTargetWindow = new Window_BattleActionTarget(rect);
         this._actionTargetWindow.setHandler("ok", this.onActionTargetOk.bind(this));
         this._actionTargetWindow.setHandler("cancel", this.onActionTargetCancel.bind(this));
         this._actionTargetWindow.setActorWindow(this._actorWindow);
@@ -1362,6 +1439,7 @@ $dataItemScopes = null;
     Scene_Battle.prototype.onActorCancel = function() {
         this.onActionTargetCancel();
         this._actionTargetWindow.hide();
+        this._actorWindow.hide();
         switch (this._actorCommandWindow.currentSymbol()) {
             case "attack":
                 this._statusWindow.show();
@@ -1399,6 +1477,7 @@ $dataItemScopes = null;
      */
     Scene_Battle.prototype.onEnemyCancel = function() {
         this.onActionTargetCancel();
+        this._actorWindow.hide();
         this._actionTargetWindow.hide();
         switch (this._actorCommandWindow.currentSymbol()) {
             case "attack":
@@ -1426,7 +1505,11 @@ $dataItemScopes = null;
         this._actionTargetWindow.show();
         this._actionTargetWindow.select(0);
         this._actionTargetWindow.activate();
-        this._statusWindow.hide(); // ステータスウィンドウは隠す
+        this._statusWindow.hide();
+        this._itemWindow.hide();
+        this._skillWindow.hide();
+        this._actorWindow.deselect();
+        this._actorWindow.show();
     };
 
     /**
@@ -1632,7 +1715,7 @@ $dataItemScopes = null;
      */
     Scene_ItemBase.prototype.createActionTargetWindow = function() {
         const rect = this.actionTargetWindowRect();
-        this._actionTargetWindow = new Window_ActionTarget(rect);
+        this._actionTargetWindow = new Window_MenuActionTarget(rect);
         this._actionTargetWindow.setHandler("ok", this.onActionTargetOk.bind(this));
         this._actionTargetWindow.setHandler("cancel", this.onActionTargetCancel.bind(this));
         this.addWindow(this._actionTargetWindow);
@@ -1652,7 +1735,7 @@ $dataItemScopes = null;
         const wy = rect.y + rect.height;
         const ww = rect.width;
         const memberDisplayHeight = this.calcWindowHeight($gameParty.members().length, true);
-        const wh = Math.min((this.mainAreaHeight() - rect.wh), memberDisplayHeight);
+        const wh = Math.min((this.mainAreaHeight() - rect.height), memberDisplayHeight);
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -1686,19 +1769,19 @@ $dataItemScopes = null;
         if (DataManager.isItem(item) && scopeInfo.forUserOnly) {
             const actionTargets = [];
             for (const member of $gameParty.movableMembers()) {
-                const selectableTargets = TargetManager.makeSelectableActionTargets(member, item);
+                const selectableTargets = TargetManager.makeSelectableActionTargets(member, item, false);
                 for (const selectableTarget of selectableTargets) {
                     actionTargets.push(selectableTarget);
                 }
             }
             this._actionTargetWindow.setTargetGroups(actionTargets);
         } else {
-            const actionTargets = TargetManager.makeSelectableActionTargets(this.user(), item);
+            const actionTargets = TargetManager.makeSelectableActionTargets(this.user(), item, false);
             this._actionTargetWindow.setTargetGroups(actionTargets);
         }
 
-        this._itemWindow.setItem(item);
-        this._itemWindow.show();
+        this._itemNameWindow.setItem(item);
+        this._itemNameWindow.show();
         this._actionTargetWindow.show();
         this._actorWindow.show();
         this._actionTargetWindow.activate();
@@ -1709,7 +1792,7 @@ $dataItemScopes = null;
      *     対象選択を置き換えるためオーバーライドする。
      */
     Scene_ItemBase.prototype.hideActorWindow = function() {
-        this._itemWindow.hide();
+        this._itemNameWindow.hide();
         this._actionTargetWindow.hide();
         this._actorWindow.hide();
         this._actionTargetWindow.deactivate();
@@ -1802,7 +1885,7 @@ $dataItemScopes = null;
         const scopeInfo = TargetManager.scopeInfo(item.scope);
         let user = null;
         if (DataManager.isItem(item) && scopeInfo.forUserOnly) {
-            const group = _actionTargetWindow.item();
+            const group = this._actionTargetWindow.item();
             for (const member of $gameParty.movableMembers()) {
                 if (group.isMainTarget(member)) {
                     user = member;
@@ -1815,11 +1898,11 @@ $dataItemScopes = null;
 
         const action = new Game_Action(user);
         action.setItemObject(item);
-        const selectedGroup = _actionTargetWindow.item();
+        const selectedGroup = this._actionTargetWindow.item();
         if (selectedGroup) {
             action.setTarget(selectedGroup.targetIndex());
         }
-        for (const target of this.action.makeEffectiveTargets()) {
+        for (const target of action.makeEffectiveTargets()) {
             for (let i = 0; i < action.numRepeats(); i++) {
                 action.apply(target);
             }
@@ -1848,7 +1931,7 @@ $dataItemScopes = null;
      */
     Game_Enemy.prototype.hasAnyTarget = function(action) {
         const skill = $dataSkills[action.skillId];
-        const actionTargets = TargetManager.makeSelectableActionTargets(this, skill, subject.isConfused());
+        const actionTargets = TargetManager.makeSelectableActionTargets(this, skill, this.isConfused());
         return actionTargets.some(actionTarget => actionTarget.members().length >= 0);
     };
 
