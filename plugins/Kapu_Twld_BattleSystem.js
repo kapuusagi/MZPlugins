@@ -2335,8 +2335,23 @@ function Sprite_BattleHudPicture() {
         if (this._statusWindow) {
             this._statusWindow.destroy();
         }
+        if (this._actorWindow) {
+            this._actorWindow.destroy();
+        }
     };
-
+    /**
+     * スキル使用対象選択用のアクター選択ウィンドウを作成する。
+     * 
+     * !!!overwrite!!! Scene_Battle.createActorWindow()
+     *     アイテム・スキル使用対象のアクターウィンドウを表示させないようにするため、オーバーライドする。
+     */
+     Scene_Battle.prototype.createActorWindow = function() {
+        const rect = this.actorWindowRect();
+        this._actorWindow = new Window_BattleActor(rect);
+        this._actorWindow.setHandler("ok", this.onActorOk.bind(this));
+        this._actorWindow.setHandler("cancel", this.onActorCancel.bind(this));
+        //this.addWindow(this._actorWindow);
+    };
     /**
      * アイテム名表示ウィンドウを作成する。
      */
