@@ -218,6 +218,24 @@
  * @decimals 2
  * @default 0.50
  * 
+ * @param defaultPhysicalElementId
+ * @text デフォルト属性(物理)
+ * @desc ダメージ計算時、属性指定がなかったとき、命中タイプ「物理」に適用する属性番号
+ * @type number
+ * @default 0
+ * 
+ * @param defaultMagicalElementId
+ * @text デフォルト属性(魔法)
+ * @desc ダメージ計算時、属性指定がなかったとき、命中タイプ「魔法」に適用する属性番号
+ * @type number
+ * @default 0
+ * 
+ * @param defaultOtherElementId
+ * @text デフォルト属性(その他)
+ * @desc ダメージ計算時、属性指定がなかったとき、命中タイプ「必中」に適用する属性番号
+ * @type number
+ * @default 0
+ * 
  * @help 
  * ベーシックシステムのTWLD向け変更を行うプラグインです。
  * 各Trait系プラグインによる変更前に適用するものを全て入れます。
@@ -333,6 +351,11 @@
     if (!Game_BattlerBase.TRAIT_PARAM_RATE_ALL) {
         console.error(pluginName + " TRAIT_PARAM_RATE_ALL is not valid.");
     }
+
+    const defaultPhysicalElementId = Math.round(Number(parameters["defaultPhysicalElementId"]) || 0);
+    const defaultMagicalElementId = Math.round(Number(parameters["defaultMagicalElementId"]) || 0);
+    const defaultOtherElemntId = Math.round(Number(parameters["defaultOtherElemntId"]) || 0);
+
 
     const colorHpDead = parameters["colorHpDead"] || "#FF8000";
     const colorHpDying = parameters["colorHpDying"] || "#FF8040";
@@ -526,6 +549,25 @@
     };
     //------------------------------------------------------------------------------
     // Game_Battler
+    const _Game_Battler_addState = Game_Battler.prototype.addState;
+    /**
+     * ステートを付与する。但しステート防止がある場合には付与されない。
+     * 
+     * @param {number} stateId ステートID
+     */
+    Game_Battler.prototype.addState = function(stateId) {
+        _Game_Battler_addState.call(this, stateId);
+        if (this.isDead()) {
+            // DeadするとHP,MPはゼロになる。
+            if (this.tp > 0) {
+                this.clearTp();
+            }
+            if (this.mp > 0) {
+                this.setMp(0);
+            }
+        }
+    };
+
     /**
      * 速度からTPB速度を得る。
      * 
@@ -729,7 +771,6 @@
         result.drain = this.isDrain();
         if (result.isHit()) {
             if (this.item().damage.type > 0) {
-                result.critical = Math.random() < this.itemCri(target);
                 const value = this.makeDamageValue(target, result.critical);
                 this.executeDamage(target, value);
             }
@@ -833,6 +874,16 @@
      */
     Game_Action.prototype.makeDamageValueWithElements = function(target, critical) {
         const elementIds = this.elementIds();
+        if (elementIds.length === 0) {
+            // 属性なし。
+            if (this.isPhysical() && (defaultPhysicalElementId > 0)) {
+                elementIds.push(defaultPhysicalElementId);
+            } else if (this.isMagical() && (defaultMagicalElementId > 0)) {
+                elementIds.push(defaultMagicalElementId);
+            } else if (defaultOtherElemntId > 0) {
+                elementIds.push(defaultOtherElemntId);
+            }
+        }
         const phyElementIds = elementIds.filter(id => DataManager.isPhysicalElement(id));
         const magElementIds = elementIds.filter(id => DataManager.isMagicalElement(id));
         const otherElementIds = elementIds.filter(id => !DataManager.isPhysicalElement(id) && !DataManager.isMagicalElement(id));
