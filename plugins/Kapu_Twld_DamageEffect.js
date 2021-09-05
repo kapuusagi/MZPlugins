@@ -53,6 +53,7 @@
  * @text 追加ステート文字色
  * @desc 追加ステート文字色
  * @type string
+ * @default #ffffff
  * @parent textAddedState
  * 
  * 
@@ -75,6 +76,46 @@
  * @desc ステート追加/解除をポップアップさせる時間[フレーム数]
  * @type number
  * @default 80
+ * 
+ * @param textAddedBuff
+ * @text 追加されたバフポップアップテキスト
+ * @desc 追加されたバフポップアップテキスト。%1にパラメータ名。空にするとポップアップさせない。
+ * @type string
+ * @default %1上昇
+ * 
+ * @param colorAddedBuff
+ * @text 追加バフ文字色
+ * @desc 追加バフ文字色
+ * @type string
+ * @default #FFB000
+ * @parent textAddedBuff
+ * 
+ * @param textAddedDebuff
+ * @text 追加されたデバフポップアップテキスト
+ * @desc 追加されたデバフポップアップテキスト。%1にパラメータ名。カアにするとポップアップさせない。
+ * @string
+ * @default %1低下
+ * 
+ * @param colorAddedDebuff
+ * @text 追加デバフ文字色
+ * @desc 追加デバフ文字色
+ * @type string
+ * @default #0080B0
+ * @parent textAddedDebuff
+ * 
+ * @param textRemovedBuff
+ * @text 解除されたバフ/デバフポップアップテキスト
+ * @desc 解除されたバフ/デバフポップアップテキスト。%1にステート名。空にするとポップアップさせない。
+ * @type string
+ * @default #808080
+ * @default %1通常
+ * 
+ * @param colorRemovedBuff
+ * @text 解除バフ/デバフ文字色
+ * @desc 解除バフ/デバフ文字色
+ * @type string
+ * @default #ffffff
+ * @parent textRemovedBuff
  * 
  * @param textEffective
  * @text 効果的メッセージ
@@ -160,6 +201,48 @@
  * @default #ffffff
  * @parent textCritical
  *  
+ * @param colorHpDamage
+ * @text HPダメージカラー
+ * @desc HPダメージ数値の色
+ * @type string
+ * @default #ffffff
+ * 
+ * @param colorHpRecover
+ * @text HPリカバリーカラー
+ * @desc HP回復数値の色
+ * @type string
+ * @default #80ff80
+ * 
+ * @param colorHpNoDamage
+ * @text HPノーダメージカラー
+ * @desc HPノーダメージ数値の色
+ * @type string
+ * @default #ffffff
+ * 
+ * @param colorMpDamage
+ * @text MPダメージカラー
+ * @desc MPダメージ数値の色
+ * @type string
+ * @default #ff8080
+ * 
+ * @param colorMpRecover
+ * @text MPリカバリーカラー
+ * @desc MP回復数値の色
+ * @type string
+ * @default #ff80ff
+ * 
+ * @param colorTpDamage
+ * @text TPダメージカラー
+ * @desc TPダメージ数値の色
+ * @type string
+ * @default #b4b440
+ * 
+ * @param colorTpRecover
+ * @text TP回復カラー
+ * @desc TP回復数値の色
+ * @type string
+ * @default #ffff40
+ * 
  * @help 
  * TWLD向けに作成した、ダメージエフェクトのプラグイン。
  * ダメージエフェクトは色々考えるため、設定の幅を持たせて色々できるようにするよりは、
@@ -263,11 +346,28 @@
     const fadeInDuration = Math.max(0, Math.round(Number(parameters["fadeInDuration"]) || 30));
     const popupDuration = Math.max(30, Math.round(Number(parameters["popupDuration"]) || 60));
     const fadeOutDuration = Math.max(0, Math.round(Number(parameters["fadeOutDuration"]) || 30));
+
+    const colorHpDamage = parameters["colorHpDamage"] || "#ffffff";
+    const colorHpRecover = parameters["colorHpRecover"] || "#80ff80";
+    const colorHpNoDamage = parameters["colorHpNoDamage"] || "#ffffff";
+    const colorMpDamage = parameters["colorMpDamage"] || "#ff8080";
+    const colorMpRecover = parameters["colorMpRecover"] || "#ff80ff";
+    const colorTpDamage = parameters["colorTpDamage"] || "#b4b440";
+    const colorTpRecover = parameters["colorTpRecover"] || "#ffff40";
+
     const textAddedState = parameters["textAddedState"] || "";
     const colorAddedState = parameters["colorAddedState"] || "#ffffff";
     const textRemovedState = parameters["textRemovedState"] || "";
-    const colorRemovedState = parameters["colorRemovedState"] || "";
+    const colorRemovedState = parameters["colorRemovedState"] || "#808080";
     const statePopupDuration = Math.max(0, Number("statePopupDuration") || 90);
+
+    const textAddedBuff = parameters["textAddedBuff"] || "";
+    const colorAddedBuff = parameters["colorAddedBuff"] || "#ffb000";
+    const textAddedDebuff = parameters["textAddedDebuff"] || "";
+    const colorAddedDebuff = parameters["colorAddedDebuff"] || "#0080b0"
+    const textRemovedBuff = parameters["textRemovedBuff"] || "";
+    const colorRemovedBuff = parameters["colorRemovedBuff"] || "#808080";
+
     const textEffective = parameters["textEffective"] || "";
     const colorEffective = parameters["colorEffective"] || "#ff8000";
     const effectiveRate = Math.max((Number(parameters["effectiveRate"]) || 1.3), 1);
@@ -309,6 +409,8 @@
      */
     Sprite_Damage.prototype.initialize = function() {
         _Sprite_Damage_initialize.call(this);
+        this._displayWait = 0;
+        this._stateDisplayNo = 0;
         this._duration = fadeInDuration + popupDuration + fadeOutDuration;
         this._frameCount = 0;
     };
@@ -343,13 +445,26 @@
             } else if ((result.elementRate > effectiveRate) && textEffective) {
                 this.createEffective();
             }
-            if (result.hpAffected) {
-                this._colorType = result.hpDamage >= 0 ? 0 : 1;
-                this.createDigits(result.hpDamage);
-            } else if (target.isAlive() && result.mpDamage !== 0) {
-                this._colorType = result.mpDamage >= 0 ? 2 : 3;
-                this.createDigits(result.mpDamage);
-                this.setupNormalEffect();
+            if (result.hpDamage > 0) {
+                this.createDigitsWithColor(result.hpDamage, colorHpDamage);
+            } else if (result.hpDamage < 0) {
+                this.createDigitsWithColor(result.hpDamage, colorHpRecover);
+            } else {
+                if (result.hpAffected) {
+                    this.createDigitsWithColor(result.hpDamage, colorHpNoDamage);
+                }
+            }
+            if (target.isAlive()) {
+                if (result.mpDamage > 0) {
+                    this.createDigitsWithColor(result.mpDamage, colorMpDamage);
+                } else if (result.mpDamage < 0) {
+                    this.createDigitsWithColor(result.mpDamage, colorMpRecover);
+                }
+                if (result.tpDamage > 0) {
+                    this.createDigitsWithColor(result.tpDamage, colorTpDamage);
+                } else if (result.tpDamage < 0) {
+                    this.createDigitsWithColor(result.tpDamage, colorTpRecover);
+                }
             }
             if (result.critical) {
                 this.setupCriticalEffect();
@@ -357,20 +472,49 @@
                 this.setupNormalEffect();
             }
         }
-        let displayNo = 0;
+
+        this.setupBufStatePopup(target);
+    };
+
+    /**
+     * バフとステートの変化をポップアップさせる。
+     * 
+     * @param {Game_Battler} target 対象
+     */
+    Sprite_Damage.prototype.setupBufStatePopup = function(target) {
+        const result = target.result();
         if (textRemovedState && (statePopupDuration > 0)) {
             for (const stateId of result.removedStates) {
                 if (!target.isStateAffected(stateId)) {
-                    this.createAddRemoveState(stateId, false, displayNo);
-                    displayNo++;
+                    this.createAddRemoveState(stateId, false);
+                }
+            }
+        }
+        if (textRemovedBuff && (statePopupDuration > 0)) {
+            for (const paramId of result.addedBuffs) {
+                if (!target.isBuffAffected(paramId)) {
+                    this.createAddRemoveBuff(paramId, 0);
                 }
             }
         }
         if (textAddedState && (statePopupDuration > 0)) {
             for (const stateId of result.addedStates) {
                 if (target.isStateAffected(stateId)) {
-                    this.createAddRemoveState(stateId, true, displayNo);
-                    displayNo++;
+                    this.createAddRemoveState(stateId, true);
+                }
+            }
+        }
+        if (textAddedDebuff && (statePopupDuration > 0)) {
+            for (const paramId of result.addedDebuffs) {
+                if (target.isDebuffAffected(paramId)) {
+                    this.createAddRemoveBuff(paramId, -1);
+                }
+            }
+        }
+        if (textAddedBuff && (statePopupDuration > 0)) {
+            for (const paramId of result.removedBuffs) {
+                if (target.isBuffAffected(paramId)) {
+                    this.createAddRemoveBuff(paramId, 1);
                 }
             }
         }
@@ -493,26 +637,29 @@
      * 数値スプライトを作成する。
      * 
      * @param {number} value 表示する値
-     * !!!overwrite!!! Sprite_Damage_createDigits
+     * @param {string} valueColor 値の色
      */
-    Sprite_Damage.prototype.createDigits = function(value) {
+    Sprite_Damage.prototype.createDigitsWithColor = function(value, valueColor) {
         const string = Math.abs(value).toString();
         const h = this.fontSize();
         const w = Math.floor(h * 0.75);
         for (let i = 0; i < string.length; i++) {
             const sprite = this.createChildSprite(w, h);
+            sprite.bitmap.textColor = valueColor;
             sprite.bitmap.drawText(string[i], 0, 0, w, h, "center");
             sprite.x = (i - (string.length - 1) / 2) * w;
             sprite.ry = baseY; // ry : 実数y
             sprite.dy = 10; // dy: 速度
             sprite.ay = 0.5; // ay: 加速度 
             sprite.rx = sprite.x; // rx : 実数x
-            sprite.wait = i * 8; // 左から順番に表示していく。
+            sprite.wait = this._displayWait + i * 8; // 左から順番に表示していく。
             sprite.visible = sprite.wait === 0;
             sprite.updatePosition = this.updateDigits.bind(this);
             sprite.scale.x = 0.8;
             sprite.scale.y = 0.8;
         }
+        this._displayWait += 30;
+        this._duration += 30;
     };
 
     /**
@@ -688,31 +835,74 @@
      * 追加または解除されたステートのポップアップを作成する。
      * 
      * @param {number} stateId ステートID
-     * @param {boolean} isAdded 追加された場合にはtrue, 解除された場合にはfalse
-     * @param {number} displayNo 表示番号
+     * @param {boolean} isAdded 追加された場合にはtrue, 解除された場合にはfalse.
+     * @returns {boolean} 追加した場合にはtrue, 追加しない場合にはfalse.
      */
-    Sprite_Damage.prototype.createAddRemoveState = function(stateId, isAdded, displayNo) {
-        const fontSize = $gameSystem.mainFontSize();
-        const displayableCount = Math.max(1, Math.floor(140 / (fontSize + 8)));
-        const stateWaitOffset = popupDuration - fadeInDuration + Math.floor(displayNo / displayableCount) * (statePopupDuration - 10) + (displayNo % 4) * 10;
+    Sprite_Damage.prototype.createAddRemoveState = function(stateId, isAdded) {
         const state = $dataStates[stateId];
         if (noDispStateIds.includes(stateId) || !state || !state.message1 || state.meta.noPopup) {
-            return ;
+            return false;
         }
+
         const text = isAdded ? textAddedState.format(state.name) : textRemovedState.format(state.name);
-        if (text.length == 0) {
-            return ;
+        if (text.length === 0) {
+            return false;
         }
+
+        const textColor = isAdded ? colorAddedState : colorRemovedState;
+        this.createBuffStateSprite(text, textColor);
+        return true;
+    };
+    /**
+     * 追加または解除されたバフのポップアップを作成する。
+     * 
+     * @param {number} paramId パラメータID
+     * @param {number} type タイプ(>0:バフ, <0:デバフ, 0:解除)
+     * @returns {boolean} 追加した場合にはtrue, 追加しない場合にはfalse.
+     */
+    Sprite_Damage.prototype.createAddRemoveBuff = function(paramId, type) {
+        let text = "";
+        let textColor = "";
+        if (type > 0) {
+            text = textAddedBuff.format(TextManager.param(paramId));
+            textColor = colorAddedBuff;
+        } else if (type < 0) {
+            text = textAddedDebuff.format(TextManager.param(paramId));
+            textColor = colorAddedDebuff;
+        } else {
+            text = textRemovedBuff.format(TextManager.param(paramId));
+            textColor = colorRemovedBuff;
+        }
+        if (text.length === 0) {
+            return false;
+        }
+        this.createBuffStateSprite(text, textColor)
+
+        return true;
+    };
+
+    /**
+     * バフ・デバフのポップアップスプライトを作成する。
+     * 
+     * @param {string} text 文字
+     * @param {string} textColor 文字色
+     */
+    Sprite_Damage.prototype.createBuffStateSprite = function(text, textColor) {
+        const fontSize = $gameSystem.mainFontSize();
+        const displayableCount = Math.max(1, Math.floor(140 / (fontSize + 8)));
+        const stateWaitOffset = popupDuration - fadeInDuration
+                + Math.floor(this._stateDisplayNo / displayableCount) * (statePopupDuration - 10)
+                + (this._stateDisplayNo % 4) * 10 + this._displayWait;
 
         const h = fontSize;
         const w = Math.floor(h * text.length);
         const sprite = this.createChildSprite(w, h);
-        sprite.bitmap.textColor = isAdded ? colorAddedState : colorRemovedState;
+        sprite.bitmap.textColor = textColor;
         sprite.bitmap.fontSize = fontSize;
         sprite.bitmap.drawText(text, 0, 0, w, h, "center");
         sprite.anchor.y = 0;
-        sprite.x = -10 + displayNo % displayableCount * 5;
-        sprite.y = -140 + displayNo % displayableCount * (fontSize + 8);
+        sprite.x = -10 + this._stateDisplayNo % displayableCount * 5;
+        sprite.y = -140 + this._stateDisplayNo % displayableCount * (fontSize + 8);
         sprite.opacity = 0;
         sprite.ry = sprite.y;
         sprite.dy = 0;
@@ -721,7 +911,9 @@
         sprite.frameCount = 0;
 
         this._duration += Math.max(0, statePopupDuration - fadeInDuration); // 表示長さだけ延長
+        this._stateDisplayNo++;
     };
+
     /**
      * ステート付与/解除ポップアップ表示Spriteを更新する。
      * Y=-60から上に移動する。
@@ -798,6 +990,118 @@
             this._flashDuration--;
         } else if (this._flashDuration == 0) {
             this._flashDuration = 40;
+        }
+    };
+    //------------------------------------------------------------------------------
+    // Window_BattleLog の変更
+
+    /**
+     * HPダメージを表示する。
+     * 
+     * @param {Game_Battler} target 表示対象
+     */
+    Window_BattleLog.prototype.displayHpDamage = function(target) {
+        if (target.result().hpAffected) {
+            if (target.result().hpDamage > 0 && !target.result().drain) {
+                this.push("performDamage", target);
+            }
+            if (target.result().hpDamage < 0) {
+                this.push("performRecovery", target);
+            }
+            //this.push("addText", this.makeHpDamageText(target));
+        }
+    };
+
+    /**
+     * MPダメージを表示する。
+     * 
+     * @param {Game_Battler} target 表示対象
+     */
+    Window_BattleLog.prototype.displayMpDamage = function(target) {
+        if (target.isAlive() && target.result().mpDamage !== 0) {
+            if (target.result().mpDamage < 0) {
+                this.push("performRecovery", target);
+            }
+            //this.push("addText", this.makeMpDamageText(target));
+        }
+    };
+
+    /**
+     * TPダメージを表示する。
+     * 
+     * @param {Game_Battler} target 表示対象
+     */
+    Window_BattleLog.prototype.displayTpDamage = function(target) {
+        if (target.isAlive() && target.result().tpDamage !== 0) {
+            if (target.result().tpDamage < 0) {
+                this.push("performRecovery", target);
+            }
+            //this.push("addText", this.makeTpDamageText(target));
+        }
+    };    
+    /**
+     * 対象にクリティカルを表示する。
+     * 
+     * @param {Game_Battler} target 対象
+     * !!!overwrite!!! Window_BattleLog.displayCritical(target)
+     *     クリティカル発動テキストは表示しないため、オーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_BattleLog.prototype.displayCritical = function(target) {
+    };
+
+    /**
+     * 変化したバフを表示する。
+     * 
+     * @param {Game_Battler} target 対象
+     * !!!Window_BattleLog.displayChangedBuffs(target)
+     *     バフ/デバフのテキストメッセージは表示しないため、オーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_BattleLog.prototype.displayChangedBuffs = function(target) {
+    };
+    /**
+     * 対象のステートが変化されたのを表示する。
+     * 
+     * @param {Game_Battler} target 対象
+     * !!!Window_BattleLog.displayChangedStates(target)
+     *     ステート変更のメッセージは表示しないため、オーバーライドする。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_BattleLog.prototype.displayChangedStates = function(target) {
+        const result = target.result();
+        const states = result.addedStateObjects();
+        if (states.some(state => state.id === target.deathStateId())) {
+            this.push("performCollapse", target);
+            this.push("waitForEffect");
+        }
+    };
+
+    /**
+     * ミスした表示する。
+     * 
+     * @param {Game_Battler} target 対象
+     * !!!overwrite!!! Window_BattleLog.displayMiss(target)
+     *     バトルログにミスした表示を出さないためオーバーライドする。
+     */
+    Window_BattleLog.prototype.displayMiss = function(target) {
+        if (target.result().physical) {
+            this.push("performMiss", target);
+        }
+    };
+
+    /**
+     * 回避された表示する。
+     * 
+     * @param {Game_Battler} target 対象
+     * !!!overwrite!!! Window_BattleLog.displayEvasion(target)
+     *     メッセージログに回避したメッセージを表示させないため、オーバーライドする。
+     */
+    Window_BattleLog.prototype.displayEvasion = function(target) {
+        if (target.result().physical) {
+            this.push("performEvasion", target);
+        } else {
+            this.push("performMagicEvasion", target);
         }
     };
 
