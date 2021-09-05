@@ -1256,7 +1256,7 @@ function Sprite_BattleHudPicture() {
         this.bitmap.clear();
         if (icons.length > 0) {
             this._iconIndex += 4;
-            if (this._iconIndex > icons.length) {
+            if (this._iconIndex >= icons.length) {
                 this._iconIndex = 0;
             }
             for (let i = 0; i < 4; i++) {
