@@ -282,6 +282,7 @@
                 || _Game_Action_testCertainHit.call(this, target);
     };
 
+    const _Game_Action_testCertainEvad = Game_Action.prototype.testCertainEvad;
     /**
      * 確実に回避できるかどうかを取得する。
      * 
@@ -296,7 +297,7 @@
                 return true;
             }
 
-            return _Game_Action_testCertainHit.call(this, target);
+            return _Game_Action_testCertainEvad.call(this, target);
         }
     };
 })();
