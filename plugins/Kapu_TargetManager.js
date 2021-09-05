@@ -784,14 +784,16 @@ $dataItemScopes = null;
         const selectableGroups = this.makeSelectableActionTargets(subject, item, includesConfusionTarget);
         let selectedGroup = selectableGroups.find(selectableTarget => selectableTarget.targetIndex() === targetIndex);
         if (!selectedGroup) {
+            // 選択可能な対象から候補を選出する。
+            const candidateGroups = this.makeSelectableActionTargets(subject, item, false);
             if (targetIndex >= 0) {
                 // 選択した対象がいない。 -> デフォルトターゲットを設定
-                selectedGroup = selectableGroups[0];
+                selectedGroup = candidateGroups[0];
             } else {
                 // 選択対象が選択されていない。
                 // 選択可能なグループから、狙われ率を考慮したターゲットを選定し、
                 // そのターゲットが含まれるグループを選出する。
-                selectedGroup = this.pickActionTarget(selectableGroups);
+                selectedGroup = this.pickActionTarget(candidateGroups);
             }
         }
         if (selectedGroup) {
