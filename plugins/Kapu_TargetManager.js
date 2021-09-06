@@ -1941,30 +1941,54 @@ $dataItemScopes = null;
         }
         action.applyGlobal();
     };
+    //------------------------------------------------------------------------------
+    // Game_BattlerBase
+    const _Game_BattlerBase_canUse = Game_BattlerBase.prototype.canUse;
+    /**
+     * itemで指定されるオブジェクトを使用可能かどうかを得る。
+     * 
+     * @param {DataItem} item アイテム
+     * @return {boolean} 使用可能な場合にはtrue, それ以外はfalse
+     */
+    Game_BattlerBase.prototype.canUse = function(item) {
+        return _Game_BattlerBase_canUse.call(this, item)
+                && this.hasAnyTarget(item);
+    };
+
+    /**
+     * 使用可能な対象があるかどうかを判定する。
+     * 
+     * @param {object} item DataItem/DataSkill
+     * @returns {boolean} 使用可能な場合にはtrue, それ以外はfalse.
+     */
+    Game_BattlerBase.prototype.hasAnyTarget = function(item) {
+        const actionTargets = TargetManager.makeSelectableActionTargets(this, item, this.isConfused());
+        return actionTargets.some(actionTarget => actionTarget.members().length >= 0);
+    };
 
     //------------------------------------------------------------------------------
     // Game_Enemy
 
-    const _Game_Enemy_isActionValid = Game_Enemy.prototype.isActionValid;
-    /**
-     * actionが実行対象かどうかを判定する。
-     * 
-     * @param {DataEnemyAction} action エネミーアクションデータ
-     */
-    Game_Enemy.prototype.isActionValid = function(action) {
-        return _Game_Enemy_isActionValid.call(this, action)
-            && this.hasAnyTarget(action);
-    };
+    // const _Game_Enemy_isActionValid = Game_Enemy.prototype.isActionValid;
+    // /**
+    //  * actionが実行対象かどうかを判定する。
+    //  * 
+    //  * @param {DataEnemyAction} action エネミーアクションデータ
+    //  */
+    // Game_Enemy.prototype.isActionValid = function(action) {
+    //     return _Game_Enemy_isActionValid.call(this, action)
+    //         && this.hasAnyTarget(action);
+    // };
 
-    /**
-     * action使用対象があるかどうかを得る。
-     * 
-     * @param {DataEnemyAction} action エネミーアクションデータ
-     */
-    Game_Enemy.prototype.hasAnyTarget = function(action) {
-        const skill = $dataSkills[action.skillId];
-        const actionTargets = TargetManager.makeSelectableActionTargets(this, skill, this.isConfused());
-        return actionTargets.some(actionTarget => actionTarget.members().length >= 0);
-    };
+    // /**
+    //  * action使用対象があるかどうかを得る。
+    //  * 
+    //  * @param {DataEnemyAction} action エネミーアクションデータ
+    //  */
+    // Game_Enemy.prototype.hasAnyTarget = function(action) {
+    //     const skill = $dataSkills[action.skillId];
+    //     const actionTargets = TargetManager.makeSelectableActionTargets(this, skill, this.isConfused());
+    //     return actionTargets.some(actionTarget => actionTarget.members().length >= 0);
+    // };
 
 })();

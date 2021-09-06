@@ -16,6 +16,9 @@
   ☐ Kapu_FastTravel (isEnabledを変更したため)
   Kapu_Base_Twld:
     ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
+  Kapu_TargetManager: 
+    ☐ アイテム/スキルを使用可能かどうか判定するのに、canUse()を使用するようにしてみた。
+       リスト表示処理が(かなり)重くなってるはず。
       
 機能拡張予定:
   Kapu_Twld_DamageEffect:
