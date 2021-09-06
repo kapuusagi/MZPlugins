@@ -780,7 +780,7 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     TargetManager.makeActionTargetsNormal = function(subject, item, targetIndex, isForce) {
-        const includesConfusionTarget = !isForce && (subject.isActor() && !subject.isAutoBattle() && allowSelectConfusionTarget);
+        const includesConfusionTarget = !isForce && (subject.isActor() && allowSelectConfusionTarget);
         const selectableGroups = this.makeSelectableActionTargets(subject, item, includesConfusionTarget);
         let selectedGroup = selectableGroups.find(selectableTarget => selectableTarget.targetIndex() === targetIndex);
         if (!selectedGroup) {
@@ -853,8 +853,6 @@ $dataItemScopes = null;
         return [ target ];
     };
 
-
-
     /**
      * スコープ情報を得る。
      * 
@@ -876,7 +874,7 @@ $dataItemScopes = null;
         const subject = this.subject();
         const item = this.item();
         if (item && subject) {
-            const includesConfusionTarget = subject.isActor() && !subject.isAutoBattle() &&  allowSelectConfusionTarget;
+            const includesConfusionTarget = subject.isActor() &&  allowSelectConfusionTarget;
             return TargetManager.makeSelectableActionTargets(subject, item, includesConfusionTarget);
         } else {
             return [];
@@ -1087,7 +1085,44 @@ $dataItemScopes = null;
             this._targetIndex = -1;
         }
     };
+    /**
+     * このアクションを評価する。
+     * 
+     * @return {number} 評価値。
+     * !!!overwrite!!! Game_Action.itemTargetCandiates()
+     *     ターゲット置き換えのため、オーバーライドする。
+     */
+    Game_Action.prototype.evaluate = function() {
+        let evaluateValue = 0;
 
+        const subject = this.subject();
+        const item = this.item();
+        const scopeInfo = TargetManager.scopeInfo(subject.itemScope(item));
+        const candidateGroups = TargetManager.makeSelectableActionTargets(subject, item, subject.isConfused());
+        for (const candidateGroup of candidateGroups) {
+            let value = 0;
+            for (const target of candidateGroup.members()) {
+                const targetValue = this.evaluateWithTarget(target);
+                if (scopeInfo.random) {
+                    if (targetValue > value) {
+                        value = targetValue;
+                    }
+                } else {
+                    value += targetValue;
+                }
+            }
+            value *= this.numRepeats();
+            if (value > 0) {
+                value += Math.random();
+            }
+            if (value > evaluateValue) {
+                evaluateValue = value;
+                this._targetIndex = candidateGroups.targetIndex();
+            }
+        }
+
+        return evaluateValue;
+    };
     /**
      * ターゲット条件を得る。
      * 
@@ -1099,7 +1134,9 @@ $dataItemScopes = null;
         if (!this.isValid()) {
             return [];
         } else {
-            const actionTargets = this.makeSelectableActionTargets();
+            const subject = this.subject();
+            const item = this.item();
+            const actionTargets = TargetManager.makeSelectableActionTargets(subject, item, false);
             if (actionTargets && (actionTargets.length > 0)) {
                 return actionTargets[0].members();
             } else {
