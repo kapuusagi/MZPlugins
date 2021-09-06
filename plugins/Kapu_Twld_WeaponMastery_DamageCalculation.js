@@ -54,6 +54,8 @@
  * @param wmTypeId
  * @text ウェポンマスタリタイプ
  * @desc ウェポンマスタリタイプ番号を指定する。重複した番号をテーブルにのせた場合、後に載せたものが優先される。
+ * @type number
+ * @default 1
  *
  * @param atkRate
  * @text 攻撃力補正値
@@ -108,7 +110,8 @@
 
     const wmStatusCorrectionValues = [];
     try {
-        const array = JSON.parse(parameters["correctRateTable"]).map(line => JSON.parse(line));
+        const listStr = parameters["correctRateTable"];
+        const array = JSON.parse(listStr).map(line => JSON.parse(line));
         for (const entry of array) {
             entry.wmTypeId = Number(entry.wmTypeId) || 0;
             entry.atkRate = Number(entry.AtkRate) || 0;
