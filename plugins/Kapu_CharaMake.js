@@ -1176,7 +1176,16 @@ function Scene_UnregisterActor() {
      * @returns {object} アイテム
      */
     Window_CharaMakeItemSelection.prototype.item = function() {
-        const index = this.index();
+        return this.itemAt(this.index());
+    };
+
+    /**
+     * indexで指定される位置の項目を得る。
+     * 
+     * @param {number} index インデックス番号
+     * @returns {object} 項目。indexが範囲外の場合にはnull
+     */
+    Window_CharaMakeItemSelection.prototype.itemAt = function(index) {
         return ((index >= 0) && (index < this._items.length)) ? this._items[index] : null;
     };
 
@@ -1186,25 +1195,21 @@ function Scene_UnregisterActor() {
      * @returns {boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
     Window_CharaMakeItemSelection.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.index());
+        const item = this.itemAt(this.index());
+        return (item) ? this.isEnabled(item) : false;
     };
 
     /**
      * indexで指定される選択項目が選択可能かどうかを得る。
      * 
-     * @param {number} index インデックス番号
+     * @param {object} item 項目
      * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse.
      */
-    Window_CharaMakeItemSelection.prototype.isEnabled = function(index) {
-        if ((index >= 0) && (index < this._items.length)) {
-            const item = this._items[index];
-            if (this._isItemEnabled) {
-                return this._isItemEnabled(item, this._actor);
-            } else {
-                return true;
-            }
+    Window_CharaMakeItemSelection.prototype.isEnabled = function(item) {
+        if (this._isItemEnabled) {
+            return this._isItemEnabled(item, this._actor);
         } else {
-            return false;
+            return true;
         }
     };
 
@@ -1227,9 +1232,11 @@ function Scene_UnregisterActor() {
     Window_CharaMakeItemSelection.prototype.drawItem = function(index) {
         const rect = this.itemLineRect(index);
         const item = this._items[index];
-        this.changePaintOpacity(this.isEnabled(index));
-        this.drawText(item.name, rect.x, rect.y, rect.width);
-        this.changePaintOpacity(true);
+        if (item) {
+            this.changePaintOpacity(this.isEnabled(item));
+            this.drawText(item.name, rect.x, rect.y, rect.width);
+            this.changePaintOpacity(true);
+        }
     };
     /**
      * 選択項目の説明を更新する。
@@ -1379,9 +1386,9 @@ function Scene_UnregisterActor() {
      */
     Window_CharaMakeItemList.prototype.isCurrentItemEnabled = function() {
         const index = this.index();
-        if (index < this._items.length) {
+        if ((index >= 0) && (index < this._items.length)) {
             const item = this._items[index];
-            return item.canApply(this._actor, this._isModify);
+            return (item) ? item.canApply(this._actor, this._isModify) : false;
         } else {
             return true;
         }

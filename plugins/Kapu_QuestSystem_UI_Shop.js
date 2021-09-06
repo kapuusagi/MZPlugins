@@ -479,22 +479,23 @@ function Scene_SelectGiveupQuest() {
      * 現在選択中の項目が選択可能かどうかを判定する。
      */
     Window_QuestShopUnderTakeList.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.index());
+        const item = this.quest(this.index());
+        return (item) ? this.isEnabled(item) : false;
     };
 
     /**
      * indexで指定される項目が選択可能かどうかを判定する。
      * 派生クラスはこのメソッドを実装して選択可否判定を行うこと。
      * 
-     * @param {number} index インデックス番号
+     * @param {Game_Quest} quest クエストデータ
      * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse.
      */
     // eslint-disable-next-line no-unused-vars
-    Window_QuestShopUnderTakeList.prototype.isEnabled = function(index) {
+    Window_QuestShopUnderTakeList.prototype.isEnabled = function(quest) {
         if ($gameParty.quests().length >= 3) {
             return false; // 3件以上受託中。
         }
-        const quest = this.quest(index);
+        
         if ($gameParty.isAcceptQuest(quest.id())) {
             return false; // 既に受託中
         }
@@ -541,7 +542,7 @@ function Scene_SelectGiveupQuest() {
         const rect = this.itemRect(index);
         const quest = this.quest(index);
         if (quest) {
-            this.changePaintOpacity(this.isEnabled(index));
+            this.changePaintOpacity(this.isEnabled(quest));
             const name = quest.name();
             if (quest.isDone()) {
                 this.changeTextColor(ColorManager.textColor(1));
@@ -600,17 +601,17 @@ function Scene_SelectGiveupQuest() {
      * 現在選択中の項目が選択可能かどうかを判定する。
      */
     Window_QuestShopReportList.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.index());
+        const quest = this.quest(this.index());
+        return (quest) ? this.isEnabled(quest): false;
     };
 
     /**
      * indexで指定される項目が選択可能かどうかを判定する。
      * 
-     * @param {number} index インデックス番号
+     * @param {Game_Quest} quest クエストデータ
      * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse
      */
-    Window_QuestShopReportList.prototype.isEnabled = function(index) {
-        const quest = this.quest(index);
+    Window_QuestShopReportList.prototype.isEnabled = function(quest) {
         return quest.isDone();
     };
 
@@ -643,7 +644,7 @@ function Scene_SelectGiveupQuest() {
         const rect = this.itemRect(index);
         const quest = this.quest(index);
         if (quest) {
-            this.changePaintOpacity(this.isEnabled(index));
+            this.changePaintOpacity(this.isEnabled(quest));
             const name = quest.name();
             if (quest.isDone()) {
                 this.changeTextColor(ColorManager.textColor(1));
@@ -714,16 +715,18 @@ function Scene_SelectGiveupQuest() {
      * 現在選択中の項目が選択可能かどうかを判定する。
      */
     Window_QuestShopGiveupList.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.index());
+        const quest = this.quest(this.index());
+        return (quest) ? this.isEnabled(quest): false;
     };
 
     /**
      * indexで指定される項目が選択可能かどうかを判定する。
-     * @param {number} index インデックス番号
+     * 
+     * @param {Game_Quest} quest クエストデータ
      * @returns {boolean} 選択可能な場合にはtrue, それ以外はfalse
      */
     // eslint-disable-next-line no-unused-vars
-    Window_QuestShopGiveupList.prototype.isEnabled = function(index) {
+    Window_QuestShopGiveupList.prototype.isEnabled = function(quest) {
         return true;
     };
 
@@ -754,7 +757,7 @@ function Scene_SelectGiveupQuest() {
         const rect = this.itemRect(index);
         const quest = this.quest(index);
         if (quest) {
-            this.changePaintOpacity(this.isEnabled(index));
+            this.changePaintOpacity(this.isEnabled(quest));
             const name = quest.name();
             if (quest.isDone()) {
                 this.changeTextColor(ColorManager.textColor(1));

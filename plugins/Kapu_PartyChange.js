@@ -586,7 +586,7 @@ function Scene_PartyChange() {
      */
     Window_PartyChangeMemberBase.prototype.isCurrentItemEnabled = function() {
         const actor = this.actorAt(this.index());
-        return this.isEnabled(actor);
+        return (actor) ? this.isEnabled(actor) : false;
     };
 
     /**

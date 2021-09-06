@@ -602,6 +602,16 @@ function Window_BlacksmithNameEdit() {
     };
 
     /**
+     * 指定インデックスの項目を得る。
+     * 
+     * @param {number} index インデックス番号
+     * @returns {object} 項目
+     */
+    Window_BlacksmithItemList.prototype.itemAt = function(index) {
+        return ((index >= 0) && (index < this._items.length)) ? this._items[index] : null;
+    };
+
+    /**
      * 所持金を設定する。
      * 
      * @param {number} money 所持金
@@ -617,7 +627,8 @@ function Window_BlacksmithNameEdit() {
      * @returns {boolean} 選択可能な場合にはtrue, 選択できない場合にはfalse
      */
     Window_BlacksmithItemList.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this._items[this.index()]);
+        const item = this.itemAt(this.index());
+        return (item) ? this.isEnabled(item) : false;
     };
 
     /**
@@ -834,7 +845,8 @@ function Window_BlacksmithNameEdit() {
      * @returns {boolean} 現在選択している項目が選択可能な場合にはtrue。
      */
     Window_BlacksmithCatalystList.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.item());
+        const item = this.item();
+        return (item) ? this.isEnabled(item) : false;
     };
 
     /**

@@ -1226,11 +1226,7 @@ $dataItemScopes = null;
      */
     Window_ActionTargetBase.prototype.isCurrentItemEnabled = function() {
         const item = this.itemAt(this.index());
-        if (item) {
-            return allowSelectNonEffectiveMembers || this.isEnabled(item);
-        } else {
-            return false;
-        }
+        return (item) ? (allowSelectNonEffectiveMembers || this.isEnabled(item)) : false;
     };
 
     /**

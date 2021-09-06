@@ -219,11 +219,20 @@ function Window_QuestStatus() {
      * @param {number} index インデックス（未指定の場合には現在のインデックス）
      * @returns {Game_Quest} クエストデータ
      */
-    Window_MenuQuestList.prototype.quest = function(index) {
+    Window_MenuQuestList.prototype.questAt = function(index) {
         if (index === undefined) {
             index = this.index();
         }
         return ((index >= 0) && (index < this._quests.length)) ? this._quests[index] : null;
+    };
+
+    /**
+     * 現在選択されているクエストデータを得る。
+     * 
+     * @returns {Game_Quest} クエストデータ
+     */
+    Window_MenuQuestList.prototype.quest = function() {
+        return this.questAt(this.index());
     };
 
     /**
@@ -233,7 +242,7 @@ function Window_QuestStatus() {
      */
     Window_MenuQuestList.prototype.drawItem = function(index) {
         const rect = this.itemRect(index);
-        const quest = this.quest(index);
+        const quest = this.questAt(index);
         if (quest) {
             const name = quest.name();
             if (quest.isDone()) {
@@ -262,7 +271,8 @@ function Window_QuestStatus() {
      * @returns {boolean} 選択可能な場合にはtrue, 選択不可の場合にはfalse
      */
     Window_MenuQuestList.prototype.isCurrentItemEnabled = function() {
-        return true;
+        const quest = this.quest();
+        return (quest) ? true : false;
     };
 
     /**

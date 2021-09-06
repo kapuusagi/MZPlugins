@@ -721,8 +721,18 @@ function Scene_Appraise() {
      * @returns {Data_Item} アイテム(Item/Weapon/Armor)
      */
     Window_AppraiseItemList.prototype.item = function() {
-        return this._items[this.index()];
+        return this.itemAt(this.index());
     };
+
+    /**
+     * 選択されているアイテムを得る。
+     * 
+     * @param {number} index 
+     * @returns {DataItem} アイテム(Item/Weapon/Armor)
+     */
+    Window_AppraiseItemList.prototype.itemAt = function(index) {
+        return ((index >= 0) && (index < this._items.length)) ? this._items[index] : null;
+    }
 
     /**
      * 現在の所持金を設定する。
@@ -749,7 +759,8 @@ function Scene_Appraise() {
      * @returns {boolean} 有効な場合にはtrue, それ以外はfalse
      */
     Window_AppraiseItemList.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this._items[this.index()]);
+        const item = this.itemAt(this.index());
+        return (item) ? this.isEnabled(item) : false;
     };
 
     /**

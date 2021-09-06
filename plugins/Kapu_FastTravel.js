@@ -619,12 +619,17 @@ function Scene_SelectFastTravelPosition() {
      * @returns {object} 選択されているアイテム。
      */
     Window_FastTravelList.prototype.item = function() {
-        const index = this.index();
-        if ((index >= 0) && (index < this._fastTravelPositions.length)) {
-            return this._fastTravelPositions[index];
-        } else {
-            return null;
-        }
+        return this.itemAt(this.index());
+    };
+
+    /**
+     * indexで指定された項目を得る。
+     * 
+     * @param {number} index インデックス番号
+     * @returns {object} 項目。indexが範囲外の場合にはnull.
+     */
+    Window_FastTravelList.prototype.itemAt = function(index) {
+        return ((index >= 0) && (index < this._fastTravelPositions.length)) ? this._fastTravelPositions[index] : null;
     };
 
     /**
@@ -641,25 +646,21 @@ function Scene_SelectFastTravelPosition() {
      * @returns {boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
     Window_FastTravelList.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.index());
+        const item = this.itemAt(this.index());
+        return (item) ? this.isEnabled(item) : false;
     };
 
     /**
      * indexで指定される項目が有効かどうかを判定する。
      * 
-     * @param {number} index インデックス番号
+     * @param {object} item 項目
      * @returns {boolean} 有効な場合にはtrue, それ以外はfalse
      */
-    Window_FastTravelList.prototype.isEnabled = function(index) {
-        if ((index >= 0) && (index < this._fastTravelPositions.length)) {
-            if (this._actors.length > 0) {
-                const ftp = this._fastTravelPositions[index];
-                return this._actors.some(a => a.canFastTravel(ftp.id));
-            } else {
-                return true;
-            }
+    Window_FastTravelList.prototype.isEnabled = function(item) {
+        if (this._actors.length > 0) {
+            return this._actors.some(a => a.canFastTravel(item.id));
         } else {
-            return false;
+            return true;
         }
     };
 

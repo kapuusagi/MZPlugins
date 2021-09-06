@@ -507,7 +507,8 @@ function Scene_Growup() {
      * @returns 有効な場合にはtrue, それ以外はfalse
      */
     Window_GrowupSelect.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.item());
+        const item = this.item();
+        return (item) ? this.isEnabled(item) : false;
     };
 
     /**
