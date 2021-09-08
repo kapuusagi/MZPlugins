@@ -455,10 +455,25 @@ $dataItemScopes = null;
     /**
      * このターゲットの狙われ率を得る。
      * 
+     * Note: 既定の実装では、ターゲットレートはメインターゲットから算出する。
+     * 
      * @returns {number} 狙われ率
      */
     Game_ActionTargetGroup.prototype.targetRate = function() {
         return Math.max(...(this._mainTargets.map(member => member.tgr)));
+    };
+
+    /**
+     * subjectにとっての狙われ率を得る。
+     * 
+     * Note: 既定の実装ではtargetRate()と同じである。
+     * 
+     * @param {Game_Battler} subject 使用者
+     * @returns {number} 狙われ率
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_ActionTargetGroup.prototype.targetRateForSubject = function(subject) {
+        return this.targetRate();
     };
 
     /**
@@ -793,7 +808,7 @@ $dataItemScopes = null;
                 // 選択対象が選択されていない。
                 // 選択可能なグループから、狙われ率を考慮したターゲットを選定し、
                 // そのターゲットが含まれるグループを選出する。
-                selectedGroup = this.pickActionTarget(candidateGroups);
+                selectedGroup = this.pickActionTarget(subject, candidateGroups);
             }
         }
         if (selectedGroup) {
@@ -814,26 +829,28 @@ $dataItemScopes = null;
     /**
      * 選択可能なアクションターゲットから、狙われ率を考慮したアクションターゲットを選定する。
      * 
+     * @param {Game_Battler} subject 使用者
      * @param {Array<Game_ActionTargetGroup>} selectableGroups 選択可能グループ
      * @returns {Game_ActionTargetGroup>} 対象グループ
      */
-    TargetManager.pickActionTarget = function(selectableGroups) {
+    TargetManager.pickActionTarget = function(subject, selectableGroups) {
         if (selectableGroups.length === 0) {
+            // 選択可能なターゲットがない
             return null;
         } else if (selectableGroups.length === 1) {
             // 候補が1つしかない。
             return selectableGroups[0];
         } else {
             // mainTargetの狙われ率で重み付けしてランダムに選定
-            const targetRateSum = selectableGroups.reduce((prev, group) => prev + group.targetRate(), 0);
+            const targetRates = selectableGroups.map(group => group.targetRateForSubject(subject))
+            const targetRateSum = targetRates.reduce((prev, targetRate) => prev + targetRate, 0);
             let rand = Math.random() * targetRateSum;
-            for (const group of selectableGroups) {
-                rand -= group.targetRate();
+            for (let i = 0; i < targetRates.length; i++) {
+                rand -= targetRates[i];
                 if (rand <= 0) {
-                    return group;
+                    return selectableGroups[i];
                 }
             }
-
             // ここに来ることはないはず。
             return selectableGroups[0];
         }
