@@ -129,19 +129,24 @@ function BattleAIManager() {
         // subjectが実行可能な行動を列挙する。
         const selectableActionList = this.selectableActions(subject, useableActions);
 
-        for (const action of actionList) {
-            this.setupAction(action, selectableActionList, studyData);
+        for (let i = 0; i < actionList.length; i++) {
+            const action = actionList[i];
+            actionList[i] = this.selectAction(action, selectableActionList, studyData);
         }
     };
 
     /**
+     * アクションを選択する。
      * 
      * @param {Game_Action} action 設定対象アクション
-     * @param {*} selectableActions 
-     * @param {*} studyData 
+     * @param {List<DataActionEntry>} selectableActions 選択可能アクションを得る。
+     * @param {object} studyData 学習データ
+     * @retuns {Game_Action} 設定したアクション。actionを返してもいいし、別なアクションを構築してもいい。
      */
+    // eslint-disable-next-line no-unused-vars
     Game_BattleAIBase.prototype.setupAction = function(action, selectableActions, studyData) {
-
+        action.setAttack();
+        return action;
     };
 
     /**
@@ -160,15 +165,16 @@ function BattleAIManager() {
      * @param {Game_Battler} subject 使用者
      * @param {DataActionEntry} actionEntry アクションエントリ
      */
+    // eslint-disable-next-line no-unused-vars
     Game_BattleAIBase.prototype.isActionValid = function(subject, actionEntry) {
-        return this.meetsCondition(subject, actionEntry)
-                && this.canUse(subject, this.actionItem(actionEntry));
+        return true;
     };
 
     /**
+     * アクションのアイテムを得る。
      * 
      * @param {DataActionEntry} actionEntry アクションエントリ
-     * @returns 
+     * @returns {object} DataItem/DataSkill
      */
     Game_BattleAIBase.prototype.actionItem = function(actionEntry) {
         if (actionEntry.skillId > 0) {
@@ -179,41 +185,6 @@ function BattleAIManager() {
             return null;
         }
     };
-
-    /**
-     * アクションの実行判定をする。
-     * 
-     * @param {DataActionEntry} actionEntry アクションエントリ
-     * @retuns {booelan} 条件を満たす場合にはtrue, それ以外はfalse.
-     */
-    Game_BattleAIBase.prototype.meetsCondition = function(subject, actionEntry) {
-        if (subject.isEnemy()) {
-            return subject.meetsCondition(actionEntry);
-        } else {
-            return true;
-        }
-    };
-    /**
-     * subjectがitemを使用可能かどうかを判定する。
-     * 
-     * @param {Game_Battler} subject 
-     * @param {object} item DataItem/DataSkill (基本的にDataSkillが渡される)
-     * @returns {boolean} 使用可能な場合にはtrue, それ以外はfalse.
-     */
-    Game_BattleAIBase.prototype.canUse = function(subject, item) {
-        return subject.canUse(item);
-    };
-
-
-
-
-
-
-
-
-
-
-
 
     //------------------------------------------------------------------------------
     // BattleAIEnemyDefault
@@ -237,10 +208,57 @@ function BattleAIManager() {
      */
     Game_BattleAIEnemyDefault.prototype.selectableActions = function(subject, actionList) {
         const list = Game_BattleAIBase.prototype.selectableActions.call(this, subject, actionList);
-        const ratingMax = Math.max(...actionList.map(a => a.rating));
+        const ratingMax = Math.max(...actionList.map(a => a.rating || 0));
         const ratingZero = ratingMax - 3;
         return list.filter(a => a.rating > ratingZero);
-    }
+    };
+    /**
+     * アクションを選択する。
+     * 
+     * @param {Game_Action} action 設定対象アクション
+     * @param {List<DataActionEntry>} selectableActions 選択可能アクション。
+     * @param {object} studyData 学習データ
+     * @retuns {Game_Action} 設定したアクション。actionを返してもいいし、別なアクションを構築してもいい。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_BattleAIEnemyDefault.prototype.setupAction = function(action, selectableActions, studyData) {
+        const actionEntry = this.selectActionByRating(selectableActions)
+        if (actionEntry) {
+            if (actionEntry.skillId) {
+                action.setSkill(actionEntry.skillId);
+            } else if (actionEntry.itemId) {
+                action.setItem(actionEntry, itemId);
+            } else {
+                action.clear();
+            }
+        } else {
+            action.clear();
+        }
+        return action;
+    };
+
+    /**
+     * ratingを元に行動を選択する。
+     * 
+     * @param {List<DataActionEntry>} selectableActions 選択可能アクション。 
+     * @returns {DataActionEntry} アクションエントリ
+     */
+    Game_BattleAIEnemyDefault.prototype.selectActionByRating = function(selectableActions) {
+        const ratingMax = Math.max(...selectableActions.map(a => a.rating || 0));
+        const ratingZero = ratingMax - 3;
+        const sum = selectableActions.reduce((r, a) => r + a.rating - ratingZero, 0);
+        if (sum > 0) {
+            let value = Math.randomInt(sum);
+            for (const actionEntry of selectableActions) {
+                value -= actionEntry.rating - ratingZero;
+                if (value < 0) {
+                    return actionEntry;
+                }
+            }
+        } else {
+            return null;
+        }
+    };
 
     //------------------------------------------------------------------------------
     // BattleAIActorDefault
@@ -253,6 +271,45 @@ function BattleAIManager() {
     Game_BattleAIActorDefault.prototype.initialize = function() {
         Game_BattleAIBase.prototype.initialize.call(this);
     };
+
+    /**
+     * アクションを選択する。
+     * 
+     * @param {Game_Action} action 設定対象アクション
+     * @param {List<DataActionEntry>} selectableActions 選択可能アクション。
+     * @param {object} studyData 学習データ
+     * @retuns {Game_Action} 設定したアクション。actionを返してもいいし、別なアクションを構築してもいい。
+     */
+    // eslint-disable-next-line no-unused-vars
+    Game_BattleAIActorDefault.prototype.setupAction = function(action, selectableActions, studyData) {
+        const candidateActions = [];
+
+        for (const actionEntry of this.selectableActions) {
+            const a = new Game_Action(this);
+            if (actionEntry.skillId) {
+                a.setSkill(actionEntry.skillId);
+            } else if (actionEntry.itemId) {
+                a.setItem(actionEntry.itemId);
+            } else {
+                continue;
+            }
+            candidateActions.push(a);
+        }
+
+        // 評価してセットする。
+        let selectedAction = action;
+        let mostEvalValue = Number.MIN_VALUE;
+        for (const candidateAction of candidateActions) {
+            const evalValue = candidateAction.evaluate();
+            if (evalValue > mostEvalValue) {
+                mostEvalValue = evalValue;
+                selectedAction = candidateAction;
+            }
+        }
+        return selectedAction;
+    };
+
+
     //------------------------------------------------------------------------------
     // BattleAIManager
     BattleAIManager.aiEntries = {};
@@ -355,18 +412,6 @@ function BattleAIManager() {
             this.setBattleAI(dataEnemy.meta.battleAI);
         }
     };
-    /**
-     * actionが実行対象かどうかを判定する。
-     * 
-     * @param {DataEnemyAction} action エネミーアクションデータ
-     * @return {boolean} 実行条件を満たす場合にはtrue, それ以外はfalse.
-     * !!!overwrite!!! Game_Enemy.isActionValid
-     *     実行条件判定を、AIにて行うようにするためオーバーライドする。
-     */
-    // eslint-disable-next-line no-unused-vars
-    Game_Enemy.prototype.isActionValid = function(action) {
-        return true;
-    };
 
     /**
      * エネミーの行動選択をする。
@@ -377,15 +422,15 @@ function BattleAIManager() {
      *     戦闘行動の選択をカスタマイズできるようにするため、オーバーライドする。
      */
     Game_Enemy.prototype.selectAllActions = function(actionList) {
-        const ratingMax = Math.max(...actionList.map(a => a.rating));
-        const ratingZero = ratingMax - 3;
-        actionList = actionList.filter(a => a.rating > ratingZero);
-        for (let i = 0; i < this.numActions(); i++) {
-            this.action(i).setEnemyAction(
-                this.selectAction(actionList, ratingZero)
-            );
+        let battleAI = BattleAIManager.getAI(this.battleAI());
+        if (!battleAI) {
+            battleAI = BattleAIManager.getAI(BattleAIManager.AI_NAME_ENEMY_DEFAULT);
         }
+        const studyData = this._aiStudyData[battleAI.studyDataName()];
+
+        battleAI.setupActions(this._actions, actionList, studyData);
     };
+
     //------------------------------------------------------------------------------
     // Game_Actor
     const _Game_Actor_initMembers = Game_Actor.prototype.initMembers;
@@ -417,23 +462,55 @@ function BattleAIManager() {
     };
 
     /**
+     * 自動戦闘にてアイテムを使うかどうかを得る。
+     * 
+     * @returns {boolean} アイテムを使う場合にはtrue, それ以外はfalse.
+     */
+    Game_Actor.prototype.useItemInAutoBattle = function() {
+        return false;
+    };
+
+    /**
+     * 自動戦闘で使用するアイテムを返す。
+     * 
+     * @retuns {Array<DataItem>} アイテム
+     */
+    Game_Actor.prototype.useableItemsInAutoBattle = function() {
+        return $gameParty.items().filter(item => this.canUse(item));
+    };
+
+    /**
      * 自動戦闘行動を作成する。
      * 
      * !!!overwrite!!! Game_Actor.makeAutoBattleActions()
      *     戦闘行動の選択をカスタマイズできるようにするため、オーバーライドする。
      */
     Game_Actor.prototype.makeAutoBattleActions = function() {
-        for (let i = 0; i < this.numActions(); i++) {
-            const list = this.makeActionList();
-            let maxValue = Number.MIN_VALUE;
-            for (const action of list) {
-                const value = action.evaluate();
-                if (value > maxValue) {
-                    maxValue = value;
-                    this.setAction(i, action);
-                }
+        const list = [];
+        // 通常攻撃を追加
+        list.push({ skillId:this.attackSkillId() });
+
+        // 使用可能なスキルを追加。
+        for (const skill of this.usableSkills()) {
+            list.push({ skillId:skill.id });
+        }
+
+        if (this.useItemInAutoBattle()) {
+            // アイテムを追加
+            for (const item of this.useableItemsInAutoBattle()) {
+                list.push({ itemId:item.id });
             }
         }
+
+        let battleAI = BattleAIManager.getAI(this.battleAI());
+        if (!battleAI) {
+            battleAI = BattleAIManager.getAI(BattleAIManager.AI_NAME_ACTOR_DEFAULT);
+        }
+        const studyData = this._aiStudyData[battleAI.studyDataName()];
+
+        battleAI.setupActions(this._actions, actionList, studyData);
+
         this.setActionState("waiting");
+        return ;
     };
 })();
