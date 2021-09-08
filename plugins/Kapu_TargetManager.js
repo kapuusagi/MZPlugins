@@ -1119,7 +1119,7 @@ $dataItemScopes = null;
         for (const candidateGroup of candidateGroups) {
             let value = 0;
             for (const target of candidateGroup.members()) {
-                const targetValue = this.evaluateWithTarget(target);
+                const targetValue = this.evaluateWithTarget(target) || 0;
                 if (scopeInfo.random) {
                     if (targetValue > value) {
                         value = targetValue;
@@ -1140,6 +1140,7 @@ $dataItemScopes = null;
 
         return evaluateValue;
     };
+
     /**
      * ターゲット条件を得る。
      * 
