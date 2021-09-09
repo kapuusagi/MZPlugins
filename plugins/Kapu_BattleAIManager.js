@@ -33,6 +33,12 @@
  * ============================================
  * ノートタグ
  * ============================================
+ * アクター/エネミー
+ *   <battleAI:AI名>
+ *     初期AIをAI名で指定したものに設定する
+ * 
+ *   <battleAI:AI名1,AI名2,AI名3,...>
+ *     初期AIをAI名で指定したものに設定する
  * 
  * ============================================
  * 変更履歴
@@ -77,6 +83,13 @@ function BattleAIManager() {
     throw new Error("This is static class.");
 }
 
+/**
+ * アクション評価用データ
+ */
+function Game_ActionEvaluateData() {
+    this.initialize(...arguments);
+}
+
 (() => {
     const pluginName = "Kapu_BattleAIManager";
     const parameters = PluginManager.parameters(pluginName);
@@ -85,6 +98,28 @@ function BattleAIManager() {
     //     // TODO : コマンドの処理。
     //     // パラメータメンバは @argで指定した名前でアクセスできる。
     // });
+
+    //------------------------------------------------------------------------------
+    // Game_ActionEvaluate
+    /**
+     * 行動評価用データを初期化する。
+     */
+    Game_ActionEvaluateData.prototype.initialize = function() {
+        this.target = null; // アクションターゲット
+        this.hpDamage = 0; // HPダメージ
+        this.mpDamage = 0; // MPダメージ
+        this.evaRate = 0; // 回避率
+        this.hitRate = 0; // 命中率
+        this.hpCost = 0; // HPコスト（スキル使用時）
+        this.mpCost = 0; // MPコスト（スキル使用時）
+        this.tpCost = 0; // TPコスト（スキル使用時）
+        this.price = 0; // お値段（アイテム使用時
+
+
+    };
+
+    
+
     //------------------------------------------------------------------------------
     // Game_BattleAIBase
     Game_BattleAIBase.prototype.initialize = function() {
@@ -184,6 +219,56 @@ function BattleAIManager() {
         } else {
             return null;
         }
+    };
+
+    /**
+     * subjectにとっての、evaluteDataの評価値を得る。
+     * 
+     * @param {Game_Battler} subject 使用者
+     * @param {Game_Battler} target 対象
+     * @param {object} item 行動
+     * @param {Game_EvaluateData} evaluateData 評価データ
+     * @param {object} studyData 学習データ
+     * @returns {number} 評価値
+     */
+    Game_BattleAIBase.prototype.evaluateForAction = function(subject, target, item, evaluateData, studyData) {
+        // ベーシックシステムではHPダメージの対象に対する割合だけ評価している。
+        if (subject.isConfused()) {
+            return this.evaluateHpDamage(target, evaluateData);
+        } else {
+            if (subject.friendsUnit().members().includes(target)) {
+                // for friend.
+                return this.evaluateHpDamage(target, evaluateData);
+            } else {
+                // for opponent
+                return this.evaluateHpRecover(target, evaluateData);
+            }
+        }
+    };
+
+    /**
+     * HPダメージの評価値を得る。
+     * 
+     * @param {Game_Battler} target 対象
+     * @param {Game_EvaluateData} evaluateData 評価データ
+     * @returns {number} 評価値
+     */
+    Game_BattleAIBase.prototype.evaluateHpDamage = function(target, evaluateData) {
+        // ベーシックシステムの実装では、対象の現在HPに対するダメージの割合である。
+        // つまり、HP低いやつに最大ダメージでるようなスキルで攻撃するということ。
+        return evaluateData.hpDamage / Math.max(target.hp, 1);
+    };
+
+    /**
+     * HP回復の評価値を得る。
+     * 
+     * @param {Game_Battler} target 対象
+     * @param {Game_EvaluateData} evaluateData 評価データ
+     * @returns {number} 評価値
+     */
+    Game_BattleAIBase.prototype.evaluateHpRecover = function(target, evaluateData) {
+        // ベーシックシステムの実装では、全体HPに対するHP上昇量の割合である
+        return Math.max(-evaluateData.hpDamage, target.mhp - target.mhp) / target.mhp;
     };
 
     //------------------------------------------------------------------------------
@@ -335,6 +420,15 @@ function BattleAIManager() {
         return this.aiEntries[aiName];
     };
 
+    /**
+     * aiNamesのうち、有効なものだけ取り出す。
+     * 
+     * @param {Array<string>} aiNames AI名
+     * @returns {Array<string>} 有効なAI名
+     */
+    BattleAIManager.getSelecatableAI = function(aiNames) {
+        return aiNames.filter(name => !!this.aiEntries[name]);
+    };
 
     
     
@@ -378,7 +472,26 @@ function BattleAIManager() {
         return this._aiName;
     };
 
-
+    /**
+     * 評価データを元に評価値を算出する。
+     * 
+     * @param {Game_Battler} target 対象
+     * @param {object} item 行動に使用するデータ
+     * @param {Game_EvaluateData} evaluateData 評価データ
+     * @retuns {number} 評価値
+     */
+    Game_Battler.prototype.evaluateForAction = function(target, item, evaluateData) {
+        let battleAI = BattleAIManager.getAI(this.battleAI());
+        if (!battleAI) {
+            if (this.isActor()) {
+                battleAI = BattleAIManager.getAI(BattleAIManager.AI_NAME_ACTOR_DEFAULT);
+            } else {
+                battleAI = BattleAIManager.getAI(BattleAIManager.AI_NAME_ENEMY_DEFAULT);
+            }
+        }
+        const studyData = this._aiStudyData[battleAI.studyDataName()];
+        return battleAI.evaluateForAction(this, target, item, evaluateData, studyData);
+    };
     //------------------------------------------------------------------------------
     // Game_Enemy
     const _Game_Enemy_initMembers = Game_Enemy.prototype.initMembers;
@@ -409,7 +522,11 @@ function BattleAIManager() {
 
         const dataEnemy = this.enemy();
         if (dataEnemy.meta.battleAI) {
-            this.setBattleAI(dataEnemy.meta.battleAI);
+            const candidates = BattleAIManager.getSelecatableAI(dataEnemy.meta.battleAI.split(','));
+            if (candidates.length > 0) {
+                const sel = Math.randomInt(candidates.length);
+                this.setBattleAI(candidates[sel]);
+            }
         }
     };
 
@@ -457,7 +574,11 @@ function BattleAIManager() {
 
         const dataActor = this.actor();
         if (dataActor.meta.battleAI) {
-            this.setBattleAI(dataActor.meta.battleAI);
+            const candidates = BattleAIManager.getSelecatableAI(dataActor.meta.battleAI.split(','));
+            if (candidates.length > 0) {
+                const sel = Math.randomInt(candidates.length);
+                this.setBattleAI(candidates[sel]);
+            }
         }
     };
 
@@ -512,5 +633,95 @@ function BattleAIManager() {
 
         this.setActionState("waiting");
         return ;
+    };
+
+    //------------------------------------------------------------------------------
+    // Game_Action
+    /**
+     * ターゲットに対する結果を評価する。
+     * 
+     * 自動戦闘処理時の行動選択時に、優先行動の選択をするために使用される。
+     * 敵対者へのアクションの場合には、残りHPに対する効果量の割合が評価される。
+     * それ以外は味方に対する効果量の割合が評価される。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @return {number} 評価値(0～1.0)
+     * !!!overwrite!!! Game_Action.evaulate(target)
+     *     評価値の算出にAI要素を絡めるため、オーバーライドする。
+     */
+    Game_Action.prototype.evaluateWithTarget = function(target) {
+        // さすがにTargetを複製してごにょごにょするとコストかかるかな
+        const evaluateData = this.makeEvalulateData(target);
+        const subject = this.subject();
+        return subject.evaluateForAction(target, this.item(), evaluateData);
+    };
+
+    /**
+     * 行動評価用データを作成する。
+     * 
+     * @param {Game_Battler} target 対象
+     * @returns {Game_ActionEvaluateData} 評価データ
+     */
+    Game_Action.prototype.makeEvalulateData = function(target) {
+        const subject = this.subject();
+        const evaluateData = new Game_ActionEvaluateData();
+        evaluateData.evaRate = this.itemEva(target);
+        evaluateData.hitRate = this.itemHit(target);
+
+        if (this.isHpEffect()) {
+            evaluateData.hpDamage = this.makeDamageValue(target, false);
+        }
+        if (this.isMpEffect()) {
+            evaluateData.mpDamage = this.makeDamageValue(target, false);
+        }
+
+        const item = this.item();
+        if (this.isSkill()) {
+            if (subject.skillHpCost) {
+                evaluateData.hpCost = subject.skillHpCost(item);
+            }
+            evaluateData.mpCost = subject.skillMpCost(item);
+            evaluateData.tpCost = subject.skillTpCost(item);
+        } else if (this.isItem()) {
+            if (item.consumable) {
+                evaluateData.price = item.price;
+            }
+        }
+
+        // あんまりやりたくないけど、effectsを見る。
+        for (const effect of item.effects) {
+            switch (effect.code) {
+                case Game_Action.EFFECT_RECOVER_HP:
+                    evaluateData.hpDamage -= Math.round(target.mhp * effect.value1 + effect.value2);
+                    break;
+                case Game_Action.EFFECT_RECOVER_MP:
+                    evaluateData.mpDamage -= Math.round(target.mhp * effect.value1 + effect.value2);
+                    break;
+                case Game_Action.EFFECT_ADD_STATE:
+                    if (effect.dataId === 0) {
+                        for (const stateId of subject.attackStates()) {
+                            evaluateData.addStates.push(stateId);
+                        }
+                    } else {
+                        evaluateData.addStates.push(effect.dataId);
+                    }
+                    break;
+                case Game_Action.EFFECT_REMOVE_STATE:
+                    evaluateData.removeStates.push(effect.dataId);
+                    break;
+                case Game_Action.EFFECT_ADD_BUFF:
+                    evaluateData.addBuffs.push(effect.dataId);
+                    break;
+                case Game_Action.EFFECT_ADD_DEBUFF:
+                    evaluateData.addDebuffs.push(effect.dataId);
+                    break;
+                case Game_Action.EFFECT_REMOVE_BUFF:
+                    evaluateData.removeBuffs.push(effect.dataId);
+                    break;
+                case Game_Action.EFFECT_REMOVE_DEBUFF:
+                    evaluateData.removeDebuffs.push(effect.dataId);
+                    break;
+            }
+        }
     };
 })();
