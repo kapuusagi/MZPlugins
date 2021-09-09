@@ -390,6 +390,18 @@ $dataItemScopes = null;
     Game_Battler.prototype.itemScope = function(item) {
         return item.scope;
     };
+
+    /**
+     * このバトラーにとっての、battlerを標的とする割合を得る。
+     * 
+     * Note: ヘイトシステムなどを実装したい場合にフックするかオーバーライドする。
+     * 
+     * @param {Game_Battler} battler 対象
+     * @returns {number} 標的率
+     */
+    Game_Battler.prototype.targetRate = function(battler) {
+        return battler.tgr;
+    };
     
     //------------------------------------------------------------------------------
     // Game_ActionTargetGroup
@@ -473,7 +485,8 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     Game_ActionTargetGroup.prototype.targetRateForSubject = function(subject) {
-        return this.targetRate();
+        var targetRates = this._mainTargets.map(member => subject.targetRate(member));
+        return Math.max(...targetRates);
     };
 
     /**
