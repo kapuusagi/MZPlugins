@@ -1710,7 +1710,7 @@ function Window_StatusProfile() {
      */
     Window_StatusSkillType.prototype.makeCommandList = function() {
         if (this._actor) {
-            const skillTypes = this._actor.addedSkillTypes();
+            const skillTypes = this._actor.skillTypes();
             skillTypes.sort(function(a, b) {
                 return a - b;
             });
