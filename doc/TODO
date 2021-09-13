@@ -14,6 +14,7 @@
   ☐ Kapu_Trait_BuffExtension (Kapu_Base_Hitでのメソッド名変更に対応)
   ☐ Kapu_CharaMake (isEnabledを変更したため)
   ☐ Kapu_FastTravel (isEnabledを変更したため)
+  ☐ Kapu_Twld_DamageEffect (カウンター/反射のポップアップ追加)
   Kapu_Base_Twld:
     ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
   Kapu_TargetManager: 
@@ -55,6 +56,7 @@
   ☐ パーティーにステートを与えたい。たいまつ使用とかね。
   ☐ 設置スキルやりたい。パーティーステートと、ActionStateと組み合わせたらできないかな。
 
+リファクタリング:
 
 
   
