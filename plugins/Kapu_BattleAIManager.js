@@ -91,8 +91,8 @@ function Game_ActionEvaluateData() {
 }
 
 (() => {
-    const pluginName = "Kapu_BattleAIManager";
-    const parameters = PluginManager.parameters(pluginName);
+    // const pluginName = "Kapu_BattleAIManager";
+    // const parameters = PluginManager.parameters(pluginName);
 
     // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
     //     // TODO : コマンドの処理。
@@ -231,6 +231,7 @@ function Game_ActionEvaluateData() {
      * @param {object} studyData 学習データ
      * @returns {number} 評価値
      */
+    // eslint-disable-next-line no-unused-vars
     Game_BattleAIBase.prototype.evaluateForAction = function(subject, target, item, evaluateData, studyData) {
         // ベーシックシステムではHPダメージの対象に対する割合だけ評価している。
         if (subject.isConfused()) {
