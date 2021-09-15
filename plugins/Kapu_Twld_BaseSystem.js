@@ -28,6 +28,15 @@
  * @type number
  * @default 0
  * 
+ * @param basicGuardRate
+ * @text 基本防御軽減量
+ * @desc 防御成立時に軽減するダメージ量(%)
+ * @type number
+ * @decimals 2
+ * @min 0.00
+ * @max 1.00
+ * @default 0.50
+ * 
  * @param actorParameter
  * @text アクターパラメータ
  * @desc アクターのパラメータ
@@ -394,6 +403,7 @@
     const defaultMagicalElementId = Math.round(Number(parameters["defaultMagicalElementId"]) || 0);
     const defaultOtherElemntId = Math.round(Number(parameters["defaultOtherElemntId"]) || 0);
 
+    const basicGuardRate = (Number(parameters["basicGuardRate"]) || 0).clamp(0, 1);
 
     const colorHpDead = parameters["colorHpDead"] || "#FF8000";
     const colorHpDying = parameters["colorHpDying"] || "#FF8040";
@@ -1111,6 +1121,28 @@
         }
         return value;
     };
+
+    /**
+     * ガードの有無によるダメージ変動を適用する。
+     * 
+     * @param {number} damage ダメージ計算値
+     * @param {Game_BattlerBase} target 適用対象
+     * @return {number} ダメージ量が返る。
+     * !!!overwrite!!! Game_Action.applyGuard(damage, target)
+     *     ガード適用時のレート計算変更のため、オーバーライドする。
+     */
+    Game_Action.prototype.applyGuard = function(damage, target) {
+        if ((damage > 0) && target.isGuard()) {
+            // Guard 適用
+            const damageCoef = (1 - basicGuardRate) / target.grd;
+            return damage * damageCoef;
+        } else {
+            return damage;
+        }
+
+
+        return damage / (damage > 0 && target.isGuard() ? 2 * target.grd : 1);
+    };    
 
     /**
      * 属性レートを適用するかどうかを得る。
