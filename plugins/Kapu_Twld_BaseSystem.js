@@ -12,12 +12,30 @@
  * @base Kapu_ElementCore
  * @orderAfter Kapu_ElementCore
  * @orderAfter Kapu_Base_Hit
+ * @base Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Base_DamageCalculation
+ * @base Kapu_Base_ParamName
+ * @orderAfter Kapu_Base_ParamName
  * 
  * @param traitCode
- * @text 特性コード
+ * @text パラメータ全体にかかるレート特性のコード
  * @type number
  * @default 1003
+ * 
+ * @param passiveSkillType
+ * @text パッシブスキルタイプ
+ * @desc パッシブスキルとして扱うスキルタイプ
+ * @type number
+ * @default 0
+ * 
+ * @param basicGuardRate
+ * @text 基本防御軽減量
+ * @desc 防御成立時に軽減するダメージ量(%)
+ * @type number
+ * @decimals 2
+ * @min 0.00
+ * @max 1.00
+ * @default 0.50
  * 
  * @param actorParameter
  * @text アクターパラメータ
@@ -265,6 +283,27 @@
  * 7. 戦闘中行動時、アイテム･スキル対象が無い場合には何もしないようにする。
  *    (単体対象の自動切り替えは有効。射程とか入ってきた場合用)
  * 
+ * 8. TP周りの挙動を変更
+ *     ・戦闘開始時のTPはゼロ。
+ *      （他のプラグインにより変動したり、TP保留の場合にはそちらに従う。）
+ *     ・非戦闘中はTPが増加しない。
+ *     ・ダメージ計算時、TPが対象のTPに対して1高い毎に1%のボーナスが与えられます。
+ *     ・アクション実行時、TPが対象のTPに対して1高い毎に 0.05%のボーナスが与えられます。
+ *     ・アクション実行時、TPが対象のTPに対して1低い毎に 0.05%の減算ボーナスがかかります。
+ *     ・アクション実行時、TPが対象のTPに対して1高い毎に、0.01%クリティカル発生率が上がります。
+ * 
+ * 9.パラメータの計算変更
+ *   MaxHP/MaxMP/ATK/DEF/MAT/MDF/AGI/LUKの計算式
+ *   ベーシックシステムでは
+ *       {(クラス値)+(種増減分)+(装備品)} x (特性レート) x (バフ増減レート)
+ *   となっていた。これを
+ *       [{(パラメータベース値計算式) + (種増加分)}x (特性によるレート) + (装備品)] x (バフ増減レート)
+ *   に変更する。
+ * 
+ * 10.パーティーアビリティの有効判定
+ *   ベーシックシステムでは死亡メンバーが持っているアビリティも対象となっていた。
+ *   TWLDでは死亡メンバーを除くように変更する。
+ * 
  * ■ 使用時の注意
  * なし。
  * 
@@ -272,6 +311,14 @@
  * Game_Actor.param()をオーバーライドします。
  * Game_Actor.paramPlus()をオーバーライドします。
  * 装備品補正値、paramEquip()は Kapu_Base_Params にて定義しています。
+ * 
+ * パッシブスキルタイプとして
+ * Game_BattlerBase.PASSIVE_SKILL_TYPE を定義します。
+ * 
+ * TWLD向けの便利メソッド追加
+ *   Game_BattlerBase.hasPassiveSkill() : boolean
+ *     1つ以上のパッシブスキルを持っているかを判定する。
+ *
  * 
  * ============================================
  * プラグインコマンド
@@ -356,6 +403,7 @@
     const defaultMagicalElementId = Math.round(Number(parameters["defaultMagicalElementId"]) || 0);
     const defaultOtherElemntId = Math.round(Number(parameters["defaultOtherElemntId"]) || 0);
 
+    const basicGuardRate = (Number(parameters["basicGuardRate"]) || 0).clamp(0, 1);
 
     const colorHpDead = parameters["colorHpDead"] || "#FF8000";
     const colorHpDying = parameters["colorHpDying"] || "#FF8040";
@@ -469,6 +517,12 @@
     DataManager.isMagicalElement = function(elementId) {
         return magicalElementIds.includes(elementId);
     };
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._traitConverters) {
+        // パラメータ特性バフを乗算から加算に変更しているので修正する。
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_PARAM].value = TextManager.traitValueSum;
+    }
 
     //------------------------------------------------------------------------------
     // ColorManager
@@ -529,6 +583,23 @@
     };
     //------------------------------------------------------------------------------
     // Game_BattlerBase
+    Game_BattlerBase.PASSIVE_SKILL_TYPE = Number(parameters["passiveSkillType"]) || 0;
+
+    /**
+     * MaxHP/MaxMP/ATK/DEF/MATK/MDEFパラメータの増幅率を得る。
+     * 
+     * @returns {number} 増幅率
+     * !!!overwrite!!! Game_BattlerBase.paramRate()
+     *     基本パラメータの割合増加を加算合成に変更するため、オーバーライドする。
+     */
+     Game_BattlerBase.prototype.paramRate = function(paramId) {
+        // 基本パラメータを乗算レートでやると、めっちゃ大きくなるのでやめる。
+        const rate = this.traitsWithId(Game_BattlerBase.TRAIT_PARAM, paramId).reduce((r, trait) => {
+            return r + (trait.value - 1);
+        }, 1.0, this);
+        return Math.max(0, rate);
+    };
+
     /**
      * ステートのアイコンIDを得る。
      * 
@@ -549,6 +620,31 @@
     };
     //------------------------------------------------------------------------------
     // Game_Battler
+    /**
+     * TPを初期化する。
+     * 既定の実装では、0～25の間の乱数値がセットされる。
+     * 
+     * !!!overwrite!!! Game_Battler.initTp
+     *     初期TPを乱数でなく、ゼロとするためオーバーライドする。
+     */
+     Game_Battler.prototype.initTp = function() {
+        this.clearTp();
+    };
+
+    const _Game_Battler_gailTp = Game_Battler.prototype.gainTp;
+
+    /**
+     * TPを上昇させる。
+     * 
+     * @param {number} value 上昇値
+     */
+    Game_Battler.prototype.gainTp = function(value) {
+        if ($gameParty.inBattle()) {
+            // 戦闘中のみ変動する。
+            _Game_Battler_gailTp.call(this, value);
+        }
+    };
+
     const _Game_Battler_addState = Game_Battler.prototype.addState;
     /**
      * ステートを付与する。但しステート防止がある場合には付与されない。
@@ -672,6 +768,17 @@
     //------------------------------------------------------------------------------
     // Game_Actor
     /**
+     * パッシブスキルを持っているかどうかを判定する。
+     * 
+     * @returns {boolean} パッシブスキルを持っている場合にはtrue, それ以外はfalse
+     */
+    Game_Actor.prototype.hasPassiveSkill = function() {
+        return this.skills().some(function(skill) {
+            return skill && (skill.stypeId == Game_BattlerBase.PASSIVE_SKILL_TYPE);
+        });
+    };
+
+    /**
      * パラメータのバフ/デバフ適用前のベース値を得る。
      * 
      * @param {number} paramId パラメータID
@@ -747,6 +854,89 @@
 
     //------------------------------------------------------------------------------
     // Game_Action
+    const _Game_Action_initialize = Game_Action.prototype.initialize;
+    /**
+     * Game_Actionを初期化する。
+     * 
+     * @param {Game_Battler} subject 使用者
+     * @param {boolean} forcing 強制実行
+     */
+    Game_Action.prototype.initialize = function(subject, forcing) {
+        _Game_Action_initialize.call(this, subject, forcing);
+        this._subjectTp = ((subject) ? subject.tp : 0) || 0;
+    };
+
+
+    const _Game_Action_prepare = Game_Action.prototype.prepare;
+    /**
+     * アクションを準備する。
+     */
+    Game_Action.prototype.prepare = function() {
+        _Game_Action_prepare.call(this);
+        // Note: TPはapply()毎に変動するため、
+        //       実行(startAction)前の値を元に算出しておく。
+        this._subjectTp = this.subject().tp;
+    };
+
+    /**
+     * TPダメージレートを取得する。
+     * 
+     * @param {Game_Battler} ターゲット
+     * @returns {number} TPダメージレート
+     */
+    Game_Action.prototype.tpDamageRate = function(target) {
+        return 1 + Math.max(0, ((this._subjectTp - target.tp) * 0.01));
+    };
+
+    const _Game_Action_multiplyDamageRate = Game_Action.prototype.multiplyDamageRate;
+    /**
+     * ダメージ量の乗算ボーナスレートを得る。
+     * 
+     * @param {Game_Battler} target ターゲット。
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} 乗算ボーナスレート
+     */
+    Game_Action.prototype.multiplyDamageRate = function(target, critical) {
+        const tpDamageRate = this.tpDamageRate(target);
+        return _Game_Action_multiplyDamageRate.call(this, target, critical) * tpDamageRate;
+    };
+
+    const _Game_Action_itemHit = Game_Action.prototype.itemHit;
+    /**
+     * 命中率を得る。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @returns {number} 命中率。
+     */
+    Game_Action.prototype.itemHit = function(target) {
+        const tpHitRate = ((this._subjectTp - target.tp) * 0.005).clamp(0, 0.5);
+        return _Game_Action_itemHit.call(this, target) + tpHitRate;
+    };
+
+    const _Game_Action_itemEva = Game_Action.prototype.itemEva;
+    /**
+     * 回避率を得る。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @returns {number} 回避率。
+     */
+    Game_Action.prototype.itemEva = function(target) {
+        const tpEvaRate = ((target.tp - this._subjectTp) * 0.005).clamp(0, 0.5);
+        return _Game_Action_itemEva.call(this, target) + tpEvaRate;
+    };
+
+
+    const _Game_Action_itemCri = Game_Action.prototype.itemCri;
+    /**
+     * このアクションのクリティカル率を得る。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @returns {number} クリティカル率(0.0～1.0）
+     */
+    Game_Action.prototype.itemCri = function(target) {
+        const tpCriRate = ((this._subjectTp - target.tp) * 0.0025).clamp(0, 0.25);
+        return _Game_Action_itemCri.call(this, target) + tpCriRate;
+    };
 
     /**
      * このアクションをtargetに適用する。
@@ -931,6 +1121,28 @@
         }
         return value;
     };
+
+    /**
+     * ガードの有無によるダメージ変動を適用する。
+     * 
+     * @param {number} damage ダメージ計算値
+     * @param {Game_BattlerBase} target 適用対象
+     * @return {number} ダメージ量が返る。
+     * !!!overwrite!!! Game_Action.applyGuard(damage, target)
+     *     ガード適用時のレート計算変更のため、オーバーライドする。
+     */
+    Game_Action.prototype.applyGuard = function(damage, target) {
+        if ((damage > 0) && target.isGuard()) {
+            // Guard 適用
+            const damageCoef = (1 - basicGuardRate) / target.grd;
+            return damage * damageCoef;
+        } else {
+            return damage;
+        }
+
+
+        return damage / (damage > 0 && target.isGuard() ? 2 * target.grd : 1);
+    };    
 
     /**
      * 属性レートを適用するかどうかを得る。
@@ -1184,5 +1396,22 @@
         // this.subject().gainSilentTp(value);
     };
 
+
+    //------------------------------------------------------------------------------
+    // Game_Party
+    /**
+     * ablitiyIdで指定されるdataIdのパーティーアビリティを持っているかどうかを判定する。
+     * 
+     * Note: ベーシックシステムではアクターがDead状態でもスキルがあるかどうかを判定していた。
+     * 
+     * @param {number} abilityId アビリティID
+     * !!!overwrite!!! Game_Party.partyAbility()
+     *     パーティーアビリティ有無は生存メンバーだけ対象にするため、オーバーライドする。
+     */
+    Game_Party.prototype.partyAbility = function(abilityId) {
+        return this.battleMembers().some(function(actor) {
+            return !actor.isDead() && actor.partyAbility(abilityId);
+        });
+    };
 
 })();

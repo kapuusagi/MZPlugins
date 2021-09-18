@@ -19,6 +19,22 @@
  * @min -5.00
  * @max 5.00
  * 
+ * @param multiplePopupOffsetX
+ * @text 同時ポップアップオフセットX
+ * @desc 連続してダメージポップアップさせるとき、前の表示からずらす水平ピクセル数。(正数で右にずれる)
+ * @type number
+ * @default 8
+ * @min -255
+ * @max 255
+ * 
+ * @param multiplePopupOffsetY
+ * @text 同時ポップアップオフセットY
+ * @desc 連続してダメージポップアップさせるとき、前の表示からずらす垂直ピクセル数。(正数で上にずれる)
+ * @type number
+ * @default 16
+ * @min -255
+ * @max 255
+ * 
  * @param noDispStateIds
  * @text 付与/解除を表示させないステートID
  * @desc 付与/解除を表示させないステートID
@@ -200,6 +216,32 @@
  * @type string
  * @default #ffffff
  * @parent textCritical
+ * 
+ * @param textReflection
+ * @text 反射メッセージ
+ * @desc 反射時メッセージ。空にするとポップアップさせない。
+ * @type string
+ * @default Reflect!!
+ * 
+ * @param colorReflection
+ * @text 反射文字カラー
+ * @desc 反射メッセージの色
+ * @type string
+ * @default #ff80ff
+ * @parent textReflection
+ * 
+ * @param textCounter
+ * @text カウンターメッセージ
+ * @desc カウンター時のメッセージ。空にするとポップアップさせない。
+ * @type string
+ * @default Counter!!
+ * 
+ * @param colorCounter
+ * @text カウンターカラー
+ * @desc カウンターメッセージの色
+ * @type string
+ * @default #8080ff
+ * @parent textCounter
  *  
  * @param colorHpDamage
  * @text HPダメージカラー
@@ -242,6 +284,8 @@
  * @desc TP回復数値の色
  * @type string
  * @default #ffff40
+ * 
+ * 
  * 
  * @help 
  * TWLD向けに作成した、ダメージエフェクトのプラグイン。
@@ -347,6 +391,9 @@
     const popupDuration = Math.max(30, Math.round(Number(parameters["popupDuration"]) || 60));
     const fadeOutDuration = Math.max(0, Math.round(Number(parameters["fadeOutDuration"]) || 30));
 
+    const multiplePopupOffsetX = Max(0, Math.round(Number(parameters["multiplePopupOffsetX"]) || 8));
+    const multiplePopupOffsetY = Max(0, Math.round(Number(parameters["multiplePopupOffsetY"]) || 16));
+
     const colorHpDamage = parameters["colorHpDamage"] || "#ffffff";
     const colorHpRecover = parameters["colorHpRecover"] || "#80ff80";
     const colorHpNoDamage = parameters["colorHpNoDamage"] || "#ffffff";
@@ -380,6 +427,10 @@
     const colorMiss = parameters["colorMiss"] || "#ffffff";
     const textCritical = parameters["textCritical"] || "";
     const colorCritical = parameters["colorCritical"] || "#ffffff";
+    const textReflection = parameters["textReflection"] || "";
+    const colorReflection = parameters["colorReflection"] || "#ff80ff";
+    const textCounter = parameters["textCounter"] || "";
+    const colorCounter = parameters["colorCounter"] || "#8080ff"
 
     const damageMoveXRandom = (parameters["damageMoveXRandom"] === undefined)
             ? false : (parameters["damageMoveXRandom"] === "true");
@@ -400,6 +451,66 @@
     }
 
     const baseY = 40;
+
+    const _Game_Battler_initMembers = Game_Battler.prototype.initMembers;
+
+    //------------------------------------------------------------------------------
+    // Game_Battlerの変更
+    /**
+     * メンバーを初期化する。
+     */
+    Game_Battler.prototype.initMembers = function() {
+        _Game_Battler_initMembers.call(this);
+        this._counterPopup = false; // カウンターポップアップ
+        this._reflectionPopup = false; // リフレクションポップアップ
+    };
+
+    /**
+     * カウンターポップアップフラグをクリアする。
+     */
+    Game_Battler.prototype.clearCounterPopup = function() {
+        this._counterPopup = false;
+    };
+
+    /**
+     * カウンターポップアップ要求が出ているかどうかを得る。
+     * 
+     * @returns {boolean} 要求が出ている場合にはtrue, それ以外はfalse.
+     */
+    Game_Battler.prototype.isCounterPopupRequested = function() {
+        return this._counterPopup || false;
+    };
+
+    /**
+     * カウンターポップアップを開始する。
+     */
+    Game_Battler.prototype.startCounterPopup = function() {
+        this._counterPopup = true;
+    };
+
+    /**
+     * 反射ポップアップフラグをクリアする。
+     */
+    Game_Battler.prototype.clearReflectionPopup = function() {
+        this._reflectionPopup = false;
+    };
+
+    /**
+     * 反射ポップアップ要求が出ているかどうかを得る。
+     * 
+     * @returns {boolean} 反射ポップアップ要求が出ている場合にはtrue, それ以外はfalse.
+     */
+    Game_Battler.prototype.isReflectionPopupRequested = function() {
+        return this._reflectionPopup || false;
+    };
+
+    /**
+     * 反射ポップアップを開始する。
+     */
+    Game_Battler.prototype.startReflectionPopup = function() {
+        this._reflectionPopup = true;
+    };
+
 
     //------------------------------------------------------------------------------
     // Sprite_Damage
@@ -554,11 +665,12 @@
         const w = Math.floor(h * textMiss.length);
         const sprite = this.createChildSprite(w, h);
         sprite.bitmap.textColor = colorMiss;
+        sprite.bitmap.fontItalic = true;
         sprite.bitmap.drawText(textMiss, 0, 0, w, h, "center");
         sprite.anchor.y = 0.5;
         sprite.dy = 0;
         sprite.opacity = 0;
-        sprite.x = -60;
+        sprite.x = -3 * fadeInDuration;
         sprite.y = -40;
         sprite.updatePosition = this.updateMiss.bind(this);
     };
@@ -571,6 +683,7 @@
         const w = Math.floor(h * textCritical.length);
         const sprite = this.createChildSprite(w, h);
         sprite.bitmap.TextColor = colorCritical;
+        sprite.bitmap.fontItalic = true;
         sprite.bitmap.drawText(textCritical, 0, 0, w, h, "center");
         sprite.anchor.y = 0;
         sprite.x = -40;
@@ -588,6 +701,7 @@
         const w = Math.floor(h * textAbsorb.length);
         const sprite = this.createChildSprite(w, h);
         sprite.bitmap.textColor = colorAbsorb;
+        sprite.bitmap.fontItalic = true;
         sprite.bitmap.drawText(textAbsorb, 0, 0, w, h, "center");
         sprite.anchor.y = 0;
         sprite.x = -40;
@@ -605,6 +719,7 @@
         const w = Math.floor(h * textEffective.length);
         const sprite = this.createChildSprite(w, h);
         sprite.bitmap.textColor = colorEffective;
+        sprite.bitmap.fontItalic = true;
         sprite.bitmap.drawText(textEffective, 0, 0, w, h, "center");
         sprite.anchor.y = 0;
         sprite.x = -40;
@@ -622,6 +737,7 @@
         const w = Math.floor(h * textIneffective.length);
         const sprite = this.createChildSprite(w, h);
         sprite.bitmap.textColor = colorIneffective;
+        sprite.bitmap.fontItalic = true;
         sprite.bitmap.drawText(textIneffective, 0, 0, w, h, "center");
         sprite.anchor.y = 0;
         sprite.x = -40;
@@ -992,6 +1108,255 @@
             this._flashDuration = 40;
         }
     };
+
+    //------------------------------------------------------------------------------
+    // Sprite_BattlePopupText の変更
+    /**
+     * Sprite_BattlePopupText
+     * ポップアップテキストを表示するためのスプライト。
+     * Counter/Reflectionの表示を行う。
+     */
+    function Sprite_BattlePopupText() {
+        this.initialize(...arguments);
+    }
+
+    Sprite_BattlePopupText.prototype = Object.create(Sprite.prototype);
+    Sprite_BattlePopupText.prototype.constructor = Sprite_BattlePopupText;
+
+    /**
+     * Sprite_BattlePopupText を初期化する。
+     */
+    Sprite_BattlePopupText.prototype.initialize = function() {
+        Sprite.prototype.initialize.call(this);
+        this._duration = 90;
+    };
+
+    /**
+     * Sprite_BattlePopupTextを破棄する。
+     * 
+     * @param {object} options 破棄オブション
+     */
+    Sprite_BattlePopupText.prototype.destroy = function(options) {
+        for (const child of this.children) {
+            if (child.bitmap) {
+                child.bitmap.destroy();
+            }
+        }
+        Sprite.prototype.destroy.call(this, options);
+    };
+
+    /**
+     * このスプライトに描画するフォントのサイズを得る。
+     * 
+     * @returns {number} フォントサイズ
+     */
+    Sprite_BattlePopupText.prototype.fontSize = function() {
+        return $gameSystem.mainFontSize() + 4;
+    };
+
+    /**
+     * フォントフェースを得る。
+     * 
+     * @returns {string} フォントフェース
+    */
+     Sprite_BattlePopupText.prototype.fontFace = function() {
+        return $gameSystem.numberFontFace();
+    };
+
+    /**
+     * Sprite_BattlePopupTextを表示させるための準備をする。
+     * 
+     * @param {string} text ポップアップテキスト
+     * @param {string} textColor テキストカラー
+     */
+    Sprite_BattlePopupText.prototype.setup = function(text, textColor) {
+        const h = this.fontSize();
+        const w = Math.floor(h * text.length);
+        const sprite = this.createChildSprite(w, h);
+        sprite.bitmap.textColor = textColor;
+        sprite.bitmap.fontItalic = true;
+        sprite.bitmap.drawText(text, 0, 0, w, h, "center");
+        sprite.anchor.y = 0.5;
+        sprite.dy = 0;
+        sprite.opacity = 0;
+        sprite.x = -3 * fadeInDuration;
+        sprite.y = -40;
+    };
+
+    /**
+     * 子スプライトを作成する。
+     * 既定の実装では、スプライト下端中央に原点、
+     * 基準位置から(0,-40)の位置にスプライトを作成する。
+     * 
+     * @param {number} width 幅
+     * @param {number} height 高さ
+     */
+    Sprite_BattlePopupText.prototype.createChildSprite = function(width, height) {
+        const sprite = new Sprite();
+        sprite.bitmap = this.createBitmap(width, height);
+        sprite.anchor.x = 0.5;
+        sprite.anchor.y = 1;
+        sprite.y = -40;
+        sprite.ry = sprite.y;
+        sprite.opacity = 0;
+        this.addChild(sprite);
+        return sprite;
+    };
+    /**
+     * Bitmapを作成する。
+     * 
+     * @param {number} width 幅
+     * @param {number} height 高さ
+     * @return {Bitmap} Bitmapオブジェクト
+     */
+    Sprite_BattlePopupText.prototype.createBitmap = function(width, height) {
+        const bitmap = new Bitmap(width, height);
+        bitmap.fontFace = this.fontFace();
+        bitmap.fontSize = this.fontSize();
+        bitmap.outlineColor = "rgba(0, 0, 0, 0.7)";
+        bitmap.outlineWidth = 4;
+        return bitmap;
+    };
+
+    /**
+     * Sprite_Damageを更新する。
+     */
+    Sprite_BattlePopupText.prototype.update = function() {
+        Sprite.prototype.update.call(this);
+        if (this._duration > 0) {
+            this._duration--;
+            for (const child of this.children) {
+                this.updateChild(child);
+            }
+        }
+    };
+
+    /**
+     * 子スプライトを更新する。
+     * 
+     * @param {Sprite} sprite 子スプライト
+     */
+    Sprite_BattlePopupText.prototype.updateChild = function(sprite) {
+        if (this._frameCount < fadeInDuration) {
+            if (sprite.x < 0) {
+                sprite.x += 3;
+            }
+            let opacity = sprite.opacity;
+            if (opacity < 255) {
+                sprite.opacity = Math.min(255, opacity + 10);
+            }
+        }
+        if (this._frameCount > (fadeInDuration + popupDuration)) {
+            let opacity = sprite.opacity;
+            if (opacity > 0) {
+                sprite.opacity = Math.max(0, opacity -= 10);
+            }
+            sprite.x += 3;
+        }
+    };
+
+
+    //------------------------------------------------------------------------------
+    // Sprite_Battler の変更
+    const _Sprite_Battler_setupDamagePopup = Sprite_Battler.prototype.setupDamagePopup;
+    /**
+     * ダメージポップアップを準備する。
+     * 
+     * Note: 対象のバトラーにダメージポップアップ要求がセットされている場合に
+     *       Sprite_Damageを作成して情報をポップさせるように動作する。
+     */
+    Sprite_Battler.prototype.setupDamagePopup = function() {
+        this.setupCounterPopup();
+        this.setupReflectionPopup();
+        _Sprite_Battler_setupDamagePopup.call(this);
+    };
+
+    /**
+     * ダメージスプライトを作成する。
+     * 
+     * Note: ベーシックシステムでは、連続して複数のダメージを表示する場合にはちょっとずつ左上にずらす。
+     * 
+     * !!!overwrite!!! Sprite_Battler.createDamageSprite()
+     *     多重にダメージポップアップさせるときのオフセットを調整できるようにするため、オーバーライドする。
+     */
+    Sprite_Battler.prototype.createDamageSprite = function() {
+        const last = this._damages[this._damages.length - 1];
+        const sprite = new Sprite_Damage();
+        if (last) {
+            // 連続表示されているのでずらす。
+            sprite.x = last.x + multiplePopupOffsetX;
+            sprite.y = last.y - multiplePopupOffsetY;
+        } else {
+            sprite.x = this.x + this.damageOffsetX();
+            sprite.y = this.y + this.damageOffsetY();
+        }
+        sprite.setup(this._battler);
+        this._damages.push(sprite);
+        this.parent.addChild(sprite);
+    };
+
+    /**
+     * カウンターポップアップを準備する。
+     */
+    Sprite_Battler.prototype.setupCounterPopup = function() {
+        if (this._battler.isCounterPopupRequested()) {
+            this.createCounterSprite();
+            this._battler.clearCounterPopup();
+        }
+    };
+
+    /**
+     * カウンター表示スプライトを作成する。
+     */
+    Sprite_Battler.prototype.createCounterSprite = function() {
+        if (textCounter) {
+            const last = this._damages[this._damages.length - 1];
+            const sprite = new Sprite_BattlePopupText();
+            if (last) {
+                // 連続表示されているのでずらす。
+                sprite.x = last.x + multiplePopupOffsetX;
+                sprite.y = last.y - multiplePopupOffsetY;
+            } else {
+                sprite.x = this.x + this.damageOffsetX();
+                sprite.y = this.y + this.damageOffsetY();
+            }
+            sprite.setup(textCounter, colorCounter);
+            this._damages.push(sprite);
+            this.parent.addChild(sprite);
+        }
+    };
+
+    /**
+     * リフレクションポップアップを準備する。
+     */
+    Sprite_Battler.prototype.setupReflectionPopup = function() {
+        if (this._battler.isReflectionPopupRequested()) {
+            this.createReflectionSprite();
+            this._battler.clearReflectionPopup();
+        }
+    };
+
+    /**
+     * 反射ポップアップを準備する。
+     */
+    Sprite_Battler.prototype.createReflectionSprite = function() {
+        if (textReflection) {
+            const last = this._damages[this._damages.length - 1];
+            const sprite = new Sprite_BattlePopupText();
+            if (last) {
+                // 連続表示されているのでずらす。
+                sprite.x = last.x + multiplePopupOffsetX;
+                sprite.y = last.y - multiplePopupOffsetY;
+            } else {
+                sprite.x = this.x + this.damageOffsetX();
+                sprite.y = this.y + this.damageOffsetY();
+            }
+            sprite.setup(textReflection, colorReflection);
+            this._damages.push(sprite);
+            this.parent.addChild(sprite);
+        }
+    };
+
     //------------------------------------------------------------------------------
     // Window_BattleLog の変更
 
@@ -1048,6 +1413,15 @@
      */
     // eslint-disable-next-line no-unused-vars
     Window_BattleLog.prototype.displayCritical = function(target) {
+        if (!textCritical) {
+            if (target.result().critical) {
+                if (target.isActor()) {
+                    this.push("addText", TextManager.criticalToActor);
+                } else {
+                    this.push("addText", TextManager.criticalToEnemy);
+                }
+            }            
+        }
     };
 
     /**
@@ -1059,6 +1433,17 @@
      */
     // eslint-disable-next-line no-unused-vars
     Window_BattleLog.prototype.displayChangedBuffs = function(target) {
+        const result = target.result();
+        if (!textAddedBuff) {
+            this.displayBuffs(target, result.addedBuffs, TextManager.buffAdd);
+        }
+        if (!textAddedDebuff) {
+            this.displayBuffs(target, result.addedDebuffs, TextManager.debuffAdd);
+        }
+        if (!textRemovedBuff) {
+            this.displayBuffs(target, result.removedBuffs, TextManager.buffRemove);
+        }
+    
     };
     /**
      * 対象のステートが変化されたのを表示する。
@@ -1069,11 +1454,16 @@
      */
     // eslint-disable-next-line no-unused-vars
     Window_BattleLog.prototype.displayChangedStates = function(target) {
-        const result = target.result();
-        const states = result.addedStateObjects();
-        if (states.some(state => state.id === target.deathStateId())) {
-            this.push("performCollapse", target);
-            this.push("waitForEffect");
+        if (textAddedState || textRemovedState) {
+            const result = target.result();
+            const states = result.addedStateObjects();
+            if (states.some(state => state.id === target.deathStateId())) {
+                this.push("performCollapse", target);
+                this.push("waitForEffect");
+            }
+        } else {
+            this.displayAddedStates(target);
+            this.displayRemovedStates(target);
         }
     };
 
@@ -1085,8 +1475,20 @@
      *     バトルログにミスした表示を出さないためオーバーライドする。
      */
     Window_BattleLog.prototype.displayMiss = function(target) {
-        if (target.result().physical) {
-            this.push("performMiss", target);
+        if (textMiss) {
+            if (target.result().physical) {
+                this.push("performMiss", target);
+            }
+        } else {
+            let fmt;
+            if (target.result().physical) {
+                const isActor = target.isActor();
+                fmt = isActor ? TextManager.actorNoHit : TextManager.enemyNoHit;
+                this.push("performMiss", target);
+            } else {
+                fmt = TextManager.actionFailure;
+            }
+            this.push("addText", fmt.format(target.name()));
         }
     };
 
@@ -1098,11 +1500,49 @@
      *     メッセージログに回避したメッセージを表示させないため、オーバーライドする。
      */
     Window_BattleLog.prototype.displayEvasion = function(target) {
-        if (target.result().physical) {
-            this.push("performEvasion", target);
+        if (textMiss) {
+            if (target.result().physical) {
+                this.push("performEvasion", target);
+            } else {
+                this.push("performMagicEvasion", target);
+            }
         } else {
-            this.push("performMagicEvasion", target);
+            let fmt;
+            if (target.result().physical) {
+                fmt = TextManager.evasion;
+                this.push("performEvasion", target);
+            } else {
+                fmt = TextManager.magicEvasion;
+                this.push("performMagicEvasion", target);
+            }
+            this.push("addText", fmt.format(target.name()));
+        }
+    };
+    /**
+     * カウンターを表示する。
+     * 
+     * @param {Game_Battler} target 対象
+     */
+    Window_BattleLog.prototype.displayCounter = function(target) {
+        this.push("performCounter", target);
+        if (textCounter) {
+            target.startCounterPopup();
+        } else {
+            this.push("addText", TextManager.counterAttack.format(target.name()));
         }
     };
 
+    /**
+     * 反射を表示する。
+     * 
+     * @param {Game_Battler} target 対象
+     */
+    Window_BattleLog.prototype.displayReflection = function(target) {
+        this.push("performReflection", target);
+        if (textReflection) {
+            target.startReflectionPopup();
+        } else {
+            this.push("addText", TextManager.magicReflection.format(target.name()));
+        }
+    };
 })();
