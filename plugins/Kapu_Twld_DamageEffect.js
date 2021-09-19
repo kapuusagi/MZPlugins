@@ -391,8 +391,8 @@
     const popupDuration = Math.max(30, Math.round(Number(parameters["popupDuration"]) || 60));
     const fadeOutDuration = Math.max(0, Math.round(Number(parameters["fadeOutDuration"]) || 30));
 
-    const multiplePopupOffsetX = Max(0, Math.round(Number(parameters["multiplePopupOffsetX"]) || 8));
-    const multiplePopupOffsetY = Max(0, Math.round(Number(parameters["multiplePopupOffsetY"]) || 16));
+    const multiplePopupOffsetX = Math.max(0, Math.round(Number(parameters["multiplePopupOffsetX"]) || 8));
+    const multiplePopupOffsetY = Math.max(0, Math.round(Number(parameters["multiplePopupOffsetY"]) || 16));
 
     const colorHpDamage = parameters["colorHpDamage"] || "#ffffff";
     const colorHpRecover = parameters["colorHpRecover"] || "#80ff80";
