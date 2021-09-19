@@ -5,8 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_IndependentItem
  * @orderAfter Kapu_IndependentItem
- * @base Kapu_Twld_System
- * @orderAfter Kapu_Twld_System
+ * @base Kapu_Twld_BaseSystem
+ * @orderAfter Kapu_Twld_BaseSystem
  * @base Kapu_Base_ParamName
  * 
  * @param textInfo
