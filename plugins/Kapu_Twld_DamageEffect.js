@@ -1129,6 +1129,7 @@
     Sprite_BattlePopupText.prototype.initialize = function() {
         Sprite.prototype.initialize.call(this);
         this._duration = 90;
+        this._frameCount = 0;
     };
 
     /**
@@ -1180,7 +1181,7 @@
         sprite.dy = 0;
         sprite.opacity = 0;
         sprite.x = -3 * fadeInDuration;
-        sprite.y = -40;
+        sprite.y = -60;
     };
 
     /**
@@ -1228,7 +1229,17 @@
             for (const child of this.children) {
                 this.updateChild(child);
             }
+            this.visible = (this._duration > 0);
         }
+    };
+
+    /**
+     * このスプライトがアニメーション中かどうかを得る。
+     *
+     * @returns {boolean} アニメーション中の場合にはtrue, それ以外はfalse
+     */
+    Sprite_BattlePopupText.prototype.isPlaying = function() {
+        return this._duration > 0;
     };
 
     /**
