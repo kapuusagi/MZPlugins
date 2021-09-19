@@ -1139,9 +1139,6 @@
         } else {
             return damage;
         }
-
-
-        return damage / (damage > 0 && target.isGuard() ? 2 * target.grd : 1);
     };    
 
     /**
