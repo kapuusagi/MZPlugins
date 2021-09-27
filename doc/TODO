@@ -39,12 +39,7 @@
     ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど。
   Kapu_Timer_Extend:
     ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
-  Kapu_Twld_BattleSystem
-    ☐ カウンターとかリフレクションが発生した時の表示がよろしくない。
-       現状ログウィンドウにメッセージ表示するのみ。
-       Window_BattleLog.displayCounter
-       Window_BattleLog.displayRefrection
-       とかこの辺をなんとかしないといかん。
+  Kapu_Twld_BattleSystem:
     ☐ スキルの連続効果みたいなの。
        ActionStateと競合しないように組み込みたい。難しいかなあ。難しいなあ。
 
