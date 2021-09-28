@@ -15,6 +15,10 @@
   ☐ Kapu_CharaMake (isEnabledを変更したため)
   ☐ Kapu_FastTravel (isEnabledを変更したため)
   ☐ Kapu_Twld_DamageEffect (カウンター/反射のポップアップ追加)
+  ☐ Kapu_ContinuousSkill (新規追加。思った通りには動かないはず)
+  ☐ Kapu_EncounterEffect_Pixelate (新規追加)
+  ☐ Kapu_EncounterEffect_Pattern (新規追加)
+  ☐ Kapu_BattlerGender_States (新規追加)
   Kapu_Base_Twld:
     ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
   Kapu_TargetManager: 
