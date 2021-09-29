@@ -958,33 +958,32 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargets = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargets = function(subject, item) {
         switch (subject.itemScope(item)) {
             case TargetManager.SCOPE_SELECTED_ROW_OPPONENTS:
             case TargetManager.SCOPE_RANDOME_1_OPPONENT_IN_ROW:
             case TargetManager.SCOPE_RANDOME_2_OPPONENTS_IN_ROW:
             case TargetManager.SCOPE_RANDOME_3_OPPONENTS_IN_ROW:
             case TargetManager.SCOPE_RANDOME_4_OPPONENTS_IN_ROW:
-                return this.makeSelectableActionTargetsRowOpponents(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsRowOpponents(subject, item);
             case TargetManager.SCOPE_FRONT_OPPONENTS:
             case TargetManager.SCOPE_RANDOME_1_OPPONENT_IN_FRONT_ROW:
             case TargetManager.SCOPE_RANDOME_2_OPPONENTS_IN_FRONT_ROW:
             case TargetManager.SCOPE_RANDOME_3_OPPONENTS_IN_FRONT_ROW:
             case TargetManager.SCOPE_RANDOME_4_OPPONENTS_IN_FRONT_ROW:
-                return this.makeSelectableActionTargetsFrontOpponents(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsFrontOpponents(subject, item);
             case TargetManager.SCOPE_ALIVED_ROW_FRIENDS:
             case TargetManager.SCOPE_DEAD_ROW_FRIENDS:
             case TargetManager.SCOPE_ROW_FRIENDS:
-                return this.makeSelectableActionTargetsRowFriends(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsRowFriends(subject, item);
             case TargetManager.SCOPE_ALIVED_FRONT_FRIENDS:
-                return this.makeSelectableActionTargetsFrontFriends(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsFrontFriends(subject, item);
             case TargetManager.SCOPE_ALIVED_SAME_ROW_FRIENDS:
-                return this.makeSelectableActionTargetsSameRowFriends(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsSameRowFriends(subject, item);
             default:
-                return _TargetManager_makeSelectableActionTargets.call(this, subject, item, includesConfusionTarget);
+                return _TargetManager_makeSelectableActionTargets.call(this, subject, item);
         }
     };
 
@@ -993,10 +992,9 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargetsRowOpponents = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsRowOpponents = function(subject, item) {
         const selectable = [];
 
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
@@ -1006,20 +1004,18 @@
                 break;
             }
             const name = textTargetRowOpponents.format(row + 1);
-            selectable.push(new Game_ActionTargetGroup(row, name, rowMembers, rowMembers));
+            selectable.push(new Game_ActionTargetGroup(row, name, rowMembers, rowMembers, true));
         }
-        if (includesConfusionTarget) {
-            const friendMembers = this.friendMembers(subject);
-            for (let row = 0; row < 12; row++) {
-                const rowMembers = friendMembers.filter(member => member.battlePosition() === row);
-                if (rowMembers.length === 0) {
-                    break;
-                }
-
-                const targetMembers = rowMembers.filter(member => TargetManager.isTargetable(subject, member, item));
-                const name = textTargetRowFriends.format(row + 1);
-                selectable.push(new Game_ActionTargetGroup(row + 1000, name, targetMembers, targetMembers));
+        const friendMembers = this.friendMembers(subject);
+        for (let row = 0; row < 12; row++) {
+            const rowMembers = friendMembers.filter(member => member.battlePosition() === row);
+            if (rowMembers.length === 0) {
+                break;
             }
+
+            const targetMembers = rowMembers.filter(member => TargetManager.isTargetable(subject, member, item));
+            const name = textTargetRowFriends.format(row + 1);
+            selectable.push(new Game_ActionTargetGroup(row + 1000, name, targetMembers, targetMembers, false));
         }
         return selectable;
     };
@@ -1028,23 +1024,24 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargetsFrontOpponents = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsFrontOpponents = function(subject, item) {
         const selectable = [];
         const scopeInfo = TargetManager.scopeInfo(subject.itemScope(item));
 
-        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        const rowMembers = opponentMembers.filter(member => member.battlePosition() === 0);
-        if (rowMembers.length > 0) {
-            selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers));
+        {
+            const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+            const rowMembers = opponentMembers.filter(member => member.battlePosition() === 0);
+            if (rowMembers.length > 0) {
+                selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers, true));
+            }
         }
-        if (includesConfusionTarget) {
+        {
             const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             const rowMembers = friendMembers.filter(member => member.battlePosition() === 0);
             if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, rowMembers, rowMembers));
+                selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, rowMembers, rowMembers, false));
             }
         }
         return selectable;
@@ -1054,10 +1051,9 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargetsRowFriends = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsRowFriends = function(subject, item) {
         const selectable = [];
 
         const friendMembers = this.friendMembers(subject);
@@ -1068,18 +1064,16 @@
             }
             const targetMembers = rowMembers.filter(member => TargetManager.isTargetable(subject, member, item));
             const name = textTargetRowFriends.format(row + 1);
-            selectable.push(new Game_ActionTargetGroup(row, name, targetMembers, targetMembers));
+            selectable.push(new Game_ActionTargetGroup(row, name, targetMembers, targetMembers, true));
         }
-        if (includesConfusionTarget) {
-            const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-            for (let row = 0; row < 12; row++) {
-                const rowMembers = opponentMembers.filter(member => member.battlePosition() === row);
-                if (rowMembers.length === 0) {
-                    break;
-                }
-                const name = textTargetRowOpponents.format(row + 1);
-                selectable.push(new Game_ActionTargetGroup(row + 1000, name, rowMembers, rowMembers));
+        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+        for (let row = 0; row < 12; row++) {
+            const rowMembers = opponentMembers.filter(member => member.battlePosition() === row);
+            if (rowMembers.length === 0) {
+                break;
             }
+            const name = textTargetRowOpponents.format(row + 1);
+            selectable.push(new Game_ActionTargetGroup(row + 1000, name, rowMembers, rowMembers, false));
         }
         return selectable;
     };
@@ -1089,23 +1083,24 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargetsFrontFriends = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsFrontFriends = function(subject, item) {
         const selectable = [];
         const scopeInfo = TargetManager.scopeInfo(subject.itemScope(item));
 
-        const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        const rowMembers = friendMembers.filter(member => member.battlePosition() === 0);
-        if (rowMembers.length > 0) {
-            selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers));
+        {
+            const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+            const rowMembers = friendMembers.filter(member => member.battlePosition() === 0);
+            if (rowMembers.length > 0) {
+                selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers, true));
+            }
         }
-        if (includesConfusionTarget) {
+        {
             const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             const rowMembers = opponentMembers.filter(member => member.battlePosition() === 0);
             if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, rowMembers, rowMembers));
+                selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, rowMembers, rowMembers, false));
             }
         }
         return selectable;
@@ -1115,17 +1110,15 @@
      * 
      * @param {Game_Battelr} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    // eslint-disable-next-line no-unused-vars
-    TargetManager.makeSelectableActionTargetsSameRowFriends = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsSameRowFriends = function(subject, item) {
         const selectable = [];
         const scopeInfo = TargetManager.scopeInfo(subject.itemScope(item));
 
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const rowMembers = friendMembers.filter(member => member.battlePosition() === subject.battlePosition());
-        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers));
+        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers, true));
         return selectable;
     };
 

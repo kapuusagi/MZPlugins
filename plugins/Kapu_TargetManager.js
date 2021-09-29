@@ -155,11 +155,11 @@
  *   forAll: {boolean} // 対象は敵味方全体が対象
  * }
  * 
- * TargetManager.makeSelectableActionTargets(subject:Game_Battler, item:object, includesConfusionTarget:boolean) : Array<Game_ActionTargetGroup>
+ * TargetManager.makeSelectableActionTargets(subject:Game_Battler, item:object) : Array<Game_ActionTargetGroup>
  *     subjectがitemを使用する時の選択可能な対象を得る。
  *     scopeを追加する場合にはこのメソッドを派生させる。
  * 
- * Game_ActionTargetGroup(targetIndex:number, name:string, mainTargets:Array<Game_Battler>, targets:Array<Game_Battler>)
+ * Game_ActionTargetGroup(targetIndex:number, name:string, mainTargets:Array<Game_Battler>, targets:Array<Game_Battler>, isNormalyTargets:boolean)
  *     1つの選択範囲を表す。
  *     メインのターゲットは mainTargets で、
  *     その効果が及ぶ範囲は targets で渡す。
@@ -412,12 +412,14 @@ $dataItemScopes = null;
      * @param {string} name 選択項目名
      * @param {Array<Game_Battler>} mainTargets メインターゲット
      * @param {Array<Game_Battler>} members 効果対象メンバー(メインターゲットと同じであればnull可)
+     * @param {boolean} isNormalyTarget 通常選択可能なターゲットかどうか。
      */
-    Game_ActionTargetGroup.prototype.initialize = function(targetIndex, name, mainTargets, members) {
+    Game_ActionTargetGroup.prototype.initialize = function(targetIndex, name, mainTargets, members, isNormalyTarget) {
         this._targetIndex = targetIndex;
         this._name = name || "";
         this._mainTargets = mainTargets || [];
         this._members = members || mainTargets || [];
+        this._isNormalyTarget = isNormalyTarget;
     };
 
     /**
@@ -498,6 +500,15 @@ $dataItemScopes = null;
         return this._mainTargets.includes(battler);
     };
 
+    /**
+     * 通常選択可能なターゲットかどうかを得る。
+     * 
+     * @returns {boolean} 通常選択可能なターゲットの場合にはtrue, それ以外はfalse.
+     */
+    Game_ActionTargetGroup.prototype.isNormalyTarget = function() {
+        return this._isNormalyTarget;
+    };
+
 
     //------------------------------------------------------------------------------
     // TargetManager
@@ -506,32 +517,31 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battelr} subject 
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能な対象
      */
-    TargetManager.makeSelectableActionTargets = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargets = function(subject, item) {
         switch (subject.itemScope(item)) {
             case TargetManager.SCOPE_ONE_OPPONENTS: // selected opponent one.
-                return this.makeSelectableActionTargetsSelectedOpponent(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsSelectedOpponent(subject, item);
             case TargetManager.SCOPE_ALL_OPPONENTS: // all opponents.
-                return this.makeSelectableActionTargetsAllOpponents(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsAllOpponents(subject, item);
             case TargetManager.SCOPE_RANDOME_1_OPPONENT: // random one opponent
             case TargetManager.SCOPE_RANDOME_2_OPPONENTS: // random two opponents
             case TargetManager.SCOPE_RANDOME_3_OPPONENTS: // random three opponents
             case TargetManager.SCOPE_RANDOME_4_OPPONENTS: // random four opponents
-                return this.makeSelectableActionTargetsRandomOpponents(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsRandomOpponents(subject, item);
             case TargetManager.SCOPE_ALIVED_FRIEND: // selected alived friend
             case TargetManager.SCOPE_DEAD_FRIEND: // selected dead friend
             case TargetManager.SCOPE_FRIEND: // selected friend
-                return this.makeSelectableActionTargetsOneFriend(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsOneFriend(subject, item);
             case TargetManager.SCOPE_ALL_ALIVED_FRIENDS: // all alived friends
             case TargetManager.SCOPE_ALL_DEAD_FRIENDS: // all dead friend
             case TargetManager.SCOPE_ALL_FRIENDS: // all friends
-                return this.makeSelectableActionTargetsAllFriends(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsAllFriends(subject, item);
             case TargetManager.SCOPE_USER_ONLY: // user
-                return this.makeSelectableActionTargetsUser(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsUser(subject, item);
             case TargetManager.SCOPE_EVERYONE: // all alived
-                return this.makeSelectableActionTargetsAll(subject, item, includesConfusionTarget);
+                return this.makeSelectableActionTargetsAll(subject, item);
         }
     };
 
@@ -564,23 +574,20 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsSelectedOpponent = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsSelectedOpponent = function(subject, item) {
         const selectable = [];
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         for (const member of opponentMembers) {
             const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
-            selectable.push(new Game_ActionTargetGroup(member.index(), member.name(), [ member ], effectiveMembers));
+            selectable.push(new Game_ActionTargetGroup(member.index(), member.name(), [ member ], effectiveMembers, true));
         }
 
-        if (includesConfusionTarget) {
-            const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-            for (const member of friendMembers) {
-                const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
-                selectable.push(new Game_ActionTargetGroup(member.index() + 1000, member.name(), [ member ], effectiveMembers));
-            }
+        const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+        for (const member of friendMembers) {
+            const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
+            selectable.push(new Game_ActionTargetGroup(member.index() + 1000, member.name(), [ member ], effectiveMembers, false));
         }
         return selectable;
     };
@@ -590,19 +597,16 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsRandomOpponents = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsRandomOpponents = function(subject, item) {
         const selectable = [];
         const scopeInfo = this.scopeInfo(subject.itemScope(item));
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers));
+        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers, true));
 
-        if (includesConfusionTarget) {
-            const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-            selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers));
-        }
+        const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+        selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers, false));
         return selectable;
     };
 
@@ -611,19 +615,16 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsAllOpponents = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsAllOpponents = function(subject, item) {
         const scopeInfo = this.scopeInfo(subject.itemScope(item));
         const selectable = [];
 
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers));
-        if (includesConfusionTarget) {
-            const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-            selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers));
-        }
+        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers, true));
+        const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+        selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers, false));
 
         return selectable;
     };
@@ -633,27 +634,24 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsOneFriend = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsOneFriend = function(subject, item) {
         const selectable = [];
         const friendMembers = this.friendMembers(subject);
         for (const friend of friendMembers) {
             if (this.isTargetable(subject, friend, item)) {
                 const effectiveTargets = this.itemEffectiveMembers(subject, item, friend);
-                selectable.push(new Game_ActionTargetGroup(friend.index(), friend.name(), [ friend ], effectiveTargets));
+                selectable.push(new Game_ActionTargetGroup(friend.index(), friend.name(), [ friend ], effectiveTargets, true));
             } else {
-                selectable.push(new Game_ActionTargetGroup(friend.index(), friend.name(), [], []));
+                selectable.push(new Game_ActionTargetGroup(friend.index(), friend.name(), [], [], true));
             }
         }
 
-        if (includesConfusionTarget) {
-            const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-            for (const opponent of opponentMembers) {
-                const effectiveTargets = this.itemEffectiveMembers(subject, item, opponent);
-                selectable.push(new Game_ActionTargetGroup(opponent.index() + 1000, opponent.name(), [ opponent ], effectiveTargets));
-            }
+        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+        for (const opponent of opponentMembers) {
+            const effectiveTargets = this.itemEffectiveMembers(subject, item, opponent);
+            selectable.push(new Game_ActionTargetGroup(opponent.index() + 1000, opponent.name(), [ opponent ], effectiveTargets, false));
         }
         return selectable;
     };
@@ -663,19 +661,16 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    TargetManager.makeSelectableActionTargetsAllFriends = function(subject, item, includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsAllFriends = function(subject, item) {
         const scopeInfo = this.scopeInfo(subject.itemScope(item));
         const selectable = [];
 
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, friendMembers, friendMembers));
-        if (includesConfusionTarget) {
-            const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-            selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_OPPONENTS), opponentMembers, opponentMembers));
-        }
+        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, friendMembers, friendMembers, true));
+        const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
+        selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_OPPONENTS), opponentMembers, opponentMembers, false));
 
         return selectable;
     };
@@ -685,12 +680,11 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
     // eslint-disable-next-line no-unused-vars
-    TargetManager.makeSelectableActionTargetsUser = function(subject, item, includesConfusionTarget) {
-        return [ new Game_ActionTargetGroup(-1, subject.name(), [ subject ], [ subject ])];
+    TargetManager.makeSelectableActionTargetsUser = function(subject, item) {
+        return [ new Game_ActionTargetGroup(-1, subject.name(), [ subject ], [ subject ], true)];
     };
 
     /**
@@ -698,17 +692,15 @@ $dataItemScopes = null;
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item アイテムまたはスキル
-     * @param {boolean} includesConfusionTarget 混乱時の対象を含めるかどうか
      * @returns {Array<Game_ActionTargetGroup>} 選択可能メンバー
      */
-    // eslint-disable-next-line no-unused-vars
-    TargetManager.makeSelectableActionTargetsAll = function(subject, item , includesConfusionTarget) {
+    TargetManager.makeSelectableActionTargetsAll = function(subject, item) {
         const scopeInfo = this.scopeInfo(subject.itemScope(item));
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const allMembers = friendMembers.concat(opponentMembers);
 
-        return [ new Game_ActionTargetGroup(-1, scopeInfo.name, allMembers, allMembers)];
+        return [ new Game_ActionTargetGroup(-1, scopeInfo.name, allMembers, allMembers, true)];
 
     };
 
@@ -746,6 +738,49 @@ $dataItemScopes = null;
     };
 
     /**
+     * 混乱レベルに応じた選択可能対象を得る。
+     * 
+     * @param {Game_Battler} subject 使用者
+     * @param {object} item DataSkill/DataItem
+     * @returns {Array<Game_ActionTargetGroup>} 選択対象候補
+     */
+    TargetManager.makeSelectableActionTargetsWithConfusionLevel = function(subject, item) {
+        const selectableTargets = this.makeSelectableActionTargets(subject, item);
+        if (selectableTargets.length === 0) {
+            // アクション可能な対象なし。
+            return [];
+        }
+
+        if (selectableTargets.length === 1) {
+            return selectableTargets;
+        }
+
+        // 混乱レベルによって、選択可能な対象が変わる。
+        switch (subject.confusionLevel()) {
+            case 1:
+                {
+                    // 本来の対象が候補
+                    const normalyTargets = selectableTargets.filter(group => group.isNormalyTarget());
+                    return normalyTargets;
+                }
+            case 3:
+                {
+                    // 味方が対象
+                    const abnormalTargets = selectableTargets.filter(group => !group.isNormalyTarget());
+                    if (abnormalTargets.length > 0) {
+                        return abnormalTargets;
+                    } else {
+                        return [];
+                    }
+                }
+            case 2:
+            default:
+                // 全ての選択可能な対象からランダム。
+                return selectableTargets;
+        }
+    };
+
+    /**
      * 混乱時のアクションターゲットを作成する。
      * 
      * @param {Game_Battler} subject 使用者
@@ -754,11 +789,12 @@ $dataItemScopes = null;
      */
     TargetManager.makeActionTargetsConfused = function(subject, item) {
         // 選択可能対象からランダムで選択して選定する。
-        const selectableTargets = this.makeSelectableActionTargets(subject, item, true);
+        const selectableTargets = this.makeSelectableActionTargetsWithConfusionLevel(subject, item);
         if (selectableTargets.length === 0) {
             // アクション可能な対象なし。
             return [];
         }
+
         const scopeInfo = this.scopeInfo(subject.itemScope(item.scope));
         if (scopeInfo.random) {
             // ランダム対象
@@ -808,12 +844,13 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     TargetManager.makeActionTargetsNormal = function(subject, item, targetIndex, isForce) {
-        const includesConfusionTarget = !isForce && (subject.isActor() && allowSelectConfusionTarget);
-        const selectableGroups = this.makeSelectableActionTargets(subject, item, includesConfusionTarget);
+        const selectableAll = !isForce && (subject.isActor() && allowSelectConfusionTarget);
+        const selectableGroups = this.makeSelectableActionTargets(subject).filter(group => group.isNormalyTarget() || selectableAll);
+
         let selectedGroup = selectableGroups.find(selectableTarget => selectableTarget.targetIndex() === targetIndex);
         if (!selectedGroup) {
             // 選択可能な対象から候補を選出する。
-            const candidateGroups = this.makeSelectableActionTargets(subject, item, false);
+            const candidateGroups = selectableGroups.filter(group => group.isNormalyTarget());
             if (targetIndex >= 0) {
                 // 選択した対象がいない。 -> デフォルトターゲットを設定
                 selectedGroup = candidateGroups[0];
@@ -904,8 +941,8 @@ $dataItemScopes = null;
         const subject = this.subject();
         const item = this.item();
         if (item && subject) {
-            const includesConfusionTarget = subject.isActor() &&  allowSelectConfusionTarget;
-            return TargetManager.makeSelectableActionTargets(subject, item, includesConfusionTarget);
+            const selectableAll = subject.isActor() &&  allowSelectConfusionTarget;
+            return TargetManager.makeSelectableActionTargets(subject, item).filter(group => group.isNormalyTarget() || selectableAll);
         } else {
             return [];
         }
@@ -1106,7 +1143,7 @@ $dataItemScopes = null;
      * Note: ランダムに対象を選択し、_targetIndexを格納する。
      */
     Game_Action.prototype.decideRandomTarget = function() {
-        const selectableGroups = TargetManager.makeSelectableActionTargets(this.subject(), this.item(), false);
+        const selectableGroups = TargetManager.makeSelectableActionTargets(this.subject(), this.item()).filter(group => group.isNormalyTarget());
         const groupSel = Math.randomInt(selectableGroups.length);
         const selectedGroup = selectableGroups[groupSel];
         if (selectedGroup) {
@@ -1128,7 +1165,9 @@ $dataItemScopes = null;
         const subject = this.subject();
         const item = this.item();
         const scopeInfo = TargetManager.scopeInfo(subject.itemScope(item));
-        const candidateGroups = TargetManager.makeSelectableActionTargets(subject, item, subject.isConfused());
+        const candidateGroups = subject.isConfused()
+                ? TargetManager.makeSelectableActionTargetsWithConfusionLevel(subject, item)
+                : TargetManager.makeSelectableActionTargets(subject, item);
         for (const candidateGroup of candidateGroups) {
             let value = 0;
             for (const target of candidateGroup.members()) {
@@ -1167,7 +1206,7 @@ $dataItemScopes = null;
         } else {
             const subject = this.subject();
             const item = this.item();
-            const actionTargets = TargetManager.makeSelectableActionTargets(subject, item, false);
+            const actionTargets = TargetManager.makeSelectableActionTargets(subject, item).filter(group => group.isNormalyTarget());
             if (actionTargets && (actionTargets.length > 0)) {
                 return actionTargets[0].members();
             } else {
@@ -1869,14 +1908,14 @@ $dataItemScopes = null;
         if (DataManager.isItem(item) && scopeInfo.forUserOnly) {
             const actionTargets = [];
             for (const member of $gameParty.movableMembers()) {
-                const selectableTargets = TargetManager.makeSelectableActionTargets(member, item, false);
+                const selectableTargets = TargetManager.makeSelectableActionTargets(member, item).filter(group => group.isNormalyTarget());
                 for (const selectableTarget of selectableTargets) {
                     actionTargets.push(selectableTarget);
                 }
             }
             this._actionTargetWindow.setTargetGroups(actionTargets);
         } else {
-            const actionTargets = TargetManager.makeSelectableActionTargets(this.user(), item, false);
+            const actionTargets = TargetManager.makeSelectableActionTargets(this.user(), item).filter(group => group.isNormalyTarget());
             this._actionTargetWindow.setTargetGroups(actionTargets);
         }
 
@@ -2030,7 +2069,9 @@ $dataItemScopes = null;
      * @returns {boolean} 使用可能な場合にはtrue, それ以外はfalse.
      */
     Game_BattlerBase.prototype.hasAnyTarget = function(item) {
-        const actionTargets = TargetManager.makeSelectableActionTargets(this, item, this.isConfused());
+        const actionTargets = this.isConfused()
+                ? TargetManager.makeSelectableActionTargetsWithConfusionLevel(this, item)
+                : TargetManager.makeSelectableActionTargets(this, item);
         return actionTargets.some(actionTarget => actionTarget.members().length >= 0);
     };
 
@@ -2055,7 +2096,7 @@ $dataItemScopes = null;
     //  */
     // Game_Enemy.prototype.hasAnyTarget = function(action) {
     //     const skill = $dataSkills[action.skillId];
-    //     const actionTargets = TargetManager.makeSelectableActionTargets(this, skill, this.isConfused());
+    //     const actionTargets = TargetManager.makeSelectableActionTargets(this, skill);
     //     return actionTargets.some(actionTarget => actionTarget.members().length >= 0);
     // };
 
