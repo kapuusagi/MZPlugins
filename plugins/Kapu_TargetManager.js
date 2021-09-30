@@ -1432,6 +1432,10 @@ $dataItemScopes = null;
     /**
      * アクターまたはエネミーのアクションを開始する。
      * 
+     * Note: startActionからendActionは直接呼ばない。
+     *       直接呼び出すと、startAction/endActionをフックして
+     *       ごにょごにょするプラグインで不具合が出る。
+     * 
      * !!!overwrite!!! BattleManager.startAction()
      *     アニメーション表示対象と、効果対象を分離するためオーバーライドする。
      */
@@ -1441,9 +1445,11 @@ $dataItemScopes = null;
         const targets = action.makeTargets();
         const effectiveTargets = action.makeEffectiveTargets(); // 効果対象
         if ((targets.length === 0) && cancelActionWhenNoTargets) {
-            this.endAction();
+            this._phase = "action";
+            this._targets = [];
         } else if ((effectiveTargets.length === 0) && cancelActionWhenNoEffectiveTargets) {
-            this.endAction();
+            this._phase = "action";
+            this._targets = [];
         } else {
             this._phase = "action";
             this._action = action;
