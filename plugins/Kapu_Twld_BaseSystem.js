@@ -1021,8 +1021,8 @@
     Game_Action.prototype.makeDamageValue = function(target, critical) {
         const subjectAddtionalTraits = this.additionalSubjectTraits(target);
         const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
-        this.subject().setTempTraits(subjectAddtionalTraits);
-        target.setTempTraits(targetAdditionalTraits);
+        this.subject().setTempUserTraits(subjectAddtionalTraits);
+        target.setTempTargetTraits(targetAdditionalTraits);
 
         const item = this.item();
 
@@ -1049,8 +1049,8 @@
         }
         value = Math.round(value);
 
-        target.clearTempTraits();
-        this.subject().clearTempTraits();
+        target.clearTempTargetTraits();
+        this.subject().clearTempUserTraits();
         const maxDamage = this.maxDamage(target);
         return value.clamp(-maxDamage, maxDamage)
     };

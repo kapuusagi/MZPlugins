@@ -120,28 +120,47 @@
      * @returns {Array<Trait>} 特性配列
      */
     Game_Battler.prototype.allTraits = function() {
-        const traits = _Game_Battler_allTraits.call(this);
-        if (this._tmpTraits && this._tmpTraits.length > 0) {
-            return traits.concat(this._tmpTraits);
-        } else {
-            return traits;
+        let traits = _Game_Battler_allTraits.call(this);
+        if (this._tmpUserTraits && (this._tmpUserTraits.length > 0)) {
+            traits = traits.concat(this._tmpUserTraits);
         }
+        if (this._tmpTargetTraits && (this._tmpTargetTraits.length > 0)) {
+            traits = traits.concat(this._tmpTargetTraits);
+        }
+
+        return traits;
     };
 
     /**
-     * 一時付与特性を設定する。
+     * 使用者一時付与特性を設定する。
      * 
-     * @param {Trait} trait 特性オブジェクト
+     * @param {Array<Trait>} traits 特性オブジェクト
      */
-    Game_Battler.prototype.setTempTraits = function(traits) {
-        this._tmpTraits = traits;
+    Game_Battler.prototype.setTempUserTraits = function(traits) {
+        this._tmpUserTraits = traits;
     };
 
     /**
-     * 一時付与特性をクリアする。
+     * 使用者一時付与特性をクリアする。
      */
-    Game_Battler.prototype.clearTempTraits = function() {
-        delete this._tmpTraits;
+    Game_Battler.prototype.clearTempUserTraits = function() {
+        delete this._tmpUserTraits;
+    };
+
+    /**
+     * 対象一時特性を設定する。
+     * 
+     * @param {Array<Trait>} traits 特性オブジェクト
+     */
+    Game_Battler.prototype.setTempTargetTraits = function(traits) {
+        this._tmpTargetTraits = traits;
+    };
+
+    /**
+     * 対象一時特性をクリアする。
+     */
+    Game_Battler.prototype.clearTempTargetTraits = function() {
+        delete this._tmpTargetTraits;
     };
 
     const _Game_Battler_onButtleEnd = Game_Battler.prototype.onBattleEnd
@@ -150,7 +169,8 @@
      */
     Game_Battler.prototype.onBattleEnd = function() {
         _Game_Battler_onButtleEnd.call(this);
-        this.clearTempTraits();
+        this.clearTempUserTraits();
+        this.clearTempTargetTraits();
     };
 
     /**
@@ -187,8 +207,8 @@
 
             const subjectAddtionalTraits = this.additionalSubjectTraits(target);
             const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
-            this.subject().setTempTraits(subjectAddtionalTraits);
-            target.setTempTraits(targetAdditionalTraits);
+            this.subject().setTempUserTraits(subjectAddtionalTraits);
+            target.setTempTargetTraits(targetAdditionalTraits);
 
             const item = this.item();
             const baseValue = this.calcBaseDamageValue(target);
@@ -227,8 +247,8 @@
             }
             value = Math.round(value);
 
-            target.clearTempTraits();
-            this.subject().clearTempTraits();
+            target.clearTempTargetTraits();
+            this.subject().clearTempUserTraits();
             const maxDamage = this.maxDamage(target);
             const clampedValue = value.clamp(-maxDamage, maxDamage)
             console.log("  -> result = " + clampedValue);
@@ -247,8 +267,8 @@
             const result = target.result();
             const subjectAddtionalTraits = this.additionalSubjectTraits(target);
             const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
-            this.subject().setTempTraits(subjectAddtionalTraits);
-            target.setTempTraits(targetAdditionalTraits);
+            this.subject().setTempUserTraits(subjectAddtionalTraits);
+            target.setTempTargetTraits(targetAdditionalTraits);
 
             const item = this.item();
             const baseValue = this.calcBaseDamageValue(target);
@@ -276,8 +296,8 @@
             }
             value = Math.round(value);
 
-            target.clearTempTraits();
-            this.subject().clearTempTraits();
+            target.clearTempTargetTraits();
+            this.subject().clearTempUserTraits();
             const maxDamage = this.maxDamage(target);
             return value.clamp(-maxDamage, maxDamage)
         };

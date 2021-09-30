@@ -22,6 +22,8 @@
   ☐ Kapu_UniqueItem (新規追加)
   ☐ Kapu_TargetManager (ristrictionとconfusionLevelを正しく処理するように変更した。)
   ☐ Kapu_RangeDistance (ristrictionとconfusionLevelを正しく処理するように変更した。)
+  ☐ Kapu_Base_DamageCalculation (カウンター時に一時付与特性がただしく設定出来ない不具合を修正)
+  ☐ Kapu_Twld_BaseSystem (カウンター時に一時付与特性がただしく設定出来ない不具合を修正)
   Kapu_Base_Twld:
     ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
   Kapu_TargetManager: 
