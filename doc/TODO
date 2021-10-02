@@ -20,8 +20,6 @@
   ☐ Kapu_EncounterEffect_Pattern (新規追加)
   ☐ Kapu_BattlerGender_States (新規追加)
   ☐ Kapu_UniqueItem (新規追加)
-  ☐ Kapu_TargetManager (ristrictionとconfusionLevelを正しく処理するように変更した。)
-  ☐ Kapu_RangeDistance (ristrictionとconfusionLevelを正しく処理するように変更した。)
   ☐ Kapu_Base_DamageCalculation (カウンター時に一時付与特性がただしく設定出来ない不具合を修正)
   ☐ Kapu_Twld_BaseSystem (カウンター時に一時付与特性がただしく設定出来ない不具合を修正)
   Kapu_Base_Twld:
@@ -31,8 +29,6 @@
        リスト表示処理が(かなり)重くなってるはず。
       
 機能拡張予定:
-  Kapu_Twld_DamageEffect:
-    ☐ ターン経過などによるステート解除をポップアップさせたいなあ。
   Kapu_Twld_BattleSystem:
     ☐ MP/TPの数値表示が小さいので大きくする。動作確認は顔表示とBattlePicutreの両方で行う必要がある。
   Kapu_ChoiceByRoulette:

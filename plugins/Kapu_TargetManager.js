@@ -845,7 +845,7 @@ $dataItemScopes = null;
     // eslint-disable-next-line no-unused-vars
     TargetManager.makeActionTargetsNormal = function(subject, item, targetIndex, isForce) {
         const selectableAll = !isForce && (subject.isActor() && allowSelectConfusionTarget);
-        const selectableGroups = this.makeSelectableActionTargets(subject).filter(group => group.isNormalyTarget() || selectableAll);
+        const selectableGroups = this.makeSelectableActionTargets(subject, item).filter(group => group.isNormalyTarget() || selectableAll);
 
         let selectedGroup = selectableGroups.find(selectableTarget => selectableTarget.targetIndex() === targetIndex);
         if (!selectedGroup) {
