@@ -63,8 +63,8 @@
  *       初期状態でgpにより習得可能なスキルのID列を指定する。
  * 
  * クラス
- *   <addGpLearn:level#,abilityId#,abilityId#,...>
- *      level#に達したとき、abilityId#のアビリティを習得する。
+ *   <addGpLearn:level#,skillId#,skillId#,...>
+ *      level#に達したとき、skillId#のアビリティをGPで習得可能にする。
  *      複数指定可。詳細な習得可能条件は設定できない。
  *  
  * スキル
