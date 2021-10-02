@@ -1378,7 +1378,25 @@
             return target.rec;
         }
     };
-
+    /**
+     * HPダメージを適用する。
+     * 
+     * @param {Game_Battler} target 対象
+     * @param {number} value ダメージ値
+     * !!!overwrite!!! Game_Action.executeDamage()
+     *     ダメージ0以上でonDamageを呼び出すようにするため、オーバーライドする。
+     */
+    Game_Action.prototype.executeHpDamage = function(target, value) {
+        if (this.isDrain()) {
+            value = Math.min(target.hp, value);
+        }
+        this.makeSuccess(target);
+        target.gainHp(-value);
+        if (value >= 0) {
+            target.onDamage(value);
+        }
+        this.gainDrainedHp(value);
+    };
     /**
      * ユーザーエフェクトを適用する。
      * 既定ではTPの加算処理を行う。
