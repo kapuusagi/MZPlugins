@@ -665,14 +665,12 @@
     };
 
     /**
-     * 速度からTPB速度を得る。
+     * TPB計算のための元パラメータからTPB速度を計算する。
      * 
-     * @param {number} value 値
-     * @returns {number} TPB速度。
-     * !!!overwrite!!! Game_Battler.calcTpbSpeed()
-     *     TPB速度の計算式を変更する。
+     * @param {number} value パラメータ値
+     * @returns {number} TPB速度値
      */
-    Game_Battler.prototype.calcTpbSpeed = function(value) {
+    Game_Battler.prototype.paramToTpbSpeed = function(value) {
         return 10 + ((value - 20) * 0.2).clamp(0, 15);
     };
 
