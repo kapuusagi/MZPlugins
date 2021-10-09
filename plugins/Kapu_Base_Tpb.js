@@ -45,6 +45,22 @@
     Game_Battler.prototype.tpbSkillCastTime = function(item) {
         return Math.max(0, -item.speed);
     };
+
+    /**
+     * TPB計算のための元パラメータからTPB速度を計算する。
+     * 
+     * Note: パラメータの値から、TPB計算にしようする速度値を得る。
+     *       ベーシックシステムでは Math.sqrt(value) で行っており、
+     *       AGIが劇的に増加してもTPBでターンが回ってくるのにかかる時間は
+     *       差がつきにくくしてある。
+     * 
+     * @param {number} value パラメータ値
+     * @returns {number} TPB速度値
+     */
+    Game_Battler.prototype.paramToTpbSpeed = function(value) {
+        return Math.sqrt(value);
+    };
+
     /**
      * 速度からTPB速度を得る。
      * 
@@ -52,7 +68,7 @@
      * @returns {number} TPB速度。
      */
     Game_Battler.prototype.calcTpbSpeed = function(value) {
-        return Math.sqrt(value) + 1;
+        return this.paramToTpbSpeed(value) + 1;
     };
 
     /**
@@ -62,7 +78,7 @@
      * @returns {number} 必要な時間
      */
     Game_Battler.prototype.calcCastTime = function(delay) {
-        return this.calcTpbSpeed(delay) / this.tpbSpeed();
+        return this.paramToTpbSpeed(delay) / this.tpbSpeed();
     };
     /**
      * TPB速度計算に使用する基準値を得る。

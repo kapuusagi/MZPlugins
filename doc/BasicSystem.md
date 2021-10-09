@@ -214,8 +214,6 @@ TPB加算量(tpbAcceleration)分加算され、
 スキル発動時、ディレイ(速度補正のマイナス分)に
 対応した時間だけキャストが行われる。
 
-
-
 * __アクター基準速度(tpbBaseSpeed)__ = Sqrt(バフ/乗算補正なしAGI) + 1
 * __アクターTPB速度(tpbSpeed)__ = Sqrt(AGI) + 1
 * __パーティー基準速度(tpbBaseSpeed)__ = パーティーメンバーの基準速度(tpbBaseSpeed)で最大の値
@@ -238,12 +236,67 @@ TPB加算量(tpbAcceleration)分加算され、
         有効なアクションに対し、0以下のディレイを加算した結果にたいし、
         Sqrt(delay) / アクターTPB速度
 
+なんかよくわからないので実際のところの例を考える。
+以下のメンバーがいたとする。(AGIのバフはなしの状態)
+    Enemy1 AGI=16
+    Enemy2 AGI=36
+    Enemy3 AGI=81
+    Actor1 AGI=25
+    Actor2 AGI=49
 
+この場合、それぞれのTPBスピードは
+    Enemy1 AGI=16 ⇒ tpbSpeed = sqrt(16) + 1 = 5, tpbBaseSpeed = sqrt(16) + 1 = 5,
+    Enemy2 AGI=36 ⇒ tpbSpeed = sqrt(36) + 1 = 7, tpbBaseSpeed = sqrt(36) + 1 = 7
+    Enemy3 AGI=81 ⇒ tpbSpeed = sqrt(81) + 1 = 10, tpbBaseSpeed = sqrt(81) + 1 = 10
+    Enemy4 AGI=196 ⇒ tpbSpeed = sqrt(196) + 1 = 15, tpbBaseSpeed = sqrt(196) + 1 = 16
+    Actor1 AGI=25 ⇒ tpbSpeed = sqrt(25) + 1 = 6, tbpBaseSpeed = sqrt(25) + 1 = 6
+    Actor2 AGI=49 ⇒ tpbSpeed = sqrt(49) + 1 = 8, tpbBaseSpeed = sqrt(49) + 1 = 8
 
+すると、$gameParty.tpbBaseSpeedはメンバーのうち、最大のtpbBaseSpeedになるから、
+    $gameParty.tpbBaseSpeed() ⇒ 8
 
+よって、tpbRelativeSpeedは以下のようになる。
+    Enemy1 AGI=16 ⇒ tpbRelativeSpeed = 5 / 8 = 0.625
+    Enemy2 AGI=36 ⇒ tpbRelativeSpeed = 7 / 8 = 0.875
+    Enemy3 AGI=81 ⇒ tpbRelativeSpeed = 10 / 8 = 1.25
+    Enemy4 AGI=196 ⇒ tpbRelativeSpeed = 16 / 8 = 2.0
+    Actor1 AGI=25 ⇒ tpbRelativeSpeed = 6 / 8 = 0.75
+    Actor2 AGI=49 ⇒ tpbRelativeSpeed = 8 / 8 = 1.0
 
+すると、TPB更新処理毎に加算される値は次のようになる。（非アクティブとすると、tpbReferenceTime = 60となる）
+    Enemy1 AGI=16 ⇒ tpbAcceleration = 0.625 / 60 = 0.0104...
+    Enemy2 AGI=36 ⇒ tpbAcceleration = 0.875 / 60 = 0.0145...
+    Enemy3 AGI=81 ⇒ tpbAcceleration = 1.25 / 60 = 0.0208...
+    Enemy4 AGI=196 ⇒ tpbAcceleration = 2.0 / 60 = 0.0333...
+    Actor1 AGI=25 ⇒ tpbAcceleration = 0.75 / 60 = 0.0125...
+    Actor2 AGI=49 ⇒ tpbAcceleration = 1.0 / 60 = 0.0166...
 
+更新毎に上記の値ずつゲージが加算され、1以上になると行動する。
 
+speed=-10のスキルを使用するとき、チャージタイムは
+    Enemy1 AGI=16 ⇒ tpbRequiredCastTime = sqrt(10) / 5 = 0.6234...
+    Enemy2 AGI=36 ⇒ tpbRequiredCastTime = sqrt(10) / 7 = 0.4517...
+    Enemy3 AGI=81 ⇒ tpbRequiredCastTime = sqrt(10) / 10 = 0.3162...
+    Enemy4 AGI=196 ⇒ tpbRequiredCastTime = sqrt(10) / 15 = 0.2108...
+    Actor1 AGI=25 ⇒ tpbRequiredCastTime = sqrt(10) / 6 = 0.5270...
+    Actor2 AGI=49 ⇒ tpbRequiredCastTime = sqrt(10) / 8 = 0.3952...
+
+    ベーシックシステムではAGIが早いほどキャストタイムも短くなる。とはいってもsqrtで処理しているので
+    速度の伸びは鈍化する。
+
+バフでActor1のAGIが2倍になったとき、
+    Actor1 AGI=50 ⇒ tpbSpeed = sqrt(50) + 1 = 8.0710...
+                     tpbRelativeSpeed = 8.071... / 8 = 1.008...
+                     tpbAcceleration = 1.008 / 60 = 0.0168...
+                     スキルスピード-10を使った時のチャージ時間 = sqrt(10) / 8.0718 = 0.3918....
+    変化量
+       AGI 25 ⇒ 50 (+100%)
+       tpbAcceleration 0.0125 ⇒ 0.0168  (+34.3%)
+       tpbRequiredCastTime 0.5270 ⇒ 0.3918 (-25.7%)
+
+     
+TPB速度計算周りをいじるならば、上記のバランスを考える必要がある。
+    
 
 ### ステート
 
