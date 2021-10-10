@@ -648,6 +648,7 @@ function Sprite_BattleHudPicture() {
         } 
         return _Window_BattleEnemy_processCursorMove.call(this);
     };
+    
     //------------------------------------------------------------------------------
     // Sprite_BattleHudHpGauge
     Sprite_BattleHudHpGauge.prototype = Object.create(Sprite_Gauge.prototype);
@@ -1398,12 +1399,14 @@ function Sprite_BattleHudPicture() {
                 && BattleManager.isInputting();
     };
 
-    const _Sprite_Enemy_createDamageSprite = Sprite_Enemy.prototype.createDamageSprite;
     /**
      * ダメージスプライトを作成する。
+     * 
+     * !!!overwrite!!! Sprite_Enemy.createDamageSprite()
+     *     Sprite_Battler.createDamageSprite()を明示的に呼び出すため、オーバーライドする。
      */
     Sprite_Enemy.prototype.createDamageSprite = function() {
-        _Sprite_Enemy_createDamageSprite.call(this);
+        Sprite_Battler.prototype.createDamageSprite.call(this);
         if (this.isGaugeVisible()) {
             this._hpGaugeSprite.startAnimation();
         }
@@ -1900,12 +1903,11 @@ function Sprite_BattleHudPicture() {
         return ImageManager.faceHeight - this.statusAreaHeight() - 60;
     };
 
-    const _Sprite_BattleHudActor_createDamageSprite = Sprite_BattleHudActor.prototype.createDamageSprite;
     /**
      * ダメージスプライトを構築する。
      */
     Sprite_BattleHudActor.prototype.createDamageSprite = function() {
-        _Sprite_BattleHudActor_createDamageSprite.call(this);
+        Sprite_Battler.prototype.createDamageSprite.call(this);
 
         if (this._hpGaugeSprite.visible) {
             this._hpGaugeSprite.startAnimation();
