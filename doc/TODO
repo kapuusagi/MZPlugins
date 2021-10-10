@@ -3,10 +3,6 @@
 動作確認が必要なプラグインリスト:
   ☐ Kapu_QuestSystem
   ☐ Kapu_QuestSystem_UI
-  ☐ Kapu_Trait_CertainlyHitEva (必中/必ず回避判定メソッド名を変えた)
-  ☐ Kapu_ContinuousSkill (新規追加。思った通りには動かないはず)
-  ☐ Kapu_EncounterEffect_Pixelate (新規追加)
-  ☐ Kapu_EncounterEffect_Pattern (新規追加)
   ☐ Kapu_BattlerGender_States (新規追加)
   ☐ Kapu_UniqueItem (新規追加)
   ☐ Kapu_Base_DamageCalculation (カウンター時に一時付与特性がただしく設定出来ない不具合を修正)
@@ -46,6 +42,7 @@
   ☐ ランダムエンカウント時に適用するフェード処理(複数からランダム)を指定するようにしたい。 → これはエンカウントエフェクトプラグインとして別にしたい。
   ☐ パーティーにステートを与えたい。たいまつ使用とかね。
   ☐ 設置スキルやりたい。パーティーステートと、ActionStateと組み合わせたらできないかな。
+  ☐ 連続スキル発動みたいなの？というより、アニメーション途中でダメージポップアップさせたりとかしたいかも？
 
 リファクタリング:
 

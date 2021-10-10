@@ -6,6 +6,12 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
+ * @param waitDamageAnimation
+ * @text ダメージアニメーションを待つ
+ * @desc 連続スキル発動時、ダメージのアニメーションが完了するのを待つ
+ * @type boolean
+ * @default true
+ * 
  * @help 
  * スキル発動後、連続して別のスキルを発動させるプラグイン。
  * たぶん期待した動作はしない。
@@ -40,8 +46,11 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    // const pluginName = "Kapu_ContinuousSkill";
-    // const parameters = PluginManager.parameters(pluginName);
+    const pluginName = "Kapu_ContinuousSkill";
+    const parameters = PluginManager.parameters(pluginName);
+    
+    const waitDamageAnimation = (parameters["waitDamageAnimation"] === undefined)
+            ? true : (parameters["waitDamageAnimation"] === "true");
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -93,6 +102,7 @@
     BattleManager.startAction = function() {
         _BattleManager_startAction.call(this);
         this._savedActionTargets = this._targets.concat();
+        this._isContinuousSkill = false;
 
     }
 
@@ -136,7 +146,7 @@
         if (skill.continuousSkill.consume) {
             subject.useItem(action.item());
         }
-
+        this._isContinuousSkill = true;
         // アニメーション
         const nextSkill = this._action.item();
         this._logWindow.showAnimation(subject, this._targets.clone(), nextSkill.animationId);
@@ -190,4 +200,21 @@
         this._savedActionTargets = null;
         _BattleManager_endBattle.call(this, result);
     };
+
+    if (!waitDamageAnimation) {
+        /**
+         * ビジーかどうかを取得する。
+         * 
+         * Note: 他のプラグインとめちゃくちゃ競合する。
+         * 
+         * @return {boolean} ビジーな場合にはtrue, それ以外はfalse.
+         */
+        BattleManager.isBusy = function() {
+            const isMsgBusy = $gameMessage.isBusy();
+            const isSpritesetBusy = this._spriteset.isBusy();
+            const isLogWindowBusy = !this._isContinuousSkill && this._logWindow.isBusy();
+            const isBusy = isMsgBusy || isSpritesetBusy || isLogWindowBusy;
+            return isBusy;
+        };
+    }
 })();
