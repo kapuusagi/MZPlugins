@@ -540,6 +540,7 @@ function Sprite_BattleHudPicture() {
     };
     //------------------------------------------------------------------------------
     // Window_BattleActor の変更
+    // 基本的に表示させないのにオーバーライドしてゴニョゴニョしてるのはなんでだ。
     const _Window_BattleActor_initialize = Window_BattleActor.prototype.initialize;
 
     /**
@@ -554,6 +555,7 @@ function Sprite_BattleHudPicture() {
         this.frameVisible = true;
         this._bitmapsReady = 255;
     };
+    
     /**
      * 項目を描画する。
      * 
@@ -579,7 +581,7 @@ function Sprite_BattleHudPicture() {
      * 
      * @returns {number} 1項目の高さ。
      */
-    Window_BattleStatus.prototype.itemHeight = function() {
+    Window_BattleActor.prototype.itemHeight = function() {
         return this.lineHeight();
     };
 
@@ -2347,19 +2349,7 @@ function Sprite_BattleHudPicture() {
             this._actorWindow.destroy();
         }
     };
-    /**
-     * スキル使用対象選択用のアクター選択ウィンドウを作成する。
-     * 
-     * !!!overwrite!!! Scene_Battle.createActorWindow()
-     *     アイテム・スキル使用対象のアクターウィンドウを表示させないようにするため、オーバーライドする。
-     */
-     Scene_Battle.prototype.createActorWindow = function() {
-        const rect = this.actorWindowRect();
-        this._actorWindow = new Window_BattleActor(rect);
-        this._actorWindow.setHandler("ok", this.onActorOk.bind(this));
-        this._actorWindow.setHandler("cancel", this.onActorCancel.bind(this));
-        //this.addWindow(this._actorWindow);
-    };
+
     /**
      * アイテム名表示ウィンドウを作成する。
      */

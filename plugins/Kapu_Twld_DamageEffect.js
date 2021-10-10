@@ -3,6 +3,8 @@
  * @plugindesc TWLD向けダメージエフェクトプラグイン。
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
+ * @base Kapu_Twld_BattleSystem
+ * @orderAfter Kapu_Twld_BattleSystem
  * 
  * @param damageMoveXRandom
  * @text ダメージポップアップ方向ランダム
