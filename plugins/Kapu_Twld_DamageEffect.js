@@ -37,6 +37,12 @@
  * @min -255
  * @max 255
  * 
+ * @param displayLimitY
+ * @text ポップアップ表示させるYの最大値
+ * @desc 連続ダメージポップアップさせるとき、表示可能なY位置上限(画面上端からのピクセル数)
+ * @type number
+ * @default 136
+ * 
  * @param noDispStateIds
  * @text 付与/解除を表示させないステートID
  * @desc 付与/解除を表示させないステートID
@@ -393,8 +399,13 @@
     const popupDuration = Math.max(30, Math.round(Number(parameters["popupDuration"]) || 60));
     const fadeOutDuration = Math.max(0, Math.round(Number(parameters["fadeOutDuration"]) || 30));
 
-    const multiplePopupOffsetX = Math.max(0, Math.round(Number(parameters["multiplePopupOffsetX"]) || 8));
-    const multiplePopupOffsetY = Math.max(0, Math.round(Number(parameters["multiplePopupOffsetY"]) || 16));
+    const multiplePopupOffsetX = (parameters["multiplePopupOffsetX"] === undefined)
+            ? 8
+            : Math.max(0, Math.round(Number(parameters["multiplePopupOffsetX"]) || 0));
+    const multiplePopupOffsetY = (parameters["multiplePopupOffsetY"] === undefined)
+            ? 16
+            : Math.max(0, Math.round(Number(parameters["multiplePopupOffsetY"]) || 0));
+    const displayLimitY = Math.max(0, Math.round(Number(parameters["displayLimitY"])) || 136)
 
     const colorHpDamage = parameters["colorHpDamage"] || "#ffffff";
     const colorHpRecover = parameters["colorHpRecover"] || "#80ff80";
@@ -1295,17 +1306,33 @@
     Sprite_Battler.prototype.createDamageSprite = function() {
         const last = this._damages[this._damages.length - 1];
         const sprite = new Sprite_Damage();
+        this.adjustDamagePopupPosition(sprite, last);
+        sprite.setup(this._battler);
+        this._damages.push(sprite);
+        this.parent.addChild(sprite);
+    };
+
+    /**
+     * ダメージスプライトの初期位置を調整する。
+     * 
+     * @param {Sprite} sprite 調整対象のダメージポップアップスプライト
+     * @param {Sprite} last 最後に表示したダメージポップアップスプライト
+     */
+    Sprite_Battler.prototype.adjustDamagePopupPosition = function(sprite, last) {
         if (last) {
             // 連続表示されているのでずらす。
             sprite.x = last.x + multiplePopupOffsetX;
             sprite.y = last.y - multiplePopupOffsetY;
+            if (sprite.x >= (this.x + (this.width / 4))) {
+                sprite.x = this.x + this.damageOffsetX();
+            }
+            if (sprite.y < displayLimitY) {
+                sprite.y = this.y + this.damageOffsetY();
+            }
         } else {
             sprite.x = this.x + this.damageOffsetX();
             sprite.y = this.y + this.damageOffsetY();
         }
-        sprite.setup(this._battler);
-        this._damages.push(sprite);
-        this.parent.addChild(sprite);
     };
 
     /**
@@ -1325,14 +1352,7 @@
         if (textCounter) {
             const last = this._damages[this._damages.length - 1];
             const sprite = new Sprite_BattlePopupText();
-            if (last) {
-                // 連続表示されているのでずらす。
-                sprite.x = last.x + multiplePopupOffsetX;
-                sprite.y = last.y - multiplePopupOffsetY;
-            } else {
-                sprite.x = this.x + this.damageOffsetX();
-                sprite.y = this.y + this.damageOffsetY();
-            }
+            this.adjustDamagePopupPosition(sprite, last);
             sprite.setup(textCounter, colorCounter);
             this._damages.push(sprite);
             this.parent.addChild(sprite);
@@ -1356,14 +1376,7 @@
         if (textReflection) {
             const last = this._damages[this._damages.length - 1];
             const sprite = new Sprite_BattlePopupText();
-            if (last) {
-                // 連続表示されているのでずらす。
-                sprite.x = last.x + multiplePopupOffsetX;
-                sprite.y = last.y - multiplePopupOffsetY;
-            } else {
-                sprite.x = this.x + this.damageOffsetX();
-                sprite.y = this.y + this.damageOffsetY();
-            }
+            this.adjustDamagePopupPosition(sprite, last);
             sprite.setup(textReflection, colorReflection);
             this._damages.push(sprite);
             this.parent.addChild(sprite);
