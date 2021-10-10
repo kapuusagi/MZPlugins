@@ -11,7 +11,7 @@
  * @command setupNext
  * @text 次のエンカウントエフェクトに設定する。
  * 
- * @param name
+ * @arg name
  * @text エフェクトエントリ名
  * @desc エフェクトエントリで登録した名前
  * @type string
@@ -19,7 +19,7 @@
  * @command setupRandom
  * @text ランダム対象設定
  * 
- * @param name
+ * @arg name
  * @text エフェクトエントリ名
  * @desc エフェクトエントリで登録した名前
  * @type string
@@ -34,7 +34,7 @@
  * @param effectEntries
  * @text エフェクトエントリ
  * @desc エフェクトエントリのテーブル
- * @type struct<SoundEffect>[]
+ * @type struct<EffectEntry>[]
  * @default {}
  * 
  * @help 
@@ -178,7 +178,7 @@
                 color:[0,0,0,255],
                 zoom:1
             });
-            this.startFadeOut(fadePeriod);
+            this.startFadeOut(effectEntry.duration);
             if (effectEntry.se.name) {
                 AudioManager.playSe(effectEntry.se);
             }

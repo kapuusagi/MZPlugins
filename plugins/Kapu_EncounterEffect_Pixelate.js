@@ -39,17 +39,23 @@
  * @type number
  * @default 30
  * 
- * @param seFade
- * @text フェード時SE
- * @desc フェード時SE
+ * @param seFade1
+ * @text フェード時SE1
+ * @desc フェード時SE1
  * @type struct<SoundEffect>
  * @default {"name":"","volume":"90","pitch":"100","pan":"100"}
  *  
+ * @param seFade2
+ * @text フェード時SE2
+ * @desc フェード時SE2
+ * @type struct<SoundEffect>
+ * @default {"name":"","volume":"90","pitch":"100","pan":"100"}
+ * 
  * @help
  * エンカウントしたとき、以下のエフェクトを行います。
- * 1.フェードアウト + SE鳴らす(未設定時は省略)
+ * 1.フェードアウト + SE1鳴らす(未設定時は省略)
  * 2.フェードイン
- * 3.フェードアウト + SE鳴らす(未設定時は省略)
+ * 3.フェードアウト + SE2鳴らす(未設定時は省略)
  * 4.戦闘BGM再生
  * 
  * ■ 使用時の注意
@@ -110,7 +116,13 @@
     const fadePeriod = Math.max(0, Math.floor(Number(parameters["fadePeriod"]) || 0));
     const delayPlayBgm = Math.max(0, Math.floor(Number(parameters["delayPlayBgm"]) || 0));
     const waitChangeScene = Math.max(0, Math.floor(Number(parameters["waitChangeScene"]) || 0));
-    const seFade = JSON.parse(parameters["seFade"] || "{}");
+    const seFade1 = JSON.parse(parameters["seFade1"] || "{}");
+    const seFade2 = JSON.parse(parameters["seFade2"] || "{}");
+    const fadeOutPeriod1 = Math.floor(fadePeriod * 0.5);
+    const fadeInTiming = fadeOutPeriod1;
+    const fadeInPeriod = Math.floor(fadePeriod * 0.5);
+    const fadeOutTiming = fadeOutPeriod1 + fadeOutPeriod1;
+    const plyBgmTiming = fadeOutPeriod1 + fadeInPeriod + fadePeriod + delayPlayBgm;
 
     EncounterEffectManager.ENCOUNTEFFECT_PIXELATE = "Pixelate";
 
@@ -131,7 +143,7 @@
     //------------------------------------------------------------------------------
     // エンカウントエフェクト処理
     const _onEncountEffectStartPixelate = function() {
-        this._encounterEffectDuration = fadeDuration * 3 + delayPlayBgm + waitChangeScene;
+        this._encounterEffectDuration = fadePeriod * 3 + delayPlayBgm + waitChangeScene;
         this._encounterEffectFrame = 0;
     };
 
@@ -140,42 +152,46 @@
      */
     const _onEncountEffectUpdatePixelate = function() {
         const frame = this._encounterEffectFrame;
+
         if (frame === 0) {
             $gameTemp.setupNextFadeOut({
                 mode: Game_Screen.FADE_MODE_PIXELATE,
                 pattern: "",
-                duration: fadePeriod,
+                duration: fadeOutPeriod1,
                 color:[0,0,0,255],
-                zoom:1.5
+                zoom:2
             });
-            this.startFadeOut(fadePeriod);
-            if (seFade.name) {
-                AudioManager.playSe(seFade);
+            this.startFadeOut(fadeOutPeriod1);
+            if (seFade1.name) {
+                AudioManager.playSe(seFade1);
             }
-        } else if (frame === (fadePeriod * 1)) {
+        } else if (frame === fadeInTiming) {
             $gameTemp.setupNextFadeIn({
                 mode: Game_Screen.FADE_MODE_PIXELATE,
                 pattern: "",
-                duration: fadePeriod,
+                duration: fadeInPeriod,
                 color:[0,0,0,255],
-                zoom:1.0
+                zoom:1.4
             });
-            this.startFadeIn(fadePeriod);
-        } else if (frame === (fadePeriod * 2)) {
+            this.startFadeIn(fadeInPeriod);
+        } else if (frame === fadeOutTiming) {
             $gameTemp.setupNextFadeOut({
                 mode: Game_Screen.FADE_MODE_PIXELATE,
                 pattern: "",
                 duration: fadePeriod,
                 color:[0,0,0,255],
-                zoom:1.5
+                zoom:1.4
             });
             this.startFadeOut(fadePeriod);
-            if (seFade.name) {
-                AudioManager.playSe(seFade);
+            if (seFade2.name) {
+                AudioManager.playSe(seFade2);
             }
-        } else if (frame === (fadePeriod * 3 + delayPlayBgm)) {
+        } else if (frame === plyBgmTiming) {
             BattleManager.playBattleBgm();
         }
+
+
+
         this._encounterEffectFrame++;
     };
 
