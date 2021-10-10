@@ -987,7 +987,7 @@
         } else if (this.testCertainHit(target)) {
             result.missed = false;
             result.evaded = false;
-            result.critical = false;
+            result.critical = this.testCritical(target);
         } else if (this.testCritical(target)) {
             result.missed = false;
             result.evaded = false;
