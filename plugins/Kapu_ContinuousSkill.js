@@ -101,7 +101,7 @@
      * アクターまたはエネミーのアクションを更新する。
      */
     BattleManager.updateAction = function() {
-        if ((this._targets.length === 0) && this._action.isSkill()) {
+        if (this._action && (this._targets.length === 0) && this._action.isSkill()) {
             // 現在のアクションがスキルで次の効果適用対象がいない。
             const skill = this._action.item();
             if (skill.continuousSkill && this.testContinuousSkill()) {
@@ -138,7 +138,8 @@
         }
 
         // アニメーション
-        this._logWindow.showAnimation(subject, this._targets.clone(), skill.animationId);
+        const nextSkill = this._action.item();
+        this._logWindow.showAnimation(subject, this._targets.clone(), nextSkill.animationId);
     };
 
     /**
@@ -148,6 +149,24 @@
      */
     BattleManager.testContinuousSkill = function() {
         const skill = this._action.item();
+        if (skill.continuousSkill.resetTargets) {
+            const subject = this._subject;
+            const action = new Game_Action(subject);
+            action.setSkill(skill.continuousSkill.id);
+            const testTargets = action.makeTargets();
+            if (!testTargets.some(target => action.testApply(target))) {
+                // 適用可能な対象がいない。
+                return false;
+            }
+        } else {
+            const testTargets = this._savedActionTargets;
+            const action = this._action;
+            if (!testTargets.some(target => action.testApply(target))) {
+                // 適用可能な対象がいない。
+                return false;
+            }
+        }
+
         const nextSkill = $dataSkills[skill.continuousSkill.id];
         if (!skill.continuousSkill.consume || this._subject.canPaySkillCost(nextSkill)) {
             const rate = skill.continuousSkill.rate;
