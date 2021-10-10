@@ -3,9 +3,6 @@
 動作確認が必要なプラグインリスト:
   ☐ Kapu_QuestSystem
   ☐ Kapu_QuestSystem_UI
-  ☐ Kapu_EncounterEffectManager
-  ☐ Kapu_Base_Hit (必中/必ず回避判定メソッド名を変えた/ステート・デバフ成功率拡張メソッドを用意した)
-  ☐ Kapu_Base_Twld (必中/必ず回避判定メソッド名を変えた)
   ☐ Kapu_Trait_CertainlyHitEva (必中/必ず回避判定メソッド名を変えた)
   ☐ Kapu_ContinuousSkill (新規追加。思った通りには動かないはず)
   ☐ Kapu_EncounterEffect_Pixelate (新規追加)
@@ -39,6 +36,8 @@
        ActionStateと競合しないように組み込みたい。難しいかなあ。難しいなあ。
   Kapu_BuffExtension:
     ☐ 効果量に範囲を持たせたい。(Effectに含めるなら難しいかな)
+  Kapu_EncounterEffectManager:
+    ☐ エンカウント時のMEがかぶってる。
 
 
 その他:
