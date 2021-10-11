@@ -96,6 +96,7 @@ function EncounterEffectManager() {
     //------------------------------------------------------------------------------
     // 既定のエンカウントエフェクト処理
     const _onEncountEffectStartDefault = function() {
+        SoundManager.playBattleStartDefault();
         this._encounterEffectDuration = this.encounterEffectSpeed();
     };
 
@@ -350,4 +351,23 @@ function EncounterEffectManager() {
         }
     };
 
+    //------------------------------------------------------------------------------
+    // Scene_Map
+
+    /**
+     * 先頭開始時のSEを鳴らす。
+     * 
+     * !!!overwrite!!! SoundManager.playBattleStart()
+     *     戦闘開始時のSEはエンカウントエフェクト側で処理し、こちらでは鳴らさないようにするためオーバーライドする。
+     */
+    SoundManager.playBattleStart = function() {
+        //this.playSystemSound(7);
+    };
+
+    /**
+     * 先頭開始時のSEを鳴らす。
+     */
+    SoundManager.playBattleStartDefault = function() {
+        this.playSystemSound(7);
+    };
 })();
