@@ -29,15 +29,21 @@
  * ノートタグ
  * ============================================
  * スキル
- *   <continuousSkill:id#,rate#,consume$,resetTarget$>
+ *   <continuousSkill:id#,rate#,consume$,resetTarget$,animationWaitCount#>
  *     このスキル発動後、続けて発動するスキルを指定する。
  *     id# : スキルID
  *     rate# : 発動率。(0～1の数値または0%～100%)
- *     consume : trueを指定すると、スキルコストを消費する。
- *               スキルコストが払えない場合には、続けて発動できない。
- *     resetTargets : trueを指定すると、対象をリセットする。
- *                    false指定時は前の対象と同じ標的になる。
- *                    true指定時、対象は固定指定になることを想定している。
+ *     consume : 
+ *         trueを指定すると、スキルコストを消費する。
+ *         スキルコストが払えない場合には、続けて発動できない。
+ *     resetTargets :
+ *         trueを指定すると、対象をリセットする。
+ *         false指定時は前の対象と同じ標的になる。
+ *         true指定時、対象は固定指定になることを想定している。
+ *     animationWaitCount :
+ *         このアニメーションのウェイト期間[フレーム数]。
+ *         アニメーションが開始されてから、このフレーム数だけ経過後に
+ *         apply()をコールする。
  *     
  * 
  * ============================================
@@ -80,12 +86,14 @@
                 const rate = (tokens.length >= 2) ? _getRate(tokens[1]) : 1;
                 const consume = (tokens.length >= 3) ? (tokens[2] === "true") : false;
                 const resetTargets = (tokens.length >= 4) ? (tokens[3] === "true") : false;
+                const animationWaitCount = (tokens.length >= 5) ? (Number(tokens[4]) || 0) : 0;
                 if ((skillId > 0) && (skillId < $dataSkills.length) && (rate > 0)) {
                     obj.continuousSkill = {
                         id : skillId,
                         rate : rate,
                         consume : consume,
-                        resetTargets : resetTargets
+                        resetTargets : resetTargets,
+                        animationWaitCount : animationWaitCount
                     };
                 }
             }
@@ -95,6 +103,35 @@
 
     //------------------------------------------------------------------------------
     // BattleManager
+
+    const _BattleManager_initMembers = BattleManager.initMembers;
+    /**
+     * オブジェクトのメンバーを初期化する。
+     */
+    BattleManager.initMembers = function() {
+        _BattleManager_initMembers.call(this);
+        this._animationWaitCount = 0;
+    };
+
+    /**
+     * アニメーション待機カウントを得る。
+     * 
+     * @param {Game_Action} action アクション
+     * @returns {number} アニメーション待機カウント
+     */
+    BattleManager.animationWaitCount = function(action) {
+        if (action) {
+            const item = action.item();
+            if (item.continuousSkill) {
+                return Number(item.continuousSkill.animationWaitCount) || 0;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    };
+
     const _BattleManager_startAction = BattleManager.startAction;
     /**
      * アクターまたはエネミーのアクションを開始する。
@@ -104,7 +141,9 @@
         _BattleManager_startAction.call(this);
         this._savedActionTargets = this._targets.concat();
         this._isContinuousSkill = false;
-    }
+
+        this._animationWaitCount = this.animationWaitCount(this._action);
+    };
 
     const _BattleManager_updateAction = BattleManager.updateAction;
     /**
@@ -113,7 +152,8 @@
     BattleManager.updateAction = function() {
         const nextTarget = this._targets[0];
 
-        if (nextTarget && this._spriteset.isAnimationPlayingWithTarget(nextTarget)) {
+
+        if (nextTarget && this._spriteset.isAnimationPlayingWithTarget(nextTarget, this._animationWaitCount)) {
             // 次の対象に対するアニメーションが表示中なので更新しない。
             return ;
         }
@@ -156,6 +196,7 @@
         this._isContinuousSkill = true;
         // アニメーション
         const nextSkill = this._action.item();
+        this._animationWaitCount = this.animationWaitCount(this._action);
         this._spriteset.setUseAnimationDelay(false);
         this._logWindow.showAnimation(subject, this._targets.clone(), nextSkill.animationId);
     };
@@ -233,6 +274,9 @@
             const isSpritesetBusy = !this._isContinuousSkill && this._spriteset.isBusy();
             const isLogWindowBusy = !this._isContinuousSkill && this._logWindow.isBusy();
             const isBusy = isMsgBusy || isSpritesetBusy || isLogWindowBusy;
+            // if (isBusy) {
+            //     console.log("busywait: msg=" + isMsgBusy + " spriteset=" + isSpritesetBusy + " log=" + isLogWindowBusy);
+            // }
             return isBusy;
         };
     }
@@ -250,12 +294,14 @@
     /**
      * targetを対象としたアニメーションが再生中かどうかを得る。
      * 
-     * @param {Game_Battler} target 
+     * @param {Game_Battler} target 対象
+     * @param {number} animatinWaitCount アニメーション待機時間
      * @returns {boolean} アニメーション再生中の場合にはtrue, それ以外はfalse.
      */
-    Spriteset_Battle.prototype.isAnimationPlayingWithTarget = function(target) {
-        // Note: isPlaying()も調べた方がいいかも。
-        return this._animationSprites.some(animationSprite => animationSprite.targetObjects.includes(target));
+    Spriteset_Battle.prototype.isAnimationPlayingWithTarget = function(target, animationWaitCount) {
+        return this._animationSprites.some(animationSprite => 
+            animationSprite.targetObjects.includes(target)
+                && ((animationWaitCount === 0) || (animationSprite.currentFrameIndex() < animationWaitCount)));
     };
 
     /**
@@ -287,23 +333,16 @@
         return (this._isUseDelay) ? _Spriteset_Battle_animationNextDelay.call(this) : 0;
     };
 
-    // /**
-    //  * アニメーションを再生中かどうかを取得する。
-    //  * @return {boolean} アニメーションを再生中の場合にはtrue, それ以外はfalse.
-    //  */
-    // Spriteset_Battle.prototype.isAnimationPlaying = function() {
-    //     return this._animationSprites.some(sprite => sprite.isBusy());
-    //     //return this._animationSprites.length > 0;
-    // };
-
-    // /**
-    //  * 現在のフレームインデックスを得る。
-    //  * 
-    //  * @return {number} フレーム番号
-    //  */
-    // Sprite_Animation.prototype.currentFrameIndex = function() {
-    //     return this._frameIndex;
-    // };
+    //------------------------------------------------------------------------------
+    // Sprite_Animation
+    /**
+     * 現在のフレームインデックスを得る。
+     * 
+     * @return {number} フレーム番号
+     */
+    Sprite_Animation.prototype.currentFrameIndex = function() {
+        return this._frameIndex;
+    };
 
 
 })();
