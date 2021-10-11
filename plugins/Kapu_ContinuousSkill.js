@@ -100,10 +100,10 @@
      * アクターまたはエネミーのアクションを開始する。
      */
     BattleManager.startAction = function() {
+        this._spriteset.setUseAnimationDelay(true);
         _BattleManager_startAction.call(this);
         this._savedActionTargets = this._targets.concat();
         this._isContinuousSkill = false;
-
     }
 
     const _BattleManager_updateAction = BattleManager.updateAction;
@@ -111,6 +111,13 @@
      * アクターまたはエネミーのアクションを更新する。
      */
     BattleManager.updateAction = function() {
+        const nextTarget = this._targets[0];
+
+        if (nextTarget && this._spriteset.isAnimationPlayingWithTarget(nextTarget)) {
+            // 次の対象に対するアニメーションが表示中なので更新しない。
+            return ;
+        }
+
         if (this._action && (this._targets.length === 0) && this._action.isSkill()) {
             // 現在のアクションがスキルで次の効果適用対象がいない。
             const skill = this._action.item();
@@ -149,6 +156,7 @@
         this._isContinuousSkill = true;
         // アニメーション
         const nextSkill = this._action.item();
+        this._spriteset.setUseAnimationDelay(false);
         this._logWindow.showAnimation(subject, this._targets.clone(), nextSkill.animationId);
     };
 
@@ -189,6 +197,15 @@
         return false;
     }
 
+    const _BattleManager_endAction = BattleManager.endAction;
+    /**
+     * アクターまたはエネミーのアクションが完了したときの処理を行う。
+     */
+    BattleManager.endAction = function() {
+        this._spriteset.setUseAnimationDelay(true);
+        _BattleManager_endAction.call(this);
+    };
+
     const _BattleManager_endBattle = BattleManager.endBattle;
     /**
      * 戦闘を終了させる。
@@ -201,6 +218,8 @@
         _BattleManager_endBattle.call(this, result);
     };
 
+
+
     if (!waitDamageAnimation) {
         /**
          * ビジーかどうかを取得する。
@@ -211,10 +230,80 @@
          */
         BattleManager.isBusy = function() {
             const isMsgBusy = $gameMessage.isBusy();
-            const isSpritesetBusy = this._spriteset.isBusy();
+            const isSpritesetBusy = !this._isContinuousSkill && this._spriteset.isBusy();
             const isLogWindowBusy = !this._isContinuousSkill && this._logWindow.isBusy();
             const isBusy = isMsgBusy || isSpritesetBusy || isLogWindowBusy;
             return isBusy;
         };
     }
+
+    //------------------------------------------------------------------------------
+    // Spriteset_Battle
+    const _Spriteset_Battle_initialize = Spriteset_Battle.prototype.initialize;
+    /**
+     * Spriteset_Battleを初期化する。
+     */
+    Spriteset_Battle.prototype.initialize = function() {
+        _Spriteset_Battle_initialize.call(this);
+        this._isUseDelay = true;
+    };
+    /**
+     * targetを対象としたアニメーションが再生中かどうかを得る。
+     * 
+     * @param {Game_Battler} target 
+     * @returns {boolean} アニメーション再生中の場合にはtrue, それ以外はfalse.
+     */
+    Spriteset_Battle.prototype.isAnimationPlayingWithTarget = function(target) {
+        // Note: isPlaying()も調べた方がいいかも。
+        return this._animationSprites.some(animationSprite => animationSprite.targetObjects.includes(target));
+    };
+
+    /**
+     * アニメーションにディレイをつけるかどうかを設定する。
+     * 
+     * @param {boolean} isNoDelay ディレイを有効にする場合にはtrue, それ以外はfalse.
+     */
+    Spriteset_Battle.prototype.setUseAnimationDelay = function(isUseDelay) {
+        this._isUseDelay = isUseDelay;
+    };
+
+    const _Spriteset_Battle_animationBaseDelay = Spriteset_Battle.prototype.animationBaseDelay;
+    /**
+     * アニメーションの基本ディレイを得る。
+     * 
+     * @returns {number} アニメーションのディレイ
+     */
+    Spriteset_Battle.prototype.animationBaseDelay = function() {
+        return (this._isUseDelay) ? _Spriteset_Battle_animationBaseDelay.call(this) : 0;
+    };
+
+    const _Spriteset_Battle_animationNextDelay = Spriteset_Battle.prototype.animationNextDelay;
+    /**
+     * 複数のアニメーションを表示するときの遅延量を得る。
+     * 
+     * @returns {number} アニメーションのディレイ
+     */
+    Spriteset_Battle.prototype.animationNextDelay = function() {
+        return (this._isUseDelay) ? _Spriteset_Battle_animationNextDelay.call(this) : 0;
+    };
+
+    // /**
+    //  * アニメーションを再生中かどうかを取得する。
+    //  * @return {boolean} アニメーションを再生中の場合にはtrue, それ以外はfalse.
+    //  */
+    // Spriteset_Battle.prototype.isAnimationPlaying = function() {
+    //     return this._animationSprites.some(sprite => sprite.isBusy());
+    //     //return this._animationSprites.length > 0;
+    // };
+
+    // /**
+    //  * 現在のフレームインデックスを得る。
+    //  * 
+    //  * @return {number} フレーム番号
+    //  */
+    // Sprite_Animation.prototype.currentFrameIndex = function() {
+    //     return this._frameIndex;
+    // };
+
+
 })();
