@@ -12,8 +12,9 @@
  * 例えばDEF0%ステートを作って、スキルに一時付与ステートとして設定すると、
  * 防御力無視スキルになります。
  * DamageCalculationにも似たような機能がありますが、あちらは特性(Trait)の付与で、
- * TRAIT系プラグインで機能を実現するためのものになります。
- * 例
+ * TRAIT系プラグインの機能を実現するためのものになります。
+ *
+ * このプラグインで実現するようなスキルの例
  *    対象の防御力を無視するスキル
  *    クリティカル率が高いスキル。
  * 
@@ -190,37 +191,14 @@
      * @param {Game_BattlerBase} target 対象
      */
     Game_Action.prototype.apply = function(target) {
+        const subject = this.subject();
+        subject.setActionUserStates(this.userStateIds());
         target.setActionTargetStates(this.targetStateIds());
+
         _Game_Action_apply.call(this, target);
+
+        subject.clearActionUserStates();
         target.clearActionTargetStates();
     };
-    //------------------------------------------------------------------------------
-    // BattleManager
-    const _BattleManager_startAction = BattleManager.startAction;
-    /**
-     * アクターまたはエネミーのアクションを開始する。
-     */
-    BattleManager.startAction = function() {
-        _BattleManager_startAction.call(this);
-
-        // 使用者にステート付与
-        if (this._phase === "action") {
-            const subject = this._subject;
-            const action = this._action;
-            subject.setActionUserStates(action.userStateIds());
-        }
-    };
-
-
-    const _BattleManager_endAction = BattleManager.endAction;
-    /**
-     * アクターまたはエネミーのアクションが完了したときの処理を行う。
-     */
-    BattleManager.endAction = function() {
-        // Note: _BattleManager_endActionをコールすると
-        //       this._subject はnullにセットされる（かもしれない）のでここで取得する。
-        const subject = this._subject;
-        _BattleManager_endAction.call(this);
-        subject.clearActionUserStates();
-    };
+  
 })();
