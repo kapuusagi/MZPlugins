@@ -91,7 +91,8 @@
          * @returns {boolean} クリティカルヒットする場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testCritical = function(target) {
-            if (this.item().damage.type > 0) {
+            const item = this.item();
+            if (item.critical && (item.damage.type > 0)) {
                 const rate = this.itemCri(target);
                 console.log("  criticalRate = " + rate);
                 return Math.random() < rate;
@@ -107,7 +108,8 @@
          * @returns {boolean} クリティカルヒットする場合にはtrue, それ以外はfalse
          */
         Game_Action.prototype.testCritical = function(target) {
-            if (this.item().damage.type > 0) {
+            const item = this.item();
+            if (item.critical && (item.damage.type > 0)) {
                 return Math.random() < this.itemCri(target);
             } else {
                 return false;
