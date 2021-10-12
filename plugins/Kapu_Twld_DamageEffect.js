@@ -250,6 +250,27 @@
  * @type string
  * @default #8080ff
  * @parent textCounter
+ * 
+ * 
+ * @param textGuard
+ * @text ガードメッセージ
+ * @desc ガード時のメッセージ。空にするとポップアップさせない。
+ * @type string
+ * @default Guard!!
+ * 
+ * @param colorGuard
+ * @text ガードカラー
+ * @desc ガードメッセージの色
+ * @type string
+ * @default #808080
+ * @parent textGuard
+ * 
+ * @param seGuard
+ * @text ガードSE
+ * @desc ガード時のSE。ファイルを指定しないと鳴らさない。
+ * @type struct<SoundEffect>
+ * @default {"name":"","volume":"90","pitch":"100","pan":"100"}
+ * @parent textGuard
  *  
  * @param colorHpDamage
  * @text HPダメージカラー
@@ -292,7 +313,6 @@
  * @desc TP回復数値の色
  * @type string
  * @default #ffff40
- * 
  * 
  * 
  * @help 
@@ -391,6 +411,39 @@
  * @value popOut
  * 
  */
+/*~struct~SoundEffect:
+ *
+ * @param name
+ * @type file
+ * @dir audio/se/
+ * @desc 効果音のファイル名
+ * @default 
+ * @require 1
+ *
+ * @param volume
+ * @type number
+ * @max 100
+ * @desc 効果音の音量
+ * 初期値: 90
+ * @default 90
+ *
+ * @param pitch
+ * @type number
+ * @min 50
+ * @max 150
+ * @desc 効果音のピッチ
+ * 初期値: 100
+ * @default 100
+ *
+ * @param pan
+ * @type number
+ * @min -100
+ * @max 100
+ * @desc 効果音の位相
+ * 初期値: 0
+ * @default 0
+ *
+ */
 (() => {
     const pluginName = "Kapu_Twld_DamageEffect";
     const parameters = PluginManager.parameters(pluginName);
@@ -434,6 +487,9 @@
     const textIneffective = parameters["textIneffective"] || "";
     const colorIneffective = parameters["colorIneffective"] || "#0080ff";
     const ineffectiveRate = (Number(parameters["ineffectiveRate"]) || 0).clamp(0, 1);
+    const textGuard = parameters["textGuard"] || "";
+    const colorGuard = parameters["colorGuard"] || "#808080";
+    const seGuard = JSON.parse(parameters["seGuard"] || "{}");
     const textAbsorb = parameters["textAbsorb"] || "";
     const colorAbsorb = parameters["colorAbsorb"] || "#ff80ff";
     const textMiss = parameters["textMiss"] || "";
@@ -524,6 +580,21 @@
         this._reflectionPopup = true;
     };
 
+    /**
+     * ガードを行う。
+     */
+    Game_Battler.prototype.performGuard = function() {
+        SoundManager.playGuard();
+    };
+
+    /**
+     * ガード時のSEを鳴らす。
+     */
+    SoundManager.playGuard = function() {
+        if (seGuard.name) {
+            AudioManager.playStaticSe(seGuard);
+        }
+    };
 
     //------------------------------------------------------------------------------
     // Sprite_Damage
@@ -568,6 +639,9 @@
                 this.createIneffective();
             } else if ((result.elementRate > effectiveRate) && textEffective) {
                 this.createEffective();
+            }
+            if (textGuard && (result.hpDamage > 0) && result.isGuard) {
+                this.createGuard();
             }
             if (result.hpDamage > 0) {
                 this.createDigitsWithColor(result.hpDamage, colorHpDamage);
@@ -760,7 +834,23 @@
         sprite.updatePosition = this.updateEffective.bind(this);
     };
 
-
+    /**
+     * ガード表示のスプライトを作成する。
+     */
+    Sprite_Damage.prototype.createGuard = function() {
+        const h = this.fontSize();
+        const w = Math.floor(h * textGuard.length);
+        const sprite = this.createChildSprite(w, h);
+        sprite.bitmap.textColor = colorGuard;
+        sprite.bitmap.fontItalic = true;
+        sprite.bitmap.drawText(textGuard, 0, 0, w, h, "center");
+        sprite.anchor.y = 0;
+        sprite.x = -40;
+        sprite.y = -60;
+        sprite.opacity = 0;
+        sprite.dy = 0;
+        sprite.updatePosition = this.updateGuard.bind(this);
+    };
 
     /**
      * 数値スプライトを作成する。
@@ -911,7 +1001,29 @@
             sprite.x += 3;
         }
     };
-
+    /**
+     * 効果的表示Spriteを更新する。
+     * 
+     * @param {Sprite} sprite Spriteオブジェクト。
+     */
+    Sprite_Damage.prototype.updateGuard = function(sprite) {
+        if (this._frameCount < fadeInDuration) {
+            if (sprite.x < 0) {
+                sprite.x += 3;
+            }
+            let opacity = sprite.opacity;
+            if (opacity < 255) {
+                sprite.opacity = Math.min(255, opacity + 10);
+            }
+        }
+        if (this._frameCount > (fadeInDuration + fadeOutDuration)) {
+            let opacity = sprite.opacity;
+            if (opacity > 0) {
+                sprite.opacity = Math.max(0, opacity -= 10);
+            }
+            sprite.x += 3;
+        }
+    };
     /**
      * 効果的表示Spriteを更新する。
      * 
@@ -1390,13 +1502,21 @@
      * HPダメージを表示する。
      * 
      * @param {Game_Battler} target 表示対象
+     * !!!overwrite!!! Window_BattleLog.displayHpDamage()
+     *     メッセージウィンドウにダメージテキストを表示させないようにするため、オーバーライドする。
      */
     Window_BattleLog.prototype.displayHpDamage = function(target) {
-        if (target.result().hpAffected) {
-            if (target.result().hpDamage > 0 && !target.result().drain) {
-                this.push("performDamage", target);
+        const result = target.result();
+        if (result.hpAffected) {
+            if (result.hpDamage > 0) {
+                if (!result.drain) {
+                    this.push("performDamage", target);
+                }
+                if (result.isGuard) {
+                    this.push("performGuard", target);
+                }
             }
-            if (target.result().hpDamage < 0) {
+            if (result.hpDamage < 0) {
                 this.push("performRecovery", target);
             }
             //this.push("addText", this.makeHpDamageText(target));
@@ -1407,6 +1527,8 @@
      * MPダメージを表示する。
      * 
      * @param {Game_Battler} target 表示対象
+     * !!!overwrite!!! Window_BattleLog.displayMpDamage()
+     *     メッセージウィンドウにダメージテキストを表示させないようにするため、オーバーライドする。
      */
     Window_BattleLog.prototype.displayMpDamage = function(target) {
         if (target.isAlive() && target.result().mpDamage !== 0) {
@@ -1548,6 +1670,8 @@
      * カウンターを表示する。
      * 
      * @param {Game_Battler} target 対象
+     * !!!overwrite!!! Window_BattleLog.displaycounter()
+     *     カウンター発生時にポップアップテキストでの表示を行うため、オーバーライドする。
      */
     Window_BattleLog.prototype.displayCounter = function(target) {
         this.push("performCounter", target);
@@ -1562,6 +1686,8 @@
      * 反射を表示する。
      * 
      * @param {Game_Battler} target 対象
+     * !!!overwrite!!! Window_BattleLog.displayReflection()
+     *     反射発生時、メッセージポップアップさせるため、オーバーライドする。
      */
     Window_BattleLog.prototype.displayReflection = function(target) {
         this.push("performReflection", target);
@@ -1570,5 +1696,14 @@
         } else {
             this.push("addText", TextManager.magicReflection.format(target.name()));
         }
+    };
+
+    /**
+     * ガードを表示する。
+     * 
+     * @param {Game_Battler} target 対象
+     */
+    Window_BattleLog.prototype.performGuard = function(target) {
+        target.performGuard();
     };
 })();
