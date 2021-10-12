@@ -111,6 +111,13 @@
     const isDebug = (typeof parameters["debug"] === "undefined")
             ? false : (parameters["debug"] === "true");
 
+    /**
+     * デバッグ表示用メソッド
+     * 
+     * @param {string} msg メッセージ
+     */
+    const _debugPrint = (isDebug) ? function(msg) { console.log(msg); } : function( /* msg */) {};
+
     //------------------------------------------------------------------------------
     // Game_Battler
     const _Game_Battler_allTraits = Game_BattlerBase.prototype.allTraits;
@@ -190,118 +197,71 @@
     Game_ActionResult.prototype.clear = function() {
         _Game_ActionResult_clear.call(this);
         this.elementRate = 1.0;
+        this.isGuard = false;
     };
     //------------------------------------------------------------------------------
     // Game_Action
-    if (isDebug) {
-        /**
-         * ダメージ値を計算する。
-         * 
-         * @param {Game_BattlerBase} target 対象
-         * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
-         * @returns {number} ダメージ値
-         * !!!overwrite!!! Game_Action.makeDamageValue
-         */
-        Game_Action.prototype.makeDamageValue = function(target, critical) {
-            const result = target.result();
+    /**
+     * ダメージ値を計算する。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
+     * @returns {number} ダメージ値
+     * !!!overwrite!!! Game_Action.makeDamageValue
+     */
+    Game_Action.prototype.makeDamageValue = function(target, critical) {
+        const result = target.result();
 
-            const subjectAddtionalTraits = this.additionalSubjectTraits(target);
-            const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
-            this.subject().setTempUserTraits(subjectAddtionalTraits);
-            target.setTempTargetTraits(targetAdditionalTraits);
+        const subjectAddtionalTraits = this.additionalSubjectTraits(target);
+        const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
+        this.subject().setTempUserTraits(subjectAddtionalTraits);
+        target.setTempTargetTraits(targetAdditionalTraits);
 
-            const item = this.item();
-            const baseValue = this.calcBaseDamageValue(target);
-            let value = baseValue;
-            console.log(this.subject().name() + " --(" + item.name + ")--> " + target.name());
-            console.log("  eval:" + item.damage.formula + "=" + baseValue);
-            if (this.isElementRateApplicable(target)) {
-                value = value * elementRate;
-                const elementRate = this.calcElementRate(target);
-                result.elementRate = elementRate;
-                    console.log("  elementRate:" + elementRate);
-            } else {
-                result.elementRate = 1;
-            }
+        const item = this.item();
+        const baseValue = this.calcBaseDamageValue(target);
+        let value = baseValue;
+        _debugPrint(this.subject().name() + " --(" + item.name + ")--> " + target.name());
+        _debugPrint("  eval:" + item.damage.formula + "=" + baseValue);
+        if (this.isElementRateApplicable(target)) {
+            value = value * elementRate;
+            const elementRate = this.calcElementRate(target);
+            result.elementRate = elementRate;
+            _debugPrint("  elementRate:" + elementRate);
+        } else {
+            result.elementRate = 1;
+        }
 
-            if (this.isDamageRateApplicable(target)) {
-                value = this.applyDamageRate(value, target, critical);
-                console.log("  -> applyDamageRate() = " + value);
-            }
+        if (this.isDamageRateApplicable(target)) {
+            value = this.applyDamageRate(value, target, critical);
+            _debugPrint("  -> applyDamageRate() = " + value);
+        }
 
-            if (this.isRecoveryRateApplicable(target)) {
-                value = this.applyRecoveryRate(value, target);
-                console.log("  -> applyRecoveryRate() = " + value);
-            }
-            if (critical && this.isCriticalApplicable(target)) {
-                value = this.applyCritical(value);
-                console.log("  -> applyCritical() = " + value);
-            }
-            if (this.isVarianceApplicable(target)) {
-                value = this.applyVariance(value, item.damage.variance);
-                console.log("  -> applyVariance() = " + value);
-            }
-            if (this.isGuardApplicable(target)) {
-                value = this.applyGuard(value, target);
-                console.log("  -> applyGuard() = " + value);
-            }
-            value = Math.round(value);
+        if (this.isRecoveryRateApplicable(target)) {
+            value = this.applyRecoveryRate(value, target);
+            _debigPrint("  -> applyRecoveryRate() = " + value);
+        }
+        if (critical && this.isCriticalApplicable(target)) {
+            value = this.applyCritical(value);
+            _debugPrint("  -> applyCritical() = " + value);
+        }
+        if (this.isVarianceApplicable(target)) {
+            value = this.applyVariance(value, item.damage.variance);
+            _debugPrint("  -> applyVariance() = " + value);
+        }
+        if (this.isGuardApplicable(target)) {
+            result.isGuard = target.isGuard();
+            value = this.applyGuard(value, target);
+            _debugPrint("  -> applyGuard() = " + value);
+        }
+        value = Math.round(value);
 
-            target.clearTempTargetTraits();
-            this.subject().clearTempUserTraits();
-            const maxDamage = this.maxDamage(target);
-            const clampedValue = value.clamp(-maxDamage, maxDamage)
-            console.log("  -> result = " + clampedValue);
-            return clampedValue;
-        };
-    } else {
-        /**
-         * ダメージ値を計算する。
-         * 
-         * @param {Game_BattlerBase} target 対象
-         * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
-         * @returns {number} ダメージ値
-         * !!!overwrite!!! Game_Action.makeDamageValue
-         */
-        Game_Action.prototype.makeDamageValue = function(target, critical) {
-            const result = target.result();
-            const subjectAddtionalTraits = this.additionalSubjectTraits(target);
-            const targetAdditionalTraits = this.additionalTargetTraits(target, critical);
-            this.subject().setTempUserTraits(subjectAddtionalTraits);
-            target.setTempTargetTraits(targetAdditionalTraits);
-
-            const item = this.item();
-            const baseValue = this.calcBaseDamageValue(target);
-            if (this.isElementRateApplicable(target)) {
-                const elementRate = this.calcElementRate(target);
-                result.elementRate = elementRate;
-            } else {
-                result.elementRate = 1;
-            }
-            let value = baseValue * elementRate;
-            if (this.isDamageRateApplicable(target)) {
-                value = this.applyDamageRate(value, target, critical);
-            }
-            if (this.isRecoveryRateApplicable(target)) {
-                value = this.applyRecoveryRate(value, target);
-            }
-            if (critical && this.isCriticalApplicable(target)) {
-                value = this.applyCritical(value);
-            }
-            if (this.isVarianceApplicable(target)) {
-                value = this.applyVariance(value, item.damage.variance);
-            }
-            if (this.isGuardApplicable(target)) {
-                value = this.applyGuard(value, target);
-            }
-            value = Math.round(value);
-
-            target.clearTempTargetTraits();
-            this.subject().clearTempUserTraits();
-            const maxDamage = this.maxDamage(target);
-            return value.clamp(-maxDamage, maxDamage)
-        };
-    }
+        target.clearTempTargetTraits();
+        this.subject().clearTempUserTraits();
+        const maxDamage = this.maxDamage(target);
+        const clampedValue = value.clamp(-maxDamage, maxDamage)
+        _debugPrint("  -> result = " + clampedValue);
+        return clampedValue;
+    };
 
     /**
      * 属性レートを適用するかどうかを得る。
