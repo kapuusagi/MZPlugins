@@ -1043,6 +1043,7 @@
             value = this.applyVariance(value, item.damage.variance);
         }
         if (this.isGuardApplicable(target)) {
+            target.result().isGuard = target.isGuard();
             value = this.applyGuard(value, target);
         }
         value = Math.round(value);

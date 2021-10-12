@@ -52,6 +52,7 @@
  * 変更履歴
  * ============================================
  * Version.0.2.0 Kapu_Base_ParamNameに対応
+ *               機能の実装方法を変更した。
  * Version.0.1.1 TRAIT_XPARAM_DID_AUTOGUARD_RATE未指定時は
  *               ログに出力して動作しないように変更した。
  * Version.0.1.0 ソースを調査していて思いついたので追加した。
@@ -118,7 +119,7 @@
     Game_Action.prototype.apply = function(target) {
         target.updateAutoGuard();
 
-        _Game_Action_apply.call(this);
+        _Game_Action_apply.call(this, target);
         target.resetAutoGuard();
     };
     //------------------------------------------------------------------------------
@@ -128,7 +129,7 @@
      * 自動防御状態を更新する。
      */
     Game_BattlerBase.prototype.updateAutoGuard = function() {
-        const rate = target.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE);
+        const rate = this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE);
         this._isAutoGuard = (rate > 0) ? Math.random() < rate : false;
     };
 
