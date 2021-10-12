@@ -22,11 +22,12 @@
  * @default 自動防御率
  * 
  * @help 
- * 敵対者のアクションが行われたとき、指定した確率で自動ガード処理される特性を追加します。
+ * 敵対者のアクションが行われたとき、指定した確率で自動ガードによるダメージ軽減処理される特性を追加します。
  * 複数の特性を持つ場合、確率は加算合計になります。
  * 
  * ■ 注意
- * 特にありません。
+ * 防御コマンドによる防御ステート付与とは異なります。
+ * ダメージ軽減部分だけの適用です。
  * 
  * ■ プラグイン開発者向け
  * Trait XPARAMを使用し、
@@ -104,24 +105,49 @@
         TextManager._xparam[Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE] = parameters["textTraitAutoGuardRate"] || "";
     }
     
+
+    //------------------------------------------------------------------------------
+    // Game_Action
+    const _Game_Action_apply = Game_Action.prototype.apply;
+    /**
+     * このアクションをtargetに適用する。
+     * 命中判定とダメージ算出、効果適用を行う。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     */
+    Game_Action.prototype.apply = function(target) {
+        target.updateAutoGuard();
+
+        _Game_Action_apply.call(this);
+        target.resetAutoGuard();
+    };
     //------------------------------------------------------------------------------
     // Game_BattlerBase
 
-    const _Game_BattlerBase_isGuard = Game_BattlerBase.prototype.isGuard;
+    /**
+     * 自動防御状態を更新する。
+     */
+    Game_BattlerBase.prototype.updateAutoGuard = function() {
+        const rate = target.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE);
+        this._isAutoGuard = (rate > 0) ? Math.random() < rate : false;
+    };
 
+    /**
+     * 自動防御状態を破棄する。
+     */
+    Game_BattlerBase.prototype.resetAutoGuard = function() {
+        delete this._isAutoGuard;
+    };
+
+
+    const _Game_BattlerBase_isGuard = Game_BattlerBase.prototype.isGuard;
     /**
      * 防御かどうかを得る。
      * 
      * @returns {boolean} 防御している場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isGuard = function() {
-        const guard = _Game_BattlerBase_isGuard.call(this);
-        if (guard) {
-            return guard; // 防御指定されている。
-        } else {
-            const rate = this.xparam(Game_BattlerBase.TRAIT_XPARAM_DID_AUTOGUARD_RATE);
-            return (rate > 0) ? Math.random() < rate : false;
-        }
+        return this._isAutoGuard || _Game_BattlerBase_isGuard.call(this);
     };
 
 
