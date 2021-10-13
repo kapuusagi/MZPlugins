@@ -89,6 +89,18 @@ https://gist.github.com/gyohk/abf13dbcb5be750b3b021752b280ccd3
 
     出力するピクセルの座標が格納されている。こっちは普通に0,1,2,...とふえていくっぽい。
 
+* 変数宣言の修飾子
+
+
+    |修飾子|説明|例|
+    |---|---|---|
+    |なし/デフォルト|ローカル|float a;|
+    |const|コンパイル時の定数|const float redScale   = 0.298912;|
+    |attribute|どこでセットされる？ 頂点ごとに異なる情報を参照するために使用する。|attribute vec2 aTextureCoord;|
+    |varying|バーテックスシェーダーで値を格納し、フラグメントシェーダーに渡すパラメータ。バーテックスシェーダーで書き込まれた同名の変数を参照するために使用する。|varying vec2 vTextureCoord;|
+    |uniform|アプリケーションとシェーダー間で連関するパラメータ。||
+
+
 * varying vec2 vTextureCoord
 
     Textureの座標が0.0～1.0で格納される。左上が0っぽいけど、座標系によるのかな？
@@ -96,6 +108,7 @@ https://gist.github.com/gyohk/abf13dbcb5be750b3b021752b280ccd3
 * uniform sampler2D uSampler
 
     テクスチャ？ texture2D(uSampler, vTextureCoord); とすると、テクスチャの座標に対応するピクセルが得られる。
+
 
 
 ## フィルタでapply()を複数繰り返したときどうなるの？
