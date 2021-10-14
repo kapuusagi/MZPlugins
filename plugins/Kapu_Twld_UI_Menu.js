@@ -335,7 +335,6 @@
         this.contents.fontSize = $gameSystem.mainFontSize() - 4;
         this.drawText(TextManager.levelA, x, y + 4, 20);
         this.resetFontSettings();
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(actor.level, x + 24, y, 32, "right");
     };
 
@@ -418,15 +417,12 @@
         this.drawText(data.label, x, y + 10, paramWidth, "left");
         x += paramWidth;
         this.changeTextColor(data.color);
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() + 8;
         this.drawText(data.current, x, y, currentValueWidth, "right");
         x += currentValueWidth;
-        this.contents.fontFace = $gameSystem.mainFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() - 2;
         this.drawText("/", x, y + 12, 16, "center");
         x += 16;
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() - 4;
         this.drawText(data.max, x, y + 12, maxValueWidth, "right");
     };

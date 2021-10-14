@@ -805,7 +805,6 @@ function Window_EquipItemName() {
         } else {
             this.resetTextColor();
         }
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(rateStr, x + 40 + labelWidth, y, valueWidth);
         this.changePaintOpacity(true);
     };
@@ -958,14 +957,11 @@ function Window_EquipItemName() {
         const spacing = 16;
         const valueWidth = Math.floor((width - labelWidth - rightArrowWidth - spacing * 3) / 2);
         const value1X = x + labelWidth + spacing;
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(paramItem.value1, value1X, y, valueWidth);
         const arrowX = value1X + valueWidth + spacing;
-        this.contents.fontFace = $gameSystem.mainFontFace();
         this.drawRightArrow(arrowX, y);
         const value2X = arrowX + rightArrowWidth + spacing;
         this.changeTextColor(paramItem.color);
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(paramItem.value2, value2X, y, valueWidth);
     };
 
@@ -1007,14 +1003,12 @@ function Window_EquipItemName() {
 
         const value1X = x + paramWidth + spacing;
         this.resetTextColor();
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(value1 + " ", value1X, y, valueWidth, "right");
 
         if (value1 === value2) {
             return;
         }
         const arrowX = value1X + valueWidth + spacing;
-        this.contents.fontFace = $gameSystem.mainFontFace();
         this.drawRightArrow(arrowX, y);
         if (value2 >= value1) {
             this.changeTextColor(ColorManager.powerUpColor());
@@ -1022,7 +1016,6 @@ function Window_EquipItemName() {
             this.changeTextColor(ColorManager.powerDownColor());
         }
         const value2X = arrowX + rightArrowWidth + spacing;
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(value2 + " ", value2X, y, valueWidth, "right");
     };
 
@@ -1051,14 +1044,12 @@ function Window_EquipItemName() {
         const value1X = x + paramWidth + spacing;
         this.resetTextColor();
         const value1Str = (Math.floor(value1 * 1000) / 10) + "%";
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(value1Str, value1X, y, valueWidth, "right");
 
         if (value1 === value2) {
             return;
         }
         const arrowX = value1X + valueWidth + spacing;
-        this.contents.fontFace = $gameSystem.mainFontFace();
         this.drawRightArrow(arrowX, y);
         if (value2 >= value1) {
             this.changeTextColor(ColorManager.powerUpColor());
@@ -1067,7 +1058,6 @@ function Window_EquipItemName() {
         }
         const value2X = arrowX + rightArrowWidth + spacing;
         const value2Str = (Math.floor(value2 * 1000) / 10) + "%";
-        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(value2Str, value2X, y, valueWidth, "right");
     };
 
