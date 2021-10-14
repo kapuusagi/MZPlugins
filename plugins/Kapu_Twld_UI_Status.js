@@ -879,6 +879,7 @@ function Window_StatusProfile() {
         this.drawText(TextManager.levelA, x, y, statusLabelWidth);
         this.resetTextColor();
         const valueWidth = Math.min(this.textWidth("000"), width - statusLabelWidth);
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(actor.level, x + statusLabelWidth, y, valueWidth, "right");
     };
     /**
@@ -895,6 +896,7 @@ function Window_StatusProfile() {
         this.drawText(TextManager.growPoint, x, y, statusLabelWidth);
         this.resetTextColor();
         const valueWidth = Math.min(this.textWidth("000"), width - statusLabelWidth);
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(actor.growPoint(), x + statusLabelWidth, y, valueWidth, "right");
     };
     /**
@@ -934,6 +936,7 @@ function Window_StatusProfile() {
         this.drawText(TextManager.exp, x, y, statusLabelWidth);
         this.resetTextColor();
         const valueWidth = width - statusLabelWidth;
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(this.expTotalValue(), x + statusLabelWidth, y, valueWidth, "right");
     };
     /**
@@ -951,6 +954,7 @@ function Window_StatusProfile() {
         this.drawText(expNext, x, y, statusLabelWidth);
         this.resetTextColor();
         const valueWidth = width - statusLabelWidth;
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(this.expNextValue(), x + statusLabelWidth, y, valueWidth, "right");
     };
     
@@ -1036,6 +1040,7 @@ function Window_StatusProfile() {
         this.drawText(textMaxTp, x, y + 8, statusLabelWidth, "left");
         const valueWidth = this.textWidth("000");
         this.changeTextColor(ColorManager.tpColor(actor));
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() + 8;
         this.drawText(actor.maxTp(), x + statusLabelWidth + 16, y, valueWidth, "right");
     };
@@ -1080,12 +1085,15 @@ function Window_StatusProfile() {
         this.drawText(data.label, x, y + 8, paramWidth, "left");
         x += paramWidth;
         this.changeTextColor(data.color);
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() + 8;
         this.drawText(data.current, x, y, currentValueWidth, "right");
         x += currentValueWidth;
+        this.contents.fontFace = $gameSystem.mainFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() - 2;
         this.drawText("/", x, y + 8, 16, "center");
         x += 16;
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() + 8;
         this.drawText(data.max, x, y, maxValueWidth, "right");
     };
@@ -1311,6 +1319,7 @@ function Window_StatusProfile() {
         } else {
             this.resetTextColor();
         }
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(rateStr, x + 40 + labelWidth, y, valueWidth);
         this.changePaintOpacity(true);
     };
@@ -1405,6 +1414,7 @@ function Window_StatusProfile() {
         this.drawText(paramItem.label, x, y, statusLabelWidth);
         this.resetTextColor();
         const valueWidth = width - statusLabelWidth - 16;
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(paramItem.value, x + statusLabelWidth + 16, y, valueWidth);
     };
     /**
@@ -1602,6 +1612,7 @@ function Window_StatusProfile() {
 
         // Lv描画
         this.resetTextColor();
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.drawText(TextManager.levelA + " " + wm.level, x2, y, levelWidth, "right");
     };
 
