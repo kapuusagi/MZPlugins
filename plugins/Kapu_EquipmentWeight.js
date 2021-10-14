@@ -30,6 +30,12 @@
  * @type number
  * @default 100
  * 
+ * @param changeEquipStyleByWeight
+ * @text 装備重量により装備タイプを変える
+ * @desc trueにすると、武器重量により片手持ち、両手持ちが変わります。
+ * @type boolean
+ * @default false
+ * 
  * 
  * @help 
  * アクターに装備可能重量の概念を追加し、装備品に重量を持たせます。
@@ -39,6 +45,10 @@
  * 「許容重量を超えても装備できる」をfalseにすると、そもそも装備できません。
  * 
  * 本プラグイン単体では、特に命中率やAGIなどに補正は行いません。
+ * 
+ * プラグインパラメータ「装備重量により装備タイプを変える」をtrue にした場合、
+ * アクターの装備可能重量により片手装備/両手装備が変わります。
+ * (ただしノートタグでbothHandsが指定されている場合、必ず両手装備になります)
  * 
  * ■ 使用時の注意
  * 特になし。
@@ -95,7 +105,8 @@
             ? false : (parameters["shareWeightTolerance"] === "true");
     const defaultActorWeaponWeightTolerance = Math.max(0, Math.round(Number(parameters["defaultActorWeaponWeightTolerance"]) || 0));
     const defaultActorArmorWeightTolerance = Math.max(0, Math.round(Number(parameters["defaultActorArmorWeightTolerance"]) || 0));
-
+    const changeEquipStyleByWeight = (parameters["changeEquipStyleByWeight"] === undefined)
+            ? false : (parameters["changeEquipStyleByWeight"] === "true");
 
     // PluginManager.registerCommand(pluginName, "Kapu_EquipWeight", args => {
     //     // TODO : コマンドの処理。
@@ -300,5 +311,39 @@
         } else {
             return 1;
         }
-    };    
+    };
+
+    if (changeEquipStyleByWeight) {
+        const _Game_Actor_isBothHands = Game_Actor.prototype.isBothHands;
+        /**
+         * 両手装備かどうかを判定する。
+         * 
+         * @returns {boolean} 両手装備
+         */
+        Game_Actor.prototype.isBothHands = function() {
+            const weapon = this.mainWeapon();
+            const weight = (weapon) ? (weapon.weight || 0) : 0;
+            if (weight > (this.weaponWeightTolerance() / 2)) {
+                // 武器キャパシティの半分を超えるなら、両手持ちが必要。
+                return true;
+            } else {
+                return _Game_Actor_isBothHands.call(this);
+            }
+        };
+
+        const _Game_Actor_isNeedBothHandsItem = Game_Actor.prototype.isNeedBothHandsItem;
+        /**
+         * itemが両手装備必要なものかどうかを判定する。
+         * 
+         * @param {object} item DataWeaponを想定
+         * @returns {boolean} 両手装備が必要な場合にはtrue, それ以外はfalse.
+         */
+        Game_Actor.prototype.isNeedBothHandsItem = function(item) {
+            const weight = (weapon) ? (weapon.weight || 0) : 0;
+            if (weight > (this.weaponWeightTolerance() / 2)) {
+                return true;
+            }
+            return _Game_Actor_isNeedBothHandsItem.call(this, item);
+        };
+    }
 })();

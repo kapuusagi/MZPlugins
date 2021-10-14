@@ -250,6 +250,16 @@
     };
 
     /**
+     * itemが両手装備必要なものかどうかを判定する。
+     * 
+     * @param {object} item DataWeaponを想定
+     * @returns {boolean} 両手装備が必要な場合にはtrue, それ以外はfalse.
+     */
+    Game_Actor.prototype.isNeedBothHandsItem = function(item) {
+        return item.meta.bothHands;
+    };
+
+    /**
      * サブウエポンが必要かどうかを判定する。
      * 
      * @returns {boolean} サブウェポンの場合にはtrue, それ以外はfalse
@@ -396,7 +406,7 @@
                 // 両手の時はサブウェポンスロットを強制リジェクト。
                 return false;
             }
-            if (item.meta.bothHands) {
+            if (this.isNeedBothHandsItem(item)) {
                 // サブウェポンスロットに両手装備品を装備
                 return false;
             }
