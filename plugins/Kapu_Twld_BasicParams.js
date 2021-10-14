@@ -661,16 +661,23 @@
 
     //------------------------------------------------------------------------------
     // Game_Actor
-    const _Game_Actor_setup = Game_Actor.prototype.setup;
+    const _Game_Actor_initEquips = Game_Actor.prototype.initEquips;
     /**
-     * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
+     * 装備を初期化する。
      * 
-     * @param {number} actorId アクターID
+     * @param {Array<Number>} equips 装備品ID配列
      */
-    Game_Actor.prototype.setup = function(actorId) {
+    Game_Actor.prototype.initEquips = function(equips) {
+        this.initBasicParams();
+        _Game_Actor_initEquips.call(this, equips);
+    };
+    /**
+     * 基本パラメータを初期化する。
+     */
+    Game_Actor.prototype.initBasicParams = function() {
         _Game_Actor_setup.call(this, actorId);
 
-        const actor = $dataActors[actorId];
+        const actor = this.actor();
         if (actor.meta.basicParams) {
             const tokens = actor.meta.basicParams.split(",");
             const count = Math.min(actor.meta.basicParams.length, tokens.length);
