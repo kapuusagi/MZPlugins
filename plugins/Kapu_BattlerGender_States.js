@@ -164,7 +164,7 @@
      * @return {boolean} ステートを受け付けない場合にはtrue, それ以外はfalse
      */
     Game_BattlerBase.prototype.isStateResist = function(stateId) {
-        let isResist = !_Game_BattlerBase_isStateResist(this, stateId);
+        let isResist = _Game_BattlerBase_isStateResist.call(this, stateId);
         if (!isResist) {
             const state = $dataStates[stateId];
             if ((this.isMale() && (state.maleRate === 0))
