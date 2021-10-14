@@ -10,8 +10,6 @@
   ☐ Kapu_Base_DamageCalculation (ガード状態をresultに追加)
   ☐ Kapu_Twld_BaseSystem (カウンター時に一時付与特性がただしく設定出来ない不具合を修正)
   ☐ Kapu_EncounterEffectManager:エンカウント時のSEがかぶってるバグをなおしてみた。
-  ☐ Kapu_Twld_BasicParams: アクターの基本パラメータについて、初期化タイミングを変更した
-  ☐ Kapu_GrowupSystem アクターのGrowupSystem周りの初期化タイミングを、装備設定前に変更した。
   Kapu_Base_Twld:
     ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
        ※逆にした方がいいのかも？
