@@ -675,8 +675,6 @@
      * 基本パラメータを初期化する。
      */
     Game_Actor.prototype.initBasicParams = function() {
-        _Game_Actor_setup.call(this, actorId);
-
         const actor = this.actor();
         if (actor.meta.basicParams) {
             const tokens = actor.meta.basicParams.split(",");
