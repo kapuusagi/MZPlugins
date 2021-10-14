@@ -868,7 +868,17 @@ function Scene_PartyChange() {
         const actor = this.actorAt(index);
         return (actor !== null);
     };
-
+    /**
+     * 現在選択中の項目が選択可能かどうかを得る。
+     * 
+     * Note: パーティーメンバーに追加する場合を想定し、nullでも選択可能にする必要がある。
+     * 
+     * @returns {boolean} 選択可能である場合にはtrue, それ以外はfalse
+     */
+    Window_PartyChangePartyMembers.prototype.isCurrentItemEnabled = function() {
+        const actor = this.actorAt(this.index());
+        return (actor) ? this.isEnabled(actor) : true;
+    };
     //------------------------------------------------------------------------------
     // Window_PartyChangeCandidateMembers
     Window_PartyChangeCandidateMembers.prototype = Object.create(Window_PartyChangeMemberBase.prototype);
