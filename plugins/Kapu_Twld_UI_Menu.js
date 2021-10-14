@@ -417,12 +417,15 @@
         this.drawText(data.label, x, y + 10, paramWidth, "left");
         x += paramWidth;
         this.changeTextColor(data.color);
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() + 8;
         this.drawText(data.current, x, y, currentValueWidth, "right");
         x += currentValueWidth;
+        this.contents.fontFace = $gameSystem.mainFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() - 2;
         this.drawText("/", x, y + 12, 16, "center");
         x += 16;
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() - 4;
         this.drawText(data.max, x, y + 12, maxValueWidth, "right");
     };

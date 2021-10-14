@@ -1034,10 +1034,11 @@ function Window_StatusProfile() {
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());
         this.drawText(textMaxTp, x, y + 8, statusLabelWidth, "left");
-        const valueWidth = this.textWidth("000");
         this.changeTextColor(ColorManager.tpColor(actor));
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() + 8;
-        this.drawText(actor.maxTp(), x + statusLabelWidth + 16, y, valueWidth, "right");
+        const valueWidth = Math.max(this.textWidth("000"), (width - statusLabelWidth - 16));
+        this.drawText(actor.maxTp(), x + statusLabelWidth + 16, y, valueWidth, "left");
     };
 
 
@@ -1080,12 +1081,15 @@ function Window_StatusProfile() {
         this.drawText(data.label, x, y + 8, paramWidth, "left");
         x += paramWidth;
         this.changeTextColor(data.color);
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() + 8;
         this.drawText(data.current, x, y, currentValueWidth, "right");
         x += currentValueWidth;
+        this.contents.fontFace = $gameSystem.mainFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() - 2;
         this.drawText("/", x, y + 8, 16, "center");
         x += 16;
+        this.contents.fontFace = $gameSystem.numberFontFace();
         this.contents.fontSize = $gameSystem.mainFontSize() + 8;
         this.drawText(data.max, x, y, maxValueWidth, "right");
     };
