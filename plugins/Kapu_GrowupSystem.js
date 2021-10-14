@@ -297,18 +297,29 @@
         this._gotGpLevel = this._level;
     };
 
-    const _Game_Actor_setup = Game_Actor.prototype.setup;
     /**
-     * このGame_Actorオブジェクトを、actorIdで指定されるアクターのデータで初期化する。
-     * 
-     * @param {number} actorId アクターID
+     * 育成状態を初期化する。
      */
-    Game_Actor.prototype.setup = function(actorId) {
-        _Game_Actor_setup.call(this, actorId);
+    Game_Actor.prototype.initGrows = function() {
+    };
 
+    const _Game_Actor_initEquips = Game_Actor.prototype.initEquips;
+    /**
+     * 装備を初期化する。
+     * 
+     * @param {Array<Number>} equips 装備品ID配列
+     */
+    Game_Actor.prototype.initEquips = function(equips) {
         this.initGrows();
+        this.initGrowupPoints();
+        _Game_Actor_initEquips.call(this, equips);
+    };
 
-        const actor = $dataActors[actorId];
+    /**
+     * 育成パラメータを初期化する。
+     */
+    Game_Actor.prototype.initGrowupPoints = function() {
+        const actor = this.actor();
         const growPoint = (actor.meta.growPoint !== undefined)
                 ? Math.floor(Number(actor.meta.growPoint) || 0)
                 : initialGrowPoint;
@@ -317,8 +328,6 @@
         this._growPoint.max = Math.max(usedGrowPoint + growPoint, calcGrowPoint).clamp(0, Game_Actor.MAX_GROW_POINT);
         this._growPoint.current = Math.max(0, this._growPoint.max - usedGrowPoint);
         this._gotGpLevel = this._level;
-
-        this.recoverAll();
     };
 
     /**
@@ -338,11 +347,6 @@
         return value.clamp(0, Game_Actor.MAX_GROW_POINT);
     };
 
-    /**
-     * 育成状態を初期化する。
-     */
-    Game_Actor.prototype.initGrows = function() {
-    };
 
     const _Game_Actor_levelUp = Game_Actor.prototype.levelUp;
     /**
