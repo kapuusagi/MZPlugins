@@ -6,6 +6,7 @@
   ☐ Kapu_BattlerGender_States (新規追加)
   ☐ Kapu_UniqueItem (新規追加)
   ☐ Kapu_EquipmentWeight (新規追加)
+  ☐ Kapu_Twld_BasicParams_EquipmentWeight (新規追加)
   ☐ Kapu_Base_DamageCalculation (ガード状態をresultに追加)
   ☐ Kapu_Twld_BaseSystem (カウンター時に一時付与特性がただしく設定出来ない不具合を修正)
   ☐ Kapu_EncounterEffectManager:エンカウント時のSEがかぶってるバグをなおしてみた。
