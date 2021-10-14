@@ -5,9 +5,11 @@
   ☐ Kapu_QuestSystem_UI
   ☐ Kapu_BattlerGender_States (新規追加)
   ☐ Kapu_UniqueItem (新規追加)
+  ☐ Kapu_EquipmentWeight (新規追加)
   ☐ Kapu_Base_DamageCalculation (ガード状態をresultに追加)
   ☐ Kapu_Twld_BaseSystem (カウンター時に一時付与特性がただしく設定出来ない不具合を修正)
   ☐ Kapu_EncounterEffectManager:エンカウント時のSEがかぶってるバグをなおしてみた。
+
   Kapu_Base_Twld:
     ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
        ※逆にした方がいいのかも？
@@ -33,7 +35,6 @@
   Kapu_BuffExtension:
     ☐ 効果量に範囲を持たせたい。(Effectに含めるなら難しいかな)
       ⇒ DataEffectのフィールドに入っているので難しい。
-
 
 
 その他:
