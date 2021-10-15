@@ -669,6 +669,8 @@
      * 
      * @param {number} value パラメータ値
      * @returns {number} TPB速度値
+     * !!!overwrite!!! Game_Battler.paramToTpbSpeed()
+     *     TPB計算のための元パラメータからTPB速度を計算する。
      */
     Game_Battler.prototype.paramToTpbSpeed = function(value) {
         return 10 + ((value - 20) * 0.2).clamp(0, 15);
@@ -683,7 +685,7 @@
      *     キャスト時間の計算を単純にするため、オーバーライドする。
      */
     Game_Battler.prototype.calcCastTime = function(delay) {
-        return delay / this.tpbSpeed();
+        return (10 + ((delay - 20) * 0.2)) / this.tpbSpeed();
     };
 
     /**
