@@ -12,8 +12,8 @@
  * 
  * @help 
  * 装備許容重量が次の値になります。
- *   (武器装備許容重量) = STR * 2
- *   (防具装備許容重量) = VIT * 2
+ *   (武器装備許容重量) = 20 + (STR - 20) / 2
+ *   (防具装備許容重量) = 20 + (VIT - 20) / 2
  * 
  * 装備重量により、以下の効果がでるようになります。
  * ・防具装備重量が許容重量を超えると、その分だけAGIが減少します。
@@ -71,7 +71,7 @@
      *    武器装備許容重量の計算を変更するためオーバーライドする。
      */
     Game_Actor.prototype.weaponWeightTolerance = function() {
-        return this.str * 2;
+        return 20 + (this.str - 20) / 2;
     };
 
     /**
@@ -82,7 +82,7 @@
      *   防具装備許容重量の計算を変更するためオーバーライドする。
      */
     Game_Actor.prototype.armorWeightTolerance = function() {
-        return this.vit * 2;
+        return 20 + (this.vit - 20) / 2;
     };
     //------------------------------------------------------------------------------
     // Game_Action
