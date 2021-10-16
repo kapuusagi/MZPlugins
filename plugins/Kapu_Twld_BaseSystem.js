@@ -828,7 +828,7 @@
          * @returns {number} 全体パラメータレート
          */
         Game_Actor.prototype.paramRateAll = function(paramId) {
-            return 1 + this.traitsPi(Game_BattlerBase.TRAIT_PARAM_RATE_ALL, paramId);
+            return this.traitsPi(Game_BattlerBase.TRAIT_PARAM_RATE_ALL, paramId);
         };
     } else {
         /**
