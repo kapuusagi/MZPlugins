@@ -324,7 +324,9 @@
     Game_Player.prototype.refresh = function() {
         _Game_Player_refresh.call(this);
         const actor = $gameParty.leader();
-        this._canWalkAnim = actor.canMove();
+        if (actor) {
+            this._canWalkAnim = actor.canMove();
+        }
     };
 
     const _Game_Player_updatePattern = Game_Player.prototype.updatePattern;
