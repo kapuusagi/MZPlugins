@@ -71,7 +71,7 @@
      *    武器装備許容重量の計算を変更するためオーバーライドする。
      */
     Game_Actor.prototype.weaponWeightTolerance = function() {
-        return 20 + (this.str - 20) / 2;
+        return Math.floor(30 + (this.str - 20) / 2);
     };
 
     /**
@@ -82,7 +82,7 @@
      *   防具装備許容重量の計算を変更するためオーバーライドする。
      */
     Game_Actor.prototype.armorWeightTolerance = function() {
-        return 20 + (this.vit - 20) / 2;
+        return Math.floor(30 + (this.vit - 20) / 2);
     };
     //------------------------------------------------------------------------------
     // Game_Action

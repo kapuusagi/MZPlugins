@@ -36,6 +36,23 @@
  * @type boolean
  * @default false
  * 
+ * @param textWeight
+ * @text 重量テキスト
+ * @desc 重量を表す文字列。
+ * @type string
+ * @default 重量
+ * 
+ * @param textWeaponWeight
+ * @text 武器重量テキスト
+ * @desc 武器重量を表す文字列。
+ * @type string
+ * @default 武器重量
+ * 
+ * @param textArmorWeight
+ * @text 防具重量
+ * @desc 防具重量を表す文字列
+ * @type string
+ * @default 防具重量
  * 
  * @help 
  * アクターに装備可能重量の概念を追加し、装備品に重量を持たせます。
@@ -74,6 +91,7 @@
  * Game_Actor.equipArmorWeights() :number
  *   アクターの装備防具重量合計を得る。
  * 
+ * TextManager.weight
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -89,6 +107,9 @@
  *   <armorWeightTolerance:value#>
  *     防具キャパシティをvalueにする。
  *     指定なしの場合、プラグインパラメータで指定した値になる。
+ * 武器/防具
+ *   <weight:value#>
+ *     装備品の重さをvalueに設定する。
  * 
  * ============================================
  * 変更履歴
@@ -107,6 +128,10 @@
     const defaultActorArmorWeightTolerance = Math.max(0, Math.round(Number(parameters["defaultActorArmorWeightTolerance"]) || 0));
     const changeEquipStyleByWeight = (parameters["changeEquipStyleByWeight"] === undefined)
             ? false : (parameters["changeEquipStyleByWeight"] === "true");
+
+    const textWeight = parameters["textWeight"] || "weight";
+    const textWeaponWeight = parameters["textWeaponWeight"] || "W.Weight";
+    const textArmorWeight = parameters["textArmorWeight"] || "A.Weight";
 
     // PluginManager.registerCommand(pluginName, "Kapu_EquipWeight", args => {
     //     // TODO : コマンドの処理。
@@ -128,6 +153,32 @@
     };
     DataManager.addNotetagParserWeapons(_parseWeaponArmorNotetag);
     DataManager.addNotetagParserArmors(_parseWeaponArmorNotetag);
+    //------------------------------------------------------------------------------
+    // TextManager
+    /**
+     * 重量テキスト
+     * 
+     * @returns {string} 重量を表すテキスト
+     */
+    TextManager.weight = function() {
+        return textWeight;
+    };
+    /**
+     * 武器重量テキスト
+     * 
+     * @returns {string} 武器重量を表すテキスト
+     */
+    TextManager.weaponWeight = function() {
+        return textWeaponWeight;
+    };
+    /**
+     * 防具重量テキスト
+     * 
+     * @returns {string} 防具重量を表すテキスト
+     */
+    TextManager.armorWeight = function() {
+        return textArmorWeight;
+    };
 
     //------------------------------------------------------------------------------
     // Game_Battler
@@ -214,7 +265,13 @@
      * @returns {number} 装備重量合計
      */
     Game_Actor.prototype.equipWeaponWeights = function() {
-        return this.weapons().reduce((prev, weapon) => prev + (weapon) ? (weapon.weight || 0) : 0, 0);
+        const weapons = this.weapons();
+        const total = weapons.reduce((prev, weapon) => {
+            const weight = (weapon) ? (weapon.weight || 0) : 0;
+            return prev + weight;
+        }, 0);
+        return total;
+        // return this.weapons().reduce((prev, weapon) => prev + (weapon) ? (weapon.weight || 0) : 0, 0);
     };
 
     /**
@@ -223,7 +280,13 @@
      * @returns {number} 装備重量合計
      */
     Game_Actor.prototype.equipArmorWeights = function() {
-        return this.armors().reduce((prev, armor) => prev + (armor) ? (armor.weight || 0) : 0, 0);
+        const armors = this.armors();
+        const total = armors.reduce((prev, armor) => {
+            const weight = (armor) ? (armor.weight || 0) : 0;
+            return prev + weight;
+        }, 0)
+        return total;
+        // return this.armors().reduce((prev, armor) => prev + (armor) ? (armor.weight || 0) : 0, 0);
     };
 
     /**
@@ -339,7 +402,7 @@
          * @returns {boolean} 両手装備が必要な場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.isNeedBothHandsItem = function(item) {
-            const weight = (weapon) ? (weapon.weight || 0) : 0;
+            const weight = (item) ? (item.weight || 0) : 0;
             if (weight > (this.weaponWeightTolerance() / 2)) {
                 return true;
             }

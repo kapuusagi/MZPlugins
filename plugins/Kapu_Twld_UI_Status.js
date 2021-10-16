@@ -1441,6 +1441,8 @@ function Window_StatusProfile() {
     // Window_StatusEquip
     /**
      * Window_Status_Equipを描画する。
+     * 
+     * ステータス画面の装備表示
      */
     Window_StatusEquip.prototype.refresh = function() {
         if (this.contents) {
@@ -1479,6 +1481,32 @@ function Window_StatusProfile() {
     Window_StatusEquip.prototype.drawEquip = function() {
         const lineHeight = this.lineHeight();
         const rect = this.equipRect();
+
+        const block1Width = Math.floor(rect.width * 0.5);
+        const itemWidth = Math.floor((rect.width - block1Width) / 2);
+
+        let x = 0;
+        this.drawEquipBlock1(x, rect.y, block1Width, lineHeight * 7);
+        x += block1Width;
+        this.drawEquipBlock2(x, rect.y, itemWidth, lineHeight * 7);
+        x += itemWidth;
+        this.drawEquipBlock3(x, rect.y, itemWidth, lineHeight * 7);
+        x += itemWidth;
+
+        this.drawHorzLine(rect.x, rect.y + lineHeight * 8, rect.width);
+    };
+
+    /**
+     * 装備表示ブロック1を描画する。
+     * 装備一覧を描画する。
+     * 
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     * @param {number} height 高さ
+     */
+    Window_StatusEquip.prototype.drawEquipBlock1 = function(x, y, width, height) {
+        const lineHeight = this.lineHeight();
         const actor = this._actor;
         if (actor) {
             // 装備一覧を描画する。
@@ -1486,11 +1514,66 @@ function Window_StatusProfile() {
             const equips = actor.equips();
             for (let slotNo = 0; slotNo < slots.length; slotNo++) {
                 const slotName = this.actorSlotName(actor, slotNo);
-                this.drawEquipSlot(slotName, equips[slotNo], rect.x, rect.y + lineHeight * slotNo, rect.width);
+                const offsetY = lineHeight * slotNo;
+                if ((offsetY + lineHeight) <= height) {
+                    this.drawEquipSlot(slotName, equips[slotNo], x, y + offsetY, width);
+                }
             }
         }
+    };
 
-        this.drawHorzLine(rect.x, rect.y + lineHeight * 8, rect.width);
+    /**
+     * 装備表示ブロック2を描画する。
+     * 装備補助情報を描画する。
+     * 
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     * @param {number} height 高さ
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_StatusEquip.prototype.drawEquipBlock2 = function(x, y, width, height) {
+        const lineHeight = this.lineHeight();
+        const actor = this._actor;
+        if (actor) {
+            if (actor.equipWeights) {
+                this.drawParam(TextManager.weaponWeight(), actor.equipWeaponWeights(),
+                        x, y + lineHeight * 0, width);
+                this.drawParam(TextManager.armorWeight(), actor.equipArmorWeights(),
+                        x, y + lineHeight * 1, width);
+            }
+        }
+    };
+    /**
+     * 装備表示ブロック3を描画する。
+     * 
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     * @param {number} height 高さ
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_StatusEquip.prototype.drawEquipBlock3 = function(x, y, width, height) {
+    };
+
+    /**
+     * 値を描画する。
+     * 
+     * @param {string} label ラベルテキスト
+     * @param {number} value 値
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     */
+    Window_StatusEquip.prototype.drawParam = function(label, value, x, y, width) {
+        const labelWidth = Math.round(width * 0.4);
+        const valueWidth = width - labelWidth - 4;
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(label, x, y, labelWidth);
+        this.changeTextColor(ColorManager.normalColor());
+        const labelX = x + labelWidth + 4;
+        this.drawText(value, labelX, y, valueWidth, "right");
     };
 
     /**

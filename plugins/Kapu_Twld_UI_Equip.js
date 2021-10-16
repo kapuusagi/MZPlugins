@@ -693,6 +693,14 @@ function Window_EquipItemName() {
         }
         const tempActor = this._tempActor || actor;
         const lineHeight = this.lineHeight();
+
+        if (actor.equipWeights) {
+            this.drawParamValue(TextManager.weaponWeight(), actor.equipWeaponWeights(), tempActor.equipWeaponWeights(),
+                    x, y + lineHeight * 0, width);
+            this.drawParamValue(TextManager.armorWeight(), actor.equipArmorWeights(), tempActor.equipArmorWeights(),
+                    x, y + lineHeight * 1, width);
+        }
+
         this.drawParamRate(textCriticalRate, actor.cri, tempActor.cri,
                 x, y + lineHeight * 2, width);
         this.drawParamRate(textCriticalEvacuation, actor.cev, tempActor.cev,
