@@ -168,6 +168,19 @@
  * Window_PartyChangeStatus.paint()をオーバーライドするか、
  * drawBlock1(), drawBlock2(), drawBlock3() のいずれかをオーバーライドします。
  * 
+ * 
+ * $gameParty.addChangeableMember(actorId:number):void
+ *   入れ替え可能メンバーにactorIdで指定したメンバーを追加する。
+ * $gameParty.removePartyChangeMember(actorId:number):void
+ *   入れ替え可能メンバーからactorIdで指定したメンバーを削除する。
+ * 
+ * Game_Actor.disablePartyChange():void
+ *   入れ替えを一時的に禁止する。
+ *   パーティー入れ替えウィンドウに表示はされますが、変更できません。
+ * Game_Actor.enablePartyChange():void
+ *   入れ替えを許可する。
+ *   disablePartyChange()で無効にしたのを解除します。
+ * 
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -958,6 +971,26 @@ function Scene_PartyChange() {
             this._changeablePartyMemberOnly = false;
         }
     };
+
+
+    /**
+     * 現在選択中の項目が選択可能かどうかを得る。
+     * 
+     * Note: パーティーメンバーに追加/外す場合を想定し、
+     *       nullでも選択可能。
+     * 
+     * @returns {boolean} 選択可能である場合にはtrue, それ以外はfalse
+     */
+    Window_PartyChangeCandidateMembers.prototype.isCurrentItemEnabled = function() {
+        const actor = this.actorAt(this.index());
+        if (actor) {
+            return this.isEnabled(actor);
+        } else {
+            return !this._changeablePartyMemberOnly;
+        }
+    };
+
+
     /**
      * actorが選択可能かどうかを取得する。
      * 
@@ -1729,8 +1762,11 @@ function Scene_PartyChange() {
                     this.doChangeParty(srcActor, dstActor);
                 }
             } else {
-                // Remove srcActor member.
-                this.doRemoveActor(srcActor.actorId());
+                if ($gameParty.changeableMembers().includes(srcActor.actorId())) {
+                    // 変更可能メンバーに含まれる場合のみ外す。
+                    // Remove srcActor member.
+                    this.doRemoveActor(srcActor.actorId());
+                }
             }
         } else {
             if (dstActor !== null) {
