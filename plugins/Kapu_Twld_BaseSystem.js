@@ -254,6 +254,18 @@
  * @type number
  * @default 0
  * 
+ * @param textTraitParamAllUp
+ * @text パラメータレート特性(増加)
+ * @desc パラメータレート特性。%1にパラメータ名が入る。
+ * @type string
+ * @default %1上昇
+ * 
+ * @param textTraitParamAllDown
+ * @text パラメータレート特性(減少) 
+ * @desc パラメータレート特性。%1にパラメータ名が入る。
+ * @type string
+ * @default %1減少
+ * 
  * @help 
  * ベーシックシステムのTWLD向け変更を行うプラグインです。
  * 各Trait系プラグインによる変更前に適用するものを全て入れます。
@@ -416,6 +428,9 @@
     const colorTpFull = parameters["colorTpFull"] || "#80FF80";
     const colorTpNormal = parameters["colorTpNormal"] || "#FFFFFF";
 
+    const textTraitParamAllUp = parameters["textTraitParamAllUp"] || "";
+    const textTraitParamAllDown = parameters["textTraitParamAllDown"] || "";
+
     const _parseIds = function(str) {
         try {
             if (str) {
@@ -479,7 +494,7 @@
             for (let paramId = 0; paramId < noteTags.length; paramId++) {
                 const noteTag = noteTags[paramId];
                 if (obj.meta[noteTag] !== undefined) {
-                    const rate = _getRate(Number(obj.meta[noteTag]));
+                    const rate = _getRate(obj.meta[noteTag]);
                     if (rate >= 0) {
                         obj.traits.push({
                             code:Game_BattlerBase.TRAIT_PARAM_RATE_ALL,
@@ -673,7 +688,7 @@
      *     TPB計算のための元パラメータからTPB速度を計算する。
      */
     Game_Battler.prototype.paramToTpbSpeed = function(value) {
-        return 10 + ((value - 20) * 0.2).clamp(0, 15);
+        return (10 + (value - 20) * 0.2).clamp(0, 15);
     };
 
     /**
@@ -685,7 +700,8 @@
      *     キャスト時間の計算を単純にするため、オーバーライドする。
      */
     Game_Battler.prototype.calcCastTime = function(delay) {
-        return (10 + ((delay - 20) * 0.2)) / this.tpbSpeed();
+        return delay * 0.03;
+        //return (delay > 0) ? (10 + (delay - 20) * 0.2) / this.tpbSpeed() : 0;
     };
 
     /**
@@ -791,6 +807,20 @@
     };
 
     if (Game_BattlerBase.TRAIT_PARAM_RATE_ALL) {
+        TextManager.traitParamRateAll = function(dataId, value) {
+            const fmt = (value >= 0) ? textTraitParamAllUp : textTraitParamAllDown;
+            const paramName = this.param(dataId);
+            return ((fmt && paramName) ? fmt.format(paramName) : "");
+        };
+        TextManager._traitConverters[Game_BattlerBase.TRAIT_PARAM_RATE_ALL] = {
+            name: TextManager.traitParamRateAll,
+            value: TextManager.traitValuePi,
+            str: TextManager.traitValueStrRate,
+            baseValue: 1
+        };
+
+
+
         /**
          * パラメータレート2を得る。
          * 
