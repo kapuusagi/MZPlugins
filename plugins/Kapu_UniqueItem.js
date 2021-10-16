@@ -51,7 +51,7 @@
      * @returns {boolean} ドロップアイテム条件を満たしている場合にはtrue, それ以外はfalse.
      */
     Game_Enemy.prototype.isDropCondition = function(dropItemEntry) {
-        if (_Game_Enemy_isDropcondition.call(this, dataItemEntry)) {
+        if (_Game_Enemy_isDropcondition.call(this, dropItemEntry)) {
             const item = this.itemObject(dropItemEntry.kind, dropItemEntry.dataId);
             if (item.meta.unique || (!$gameParty.hasItem(item, true) && !$gameTemp.dropItems().includes(item))) {
                 return true;
@@ -77,7 +77,17 @@
             }
         }
         return false;
-    };    
+    };
+    //------------------------------------------------------------------------------
+    // Game_Actors
+    Game_Actors.prototype.isAnyMemberEquipped = function(item) {
+        for (const actor of this._data) {
+            if (actor && actor.isEquipped(item)) {
+                return true;
+            }
+        }
+        return false;
+    };
     //------------------------------------------------------------------------------
     // Game_Party
     const _Game_Party_gainItem = Game_Party.prototype.gainItem;
@@ -90,7 +100,7 @@
      */
     Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
         if (item.meta.unique && (amount > 0)) {
-            if (!$gameParty.hasItem(item)) {
+            if (!$gameParty.hasItem(item, false) && !$gameActors.isAnyMemberEquipped(item)) {
                 // 持っていない場合に1つだけ増やす。
                 _Game_Party_gainItem.call(this, item, 1, includeEquip);
             }

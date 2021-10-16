@@ -5,10 +5,6 @@
     ☐ 動作確認(新規追加)
   Kapu_QuestSystem_UI:
     ☐ 動作確認(新規追加)
-  Kapu_BattlerGender_States:
-    ☐ 動作確認(新規追加)
-  Kapu_UniqueItem:
-    ☐ 動作確認(新規追加)
   Kapu_EquipmentWeight:
     ☐ 動作確認(新規追加)
   Kapu_Twld_BasicParams_EquipmentWeight:
@@ -17,8 +13,6 @@
     ☐ カウンター時に一時付与特性がただしく設定出来ない不具合を修正したので、動作確認。
   Kapu_EncounterEffectManager:
     ☐ エンカウント時のSEがかぶってるバグをなおしてみたので動作確認
-  Kapu_PartyChange:
-    ☐ メンバーを外せない不具合について修正したので、動作確認
   Kapu_Base_Twld:
     ☐ 装備品も含めて、パラメータ全体にかかる特性を追加した。
        ※逆にした方がいいのかも？
