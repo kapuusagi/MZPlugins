@@ -56,7 +56,7 @@
     Game_Actor.prototype.paramEquip = function(paramId) {
         const value = _Game_Actor_paramEquip.call(this, paramId);
         if ((paramId === 2) && (Game_BattlerBase.WM_BARE_HANDS > 0) && this.hasNoWeapons()) {
-            const wmLevel = this.wmLevel(bareHandsWmTypeId);
+            const wmLevel = this.wmLevel(Game_BattlerBase.WM_BARE_HANDS);
             return value + Math.floor(wmLevel * this.str * bareHandsAtkRate);
         } else {
             return value;
