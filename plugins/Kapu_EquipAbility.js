@@ -399,7 +399,7 @@
      * @param {boolean} includeEquip 装備品を含めるかどうか。
      */
     Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
-        if (DataManager.isArmor(item) && abilityEquipTypes.includes(item.etypeId)) {
+        if (item && DataManager.isArmor(item) && abilityEquipTypes.includes(item.etypeId)) {
             /* このアイテムはアビリティデータなので増減させない */
         } else {
             _Game_Party_gainItem.call(this, item, amount, includeEquip);

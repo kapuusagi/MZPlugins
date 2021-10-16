@@ -99,13 +99,15 @@
      * @param {boolean} includeEquip 装備品を含めるかどうか。
      */
     Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
-        if (item.meta.unique && (amount > 0)) {
-            if (!$gameParty.hasItem(item, false) && !$gameActors.isAnyMemberEquipped(item)) {
+        if (item && item.meta.unique && (amount > 0)) {
+            if ($gameParty.hasItem(item, false) || $gameActors.isAnyMemberEquipped(item)) {
+                // 所持しているので増やさない。
+                return ;
+            } else {
                 // 持っていない場合に1つだけ増やす。
-                _Game_Party_gainItem.call(this, item, 1, includeEquip);
+                amount = 1;
             }
-        } else {
-            _Game_Party_gainItem.call(this, item, amount, includeEquip);
         }
+        _Game_Party_gainItem.call(this, item, amount, includeEquip);
     };
 })();
