@@ -283,19 +283,22 @@
         _Game_Actor_setup.call(this, actorId);
         const actor = $dataActors[actorId];
 
-        const pattern = /<weaponMastery: *(\d+) *, *(\d+) *, *(\d+) *>/;
+        const pattern = /<weaponMastery:(.*)>/;
         for (const line of actor.note.split(/[\r\n]+/)) {
             const re = line.match(pattern);
             if (re) {
-                const typeId = Number(re[1]);
-                const level = Number(re[2]).clamp(0, maxWmLevel);
-                const exp = Math.max(0, Number(re[3]));
-                if ((typeId > 0) && (typeId < $dataSystem.weaponTypes.length)) {
-                    if (this._wm[typeId]) {
-                        this._wm[typeId].level = level;
-                        this._wm[typeId].exp = exp;
-                    } else {
-                        this._wm[typeId] = { level:level, exp:exp };
+                const tokens = re[1].split(",");
+                if (tokens.length >= 2) {
+                    const typeId = (tokens.length >= 1) ? Number(tokens[0]) : 0;
+                    const level = (tokens.length >= 2) ? Number(tokens[1]).clamp(0, maxWmLevel) : 0;
+                    const exp = (tokens.length >= 3) ? Math.max(0, Number(tokens[2])) : 0;
+                    if ((typeId > 0) && (typeId < $dataSystem.weaponTypes.length)) {
+                        if (this._wm[typeId]) {
+                            this._wm[typeId].level = level;
+                            this._wm[typeId].exp = exp;
+                        } else {
+                            this._wm[typeId] = { level:level, exp:exp };
+                        }
                     }
                 }
             }
