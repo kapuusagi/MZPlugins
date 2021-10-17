@@ -110,6 +110,8 @@
  * 武器/防具
  *   <weight:value#>
  *     装備品の重さをvalueに設定する。
+ *   <singleHand>
+ *     片手装備であることを明示する。
  * 
  * ============================================
  * 変更履歴
@@ -313,17 +315,21 @@
                 if (canEquip) {
                     const equips = this.equips();
                     equips[slotNo] = item;
-                    if (DataManager.isWeapon(item)) {
-                        const totalWeight = equips.reduce((prev, equipment) => prev + (equipment && DataManager.isWeapon(equipment)) ? (equipment.weight || 0) : 0, 0);
-                        canEquip = totalWeight <= this.weaponWeightTolerance();
-                    } else if (DataManager.isArmor(item)) {
-                        const totalWeight = equips.reduce((prev, equipment) => prev + (equipment && DataManager.isArmor(equipment)) ? (equipment.weight || 0) : 0, 0);
-                        canEquip = totalWeight <= this.armorWeightTolerance();
-                    }
+                    // let totalWeight = 0;
+                    // for (const equipment of equips) {
+                    //     if (equipment && equipment.weight) {
+                    //         totalWeight += equipment.weight;
+                    //     }
+                    // }
+                    //const totalWeight = equips.reduce((prev, equipment) => { prev + (equipment) ? (equipment.weight || 0) : 0, 0);
+                    const totalWeight = equips.reduce((prev, equipment) => {
+                        const weight = (equipment) ? (equipment.weight || 0) : 0;
+                        return prev + weight;
+                    }, 0);
+                    canEquip = totalWeight <= this.weightTolerance();
                 }
-        
                 return canEquip;
-            };        
+            };  
         } else {
             const _Game_Actor_canEquipAtSlot = Game_Actor.prototype.canEquipAtSlot;
             /**
@@ -333,16 +339,28 @@
              * @param {object} item DataWeaponまたはDataArmor
              * @returns {boolean} 装備可能な場合にはtrue, それ以外はfalse
              */
-            Game_Actor.prototype.canEquipAtSlot = function(slotNo, item) {
+             Game_Actor.prototype.canEquipAtSlot = function(slotNo, item) {
                 let canEquip = _Game_Actor_canEquipAtSlot.call(this, slotNo, item);
                 if (canEquip) {
                     const equips = this.equips();
                     equips[slotNo] = item;
-                    const totalWeight = equips.reduce((prev, equipment) => prev + (equipment) ? (equipment.weight || 0) : 0, 0);
-                    canEquip = totalWeight <= this.weightTolerance();
+                    if (DataManager.isWeapon(item)) {
+                        const totalWeight = equips.reduce((prev, equipment) => {
+                            const weight = DataManager.isWeapon(equipment) ? (equipment.weight || 0) : 0; 
+                            return prev + weight;
+                        }, 0);
+                        canEquip = totalWeight <= this.weaponWeightTolerance();
+                    } else if (DataManager.isArmor(item)) {
+                        const totalWeight = equips.reduce((prev, equipment) => {
+                            const weight = (DataManager.isArmor(equipment)) ? (equipment.weight || 0) : 0;
+                            return prev + weight;
+                        }, 0);
+                        canEquip = totalWeight <= this.armorWeightTolerance();
+                    }
                 }
+        
                 return canEquip;
-            };  
+            };        
         }
     }
 
@@ -385,12 +403,20 @@
          */
         Game_Actor.prototype.isBothHands = function() {
             const weapon = this.mainWeapon();
-            const weight = (weapon) ? (weapon.weight || 0) : 0;
-            if (weight > (this.weaponWeightTolerance() / 2)) {
-                // 武器キャパシティの半分を超えるなら、両手持ちが必要。
-                return true;
+            if (weapon) {
+                if (weapon.meta.bothHands || weapon.meta.singleHand) {
+                    return _Game_Actor_isBothHands.call(this);
+                } else {
+                    const weight = (weapon) ? (weapon.weight || 0) : 0;
+                    if (weight > (this.weaponWeightTolerance() / 2)) {
+                        // 武器キャパシティの半分を超えるなら、両手持ちが必要。
+                        return true;
+                    } else {
+                        return _Game_Actor_isBothHands.call(this);
+                    }
+                }
             } else {
-                return _Game_Actor_isBothHands.call(this);
+                return false;
             }
         };
 
@@ -402,11 +428,16 @@
          * @returns {boolean} 両手装備が必要な場合にはtrue, それ以外はfalse.
          */
         Game_Actor.prototype.isNeedBothHandsItem = function(item) {
-            const weight = (item) ? (item.weight || 0) : 0;
-            if (weight > (this.weaponWeightTolerance() / 2)) {
-                return true;
+            if (item.meta.bothHands || item.meta.singleHand) {
+                return _Game_Actor_isNeedBothHandsItem.call(this, item);
+            } else {
+                const weight = (item) ? (item.weight || 0) : 0;
+                if (weight > (this.weaponWeightTolerance() / 2)) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
-            return _Game_Actor_isNeedBothHandsItem.call(this, item);
         };
     }
 })();
