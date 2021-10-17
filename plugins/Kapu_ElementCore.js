@@ -80,7 +80,7 @@
         const tokens = valueStr.split(",");
         for (token of tokens) {
             const elementId = Number(token);
-            if (elementId) {
+            if ((elementId > 0) && !obj.damage.elementIds.includes(elementId)) {
                 obj.damage.elementIds.push(elementId);
             }
         }
