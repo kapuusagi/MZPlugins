@@ -90,8 +90,19 @@
  *   アクターの装備武器重量合計を得る。
  * Game_Actor.equipArmorWeights() :number
  *   アクターの装備防具重量合計を得る。
+ * Game_Actor.weaponWeightRate():number
+ *   アクターの武器装備重量比（装備重量/許容重量）
+ * Game_Actor.armorWeightRate():number
+ *   アクターの防具装備重量比（装備重量/許容重量）
+ * Game_Actor.SHARED_WEIGHT_TOLERANCE
+ *   装備重量を共有するかどうかを表す。
  * 
- * TextManager.weight
+ * TextManager.weight()
+ *   装備重量を表すテキスト。
+ * TextManager.weaponWeight()
+ *   武器装備重量を表すテキスト。
+ * TextManager.armorWeight()
+ *   防具装備重量を表すテキスト。
  * ============================================
  * プラグインコマンド
  * ============================================
@@ -206,6 +217,8 @@
 
     //------------------------------------------------------------------------------
     // Game_Actor
+    Game_Actor.SHARED_WEIGHT_TOLERANCE = shareWeightTolerance;
+
     const _Game_Actor_initMembers = Game_Actor.prototype.initMembers;
     /**
      * Game_Actorのパラメータを初期化する。
@@ -297,7 +310,10 @@
      * @returns {number} 装備重量合計
      */
     Game_Actor.prototype.equipWeights = function() {
-        return this.equips().reduce((prev, equipment) => prev + (equipment) ? (equipment.weight || 0) : 0, 0);
+        return this.equips().reduce((prev, equipment) => {
+            const weight = (equipment) ? (equipment.weight || 0) : 0;
+            return prev + weight;
+        }, 0);
     };
 
     if (!canEquipOverTolerance) {
@@ -364,35 +380,62 @@
         }
     }
 
-    /**
-     * 装備重量 / 装備許容重量を取得する。
-     * Note: 過重量の場合には1を超えた値になる。
-     * 
-     * @returns {number} 割合
-     */
-    Game_Actor.prototype.weaponWeightRate = function() {
-        const tolerance = this.weaponWeightTolerance();
-        if (tolerance > 0) {
-            return this.equipWeaponWeights() / tolerance;
-        } else {
-            return 1;
-        }
-    };
+    if (shareWeightTolerance) {
+        /**
+         * 装備重量 / 装備許容重量を取得する。
+         * Note: 過重量の場合には1を超えた値になる。
+         * 
+         * @returns {number} 割合
+         */
+         Game_Actor.prototype.weaponWeightRate = function() {
+            const tolerance = this.weightTolerance();
+            if (tolerance > 0) {
+                return this.equipWeights() / tolerance;
+            } else {
+                return 1;
+            }
+        };
 
-    /**
-     * 装備重量 / 装備許容重量を取得する。
-     * Note: 過重量の場合には1を超えた値になる。
-     * 
-     * @returns {number} 割合
-     */
-    Game_Actor.prototype.armorWeightRate = function() {
-        const tolerance = this.armorWeightTolerance();
-        if (tolerance > 0) {
-            return this.equipArmorWeights() / tolerance;
-        } else {
-            return 1;
-        }
-    };
+        /**
+         * 装備重量 / 装備許容重量を取得する。
+         * Note: 過重量の場合には1を超えた値になる。
+         * 
+         * @returns {number} 割合
+         */
+        Game_Actor.prototype.armorWeightRate = function() {
+            return this.weaponWeightTolerance();
+        };
+    } else {
+        /**
+         * 装備重量 / 装備許容重量を取得する。
+         * Note: 過重量の場合には1を超えた値になる。
+         * 
+         * @returns {number} 割合
+         */
+        Game_Actor.prototype.weaponWeightRate = function() {
+            const tolerance = this.weaponWeightTolerance();
+            if (tolerance > 0) {
+                return this.equipWeaponWeights() / tolerance;
+            } else {
+                return 1;
+            }
+        };
+
+        /**
+         * 装備重量 / 装備許容重量を取得する。
+         * Note: 過重量の場合には1を超えた値になる。
+         * 
+         * @returns {number} 割合
+         */
+        Game_Actor.prototype.armorWeightRate = function() {
+            const tolerance = this.armorWeightTolerance();
+            if (tolerance > 0) {
+                return this.equipArmorWeights() / tolerance;
+            } else {
+                return 1;
+            }
+        };
+    }
 
     if (changeEquipStyleByWeight) {
         const _Game_Actor_isBothHands = Game_Actor.prototype.isBothHands;

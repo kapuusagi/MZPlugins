@@ -146,6 +146,12 @@
  * @type string
  * @default rgb(255,64,64)
  * 
+ * @param colorOverweight
+ * @text 重量超過カラー
+ * @desc 重量が超過した場合の色
+ * @type string
+ * @default rgb(255,16,16)
+ * 
  * @param allowChangeEquipInBattle
  * @text 戦闘中に装備変更を許可する
  * @desc truenにすると、戦闘コマンドに装備変更を追加する。
@@ -264,6 +270,7 @@ function Window_EquipItemName() {
     const colorAbsorb = parameters["colorAbsorb"] || "rgb(100,255,100)";
     const colorAttenuation = parameters["colorAttenuation"] || "rgb(100,180,255)";
     const colorAmplification = parameters["colorAmplification"] || "rgb(255,64,64)";
+    const colorOverweight = parameters["colorOverweight"] || "rgb(255,16,16)";
 
     /**
      * 属性エントリ配列を得る。
@@ -695,10 +702,20 @@ function Window_EquipItemName() {
         const lineHeight = this.lineHeight();
 
         if (actor.equipWeights) {
-            this.drawParamValue(TextManager.weaponWeight(), actor.equipWeaponWeights(), tempActor.equipWeaponWeights(),
+            if (Game_Actor.SHARED_WEIGHT_TOLERANCE) {
+                this.drawWeight(TextManager.weight(), actor.equipWeights(), tempActor.equipWeights(),
+                    actor.weightTolerance(),
                     x, y + lineHeight * 0, width);
-            this.drawParamValue(TextManager.armorWeight(), actor.equipArmorWeights(), tempActor.equipArmorWeights(),
+            } else {
+                this.drawWeight(TextManager.weaponWeight(),
+                    actor.equipWeaponWeights(), tempActor.equipWeaponWeights(),
+                    actor.weaponWeightTolerance(),
+                    x, y + lineHeight * 0, width);
+                this.drawWeight(TextManager.armorWeight(),
+                    actor.equipArmorWeights(), tempActor.equipArmorWeights(),
+                    actor.armorWeightTolerance(),
                     x, y + lineHeight * 1, width);
+            }
         }
 
         this.drawParamRate(textCriticalRate, actor.cri, tempActor.cri,
@@ -993,6 +1010,61 @@ function Window_EquipItemName() {
      * @param {string} paramName パラメータ名
      * @param {number} value1 値1（現在値）
      * @param {number} value2 値2（装備変更値）
+     * @param {number} tolerance 許容重量
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 幅
+     */
+     Window_EquipStatus.prototype.drawWeight = function(paramName, value1, value2, tolerance, x, y, width) {
+        if (typeof value1 === "undefined") {
+            return;
+        }
+        const paramWidth = Math.min(this.paramWidth(), Math.floor(width * 0.3));
+        const rightArrowWidth = this.rightArrowWidth();
+        const spacing = 8;
+        const valueWidth = (width - paramWidth - rightArrowWidth - spacing * 3) / 2;
+
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(paramName, x, y, paramWidth);
+
+        const value1X = x + paramWidth + spacing;
+        if (value1 > tolerance) {
+            this.changeTextColor(colorOverweight);
+        } else {
+            this.resetTextColor();
+        }
+        this.drawText(value1 + " ", value1X, y, valueWidth, "right");
+
+        if (value1 !== value2) {
+            const arrowX = value1X + valueWidth + spacing;
+            this.resetTextColor();
+            this.drawRightArrow(arrowX, y);
+            if (value2 > tolerance) {
+                this.changeTextColor(colorOverweight);
+            } else if (value2 <= value1) {
+                this.changeTextColor(ColorManager.powerUpColor());
+            } else {
+                this.changeTextColor(ColorManager.powerDownColor());
+            }
+            const value2X = arrowX + rightArrowWidth + spacing;
+            this.drawText(value2 + " ", value2X, y, valueWidth, "right");
+        } else {
+            const arrowX = value1X + valueWidth + spacing;
+            this.resetTextColor();
+            this.drawText("/", arrowX, y, rightArrowWidth);
+            const value2X = arrowX + rightArrowWidth + spacing;
+            this.drawText(tolerance, value2X, y, valueWidth, "right");
+        }
+
+        // 許容重量描画
+    };
+
+    /**
+     * 整数値タイプのパラメータを描画する。
+     * 
+     * @param {string} paramName パラメータ名
+     * @param {number} value1 値1（現在値）
+     * @param {number} value2 値2（装備変更値）
      * @param {number} x 描画位置x
      * @param {number} y 描画位置y
      * @param {number} width 幅
@@ -1078,6 +1150,7 @@ function Window_EquipItemName() {
      * @param {number} width 幅
      */
     Window_EquipStatus.prototype.drawHorzLine = function(x, y, width) {
+        this.resetTextColor();
         this.changePaintOpacity(false);
         this.drawRect(x, y + 5, width, 5);
         this.changePaintOpacity(true);

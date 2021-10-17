@@ -207,6 +207,12 @@
  * @type string
  * @default rgb(255,64,64)
  * 
+ * @param colorOverweight
+ * @text 重量超過カラー
+ * @desc 重量が超過した場合の色
+ * @type string
+ * @default rgb(255,16,16)
+ * 
  * @param weaponMasteryIcons
  * @text ウェポンマスタリアイコン
  * @desc ウェポンマスタリーで使用するアイコン。
@@ -350,6 +356,7 @@ function Window_StatusProfile() {
     const colorAbsorb = parameters["colorAbsorb"] || "rgb(100,255,100)";
     const colorAttenuation = parameters["colorAttenuation"] || "rgb(100,180,255)";
     const colorAmplification = parameters["colorAmplification"] || "rgb(255,64,64)";
+    const colorOverweight = parameters["colorOverweight"] || "rgb(255,16,16)";
     const wmGaugeColor1 = parameters["wmGaugeColor1"] || "rgb(40, 100, 40)";
     const wmGaugeColor2 = parameters["wmGaugeColor2"] || "rgb(128, 255, 128)";
     const statusPictureMethod = String(parameters["statusPictureMethod"]) || "";
@@ -859,6 +866,7 @@ function Window_StatusProfile() {
      * @param {number} width 幅
      */
     Window_Status.prototype.drawHorzLine = function(x, y, width) {
+        this.resetTextColor();
         this.changePaintOpacity(false);
         this.drawRect(x, y + 5, width, 5);
         this.changePaintOpacity(true);
@@ -1432,6 +1440,7 @@ function Window_StatusProfile() {
      * @param {number} width 幅
      */
     Window_StatusParams.prototype.drawHorzLine = function(x, y, width) {
+        this.resetTextColor();
         this.changePaintOpacity(false);
         this.drawRect(x, y + 5, width, 5);
         this.changePaintOpacity(true);
@@ -1537,10 +1546,18 @@ function Window_StatusProfile() {
         const actor = this._actor;
         if (actor) {
             if (actor.equipWeights) {
-                this.drawParam(TextManager.weaponWeight(), actor.equipWeaponWeights(),
+                if (Game_Actor.SHARED_WEIGHT_TOLERANCE) {
+                    this.drawWeight(TextManager.weight(), actor.equipWeights(),
+                        actor.weightTolerance(),
                         x, y + lineHeight * 0, width);
-                this.drawParam(TextManager.armorWeight(), actor.equipArmorWeights(),
+                } else {
+                    this.drawWeight(TextManager.weaponWeight(), actor.equipWeaponWeights(),
+                        actor.weaponWeightTolerance(),
+                        x, y + lineHeight * 0, width);
+                    this.drawWeight(TextManager.armorWeight(), actor.equipArmorWeights(),
+                        actor.armorWeightTolerance(),
                         x, y + lineHeight * 1, width);
+                }
             }
         }
     };
@@ -1554,6 +1571,28 @@ function Window_StatusProfile() {
      */
     // eslint-disable-next-line no-unused-vars
     Window_StatusEquip.prototype.drawEquipBlock3 = function(x, y, width, height) {
+    };
+    /**
+     * 値を描画する。
+     * 
+     * @param {string} label ラベルテキスト
+     * @param {number} value 値
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     */
+    Window_StatusEquip.prototype.drawWeight = function(label, value, tolerance, x, y, width) {
+        const labelWidth = Math.round(width * 0.4);
+        const valueWidth = width - labelWidth - 4;
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(label, x, y, labelWidth);
+        this.changeTextColor(ColorManager.normalColor());
+        if (value > tolerance) {
+            this.changeTextColor(colorOverweight);
+        }
+        const labelX = x + labelWidth + 4;
+        this.drawText(value, labelX, y, valueWidth, "right");
     };
 
     /**
@@ -1760,6 +1799,7 @@ function Window_StatusProfile() {
      * @param {number} width 幅
      */
     Window_StatusEquip.prototype.drawHorzLine = function(x, y, width) {
+        this.resetTextColor();
         this.changePaintOpacity(false);
         this.drawRect(x, y + 5, width, 5);
         this.changePaintOpacity(true);
@@ -1933,6 +1973,7 @@ function Window_StatusProfile() {
      * @param {number} width 幅
      */
     Window_StatusProfile.prototype.drawHorzLine = function(x, y, width) {
+        this.resetTextColor();
         this.changePaintOpacity(false);
         this.drawRect(x, y + 5, width, 5);
         this.changePaintOpacity(true);
