@@ -657,7 +657,7 @@ function Window_ItemInfo() {
         let y = rect.y;
         // 属性と射程
         this.drawWeaponBasicInformation(item, x, y, rect.width);
-        y += lineHeight;
+        y += lineHeight * 2;
 
         // 基本性能
         this.changeTextColor(ColorManager.systemColor());
@@ -683,35 +683,33 @@ function Window_ItemInfo() {
      * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawWeaponBasicInformation = function(item, x, y, width) {
-        const xLimit = x + width;
         const padding = this.itemPadding();
+        const itemWidth = (width - padding) / 4;
+
+        // 1行目
         // 種類
-        const typeWidth = 140;
-        if ((x + typeWidth) <= xLimit) {
-            this.drawWeaponType(item, x, y, typeWidth);
-            x += typeWidth + padding;
-        }
+        let offsetX = 0;
+        this.drawWeaponType(item, x + offsetX, y, itemWidth);
+        offsetX += itemWidth + padding;
 
         // 属性
-        const elementWidth = 160;
-        if ((x + elementWidth) <= xLimit) {
-            this.drawWeaponElement(item, x, y, elementWidth);
-            x += elementWidth + padding;
-        }
+        this.drawWeaponElement(item, x + offsetX, y, itemWidth);
+        offsetX += itemWidth + padding;
 
         // 射程距離
-        const rangeWidth = 140;
-        if ((x + rangeWidth) <= xLimit) {
-            this.drawWeaponRange(item, x, y, rangeWidth);
-            x += rangeWidth + padding;
-        }
+        this.drawWeaponRange(item, x + offsetX, y, itemWidth);
+        offsetX += itemWidth + padding;
 
         // 基本命中率
-        const hitRateWidth = 140;
-        if ((x + hitRateWidth) <= xLimit) {
-            this.drawWeaponHitRate(item, x, y, hitRateWidth);
-            x += hitRateWidth + padding;
-        }
+        this.drawWeaponHitRate(item, x + offsetX, y, itemWidth);
+        offsetX += itemWidth + padding;
+
+        // 2行目
+        offsetX = 0;
+        y += this.lineHeight();
+        this.drawWeight(item, x + offsetX, y, itemWidth);
+        offsetX += itemWidth + padding;
+
     };
 
     /**
@@ -723,14 +721,33 @@ function Window_ItemInfo() {
      * @param {number} width 描画幅
      */
     Window_ItemInfo.prototype.drawWeaponType = function(item, x, y, width) {
-        const textLabel = textWeaponType + ":";
-        const labelWidth = Math.min(this.textWidth(textLabel), width / 2);
-        const valueWidth = width - labelWidth;
+        const wTypeStr = TextManager.weaponTypeName(item.wtypeId) || textWeaponTypeOther;
+        this.drawLabelAndValue(textWeaponType, wTypeStr, x, y, width);
+    };
+
+    /**
+     * ラベルと値のセットを描画する。
+     * labelで指定した文字列は、最大でwidthの半分の幅に対して、システムカラーで描画される。
+     * その後に、値をvaluePositionで指定したレイアウトで描画する。
+     * 
+     * @param {string} label ラベル
+     * @param {object} value 値。(stringかnumber)
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
+     * @param {string} valuePosition 値の描画位置("left", "right", "center")。未指定時は"left"になるはず
+     */
+    Window_ItemInfo.prototype.drawLabelAndValue = function(label, value, x, y, width, valuePosition) {
+        const textLabel = label + ":";
+        const spacing = this.itemPadding();
+        const labelWidth = Math.min(this.textWidth(textLabel), (width - spacing) / 2);
+        const valueWidth = width - (labelWidth + spacing);
+        const valueX = x + labelWidth + spacing;
+
         this.changeTextColor(ColorManager.systemColor());
         this.drawText(textLabel, x, y, labelWidth);
-        const wTypeStr = TextManager.weaponTypeName(item.wtypeId) || textWeaponTypeOther;
         this.changeTextColor(ColorManager.normalColor());
-        this.drawText(wTypeStr, x + labelWidth, y, valueWidth);
+        this.drawText(value, valueX, y, valueWidth, valuePosition);
     };
 
     /**
@@ -742,20 +759,14 @@ function Window_ItemInfo() {
      * @param {number} width 描画幅
      */
      Window_ItemInfo.prototype.drawWeaponElement = function(item, x, y, width) {
-        const elementLabel = textLabelElement + ":";
-        const labelWidth = Math.min(this.textWidth(textLabelElement), width / 2);
-        const valueWidth = width - labelWidth;
-
-        this.changeTextColor(ColorManager.systemColor());
-        this.drawText(elementLabel, x, y, labelWidth);
-        this.changeTextColor(ColorManager.normalColor());
         const elementIds = this.weaponElementIds(item);
+        let elementStr;
         if (elementIds.length > 0) {
-            const elementStr = elementIds.reduce((prev, id) => prev + ($dataSystem.elements[id] || ""), "");
-            this.drawText(elementStr, x + labelWidth, y, valueWidth);
+            elementStr = elementIds.reduce((prev, id) => prev + ($dataSystem.elements[id] || ""), "");
         } else {
-            this.drawText(textNoElement, x + labelWidth, y, valueWidth);
+            elementStr = textNoElement;
         }
+        this.drawLabelAndValue(textLabelElement, elementStr, x, y, width);
     };
 
     /**
@@ -812,6 +823,8 @@ function Window_ItemInfo() {
         }
         return weaponSkillId;
     };
+
+
     /**
      * 武器レンジを描画する。
      * 武器レンジ(Kapu_RangeDistance)が適用されていない場合には何も描画しない。
@@ -822,7 +835,7 @@ function Window_ItemInfo() {
      * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawWeaponRange = function(item, x, y, width) {
-        if (typeof item.range === "undefined") {
+        if (item.range === undefined) {
             // 射程距離プラグインは導入されていないので非表示
             return ;
         }
@@ -852,13 +865,7 @@ function Window_ItemInfo() {
                 break;
         }
 
-        const labelText = textWeaponRange + ":";
-        const labelWidth = Math.min(this.textWidth(labelText), width / 2);
-        const valueWidth = width - labelWidth;
-        this.changeTextColor(ColorManager.systemColor());
-        this.drawText(labelText, x, y, labelWidth);
-        this.changeTextColor(ColorManager.normalColor());
-        this.drawText(rangeText, x + labelWidth, y, valueWidth);
+        this.drawLabelAndValue(textWeaponRange, rangeText, x, y, width);
     };
 
     /**
@@ -869,20 +876,33 @@ function Window_ItemInfo() {
      * @param {number} y y位置
      * @param {number} width 幅
      */
-    Window_ItemInfo.prototype.drawWeaponHitRate = function(item, x, y, width) {
+     Window_ItemInfo.prototype.drawWeaponHitRate = function(item, x, y, width) {
         // スキルを引っ張ってきて、successRateを出す。
         const weaponSkillId = this.weaponSkillId(item);
         const skill = $dataSkills[weaponSkillId];
         const hitRate = skill.successRate;
 
-        const labelText = textHitRate + ":";
-        const labelWidth = Math.min(this.textWidth(labelText), width / 2);
-        const valueWidth = width - labelWidth;
-        this.changeTextColor(ColorManager.systemColor());
-        this.drawText(labelText, x, y, labelWidth);
-        this.changeTextColor(ColorManager.normalColor());
-        this.drawText(hitRate + "%", x + labelWidth, y, valueWidth);
+        this.drawLabelAndValue(textHitRate, hitRate + "%", x, y, width);
     };
+
+    /**
+     * 重量を描画する。
+     * 
+     * @param {object} item アイテム(DataWeapon/DataArmor))
+     * @param {number} x 描画位置x
+     * @param {number} y 描画位置y
+     * @param {number} width 描画幅
+     */
+    Window_ItemInfo.prototype.drawWeight = function(item, x, y, width) {
+        if (item.weight === undefined) {
+            // 重量プラグインなし。
+            return ;
+        }
+        const weight = item.weight || 0;
+        this.drawLabelAndValue(TextManager.weaponWeight(), weight, x, y, width);
+    };
+
+
 
     /**
      * 武器/防具の性能(基本パラメータ)を描画する。
@@ -895,7 +915,7 @@ function Window_ItemInfo() {
     Window_ItemInfo.prototype.drawItemPerformance = function(item, x, y, width) {
         const padding = this.itemPadding();
         const offs = 40;
-        const itemWidth = (width - padding * 3 - offs) / 5;
+        const itemWidth = (width - padding * 3 - offs * 2) / 5;
 
         const x1 = x + offs;
         const x2 = x1 + itemWidth + padding;
@@ -1064,6 +1084,13 @@ function Window_ItemInfo() {
         return displayEffects;
     };
 
+    /**
+     * 描画しない特性であるかどうかを判定する。
+     * 
+     * @param {number} code コード
+     * @param {number} dataId データID
+     * @returns {boolean} 描画しない特性の場合にはtrue, それ以外はfalse。
+     */
     Window_ItemInfo.prototype.isIgnoreWeaponTrait = function(code, dataId) {
         if (((code === Game_BattlerBase.TRAIT_XPARAM) && (dataId === 0))
                 || (code === Game_BattlerBase.TRAIT_ATTACK_ELEMENT)
@@ -1081,20 +1108,18 @@ function Window_ItemInfo() {
      * @param {Rectangle} rect ウィンドウ矩形領域
      */
     Window_ItemInfo.prototype.drawArmorInformation = function(item, rect) {
-        // 加減算ステータスを表示する。
         const lineHeight = this.lineHeight();
 
         let x = rect.x;
         let y = rect.y;
         // 種類など
         this.drawArmorBasicInformation(item, x, y, rect.width);
-        y += lineHeight;
+        y += lineHeight * 2;
 
         // 基本性能
         this.changeTextColor(ColorManager.systemColor());
         this.drawText(textPerformance, x, y, rect.width, "left");
         y += lineHeight;
-
         this.drawItemPerformance(item, x, y, rect.width);
         y += lineHeight * 2;
 
@@ -1114,14 +1139,22 @@ function Window_ItemInfo() {
      * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawArmorBasicInformation = function(item, x, y, width) {
-        const xLimit = x + width;
         const padding = this.itemPadding();
+        const itemWidth = (width - padding) / 4;
+
+        // 1行目
         // 種類
-        const typeWidth = 140;
-        if ((x + typeWidth) <= xLimit) {
-            this.drawArmorType(item, x, y, typeWidth);
-            x += typeWidth + padding;
-        }
+        let offsetX = 0;
+        this.drawArmorType(item, x + offsetX, y, itemWidth);
+        offsetX += itemWidth + padding;
+
+        // 2行目
+        offsetX = 0;
+        y += this.lineHeight();
+        // 重量
+        this.drawWeight(item, x + offsetX, y, itemWidth);
+        
+
     };
 
     /**
