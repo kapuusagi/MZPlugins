@@ -59,15 +59,15 @@
  * 
  * @param textStatus2
  * @text ステータスウィンドウ2ラベル
- * @desc 「属性耐性・特性」として使用するラベル
- * @desc string
- * @default 属性耐性・特性
+ * @desc 「装備標示」として使用されるラベル。
+ * @type string
+ * @default 装備標示
  * 
  * @param textStatus3
  * @text ステータスウィンドウ3ラベル
- * @desc 「装備標示」として使用されるラベル。
- * @desc string
- * @default ページ3
+ * @desc 「属性耐性・特性」として使用するラベル
+ * @type string
+ * @default 属性耐性・特性
  * 
  * @param textProfile
  * @text プロフィールラベル
@@ -2329,10 +2329,10 @@ function Window_StatusProfile() {
                 this._statusWindow.show();
                 break;
             case "status2":
-                this._statusParamsWindow.show();
+                this._statusEquipWindow.show();
                 break;
             case "status3":
-                this._statusEquipWindow.show();
+                this._statusParamsWindow.show();
                 break;
             case "profile":
                 this._statusProfileWindow.show();
