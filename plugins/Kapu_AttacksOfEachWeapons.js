@@ -34,6 +34,8 @@
  *   <noAttack>
  *      この武器による攻撃は行わない。
  *      常にパラメータや特性の加算対象になる。
+ *   <ignoreEachWeaponAttack>
+ *      このノートタグが指定された武器を1つ以上装備していた場合、それぞれの武器による攻撃を行わない。
  * 
  * ============================================
  * 変更履歴
@@ -125,7 +127,7 @@
     Game_Actor.prototype.makeWeaponAttackActions = function(action) {
         const weaponActions = [];
 
-        if (this.hasNoWeapons()) {
+        if (this.hasNoWeapons() || this.ignoreEachWeaponAttack()) {
             // 素手の場合 -> そのままアクションを返す。
             weaponActions.push(action);
         } else {
@@ -159,6 +161,16 @@
             weaponActions.push(action);
         }
         return weaponActions;
+    };
+
+    /**
+     * それぞれの武器による攻撃を行わないかどうかを判定する。
+     * 
+     * @returns {boolean} それぞれの武器による攻撃を行わない場合にはtrue, それ以外はfalse.
+     */
+    Game_Actor.prototype.ignoreEachWeaponAttack = function() {
+        const weapons = this.weapons();
+        return weapons.some(weapon => (weapon && weapon.meta.ignoreEachWeaponAttack));
     };
 
     /**
