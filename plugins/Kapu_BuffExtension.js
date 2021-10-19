@@ -484,7 +484,6 @@ function Game_Buff() {
     Game_Buff.prototype.clear = function() {
         this._rate = 0;
         this._value = 0;
-        this._turns = 0;
     };
 
     /**
@@ -566,42 +565,6 @@ function Game_Buff() {
     };
 
     /**
-     * このバフが効果を及ぼす残りターン数を得る。
-     * 
-     * @returns {number} 残りターン数
-     */
-    Game_Buff.prototype.turns = function() {
-        return this._turns;
-    };
-
-    /**
-     * このバフの残りターン数を設定する。
-     * 
-     * @param {number} turns ターン数
-     */
-    Game_Buff.prototype.setTurns = function(turns) {
-        this._turns = turns;
-    };
-
-    /**
-     * このバフの残りターン数を加減する。
-     * 
-     * @param {number} turns ターン数
-     */
-    Game_Buff.prototype.gainTurns = function(turns) {
-        this._turns = Math.max(0, this._turns + turns);
-    };
-
-    /**
-     * 効果ターンを更新する。
-     */
-    Game_Buff.prototype.updateTurns = function() {
-        if (this._turns > 0) {
-            this._turns--;
-        }
-    };
-
-    /**
      * 
      * @param {number} baseValue ベース値
      * @returns {number} バフによる加算値
@@ -676,6 +639,7 @@ function Game_Buff() {
                 this._buffs[i] = new Game_Buff();
             }
         }
+        this._buffTurns = [0, 0, 0, 0, 0, 0, 0, 0];
     };
     /**
      * バフを消去する。
@@ -686,6 +650,7 @@ function Game_Buff() {
      */
     Game_BattlerBase.prototype.eraseBuff = function(paramId) {
         this._buffs[paramId].clear();
+        this._buffTurns[paramId] = 0;
     };
     /**
      * バフ段階を得る。
@@ -750,7 +715,8 @@ function Game_Buff() {
      */
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.isMaxBuffAffected = function(paramId) {
-        return false;
+        const buff = this.buff(paramId);
+        return buff.isBuff();
     };
 
     /**
@@ -763,7 +729,8 @@ function Game_Buff() {
      */
     // eslint-disable-next-line no-unused-vars
     Game_BattlerBase.prototype.isMaxDebuffAffected = function(paramId) {
-        return false;
+        const buff = this.buff(paramId);
+        return buff.isDebuff();
     };
 
     /**
@@ -811,46 +778,6 @@ function Game_Buff() {
     };
 
 
-
-    /**
-     * バフターンを上書きする。
-     * 
-     * @param {number} paramId パラメータID
-     * @param {number} turns ターン数
-     * !!!overwrite!!! Game_BattlerBase.overwriteBuffTurns()
-     *     バフデータ構造変更のためオーバーライドする。
-     */
-    Game_BattlerBase.prototype.overwriteBuffTurns = function(paramId, turns) {
-        const buff = this._buffs[paramId];
-        if (buff.turns() < turns) {
-            buff.setTurns(turns);
-        }
-    };
-
-    /**
-     * バフの効果ターンが切れたかどうかを取得する。
-     * 
-     * @param {number} paramId パラメータID
-     * @returns {boolean} 切れた場合にはtrue, それ以外はfalse
-     * !!!overwrite!!! Game_BattlerBase.isBuffExpired()
-     *     割合バフと固定量バフを元に計算するため、オーバーライドする。
-     */
-    Game_BattlerBase.prototype.isBuffExpired = function(paramId) {
-        const buff = this._buffs[paramId];
-        return buff.turns() === 0;
-    };
-
-    /**
-     * バフの効果ターンを更新する。
-     * 
-     * !!!overwrite!!! Game_BattlerBase.updateBuffTurns()
-     *     バフデータ構造変更のためオーバーライドする。
-     */
-    Game_BattlerBase.prototype.updateBuffTurns = function() {
-        for (let i = 0; i < this._buffs.length; i++) {
-            this._buffs[i].updateTurns();
-        }
-    };
 
     /**
      * バフアイコンを得る。
