@@ -56,6 +56,10 @@
  *       発動対象。self(ステート保持者)またはsubject(対象)
  *     count#
  *       発動回数。0で無制限。
+ *       省略時は無制限
+ *     rate#
+ *       発動確率。0より大きく、1以下の値。1で確定発動。
+ *       省略時は100％確定
  * 
  * スキル
  *   <effectOnly>
@@ -96,12 +100,13 @@ function Game_SubAction() {
      */
     const _parseAction = function(str) {
         const tokens = str.split(",");
-        if (tokens.length < 4) {
+        if (tokens.length < 3) {
             return null;
         }
         const skillId = Number(tokens[1]);
         const target = [null, "self", "subject"].indexOf(tokens[2]);
-        const count = Number(tokens[3]);
+        const count = (tokens.length >= 4) ? Number(tokens[3]) : 0;
+        const rate = (tokens.length >= 5) ? (Number(tokens[4]) || 0).clamp(0, 1) : 1;
         if ((skillId > 0) && (skillId < $dataSkills.length) && (target > 0) && (count >= 0)) {
             let when = 0;
             let stateIds = [];
@@ -136,7 +141,8 @@ function Game_SubAction() {
                     stateIds:stateIds,
                     skillId:skillId,
                     target:target,
-                    count:count
+                    count:count,
+                    rate:rate
                 };
             }
         }
@@ -257,15 +263,30 @@ function Game_SubAction() {
         const actions = [];
         for (const stateAction of stateActions) {
             if (this.meetsStateActionOfResult(stateAction, result)) {
-                const subAction = this.makeSubAction(stateAction, subject);
-                if (subAction) {
-                    actions.push(subAction);
+                if (Math.random() < stateAction.action.rate)) {
+                    const subAction = this.makeSubAction(stateAction, subject);
+                    if (subAction) {
+                        actions.push(subAction);
+                    }
                 }
             }
         }
 
         return actions;
     };
+
+    /**
+     * stateActionの発動条件に、resultが一致するかどうかを判定する。
+     * 
+     * @returns {boolean} 一致した場合にはtrue, それ以外はfalse
+     */
+     Game_Battler.prototype.meetsStateActionOfResult = function(stateAction, result) {
+        return ((stateAction.action.when === _RAISE_DAMAGED) && (result.hpDamage > 0))
+                || ((stateAction.action.when === _RAISE_HEALED) && (result.hpDamage < 0))
+                || ((stateAction.action.when === _RAISE_STATE_ADDED) && _stateIncludes(stateAction.action.stateIds))
+                || ((stateAction.action.when === _RAISE_STATE_REMOVED) && _stateIncludes(stateAction.action.stateIds));
+    };
+    
     /**
      * 行動終了時のサブアクションを得る。
      * 
@@ -275,7 +296,8 @@ function Game_SubAction() {
         const stateActions = this.stateActions();
         const actions = [];
         for (const stateAction of stateActions) {
-            if (stateAction.action.when === _RAISE_ACTIONED) {
+            if ((stateAction.action.when === _RAISE_ACTIONED)
+                    && (Math.random() < stateAction.action.rate)) {
                 const subAction = this.makeSubAction(stateAction, this);
                 if (subAction) {
                     actions.push(subAction);
@@ -295,7 +317,8 @@ function Game_SubAction() {
         const stateActions = this.stateActions();
         const actions = [];
         for (const stateAction of stateActions) {
-            if (stateAction.action.when === _RAISE_DEAD) {
+            if ((stateAction.action.when === _RAISE_DEAD)
+                    && (Math.random() < stateAction.action.rate)) {
                 const subAction = this.makeSubAction(stateAction, this);
                 if (subAction) {
                     actions.push(subAction);
@@ -369,17 +392,6 @@ function Game_SubAction() {
         return false;
     };
 
-    /**
-     * stateActionの発動条件に、resultが一致するかどうかを判定する。
-     * 
-     * @returns {boolean} 一致した場合にはtrue, それ以外はfalse
-     */
-    Game_Battler.prototype.meetsStateActionOfResult = function(stateAction, result) {
-        return ((stateAction.action.when === _RAISE_DAMAGED) && (result.hpDamage > 0))
-                || ((stateAction.action.when === _RAISE_HEALED) && (result.hpDamage < 0))
-                || ((stateAction.action.when === _RAISE_STATE_ADDED) && _stateIncludes(stateAction.action.stateIds))
-                || ((stateAction.action.when === _RAISE_STATE_REMOVED) && _stateIncludes(stateAction.action.stateIds));
-    };
 
     /**
      * ステートアクションの対象を得る。
