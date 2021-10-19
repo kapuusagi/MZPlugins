@@ -1195,6 +1195,56 @@ Game_Battler.prototype.onBattleEnd = function() {
 
 ### TPB処理について
 
+    (1) 戦闘開始直後
+    |   _tpbState は "charging" に設定される。
+    |   _tpbChageTime は 有利な状態であれば 1.0 、それ以外は tpbRelativeSpeed()の
+    |   0.0～0.5の範囲に設定される。
+    |   _tpbIdleTime は0に設定される。
+    |   
+    (2) updateTpb()によるチャージ
+    |   _tpbChargeTime は tpbAcceleration()だけ加算されていく。
+    |   _tpbCastTimeは加算なし。
+    |   _tpbChargeTime が 1.0 以上になると、_tpbState が "charged" に設定される。
+    |   _tpbIdleTime は 0 に設定される。
+    |   自動戦闘の場合には、ここでアクションが決定される。
+    |   "charged"になると、TPBターン終了処理 (Game_Battler.onTpbTurnEnd) が行われ、
+    |   ターン経過によるステート解除などが処理される。
+    |
+    (3) コマンド入力実施
+    |   アクティブ設定の場合には スキル/アイテムウィンドウを開いている時以外はTPBの更新が進む。
+    |   それ以外は、入力中TPBの更新は行われない。
+    |   コマンド入力が完了すると、startTpbCasting() にて、
+    |   _tpbState が "casting" に設定され、 _tpbCastTime が0にセットされる。
+    |   
+    (4) updateTpb()によるチャージ
+    |   _tpbChargeTime は更新されない。
+    |   _tpbCastTime は tpbAcceleration()だけ加算されていく。
+    |   _tpbCastTime が tpbRequiredCastTime() 以上になると、_tpbState が "ready" に設定される。
+    |
+    (5) BattleManager.updateTpbBattlerにてアクション発動
+    ｜  準備ができたアクションが順次実行される。
+    |
+    (6) アクション終了
+    |   BattleManager.endBattlerActions() から Game_Battler.clearTpbChargeTime() が呼び出される。
+    |   _tpbState は "charging" に設定される。
+    |   _tpbChargeTime は 0 に設定される。
+    |   次は(2)へ。
+
+    動けない時
+    (2) updateTpb()によるチャージ
+    |   動けない状態でかつ _tpbState が "charged" の場合、
+    |   _tpbIdleTime が tpbAcceleration()だけ加算されていく。
+    |
+    (3) 動けない状態での時間経過検出
+    |   Game_Battler.isTpbTimeout() でタイムアウト(_tpbIdleTime が 1.0以上)を検出すると
+    |   Game_Battler.onTpbTimeout()が呼び出され、行動後ステートの解除などが行われる。
+    |   _tpbIdleTime は 0に設定される。
+    |   続けてTPBターン終了処理 (Game_Battler.onTpbTurnEnd) が行われ、
+    |   ターン経過によるステート解除などが処理される。
+    
+
+
+
 Game_Battler.updateTpb()で処理される。TPB関連のパラメータとしては以下3つが使用される。
 * _tpbChageTime - TPBステートがchargingの時に更新される。
 _tpbChageTimeが1.0以上になるとTPBステートがchangedになる。
