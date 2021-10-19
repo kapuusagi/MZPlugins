@@ -23,6 +23,8 @@
     ☐ 動作確認(新規追加)
   Kapu_ActionState:
     ☐ ActionState発動時、発動率を設定できるようにした。
+  Kapu_Twld_WeaponMastery:
+    ☐ 素手武器タイプスキルについて、素手の場合でも使用可能判定されるようにした。
     
       
 機能拡張予定:

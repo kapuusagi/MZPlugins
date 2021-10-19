@@ -447,6 +447,22 @@
         return 1;
     };
 
+    const _Game_Actor_isWtypeEquipped = Game_Actor.prototype.isWtypeEquipped;
+    /**
+     * 指定された武器タイプを装備しているかどうかを判定する。
+     * 
+     * @param {number} wtypeId 武器タイプID
+     * @returns {boolean} 装備している場合にはtrue, それ以外はfalse.
+     */
+    Game_Actor.prototype.isWtypeEquipped = function(wtypeId) {
+        let isEquipped = _Game_Actor_isWtypeEquipped.call(wTypeId);
+        if (!isEquipped && (wtypeId === bareHandsWmTypeId) && this.hasNoWeapons()) {
+            // 素手武器タイプの場合、武器未装備の場合でも使用可能とする。
+            isEquipped = true;
+        }
+        return isEquipped;
+    }
+
     //------------------------------------------------------------------------------
     // Game_Enemy
     const _Game_Enemy_initMembers = Game_Enemy.prototype.initMembers;
