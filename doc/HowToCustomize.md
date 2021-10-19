@@ -537,14 +537,15 @@ Traitの持ってるメンバ
 |EFFECT_GAIN_TP|13|-|TP回復量|-|TP回復効果。|
 |EFFECT_ADD_STATE|21|0|付与率(0.0～1.0)|-|攻撃ステート付与効果。使用者のattackStates()を付与効果。|
 |||ステートID|付与率|-|通常ステート付与効果。dataIdで指定されたステートの付与効果。|
-|EFFECT_REMOVE_STATE|22|||||
+|EFFECT_REMOVE_STATE|22|ステートID|解除率|-|指定されたステートを解除率の確率で解除する。|
 |EFFECT_ADD_BUFF|31|パラメータID|適用ターン数|-|指定したパラメータのバフレベルを1段階向上させる。効果期間はvalue1ターン。|
 |EFFECT_ADD_DEBUFF|32|パラメータID|適用ターン数|-|指定したパラメータのバフレベルを1段階低下させる。効果期間はvalue1ターン。|
-|EFFECT_REMOVE_BUFF|33|||||
-|EFFECT_REMOVE_DEBUFF|34|||||
-|EFFECT_SPECIAL|41|||||
-|EFFECT_GROW|42|||||
-|EFFECT_LEARN_SKILL|43|||||
+|EFFECT_REMOVE_BUFF|33|パラメータID|-|-|指定したパラメータのバフを取り除く。|
+|EFFECT_REMOVE_DEBUFF|34|パラメータID|-|-|指定したパラメータのデバフを取り除く。|
+|EFFECT_SPECIAL|41|0|-|-|逃走効果。対象のescape()メソッドを呼び出す。|
+|||上記以外|-|-|割り当てなし|
+|EFFECT_GROW|42|パラメータID|効果量|-|指定したパラメータを効果量だけ増減させる。|
+|EFFECT_LEARN_SKILL|43|スキルID|-|-|指定したスキルを習得させる。（アクターのみ）|
 |EFFECT_COMMON_EVENT|44|コモンイベントID|-|-|指定したコモンイベントを実行欄に積む。|
 
 独自の効果を追加するなら、以下はフックする必要があるかもしれない。
