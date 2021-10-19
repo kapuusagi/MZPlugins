@@ -1195,6 +1195,8 @@ function Sprite_BattleHudPicture() {
         this._iconIndex = 0;
         this.anchor.x = 0;
         this.anchor.y = 0.5;
+        this.bitmap.fontFace = $gameSystem.numberFontFace();
+        this.bitmap.fontSize = ImageManager.iconHeight * 0.5;
     };
 
     /**
@@ -1252,26 +1254,51 @@ function Sprite_BattleHudPicture() {
      * 表示するアイコンを切り替えて更新する。
      */
     Sprite_HudStateIcons.prototype.updateIcon = function() {
-        const icons = [];
-        if (this.shouldDisplay()) {
-            icons.push(...this._battler.allIcons());
-        }
+        const displayStates = this.displayStates();
         this.bitmap.clear();
-        if (icons.length > 0) {
+        if (displayStates.length > 0) {
             this._iconIndex += 4;
-            if (this._iconIndex >= icons.length) {
+            if (this._iconIndex >= displayStates.length) {
                 this._iconIndex = 0;
             }
             for (let i = 0; i < 4; i++) {
-                const iconIndex = icons[this._iconIndex + i];
-                if (iconIndex) {
-                    this.drawIcon(iconIndex, i);
+                const displayState = displayStates[this._iconIndex + i];
+                if (displayState.iconId) {
+                    this.drawIcon(displayState.iconId, i);
+                }
+                if (displayState.turns) {
+                    this.drawTurns(turns, i);
                 }
             }
-
         } else {
             this._animationIndex = 0;
         }
+    };
+
+    /**
+     * 表示するステートを得る。
+     * 
+     * @returns {Array<object>} 表示するステート情報
+     */
+    Sprite_HudStateIcons.prototype.displayStates = function() {
+        if (this.shouldDisplay()) {
+            if (this._battler.displayStates) {
+                return this._battler.displayStates();
+            } else {
+                const icons = this._battler.allIcons();
+                const displayStates = [];
+                for (const iconId of icons) {
+                    displayStates.push({
+                        iconId:iconId,
+                        turns:0
+                    });
+                }
+                return displayStates;
+            }
+        } else {
+            return [];
+        }
+
     };
 
     /**
@@ -1289,6 +1316,18 @@ function Sprite_BattleHudPicture() {
         const dx = (pw + 2) * drawIndex;
         const dy = 0;
         this.bitmap.blt(this._iconBitmap, sx, sy, pw, ph, dx, dy);
+    };
+
+    /**
+     * ターン数を描画する。
+     * 
+     * @param {number} turns ターン数
+     * @param {number} drawIndex 描画位置(0-3)
+     */
+    Sprite_HudStateIcons.prototype.drawTurns = function(turns, drawIndex) {
+        const dx = (pw + 2) * drawIndex;
+        const dy = ImageManager.iconHeight / 2;
+        this.bitmap.drawText(turns, dx, dy, ImageManager.width, this.fontSize, "right")
     };
 
     /**

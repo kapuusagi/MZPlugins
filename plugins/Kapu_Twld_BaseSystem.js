@@ -668,6 +668,49 @@
                 .filter(iconIndex => iconIndex > 0);
         }
     };
+
+    /**
+     * 表示するべきステートを得る。
+     * 
+     * @returns {Array<object>} アイコンとターン数の配列。
+     */
+    Game_BattlerBase.prototype.displayStates = function() {
+        const displayStates = [];
+        // ステート
+        if ($gameParty.inBattle()) {
+            const states = this.states().filter(state => !state.meta.displayMapOnly && state.iconIndex > 0)
+            for (const state of states) {
+                const turns = (state.autoRemovalTiming === 2) ? this._stateTurns[state.id] : 0;
+                displaystates.push({
+                    iconIndex: state.iconIndex,
+                    turns: turns
+                });
+            }
+        } else {
+            const states = this.states().filter(state => state.iconIndex > 0);
+            for (const state of states) {
+                const turns = (state.autoRemovalTiming === 2) ? this._stateTurns[state.id] : 0;
+                displaystates.push({
+                    iconIndex: state.iconIndex,
+                    turns: turns
+                });
+            }
+        }
+
+        // バフ
+        for (let paramId = 0; paramId < 8; paramId++) {
+            if (this.isBuffOrDebuffAffected(paramId)) {
+                const iconIndex = this.buffIconIndex(level, paramId)
+                const turns = this._buffTurns[paramId];
+                displayStates.push({
+                    iconIndex: iconIndex,
+                    turns: turns
+                });
+            }
+        }
+
+        return displayStates;
+    };
     //------------------------------------------------------------------------------
     // Game_Battler
     /**
