@@ -34,7 +34,9 @@
   Kapu_QuestSystem_UI:
     ☐ 店で操作したときメッセージ表示。各店に個性を持たせたい。
   Kapu_MapTransfer:
-    ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど。
+    ☐ ワイプを追加したい。いけるかなあ。単純ワイプは簡単だけど、パターンでやりたい。
+       DisplacementFilterのソースを見ると、texture と vFilterCoordというのがあるので、
+       なんかこれを使ってうまくやるっぽい。
   Kapu_Timer_Extend:
     ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
   Kapu_BuffExtension:
