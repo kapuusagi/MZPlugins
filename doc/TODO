@@ -10,7 +10,10 @@
   Kapu_TargetManager: 
     ☐ アイテム/スキルを使用可能かどうか判定するのに、canUse()を使用するようにしてみた。
        リスト表示処理が(かなり)重くなってるはず。
-
+  Kapu_Base_State:
+    ☐ ステート自動解除するかどうかを判定するメソッドを追加したので確認が必要。
+  Kapu_StateExtends:
+    ☐ 動作確認(新規追加)
       
 機能拡張予定:
   Kapu_Twld_BattleSystem:

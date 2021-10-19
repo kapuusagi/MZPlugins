@@ -66,5 +66,30 @@
     Game_BattlerBase.prototype.isClearStateByDie = function(stateId) {
         return true;
     };
+    //------------------------------------------------------------------------------
+    // Game_Battler
+    /**
+     * ターンやアクション完了時のステート消去処理を行う。
+     * 
+     * @param {number} timing タイミング(1:行動終了, 2:ターン終了)
+     */
+    Game_Battler.prototype.removeStatesAuto = function(timing) {
+        for (const state of this.states()) {
+            if (this.isStateExpired(state.id)
+                    && this.meetsStateAutoRemoveCondition(state, timing)) {
+                this.removeState(state.id);
+            }
+        }
+    };
 
+    /**
+     * stateで指定したステートが自動解除される条件を満たしているかを判定する。
+     * 
+     * @param {DataState} state ステート
+     * @param {number} timing タイミング(1:行動終了, 2:ターン終了)
+     * @returns {boolean} ステート解除タイミングであればtrue, それ以外はfalse.
+     */
+    Game_Battler.prototype.meetsStateAutoRemoveCondition = function(state, timing) {
+        return (state.autoRemovalTiming === timing);
+    };
 })();
