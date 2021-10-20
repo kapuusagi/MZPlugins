@@ -190,6 +190,18 @@
  * @desc コマンド入力中、対象アクターをズーム表示させる。
  * @type boolean
  * @default false
+ * 
+ * @param defaultUseSkillAnimationId
+ * @text スキル使用時アニメーション
+ * @desc スキル使用時に、使用者のエフェクトとして表示するアニメーション。0で表示しない。
+ * @type animation
+ * @default 0
+ * 
+ * @param defaultUseItemAnimationId
+ * @text アイテム使用時アニメーション
+ * @desc アイテム使用時に、使用者のエフェクトとして表示するアニメーション。0で表示しない。
+ * @type animation
+ * @default 0
  *  
  *  
  * @requiredAssets img/hud/ActiveHud
@@ -231,8 +243,13 @@
  * ============================================
  * アクター
  *   <battlePicture:pictureName$>
- *        フロントビューで表示するアクターの画像。
- *        picturesフォルダの下から引っ張ってくる。
+ *     フロントビューで表示するアクターの画像。
+ *     picturesフォルダの下から引っ張ってくる。
+ * スキル/アイテム
+ *   <useAnimationId:id#>
+ *     スキル/アイテム使用時、使用者に表示するアニメーションID。
+ *     魔法発動効果を表示させたい場合などに使用する。
+ *     未指定時はプラグインパラメータで指定したアニメーションが表示される。
  * 
  * ============================================
  * 変更履歴
@@ -343,6 +360,9 @@ function Sprite_BattleHudPicture() {
     const pictureMethod = parameters["pictureMethod"] || "battlePicture";
     const enableInputtingZoom = (parameters["enableInputtingZoom"] === undefined)
             ? false : (parameters["enableInputtingZoom"] === "true");
+
+    const defaultUseSkillAnimationId = Math.round(Number(parameters["defaultUseSkillAnimationId"]) || 0);
+    const defaultUseItemAnimationId = Math.round(Number(parameters["defaultUseItemAnimationId"]) || 0);
 
     /**
      * アクターIDを得る。
@@ -2355,6 +2375,56 @@ function Sprite_BattleHudPicture() {
             } else {
                 return undefined;
             }
+        }
+    };
+
+
+    //------------------------------------------------------------------------------
+    // Window_BattleLog
+    const _Window_BattleLog_performAction = Window_BattleLog.prototype.performAction;
+    /**
+     * アクションを開始する。
+     * 
+     * @param {Game_Battler} subject 使用者
+     * @param {Game_Action} action アクション
+     */
+    Window_BattleLog.prototype.performAction = function(subject, action) {
+        _Window_BattleLog_performAction.call(this, subject, action);
+
+        const item = action.item();
+        const animationId = this.useAnimationId(item);
+        if (item && animationId) {
+            this.showUseAnimation(subject, animationId);
+        }
+    };
+
+    /**
+     * 使用時アニメーションを表示する。
+     * (表示要求を出す。)
+     * 
+     * @param {Game_Battler} subject 使用者
+     * @param {number} animationId アニメーションID
+     */
+    Window_BattleLog.prototype.showUseAnimation = function(subject, animationId) {
+        $gameTemp.requestAnimation([subject], animationId, false);
+    };
+
+    /**
+     * 使用時表示アニメーションIDを得る。
+     * 
+     * @param {object} item DataItem/DataSkill
+     */
+    Window_BattleLog.prototype.useAnimationId = function(item) {
+        if (item.meta.useAnimationId !== undefined) {
+            return Number(item.meta.useAnimationId);
+        } else {
+            if (DataManager.isSkill(item)) {
+                return defaultUseSkillAnimationId;
+            } else if (DataManager.isItem(item)) {
+                return defaultUseItemAnimationId;
+            }
+
+            return 0;
         }
     };
 
