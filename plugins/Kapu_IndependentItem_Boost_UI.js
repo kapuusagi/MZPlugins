@@ -227,7 +227,9 @@
  * ============================================
  * ノートタグ
  * ============================================
- * なし
+ * 武器/防具
+ *   <disableRename>
+ *     武器/防具をリネームできないように指定します。
  * 
  * ============================================
  * 変更履歴
@@ -639,6 +641,11 @@ function Window_BlacksmithNameEdit() {
      */
     Window_BlacksmithItemList.prototype.isEnabled = function(item) {
         if (item) {
+            if ((this._mode === Scene_BlacksmithShop.SHOP_MODE_RENAME) && (item.meta.disableRename)) {
+                return false;
+            }
+
+
             if (this._mode === Scene_BlacksmithShop.SHOP_MODE_BOOST) {
                 return (this.price(item) <= this._money) && DataManager.isBoostableItem(item)
                         && (item.boostCount < this._maxBoostCount);

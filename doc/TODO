@@ -26,6 +26,8 @@
     ☐ ActionState発動時、発動率を設定できるようにした。
   Kapu_Twld_WeaponMastery:
     ☐ 素手武器タイプスキルについて、素手の場合でも使用可能判定されるようにした。
+  Kapu_IndependentItem_Boost_UI:
+    ☐ ノートタグ<disableRename>を追加した。
     
       
 機能拡張予定:
@@ -43,7 +45,7 @@
        DisplacementFilterのソースを見ると、texture と vFilterCoordというのがあるので、
        なんかこれを使ってうまくやるっぽい。
   Kapu_Timer_Extend:
-    ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。
+    ☐ TimerExtend ステートをタイマー（時間経過）で解除できるようにしたい。⇒いらないかも。
   Kapu_BuffExtension:
     ☐ 効果量に範囲を持たせたい。(Effectに含めるなら難しいかな)
       ⇒ DataEffectのフィールドに入っているので難しい。
