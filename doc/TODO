@@ -28,6 +28,12 @@
     ☐ 素手武器タイプスキルについて、素手の場合でも使用可能判定されるようにした。
   Kapu_IndependentItem_Boost_UI:
     ☐ ノートタグ<disableRename>を追加した。
+  Kapu_IndependentItem_Boot:
+    ☐ 乗算特性に対する強化効果が適切でない不具合を修正。
+  Kapu_IndependentItem_Boost_Traits:
+    ☐ 乗算特性に対する強化効果が適切でない不具合を修正。
+  Kapu_IndependentItem_Boost_EquipmentWeight:
+    ☐ ウェイトを操作するタイプを追加。
     
       
 機能拡張予定:

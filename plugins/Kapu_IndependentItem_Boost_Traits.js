@@ -37,7 +37,7 @@
  *         MDRPR MDR貫通率(Kapu_Trait_Penetrateが必要)
  * 
  *         Variance ばらつき度(Kapu_Trait_Varianceが必要)
- *         
+ *         ElementAttackRate(id#) 攻撃属性レート(Kapu_ElementCoreが必要)
  *     valueで指定できる書式は次の通り。
  *         value#     value#固定値だけパラメータを増加させる。
  *         min#:max#  min#～max#の範囲のランダム値だけパラメータを増加させる。
@@ -49,7 +49,7 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
-    // const pluginName = "TODO:拡張子なしのプラグインファイル名。ファイル名変更すると動かなくなるのはどうなの？";
+    // const pluginName = "Kapu_IndependentItem_Boost_Traits";
     // const parameters = PluginManager.parameters(pluginName);
 
     // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
@@ -58,7 +58,7 @@
     // });
 
     //------------------------------------------------------------------------------
-    // TODO : メソッドフック・拡張
+    // DataManager
     const _DataManager_applyBoostEffect = DataManager.applyBoostEffect;
     /**
      * 強化項目を適用する。
@@ -69,46 +69,60 @@
      */
     // eslint-disable-next-line no-unused-vars
     DataManager.applyBoostEffect = function(item, key, value) {
+        {
+            let re;
+            if (Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE
+                    && (re = key.match(/ElementAttackRate\((\d+)\)/)) !== null) {
+                const elementId = Number(re[1]) || 0;
+                if (elementId > 0) {
+                    DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_ELEMENT_ATTACK_RATE, elementId,
+                        DataManager.getBoostValueReal(value));
+                }
+
+                return ;
+            }
+        }
+
         switch (key) {
             case "CDR":
                 if (Game_BattlerBase.TRAIT_XPARAM_DID_CDR) {
-                    DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_CDR,
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_CDR,
                             DataManager.getBoostValueReal(value));
                 }
                 break;
             case "TPAdd":
                 if (Game_BattlerBase.TRAIT_MAXTP_ADD) {
-                    DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_MAXTP_ADD, 0,
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_MAXTP_ADD, 0,
                             DataManager.getBoostValueInt(value));
                 }
                 break;
             case "DEFPR":
                 if (Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR) {
-                    DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR,
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_DEFPR,
                             DataManager.getBoostValueReal(value));
                 }
                 break;
             case "MDFPR":
                 if (Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR) {
-                    DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR,
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_MDFPR,
                             DataManager.getBoostValueReal(value));
                 }
                 break;
             case "PDRPR":
                 if (Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR) {
-                    DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR,
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_PDRPR,
                         DataManager.getBoostValueReal(value));
                 }
                 break;
             case "MDRPR":
                 if (Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR) {
-                    DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR,
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, Game_BattlerBase.TRAIT_XPARAM_DID_MDRPR,
                             DataManager.getBoostValueReal(value));
                 }
                 break;
             case "Variance":
                 if (Game_BattlerBase.TRAIT_SPARAM_DID_VARIANCE_RATE) {
-                    DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, Game_BattlerBase.TRAIT_SPARAM_DID_VARIANCE_RATE,
+                    DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, Game_BattlerBase.TRAIT_SPARAM_DID_VARIANCE_RATE,
                             DataManager.getBoostValueReal(value));
                 }
                 break;

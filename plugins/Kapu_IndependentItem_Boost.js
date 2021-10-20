@@ -121,26 +121,27 @@
  *         MDF 魔法防御力
  *         AGI 素早さ
  *         LUK 運
- *         HIT 命中率(1.0が+100%であることに注意。)
- *         EVA 回避率(1.0が+100%であることに注意。)
- *         CRI クリティカル率(1.0が+100%であることに注意。)
- *         CEV クリティカル回避率(1.0が+100%であることに注意。)
- *         MEV 魔法回避率(1.0が+100%であることに注意。)
- *         MRF 魔法反射率(1.0が+100%であることに注意。)
- *         CNT 反撃率(1.0が+100%であることに注意。)
- *         HRG HP回復率(1.0が+100%であることに注意。)
- *         MRG MP回復率(1.0が+100%であることに注意。)
- *         TRG TP回復率(1.0が+100%であることに注意。)
- *         TGR 被ターゲット率(1.0が+100%であることに注意。)
- *         GRD ガード時軽減率(1.0が+100%であることに注意。)
- *         REC リカバリ率(1.0が+100%であることに注意。)
- *         PHA アイテム使用効果補正率(1.0が+100%であることに注意。)
- *         MCR MPコストレート(1.0が+100%であることに注意。)
- *         TCR TPチャージレート(1.0が+100%であることに注意。)
- *         PDR 物理被ダメージレート(1.0が+100%であることに注意。)
- *         MDR 魔法被ダメージレート(1.0が+100%であることに注意。)
- *         FDR 床被ダメージレート(1.0が+100%であることに注意。)
- *         EXR 経験値レート(1.0が+100%であることに注意。)
+ *         HIT 命中率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         EVA 回避率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         CRI クリティカル率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         CEV クリティカル回避率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         MEV 魔法回避率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         MRF 魔法反射率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         CNT 反撃率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         HRG HP回復率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         MRG MP回復率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         TRG TP回復率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         TGR 被ターゲット率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         GRD ガード時軽減率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         REC リカバリ率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         PHA アイテム使用効果補正率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         MCR MPコストレート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         TCR TPチャージレート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         PDR 物理被ダメージレート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         MDR 魔法被ダメージレート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         FDR 床被ダメージレート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         EXR 経験値レート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
+ *         ElementRate(id#) 属性id#に対するダメージレート。(1.0が+100%であることに注意。例 +0.2すると20%増になる)
  *         
  *     valueで指定できる書式は次の通り。
  *         value#     value#固定値だけパラメータを増加させる。
@@ -470,6 +471,18 @@
      */
     // eslint-disable-next-line no-unused-vars
     DataManager.applyBoostEffect = function(item, key, value) {
+        {
+            let re;
+            if ((re = key.match(/ElementRate\((\d+)\)/)) !== null) {
+                const elementId = Number(re[1]) || 0;
+                if (elementId > 0) {
+                    DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId,
+                        DataManager.getBoostValueReal(value));
+                }
+
+                return ;
+            }
+        }        
         switch (key) {
             case "MHP":
                 item.params[0] += DataManager.getBoostValueInt(value);
@@ -496,83 +509,83 @@
                 item.params[7] += DataManager.getBoostValueInt(value);
                 break;
             case "HIT":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 0,
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 0,
                     DataManager.getBoostValueReal(value));
                 break;
             case "EVA":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 1,
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 1,
                     DataManager.getBoostValueReal(value));
                 break;
             case "CRI":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 2,
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 2,
                     DataManager.getBoostValueReal(value));
                 break;
             case "CEV":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 3,
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 3,
                     DataManager.getBoostValueReal(value));
                 break;
             case "MEV":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 4,
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 4,
                     DataManager.getBoostValueReal(value));
                 break;
             case "MRF":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 5,
-                    DataManager.getBoostValueReal(value));
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 5,
+                    DataManager.getBoostValueReal(value), 0);
                 break;
             case "CNT":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 6,
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 6,
                     DataManager.getBoostValueReal(value));
                 break;
             case "HRG":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 7,
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 7,
                     DataManager.getBoostValueReal(value));
                 break;
             case "MRG":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 8,
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 8,
                     DataManager.getBoostValueReal(value));
                 break;
             case "TRG":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_XPARAM, 9,
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 9,
                     DataManager.getBoostValueReal(value));
                 break;
             case "TGR":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 0,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 0,
                     DataManager.getBoostValueReal(value));
                 break;
             case "GRD":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 1,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 1,
                     DataManager.getBoostValueReal(value));
                 break;
             case "REC":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 2,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 2,
                     DataManager.getBoostValueReal(value));
                 break;
             case "PHA":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 3,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 3,
                     DataManager.getBoostValueReal(value));
                 break;
             case "MCR":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 4,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 4,
                     DataManager.getBoostValueReal(value));
                 break;
             case "TCR":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 5,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 5,
                     DataManager.getBoostValueReal(value));
                 break;
             case "PDR":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 6,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 6,
                     DataManager.getBoostValueReal(value));
                 break;
             case "MDR":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 7,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 7,
                     DataManager.getBoostValueReal(value));
                 break;
             case "FDR":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 8,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 8,
                     DataManager.getBoostValueReal(value));
                 break;
             case "EXR":
-                DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_SPARAM, 9,
+                DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 9,
                     DataManager.getBoostValueReal(value));
                 break;
         }
@@ -649,26 +662,49 @@
     };
 
     /**
-     * アイテムに特性を追加する。
+     * アイテムに加算タイプ特性を追加する。
      * 既に同じ内容の特性を持っている場合には加算する。
      * 
      * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
      * @param {number} code 特性コード
      * @param {number} dataId データID
      * @param {number} value 値
+     * @param {number} minValue 最小値(省略時は-1.0)
      */
-    DataManager.addBoostTrait = function(item, code, dataId, value) {
+    DataManager.addBoostTraitSum = function(item, code, dataId, value, minValue) {
+        minValue = minValue || 0;
         const trait = item.traits.find(function(t) {
             return (t.code == code) && (t.dataId == dataId);
         });
         if (trait) {
-            trait.value += value;
+            trait.value = Math.max(minValue, trait.value);
         } else {
             // 無い場合には新規追加。
             item.traits.push({ code:code, dataId:dataId, value:value });
         }
     };
-
+    /**
+     * アイテムに乗算タイプ特性を追加する。
+     * 既に同じ内容の特性を持っている場合には乗算する。
+     * 
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @param {number} code 特性コード
+     * @param {number} dataId データID
+     * @param {number} value 値
+     * @param {number} minValue 最小値(省略時は0)
+     */
+    DataManager.addBoostTraitMultiple = function(item, code, dataId, value, minValue) {
+        minValue = minValue || 0; // 省略時には0とする。
+        const trait = item.traits.find(function(t) {
+            return (t.code == code) && (t.dataId == dataId);
+        });
+        if (trait) {
+            trait.value = Math.max(minValue, trait.value + value);
+        } else {
+            // 無い場合には新規追加。
+            item.traits.push({ code:code, dataId:dataId, value:Math.max(minValue, (1.0 + value)) });
+        }
+    };
     /**
      * 強化費用を得る。
      * 
