@@ -681,7 +681,7 @@
             const states = this.states().filter(state => !state.meta.displayMapOnly && state.iconIndex > 0)
             for (const state of states) {
                 const turns = (state.autoRemovalTiming === 2) ? this._stateTurns[state.id] : 0;
-                displaystates.push({
+                displayStates.push({
                     iconIndex: state.iconIndex,
                     turns: turns
                 });
@@ -690,7 +690,7 @@
             const states = this.states().filter(state => state.iconIndex > 0);
             for (const state of states) {
                 const turns = (state.autoRemovalTiming === 2) ? this._stateTurns[state.id] : 0;
-                displaystates.push({
+                displayStates.push({
                     iconIndex: state.iconIndex,
                     turns: turns
                 });
@@ -700,6 +700,8 @@
         // バフ
         for (let paramId = 0; paramId < 8; paramId++) {
             if (this.isBuffOrDebuffAffected(paramId)) {
+                const buff = this._buffs[paramId];
+                const level = (typeof buff === "number") ? buff : (buff.isBuff() ? 1 : -1);
                 const iconIndex = this.buffIconIndex(level, paramId)
                 const turns = this._buffTurns[paramId];
                 displayStates.push({
