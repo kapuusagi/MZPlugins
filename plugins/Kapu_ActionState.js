@@ -263,7 +263,7 @@ function Game_SubAction() {
         const actions = [];
         for (const stateAction of stateActions) {
             if (this.meetsStateActionOfResult(stateAction, result)) {
-                if (Math.random() < stateAction.action.rate)) {
+                if (Math.random() < stateAction.action.rate) {
                     const subAction = this.makeSubAction(stateAction, subject);
                     if (subAction) {
                         actions.push(subAction);
