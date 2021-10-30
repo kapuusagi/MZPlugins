@@ -348,7 +348,6 @@ $dataItemScopes = null;
         name:textAllAlives, needsSelection:false, targetCount:TargetManager.TARGET_COUNT_ALL,
         forOpponent:true, forFriend:true,forEveryone:true, forAlive:true, forAll:true };
 
-
     //------------------------------------------------------------------------------
     // ColorManager
     /**
@@ -542,6 +541,8 @@ $dataItemScopes = null;
                 return this.makeSelectableActionTargetsUser(subject, item);
             case TargetManager.SCOPE_EVERYONE: // all alived
                 return this.makeSelectableActionTargetsAll(subject, item);
+            default:
+                return [];
         }
     };
 
@@ -2056,18 +2057,6 @@ $dataItemScopes = null;
     };
     //------------------------------------------------------------------------------
     // Game_BattlerBase
-    const _Game_BattlerBase_canUse = Game_BattlerBase.prototype.canUse;
-    /**
-     * itemで指定されるオブジェクトを使用可能かどうかを得る。
-     * 
-     * @param {DataItem} item アイテム
-     * @return {boolean} 使用可能な場合にはtrue, それ以外はfalse
-     */
-    Game_BattlerBase.prototype.canUse = function(item) {
-        return _Game_BattlerBase_canUse.call(this, item)
-                && this.hasAnyTarget(item);
-    };
-
     /**
      * 使用可能な対象があるかどうかを判定する。
      * 
