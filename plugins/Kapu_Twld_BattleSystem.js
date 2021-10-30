@@ -1215,8 +1215,6 @@ function Sprite_BattleHudPicture() {
         this._iconIndex = 0;
         this.anchor.x = 0;
         this.anchor.y = 0.5;
-        this.bitmap.fontFace = $gameSystem.numberFontFace();
-        this.bitmap.fontSize = ImageManager.iconHeight * 0.5;
     };
 
     /**
@@ -1235,8 +1233,12 @@ function Sprite_BattleHudPicture() {
      * IconSetのBitmapをロードする。
      */
     Sprite_HudStateIcons.prototype.loadBitmap = function() {
-        this.bitmap = new Bitmap(ImageManager.iconWidth * 4 + 6, ImageManager.iconHeight);
+        const width = ImageManager.iconWidth * 4 + 6;
+        const height = Math.floor(ImageManager.iconHeight * 1.25);
+        this.bitmap = new Bitmap(width, height);
         this._iconBitmap = ImageManager.loadSystem("IconSet");
+        this.bitmap.fontFace = $gameSystem.numberFontFace();
+        this.bitmap.fontSize = ImageManager.iconHeight * 0.5;
     };
 
     /**
@@ -1283,11 +1285,13 @@ function Sprite_BattleHudPicture() {
             }
             for (let i = 0; i < 4; i++) {
                 const displayState = displayStates[this._iconIndex + i];
-                if (displayState.iconId) {
-                    this.drawIcon(displayState.iconId, i);
-                }
-                if (displayState.turns) {
-                    this.drawTurns(turns, i);
+                if (displayState) {
+                    if (displayState.iconIndex) {
+                        this.drawIcon(displayState.iconIndex, i);
+                    }
+                    if (displayState.turns) {
+                        this.drawTurns(displayState.turns, i);
+                    }
                 }
             }
         } else {
@@ -1307,9 +1311,9 @@ function Sprite_BattleHudPicture() {
             } else {
                 const icons = this._battler.allIcons();
                 const displayStates = [];
-                for (const iconId of icons) {
+                for (const iconIndex of icons) {
                     displayStates.push({
-                        iconId:iconId,
+                        iconIndex:iconIndex,
                         turns:0
                     });
                 }
@@ -1345,9 +1349,9 @@ function Sprite_BattleHudPicture() {
      * @param {number} drawIndex 描画位置(0-3)
      */
     Sprite_HudStateIcons.prototype.drawTurns = function(turns, drawIndex) {
-        const dx = (pw + 2) * drawIndex;
-        const dy = ImageManager.iconHeight / 2;
-        this.bitmap.drawText(turns, dx, dy, ImageManager.width, this.fontSize, "right")
+        const dx = ImageManager.iconWidth * drawIndex + ImageManager.iconWidth / 2 - 2;
+        const dy = Math.round(ImageManager.iconHeight * 0.75);
+        this.bitmap.drawText(turns, dx, dy, (ImageManager.iconWidth / 2), ImageManager.iconHeight / 2, "right")
     };
 
     /**
@@ -2381,21 +2385,76 @@ function Sprite_BattleHudPicture() {
 
     //------------------------------------------------------------------------------
     // Window_BattleLog
-    const _Window_BattleLog_performAction = Window_BattleLog.prototype.performAction;
+    // const _Window_BattleLog_performAction = Window_BattleLog.prototype.performAction;
+    // /**
+    //  * アクションを開始する。
+    //  * 
+    //  * @param {Game_Battler} subject 使用者
+    //  * @param {Game_Action} action アクション
+    //  */
+    // Window_BattleLog.prototype.performAction = function(subject, action) {
+    //     _Window_BattleLog_performAction.call(this, subject, action);
+
+    //     // これだとだめ。アニメーションウェイトを入れる必要があるので、
+    //     // Window_BattleLog.startActionをオーバーライドして、
+    //     // push により呼び出しメソッドを登録する必要がある。
+    //     const item = action.item();
+    //     const animationId = this.useAnimationId(item);
+    //     if (item && animationId) {
+    //         this.showUseAnimation(subject, animationId);
+    //     }
+    // };
+
     /**
      * アクションを開始する。
      * 
      * @param {Game_Battler} subject 使用者
      * @param {Game_Action} action アクション
+     * @param {Array<Game_Battler>} targets 対象
+     * !!!overwrite!!! Window_BattleLog.startAction()
+     *   スキル使用時のアニメーションを表示するため、オーバーライドする。
      */
-    Window_BattleLog.prototype.performAction = function(subject, action) {
-        _Window_BattleLog_performAction.call(this, subject, action);
-
+    Window_BattleLog.prototype.startAction = function(subject, action, targets) {
         const item = action.item();
-        const animationId = this.useAnimationId(item);
-        if (item && animationId) {
-            this.showUseAnimation(subject, animationId);
+        this.push("performActionStart", subject, action); // アクション開始(所定の位置に移動など)
+        this.push("waitForMovement"); // performActionStart完了待ち
+        this.push("performAction", subject, action); // アクション開始
+        this.push("showUseAnimation", subject, action)
+        this.push("waitForAnimation");
+        this.push("showAnimation", subject, targets.clone(), item.animationId); // アニメーション表示
+        this.displayAction(subject, item);
+    };    
+    /**
+     * エフェクトの表示が完了するのを待つ。
+     */
+    Window_BattleLog.prototype.waitForAnimation = function() {
+        this.setWaitMode("animation");
+    };
+
+    /**
+     * 待機モードを更新する。
+     * 
+     * @returns {boolean} 待機を継続する場合にはtrue, 終了する場合にはfalse.
+     * !!!overwrite!!! Window_BattleLog.updateWaitMode()
+     *   待機モードを追加するため、オーバーライドする。
+     */
+    Window_BattleLog.prototype.updateWaitMode = function() {
+        let waiting = false;
+        switch (this._waitMode) {
+            case "effect":
+                waiting = this._spriteset.isEffecting();
+                break;
+            case "movement":
+                waiting = this._spriteset.isAnyoneMoving();
+                break;
+            case "animation":
+                waiting = this._spriteset.isAnimationPlaying();
+                break;
         }
+        if (!waiting) {
+            this._waitMode = "";
+        }
+        return waiting;
     };
 
     /**
@@ -2403,10 +2462,16 @@ function Sprite_BattleHudPicture() {
      * (表示要求を出す。)
      * 
      * @param {Game_Battler} subject 使用者
-     * @param {number} animationId アニメーションID
+     * @param {Game_Action} action アクション
      */
-    Window_BattleLog.prototype.showUseAnimation = function(subject, animationId) {
-        $gameTemp.requestAnimation([subject], animationId, false);
+    Window_BattleLog.prototype.showUseAnimation = function(subject, action) {
+        const item = action.item();
+        if (item) {
+            const animationId = this.useAnimationId(item);
+            if (animationId > 0) {
+                $gameTemp.requestAnimation([subject], animationId, false);
+            }
+        }
     };
 
     /**
