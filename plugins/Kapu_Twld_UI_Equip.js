@@ -675,11 +675,11 @@ function Window_EquipItemName() {
         const lineHeight = this.lineHeight();
         this.drawParamValue(TextManager.tpA, actor.maxTp(), tempActor.maxTp(),
                 x, y + lineHeight * 0, width);
-        this.drawParamValue(TextManager.param(3), actor.mat, tempActor.mat,
+        this.drawParamValue(TextManager.param(4), actor.mat, tempActor.mat,
                 x, y + lineHeight * 2, width);
         this.drawParamRate(textMagPenetration, actor.penetrateMDR(), tempActor.penetrateMDR(),
                 x, y + lineHeight * 3, width);
-        this.drawParamValue(TextManager.param(4), actor.mdf, tempActor.mdf,
+        this.drawParamValue(TextManager.param(5), actor.mdf, tempActor.mdf,
                 x, y + lineHeight * 4, width);
         this.drawParamRate(textMagAttenuation, 1 - actor.mdr, 1 - tempActor.mdr,
                 x, y + lineHeight * 5, width);
