@@ -59,6 +59,7 @@
  * ============================================
  * 変更履歴
  * ============================================
+ * Version.0.3.0 アイテムの装備パラメータ値を取得するためのDataManager.itemEquipParamを追加した。
  * Version.0.2.0 最大TPを拡張するために、
  *               最大TP周りのメソッドを追加した。
  * Version.0.1.0 Trait_EquipPerformance実装のため追加。
@@ -69,6 +70,19 @@
 
     const defaultMaxTp = Number(parameters["defaultMaxTp"]) || 100;
     const damageTpGainRateMax = (Number(parameters["damageTpGainRateMax"]) || 0.5).clamp(0, 1);
+
+    //------------------------------------------------------------------------------
+    // DataManager
+    /**
+     * 装備品の基本パラメータ値を得る。
+     * 
+     * @param {object} equipItem 装備品
+     * @param {number} paramId パラメータID
+     * @returns {number} 装備品のパラメータ値
+     */
+    DataManager.itemEquipParam = function(equipItem, paramId) {
+        return equipItem.params[paramId] || 0;
+    };
 
     //------------------------------------------------------------------------------
     // Game_BattlerBase
@@ -221,7 +235,8 @@
      * @returns {number} 装備品のパラメータ値
      */
     Game_Actor.prototype.paramEquipValue = function(equipItem, paramId) {
-        return equipItem.params[paramId];
+        return DataManager.itemEquipParam(equipItem, paramId);
     };
+
 
 })();

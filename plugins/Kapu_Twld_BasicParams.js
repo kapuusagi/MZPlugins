@@ -5,6 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @base Kapu_Base_Params
+ * @orderAfter Kapu_Base_params
  * @orderAfter Kapu_Base_ParamName
  * 
  * @command gainBasicParam
@@ -451,6 +453,27 @@
         DataManager.addNotetagParserSkills(_processEffectNotetag);
         DataManager.addNotetagParserItems(_processEffectNotetag);
     }
+
+    if (overwriteAGI || overwriteLUK) {
+        const _DataManager_itemEquipParam = DataManager.itemEquipParam;
+        /**
+         * 装備品の基本パラメータ値を得る。
+         * 
+         * @param {object} equipItem 装備品
+         * @param {number} paramId パラメータID
+         * @returns {number} 装備品のパラメータ値
+         */
+        DataManager.itemEquipParam = function(equipItem, paramId) {
+            if (overwriteAGI && (paramId === 6)) {
+                return 0;
+            } else if (overwriteLUK && (paramId === 7)) {
+                return 0;
+            } else {
+                return _DataManager_itemEquipParam.call(this, equipItem, paramId);
+            }
+        };
+    }
+
     //------------------------------------------------------------------------------
     // TextManager
 

@@ -8,6 +8,7 @@
  * @base Kapu_Twld_BaseSystem
  * @orderAfter Kapu_Twld_BaseSystem
  * @base Kapu_Base_ParamName
+ * @base Kapu_Base_Params
  * 
  * @param textInfo
  * @text 情報表示ラベル
@@ -129,6 +130,17 @@
  * @type number
  * @default 600
  * 
+ * @param displayAGI
+ * @text AGI情報を表示する。
+ * @desc 装備情報にAGI情報を表示する。
+ * @type boolean
+ * @default true
+ * 
+ * @param displayLUK
+ * @text LUK情報を表示する。
+ * @desc 装備情報にLUK情報を表示する。
+ * @type boolean
+ * @default true
  * 
  * 
  * @help 
@@ -222,6 +234,10 @@ function Window_ItemInfo() {
     const textEquipEffect = parameters["textEquipEffect"] || "Equip Effects";
     const itemInfoWindowWidth = Math.floor(Number(parameters["itemInfoWindowWidth"]) || 800);
     const itemInfoWindowHeight = Math.floor(Number(parameters["itemInfoWindowHeight"]) || 640);
+    const displayAGI = (parameters["displayAGI"] === undefined)
+            ? false : (parameters["displayAGI"] === "true");
+    const displayLUK = (parameters["displayLUK"] === undefined)
+            ? false : (parameters["displayLUK"] === "true");
 
     //-----------------------------------------------------------------------------
     // Window_ItemCategoryVertical
@@ -929,8 +945,12 @@ function Window_ItemInfo() {
         this.drawItemParam(item, 1, x4, y1, itemWidth); // MaxMP
         this.drawItemParam(item, 3, x1, y2, itemWidth); // DEF
         this.drawItemParam(item, 5, x2, y2, itemWidth); // MDF
-        this.drawItemParam(item, 6, x3, y2, itemWidth); // AGI
-        this.drawItemParam(item, 7, x4, y2, itemWidth); // LUK
+        if (displayAGI) {
+            this.drawItemParam(item, 6, x3, y2, itemWidth); // AGI
+        }
+        if (displayLUK) {
+            this.drawItemParam(item, 7, x4, y2, itemWidth); // LUK
+        }
     };
     /**
      * 武器/防具のパラメータを描画する。
@@ -942,7 +962,7 @@ function Window_ItemInfo() {
      * @param {number} width 幅
      */
     Window_ItemInfo.prototype.drawItemParam = function(item, paramId, x, y, width) {
-        const value = item.params[paramId];
+        const value = DataManager.itemEquipParam(item, paramId);
         const padding = this.itemPadding();
         const labelText = TextManager.param(paramId); 
         const labelWidth = Math.max(this.textWidth(labelText), (width - padding) / 2);

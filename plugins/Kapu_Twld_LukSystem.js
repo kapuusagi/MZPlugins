@@ -4,6 +4,9 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
+ * @base Kapu_Base_Params
+ * @orderAfter Kapu_Base_Params
+ * 
  * @command updateLuk
  * @text LUK更新
  * @desc LUKを更新する。
@@ -311,7 +314,7 @@
      */
     Game_Actor.prototype.getLukPlus = function() {
         const equips = this.equips();
-        return equips.reduce((r, equipItem) => (equipItem) ? r + equipItem.params[7] : r, 0);
+        return equips.reduce((r, equipItem) => (equipItem) ? r + DataManager.itemEquipParam(equipItem, 7) : r, 0);
     };
     //------------------------------------------------------------------------------
     // Game_Enemy
