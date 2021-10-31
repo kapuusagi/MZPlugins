@@ -655,6 +655,7 @@ function Window_StatusProfile() {
 
     /**
      * 2-Bを描画する。
+     * ATK,PDR,DEF,PDR,HIT,EVAを描画する。
      * 
      * @param {Game_Actor} actor アクター
      * @param {Game_Actor} noEquipActor 未装備アクター
@@ -694,6 +695,7 @@ function Window_StatusProfile() {
 
     /**
      * 2-Cを描画する。
+     * MAT/PDR/MDF/MDR/MEVを描画する。
      * 
      * @param {Game_Actor} actor アクター
      * @param {Game_Actor} noEquipActor 未装備アクター
@@ -706,7 +708,7 @@ function Window_StatusProfile() {
     Window_Status.prototype.drawBlock2C = function(actor, noEquipActor, x, y, width, maxLineCount) {
         const lineHeight = this.lineHeight();
         if (maxLineCount >= 1) {
-            this.drawParamValue(TextManager.param(3), actor.mat, noEquipActor.mat,
+            this.drawParamValue(TextManager.param(4), actor.mat, noEquipActor.mat,
                     x, y + lineHeight * 0, width);
         }
         if ((maxLineCount >= 2) && ("penetrateMDR" in actor)) {
@@ -714,7 +716,7 @@ function Window_StatusProfile() {
                     x, y + lineHeight * 1, width);
         }
         if (maxLineCount >= 3) {
-            this.drawParamValue(TextManager.param(4), actor.mdf, noEquipActor.mdf,
+            this.drawParamValue(TextManager.param(5), actor.mdf, noEquipActor.mdf,
                     x, y + lineHeight * 2, width);
         }
         if (maxLineCount >= 4) {
