@@ -12,8 +12,6 @@
        リスト表示処理が(かなり)重くなってるはず。
   Kapu_StateExtends:
     ☐ 動作確認(新規追加)
-  Kapu_BuffExtension:
-    ☐ ターン管理はベーシックシステム側の機能を使用するように変更したため、確認が必要。
   Kapu_TpbTurn:
     ☐ 動作確認(新規追加)
   Kapu_ActionState:
