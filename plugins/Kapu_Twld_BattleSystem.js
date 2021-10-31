@@ -191,10 +191,10 @@
  * @type boolean
  * @default false
  * 
- * @param defaultUseSkillAnimationId
+ * @param defaultUseSkillAnimationIds
  * @text スキル使用時アニメーション
- * @desc スキル使用時に、使用者のエフェクトとして表示するアニメーション。0で表示しない。
- * @type animation
+ * @desc スキル使用時に、使用者のエフェクトとして表示するアニメーション。0で表示しない。0番目はタイプなし、1以降はスキルタイプに対応する。
+ * @type animation[]
  * @default 0
  * 
  * @param defaultUseItemAnimationId
@@ -361,7 +361,9 @@ function Sprite_BattleHudPicture() {
     const enableInputtingZoom = (parameters["enableInputtingZoom"] === undefined)
             ? false : (parameters["enableInputtingZoom"] === "true");
 
-    const defaultUseSkillAnimationId = Math.round(Number(parameters["defaultUseSkillAnimationId"]) || 0);
+    const defaultUseSkillAnimationIds = JSON.parse((parameters["defaultUseSkillAnimationIds"] || "[]")).map(token => {
+        return Math.max(0, Math.round(Number(token)) || 0);
+    });
     const defaultUseItemAnimationId = Math.round(Number(parameters["defaultUseItemAnimationId"]) || 0);
 
     /**
@@ -2484,7 +2486,7 @@ function Sprite_BattleHudPicture() {
             return Number(item.meta.useAnimationId);
         } else {
             if (DataManager.isSkill(item)) {
-                return defaultUseSkillAnimationId;
+                return defaultUseSkillAnimationIds[item.stypeId] || 0;
             } else if (DataManager.isItem(item)) {
                 return defaultUseItemAnimationId;
             }
