@@ -1,15 +1,22 @@
 /*:ja
  * @target MZ 
- * @plugindesc Kapu_EquipParam_Extends
+ * @plugindesc 装備品のパラメータ拡張プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Base_Params
  * @orderAfter Kapu_Base_Params
  * 
  * @help 
- * 装備品のパラメータとして変数を加算できるようになります。
+ * 装備品のパラメータについて、以下の拡張を行います。
+ * ・装備品のパラメータ値として、任意の計算式を指定できるようにします。
+ *   例えば持っている所持金が多いほど攻撃力が大きい、というような武器を作ることができます。
+ *   
+ * ・装備時の計算式として、任意の計算式を指定できるようにします。
+ *   例えばアクターのHPを攻撃力に反映するような武器を作ることができます。
  * 
  * ■ 使用時の注意
+ * 計算式に重いものを入れると、全体的に重くなる可能性があります。
+ * (プラグインに依る。)
  * 
  * ■ プラグイン開発者向け
  * 
