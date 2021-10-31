@@ -663,7 +663,6 @@
                     .filter(iconIndex => iconIndex > 0);
         } else {
             return this.states()
-                .filter(state => state.meta.displayBattleOnly)
                 .map(state => state.iconIndex)
                 .filter(iconIndex => iconIndex > 0);
         }
