@@ -4,6 +4,12 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
+ * @param isDebug
+ * @text デバッグモード
+ * @desc デバッグログ出力します。
+ * @type boolean
+ * @default false
+ * 
  * @help 
  * ベーシックシステムでの動作を以下のように変更する。
  * (1) バフのターン経過による解除タイミングはステートと同じに変更
@@ -37,11 +43,14 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.0.1.0 初版作成。
  */
 (() => {
-    // const pluginName = "Kapu_TpbTurn";
-    // const parameters = PluginManager.parameters(pluginName);
+    const pluginName = "Kapu_TpbTurn";
+    const parameters = PluginManager.parameters(pluginName);
+
+    const isDebug = (parameters["isDebug"] === undefined)
+            ? false : (parameters["isDebug"] === "true");
 
     // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
     //     // TODO : コマンドの処理。
@@ -86,6 +95,20 @@
     BattleManager.startBattle = function() {
         _BattleManager_startBattle.call(this);
         this._tpbElapseTime = 0;
+        this._tpbTurnCount = 0;
+        if (this.isTpb()) {
+            this.displayTpbTurnCount();
+        }
+    };
+
+    /**
+     * TPBターン数を表示する。
+     */
+    BattleManager.displayTpbTurnCount = function() {
+        const turn = this._tpbTurnCount;
+        if (isDebug) {
+            console.log("TPB Turn " + turn);
+        }
     };
 
     const _BattleManager_updateTpb = BattleManager.updateTpb;
@@ -93,8 +116,9 @@
      * TPB周りの更新処理を行う。
      */
     BattleManager.updateTpb = function() {
-        const referenceSpeed = $gameParty.tpbBaseSpeed() / $gameParty.tpbReferenceTime();
+        const referenceSpeed = 1 / $gameParty.tpbReferenceTime();
         this._tpbElapseTime += referenceSpeed;
+        this.displayTpbTurnCount();
         if (this._tpbElapseTime > 1) {
             this._tpbElapseTime = 1;
         }
@@ -109,6 +133,11 @@
         if (this._tpbElapseTime >= 1) {
             this.endTurn();
             this.endAllBattlersTurn(); // 1ターン経過時の処理(リジェネーレート適用/ステート/バフのターン処理)
+            this._tpbElapseTime = 0;
+            this._tpbTurnCount++;
+            if (isDebug) {
+                console.log("TPB Turn " + (this._tpbTurnCount + 1));
+            }
         }
     };
 
@@ -131,5 +160,25 @@
             this.displayBattlerStatus(battler, true);
         }
     };
+
+    /**
+     * TPB時間(0.0～1.0)を得る。
+     * Note: 1ターン中の時間経過具合をUIに表示したい場合に使用する。
+     * 
+     * @returns {number} TPB時間。
+     */
+    BattleManager.tpbTime = function() {
+        return this._tpbElapseTime;
+    };
+
+    /**
+     * TPBターン数を得る。
+     * 
+     * @returns {number} ターン数
+     */
+    BattleManager.tpbTurnCount = function() {
+        return this._tpbTurnCount;
+    };
+
 
 })();
