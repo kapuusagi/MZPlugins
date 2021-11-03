@@ -2470,7 +2470,7 @@ function Window_StatusProfile() {
      */
     Scene_Status.prototype.onStatusCategoryWindowOk = function() {
         switch (this._categoryWindow.currentSymbol()) {
-            case "status3":
+            case "status2":
                 // 装備画面でOKが押されたら、装備シーンに移る
                 SceneManager.push(Scene_Equip);
                 break;
