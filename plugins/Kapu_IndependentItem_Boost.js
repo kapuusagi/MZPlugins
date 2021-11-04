@@ -110,9 +110,31 @@
  *   <boostSuccessRate:rate%>
  *     初回成功率(0.0～100.0を指定する)。未指定時は100.0になる。
  *   <boostEffect:args%>
+ *     武器・防具の両方に適用する強化効果
+ *     args書式は後述
+ *   <boostEffectWeapon:args%>
+ *     武器に対して適用する強化効果
+ *     args書式は後述
+ *   <boostEffectArmor:args%>
+ *     防具に対して適用する強化効果
+ *     args書式は後述
+ * 
+ *     boostEffect/boostEffectWeapon/boostEffectArmor書式
  *     args書式
- *     key$ または key$=value$ をカンマ(,)で区切る。
- *     本プラグインで実装済みのkeyは次の通り。
+ *        強化項目ををカンマ(,)で区切る。
+ *        強化項目1,強化項目2,強化項目3,...
+ *     強化項目書式
+ *        key$                 keyだけ指定
+ *        key$=value$          固定量強化指定
+ *        key$=min#:max#       値の範囲指定
+ *        key$=value$/rate#    固定量強化、付与率指定
+ *        key$=min#:max#/rate# 値の範囲指定、付与率指定
+ * 
+ *        valueで指定できる書式は次の通り。
+ *            value#     value#固定値だけパラメータを増加させる。
+ *            min#:max#  min#～max#の範囲のランダム値だけパラメータを増加させる。
+ * 
+ *       本プラグインで実装済みのkeyは次の通り。
  *         MHP 最大HP
  *         MMP 最大MP
  *         ATK 攻撃力
@@ -142,14 +164,16 @@
  *         FDR 床被ダメージレート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
  *         EXR 経験値レート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
  *         ElementRate(id#) 属性id#に対するダメージレート。(1.0が+100%であることに注意。例 +0.2すると20%増になる)
- *         
- *     valueで指定できる書式は次の通り。
- *         value#     value#固定値だけパラメータを増加させる。
- *         min#:max#  min#～max#の範囲のランダム値だけパラメータを増加させる。
+ *         AddState(id#) 攻撃時、ステートid#を付与する特性を追加する。既に特性を持っている場合には確率を加算する。
+ *                        (1.0が+100%であることに注意。例 +0.2すると20%軽減になる)
+ *         StateRate(id#) ステート付与効果を受けたとき、ステート付与率をvalue#だけ軽減する効果を付与する。
+ *                        (1.0が+100%であることに注意。例 +0.2すると20%軽減になる)
+ *         AddRegistState(id#) id#のステートを防ぐ特性を追加する。既に特性を持っている場合には追加されない。
  * 
  *     その他のkey及びvalueの書式はboostの追加プラグインに依存。
- *     例)
- *         <boostEffect:ATK=+12,DEF=+4>
+ *     例) ATK+12と、50％の確率でDEF+4を付ける強化素材のノートタグ
+ *         <boostEffect:ATK=+12,DEF=+4/0.5>
+ * 
  *   <boostCondition:evaluation%>
  *     適用可否を判定する処理。未指定時は常に適用可能。
  *     以下のものが参照可能
@@ -280,15 +304,34 @@
         const effects = [];
         const tokens = str.split(",");
         for (let i = 0; i < tokens.length; i++) {
-            const index = tokens[i].indexOf("=")
-            if (index >= 0) {
-                const key = tokens[i].substr(0, index).trim();
-                const value = tokens[i].substr(index + 1).trim();
-                effects.push({ key:key, value:value });
+            let key = "";
+            let value = "";
+            let rate = 1.0;
+
+            const rateIndex = tokens[i].indexOf("/");
+            if (rateIndex >= 0) {
+                const keyValue = tokens[i].substr(0, rateIndex);
+                const rateToken = tokens[i].substr(rateIndex + 1);
+                const index = keyValue.indexOf("=")
+                if (index >= 0) {
+                    key = keyValue.substr(0, index).trim();
+                    value = keyValue.substr(index + 1).trim();
+                } else {
+                    key = keyValue.trim();
+                }
+                rate = _parseRate(rateToken, 0, 1.0);
             } else {
-                const key = tokens[i].trim();
-                const value = "";
-                effects.push({ key:key, value:value });
+                const index = tokens[i].indexOf("=")
+                if (index >= 0) {
+                    key = tokens[i].substr(0, index).trim();
+                    value = tokens[i].substr(index + 1).trim();
+                } else {
+                    key = tokens[i].trim();
+                }
+            }
+
+            if (key && (rate > 0)) {
+                effects.push({ key:key, value:value, rate:rate });
             }
         }
 
@@ -302,10 +345,14 @@
      */
     const _processItemNotetags = function(dataCollection) {
         const patternBoostEffect = /<boostEffect[ :]?(.+)>/;
+        const patternBoostEffectWeapon = /<boostEffectWeapon[ :]?(.+)>/;
+        const patternBoostEffectArmor = /<boostEffectArmor[ :]?(.+)>/;
 
         for (let i = 1; i < dataCollection.length; i++) {
             const item = dataCollection[i];
             item.boostEffects = [];
+            item.boostEffectsWeapon = [];
+            item.boostEffectsArmor = [];
             item.boostSuccessRate = 1.0;
 
             if (item.meta.boostSuccessRate) {
@@ -317,6 +364,12 @@
                 if ((re = line.match(patternBoostEffect)) !== null) {
                     const effects = _parseBoostEffect(re[1]);
                     item.boostEffects = item.boostEffects.concat(effects);
+                } else if ((re = line.match(patternBoostEffectWeapon)) !== null) {
+                    const effects = _parseBoostEffect(re[1]);
+                    item.boostEffectsWeapon = item.boostEffectsWeapon.concat(effects);
+                } else if ((re = line.match(patternBoostEffectArmor)) !== null) {
+                    const effects = _parseBoostEffect(re[1]);
+                    item.boostEffectsArmor = item.boostEffectsArmor.concat(effects);
                 }
             });
         }
@@ -338,6 +391,26 @@
     };
     //------------------------------------------------------------------------------
     // DataManager
+
+    /**
+     * itemに対する強化効果を持っているかどうかを得る。
+     * 
+     * @param {object} item 対象アイテム
+     * @param {object} catalystItem 素材アイテム
+     * @returns {boolean} 強化効果がある場合にはtrue, それ以外はfalse.
+     */
+    DataManager.hasAnyBoostEffectForItem = function(item, catalystItem) {
+        if (catalystItem.boostEffects && (catalystItem.boostEffects.length > 0)) {
+            return true;
+        }
+        if (DataManager.isWeapon(item) && catalystItem.boostEffectsWeapon && (catalystItem.boostEffectsWeapon.length > 0)) {
+            return true;
+        }
+        if (DataManager.isArmor(item) && catalystItem.boostEffectsArmor && (catalystItem.boostEffectsArmor.length > 0)) {
+            return true;
+        }
+        return false;
+    };
 
     const _DataManager_initializeIndependentWeapon = DataManager.initializeIndependentWeapon;
     /**
@@ -455,9 +528,25 @@
         }
 
         for (const boostEffect of catalystItem.boostEffects) {
-            DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
-
+            if (Math.random() < boostEffect.rate) {
+                DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+            }
         }
+        if(DataManager.isWeapon(item)) {
+            for (const boostEffect of catalystItem.boostEffectsWeapon) {
+                if (Math.random() < boostEffect.rate) {
+                    DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+                }
+            }
+        }
+        if (DataManager.isArmor(item)) {
+            for (const boostEffect of catalystItem.boostEffectsArmor) {
+                if (Math.random() < boostEffect.rate) {
+                    DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+                }
+            }
+        }
+
         item.boostCount++;
         DataManager.updateBoostItemName(item);
     };
@@ -479,8 +568,31 @@
                     DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId,
                         DataManager.getBoostValueReal(value));
                 }
-
                 return ;
+            } else if ((re = key.match(/AddState\((\d+)\)/)) !== null) {
+                const stateId = Math.round(Number(re[1]) || 0);
+                if (stateId > 0) {
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_ATTACK_STATE, stateId,
+                        DataManager.getBoostValueReal(value));
+                }
+                return ;
+            } else if ((re = key.match(/StateRate\((\d+)\)/)) !== null) {
+                const stateId = Math.round(Number(re[1]) || 0);
+                if (stateId > 0) {
+                    const rate = DataManager.getBoostValueReal(value);
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_STATE_RATE, stateId,
+                        -rate);
+                }
+            } else if ((re = key.match(/AddRegistState\((\d+)\)/)) !== null) {
+                const stateId = Math.round(Number(re[1]) || 0);
+                if (stateId > 0) {
+                    DataManager.addBoostTraitFixed(item, Game_BattlerBase.TRAIT_STATE_RESIST, stateId, 0);
+                }
+            } else if ((re = key.match(/RemoveRegistState\((d+)\)/)) !== null) {
+                const stateId = Math.round(Number(re[1]) || 0);
+                if (stateId > 0) {
+                    DataManager.removeBoostTraitFixed(item, Game_BattlerBase.TRAIT_STATE_RESIST, stateId);
+                }
             }
         }        
         switch (key) {
@@ -605,7 +717,6 @@
         return Math.round(DataManager.getBoostValueReal(valueStr));
     };
 
-    
     /**
      * 実数の強化値を得る。
      * Note : valueStrでフォローしている書式は次の通り。
@@ -662,6 +773,42 @@
     };
 
     /**
+     * アイテムに特性を追加する。
+     * 既に同じ特性を持っている場合には追加されない。
+     * 
+     * @param {object} item アイテム
+     * @param {number} code 特性コード
+     * @param {number} dataId データID
+     * @param {number} value 値
+     */
+    DataManager.addBoostTraitFixed = function(item, code, dataId, value) {
+        const trait = item.traits.find(function(t) {
+            return (t.code == code) && (t.dataId == dataId);
+        });
+        if (!trait) {
+            // 無い場合には新規追加。
+            item.traits.push({ code:code, dataId:dataId, value:value });
+        }
+    };
+
+    /**
+     * アイテムから指定した特性を削除する。
+     * 
+     * @param {object} item アイテム
+     * @param {number} code 特性コード
+     * @param {number} dataId データID
+     */
+    DataManager.removeBoostTraitFixed = function(item, code, dataId) {
+        for (let i = item.traits.length - 1; i >= 0; i--) {
+            const trait = item.traits[i];
+            if ((trait.code === code) && (trait.dataId === dataId)) {
+                item.traits.splice(i, 1);
+            }
+        }
+    };
+    
+
+    /**
      * アイテムに加算タイプ特性を追加する。
      * 既に同じ内容の特性を持っている場合には加算する。
      * 
@@ -685,7 +832,7 @@
     };
     /**
      * アイテムに乗算タイプ特性を追加する。
-     * 既に同じ内容の特性を持っている場合には乗算する。
+     * 既に同じ内容の特性を持っている場合には加算する。
      * 
      * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
      * @param {number} code 特性コード
