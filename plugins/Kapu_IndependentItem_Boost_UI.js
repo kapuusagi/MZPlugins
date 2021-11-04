@@ -874,10 +874,11 @@ function Window_BlacksmithNameEdit() {
      */
     Window_BlacksmithCatalystList.prototype.makeItemList = function() {
         this._data = [];
+        const targetItem = this._targetItem;
         $gameParty.items().forEach(function(item) {
-            if (item.boostEffects && (item.boostEffects.length > 0)
+            if (DataManager.hasAnyBoostEffectForItem(targetItem, item)
                     && !DataManager.isIndependent(item)) {
-                // ブーストエフェクトが1つ以上存在する。
+                // ブーストエフェクトが1つ以上存在し、かつ個別アイテムではない。
                 this._data.push(item);
             }
         }, this);

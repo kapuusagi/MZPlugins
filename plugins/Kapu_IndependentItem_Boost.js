@@ -110,6 +110,16 @@
  *   <boostSuccessRate:rate%>
  *     初回成功率(0.0～100.0を指定する)。未指定時は100.0になる。
  *   <boostEffect:args%>
+ *     武器・防具の両方に適用する強化効果
+ *     args書式は後述
+ *   <boostEffectWeapon:args%>
+ *     武器に対して適用する強化効果
+ *     args書式は後述
+ *   <boostEffectArmor:args%>
+ *     防具に対して適用する強化効果
+ *     args書式は後述
+ * 
+ *     boostEffect/boostEffectWeapon/boostEffectArmor書式
  *     args書式
  *     key$ または key$=value$ をカンマ(,)で区切る。
  *     本プラグインで実装済みのkeyは次の通り。
@@ -302,10 +312,14 @@
      */
     const _processItemNotetags = function(dataCollection) {
         const patternBoostEffect = /<boostEffect[ :]?(.+)>/;
+        const patternBoostEffectWeapon = /<boostEffectWeapon[ :]?(.+)>/;
+        const patternBoostEffectArmor = /<boostEffectArmor[ :]?(.+)>/;
 
         for (let i = 1; i < dataCollection.length; i++) {
             const item = dataCollection[i];
             item.boostEffects = [];
+            item.boostEffectsWeapon = [];
+            item.boostEffectsArmor = [];
             item.boostSuccessRate = 1.0;
 
             if (item.meta.boostSuccessRate) {
@@ -317,6 +331,12 @@
                 if ((re = line.match(patternBoostEffect)) !== null) {
                     const effects = _parseBoostEffect(re[1]);
                     item.boostEffects = item.boostEffects.concat(effects);
+                } else if ((re = line.match(patternBoostEffectWeapon)) !== null) {
+                    const effects = _parseBoostEffect(re[1]);
+                    item.boostEffectsWeapon = item.boostEffectsWeapon.concat(effects);
+                } else if ((re = line.match(patternBoostEffectArmor)) !== null) {
+                    const effects = _parseBoostEffect(re[1]);
+                    item.boostEffectsArmor = item.boostEffectsArmor.concat(effects);
                 }
             });
         }
@@ -338,6 +358,26 @@
     };
     //------------------------------------------------------------------------------
     // DataManager
+
+    /**
+     * itemに対する強化効果を持っているかどうかを得る。
+     * 
+     * @param {object} item 対象アイテム
+     * @param {object} catalystItem 素材アイテム
+     * @returns {boolean} 強化効果がある場合にはtrue, それ以外はfalse.
+     */
+    DataManager.hasAnyBoostEffectForItem = function(item, catalystItem) {
+        if (catalystItem.boostEffects && (catalystItem.boostEffects.length > 0)) {
+            return true;
+        }
+        if (DataManager.isWeapon(item) && catalystItem.boostEffectsWeapon && (catalystItem.boostEffectsWeapon.length > 0)) {
+            return true;
+        }
+        if (DataManager.isArmor(item) && catalystItem.boostEffectsArmor && (catalystItem.boostEffectsArmor.length > 0)) {
+            return true;
+        }
+        return false;
+    };
 
     const _DataManager_initializeIndependentWeapon = DataManager.initializeIndependentWeapon;
     /**
@@ -456,8 +496,18 @@
 
         for (const boostEffect of catalystItem.boostEffects) {
             DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
-
         }
+        if(DataManager.isWeapon(item)) {
+            for (const boostEffect of catalystItem.boostEffectsWeapon) {
+                DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+            }
+        }
+        if (DataManager.isArmor(item)) {
+            for (const boostEffect of catalystItem.boostEffectsArmor) {
+                DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+            }
+        }
+
         item.boostCount++;
         DataManager.updateBoostItemName(item);
     };
