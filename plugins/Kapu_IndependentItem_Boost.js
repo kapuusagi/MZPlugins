@@ -152,7 +152,11 @@
  *         FDR 床被ダメージレート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
  *         EXR 経験値レート(1.0が+100%であることに注意。例 +0.2すると20%増になる)
  *         ElementRate(id#) 属性id#に対するダメージレート。(1.0が+100%であることに注意。例 +0.2すると20%増になる)
- *         
+ *         AddState(id#) 攻撃時、ステートid#を付与する特性を追加する。既に特性を持っている場合には確率を加算する。
+ *                        (1.0が+100%であることに注意。例 +0.2すると20%軽減になる)
+ *         StateRate(id#) ステート付与効果を受けたとき、ステート付与率をvalue#だけ軽減する効果を付与する。
+ *                        (1.0が+100%であることに注意。例 +0.2すると20%軽減になる)
+ *         AddRegistState(id#) id#のステートを防ぐ特性を追加する。既に特性を持っている場合には追加されない。
  *     valueで指定できる書式は次の通り。
  *         value#     value#固定値だけパラメータを増加させる。
  *         min#:max#  min#～max#の範囲のランダム値だけパラメータを増加させる。
@@ -529,8 +533,31 @@
                     DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId,
                         DataManager.getBoostValueReal(value));
                 }
-
                 return ;
+            } else if ((re = key.match(/AddState\((\d+)\)/)) !== null) {
+                const stateId = Math.round(Number(re[1]) || 0);
+                if (stateId > 0) {
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_ATTACK_STATE, stateId,
+                        DataManager.getBoostValueReal(value));
+                }
+                return ;
+            } else if ((re = key.match(/StateRate\((\d+)\)/)) !== null) {
+                const stateId = Math.round(Number(re[1]) || 0);
+                if (stateId > 0) {
+                    const rate = DataManager.getBoostValueReal(value);
+                    DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_STATE_RATE, stateId,
+                        -rate);
+                }
+            } else if ((re = key.match(/AddRegistState\((\d+)\)/)) !== null) {
+                const stateId = Math.round(Number(re[1]) || 0);
+                if (stateId > 0) {
+                    DataManager.addBoostTraitFixed(item, Game_BattlerBase.TRAIT_STATE_RESIST, stateId, 0);
+                }
+            } else if ((re = key.match(/RemoveRegistState\((d+)\)/)) !== null) {
+                const stateId = Math.round(Number(re[1]) || 0);
+                if (stateId > 0) {
+                    DataManager.removeBoostTraitFixed(item, Game_BattlerBase.TRAIT_STATE_RESIST, stateId);
+                }
             }
         }        
         switch (key) {
@@ -655,7 +682,6 @@
         return Math.round(DataManager.getBoostValueReal(valueStr));
     };
 
-    
     /**
      * 実数の強化値を得る。
      * Note : valueStrでフォローしている書式は次の通り。
@@ -710,6 +736,42 @@
         }
         item.name = prefix + item.name_org + postfix;
     };
+
+    /**
+     * アイテムに特性を追加する。
+     * 既に同じ特性を持っている場合には追加されない。
+     * 
+     * @param {object} item アイテム
+     * @param {number} code 特性コード
+     * @param {number} dataId データID
+     * @param {number} value 値
+     */
+    DataManager.addBoostTraitFixed = function(item, code, dataId, value) {
+        const trait = item.traits.find(function(t) {
+            return (t.code == code) && (t.dataId == dataId);
+        });
+        if (!trait) {
+            // 無い場合には新規追加。
+            item.traits.push({ code:code, dataId:dataId, value:value });
+        }
+    };
+
+    /**
+     * アイテムから指定した特性を削除する。
+     * 
+     * @param {object} item アイテム
+     * @param {number} code 特性コード
+     * @param {number} dataId データID
+     */
+    DataManager.removeBoostTraitFixed = function(item, code, dataId) {
+        for (let i = item.traits.length - 1; i >= 0; i--) {
+            const trait = item.traits[i];
+            if ((trait.code === code) && (trait.dataId === dataId)) {
+                item.traits.splice(i, 1);
+            }
+        }
+    };
+    
 
     /**
      * アイテムに加算タイプ特性を追加する。
