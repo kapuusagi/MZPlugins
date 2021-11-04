@@ -121,8 +121,20 @@
  * 
  *     boostEffect/boostEffectWeapon/boostEffectArmor書式
  *     args書式
- *     key$ または key$=value$ をカンマ(,)で区切る。
- *     本プラグインで実装済みのkeyは次の通り。
+ *        強化項目ををカンマ(,)で区切る。
+ *        強化項目1,強化項目2,強化項目3,...
+ *     強化項目書式
+ *        key$                 keyだけ指定
+ *        key$=value$          固定量強化指定
+ *        key$=min#:max#       値の範囲指定
+ *        key$=value$/rate#    固定量強化、付与率指定
+ *        key$=min#:max#/rate# 値の範囲指定、付与率指定
+ * 
+ *        valueで指定できる書式は次の通り。
+ *            value#     value#固定値だけパラメータを増加させる。
+ *            min#:max#  min#～max#の範囲のランダム値だけパラメータを増加させる。
+ * 
+ *       本プラグインで実装済みのkeyは次の通り。
  *         MHP 最大HP
  *         MMP 最大MP
  *         ATK 攻撃力
@@ -157,13 +169,11 @@
  *         StateRate(id#) ステート付与効果を受けたとき、ステート付与率をvalue#だけ軽減する効果を付与する。
  *                        (1.0が+100%であることに注意。例 +0.2すると20%軽減になる)
  *         AddRegistState(id#) id#のステートを防ぐ特性を追加する。既に特性を持っている場合には追加されない。
- *     valueで指定できる書式は次の通り。
- *         value#     value#固定値だけパラメータを増加させる。
- *         min#:max#  min#～max#の範囲のランダム値だけパラメータを増加させる。
  * 
  *     その他のkey及びvalueの書式はboostの追加プラグインに依存。
- *     例)
- *         <boostEffect:ATK=+12,DEF=+4>
+ *     例) ATK+12と、50％の確率でDEF+4を付ける強化素材のノートタグ
+ *         <boostEffect:ATK=+12,DEF=+4/0.5>
+ * 
  *   <boostCondition:evaluation%>
  *     適用可否を判定する処理。未指定時は常に適用可能。
  *     以下のものが参照可能
@@ -294,15 +304,34 @@
         const effects = [];
         const tokens = str.split(",");
         for (let i = 0; i < tokens.length; i++) {
-            const index = tokens[i].indexOf("=")
-            if (index >= 0) {
-                const key = tokens[i].substr(0, index).trim();
-                const value = tokens[i].substr(index + 1).trim();
-                effects.push({ key:key, value:value });
+            let key = "";
+            let value = "";
+            let rate = 1.0;
+
+            const rateIndex = tokens[i].indexOf("/");
+            if (rateIndex >= 0) {
+                const keyValue = tokens[i].substr(0, rateIndex);
+                const rateToken = tokens[i].substr(rateIndex + 1);
+                const index = keyValue.indexOf("=")
+                if (index >= 0) {
+                    key = keyValue.substr(0, index).trim();
+                    value = keyValue.substr(index + 1).trim();
+                } else {
+                    key = keyValue.trim();
+                }
+                rate = _parseRate(rateToken, 0, 1.0);
             } else {
-                const key = tokens[i].trim();
-                const value = "";
-                effects.push({ key:key, value:value });
+                const index = tokens[i].indexOf("=")
+                if (index >= 0) {
+                    key = tokens[i].substr(0, index).trim();
+                    value = tokens[i].substr(index + 1).trim();
+                } else {
+                    key = tokens[i].trim();
+                }
+            }
+
+            if (key && (rate > 0)) {
+                effects.push({ key:key, value:value, rate:rate });
             }
         }
 
@@ -499,16 +528,22 @@
         }
 
         for (const boostEffect of catalystItem.boostEffects) {
-            DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+            if (Math.random() < boostEffect.rate) {
+                DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+            }
         }
         if(DataManager.isWeapon(item)) {
             for (const boostEffect of catalystItem.boostEffectsWeapon) {
-                DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+                if (Math.random() < boostEffect.rate) {
+                    DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+                }
             }
         }
         if (DataManager.isArmor(item)) {
             for (const boostEffect of catalystItem.boostEffectsArmor) {
-                DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+                if (Math.random() < boostEffect.rate) {
+                    DataManager.applyBoostEffect(item, boostEffect.key, boostEffect.value);
+                }
             }
         }
 
