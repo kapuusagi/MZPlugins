@@ -24,9 +24,7 @@
  * ノートタグ
  * ============================================
  * アイテム
- *   <boostEffect:args%>
- *     args書式
- *     key$ または key$=value$ をカンマ(,)で区切る。
+ *   ノートタグについては Kapu_IndependentItem_Boost を参照
  *     本プラグインで追加実装されたkeyは次の通り。
  *         ElementRate(elementId#) 
  *            属性被ダメージ率
@@ -55,15 +53,8 @@
     // const pluginName = "Kapu_IndependentItem_Boost_Element";
     // const parameters = PluginManager.parameters(pluginName);
 
-    // PluginManager.registerCommand(pluginName, "TODO:コマンド。@commsndで指定したやつ", args => {
-    //     // TODO : コマンドの処理。
-    //     // パラメータメンバは @argで指定した名前でアクセスできる。
-    // });
-
     //------------------------------------------------------------------------------
     // DataManager
-    //------------------------------------------------------------------------------
-    // TODO : メソッドフック・拡張
     const _DataManager_applyBoostEffect = DataManager.applyBoostEffect;
     /**
      * 強化項目を適用する。

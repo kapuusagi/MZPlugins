@@ -25,9 +25,8 @@
  * ノートタグ
  * ============================================
  * アイテム
- *   <boostEffect:args%>
- *     args書式
- *     key$ または key$=value$ をカンマ(,)で区切る。
+ *   ノートタグについては Kapu_IndependentItem_Boost を参照
+ * 
  *     本プラグインで追加実装されたkeyは次の通り。
  *         CDR クリティカルダメージレート(Kapu_trait_CriticalDamageRateが必要)
  *         TPAdd 最大TP加算(Kapu_Trait_MaxTpAddが必要)
@@ -38,9 +37,6 @@
  * 
  *         Variance ばらつき度(Kapu_Trait_Varianceが必要)
  *         ElementAttackRate(id#) 攻撃属性レート(Kapu_ElementCoreが必要)
- *     valueで指定できる書式は次の通り。
- *         value#     value#固定値だけパラメータを増加させる。
- *         min#:max#  min#～max#の範囲のランダム値だけパラメータを増加させる。
  * 
  *     その他のkey及びvalueの書式はboostの追加プラグインに依存。
  * ============================================
