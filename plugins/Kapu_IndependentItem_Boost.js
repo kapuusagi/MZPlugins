@@ -135,14 +135,23 @@
  *            min#:max#  min#～max#の範囲のランダム値だけパラメータを増加させる。
  * 
  *       本プラグインで実装済みのkeyは次の通り。
- *         MHP 最大HP
- *         MMP 最大MP
- *         ATK 攻撃力
- *         DEF 防御力
- *         MAT 魔法攻撃力
- *         MDF 魔法防御力
- *         AGI 素早さ
- *         LUK 運
+ *         MHP 最大HP valueは固定値加算
+ *         MHP% 最大HP(割合) 適用時点でのMHP加算値に対してvalue%だけ増減させる。
+ *              +0.2(または20％)とすると、その時点でのHP加算値が+20％される。
+ *         MMP 最大MP valueは固定値加算
+ *         MMP% 最大MP(割合) 適用時点での値に±value%だけ増減させる。
+ *         ATK 攻撃力 valueは固定値加算
+ *         ATK% 攻撃力(割合) 適用時点での値に±value%だけ増減させる。
+ *         DEF 防御力 valueは固定値加算
+ *         DEF% 防御力(割合) 適用時点での値に±value%だけ増減させる。
+ *         MAT 魔法攻撃力 valueは固定値加算
+ *         MAT% 魔法攻撃力(割合) 適用時点での値に±value%だけ増減させる。
+ *         MDF 魔法防御力 valueは固定値加算
+ *         MDF% 魔法防御力(割合) 適用時点での値に±value%だけ増減させる。
+ *         AGI 素早さ valueは固定値加算
+ *         AGI% 素早さ(割合) 適用時点での値に±value%だけ増減させる。
+ *         LUK 運 valueは固定値加算
+ *         LUK% 運(割合) 適用時点での値に±value%だけ増減させる。
  *         HIT 命中率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
  *         EVA 回避率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
  *         CRI クリティカル率(1.0が+100%であることに注意。例 +0.2すると20%増になる)
@@ -169,6 +178,8 @@
  *         StateRate(id#) ステート付与効果を受けたとき、ステート付与率をvalue#だけ軽減する効果を付与する。
  *                        (1.0が+100%であることに注意。例 +0.2すると20%軽減になる)
  *         AddRegistState(id#) id#のステートを防ぐ特性を追加する。既に特性を持っている場合には追加されない。
+ *         GainAttackCount 攻撃回数を+1する。
+ *         LoseAttackCount 攻撃回数を-1する。トータルの攻撃回数は0回にならない。
  * 
  *     その他のkey及びvalueの書式はboostの追加プラグインに依存。
  *     例) ATK+12と、50％の確率でDEF+4を付ける強化素材のノートタグ
@@ -599,26 +610,50 @@
             case "MHP":
                 item.params[0] += DataManager.getBoostValueInt(value);
                 break;
+            case "MHP%":
+                item.params[0] += Math.floor(item.params[0] * DataManager.getBoostValueReal(value));
+                break;
             case "MMP":
                 item.params[1] += DataManager.getBoostValueInt(value);
+                break;
+            case "MMP%":
+                item.params[1] += Math.floor(item.params[1] * DataManager.getBoostValueReal(value));
                 break;
             case "ATK":
                 item.params[2] += DataManager.getBoostValueInt(value);
                 break;
+            case "ATK%":
+                item.params[2] += Math.floor(item.params[2] * DataManager.getBoostValueReal(value));
+                break;
             case "DEF":
                 item.params[3] += DataManager.getBoostValueInt(value);
+                break;
+            case "DEF%":
+                item.params[3] += Math.floor(item.params[3] * DataManager.getBoostValueReal(value));
                 break;
             case "MAT":
                 item.params[4] += DataManager.getBoostValueInt(value);
                 break;
+            case "MAT%":
+                item.params[4] += Math.floor(item.params[4] * DataManager.getBoostValueReal(value));
+                break;
             case "MDF":
                 item.params[5] += DataManager.getBoostValueInt(value);
+                break;
+            case "MDF%":
+                item.params[5] += Math.floor(item.params[5] * DataManager.getBoostValueReal(value));
                 break;
             case "AGI":
                 item.params[6] += DataManager.getBoostValueInt(value);
                 break;
+            case "AGI%":
+                item.params[6] += Math.floor(item.params[6] * DataManager.getBoostValueReal(value));
+                break;
             case "LUK":
                 item.params[7] += DataManager.getBoostValueInt(value);
+                break;
+            case "LUK%":
+                item.params[7] += Math.floor(item.params[7] * DataManager.getBoostValueReal(value));
                 break;
             case "HIT":
                 DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_XPARAM, 0,
@@ -699,6 +734,12 @@
             case "EXR":
                 DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_SPARAM, 9,
                     DataManager.getBoostValueReal(value));
+                break;
+            case "GainAttackCount":
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_ATTACK_TIMES, 0, 1, 0);
+                break;
+            case "LoseAttackCount":
+                DataManager.addBoostTraitSum(item, Game_BattlerBase.TRAIT_ATTACK_TIMES, 0, -1, 0);
                 break;
         }
 
