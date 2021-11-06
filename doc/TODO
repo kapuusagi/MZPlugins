@@ -17,11 +17,22 @@
     ☐ ノートタグ<disableRename>を追加した。
   Kapu_IndependentItem_Boot:
     ☐ 乗算特性に対する強化効果が適切でない不具合を修正。
+    ☐ 基本強化項目の追加。
+      ☐ TRAIT_ATTACK_ELEMENT
+      ☐ TRAIT_ATTACK_STATE
+      ☐ TRAIT_STATE_RATE
+      ☐ TRAIT_STATE_RESIST
+      ☐ TRAIT_ATTACK_TIMES
+    ☐ 武器強化時と防具強化時で適用する効果を変える。
   Kapu_IndependentItem_Boost_Traits:
     ☐ 乗算特性に対する強化効果が適切でない不具合を修正。
   Kapu_IndependentItem_Boost_EquipmentWeight:
     ☐ ウェイトを操作するタイプを追加。
-    
+  Kapu_IndependentItem_Boost_Trait:
+    ☐ TRAIT_DAMAGE_LIMIT
+    ☐ TRAIT_BASIC_PARAM
+  Kapu_Twld_IndependentItem_Boost:
+    ☐ BasicParamに対する強化項目を追加するため新規作成。
       
 機能拡張予定:
   Kapu_Twld_BattleSystem:
@@ -42,17 +53,6 @@
   Kapu_BuffExtension:
     ☐ 効果量に範囲を持たせたい。(Effectに含めるなら難しいかな)
       ⇒ DataEffectのフィールドに入っているので難しい。
-  Kapu_IndependentItem_Boost:
-    ☐ 基本強化項目の追加。
-      ☐ TRAIT_ATTACK_ELEMENT
-      ☐ TRAIT_ATTACK_STATE
-      ☐ TRAIT_STATE_RATE
-      ☐ TRAIT_STATE_RESIST
-      ☐ TRAIT_ATTACK_TIMES
-    ☐ 武器強化時と防具強化時で適用する効果を変える。
-  Kapu_IndependentItem_Boost_Trait:
-    ☐ TRAIT_DAMAGE_LIMIT
-    ☐ TRAIT_BASIC_PARAM
 
 
 その他:

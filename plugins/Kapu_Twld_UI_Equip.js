@@ -602,10 +602,17 @@ function Window_EquipItemName() {
      *     表示内容を変更するため、オーバーライドする。
      */
     Window_EquipStatus.prototype.refresh = function() {
+        const b2Rect = this.block2Rect();
+        const b3Rect = this.block3Rect();
         this.contents.clear();
         this.drawBlock1();
         if (!$gameParty.inBattle()) {
-            this.drawBlock2();
+            if (Game_BattlerBase.prototype.basicParam) {
+                this.drawHorzLine(b2Rect.x, b2Rect.y - 16, b2Rect.width);
+                this.drawBlock2();
+            }
+            this.drawHorzLine(b3Rect.x, b3Rect.y - 16, b3Rect.width);
+            this.drawBlock3();
         }
     };
 
@@ -614,7 +621,6 @@ function Window_EquipItemName() {
      */
     Window_EquipStatus.prototype.drawBlock1 = function() {
         const rect = this.block1Rect();
-        const lineHeight = this.lineHeight();
         const spacing = 16;
         const itemWidth = Math.floor((rect.width - spacing * 3) / 3);
         const x1 = rect.x;
@@ -624,7 +630,6 @@ function Window_EquipItemName() {
         this.drawBlock1B(x2, rect.y, itemWidth);
         this.drawBlock1C(x3, rect.y, itemWidth);
         this.resetTextColor();
-        this.drawHorzLine(rect.x, rect.y + lineHeight * 8, rect.width);
     };
 
 
@@ -661,6 +666,7 @@ function Window_EquipItemName() {
     };
     /**
      * ステータスブロック1Bを描画する。
+     * 最大TP/MAT/PMDR/MDF/MDR/MEVを描画する。
      * 
      * @param {number} x 描画位置x
      * @param {number} y 描画位置y
@@ -688,6 +694,7 @@ function Window_EquipItemName() {
     };
     /**
      * ステータスブロック1Cを描画する。
+     * 重量(プラグインが入っていれば)/CRI/CEV/PCDR/PMDRを描画する。
      * 
      * @param {number} x 描画位置x
      * @param {number} y 描画位置y
@@ -741,28 +748,118 @@ function Window_EquipItemName() {
         return new Rectangle(x, y, w, h);
      };
 
+    /**
+     * ブロック2を描画する。
+     */
+     Window_EquipStatus.prototype.drawBlock2 = function() {
+        const rect = this.block2Rect();
+        const lineHeight = this.lineHeight();
+        const spacing = 16;
+        const itemWidth = Math.floor((rect.width - spacing * 3) / 4);
+
+        const actor = this._actor;
+        const tempActor = this._tempActor;
+        if (actor == null) {
+            return;
+        }
+        let y = rect.y;
+        let x = 0;
+        this.drawBasicParam(x, y, itemWidth, TextManager.basicParam(0), actor.basicParam(0), 
+                ((tempActor) ? tempActor.basicParam(0) : undefined));
+        x += itemWidth + spacing;
+        this.drawBasicParam(x, y, itemWidth, TextManager.basicParam(1), actor.basicParam(1), 
+                ((tempActor) ? tempActor.basicParam(1) : undefined));
+        x += itemWidth + spacing;
+        this.drawBasicParam(x, y, itemWidth, TextManager.basicParam(2), actor.basicParam(2), 
+                ((tempActor) ? tempActor.basicParam(2) : undefined));
+        x += itemWidth + spacing;
+        this.drawBasicParam(x, y, itemWidth, TextManager.basicParam(3), actor.basicParam(3), 
+                ((tempActor) ? tempActor.basicParam(3) : undefined));
+        x = 0;
+        y += lineHeight;
+        this.drawBasicParam(x, y, itemWidth, TextManager.basicParam(4), actor.basicParam(4), 
+                ((tempActor) ? tempActor.basicParam(4) : undefined));
+        x += itemWidth + spacing;
+        this.drawBasicParam(x, y, itemWidth, TextManager.basicParam(5), actor.basicParam(5), 
+                ((tempActor) ? tempActor.basicParam(5) : undefined));
+        x += itemWidth + spacing;
+        this.drawBasicParam(x, y, itemWidth, TextManager.param(7), actor.param(7), 
+                ((tempActor) ? tempActor.param(7) : undefined));
+    };
+
+    /**
+     * 基本パラメータを描画する。
+     * 
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 描画範囲幅
+     * @param {string} paramName パラメータ名
+     * @param {number} current 現在の値
+     * @param {number} tempValue 一時アクターの値
+     */
+    Window_EquipStatus.prototype.drawBasicParam = function(x, y, width, paramName, current, tempValue) {
+        const paramWidth = Math.min(this.paramWidth(), Math.floor(width * 0.3));
+        const rightArrowWidth = this.rightArrowWidth();
+        const spacing = 16;
+        const valueWidth = (width - paramWidth - rightArrowWidth - spacing * 3) / 2;
+
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(paramName, x, y, paramWidth);
+
+        const currentX = x + paramWidth + spacing;
+        this.resetTextColor();
+        this.drawText(current + " ", currentX, y, valueWidth, "right");
+
+        if ((tempValue === undefined) || (current === tempValue)) {
+            return;
+        }
+        const arrowX = currentX + valueWidth + spacing;
+        this.drawRightArrow(arrowX, y);
+        if (tempValue >= current) {
+            this.changeTextColor(ColorManager.powerUpColor());
+        } else {
+            this.changeTextColor(ColorManager.powerDownColor());
+        }
+        const tempX = arrowX + rightArrowWidth + spacing;
+        this.drawText(tempValue + " ", tempX, y, valueWidth, "right");
+    };
+
+     /**
+      * ブロック2の描画領域を得る。
+      * 
+      * @returns {Rectangle} 描画領域
+      */
+    Window_EquipStatus.prototype.block2Rect = function() {
+        const rect = this.block1Rect();
+        const x = 0;
+        const y = rect.y + rect.height;
+        const w = this.innerWidth;
+        const h = this.lineHeight() * 2 + 16;
+        return new Rectangle(x, y, w, h);
+    };
      /**
       * ブロック2を描画する。
       */
-     Window_EquipStatus.prototype.drawBlock2 = function() {
+     Window_EquipStatus.prototype.drawBlock3 = function() {
          if (!this._actor) {
              return;
          }
          if (this._tempActor) {
             // 装備変更対象選択中はステータス差分のみ表示する。
-            this.drawBlock2DiffOnly();
+            this.drawBlock3DiffOnly();
          } else {
-            this.drawBlock2Normal();
+            this.drawBlock3Normal();
          }
      };
 
      /**
       * ブロック2を描画する。
+      * 属性耐性一覧を表示する。
       * 
       * Note: 属性耐性レートのみ記載。
       */
-     Window_EquipStatus.prototype.drawBlock2Normal = function() {
-        const rect = this.block2Rect();
+     Window_EquipStatus.prototype.drawBlock3Normal = function() {
+        const rect = this.block3Rect();
         const spacing = 16;
         const itemWidth = Math.floor((rect.width - spacing * 4) / 4);
         const x1 = rect.x;
@@ -776,6 +873,7 @@ function Window_EquipItemName() {
     };
     /**
      * 属性レート配列を描画する。
+     * 縦方向に属性レートを描画する。
      * 
      * @param {number} x 描画x位置
      * @param {number} y 描画y位置
@@ -784,7 +882,7 @@ function Window_EquipItemName() {
      */
     Window_EquipStatus.prototype.drawElementRates = function(x, y, width, elementEntries) {
         const lineHeight = this.lineHeight();
-        for (let i = 0; i < elementEntries.length; i++) {
+        for (let i = 0; (i < elementEntries.length) && (i < 4); i++) {
             const entry = elementEntries[i];
             this.drawElementRate(entry, this._actor, x, y + lineHeight * i, width);
         }
@@ -837,8 +935,8 @@ function Window_EquipItemName() {
     /**
      * ブロック2を描画する。
      */
-    Window_EquipStatus.prototype.drawBlock2DiffOnly = function() {
-        const rect = this.block2Rect();
+    Window_EquipStatus.prototype.drawBlock3DiffOnly = function() {
+        const rect = this.block3Rect();
         const lineHeight = this.lineHeight();
         const maxLineCount = Math.floor(rect.height / lineHeight);
         const spacing = 16;
@@ -995,8 +1093,8 @@ function Window_EquipItemName() {
       * 
       * @returns {Rectangle} 描画領域
       */
-     Window_EquipStatus.prototype.block2Rect = function() {
-        const rect = this.block1Rect();
+     Window_EquipStatus.prototype.block3Rect = function() {
+        const rect = this.block2Rect();
         const x = 0;
         const y = rect.y + rect.height;
         const w = this.innerWidth;
