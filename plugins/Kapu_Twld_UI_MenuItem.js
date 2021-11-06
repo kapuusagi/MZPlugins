@@ -118,6 +118,18 @@
  * @type string
  * @default 装備効果
  * 
+ * @param textBoostCount
+ * @text 強化回数
+ * @desc 強化回数ラベルとして表示する文字列
+ * @type string
+ * @default 強化回数
+ * 
+ * @param textBoostCountMax
+ * @text 最大
+ * @desc 最大強化数ラベルとして表示する文字列
+ * @type string
+ * @default 最大
+ * 
  * @param itemInfoWindowWidth
  * @text 情報ウィンドウ幅
  * @desc 情報ウィンドウの幅
@@ -232,6 +244,8 @@ function Window_ItemInfo() {
     const textRangeLong = parameters["textRangeLong"] || "Long";
     const textHitRate = parameters["textHitRate"] || "HitRate";
     const textEquipEffect = parameters["textEquipEffect"] || "Equip Effects";
+    const textBoostCount = parameters["textBoostCount"] || "Boost";
+    const textBoostCountMax = parameters["textBoostCountMax"] || "Max";
     const itemInfoWindowWidth = Math.floor(Number(parameters["itemInfoWindowWidth"]) || 800);
     const itemInfoWindowHeight = Math.floor(Number(parameters["itemInfoWindowHeight"]) || 640);
     const displayAGI = (parameters["displayAGI"] === undefined)
@@ -700,7 +714,7 @@ function Window_ItemInfo() {
      */
     Window_ItemInfo.prototype.drawWeaponBasicInformation = function(item, x, y, width) {
         const padding = this.itemPadding();
-        const itemWidth = (width - padding) / 4;
+        const itemWidth = (width - padding - 32) / 4;
 
         // 1行目
         // 種類
@@ -723,10 +737,19 @@ function Window_ItemInfo() {
         // 2行目
         offsetX = 0;
         y += this.lineHeight();
+        // 重量
         this.drawWeight(item, x + offsetX, y, itemWidth);
         offsetX += itemWidth + padding;
 
-    };
+        // (Reserved)
+        offsetX += itemWidth + padding;
+
+        // (Reserved)
+        offsetX += itemWidth + padding;
+
+        // 強化回数
+        this.drawBoost(item, x + offsetX, y, itemWidth);
+   };
 
     /**
      * 武器タイプを描画する。
@@ -918,7 +941,31 @@ function Window_ItemInfo() {
         this.drawLabelAndValue(TextManager.weaponWeight(), weight, x, y, width);
     };
 
+    /**
+     * 強化状態を表示する。
+     * 
+     * @param {object} item アイテム
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     */
+    Window_ItemInfo.prototype.drawBoost = function(item, x, y, width) {
+        if (item.boostCount === undefined) {
+            return;
+        }
 
+        const label = textBoostCount;
+        let valueText;
+        if (item.maxBoostCount === 0) {
+            valueText = "-";
+        } else if (item.boostCount === item.maxBoostCount) {
+            valueText = textBoostCountMax;
+        } else {
+            valueText = (String(item.boostCount)).padStart(3, " ") 
+                    + "/" + (String(item.maxBoostCount)).padStart(3, " ");
+        }
+        this.drawLabelAndValue(label, valueText, x, y, width);
+    };
 
     /**
      * 武器/防具の性能(基本パラメータ)を描画する。
@@ -1160,7 +1207,7 @@ function Window_ItemInfo() {
      */
     Window_ItemInfo.prototype.drawArmorBasicInformation = function(item, x, y, width) {
         const padding = this.itemPadding();
-        const itemWidth = (width - padding) / 4;
+        const itemWidth = (width - padding - 32) / 4;
 
         // 1行目
         // 種類
@@ -1173,8 +1220,16 @@ function Window_ItemInfo() {
         y += this.lineHeight();
         // 重量
         this.drawWeight(item, x + offsetX, y, itemWidth);
-        
+        offsetX += itemWidth + padding;
 
+        // (Reserved)
+        offsetX += itemWidth + padding;
+
+        // (Reserved)
+        offsetX += itemWidth + padding;
+
+        // (Reserved)
+        this.drawBoost(item, x + offsetX, y, itemWidth);
     };
 
     /**
