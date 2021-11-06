@@ -1752,18 +1752,18 @@ function Window_BlacksmithNameEdit() {
 
     /**
      * 強化対象のアイテム一覧を作成する。
-     * この鍛冶屋レベルによってフィルタはしない。
+     * この鍛冶屋レベルによるフィルタはしない。
      * (鍛冶屋レベルが足りないやつは、リストに表示して技量不足、と表示させる)
      */
     Scene_BlacksmithShop.prototype.makeBoostableItemList = function() {
         this._items = [];
         $gameParty.weapons().forEach(function(weapon) {
-            if (DataManager.isBoostableItem(weapon)) {
+            if (DataManager.isIndependentItem(weapon)) {
                 this._items.push(weapon);
             }
         }, this);
         $gameParty.armors().forEach(function(armor) {
-            if (DataManager.isBoostableItem(armor)) {
+            if (DataManager.isIndependentItem(armor)) {
                 this._items.push(armor);
             }
         }, this);
