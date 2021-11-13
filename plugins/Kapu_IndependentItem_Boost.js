@@ -355,9 +355,9 @@
      * @param {Array<Object>} dataCollection DataItemのコレクション
      */
     const _processItemNotetags = function(dataCollection) {
-        const patternBoostEffect = /<boostEffect[ :]?(.+)>/;
-        const patternBoostEffectWeapon = /<boostEffectWeapon[ :]?(.+)>/;
-        const patternBoostEffectArmor = /<boostEffectArmor[ :]?(.+)>/;
+        const patternBoostEffect = /<boostEffect:[ ]?(.+)>/;
+        const patternBoostEffectWeapon = /<boostEffectWeapon:[ ]?(.+)>/;
+        const patternBoostEffectArmor = /<boostEffectArmor:[ ]?(.+)>/;
 
         for (let i = 1; i < dataCollection.length; i++) {
             const item = dataCollection[i];
