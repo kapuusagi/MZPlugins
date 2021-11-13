@@ -714,8 +714,14 @@ function Window_BlacksmithNameEdit() {
             this.resetTextColor();
             if ((this._mode === Scene_BlacksmithShop.SHOP_MODE_BOOST)
                     && (!DataManager.isBoostableItem(item) || (item.boostCount >= this._maxBoostCount))) {
+                // 強化モードで強化できない条件か、すでに最大強化されている。
                 const textWidth = rect.width - x;
-                this.drawText(textInsufficientSkillLevel, x, rect.y, textWidth, "right");
+                if (item.boostCount >= this._maxBoostCount) {
+                    // 技量不足
+                    this.drawText(textInsufficientSkillLevel, x, rect.y, textWidth, "right");
+                } else {
+                    this.drawText(textMaxBoosted, x, rect.y, textWidth, "right");
+                }
             } else {
                 const rate = (this._mode === Scene_BlacksmithShop.SHOP_MODE_BOOST)
                         ? DataManager.getBoostSuccessRate(item, this._smithLevel, null, 1)
