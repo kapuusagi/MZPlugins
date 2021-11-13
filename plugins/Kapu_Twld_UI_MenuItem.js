@@ -70,6 +70,12 @@
  * @type string
  * @default その他
  * 
+ * @param textArmorEquipType
+ * @text 防具装備箇所テキスト
+ * @desc 防具装備箇所ラベルとして表示する文字列
+ * @type string
+ * @default 装備部位
+ * 
  * @param textLabelElement
  * @text 属性ラベルテキスト
  * @desc "属性"として表示するテキスト
@@ -193,8 +199,7 @@
  * 
  * アイテム
  *   <effectsString:effectsString$>
- *      カンマ("<")で区切られた文字列。
- *      情報画面の効果欄に表示される。
+ *      情報画面の効果欄に表示されるテキスト。
  * ============================================
  * 変更履歴
  * ============================================
@@ -236,6 +241,7 @@ function Window_ItemInfo() {
     const textArmorType = parameters["textArmorType"] || "type";
     const textWeaponTypeOther = parameters["textWeaponTypeOther"] || "?";
     const textArmorTypeOther = parameters["textArmorTypeOther"] || "?";
+    const textArmorEquipType = parameters["textArmorEquipType"] || "E.Position"
     const textLabelElement = parameters["textLabelElement"] || "EL";
     const textNoElement = parameters["textNoElement"] || "-";
     const textWeaponRange = parameters["textWeaponRange"] || "Range";
@@ -652,25 +658,20 @@ function Window_ItemInfo() {
             const hideText = item.meta.hideInformationText || textUnknownInformation;
             this.drawText(hideText, rect.x, rect.y, rect.width);
         } else {
-            const padding = this.itemPadding();
             let x = rect.x;
             let y = rect.y;
             this.resetTextColor();
-            const effectsString = item.meta.effectsString || "";
-            const effectStrings = effectsString.split(",").map(s => s.trim());
-            for (const effectText of effectStrings) {
-                const textWidth = this.textWidth(effectText);
-                if ((x + textWidth) > rect.width) {
+
+            const lineHeight = this.lineHeight();
+            const lines = (item.meta.effectsString || "").split("\n");
+            for (const line of lines) {
+                const effectsString = line.trim() || "";
+                if (effectsString.length > 0) {
+                    this.drawText(line, x, y, rect.width);
                     // 次の行に改行
                     x = rect.x;
                     y += lineHeight;
-                    if ((y + lineHeight) > (rect.y + rect.height)) {
-                        break; // これ以上表示できない。
-                    }
                 }
-                const w = Math.min(textWidth, rect.width);
-                this.drawText(effectText, x, y, w);
-                x += (w + padding);
             }
         }
     };
@@ -1215,6 +1216,9 @@ function Window_ItemInfo() {
         this.drawArmorType(item, x + offsetX, y, itemWidth);
         offsetX += itemWidth + padding;
 
+        this.drawArmorEquipType(item, x + offsetX, y, itemWidth);
+        offsetX += itemWidth + padding;
+
         // 2行目
         offsetX = 0;
         y += this.lineHeight();
@@ -1249,6 +1253,25 @@ function Window_ItemInfo() {
         const aTypeStr = TextManager.armorTypeName(item.atypeId) || textArmorTypeOther;
         this.changeTextColor(ColorManager.normalColor());
         this.drawText(aTypeStr, x + labelWidth, y, valueWidth);
+    };
+
+    /**
+     * 防具装備箇所を描画する。
+     * 
+     * @param {DataArmor} item DataArmor
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     */
+    Window_ItemInfo.prototype.drawArmorEquipType = function(item, x, y, width) {
+        const textLabel = textArmorEquipType + ":";
+        const labelWidth = Math.min(this.textWidth(textLabel), width / 2);
+        const valueWidth = width - labelWidth;
+        this.changeTextColor(ColorManager.systemColor());
+        this.drawText(textLabel, x, y, labelWidth);
+        const eTypeStr = $dataSystem.equipTypes[item.etypeId];
+        this.changeTextColor(ColorManager.normalColor());
+        this.drawText(eTypeStr, x + labelWidth, y, valueWidth);
     };
 
     /**
