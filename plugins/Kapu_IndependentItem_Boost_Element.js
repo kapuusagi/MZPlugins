@@ -68,15 +68,19 @@
         const pattern = /ElementRate\((\d+)\)/;
         if (key.match(pattern)) {
             const elementId = Number(RegExp.$1);
-            const value = DataManager.getBoostValueReal(value);
-            DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId, value);
+            const traitValue = DataManager.getBoostValueReal(value);
+            DataManager.addBoostTraitMultiple(item, Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId, traitValue);
         } else {
             switch (key) {
                 case "AddAttackElement":
                     {
                         const elementId = Math.floor(Number(value) || 0);
                         if (elementId > 0) {
-                            DataManager.addBoostTrait(item, Game_BattlerBase.TRAIT_ATTACK_ELEMENT, elementId, 0);
+                            item.traits.push({
+                                code:Game_BattlerBase.TRAIT_ATTACK_ELEMENT,
+                                dataId:elementId,
+                                value:0
+                            });
                         }
                     }
                     break;
