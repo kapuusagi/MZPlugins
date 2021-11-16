@@ -100,6 +100,8 @@ Game_Party.ABILITY_～で定義される。
 |108|__ABILITY_RANDOMENCOUNT_RATE__|ランダムエンカウント率特性。|
 |109|__ABILITY_DOUBLE_DROP__|2倍ドロップ特性|
 |110|__ABILITY_TRIPLE_DROP__|3倍ドロップ特性|
+|111|__ABILITY_RELIEF_TIMERANGE_SURPRISE__|時間帯不意打ち率軽減特性|
+|112|__ABILITY_RELIEF_WEATHER_SURPRISE__|天候不意打ち率軽減特性|
 ||||
 
 
