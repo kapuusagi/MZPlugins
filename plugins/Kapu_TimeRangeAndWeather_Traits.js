@@ -13,10 +13,22 @@
  * @type number
  * @defalt 111
  * 
+ * @param textTraitReliefTimeRangeSurprise
+ * @text 特性名
+ * @desc TextManagerで管理する特性名
+ * @type string
+ * @default 時間帯による不意打ち軽減
+ * 
  * @param abilityReliefWeatherSurprise
  * @text 天候による不意打ち率軽減特性アビリティID
  * @type number
  * @default 112
+ * 
+ * @param textTraitReliefWeatherSurprise
+ * @text 特性名
+ * @desc TextManagerで管理する特性名
+ * @type string
+ * @default 天候による不意打ち軽減
  * 
  * @help 
  * 時間帯・天候による不意打ち率が増加するのを防ぐ特性を追加するプラグイン。
@@ -105,6 +117,22 @@
         DataManager.addNotetagParserWeapons(_processNoteTag);
         DataManager.addNotetagParserArmors(_processNoteTag);
         DataManager.addNotetagParserStates(_processNoteTag);
+    }
+    //------------------------------------------------------------------------------
+    // TextManager
+    if (TextManager._partyAbilities && Game_Party.ABILITY_RELIEF_TIMERANGE_SURPRISE) {
+        TextManager._partyAbilities[Game_Party.ABILITY_RELIEF_TIMERANGE_SURPRISE] = {
+            name: parameters["textTraitReliefTimeRangeSurprise"] || "",
+            value: TextManager.traitValueSum,
+            str: TextManager.traitValueStrRate
+        };
+    }
+    if (TextManager._partyAbilities && Game_Party.ABILITY_RELIEF_WEATHER_SURPRISE) {
+        TextManager._partyAbilities[Game_Party.ABILITY_RELIEF_WEATHER_SURPRISE] = {
+            name: parameters["textTraitReliefWeatherSurprise"] || "",
+            value: TextManager.traitValueSum,
+            str: TextManager.traitValueStrRate
+        };
     }
     //------------------------------------------------------------------------------
     // Game_Party
