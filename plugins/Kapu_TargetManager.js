@@ -118,6 +118,13 @@
  * @type string
  * @default 敵味方全体
  * 
+ * @param textNoNormalyTarget
+ * @text 本来のターゲットなしテキスト
+ * @desc 戦闘時の対象選択で、本来のスキル対象がいない場合のテキスト
+ * @type string
+ * @default (対象なし)
+ * 
+ * 
  * 
  * @help 
  * 行動対象のベースプラグイン。
@@ -276,6 +283,7 @@ $dataItemScopes = null;
     const textFriend = parameters["textFriend"] || "One friend";
     const textAllFriends = parameters["textAllFriends"] || "All friends";
     const textAllAlives = parameters["textAllAlives"] || "All";
+    const textNoNormalyTarget = parameters["textNoNormalyTarget"] || "(None)"
 
     TargetManager.TARGET_COUNT_ALL = -1;
 
@@ -1386,7 +1394,7 @@ $dataItemScopes = null;
             const rect = this.itemRect(index);
             this.changePaintOpacity(this.isEnabled(group));
             this.drawText(group.name(), rect.x, rect.y, rect.width);
-            this.changePaintOpacity(1);
+            this.changePaintOpacity(true);
         }
     };
 
@@ -1404,6 +1412,43 @@ $dataItemScopes = null;
     Window_BattleActionTarget.prototype.initialize = function(rect) {
         Window_ActionTargetBase.prototype.initialize.call(this, rect);
     };
+
+    /**
+     * 選択対象リストを設定する。
+     * 
+     * @param {Array<Game_ActionTargetGroup>} targetGroups ターゲットグループ選択リスト
+     */
+    Window_BattleActionTarget.prototype.setTargetGroups = function(targetGroups) {
+        let selectableTargetGroups = [];
+        if (targetGroups.find(group => group && group.isNormalyTarget())) {
+            // ターゲットあり。
+            // そのまま渡す。
+            selectableTargetGroups = targetGroups.concat();
+        } else {
+            // ターゲットなし。
+            selectableTargetGroups = [null].concat(targetGroups);
+        }
+
+        Window_ActionTargetBase.prototype.setTargetGroups.call(this, selectableTargetGroups);
+    };    
+    /**
+     * 項目を描画する。
+     * 
+     * @param {number} index インデックス番号
+     */
+    Window_BattleActionTarget.prototype.drawItem = function(index) {
+        const group = this.itemAt(index);
+        if (group) {
+            const rect = this.itemRect(index);
+            this.changePaintOpacity(false);
+            this.drawText(textNoNormalyTarget, rect.x, rect.y, rect.width);
+            this.changePaintOpacity(true);
+        } else {
+            Window_ActionTargetBase.prototype.drawItem.call(this, index);
+        }
+    };
+
+        
     //------------------------------------------------------------------------------
     // Window_MenuActionTarget
     // アクションターゲット選択ウィンドウ
@@ -1471,7 +1516,7 @@ $dataItemScopes = null;
      */
     Scene_Battle.prototype.destroy = function() {
         _Scene_Battle_destroy.call(this);
-        if(this._enemyWindow) {
+        if (this._enemyWindow) {
             this._enemyWindow.destroy();
         }
     };
