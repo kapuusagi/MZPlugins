@@ -54,6 +54,13 @@
  * @type string
  * @default 防具重量
  * 
+ * @param calcurateEquipSlotBase
+ * @text 装備スロット情報を元に計算する
+ * @desc 武器重量、防具重量を計算する際、装備している品の種類ではなく、スロット情報（武器を装備可能なスロットかどうか）を元に判定する。
+ * @type boolean
+ * @default false
+ * 
+ * 
  * @help 
  * アクターに装備可能重量の概念を追加し、装備品に重量を持たせます。
  * 許容重量を超えた場合の動作はプラグインパラメータに依存します。
@@ -141,6 +148,8 @@
     const defaultActorArmorWeightTolerance = Math.max(0, Math.round(Number(parameters["defaultActorArmorWeightTolerance"]) || 0));
     const changeEquipStyleByWeight = (parameters["changeEquipStyleByWeight"] === undefined)
             ? false : (parameters["changeEquipStyleByWeight"] === "true");
+    const calcurateEquipSlotBase = (parameters["calcurateEquipSlotBase"] === undefined)
+            ? false : (parameters["calcurateEquipSlotBase"] === "true");
 
     const textWeight = parameters["textWeight"] || "weight";
     const textWeaponWeight = parameters["textWeaponWeight"] || "W.Weight";
@@ -274,35 +283,73 @@
         return this.weaponWeightTolerance() + this.armorWeightTolerance();
     };
 
-    /**
-     * 装備武器の合計重量を得る。
-     * 
-     * @returns {number} 装備重量合計
-     */
-    Game_Actor.prototype.equipWeaponWeights = function() {
-        const weapons = this.weapons();
-        const total = weapons.reduce((prev, weapon) => {
-            const weight = (weapon) ? (weapon.weight || 0) : 0;
-            return prev + weight;
-        }, 0);
-        return total;
-        // return this.weapons().reduce((prev, weapon) => prev + (weapon) ? (weapon.weight || 0) : 0, 0);
-    };
+    if (calcurateEquipSlotBase) {
+        /**
+         * 装備武器の合計重量を得る。
+         * 
+         * @returns {number} 装備重量合計
+         */
+        Game_Actor.prototype.equipWeaponWeights = function() {
+            const equips = this.equips();
+            const equipTypes = equipTypesOfSlots();
+            let weight = 0;
+            for (let i = 0; i < equips.length; i++) {
+                const equip = equips[i];
+                const etypeIds = equipTypes[i];
+                if (etypeIds.includes(1) && equip && equip.weight) {
+                    weight += equip.weight;
+                }
+            }
+            return weight;
+        };
 
-    /**
-     * 装備防具の合計重量を得る。
-     * 
-     * @returns {number} 装備重量合計
-     */
-    Game_Actor.prototype.equipArmorWeights = function() {
-        const armors = this.armors();
-        const total = armors.reduce((prev, armor) => {
-            const weight = (armor) ? (armor.weight || 0) : 0;
-            return prev + weight;
-        }, 0)
-        return total;
-        // return this.armors().reduce((prev, armor) => prev + (armor) ? (armor.weight || 0) : 0, 0);
-    };
+        /**
+         * 装備防具の合計重量を得る。
+         * 
+         * @returns {number} 装備重量合計
+         */
+        Game_Actor.prototype.equipArmorWeights = function() {
+            const equips = this.equips();
+            const equipTypes = equipTypesOfSlots();
+            let weight = 0;
+            for (let i = 0; i < equips.length; i++) {
+                const equip = equips[i];
+                const etypeIds = equipTypes[i];
+                if (!etypeIds.includes(1) && equip && equip.weight) {
+                    weight += equip.weight;
+                }
+            }
+            return weight;
+        };
+    } else {
+        /**
+         * 装備武器の合計重量を得る。
+         * 
+         * @returns {number} 装備重量合計
+         */
+        Game_Actor.prototype.equipWeaponWeights = function() {
+            const weapons = this.weapons();
+            const total = weapons.reduce((prev, weapon) => {
+                const weight = (weapon) ? (weapon.weight || 0) : 0;
+                return prev + weight;
+            }, 0);
+            return total;
+        };
+
+        /**
+         * 装備防具の合計重量を得る。
+         * 
+         * @returns {number} 装備重量合計
+         */
+        Game_Actor.prototype.equipArmorWeights = function() {
+            const armors = this.armors();
+            const total = armors.reduce((prev, armor) => {
+                const weight = (armor) ? (armor.weight || 0) : 0;
+                return prev + weight;
+            }, 0)
+            return total;
+        };
+    }
 
     /**
      * 装備品の合計重量を得る。
@@ -331,13 +378,6 @@
                 if (canEquip) {
                     const equips = this.equips();
                     equips[slotNo] = item;
-                    // let totalWeight = 0;
-                    // for (const equipment of equips) {
-                    //     if (equipment && equipment.weight) {
-                    //         totalWeight += equipment.weight;
-                    //     }
-                    // }
-                    //const totalWeight = equips.reduce((prev, equipment) => { prev + (equipment) ? (equipment.weight || 0) : 0, 0);
                     const totalWeight = equips.reduce((prev, equipment) => {
                         const weight = (equipment) ? (equipment.weight || 0) : 0;
                         return prev + weight;
@@ -345,7 +385,45 @@
                     canEquip = totalWeight <= this.weightTolerance();
                 }
                 return canEquip;
-            };  
+            };
+        } else if (calcurateEquipSlotBase) {
+            const _Game_Actor_canEquipAtSlot = Game_Actor.prototype.canEquipAtSlot;
+            /**
+             * slotNoで指定されるスロットにitemが装備可能かどうかを取得する。
+             * 
+             * @param {number} slotNo スロット番号
+             * @param {object} item DataWeaponまたはDataArmor
+             * @returns {boolean} 装備可能な場合にはtrue, それ以外はfalse
+             */
+            Game_Actor.prototype.canEquipAtSlot = function(slotNo, item) {
+                let canEquip = _Game_Actor_canEquipAtSlot.call(this, slotNo, item);
+                if (canEquip) {
+                    const equips = this.equips();
+                    const equipTypes = this.equipTypesOfSlots();
+                    equips[slotNo] = item;
+                    if (equipTypes[slotNo].includes(1)) {
+                        // 武器スロット
+                        let totalWeight = 0;
+                        for (let i = 0; i < equips.length; i++) {
+                            if (equipTypes[i].includes(1) && equips[i] && equips[i].weight) {
+                                totalWeight += equips[i].weight;
+                            } 
+                        }
+                        canEquip = totalWeight <= this.weaponWeightTolerance();
+                    } else {
+                        // 防具スロット
+                        let totalWeight = 0;
+                        for (let i = 0; i < equips.length; i++) {
+                            if (!equipTypes[i].includes(1) && equips[i] && equips[i].weight) {
+                                totalWeight = equips[i].weight;
+                            }
+                        }
+                        canEquip = totalWeight <= this.armorWeightTolerance();
+                    }
+                }
+        
+                return canEquip;
+            };        
         } else {
             const _Game_Actor_canEquipAtSlot = Game_Actor.prototype.canEquipAtSlot;
             /**
