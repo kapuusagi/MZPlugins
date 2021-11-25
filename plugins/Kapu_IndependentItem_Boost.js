@@ -57,8 +57,11 @@
  *   但し最小強化成功率以下にはならない。
  * 
  * (a) 基本強化成功率
- *     (武器・防具に設定された強化成功率) * (強化段階補正)
- *     強化段階補正は+1にするとき 100%, 2回目以降10％ずつ下がる。(最小値0.01)
+ *     POW((武器・防具に設定された強化成功率), (強化段階補正))
+ *     設定された強化成功率が1.0の場合、何回強かしても基本強化成功率は1.0となる。
+ *     そのため、強化素材の成功率、作業者の能力による成功率だけになる。
+ *     設定された強化成功率が0.9の場合、初回は100％、2回目は90%, 3回目は81% と減少していく。
+ *     最小値0.01
  * (b) 強化作業者スキルによるもの
  *     1.0 - {(武器・防具の強化難易度) + (武器・防具の強化段階) - (作業者スキルレベル)} * 0.05
  *     補正結果が0.01以下になる場合、0.01になる。
@@ -545,7 +548,7 @@
     DataManager.getBoostSuccessRate = function(item, userLevel, catalystItem, catalystItemCount) {
         const boostCount = item.boostCount || 0;
         // (a) 基本強化成功率
-        const baseRate = item.boostSuccessRate * (1.0 - boostCount * 0.1)
+        const baseRate = Math.max(0.01, Math.pow(item.boostSuccessRate, boostCount));
         // (b) 強化作業者スキルによるもの
         const skillRate = Math.max(0.01, 1.0 - ((item.boostDifficulty + boostCount - userLevel) * 0.05));
         let rate = baseRate * skillRate;
