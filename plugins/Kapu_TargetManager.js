@@ -1440,12 +1440,12 @@ $dataItemScopes = null;
     Window_BattleActionTarget.prototype.drawItem = function(index) {
         const group = this.itemAt(index);
         if (group) {
+            Window_ActionTargetBase.prototype.drawItem.call(this, index);
+        } else {
             const rect = this.itemRect(index);
             this.changePaintOpacity(false);
             this.drawText(textNoNormalyTarget, rect.x, rect.y, rect.width);
             this.changePaintOpacity(true);
-        } else {
-            Window_ActionTargetBase.prototype.drawItem.call(this, index);
         }
     };
 
