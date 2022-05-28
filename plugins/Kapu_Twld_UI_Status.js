@@ -2035,6 +2035,7 @@ function Window_StatusProfile() {
         if (this.visible) {
             this.updatePosition();
         }
+        this.updateFilter();
     };
 
     /**
@@ -2097,6 +2098,19 @@ function Window_StatusProfile() {
         // 右下揃えで配置する。
         this.x = this._displayArea.x + this._displayArea.width;
         this.y = this._displayArea.y + this._displayArea.height;
+    };
+
+    /**
+     * フィルタを更新する。
+     */
+    Sprite_StatusBackgroundPicture.prototype.updateFilter = function() {
+        if (this._actor) {
+            if (this._actor.isAlive()) {
+                this.setColorTone([0,0,0,0]);
+            } else {
+                this.setColorTone([0,0,0,255]);
+            }
+        }
     };
 
 
