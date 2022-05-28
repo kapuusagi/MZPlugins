@@ -82,7 +82,7 @@
  * 
  * @param listWindowWidth
  * @text リストウィンドウ幅
- * @desc リストウィンドウの幅。
+ * @desc リストウィンドウ(アイテムやスキルの選択ウィンドウ)の幅。
  * @default 816
  * @type number
  * @parent layout
@@ -107,6 +107,46 @@
  * @type number
  * @default 4
  * @parent layout
+ * 
+ * @param commandHudPictureDisplayX
+ * @text コマンドウィンドウピクチャ表示開始位置x
+ * @desc コマンド入力中のアクター画像を表示する画面右端基準での表示開始位置。これより左側には表示させない。
+ * @type number
+ * @default 900
+ * @parent layout
+ * 
+ * @param commandHudPictureFadeWidth
+ * @text コマンドウィンドウピクチャ水平フェード幅
+ * @desc コマンド入力中のアクター画像を表示する際の、境界のぼかし幅
+ * @type number
+ * @default 40
+ * @parent layout
+ * 
+ * @param commandHudPictureFadeHeight
+ * @text コマンドウィンドウピクチャ垂直フェード幅
+ * @desc コマンド入力中のアクター画像を表示する際の、境界のぼかし幅
+ * @type number
+ * @default 40
+ * @parent layout
+ * 
+ * @param commandHudPictureOffsetX
+ * @text コマンドウィンドウピクチャ表示オフセットX
+ * @desc コマンド入力中のアクター画像を表示をずらすオフセット。負数で左に移動、正数で右に移動
+ * @type number
+ * @default 0
+ * @min -1000
+ * @max 1000
+ * @parent layout
+ * 
+ * @param commandHudPictureOffsetY
+ * @text コマンドウィンドウピクチャ表示オフセットY
+ * @desc コマンド入力中のアクター画像を表示をずらすオフセット。負数で上に移動、正数で下に移動
+ * @type number
+ * @default 0
+ * @min -1000
+ * @max 1000
+ * @parent layout
+ * 
  * 
  * @param statusAreaWidth
  * @text ステータスエリア幅
@@ -347,6 +387,13 @@ function Sprite_BattleHudPicture() {
     const commandWindowX = Number(parameters["commandWindowX"]) || 1068;
     const commandWindowWidth = Number(parameters["commandWindowWidth"]) || 192;
     const commandWindowRowCount = Number(parameters["commandWindowRowCount"]) || 4;
+    const commandHudPictureDisplayX = Number(parameters["commandHudPictureDisplayX"]) || 280;
+    const commandHudPictureOffsetX = Number(parameters["commandHudPictureOffsetX"]) || 0;
+    const commandHudPictureOffsetY = Number(parameters["commandHudPictureOffsetY"]) || 0;
+    const commandHudPictureX = (commandHudPictureDisplayX + commandWindowX) / 2 + commandHudPictureOffsetX; 
+    const commandHudPictureFadeWidth = Number(parameters["commandHudPictureFadeWidth"]) || 0;
+    const commandHudPictureFadeHeight = Number(parameters["commandHudPictureFadeHeight"]) || 0;
+    
     const statusAreaWidth = Number(parameters["statusAreaWidth"]) || 160;
     const statusAreaPadding = Number(parameters["statusAreaPadding"]) || 16;
     const statusAreaHeight = Number(parameters["statusAreaHeight"]) || 220;
@@ -1998,10 +2045,10 @@ function Sprite_BattleHudPicture() {
      */
     DisplayBattlePictureFilter.prototype.initialize = function() {
         PIXI.Filter.call(this, null, this._fragmentSrc());
-        this.uniforms.zeroX = 900.0;
-        this.uniforms.validWidth = 100.0;
-        this.uniforms.zeroY = 540.0;
-        this.uniforms.validHeight = 40.0;
+        this.uniforms.zeroX = commandHudPictureDisplayX;
+        this.uniforms.dissolveWidth = commandHudPictureFadeWidth;
+        this.uniforms.zeroY = Graphics.boxHeight - statusAreaHeight; // ステータスウィンドウの所にはかぶせない
+        this.uniforms.dissolveHeight = commandHudPictureFadeHeight;
     };
 
     /**
@@ -2023,13 +2070,13 @@ function Sprite_BattleHudPicture() {
             "varying vec2 vTextureCoord;" +
             "uniform sampler2D uSampler;" +
             "uniform float zeroX;" +
-            "uniform float validWidth;" +
+            "uniform float dissolveWidth;" +
             "uniform float zeroY;" +
-            "uniform float validHeight;" +
+            "uniform float dissolveHeight;" +
             "void main() {" +
             "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
-            "  float rateH = clamp((gl_FragCoord.x - zeroX) / validWidth, 0.0, 1.0);" +
-            "  float rateV = 1.0 - clamp((gl_FragCoord.y - zeroY) / validHeight, 0.0, 1.0);" +
+            "  float rateH = clamp((gl_FragCoord.x - zeroX) / dissolveWidth, 0.0, 1.0);" +
+            "  float rateV = 1.0 - clamp((gl_FragCoord.y - zeroY) / dissolveHeight, 0.0, 1.0);" +
             "  float rate = min(rateH, rateV);" +
             "  vec3 rgb = sample.rgb * rate;" +
             "  float a = sample.a * rate;" +
@@ -2217,7 +2264,8 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudPicture.prototype.updateBitmap = function() {
         if (this._battler) {
-            const pictureName = this._battler.battlePicture();
+            const pictureName = (typeof this._battler[pictureMethod] === "function") 
+                    ? this._battler[pictureMethod]() : this._battler[pictureMethod];
             if (this._pictureName !== pictureName) {
                 this._pictureName = pictureName;
                 this.bitmap = this.loadBattlePicture();
@@ -2273,8 +2321,8 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudPicture.prototype.updateMovement = function() {
         if (this._battler) {
-            const distance = 240;
-            const movePos = Graphics.boxWidth - distance;
+            const distance = Graphics.boxWidth - commandHudPictureDisplayX;
+            const movePos = commandHudPictureX;
             const addCount = Math.max(1, Math.floor(distance / 20));
             if (this._battler.isInputting()) {
                 if (this.x > movePos) {
@@ -2299,16 +2347,16 @@ function Sprite_BattleHudPicture() {
             }
             if (this.bitmap != null) {
                 if (this.bitmap.height < (Graphics.boxHeight - 180)) {
-                    this.y = 180 + this.bitmap.height;
+                    this.y = 180 + this.bitmap.height + commandHudPictureOffsetY;
                 } else {
-                    this.y = Graphics.boxHeight;
+                    this.y = Graphics.boxHeight + commandHudPictureOffsetY;
                 }
             } else {
-                this.y = Graphics.boxHeight;
+                this.y = Graphics.boxHeight + commandHudPictureOffsetY;
             }
         } else {
             this.x = Graphics.boxWidth;
-            this.y = Graphics.boxHeight;
+            this.y = Graphics.boxHeight + commandHudPictureOffsetY;
             this.opacity = 0;
         }
     };
