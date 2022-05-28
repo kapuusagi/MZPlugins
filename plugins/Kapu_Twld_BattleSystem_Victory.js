@@ -1077,6 +1077,22 @@ function Window_BattleRewards() {
     };
 
     /**
+     * EXPカウントアップ前の待機処理中かどうかを判定する。
+     * 
+     * @returns {boolean} 待機中の場合にはtrue, それ以外はfalse
+     */
+    Window_BattleRewards.prototype.isWaiting = function() {
+        return this._updateWait > 0;
+    };
+
+    /**
+     * EXPカウントアップエフェクト前の待機を終了させる。
+     */
+    Window_BattleRewards.prototype.skipWait = function() {
+        this._updateWait = 0;
+    };
+
+    /**
      * アニメーションを終了させる。
      */
     Window_BattleRewards.prototype.terminateAnimation = function() {
@@ -1290,9 +1306,14 @@ function Window_BattleRewards() {
         if (!this.isRewardsPopupBusy()) {
             BattleManager.endBattle();
         } else {
-            this._battleRewardsWindow.terminateAnimation();
-            this._battleRewardsWindow.activate();
-            $gameParty.battleMembers().forEach(actor => actor.setExpPopupEndImmidiately());
+            if (this._battleRewardsWindow.isWaiting()) {
+                this._battleRewardsWindow.skipWait();
+                this._battleRewardsWindow.activate();
+            } else {
+                this._battleRewardsWindow.terminateAnimation();
+                this._battleRewardsWindow.activate();
+                $gameParty.battleMembers().forEach(actor => actor.setExpPopupEndImmidiately());
+            }
         }
     };
 
