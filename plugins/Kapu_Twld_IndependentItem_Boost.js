@@ -12,6 +12,12 @@
  * @type number
  * @default -999
  * 
+ * @param textFormatDescriptionPrefix
+ * @text 強化済みアイテム説明のプリフィックス
+ * @desc 強化したとき、アイテムの説明先頭につけるテキスト。%1に強化素材名が入る。空にすると先頭につけない。
+ * @type string
+ * @default 
+ * 
  * 
  * @help 
  * TWLD向けに追加した特製を強化項目として付与できるようにするプラグイン。
@@ -54,9 +60,27 @@
 
     const basicParamMin = (parameters["basicParamMin"] === undefined)
             ? -999 : Math.round(Number(parameters["basicParamMin"]) || 0);
+    const textFormatDescriptionPrefix = parameters["textFormatDescriptionPrefix"] || "";
 
     //------------------------------------------------------------------------------
     // DataManager
+    const _DataManager_boostIndependentItem = DataManager.boostIndependentItem;
+    /**
+     * 強化を行う。
+     * 
+     * @param {object} item 強化対象アイテム。DataWeapon/DataArmorのいずれか。
+     * @param {object} catalystItem 素材アイテム。DataItem
+     */
+    DataManager.boostIndependentItem = function(item, catalystItem) {
+        _DataManager_boostIndependentItem.call(this, item, catalystItem);
+
+        if (!item.meta.disableModifyDescription && textFormatDescriptionPrefix) {
+            const prefix = textFormatDescriptionPrefix.format(catalystItem.name);
+            const baseItem = DataManager.getBaseItem(item);
+            item.description = prefix + baseItem.description;
+        }
+    };
+
     const _DataManager_applyBoostEffect = DataManager.applyBoostEffect;
     /**
      * 強化項目を適用する。
@@ -104,5 +128,29 @@
         }
 
         _DataManager_applyBoostEffect.call(this, item, key, value);
+    };
+
+    const _DataManager_resetIndependentWeaponBoost = DataManager.resetIndependentWeaponBoost;
+    /**
+     * 個別武器の強化状態を初期化する。
+     * 
+     * @param {DataWeapon} weapon 武器
+     */
+    DataManager.resetIndependentWeaponBoost = function(weapon) {
+        _DataManager_resetIndependentWeaponBoost.call(this, weapon);
+        const baseWeapon = DataManager.getBaseItem(weapon);
+        weapon.description = baseWeapon.description;
+    };
+
+    const _DataManager_resetIndependentArmorBoost = DataManager.resetIndependentArmorBoost;
+    /**
+     * 個別防具の強化状態を初期化する。
+     * 
+     * @param {DataArmor} armor 防具
+     */
+    DataManager.resetIndependentArmorBoost = function(armor) {
+        _DataManager_resetIndependentArmorBoost.call(this, armor);
+        const baseArmor = DataManager.getBaseItem(armor);
+        armor.description = baseArmor.description;
     };
 })();
