@@ -132,3 +132,30 @@ gl_FragColor に色を設定しない場合、下の画像の色が出力され�
     Chrome（Windows10）
     (ユーザフォルダ)¥AppData¥Local¥Google¥Chrome¥User Data¥Default¥Local Storage
 
+## コアスクリプト 1.3.2 <-> 1.5.0差分による影響を調べる
+
+main.js
+    Closeの処理の呼び出し方が変更になっている。
+rmmz_core.js
+    measureTextWidthが正数でなく実数を返すようになった。
+    BitmapのstartLoadの処理が変更された。
+    タイル幅が変数として格納された。
+rmmz_manager.js
+    BattleManager.endTurnがBattleManager.endTurnとBattleManager.updateTurnEndに分かれたなど、BattleManager周りが変更されている。（要注意）
+rmmz_objects.js
+    Game_PartyにhiddenBattleMembersとallBattleMembers関数が追加された。（かぶらないか要注意）
+    Game_Partyに逃走したかどうかの判定が追加。
+    Game_Mapにタイルサイズを取得するインタフェースが追加。
+    Game_Mapで茂みの深さをマップデータから取得して設定するように変更。
+    Game_Interpreterにskipが追加。
+rmmz_scenes.js
+    マップデータの読み出しは、必要時ではなく、常に行うように修正された
+    Scene_Itemでアイテムウィンドウ作成時にcreateContentsがコールされるように変更された。
+rmmz_sprites.js
+    Sprite_Enemyで_battlerNameデフォルト値を""でなくnullがセットされるようになった。
+    Spriteにviewportというのが追加になっている。
+rmmz_windows.js
+    ロジックの変更はなし。
+
+
+    
