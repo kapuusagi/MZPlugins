@@ -31,6 +31,16 @@
     ☐ TRAIT_BASIC_PARAM
   Kapu_Twld_IndependentItem_Boost:
     ☐ BasicParamに対する強化項目を追加するため新規作成。
+  Kapu_EquipmentWeight:
+    ☐ 装備重量計算を、スロット情報（装備部位）を元に計算する機能を追加。
+  Kapu_IndependentItem_GainCustomized:
+    ☐ ベースアイテムを元にカスタマイズしたアイテムを入手するプラグインを作成（新規）
+  Kapu_RemoveStateByTimer:
+    ☐ 時間経過でステート解除するプラグインを作成（新規）
+  Kapu_TimeRangeAndWeather_Traits:
+    ☐ 夜間の不意打ち率軽減などの特性を追加。（新規)
+
+
       
 機能拡張予定:
   Kapu_Twld_BattleSystem:
@@ -67,6 +77,8 @@
   Kapu_Twld_BattleSystem:
     ☐ Window_BattleLog.updateWaitMode をoverwrite 実装しているので拡張性に乏しい。
        ベースプラグインを用意した方が良い。
+    ☐ HP/MP/TPゲージはベースラインに対して、ColorFilterで色を変えるようにした方が良い。
+
 
 
   
