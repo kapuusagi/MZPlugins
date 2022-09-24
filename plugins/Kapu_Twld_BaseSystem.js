@@ -11,6 +11,7 @@
  * @orderAfter Kapu_Base_Tpb
  * @base Kapu_ElementCore
  * @orderAfter Kapu_ElementCore
+ * @base Kapu_Base_Hit
  * @orderAfter Kapu_Base_Hit
  * @base Kapu_Base_DamageCalculation
  * @orderAfter Kapu_Base_DamageCalculation
