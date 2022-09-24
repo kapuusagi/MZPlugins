@@ -408,9 +408,22 @@ function Sprite_BattleHudPicture() {
     const enableInputtingZoom = (parameters["enableInputtingZoom"] === undefined)
             ? false : (parameters["enableInputtingZoom"] === "true");
 
-    const defaultUseSkillAnimationIds = JSON.parse((parameters["defaultUseSkillAnimationIds"] || "[]")).map(token => {
-        return Math.max(0, Math.round(Number(token)) || 0);
-    });
+    const _parseDefaultUseSkillAnimationIds = function() {
+        try {
+            var paramStr = parameters["defaultUseSkillAnimationIds"] || "[]";
+            var array = JSON.parse(paramStr);
+            return array.map(token => {
+                return Math.max(0, Math.round(Number(token)) || 0);
+            });
+        }
+        catch (e) {
+            console.error("defaultUseSkillAnimationIds parse failure. : " + e);
+            return [];
+        }
+
+    }
+
+    const defaultUseSkillAnimationIds = _parseDefaultUseSkillAnimationIds();
     const defaultUseItemAnimationId = Math.round(Number(parameters["defaultUseItemAnimationId"]) || 0);
 
     /**
