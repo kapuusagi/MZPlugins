@@ -7,6 +7,7 @@
  * @orderAfter Kapu_Twld_BaseSystem
  * @orderAfter Kapu_UserSkillOrder
  * @base Kapu_Twld_WeaponMastery
+ * @base Kapu_Twld_BasicParams
  * @base Kapu_GrowupSystem
  * 
  * @param statusLabelWidth
