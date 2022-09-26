@@ -98,7 +98,7 @@
  * @text 戦闘BGM（不利）
  * @desc 戦闘BGM未指定時、不利状態で演奏する戦闘BGM初期値。
  * @type struct<BgmEntry>
- * @default {"name"="","volume"="100","pitch"="90","pan"="0"}
+ * @default {"name":"","volume":"100","pitch":"90","pan":"0"}
  * @parent useBattleBgmSurprise
  * 
  * @help 
