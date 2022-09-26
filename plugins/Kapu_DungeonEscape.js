@@ -153,6 +153,7 @@
         const x = (Number(args.x) >= 0) ? Number(args.x) : $gamePlayer.x;
         const y = (Number(args.y) >= 0) ? Number(args.y) : $gamePlayer.y;
         $gameParty.setDungeonEscapePosition(mapId, x, y);
+        $gameParty.restoreDungeonEscapePosition();
     });
 
     // eslint-disable-next-line no-unused-vars
