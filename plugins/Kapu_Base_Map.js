@@ -209,7 +209,7 @@
      * @returns {boolean} 建物の影を表示する場合にはtrue, それ以外はfalse.
      */
     Game_Map.prototype.isDisableBuildingShadow = function() {
-        return $dataMap && $dataMap.meta.disableBuildingShadow;  
+        return $dataMap && $dataMap.meta && $dataMap.meta.disableBuildingShadow;  
     };
 
 
