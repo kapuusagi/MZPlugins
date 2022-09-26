@@ -158,7 +158,8 @@
     Game_Battler.prototype.removeBattleStates = function() {
         _Game_Battler_removeBattleStates.call(this);
         // 多分ここでステートが残ってることはないけど念のため
-        this.clearActionTempStates();
+        this.clearActionUserStates();
+        this.clearActionTargetStates();
     };
     //------------------------------------------------------------------------------
     // Game_Action
