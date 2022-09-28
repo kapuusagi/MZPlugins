@@ -39,7 +39,8 @@
     ☐ 時間経過でステート解除するプラグインを作成（新規）
   Kapu_TimeRangeAndWeather_Traits:
     ☐ 夜間の不意打ち率軽減などの特性を追加。（新規)
-
+  Kapu_ChoiceActor:
+    ☐ アクターを選択するプラグインを作製(新規)
 
       
 機能拡張予定:

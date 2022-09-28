@@ -918,16 +918,17 @@
     };
     //-------------------------------------------------------------------------
     // Game_Actors
-
-    /**
-     * アクターデータが存在するかどうかを取得する。
-     * 
-     * @param {number} actorId アクターID
-     * @returns {boolean} アクターデータが存在する場合にはtrue, 存在しない場合にはfalse
-     */
-    Game_Actors.prototype.isActorDataExists = function(actorId) {
-        return this._data[actorId] ? true : false;
-    };
+    if (!Game_Actors.prototype.isActorDataExists) { // isActorDataExistsが未定義なら追加。
+        /**
+         * アクターデータが存在するかどうかを取得する。
+         * 
+         * @param {number} actorId アクターID
+         * @returns {boolean} アクターデータが存在する場合にはtrue, 存在しない場合にはfalse
+         */
+        Game_Actors.prototype.isActorDataExists = function(actorId) {
+            return this._data[actorId] ? true : false;
+        };
+    }
 
     //-------------------------------------------------------------------------
     // Game_Party
