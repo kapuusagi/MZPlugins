@@ -5,6 +5,8 @@
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
+ * @base Kapu_Base_DisplayLevelChange
+ * @orderAfter Kapu_Base_DisplayLevelChange
  * 
  * 
  * @help 
@@ -25,8 +27,10 @@
  *   <paramGainRate:%d,%d,%d,%d,%d,%d,%d,%d>
  *      それぞれのパラメータの上昇レート。(0～500, 0で成長しない。500で5倍成長)
  *      省略した場合には全部100(1.0倍)になる。
+ *      MaxHP, MaxMP, ATK, DEF, MAT,MDEF, AGI, LUK の順
  *   <initialParams:%d,%d,%d,%d,%d,%d,%d,%d>
  *      それぞれのパラメータの初期値
+ *      MaxHP, MaxMP, ATK, DEF, MAT,MDEF, AGI, LUK の順
  * 
  * ============================================
  * 変更履歴
@@ -34,6 +38,7 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
+    
     //const pluginName = "Kapu_FS";
     //const parameters = PluginManager.parameters(pluginName);
 
@@ -78,7 +83,7 @@
         _Game_Actor_setup.call(this, actorId);
         const dataActor = this.actor();
         for (let paramId = 0; paramId < this._paramPlus.length; paramId++) {
-            this._paramPlus[paramId] = dataActor.initialParams[paramid];
+            this._paramPlus[paramId] = dataActor.initialParams[paramId];
         }
         this.refresh();
     };
@@ -144,6 +149,35 @@
     Game_Actor.prototype.paramGainRate = function(paramId) {
         const dataActor = this.actor();
         return dataActor.paramGainRate[paramId];
+    };
+    /**
+     * レベル変更の表示をする。
+     * 
+     * @param {object} prevInfo レベルアップ前のステータス 
+     * @param {object} curInfo レベルアップ後のステータス
+     * !!!overwrite!!! Game_Actor.displayLevelChange()
+     *     レベル変更時の表示をカスタマイズするため変更する。
+     */
+     Game_Actor.prototype.displayLevelChange = function(prevInfo, curInfo) {
+        const newSkills = this.findNewSkills(prevInfo.skills);
+
+        const text = TextManager.levelUp.format(
+            this._name,
+            TextManager.level,
+            this._level
+        );
+        $gameMessage.newPage();
+        $gameMessage.add(text);
+        for (let paramId = 0; paramId < 8; paramId++) {
+            const prevVal = prevInfo.params[paramId];
+            const newVal = curInfo.params[paramId];
+            if (newVal > prevVal) {
+                $gameMessage.add(TextManager.param(paramId) + " +" + (newVal - prevVal));
+            }
+        }
+        for (const skill of newSkills) {
+            $gameMessage.add(TextManager.obtainSkill.format(skill.name));
+        }        
     };
     //------------------------------------------------------------------------------
     // TODO : メソッドフック・拡張
