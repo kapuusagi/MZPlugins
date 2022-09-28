@@ -109,6 +109,7 @@ function Window_ChoiceActorList() {
 }
 
 (() => {
+    'use strict'
     const pluginName = "Kapu_ChoiceActor";
     const parameters = PluginManager.parameters(pluginName);
     const windowX = Number(parameters["windowX"]) || 0;
@@ -203,9 +204,11 @@ function Window_ChoiceActorList() {
      */
     Window_ChoiceActorList.prototype.initialize = function(rect) {
         this._actors = null;
+        this._redrawItemIndices = [];
         Window_Selectable.prototype.initialize.call(this, rect);
         this.createCancelButton();
         this.openness = 0;
+
         this.deactivate();
         this._background = 0;
         this._canRepeat = false;
@@ -281,7 +284,7 @@ function Window_ChoiceActorList() {
             } else {
                 button.x = -button.width - spacing;
             }
-            button.y = this.height / 2 - button.height / 2;
+            button.y = this.y;
         }
     };
     /**
@@ -294,34 +297,70 @@ function Window_ChoiceActorList() {
             return;
         }
 
-        const rect = this.itemRect(index);
-
         const actorId = this._actors[index];
         if ($gameActors.isActorDataExists(actorId)) {
             const actor = $gameActors.actor(actorId);
-            this.drawActor(actor, rect);
+            this.drawActor(index, actor);
         } else {
             const actor = new Game_Actor(actorId);
-            this.drawActor(actor, rect);
+            this.drawActor(index, actor);
         }
     };
 
     /**
      * アクター情報を描画する。
      * 
+     * @param {number} index 項目番号
      * @param {Game_Actor} actor アクター
-     * @param {Rectangle} rect 矩形領域
      */
-    Window_ChoiceActorList.prototype.drawActor = function(actor, rect) {
+    Window_ChoiceActorList.prototype.drawActor = function(index, actor) {
+        const rect = this.itemRect(index);
+
         let x = rect.x;
         let y = rect.y;
-        this.drawFace(actor.faceName(), actor.faceIndex(), x + 8, y + 8, 144, 144);
+
+        const bitmap = ImageManager.loadFace(actor.faceName());
+        if (bitmap.isReady()) {
+            this.drawFace(actor.faceName(), actor.faceIndex(), x + 8, y + 8, 144, 144);
+        } else {
+            this.reserveRedraw(index);
+        }
+
         const nameWidth = rect.width - 144 - 16 - 8;
         this.drawText(actor.name(), x + 144 + 16 + 8, y, nameWidth);
 
         // 他に表示するべきパラメータがあれば、ここで描画する。
 
     };
+
+    /**
+     * 再描画が必要であるとリザーブする。
+     * 
+     * @param {number} index インデックス
+     */
+    Window_ChoiceActorList.prototype.reserveRedraw = function(index) {
+        if (!this._redrawItemIndices.includes(index)) {
+            this._redrawItemIndices.push(index);
+        }
+    };
+
+    /**
+     * ウィンドウを更新する。
+     */
+    Window_ChoiceActorList.prototype.update = function() {
+        Window_Selectable.prototype.update.call(this);
+
+        // Note: フェイスイメージなど、loading中で描画できなかった場合、
+        //       ここで再描画する。
+        if (this._redrawItemIndices.length > 0) {
+            const indices = this._redrawItemIndices;
+            this._redrawItemIndices = [];
+            for (const index of indices) {
+                this.redrawItem(index);
+            }
+        }
+    }
+
 
     /**
      * 項目数を得る。
@@ -338,7 +377,15 @@ function Window_ChoiceActorList() {
      */
     Window_ChoiceActorList.prototype.itemHeight = function() {
         return Math.min(this.innerHeight, 160);
-    };    
+    };
+    /**
+     * 選択操作が可能かどうかを判定する。
+     * 
+     * @returns {boolean} 選択操作が可能な場合にはtrue, それ以外はfalse
+     */
+    Window_ChoiceActorList.prototype.isOkEnabled = function() {
+        return true;
+    };
     /**
      * キャンセル可能かどうかを判定する。
      * 
@@ -359,7 +406,7 @@ function Window_ChoiceActorList() {
      * キャンセル操作されたときの処理を行う。
      */
     Window_ChoiceActorList.prototype.callCancelHandler = function() {
-        $gameMessage.onChoiceActor($gameMessage.choiceCancelType()); // キャンセルインデックスでコールバックを実行する。
+        $gameMessage.onChoiceActor(-1); // キャンセルインデックスでコールバックを実行する。
         this._messageWindow.terminateMessage();
         this.close();
     };
@@ -436,6 +483,8 @@ function Window_ChoiceActorList() {
             if ((index >= 0) && (index < this._choiceActors.length)) {
                 const actorId = this._choiceActors[index];
                 $gameVariables.setValue(this._choiceActorVariableId, actorId);
+            } else {
+                $gameVariables.setValue(this._choiceActorVariableId, 0);
             }
         }
     };
@@ -480,7 +529,8 @@ function Window_ChoiceActorList() {
      */
     const _isCandidate = function(actorId, exclusionActors) {
         if (actorId > 0) { // アクターIDは有効？
-            if ($dataActors[actorId.meta.excludeChoiceActor]) { // メタデータで除外指定されている？
+            const dataActor = $dataActors[actorId];
+            if ($dataActors[dataActor.meta.excludeChoiceActor]) { // メタデータで除外指定されている？
                 return false;
             }
             if (exclusionActors && exclusionActors.includes(actorId)) { // 除外リストに含まれている？
@@ -562,6 +612,13 @@ function Window_ChoiceActorList() {
     Scene_Message.prototype.createChoiceActorListWindow = function() {
         this._choiceActorListWindow = new Window_ChoiceActorList(this.choiceActorListWindowRect());
         this.addWindow(this._choiceActorListWindow);
+
+        // Note: associateWindowsをフックして実装するのが理想だが、
+        // associateWindowsはcreateAllWindows()から呼び出されるため、
+        // タイミング的に_choiceActorListWindowのインスタンスが生成されていない。
+        // そのためここで設定する。
+        this._choiceActorListWindow.setMessageWindow(this._messageWindow);
+        this._messageWindow.setChoiceActorListWindow(this._choiceActorListWindow);
     };
 
     /**
@@ -571,15 +628,6 @@ function Window_ChoiceActorList() {
         return new Rectangle(windowX, windowY, windowWidth, windowHeight);
     };
 
-    const _Scene_Message_associateWindows = Scene_Message.prototype.associateWindows;
-    /**
-     * ウィンドウグループを関連付けする。
-     */
-    Scene_Message.prototype.associateWindows = function() {
-        _Scene_Message_associateWindows.call(this);
-        this._messageWindow.setChoiceActorListWindow(this._choiceActorListWindow);
-        this._choiceActorListWindow.setMessageWindow(this._messageWindow);
-    };
     //------------------------------------------------------------------------------
     // TODO : メソッドフック・拡張
 
