@@ -1579,8 +1579,19 @@ __Game_CommonEvent.refresh__ で　__Game_Interpreter__ のインスタンスを
 選択肢の場合
 
     1. Game_Interpreter -> $gameMessage (__Game_Interpreter.setupChoices__ で $gameMessageのチョイスパラメータが設定される)
-    2. ウェイトモードが"message"になり、選択肢が選択されるとウェイトが解除される。
-    3. ウェイトが解除されるとインタプリタが次のコマンドを実行する。
+    2. ウェイトモードが"message"になる。
+       "message"の場合、Game_Interpreterがビジーかどうかの判定にて、$gameMessage.isBusy()を使うようになる。
+       $gameMessage.isBusyは、チョイスパラメータを持っている場合にbusyを返す(isChoice()メソッド, 他にもtrueを返すケースはある)。
+    3. Window_Message.prototype.startInput()にて、$gameMessage.isChoice()判定がtrueを返すことにより、
+       Window_ChoiceList.start()が呼び出され、選択肢ウィンドウが有効化される。
+    4. OK操作されると、Window_ChoiceList.callOkHandler が呼び出され、
+       この中で$gameMessage.onChoiceが呼び出される。
+       ※キャンセル時は Window_ChoiceList.callCancelHandler が呼び出され、同様に$gameMessage.onChoiceが呼び出される。
+       onChoice自体は、$gameMessageの_choiceCallbackを呼び出すだけである。
+       そのあと、Window_ChoiceListに関連付けされたWindow_MessageのterminateMessage()が呼び出される。
+       この中で$gameMessage.clear()が呼び出され、選択肢がクリアされる。
+    5. Game_Interpreterにて、isChoice()を含め、ビジー要因がクリアされると、ウェイトモードはクリアされる。
+    6. インタプリタが次のコマンドを実行する。
 
 Scene_MessageとGame_Message、Game_Interpreterを使えば独自シーンでコモンイベントを処理することも出来そう。
 
