@@ -104,7 +104,7 @@
  * @arg variableId
  * @text 対象のアクター(変数指定)
  * @desc 対象のアクターを変数で指定する。対象を指定したアクターにした場合のみ有効
- * @type actor
+ * @type variable
  * @default 0
  * 
  * @arg enabled
