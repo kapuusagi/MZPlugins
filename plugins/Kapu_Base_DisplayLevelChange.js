@@ -3,9 +3,6 @@
  * @plugindesc レベルアップ時の表示を変更するプラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base 
- * @orderAfter 
- * 
  * 
  * @help 
  * ベースシステムでは、レベルアップ時の表示処理が、Game_Actor.changeExp()に内包されてしまっている。
@@ -69,10 +66,9 @@
         }
         if (show) {
             const curStatus = this.storeCurrentStatusForDisplayLevelUp();
-            if (needsDisplayLevelChange(prevStatus, curStatus)) {
+            if (this.needsDisplayLevelChange(prevStatus, curStatus)) {
                 this.displayLevelChange(prevStatus, curStatus);
             }
-            this.displayLevelChange(prevStatus, curStatus);
         }
         this.refresh();
     };
