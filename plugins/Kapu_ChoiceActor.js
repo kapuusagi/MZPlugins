@@ -49,6 +49,12 @@
  * @type boolean
  * @default true
  * 
+ * @arg displayInformation
+ * @text 表示情報
+ * @desc 選択対象として表示する情報。プラグイン拡張を想定する。
+ * @type string
+ * @default default
+ * 
  * @param windowPosition
  * @text アクター選択ウィンドウ位置
  * 
@@ -85,14 +91,28 @@
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
- * Window_ChoiceActorList.prototype.drawActor(index : number, actor : Game_Actor) : void 
- *     アクター選択時の選択項目の描画を行う。
- *     index : 項目番号(itemRect(index)で描画領域を取得できる)
- *     actor : アクターデータ。
- *             $gameActorsにインスタンス未生成の場合には一時的にGame_Actorを作成したものが渡されます。
- *             この一時的に作成されたデータは保存されません。
- * 
- * 
+ * Window_ChoiceActorList.drawActor(rect :Rectangle, actor :Game_Actor, informationType :string) : boolean 
+ *   アクター選択時の選択項目の描画を行う。
+ *   表示内容を変更したい場合にはフックして分岐させる。
+ *   描画できた場合にはtrueを返す。
+ *   描画準備が整っておらず、再描画させたい場合にはfalseを返す。
+ *   rect : 描画範囲
+ *   actor : アクターデータ。
+ *           $gameActorsにインスタンス未生成の場合には一時的にGame_Actorを作成したものが渡されます。
+ *           この一時的に作成されたデータは保存されません。
+ *   informationType : 表示情報タイプ。「アクター選択」コマンドで指定した表示情報のテキストが渡される。
+ * Window_ChoiceActorList.drawActorDefaultCustom(actor :Game_Actor, informationType :string, x :number, y :number, width :number) : void
+ *   デフォルトの描画のうち、最終段の描画をする。
+ *   顔、名前、Lv, クラス、HP,MPの描画はそのままで、
+ *   1項目だけ追加で表示させたい場合にフックして使用する。
+ *   actor : アクターデータ。
+ *           $gameActorsにインスタンス未生成の場合には一時的にGame_Actorを作成したものが渡されます。
+ *           この一時的に作成されたデータは保存されません。
+ *   informationType : 表示情報タイプ。「アクター選択」コマンドで指定した表示情報のテキストが渡される。
+ *   x : 描画位置x
+ *   y : 描画位置y
+ *   width : 描画幅
+ *   
  * 
  * ============================================
  * プラグインコマンド
@@ -161,7 +181,8 @@ function Window_ChoiceActorList() {
             console.error(e);
         }
         const isCancelable = (typeof args.isCancelable == "undefined") ? true : args.isCancelable == "true";
-        interpreter.setupChoiceActors([ variableId, choiceActorType, actors, exclusionActors, isCancelable ]);
+        const displayInformation = args.displayInformation || "default";
+        interpreter.setupChoiceActors([ variableId, choiceActorType, actors, exclusionActors, isCancelable, displayInformation ]);
         if ($gameMessage.isChoiceActor()) {
             interpreter.setWaitMode("message");
         }
@@ -317,40 +338,181 @@ function Window_ChoiceActorList() {
             return;
         }
 
+        const informationType = $gameMessage.choiceActorInformationType();
+        const rect = this.itemRect(index);
         const actorId = this._actors[index];
         if ($gameActors.isActorDataExists(actorId)) {
             const actor = $gameActors.actor(actorId);
-            this.drawActor(index, actor);
+            if (!this.drawActor(rect, actor, informationType)) {
+                this.reserveRedraw(index);
+            }
         } else {
             const actor = new Game_Actor(actorId);
-            this.drawActor(index, actor);
+            if (this.drawActor(rect, actor, informationType)) {
+                this.reserveRedraw(index);
+            }
         }
     };
 
     /**
      * アクター情報を描画する。
      * 
-     * @param {number} index 項目番号
+     * @param {Rectangle} rect 描画領域
      * @param {Game_Actor} actor アクター
+     * @param {string} informationType 表示情報タイプ
+     * @return {boolean} 描画完了した場合にtrue, それ以外はfalse.
      */
-    Window_ChoiceActorList.prototype.drawActor = function(index, actor) {
-        const rect = this.itemRect(index);
+    Window_ChoiceActorList.prototype.drawActor = function(rect, actor, informationType) {
+        switch (informationType) {
+            case "default":
+            default:
+                return drawActorDefault(rect, actor, informationType);
+        }
+    };
 
+    /**
+     * 単純なアクター情報を描画する。
+     * 
+     * @param {Rectangle} rect 描画領域
+     * @param {Game_Actor} actor アクター
+     * @param {string} informationType 表示情報タイプ
+     * @returns {boolean} 描画完了した場合にtrue, それ以外はfalse.
+     */
+    Window_ChoiceActorList.prototype.drawActorDefault = function(rect, actor, informationType) {
+        const inset = 8;
         let x = rect.x;
         let y = rect.y;
 
         const bitmap = ImageManager.loadFace(actor.faceName());
         if (bitmap.isReady()) {
-            this.drawFace(actor.faceName(), actor.faceIndex(), x + 8, y + 8, 144, 144);
+            this.drawFace(actor.faceName(), actor.faceIndex(), x + inset, y + inset, 144, 144);
         } else {
-            this.reserveRedraw(index);
+            return false;
         }
 
-        const nameWidth = rect.width - 144 - 16 - 8;
-        this.drawText(actor.name(), x + 144 + 16 + 8, y, nameWidth);
+        const lineHeight = this.lineHeight();
+        const padding = 8;
+        x += 144 + inset * 2 + padding;
+        y = inset;
+        const itemAreaWidth = rect.width - 144 - padding - inset * 2
 
-        // 他に表示するべきパラメータがあれば、ここで描画する。
+        // 1段目：アクター名
+        const nameWidth = itemAreaWidth;
+        this.drawText(actor.name(), x, y, nameWidth);
 
+        y += lineHeight;
+
+        // 2段目：レベルとクラス
+        const levelWidth = Math.min(120, Math.floor(itemAreaWidth * 0.4))
+        this.drawActorLevel(actor, x, y, levelWidth);
+        const classWidth = itemAreaWidth - padding - levelWidth;
+        this.drawActorClass(actor, x + levelWidth + padding, y, classWidth);
+
+        y += lineHeight;
+
+        // 3段目：現在HP, 現在MP
+        const hpWidth = Math.min(160, itemAreaWidth * 0.5 - padding);
+        this.drawActorHp(actor, x, y, hpWidth);
+        const mpWidth = Math.min(160, itemAreaWidth * 0.5 - padding);
+        this.drawActorMp(actor, x + hpWidth + padding, y, mpWidth);
+
+        y += lineHeight;
+        // 4段目：カスタム
+        this.drawActorDefaultCustom(actor, informationType, x, y, itemAreaWidth);
+
+        return true;
+    };
+
+    /**
+     * 単純なアクター情報の最終行を描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {string} informationType 表示情報タイプ
+     * @param {number} x 描画位置X
+     * @param {number} y 描画位置Y
+     * @param {number} width 幅
+     */
+    Window_ChoiceActorList.prototype.drawActorDefaultCustom = function(/* actor , informationType, x, y, width */) {
+        // do nothing.
+    };
+
+    /**
+     * アクターの現在レベルを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {number} x 描画位置X
+     * @param {number} y 描画位置Y
+     * @param {number} width 描画幅
+     */
+    Window_ChoiceActorList.prototype.drawActorLevel = function(actor, x, y, width) {
+        const paramWidth = Math.floor(width * 0.3);
+        const currentValueWidth = width - paramWidth - 16;
+
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        
+        this.drawText(TextManager.levelA, x, y + 8, paramWidth, "left");
+        x += paramWidth;
+        this.changeTextColor(ColorManager.hpColor(actor));
+        this.contents.fontFace = $gameSystem.numberFontFace();
+        this.drawText(actor.level, x, y, currentValueWidth, "right");
+    };
+
+    /**
+     * アクターの現在のクラスを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {number} x 描画位置X
+     * @param {number} y 描画位置Y
+     * @param {number} width 描画幅
+     */
+    Window_ChoiceActorList.prototype.drawActorClass = function(actor, x, y, width) {
+        this.resetTextColor();
+        this.drawText(actor.currentClass().name, x, y, width);
+    };
+
+    /**
+     * アクターの現在HPを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {number} x 描画位置X
+     * @param {number} y 描画位置Y
+     * @param {number} width 描画幅
+     */
+    Window_ChoiceActorList.prototype.drawActorHp = function(actor, x, y, width) {
+        const paramWidth = Math.floor(width * 0.3);
+        const currentValueWidth = width - paramWidth - 16;
+
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        
+        this.drawText(TextManager.hpA, x, y + 8, paramWidth, "left");
+        x += paramWidth;
+        this.changeTextColor(ColorManager.hpColor(actor));
+        this.contents.fontFace = $gameSystem.numberFontFace();
+        this.drawText(actor.hp, x, y, currentValueWidth, "right");
+    };
+
+    /**
+     * アクターの現在MPを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {number} x 描画位置X
+     * @param {number} y 描画位置Y
+     * @param {number} width 描画幅
+     */
+    Window_ChoiceActorList.prototype.drawActorMp = function(actor, x, y, width) {
+        const paramWidth = Math.floor(width * 0.3);
+        const currentValueWidth = width - paramWidth - 16;
+
+        this.resetFontSettings();
+        this.changeTextColor(ColorManager.systemColor());
+        
+        this.drawText(TextManager.mpA, x, y + 8, paramWidth, "left");
+        x += paramWidth;
+        this.changeTextColor(ColorManager.mpColor(actor));
+        this.contents.fontFace = $gameSystem.numberFontFace();
+        this.drawText(actor.mp, x, y, currentValueWidth, "right");
     };
 
     /**
@@ -452,6 +614,7 @@ function Window_ChoiceActorList() {
         this._choiceActorVariableId = 0;
         this._choiceActors = null;
         this._choiceActorCancelable = true;
+        this._choiceActorInformationType = "default";
     };
     /**
      * アクター選択をセットアップする。
@@ -459,11 +622,13 @@ function Window_ChoiceActorList() {
      * @param {number} variableId 結果を格納する変数ID
      * @param {Array<number>} actors アクターリスト
      * @param {boolean} isCancelable キャンセル可否
+     * @param {string} informationType 情報タイプ
      */
-    Game_Message.prototype.setChoiceActors = function(variableId, actors, isCancelable) {
+    Game_Message.prototype.setChoiceActors = function(variableId, actors, isCancelable, informationType) {
         this._choiceActorVariableId = variableId;
         this._choiceActors = actors;
         this._choiceActorCancelable = isCancelable;
+        this._choiceActorInformationType = informationType;
     };
 
     /**
@@ -491,6 +656,15 @@ function Window_ChoiceActorList() {
      */
     Game_Message.prototype.choiceActors = function() {
         return this._choiceActors || [];
+    };
+
+    /**
+     * アクター選択の情報タイプを得る。
+     * 
+     * @returns {string} 情報タイプ
+     */
+    Game_Message.prototype.choiceActorInformationType = function() {
+        return this._choiceActorInformationType;
     };
 
     /**
@@ -525,11 +699,12 @@ function Window_ChoiceActorList() {
     /**
      * アクター選択をセットアップする。
      * 
-     * params[0] : 結果を格納する変数ID
-     * params[1] : 選択タイプ(CHOICEACTOR_FROM_x)
-     * params[2] : 選択候補アクター
-     * params[3] : 除外アクター
-     * params[4] : キャンセル許可/禁止
+     * params[0] : {number} 結果を格納する変数ID
+     * params[1] : {number} 選択タイプ(CHOICEACTOR_FROM_x)
+     * params[2] : {Array<number>} 選択候補アクターID配列
+     * params[3] : {Array<number>} 除外アクターID配列
+     * params[4] : {boolean} キャンセル許可/禁止
+     * params[5] : {string} 表示情報種類
      * 
      * @param {Array<object>} params パラメータ
      */
@@ -538,7 +713,8 @@ function Window_ChoiceActorList() {
         const actors = this.makeCandidateActors(params[1], params[2], params[3]);
         if (actors.length > 0) {
             const isCancelable = params[4];
-            $gameMessage.setChoiceActors(variableId, actors, isCancelable);
+            const informationType = prams[5];
+            $gameMessage.setChoiceActors(variableId, actors, isCancelable, informationType);
         } else {
             $gameVariables.setValue(variableId, 0); // キャンセル
         }
