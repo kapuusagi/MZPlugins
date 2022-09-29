@@ -8,19 +8,19 @@
  * 
  * @command choiceActor
  * @text アクター選択
- * @desc アクター選択を行います。選択時はアクターID、未選択時は指定変数に0が格納される。
+ * @desc アクター選択を行います。選択時はアクターID、未選択時は指定変数に0が格納されます。選択対象アクターがいない場合も0が格納されます。
  * 
  * @arg choiceActorType
  * @type select
  * @default 1
- * @option パーティーメンバー
+ * @option パーティーメンバー(デフォルト)
  * @value 1
  * @option インスタンスがあるメンバー
- * @value 2
- * @option すべてのアクター(無名は除く)
  * @value 3
+ * @option すべてのアクター(無名は除く)
+ * @value 9
  * @option 特定のメンバー
- * @value 4
+ * @value 99
  * 
  * @arg variableId
  * @text 変数ID
@@ -74,6 +74,7 @@
  * 
  * @help 
  * アクター選択を提供するプラグイン。
+ * 戦闘中でも選択は可能。
  * 
  * ■ 使用時の注意
  * 
@@ -86,6 +87,9 @@
  * ============================================
  * アクター選択
  *   アクター選択を開始します。
+ *   選択時はアクターID、未選択時は指定変数に0が格納されます。
+ *   選択対象アクターがいない場合、選択処理はスキップされます。
+ *   この場合、0が格納されます。
  * 
  * ============================================
  * ノートタグ
@@ -118,9 +122,9 @@ function Window_ChoiceActorList() {
     const windowHeight = Number(parameters["windowHeight"]) || 0;
 
     const CHOICEACTOR_FROM_PARTY = 1;
-    const CHOICEACTOR_FROM_INSTANCE = 2;
-    const CHOICEACTOR_FROM_ALL = 3;
-    const CHOICEACTOR_FROM_CANDIDATES = 4;
+    const CHOICEACTOR_FROM_INSTANCE = 3;
+    const CHOICEACTOR_FROM_ALL = 9;
+    const CHOICEACTOR_FROM_CANDIDATES = 99;
 
     // Note: 匿名関数だと this に Game_Interpreter が渡らないことに注意。
     PluginManager.registerCommand(pluginName, "choiceActor", function(args) {
@@ -144,7 +148,9 @@ function Window_ChoiceActorList() {
         }
         const isCancelable = (typeof args.isCancelable == "undefined") ? true : args.isCancelable == "true";
         interpreter.setupChoiceActors([ variableId, choiceActorType, actors, exclusionActors, isCancelable ]);
-        interpreter.setWaitMode("message");
+        if ($gameMessage.isChoiceActor()) {
+            interpreter.setWaitMode("message");
+        }
         return true;
     });
     //------------------------------------------------------------------------------
@@ -185,7 +191,7 @@ function Window_ChoiceActorList() {
      * @return {boolean} 入力を開始した場合にはtrue, それ以外はfalse.
      */
     Window_Message.prototype.startInput = function() {
-        if ($gameMessage.isSelectingActor()) {
+        if ($gameMessage.isChoiceActor()) {
             this._choiceActorListWindow.start();
             return true;
         }
@@ -440,7 +446,7 @@ function Window_ChoiceActorList() {
      * @param {Array<number>} actors アクターリスト
      * @param {boolean} isCancelable キャンセル可否
      */
-    Game_Message.prototype.setSelectableActors = function(variableId, actors, isCancelable) {
+    Game_Message.prototype.setChoiceActors = function(variableId, actors, isCancelable) {
         this._choiceActorVariableId = variableId;
         this._choiceActors = actors;
         this._choiceActorCancelable = isCancelable;
@@ -451,7 +457,7 @@ function Window_ChoiceActorList() {
      * 
      * @returns {boolean}アクター選択中の場合にはtrue, それ以外はfalse.
      */
-    Game_Message.prototype.isSelectingActor = function() {
+    Game_Message.prototype.isChoiceActor = function() {
         return this._choiceActors != null;
     };
 
@@ -497,7 +503,7 @@ function Window_ChoiceActorList() {
      */
     Game_Message.prototype.isBusy = function() {
         return _Game_Message_isBusy.call(this)
-            || this.isSelectingActor();
+            || this.isChoiceActor();
     };
 
     //------------------------------------------------------------------------------
@@ -516,8 +522,12 @@ function Window_ChoiceActorList() {
     Game_Interpreter.prototype.setupChoiceActors = function(params) {
         const variableId = params[0];
         const actors = this.makeCandidateActors(params[1], params[2], params[3]);
-        const isCancelable = params[4];
-        $gameMessage.setSelectableActors(variableId, actors, isCancelable);
+        if (actors.length > 0) {
+            const isCancelable = params[4];
+            $gameMessage.setChoiceActors(variableId, actors, isCancelable);
+        } else {
+            $gameVariables.setValue(variableId, 0); // キャンセル
+        }
     };
 
     /**
