@@ -28,6 +28,7 @@
  * Version.0.1.0 動作未確認。
  */
 (() => {
+    'use strict';
     const pluginName = "TODO:拡張子なしのプラグインファイル名。ファイル名変更すると動かなくなるのはどうなの？";
     const parameters = PluginManager.parameters(pluginName);
 
