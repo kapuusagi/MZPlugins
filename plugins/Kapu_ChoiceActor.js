@@ -15,8 +15,12 @@
  * @default 1
  * @option パーティーメンバー(デフォルト)
  * @value 1
- * @option インスタンスがあるメンバー
+ * @option パーティー戦闘参加メンバー
+ * @value 2
+ * @option パーティー控えメンバー
  * @value 3
+ * @option インスタンスがあるメンバー
+ * @value 8
  * @option すべてのアクター(無名は除く)
  * @value 9
  * @option 特定のメンバー
@@ -74,13 +78,21 @@
  * 
  * @help 
  * アクター選択を提供するプラグイン。
- * 戦闘中でも選択は可能。
+ * イベントにて、アクターを簡単に選択できるようにする用途を想定します。
+ * 戦闘中でも選択は可能にしてあるので、頑張ればメンバー変更イベントもできます。
+ * (尚、戦闘時メンバー入れ替えプラグインを導入した方が楽だと思います。)
  * 
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
- * Window_ChoiceActorList.prototype.drawActor(actor : Game_Actor, rect : Rectangle) : void 
+ * Window_ChoiceActorList.prototype.drawActor(index : number, actor : Game_Actor) : void 
  *     アクター選択時の選択項目の描画を行う。
+ *     index : 項目番号(itemRect(index)で描画領域を取得できる)
+ *     actor : アクターデータ。
+ *             $gameActorsにインスタンス未生成の場合には一時的にGame_Actorを作成したものが渡されます。
+ *             この一時的に作成されたデータは保存されません。
+ * 
+ * 
  * 
  * ============================================
  * プラグインコマンド
@@ -122,7 +134,9 @@ function Window_ChoiceActorList() {
     const windowHeight = Number(parameters["windowHeight"]) || 0;
 
     const CHOICEACTOR_FROM_PARTY = 1;
-    const CHOICEACTOR_FROM_INSTANCE = 3;
+    const CHOICEACTOR_FORM_BATTLEMEMBERS = 2;
+    const CHOICEACTOR_FROM_NOTBATTLEMEMBERS = 3;
+    const CHOICEACTOR_FROM_INSTANCE = 8;
     const CHOICEACTOR_FROM_ALL = 9;
     const CHOICEACTOR_FROM_CANDIDATES = 99;
 
@@ -590,9 +604,28 @@ function Window_ChoiceActorList() {
                     }
                 }
                 break;
+            case CHOICEACTOR_FORM_BATTLEMEMBERS:
+                for (const actor of $gameParty.battleMembers()) {
+                    const actorId = actor.actorId;
+                    if (actorId > 0) {
+                        canditates.push(actorId);
+                    }
+                }
+                break;
+            case CHOICEACTOR_FROM_NOTBATTLEMEMBERS:
+                {
+                    const battleMembers = $gameParty.battleMembers();
+                    for (const actor of $gameParty.allMembers()) {
+                        const actorId = actor.actorId;
+                        if ((actorId > 0) && !battleMembers.includes(actor)) {
+                            canditates.push(actorId);
+                        }
+                    }
+                }
+                break;
             case CHOICEACTOR_FROM_PARTY:
             default:
-                for (const actor of $gameParty.members()) {
+                for (const actor of $gameParty.allMembers()) {
                     const actorId = actor.actorId;
                     if (actorId > 0) {
                         canditates.push(actorId);
