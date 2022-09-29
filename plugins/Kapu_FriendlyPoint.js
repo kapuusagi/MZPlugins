@@ -6,6 +6,28 @@
  * @base Kapu_Utility
  * @orderAfter Kapu_Utility
  * 
+ * @command lockFriendlyPoint
+ * @text 友好度固定
+ * @desc 指定アクターの友好度変動を停止する。
+ * 
+ * @arg actorId
+ * @text 対象のアクター
+ * @desc 対象のアクター。
+ * @type actor
+ * @default 0
+ * 
+ * @arg actorVariableId
+ * @text 対象のアクター(変数指定)
+ * @desc 対象のアクターを変数で指定する。アクターの明示指定が無い場合のみ有効。
+ * @type variable
+ * @default 0
+ * 
+ * @arg isLock
+ * @text ロック状態
+ * @desc 設定するロック状態。trueにするとロック、falseにするとロック解除
+ * @type boolean
+ * @default false
+ * 
  * @command getFriendlyPoint
  * @text 友好度取得
  * @desc 指定アクターAの、指定アクターBに対する友好度を得る。
@@ -176,6 +198,13 @@
         Math.min(Game_Actor.FRIENDLY_POINT_MIN, 
             Math.floor(Number(parameters["friendlyPointDefault"] || 0))));
 
+    /**
+     * アクターIDを得る。
+     * 
+     * @param {number} actorId アクターID
+     * @param {number} variableId 変数ID
+     * @returns {number} アクターID。指定が無効な場合には0を返す。
+     */
     const _getTargetActor = function(actorId, variableId) {
         if ((actorId > 0) && (actorId < $dataActors.length)) {
             return actorId;
@@ -188,6 +217,13 @@
 
         return 0;
     }
+    PluginManager.registerCommand(pluginName, "lockFriendlyPoint", args => {
+        const actorId = _getTargetActor(Number(args.actorId), Number(args.variableId));
+        const isLock = (typeof args.isLock == "undefined") ? false : (args.isLock == "true");
+        if ((actorId > 0) && $gameActors.isActorDataExists(actorId)) {
+            $gameActors.actor(actorId).setFriendlyPointLock(isLock);
+        }
+    });
     
     PluginManager.registerCommand(pluginName, "getFriendlyPoint", args => {
         const srcActorId = _getTargetActor(Number(args.srcActorId), Number(args.srcActorVariableId));
@@ -244,6 +280,7 @@
     Game_Actor.prototype.initMembers = function() {
         _Game_Actor_initMembers.call(this);
         this._friendlyPoints = [];
+        this._lockFriendlyPoints = false;
     };
 
     const _Game_Actor_setup = Game_Actor.prototype.setup;
@@ -286,6 +323,23 @@
     };
 
     /**
+     * 友好度ロック状態を変更する。
+     * 
+     * @param {boolean} isLock ロック状態
+     */
+    Game_Actor.prototype.setFriendlyPointLock = function(isLock) {
+        this._lockFriendlyPoints = isLock;
+    };
+    /**
+     * 友好度ロック状態を得る。
+     * 
+     * @returns {boolean} ロック状態
+     */
+    Game_Actor.prototype.isFriendlyPointsLocked = function() {
+        return this._lockFriendlyPoints;
+    };
+
+    /**
      * actorIdで指定されるアクターに対する友好度を得る。
      * 
      * @param {number} actorId アクターID
@@ -303,7 +357,7 @@
      * @param {number} fp 友好度
      */
     Game_Actor.prototype.setFriendlyPoint = function(actorId, fp) {
-        if (actorId > 0) {
+        if ((actorId > 0) && !this._lockFriendlyPoints) {
             this._friendlyPoints[actorId] = fp.clamp(Game_Actor.FRIENDLY_POINT_MIN, Game_Actor.FRIENDLY_POINT_MAX);
         }
     };
@@ -317,7 +371,7 @@
     Game_Actor.prototype.gainFriendlyPoint = function(actorId, gainPoint) {
         if (actorId > 0) {
             const newFp = this.friendlyPoint(actorId) + gainPoint;
-            this._friendlyPoints[actorId] = newFp.clamp(Game_Actor.FRIENDLY_POINT_MIN, Game_Actor.FRIENDLY_POINT_MAX);
+            this.setFriendlyPoint(actorId, newFp);
         }
     };
     //------------------------------------------------------------------------------
