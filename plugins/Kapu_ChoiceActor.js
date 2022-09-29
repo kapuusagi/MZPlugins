@@ -766,7 +766,7 @@ function Window_ChoiceActorList() {
             case CHOICEACTOR_FROM_ALL:
                 for (let actorId = 1; actorId < $dataActors.length; actorId++) {
                     if ($gameActors.isActorDataExists(actorId)
-                            || $dataActors[actorId].characterName) {
+                            || $dataActors[actorId].name) {
                         if (_isCandidate(actorId, exclusionActors)) {
                             canditates.push(actorId);
                         }
