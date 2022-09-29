@@ -261,14 +261,21 @@
         return (isShort) ? friendlyPointParamNameA : friendlyPointParamName;
     };
 
-    // TextManagerプロパティ定義。
-    // ちょっとわかりにくいが、getter(XXXX, id)は
-    // $dataSystem.terms.XXXX[id]
-    Object.defineProperties(TextManager, {
-        /** 友好度を表すテキスト @constant {string} */
-        frindlyPoint: TextManager.getFriendlyPoint(false),
-        /** 友好度(省略形)を表すテキスト @constant {string} */
-        frindlyPointA: TextManager.getFriendlyPoint(true)
+    /** 
+     * 友好度を表すテキスト
+     * @constant {string} 
+     */
+    Object.defineProperty(TextManager, "friendlyPoint", {
+        get: function() {
+            return TextManager.getFriendlyPoint(false);
+        },
+        configurable: true
+    });
+    Object.defineProperty(TextManager, "frindlyPointA", {
+        get: function() {
+            return TextManager.getFriendlyPoint(true);
+        },
+        configurable: true
     });
 
     //------------------------------------------------------------------------------

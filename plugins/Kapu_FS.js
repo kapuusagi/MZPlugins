@@ -331,8 +331,8 @@
      */
     Game_Actor.prototype.initTp = function() {
         this.clearTp();
-        fp = _getFriendlyPoint(this);
-        initialTp = Math.max(0, Math.floor(fp * friendlyPointTpRate));
+        const fp = _getFriendlyPoint(this);
+        const initialTp = Math.max(0, Math.floor(fp * friendlyPointTpRate));
         this.setTp(Math.randomInt(initialTp));
     };
 
