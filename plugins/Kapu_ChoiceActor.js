@@ -3,8 +3,6 @@
  * @plugindesc アクター選択プラグイン
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
- * @base 
- * @orderAfter 
  * 
  * @command choiceActor
  * @text アクター選択
@@ -19,6 +17,8 @@
  * @value 2
  * @option パーティー控えメンバー
  * @value 3
+ * @option インスタンスがあり、パーティーにいないメンバー
+ * @value 7
  * @option インスタンスがあるメンバー
  * @value 8
  * @option すべてのアクター(無名は除く)
@@ -128,8 +128,11 @@
  * ============================================
  * アクター
  *   <excludeChoiceActor>
- *     アクター選択で「インスタンスがあるメンバー」「すべてのアクター」が選択されたとき、
- *     選択候補から除外する。
+ *     アクター選択で
+ *       「インスタンスがあり、パーティーにいないメンバー」
+ *       「インスタンスがあるメンバー」
+ *       「すべてのアクター」
+ *     が選択されたとき、選択候補から除外する。
  * 
  * ============================================
  * 変更履歴
@@ -145,7 +148,7 @@ function Window_ChoiceActorList() {
 }
 
 (() => {
-    'use strict'
+    'use strict';
     const pluginName = "Kapu_ChoiceActor";
     const parameters = PluginManager.parameters(pluginName);
     const windowX = Number(parameters["windowX"]) || 0;
@@ -156,6 +159,7 @@ function Window_ChoiceActorList() {
     const CHOICEACTOR_FROM_PARTY = 1;
     const CHOICEACTOR_FORM_BATTLEMEMBERS = 2;
     const CHOICEACTOR_FROM_NOTBATTLEMEMBERS = 3;
+    const CHOICEACTOR_FROM_INSTANCE_WITHOUT_PARTY = 7;
     const CHOICEACTOR_FROM_INSTANCE = 8;
     const CHOICEACTOR_FROM_ALL = 9;
     const CHOICEACTOR_FROM_CANDIDATES = 99;
@@ -366,7 +370,7 @@ function Window_ChoiceActorList() {
         switch (informationType) {
             case "default":
             default:
-                return drawActorDefault(rect, actor, informationType);
+                return this.drawActorDefault(rect, actor, informationType);
         }
     };
 
@@ -393,7 +397,7 @@ function Window_ChoiceActorList() {
         const lineHeight = this.lineHeight();
         const padding = 8;
         x += 144 + inset * 2 + padding;
-        y = inset;
+        y += inset;
         const itemAreaWidth = rect.width - 144 - padding - inset * 2
 
         // 1段目：アクター名
@@ -713,7 +717,7 @@ function Window_ChoiceActorList() {
         const actors = this.makeCandidateActors(params[1], params[2], params[3]);
         if (actors.length > 0) {
             const isCancelable = params[4];
-            const informationType = prams[5];
+            const informationType = params[5];
             $gameMessage.setChoiceActors(variableId, actors, isCancelable, informationType);
         } else {
             $gameVariables.setValue(variableId, 0); // キャンセル
@@ -741,7 +745,26 @@ function Window_ChoiceActorList() {
         } else {
             return false;
         }
-    }
+    };
+    /**
+     * acotrIdで指定されるアクターが選択候補になり得るかどうかを判定する。
+     * アクターデータのexcludeChoiceActor指定は無視される。
+     * 
+     * @param {number} actorId アクターID
+     * @param {Array<number>} exclusionActors 除外アクターリスト
+     * @returns {boolean} 候補になる場合にはtrue, それ以外はfalse.
+     */
+     const _isCandidateInParty = function(actorId, exclusionActors) {
+        if (actorId > 0) { // アクターIDは有効？
+            if (exclusionActors && exclusionActors.includes(actorId)) { // 除外リストに含まれている？
+                return false;
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }    
 
     /**
      * 選択候補のアクターIDリストを作る
@@ -757,6 +780,16 @@ function Window_ChoiceActorList() {
             case CHOICEACTOR_FROM_INSTANCE:
                 for (let actorId = 1; actorId < $dataActors.length; actorId++) {
                     if ($gameActors.isActorDataExists(actorId)) {
+                        if (_isCandidate(actorId, exclusionActors)) {
+                            canditates.push(actorId);
+                        }
+                    }
+                }
+                break;
+            case CHOICEACTOR_FROM_INSTANCE_WITHOUT_PARTY:
+                for (let actorId = 1; actorId < $dataActors.length; actorId++) {
+                    if ($gameActors.isActorDataExists(actorId)
+                            && !$gameParty.allMembers().some((actor) => actor.actorId() == actorId)) {
                         if (_isCandidate(actorId, exclusionActors)) {
                             canditates.push(actorId);
                         }
@@ -782,8 +815,8 @@ function Window_ChoiceActorList() {
                 break;
             case CHOICEACTOR_FORM_BATTLEMEMBERS:
                 for (const actor of $gameParty.battleMembers()) {
-                    const actorId = actor.actorId;
-                    if (actorId > 0) {
+                    const actorId = actor.actorId();
+                    if (_isCandidateInParty(actorId, exclusionActors)) {
                         canditates.push(actorId);
                     }
                 }
@@ -792,8 +825,9 @@ function Window_ChoiceActorList() {
                 {
                     const battleMembers = $gameParty.battleMembers();
                     for (const actor of $gameParty.allMembers()) {
-                        const actorId = actor.actorId;
-                        if ((actorId > 0) && !battleMembers.includes(actor)) {
+                        const actorId = actor.actorId();
+                        if (!battleMembers.includes(actor)
+                                && _isCandidateInParty(actorId, exclusionActors)) {
                             canditates.push(actorId);
                         }
                     }
@@ -802,8 +836,8 @@ function Window_ChoiceActorList() {
             case CHOICEACTOR_FROM_PARTY:
             default:
                 for (const actor of $gameParty.allMembers()) {
-                    const actorId = actor.actorId;
-                    if (actorId > 0) {
+                    const actorId = actor.actorId();
+                    if (_isCandidateInParty(actorId, exclusionActors)) {
                         canditates.push(actorId);
                     }
                 }
