@@ -17,12 +17,10 @@
  * @value 2
  * @option パーティー控えメンバー
  * @value 3
- * @option インスタンスがあり、パーティーにいないメンバー
+ * @option 選択可能フラグがセットされた、パーティーにいないメンバー
  * @value 7
- * @option インスタンスがあるメンバー
+ * @option 選択可能フラグがセットされた、全てのメンバー
  * @value 8
- * @option すべてのアクター(無名は除く)
- * @value 9
  * @option 特定のメンバー
  * @value 99
  * 
@@ -82,6 +80,27 @@
  * @default 480
  * @parent windowPosition
  * 
+ * 
+ * @command setChoicable
+ * @text 選択可能/不可能を設定する
+ * @desc 選択可能フラグをセット/解除する。
+ * 
+ * @arg actorId
+ * @text アクターID
+ * @type actor
+ * @default 0
+ * 
+ * @arg variableId
+ * @text アクターID(変数指定)
+ * @type variable
+ * @default 0
+ * 
+ * @arg choicable
+ * @text 選択可否
+ * @desc 選択可能にする場合にはtrue, 選択不可にする場合にはfalse
+ * @type boolean
+ * @default false
+ * 
  * @help 
  * アクター選択を提供するプラグイン。
  * イベントにて、アクターを簡単に選択できるようにする用途を想定します。
@@ -123,6 +142,10 @@
  *   選択対象アクターがいない場合、選択処理はスキップされます。
  *   この場合、0が格納されます。
  * 
+ * 選択可能/不可能を設定する
+ *   指定したアクターに、選択可能/不可フラグを設定します。
+ *   初期選択可能フラグは選択不可になっています。
+ * 
  * ============================================
  * ノートタグ
  * ============================================
@@ -159,11 +182,13 @@ function Window_ChoiceActorList() {
     const CHOICEACTOR_FROM_PARTY = 1;
     const CHOICEACTOR_FORM_BATTLEMEMBERS = 2;
     const CHOICEACTOR_FROM_NOTBATTLEMEMBERS = 3;
-    const CHOICEACTOR_FROM_INSTANCE_WITHOUT_PARTY = 7;
-    const CHOICEACTOR_FROM_INSTANCE = 8;
-    const CHOICEACTOR_FROM_ALL = 9;
+    const CHOICEACTOR_FROM_CHOICABLE_WITHOUT_PARTY = 7;
+    const CHOICEACTOR_FROM_CHOICABLE = 8;
     const CHOICEACTOR_FROM_CANDIDATES = 99;
 
+    /**
+     * アクター選択
+     */
     // Note: 匿名関数だと this に Game_Interpreter が渡らないことに注意。
     PluginManager.registerCommand(pluginName, "choiceActor", function(args) {
         const interpreter = this;
@@ -191,6 +216,30 @@ function Window_ChoiceActorList() {
             interpreter.setWaitMode("message");
         }
         return true;
+    });
+
+    const _getActorId = function(actorId, variableId) {
+        if (actorId > 0) {
+            return actorId;
+        } else if (variableId > 0) {
+            return $gameVariables.value(variableId);
+        } else {
+            return 0;
+        }
+    };
+
+    /**
+     * 選択可能/不可能を設定する
+     */
+    PluginManager.registerCommand(pluginName, "setChoicable", function(args) {
+        let actorId = _getActorId(Number(args.actorId), Number(args.variableId));
+        const choicable = (typeof args.choicable == "undefined") ? false : (args.choicable == "true");
+        if ((actorId > 0) && (actorId < $dataActors.length)) {
+            if ($gameActors.isActorDataExists(actorId)) {
+                const actor = $gameActors.actor(actorId);
+                actor.setChoicableActor(choicable);
+            }
+        }
     });
     //------------------------------------------------------------------------------
     // Window_Message
@@ -596,7 +645,34 @@ function Window_ChoiceActorList() {
         this._messageWindow.terminateMessage();
         this.close();
     };
+    //------------------------------------------------------------------------------
+    // Game_Actor
+    const _Game_Actor_initMembers = Game_Actor.prototype.initMembers;
+    /**
+     * Game_Actorのパラメータを初期化する。
+     */
+    Game_Actor.prototype.initMembers = function() {
+        _Game_Actor_initMembers.call(this);
+        this._choicableActor = false;
+    };
 
+    /**
+     * アクター選択可能かどうかを設定する。
+     * 
+     * @param {boolean} choicable アクター選択可能な場合にはtrue, 選択不可な場合にはfalse.
+     */
+    Game_Actor.prototype.setChoicableActor = function(choicable) {
+        this._choicableActor = choicable;
+    };
+
+    /**
+     * アクター選択可能かどうかを取得する。
+     * 
+     * @returns {boolean} アクター選択可能な場合にはtrue, 選択不可な場合にはfalse.
+     */
+    Game_Actor.prototype.choicableActor = function() {
+        return this._choicableActor;
+    };
     //------------------------------------------------------------------------------
     // Game_Actors
     if (!Game_Actors.prototype.isActorDataExists) { // isActorDataExistsが未定義なら追加。
@@ -733,10 +809,6 @@ function Window_ChoiceActorList() {
      */
     const _isCandidate = function(actorId, exclusionActors) {
         if (actorId > 0) { // アクターIDは有効？
-            const dataActor = $dataActors[actorId];
-            if ($dataActors[dataActor.meta.excludeChoiceActor]) { // メタデータで除外指定されている？
-                return false;
-            }
             if (exclusionActors && exclusionActors.includes(actorId)) { // 除外リストに含まれている？
                 return false;
             }
@@ -746,25 +818,6 @@ function Window_ChoiceActorList() {
             return false;
         }
     };
-    /**
-     * acotrIdで指定されるアクターが選択候補になり得るかどうかを判定する。
-     * アクターデータのexcludeChoiceActor指定は無視される。
-     * 
-     * @param {number} actorId アクターID
-     * @param {Array<number>} exclusionActors 除外アクターリスト
-     * @returns {boolean} 候補になる場合にはtrue, それ以外はfalse.
-     */
-     const _isCandidateInParty = function(actorId, exclusionActors) {
-        if (actorId > 0) { // アクターIDは有効？
-            if (exclusionActors && exclusionActors.includes(actorId)) { // 除外リストに含まれている？
-                return false;
-            }
-
-            return true;
-        } else {
-            return false;
-        }
-    }    
 
     /**
      * 選択候補のアクターIDリストを作る
@@ -777,30 +830,22 @@ function Window_ChoiceActorList() {
     Game_Interpreter.prototype.makeCandidateActors = function(choiceActorType, actors, exclusionActors) {
         const canditates = [];
         switch (choiceActorType) {
-            case CHOICEACTOR_FROM_INSTANCE:
+            case CHOICEACTOR_FROM_CHOICABLE:
                 for (let actorId = 1; actorId < $dataActors.length; actorId++) {
                     if ($gameActors.isActorDataExists(actorId)) {
-                        if (_isCandidate(actorId, exclusionActors)) {
+                        const actor = $gameActors.actor(actorId);
+                        if (actor.choicableActor() && _isCandidate(actorId, exclusionActors)) {
                             canditates.push(actorId);
                         }
                     }
                 }
                 break;
-            case CHOICEACTOR_FROM_INSTANCE_WITHOUT_PARTY:
+            case CHOICEACTOR_FROM_CHOICABLE_WITHOUT_PARTY:
                 for (let actorId = 1; actorId < $dataActors.length; actorId++) {
                     if ($gameActors.isActorDataExists(actorId)
                             && !$gameParty.allMembers().some((actor) => actor.actorId() == actorId)) {
-                        if (_isCandidate(actorId, exclusionActors)) {
-                            canditates.push(actorId);
-                        }
-                    }
-                }
-                break;
-            case CHOICEACTOR_FROM_ALL:
-                for (let actorId = 1; actorId < $dataActors.length; actorId++) {
-                    if ($gameActors.isActorDataExists(actorId)
-                            || $dataActors[actorId].name) {
-                        if (_isCandidate(actorId, exclusionActors)) {
+                        const actor = $gameActors.actor(actorId);
+                        if (actor.choicableActor() && _isCandidate(actorId, exclusionActors)) {
                             canditates.push(actorId);
                         }
                     }
@@ -816,7 +861,7 @@ function Window_ChoiceActorList() {
             case CHOICEACTOR_FORM_BATTLEMEMBERS:
                 for (const actor of $gameParty.battleMembers()) {
                     const actorId = actor.actorId();
-                    if (_isCandidateInParty(actorId, exclusionActors)) {
+                    if (_isCandidate(actorId, exclusionActors)) {
                         canditates.push(actorId);
                     }
                 }
@@ -827,7 +872,7 @@ function Window_ChoiceActorList() {
                     for (const actor of $gameParty.allMembers()) {
                         const actorId = actor.actorId();
                         if (!battleMembers.includes(actor)
-                                && _isCandidateInParty(actorId, exclusionActors)) {
+                                && _isCandidate(actorId, exclusionActors)) {
                             canditates.push(actorId);
                         }
                     }
@@ -837,7 +882,7 @@ function Window_ChoiceActorList() {
             default:
                 for (const actor of $gameParty.allMembers()) {
                     const actorId = actor.actorId();
-                    if (_isCandidateInParty(actorId, exclusionActors)) {
+                    if (_isCandidate(actorId, exclusionActors)) {
                         canditates.push(actorId);
                     }
                 }
