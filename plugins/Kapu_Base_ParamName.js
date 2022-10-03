@@ -487,61 +487,61 @@
     if (enableProperty) {
         Object.defineProperties(TextManager, {
             /** 最大HPを表すテキスト @constant {string} */
-            mhp : TextManager.param(0),
+            mhp : TextManager.getter("param", 0),
             /** 最大MPを表すテキスト @constant {string} */
-            mmp : TextManager.param(1),
+            mmp : TextManager.getter("param", 1),
             /** 攻撃力を表すテキスト @constant {string} */
-            atk : TextManager.param(2),
+            atk : TextManager.getter("param", 2),
             /** 防御力を表すテキスト @constant {string} */
-            def : TextManager.param(3),
+            def : TextManager.getter("param", 3),
             /** 魔法攻撃力を表すテキスト @constant {string} */
-            mat : TextManager.param(4),
+            mat : TextManager.getter("param", 4),
             /** 魔法防御力を表すテキスト @constant {string} */
-            mdf : TextManager.param(5),
+            mdf : TextManager.getter("param", 5),
             /** 敏捷を表すテキスト @constant {string} */
-            agi : TextManager.param(6),
+            agi : TextManager.getter("param", 6),
             /** 運を表すテキスト @constant {string} */
-            luk : TextManager.param(7),
+            luk : TextManager.getter("param", 7),
             /** 命中率を表すテキスト @constant {string} */
-            hit : TextManager.param(8),
+            hit : TextManager.getter("param", 8),
             /** 物理回避率を表すテキスト @constant {string} */
-            eva : TextManager.param(9),
+            eva : TextManager.getter("param", 9),
             /** 会心率を表すテキスト @constant {string} */
-            cri : TextManager.xparam(2),
+            cri : TextManager.getter("xparam", 2),
             /** 会心回避率を表すテキスト @constant {string} */
-            cev : TextManager.xparam(3),
+            cev : TextManager.getter("xparam", 3),
             /** 魔法回避率を表すテキスト @constant {string} */
-            mev : TextManager.xparam(4),
+            mev : TextManager.getter("xparam", 4),
             /** 魔法反射率を表すテキスト @constant {string} */
-            mrf : TextManager.xparam(5),
+            mrf : TextManager.getter("xparam", 5),
             /** カウンター率を表すテキスト @constant {string} */
-            cnt : TextManager.xparam(6),
+            cnt : TextManager.getter("xparam", 6),
             /** HP自動回復率を表すテキスト @constant {string} */
-            hrg : TextManager.xparam(7),
+            hrg : TextManager.getter("xparam", 7),
             /** MP自動回復率を表すテキスト @constant {string} */
-            mrg : TextManager.xparam(8),
+            mrg : TextManager.getter("xparam", 8),
             /** TP自動回復率を表すテキスト @constant {string} */
-            trg : TextManager.xparam(9),
+            trg : TextManager.getter("xparam", 9),
             /** ターゲット率を表すテキスト @constant {string} */
-            tgr : TextManager.sparam(0),
+            tgr : TextManager.getter("sparam", 0),
             /** 防御時ダメージ軽減率を表すテキスト @constant {string} */
-            grd : TextManager.sparam(1),
+            grd : TextManager.getter("sparam", 1),
             /** 回復率を表すテキスト @constant {string} */
-            rec : TextManager.sparam(2),
+            rec : TextManager.getter("sparam", 2),
             /** アイテム効果率を表すテキスト @constant {string} */
-            pha : TextManager.sparam(3),
+            pha : TextManager.getter("sparam", 3),
             /** MPコストレートを表すテキスト @constant {string} */
-            mcr : TextManager.sparam(4),
+            mcr : TextManager.getter("sparam", 4),
             /** TPコストレートを表すテキスト @constant {string} */
-            tcr : TextManager.sparam(5),
+            tcr : TextManager.getter("sparam", 5),
             /** 物理被ダメージ率を表すテキスト @constant {string} */
-            pdr : TextManager.sparam(6),
+            pdr : TextManager.getter("sparam", 6),
             /** 魔法被ダメージ率を表すテキスト @constant {string} */
-            mdr : TextManager.sparam(7),
+            mdr : TextManager.getter("sparam", 7),
             /** 床被ダメージ率を表すテキスト @constant {string} */
-            fdr : TextManager.sparam(8),
+            fdr : TextManager.getter("sparam", 8),
             /** 経験値取得率を表すテキスト @constant {string} */
-            exr : TextManager.sparam(9),
+            exr : TextManager.getter("sparam", 9),
         });
     }
 
