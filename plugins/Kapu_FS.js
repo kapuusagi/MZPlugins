@@ -445,7 +445,48 @@
         this.setTp(Math.randomInt(initialTp));
     };
 
-
+    const _Game_Actor_paramPlus = Game_Actor.prototype.paramPlus;
+    /**
+     * 基本パラメータベース値を得る。
+     * 
+     * @param paramId {number} パラメータID
+     * @returns {number} パラメータ値
+     */
+    Game_Actor.prototype.paramPlus = function(paramId) {
+        const value = _Game_Actor_paramPlus.call(this, paramId);
+        switch (paramId) {
+            case 0: // MaxHP
+                {
+                    return value + this.vit * 3 + (this.vit >> 3) * 10;
+                }
+            case 1: // MaxMP
+                {
+                    const intmen = this.int + this.men;
+                    return value + (intmen >> 2) + (intmen >> 3) * 4;
+                }
+            case 2: // ATK
+                {
+                    return value + this.str + (this.str >> 3) * 5;
+                }
+            case 3: // DEF
+                {
+                    return value + this.vit + (this.vit >> 3) * 3;
+                }
+            case 4: // MAT
+                {
+                    return value + this.int + (this.int >> 3) * 5;
+                }
+            case 5: // MDF
+                {
+                    return value + this.men + (this.men >> 3) * 3;
+                }
+            case 6: // AGI
+                return value;
+            case 7: // LUK
+                return value; // LUKを返す。
+        }
+        return 0;
+    };
 
     //------------------------------------------------------------------------------
     // BattleManager
