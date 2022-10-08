@@ -11,6 +11,8 @@
  * @orderAfter Kapu_Base_DamageCalculation
  * @base Kapu_FriendlyPoint
  * @orderAfter Kapu_FriendlyPoint
+ * @base Kapu_ChoiceActor
+ * @orderAfter Kapu_ChoiceActor
  * 
  * 
  * @command gainFriendlyPoint
@@ -82,6 +84,39 @@
  * @decimals 2
  * @default 0.25
  * 
+ * @param displayFriendlyPoint
+ * @text 友好度表示
+ * 
+ * @param displayFriendlyPointMin
+ * @text 表示友好度下限
+ * @type number
+ * @default -100
+ * @min -100000
+ * @max 100000
+ * @parent displayFriendlyPoint
+ *  
+ * 
+ * @param displayFriendlyPointMax
+ * @text 表示友好度上限
+ * @type number
+ * @default 100
+ * @min -100000
+ * @max 100000
+ * @parent displayFriendlyPoint
+ * 
+ * @param displayFriendlyPointIconTable
+ * @text アイコンテーブル
+ * @desc 友好度を表示するアイコンテーブル。(0番のインデックスがデフォルト友好度時のもの、最大のインデックスが表示最大友好度のもの。中央が標準)
+ * @type number[]
+ * @default []
+ * @parent displayFriendlyPoint
+ * 
+ * @param displayNegativeFriendlyPointIconTable
+ * @text ネガティブアイコンテーブル
+ * @desc 友好度を表示するアイコンテーブル。(0番目のインデックスが表示最低友好度のもの、最大のインデックスがデフォルト以下のもの)
+ * @type number[]
+ * @default []
+ * @parent displayFriendlyPoint
  * 
  * @help 
  * FS向けの変更
@@ -138,22 +173,88 @@
     const gainFriendlyPointOnBattleWin = Math.floor(Number(parameters["gainFriendlyPointOnBattleWin"] || 0));
     const friendlyPointDamageRate = Math.floor(Number(parameters["friendlyPointDamageRate"] || 0));
 
+    const displayFriendlyPointMin = Number(parameters["displayFriendlyPointMin"] || 0).clamp(
+        Game_Actor.FRIENDLY_POINT_MIN, Game_Actor.FRIENDLY_POINT_DEFAULT);
+    const displayFriendlyPointMax = Number(parameters["displayFriendlyPointMax"] || 0).clamp(
+        Game_Actor.FRIENDLY_POINT_DEFAULT, Game_Actor.FRIENDLY_POINT_MAX);
+    /**
+     * paramを解析して、アイコン番号テーブルを得る。
+     * 
+     * @param {string} param パラメータ
+     * @returns {Array<number>} アイコンインデックス配列
+     */
+    const _parseFriendlyIconTable = function(param) {
+        try {
+            if (param) {
+                return JSON.parse(param || "[]").map((token) => Number(token || 0) || 0);
+            }
+        }
+        catch (e) {
+            console.error("Parse displayFriendlyPointIconTable failure:" + e);
+        }
+
+        return [];
+    };
+
+    const displayFriendlyPointIconTable = _parseFriendlyIconTable(parameters["displayFriendlyPointIconTable"]);
+    const displayNegativeFriendlyPointIconTable = _parseFriendlyIconTable(parameters["displayNegativeFriendlyPointIconTable"]);
+    /**
+     * 有効度に対応したアイコンIDを得る。
+     * 
+     * @param {number} fp 有効度
+     * @returns {number} アイコンID
+     */
+    const _getFriendlyPointIconId = function(fp) {
+        // デフォルトより上か？
+        const iconTable = (fp >= Game_Actor.FRIENDLY_POINT_DEFAULT)
+            ? displayFriendlyPointIconTable : displayNegativeFriendlyPointIconTable;
+        const range = (fp >= Game_Actor.FRIENDLY_POINT_DEFAULT)
+            ? displayFriendlyPointMax - Game_Actor.FRIENDLY_POINT_DEFAULT
+            : Game_Actor.FRIENDLY_POINT_DEFAULT - displayFriendlyPointMin;
+        const gaugeValue = (fp >= Game_Actor.FRIENDLY_POINT_DEFAULT)
+            ? (fp - Game_Actor.FRIENDLY_POINT_DEFAULT)
+            : (fp - Game_Actor.FRIENDLY_POINT_MIN);
+        const limitIconIndex = (fp >= Game_Actor.FRIENDLY_POINT_DEFAULT)
+            ? (iconTable.length - 1) : 0;
+        const isOverRange = (fp >= Game_Actor.FRIENDLY_POINT_DEFAULT)
+            ? (fp >= displayFriendlyPointMax) : (fp < displayFriendlyPointMin);
+
+        if (iconTable.length == 0) { // 表示アイコンテーブルなし？
+            return 0;
+        } else {
+            if (range == 0) { // 表示範囲なし？
+                return iconTable[0];
+            } else {
+                if (isOverRange) {
+                    return iconTable[limitIconIndex];
+                } else {
+                    const position = gaugeValue / range;
+                    const iconIndex = Math.round((iconTable.length - 1) * position);
+                    return iconTable[iconIndex];
+                }
+            }
+        }
+    };
+
+    const mainActorId = 1;
+
     PluginManager.registerCommand(pluginName, "gainFriendlyPoint", args => {
         const actorId = Number(args.actorId);
         const value = Math.floor(Number(args.value));
-        if ((actorId > 1) && $gameActors.isActorDataExists(actorId) && (value != 0)) {
+        if ((actorId > 0) && (actorId != mainActorId) 
+                && $gameActors.isActorDataExists(actorId) && (value != 0)) {
             const actor = $gameActors.actor(actorId);
-            actor.gainFriendlyPoint(1, value);
+            actor.gainFriendlyPoint(mainActorId, value);
         }
     });
     PluginManager.registerCommand(pluginName, "gainFriendlyPointWithoutActor", args => {
         const excludeActorId = Number(args.actorId);
         const value = Math.floor(Number(args.value));
-        if ((actorId > 1) && (value != 0)) {
-            for (let actorId = 2; actorId < $dataActors.length; actorId++) {
-                if ((actorId != excludeActorId) && $gameActors.isActorDataExists(actorId)) {
+        if ((actorId > 0) && (value != 0)) {
+            for (let actorId = 1; actorId < $dataActors.length; actorId++) {
+                if ((actorId != mainActorId) && (actorId != excludeActorId) && $gameActors.isActorDataExists(actorId)) {
                     const actor = $gameActors.actor(actorId);
-                    actor.gainFriendlyPoint(1, value);
+                    actor.gainFriendlyPoint(mainActorId, value);
                 }
             }
         }
@@ -161,8 +262,8 @@
     PluginManager.registerCommand(pluginName, "gainFriendlyPointAll", args => {
         const value = Math.floor(Number(args.value));
         if (value != 0) {
-            for (let actorId = 2; actorId < $dataActors.length; actorId++) {
-                if ($gameActors.isActorDataExists(actorId)) {
+            for (let actorId = 1; actorId < $dataActors.length; actorId++) {
+                if ((actorId != mainActorId) && $gameActors.isActorDataExists(actorId)) {
                     const actor = $gameActors.actor(actorId);
                     actor.gainFriendlyPoint(1, value);
                 }
@@ -200,9 +301,17 @@
 
     DataManager.addNotetagParserActors(_processNotetag);
 
+    /**
+     * 友好度を得る。
+     * メインアクターの場合、パーティーメンバーとの友好度の平均値を返す。
+     * それ以外のアクターの場合、メインアクターとの友好度を返す。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @returns {number} 友好度
+     */
     const _getFriendlyPoint = function(actor) {
         if (actor.isActor()) {
-            if (actor.actorId() == 1) {
+            if (actor.actorId() == mainActorId) { // メインアクターか？
                 const maxFp = $gameParty.allMembers().reduce((prev, actor) => Math.max(prev, actor.friendlyPoint(1)), 0);
                 return maxFp;
             } else {
@@ -385,7 +494,72 @@
             rate *= (1.0 + plusFp * friendlyPointDamageRate / 100.0);
         }
         return rate;
-    };  
+    };
+    //------------------------------------------------------------------------------
+    // Window_ChoiceActorList
+    const _Window_ChoiceActorList_drawActorDefaultCustom = Window_ChoiceActorList.prototype.drawActorDefaultCustom;
+    /**
+     * 単純なアクター情報の最終行を描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {string} informationType 表示情報タイプ
+     * @param {number} x 描画位置X
+     * @param {number} y 描画位置Y
+     * @param {number} width 幅
+     */
+    Window_ChoiceActorList.prototype.drawActorDefaultCustom = function(actor , informationType, x, y, width) {
+        _Window_ChoiceActorList_drawActorDefaultCustom.call(this, ...arguments);
+        if (informationType == "fp") {
+            if (actor.actorId() != 1) {
+
+                const fp = _getFriendlyPoint(actor);
+
+                const labelWidth = Math.min(48, (width - 40) * 0.3);
+                const paramWidth = Math.min(120, width - 40 - labelWidth - 8);
+                this.changeTextColor(ColorManager.systemColor());
+                this.drawText(TextManager.frindlyPointA, x, y, labelWidth);
+
+                this.changeTextColor(ColorManager.paramchangeTextColor(fp - Game_Actor.FRIENDLY_POINT_DEFAULT));
+                this.drawText(fp, x + labelWidth + 8, y, paramWidth, "right");
+
+                const iconId = _getFriendlyPointIconId(fp);
+                if (iconId >= 0) {
+                    this.drawIcon(iconId, x + labelWidth + 16 + paramWidth, y + 2);
+                }
+            }
+        }
+    };
+
+    //------------------------------------------------------------------------------
+    // Window_Status
+    if (Window_Status.prototype.drawActorGuildRank) {
+        /**
+         * ギルドランクの代わりに友好度を表示する。
+         * 
+         * @param {Game_Actor} actor アクター
+         * @param {number} x 描画領域左上x
+         * @param {number} y 描画領域左上y
+         * @param {number} width 幅
+         */
+        Window_Status.prototype.drawActorGuildRank = function(actor, x, y, width) {
+            if (actor.actorId() != 1) {
+                const fp = _getFriendlyPoint(actor);
+
+                const labelWidth = Math.min(48, (width - 40) * 0.3);
+                const paramWidth = Math.min(120, width - 40 - labelWidth - 8);
+                this.changeTextColor(ColorManager.systemColor());
+                this.drawText(TextManager.frindlyPointA, x, y, labelWidth);
+
+                this.changeTextColor(ColorManager.normalColor());
+                this.drawText(fp, x + labelWidth + 8, y, paramWidth, "right");
+
+                const iconId = _getFriendlyPointIconId(fp);
+                if (iconId >= 0) {
+                    this.drawIcon(iconId, x + labelWidth + 16 + paramWidth, y + 2);
+                }
+            }
+        };
+    }
     //------------------------------------------------------------------------------
     // TODO : メソッドフック・拡張
 
