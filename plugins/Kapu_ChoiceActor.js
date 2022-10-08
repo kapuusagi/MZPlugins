@@ -449,6 +449,8 @@ function Window_ChoiceActorList() {
         y += inset;
         const itemAreaWidth = rect.width - 144 - padding - inset * 2
 
+        this.resetFontSettings();
+
         // 1段目：アクター名
         const nameWidth = itemAreaWidth;
         this.drawText(actor.name(), x, y, nameWidth);
