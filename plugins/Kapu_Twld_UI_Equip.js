@@ -463,6 +463,7 @@ function Window_EquipItemName() {
             this.changeTextColor(ColorManager.systemColor());
             this.changePaintOpacity(this.isEnabled(index));
             this.drawText(slotName, rect.x, rect.y, slotNameWidth, rect.height);
+            this.changeTextColor(ColorManager.normalColor());
             this.drawEquipItemName(item, rect.x + slotNameWidth, rect.y, itemWidth);
             this.changePaintOpacity(true);
         }

@@ -16,6 +16,13 @@
  * @type number
  * @default 48
  * 
+ * @param equipWindowLineCount
+ * @text 装備ウィンドウの表示欄の表示数
+ * @desc 装備ウィンドウの表示欄の表示数
+ * @type number
+ * @min 2
+ * @default 8
+ * 
  * @param enableProfile
  * @text プロフィールを専用画面にする
  * @desc trueにすると、プロフィールを専用ウィンドウで提供する。
@@ -330,6 +337,7 @@ function Window_StatusProfile() {
 
     const enableProfile = (typeof parameters["enableProfile"] === "undefined") 
             ? false : (parameters["enableProfile"] === "true");
+    const equipWindowLineCount = Math.max(2, Math.floor(Number(parameters["equipWindowLineCount"] || 0)));
 
     const statusLabelWidth = Number(parameters["statusLabelWidth"]) || 80;
     const textClassName = parameters["textClassName"] || "Class";
@@ -386,6 +394,10 @@ function Window_StatusProfile() {
     const elementEntries2 = _parseElementEntries(parameters["elementEntries2"]);
     const elementEntries3 = _parseElementEntries(parameters["elementEntries3"]);
     const elementEntries4 = _parseElementEntries(parameters["elementEntries4"]);
+
+    const elementRateLineCount = Math.max(
+        elementEntries1.length, elementEntries2.length, elementEntries3.length, elementEntries4.length
+    );
 
     /**
      * ステータスに表示するカスタムパラメータを得る。
@@ -523,9 +535,10 @@ function Window_StatusProfile() {
      * @returns {Rectangle} ヘッダ矩形領域。
      */
     Window_Status.prototype.headerRect = function() {
-        const x = 0;
-        const y = 0;
-        const w = this.innerWidth;
+        const padding = this.itemPadding();
+        const x = padding;
+        const y = padding;
+        const w = this.innerWidth - padding * 2;
         const h = this.lineHeight() + 16;
         return new Rectangle(x, y, w, h);
     };
@@ -574,9 +587,11 @@ function Window_StatusProfile() {
      * @returns {Rectangle} プロフィール描画領域。
      */
     Window_Status.prototype.block1Rect = function() {
-        const x = 0;
-        const y = this.lineHeight() + 16;
-        const w = this.innerWidth;
+        const headerRect = this.headerRect();
+        const padding = this.itemPadding();
+        const x = padding;
+        const y = headerRect.y + headerRect.height + 16;
+        const w = headerRect.width;
         const h = this.lineHeight() * 6 + 16;
         return new Rectangle(x, y, w, h);
     };
@@ -827,9 +842,10 @@ function Window_StatusProfile() {
     Window_Status.prototype.block2Rect = function() {
         const block1Rect = this.block1Rect();
         const block3Rect = this.block3Rect();
-        const x = 0;
+        const padding = this.itemPadding();
+        const x = padding;
         const y = block1Rect.y + block1Rect.height;
-        const w = this.innerWidth;
+        const w = block1Rect.width;
         const h = block3Rect.y - y;
         return new Rectangle(x, y, w, h);
     };
@@ -854,9 +870,10 @@ function Window_StatusProfile() {
      * @returns {Rectangle} 描画領域。
      */
     Window_Status.prototype.block3Rect = function() {
-        const w = this.innerWidth;
+        const padding = this.itemPadding();
+        const w = this.innerWidth - padding * 2;
         const h = (enableProfile) ? 0 : (this.lineHeight() * 2 + 16);
-        const x = 0;
+        const x = padding;
         const y = this.innerHeight - h;
         return new Rectangle(x, y, w, h);
     };
@@ -1240,9 +1257,10 @@ function Window_StatusProfile() {
      * @returns {Rectangle} ヘッダ矩形領域。
      */
     Window_StatusParams.prototype.headerRect = function() {
-        const x = 0;
-        const y = 0;
-        const w = this.innerWidth;
+        const padding = this.itemPadding();
+        const x = padding;
+        const y = padding;
+        const w = this.innerWidth - padding * 2;
         const h = this.lineHeight() + 16;
         return new Rectangle(x, y, w, h);
     };
@@ -1265,7 +1283,21 @@ function Window_StatusProfile() {
             this.drawElementRates(x3, rect.y, itemWidth, elementEntries3);
             this.drawElementRates(x4, rect.y, itemWidth, elementEntries4);
         }
-        this.drawHorzLine(rect.x, rect.y + this.lineHeight() * 5, rect.width)
+        this.drawHorzLine(rect.x, rect.y + this.lineHeight() * elementRateLineCount, rect.width)
+    };
+
+    /**
+     * ブロック1の描画領域を得る。
+     * 
+     * @returns {Rectangle} プロフィール描画領域。
+     */
+    Window_StatusParams.prototype.block1Rect = function() {
+        const headerRect = this.headerRect();
+        const x = headerRect.x;
+        const y = headerRect.y + headerRect.height;
+        const w = headerRect.width;
+        const h = this.lineHeight() * elementRateLineCount + 16;
+        return new Rectangle(x, y, w, h);
     };
 
     /**
@@ -1330,19 +1362,6 @@ function Window_StatusProfile() {
         this.changePaintOpacity(true);
     };
     /**
-     * ブロック1の描画領域を得る。
-     * 
-     * @returns {Rectangle} プロフィール描画領域。
-     */
-    Window_StatusParams.prototype.block1Rect = function() {
-        const x = 0;
-        const y = this.lineHeight() + 16;
-        const w = this.innerWidth;
-        const h = this.lineHeight() * 5 + 16;
-        return new Rectangle(x, y, w, h);
-    };
-
-    /**
      * ブロック2を描画する。
      */
     Window_StatusParams.prototype.drawBlock2 = function() {
@@ -1369,6 +1388,20 @@ function Window_StatusProfile() {
                 }
             }
         }
+    };
+
+    /**
+     * ブロック2の描画領域を得る。
+     * 
+     * @returns {Rectangle} 描画領域。
+     */
+     Window_StatusParams.prototype.block2Rect = function() {
+        const rect = this.block1Rect();
+        const x = rect.x;
+        const y = rect.y + rect.height;
+        const w = rect.width;
+        const h = this.innerHeight - y;
+        return new Rectangle(x, y, w, h);
     };
 
     /**
@@ -1423,19 +1456,6 @@ function Window_StatusProfile() {
         this.drawText(paramItem.value, x + statusLabelWidth + 16, y, valueWidth);
     };
     /**
-     * ブロック2の描画領域を得る。
-     * 
-     * @returns {Rectangle} 描画領域。
-     */
-    Window_StatusParams.prototype.block2Rect = function() {
-        const rect = this.block1Rect();
-        const x = 0;
-        const y = rect.y + rect.height;
-        const w = this.innerWidth;
-        const h = this.innerHeight - y;
-        return new Rectangle(x, y, w, h);
-    };
-    /**
      * 水平ラインを描画する。
      * 
      * @param {number} x 描画x位置
@@ -1481,9 +1501,10 @@ function Window_StatusProfile() {
      * @returns {Rectangle} ヘッダ矩形領域。
      */
     Window_StatusEquip.prototype.headerRect = function() {
-        const x = 0;
-        const y = 0;
-        const w = this.innerWidth;
+        const padding = this.itemPadding();
+        const x = padding;
+        const y = padding;
+        const w = this.innerWidth - padding * 2;
         const h = this.lineHeight() + 16;
         return new Rectangle(x, y, w, h);
     };
@@ -1494,18 +1515,35 @@ function Window_StatusProfile() {
         const lineHeight = this.lineHeight();
         const rect = this.equipRect();
 
+        const padding = this.itemPadding();
         const block1Width = Math.floor(rect.width * 0.5);
-        const itemWidth = Math.floor((rect.width - block1Width) / 2);
+        const itemWidth = Math.floor((rect.width - block1Width - padding * 2) / 2);
 
-        let x = 0;
-        this.drawEquipBlock1(x, rect.y, block1Width, lineHeight * 7);
+        const lineCount = equipWindowLineCount - 1;
+
+        let x = rect.x;
+        this.drawEquipBlock1(x, rect.y, block1Width, lineHeight * lineCount);
         x += block1Width;
-        this.drawEquipBlock2(x, rect.y, itemWidth, lineHeight * 7);
-        x += itemWidth;
-        this.drawEquipBlock3(x, rect.y, itemWidth, lineHeight * 7);
-        x += itemWidth;
+        this.drawEquipBlock2(x, rect.y, itemWidth, lineHeight * lineCount);
+        x += itemWidth + padding;
+        this.drawEquipBlock3(x, rect.y, itemWidth, lineHeight * lineCount);
+        x += itemWidth + padding;
 
-        this.drawHorzLine(rect.x, rect.y + lineHeight * 8, rect.width);
+        this.drawHorzLine(rect.x, rect.y + lineHeight * equipWindowLineCount, rect.width);
+    };
+
+    /**
+     * 装備の描画領域を得る。
+     * 
+     * @returns {Rectangle} プロフィール描画領域。
+     */
+    Window_StatusEquip.prototype.equipRect = function() {
+        const headerRect = this.headerRect();
+        const x = headerRect.x;
+        const y = headerRect.y + headerRect.height;
+        const w = headerRect.width;
+        const h = this.lineHeight() * equipWindowLineCount + 16;
+        return new Rectangle(x, y, w, h);
     };
 
     /**
@@ -1656,19 +1694,6 @@ function Window_StatusProfile() {
     };
 
     /**
-     * 装備の描画領域を得る。
-     * 
-     * @returns {Rectangle} プロフィール描画領域。
-     */
-    Window_StatusEquip.prototype.equipRect = function() {
-        const x = 0;
-        const y = this.lineHeight() + 16;
-        const w = this.innerWidth;
-        const h = this.lineHeight() * 8 + 16;
-        return new Rectangle(x, y, w, h);
-    };
-
-    /**
      * ウェポンマスタリを描画する。
      */
     Window_StatusEquip.prototype.drawWeaponMasteries = function() {
@@ -1788,9 +1813,9 @@ function Window_StatusProfile() {
      */
     Window_StatusEquip.prototype.weaponMasteryRect = function() {
         const rect = this.equipRect();
-        const x = 0;
+        const x = rect.x;
         const y = rect.y + rect.height;
-        const w = this.innerWidth;
+        const w = rect.width;
         const h = this.innerHeight - y;
         return new Rectangle(x, y, w, h);
     };
@@ -1939,9 +1964,10 @@ function Window_StatusProfile() {
      * @returns {Rectangle} ヘッダ矩形領域。
      */
     Window_StatusProfile.prototype.headerRect = function() {
-        const x = 0;
-        const y = 0;
-        const w = this.innerWidth;
+        const padding = this.itemPadding();
+        const x = padding;
+        const y = padding;
+        const w = this.innerWidth - padding * 2;
         const h = this.lineHeight() + 16;
         return new Rectangle(x, y, w, h);
     };
@@ -1962,9 +1988,10 @@ function Window_StatusProfile() {
      * @returns {Rectangle} プロフィール描画領域。
      */
     Window_StatusProfile.prototype.profileRect = function() {
-        const x = 0;
-        const y = this.lineHeight() + 16;
-        const w = this.innerWidth;
+        const headerRect = this.headerRect();
+        const x = headerRect.x;
+        const y = headerRect.y + headerRect.height + 16;
+        const w = headerRect.width;
         const h = this.innerHeight - y;
         return new Rectangle(x, y, w, h);
     };
