@@ -66,8 +66,7 @@
  *  
  * @command setFriendlyPoint
  * @text 友好度設定
- * @text 友好度取得
- * @desc 指定アクターの、指定アクターに対する友好度を設定する。
+ * @desc 指定アクターAの、指定アクターBに対する友好度を設定する。
  * 
  * @arg variableId
  * @text 友好度を格納する変数
@@ -99,6 +98,48 @@
  * @type variable
  * @default 0
  * 
+ * 
+ * @command gainFriendlyPoint
+ * @text 友好度を加減する
+ * @desc 指定アクターの、指定アクターに対する友好度を変更する。
+ * 
+ * @arg gainValue
+ * @text 加減する値
+ * @desc 加減する友好度を固定値で指定する場合の値
+ * @type number
+ * @min -100000
+ * @max -100000
+ * @default 0
+ * 
+ * @arg variableId
+ * @text 加減友好度変数ID
+ * @desc 加減する友好度を変数で値を指定する場合のID
+ * @type variable
+ * @default 0
+ * 
+ * @arg srcActorId
+ * @text 取得対象のアクターA
+ * @desc 取得対象のアクターA。
+ * @type actor
+ * @default 0
+ * 
+ * @arg srcActorVariableId
+ * @text 取得対象のアクターA(変数指定)
+ * @desc 取得対象のアクターAを変数で指定する。アクターの明示指定が無い場合のみ有効。
+ * @type variable
+ * @default 0
+ * 
+ * @arg dstActorId
+ * @text 対象のアクターB
+ * @desc 対象のアクターB。
+ * @type actor
+ * @default 0
+ * 
+ * @arg dstActorVariableId
+ * @text 対象のアクターB(変数指定)
+ * @desc 対象のアクターBを変数で指定する。アクターの明示指定が無い場合のみ有効。
+ * @type variable
+ * @default 0
  * 
  * 
  * @param paramName
@@ -160,7 +201,7 @@
  * ============================================
  * 友好度取得
  *   アクターAの、アクターBに対する友好度を、指定した変数に取得する。
- *   $gameActors.actor(srcActorId).getFriendlyPoint(dstActorId);
+ *   $gameActors.actor(srcActorId).friendlyPoint(dstActorId);
  *   スクリプトで書くなら
  * 
  * 友好度設定
@@ -195,7 +236,7 @@
     Game_Actor.FRIENDLY_POINT_MAX = Math.max(Game_Actor.FRIENDLY_POINT_MIN,
         Math.floor(Number(parameters["friendlyPointMax"] || -100)));
     Game_Actor.FRIENDLY_POINT_DEFAULT = Math.min(Game_Actor.FRIENDLY_POINT_MAX, 
-        Math.min(Game_Actor.FRIENDLY_POINT_MIN, 
+        Math.max(Game_Actor.FRIENDLY_POINT_MIN, 
             Math.floor(Number(parameters["friendlyPointDefault"] || 0))));
 
     /**
@@ -233,7 +274,7 @@
                 && (dstActorId > 0) // 対象のアクターIDは有効？
                 && (variableId > 0)) { // 格納する変数IDは有効？
             const actor = $gameActors.actor(srcActorId);
-            const fp = actor.getFriendlyPoint(dstActorId);
+            const fp = actor.friendlyPoint(dstActorId);
             $gameVariables.setValue(variableId, fp);
         }
     });
@@ -247,6 +288,21 @@
             const fp = $gameVariables.value(variableId);
             const actor = $gameActors.actor(srcActorId);
             actor.setFriendlyPoint(dstActorId, fp);
+        }
+    });
+    PluginManager.registerCommand(pluginName, "gainFriendlyPoint", args => {
+        const srcActorId = _getTargetActor(Number(args.srcActorId), Number(args.srcActorVariableId));
+        const dstActorId = _getTargetActor(Number(args.dstActorId), Number(args.dstActorVariableId));
+        const gainValue = Math.floor(Number(args.gainValue || 0));
+        const variableId = Math.floor(Number(args.variableId) || 0);
+        if ($gameActors.isActorDataExists(srcActorId) // 取得元のアクターデータがある？
+                && (dstActorId > 0)) { // 対象のアクターIDは有効？
+            const value = (variableId > 0) ? $gameVariables.value(variableId) : gainValue;
+            if (value !== 0) {
+                const actor = $gameActors.actor(srcActorId);
+                const fp = actor.friendlyPoint(dstActorId);
+                actor.setFriendlyPoint(dstActorId, fp + value);
+            }
         }
     });
     //------------------------------------------------------------------------------
@@ -312,7 +368,7 @@
             for (const setting of settings) {
                 const tokens = setting.trim().split('=');
                 if (tokens.length >= 2) {
-                    const actorId = Number(toknes[0].trim());
+                    const actorId = Number(tokens[0].trim());
                     const fp = Math.floor(Number(tokens[1].trim() || Game_Actor.FRIENDLY_POINT_DEFAULT)).clamp(
                         Game_Actor.FRIENDLY_POINT_MIN, Game_Actor.FRIENDLY_POINT_MAX);
                     if (Number.isNaN(actorId)) { // 名前指定？
