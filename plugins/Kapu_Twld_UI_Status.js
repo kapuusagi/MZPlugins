@@ -216,7 +216,7 @@
  * 
  * @param weaponMasteryIcons
  * @text ウェポンマスタリアイコン
- * @desc ウェポンマスタリーで使用するアイコン。
+ * @desc ウェポンマスタリーで使用するアイコン。武器タイプ1のアイコンが0番、武器タイプ2のアイコンが2番、．．．。
  * @type number[]
  * @default []
  * 
