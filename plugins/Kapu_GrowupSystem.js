@@ -15,6 +15,7 @@
  * @text アクターID
  * @desc 加算するアクターのID。
  * @type actor
+ * @default 0
  * 
  * @arg variableId
  * @text 変数ID
@@ -27,6 +28,12 @@
  * @desc 加算する値
  * @type number
  * @min 1
+ * 
+ * @arg gainVariableId
+ * @text 増加量変数ID
+ * @desc 増加量を変数で指定する場合
+ * @type variable
+ * @default 0
  * 
  * ■ resetGrows
  * @command resetGrows
@@ -232,11 +239,13 @@
 
     PluginManager.registerCommand(pluginName, "gainGrowPoint", args => {
         const actorId = _getActorId(args);
-        const value = Math.floor(Number(args.value) || 0);
-        if ((actorId > 0) && (value > 0)) {
+        const value = Math.floor(Number(args.value || 0));
+        const gainVariableId = Math.floor(Number(args.gainVariableId || 0));
+        const gainValue = (gainVariableId > 0) ? $gameVariables.value(gainVariableId) : value;
+        if ((actorId > 0) && (gainValue > 0)) {
             const actor = $gameActors.actor(actorId);
             if (actor) {
-                actor.gainGrowPoint(value);
+                actor.gainGrowPoint(gainValue);
             }
         }
     });
