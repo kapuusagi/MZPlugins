@@ -4,6 +4,10 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
+ * @command releaseParty
+ * @text パーティー解散
+ * 
+ * 
  * @command addActorByVariable
  * @text パーティーに変数で指定したアクターを追加
  * 
@@ -57,6 +61,18 @@
     'use strict';
     const pluginName = "Kapu_UtilityCommands";
     const parameters = PluginManager.parameters(pluginName);
+
+    /**
+     * パーティー解散
+     */
+    // Note: 匿名関数だと this に Game_Interpreter が渡らないことに注意。
+    // eslint-disable-next-line no-unused-vars
+    PluginManager.registerCommand(pluginName, "releaseParty", function(arg) {
+        while ($gameParty.members().length > 0) {
+            const actorId = $gameParty.members()[0].actorId();
+            $gameParty.removeActor(actorId);
+        }
+    });
 
     /**
      * パーティーに変数で指定したアクターを追加
