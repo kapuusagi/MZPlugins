@@ -49,7 +49,7 @@
      * !!!overwrite!!! Game_Shop.getItemEntryByItem
      */
     Game_Shop.prototype.getItemEntryByItem = function(item) {
-        const dataShop = this.shopData();
+        const dataShop = this.shop();
         let kind = 0;
         if (DataManager.isItem(item)) {
             kind = 1;
