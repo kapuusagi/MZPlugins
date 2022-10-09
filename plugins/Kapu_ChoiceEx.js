@@ -987,7 +987,9 @@
         const type = $gameMessage.choiceCancelType();
         const results = $gameMessage.choiceResults();
         const index = results.indexOf(results[type]);
-        if (this.isCancelEnabled() && (index !== type) && !this.isCommandEnabled(index)) {
+        if (this.isCancelEnabled() // キャンセルは有効？
+                && (index !== type) // キャンセルに相当するインデックスでない？
+                && ((index >= 0) && !this.isCommandEnabled(index))) { // このインデックスのコマンドは有効でない？
             this.playBuzzerSound();
         } else {
             _Window_ChoiceList_processCancel.call(this, ...arguments);
