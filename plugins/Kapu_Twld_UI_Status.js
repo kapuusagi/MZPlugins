@@ -1472,7 +1472,7 @@ function Window_StatusProfile() {
     //------------------------------------------------------------------------------
     // Window_StatusEquip
     /**
-     * Window_Status_Equipを描画する。
+     * Window_StatusEquipを描画する。
      * 
      * ステータス画面の装備表示
      */
@@ -1519,14 +1519,12 @@ function Window_StatusProfile() {
         const block1Width = Math.floor(rect.width * 0.5);
         const itemWidth = Math.floor((rect.width - block1Width - padding * 2) / 2);
 
-        const lineCount = equipWindowLineCount - 1;
-
         let x = rect.x;
-        this.drawEquipBlock1(x, rect.y, block1Width, lineHeight * lineCount);
+        this.drawEquipBlock1(x, rect.y, block1Width, lineHeight * equipWindowLineCount);
         x += block1Width;
-        this.drawEquipBlock2(x, rect.y, itemWidth, lineHeight * lineCount);
+        this.drawEquipBlock2(x, rect.y, itemWidth, lineHeight * equipWindowLineCount);
         x += itemWidth + padding;
-        this.drawEquipBlock3(x, rect.y, itemWidth, lineHeight * lineCount);
+        this.drawEquipBlock3(x, rect.y, itemWidth, lineHeight * equipWindowLineCount);
         x += itemWidth + padding;
 
         this.drawHorzLine(rect.x, rect.y + lineHeight * equipWindowLineCount, rect.width);
