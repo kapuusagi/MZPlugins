@@ -1038,7 +1038,14 @@ function Scene_TwldShop() {
         return (item && (this.price(item) <= this._money)
                 && !$gameParty.hasMaxItems(item));
     };
-
+    /**
+     * 現在の選択が選択可能かどうかを取得する。
+     * 
+     * @return {boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
+     */
+    Window_TwldShopBuy.prototype.isCurrentItemEnabled = function() {
+        return this.isEnabled(this.item());
+    };
     /**
      * 更新する。
      */
