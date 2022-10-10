@@ -67,6 +67,12 @@
  * @type string
  * @default 長距離
  * 
+ * @param enableBattlerSpritePositionChange
+ * @text 戦闘時バトラースプライト位置調整
+ * @desc 戦闘時のバトラースプライトを前衛なら上方向、後衛なら下方向に移動させるかどうか。
+ * @type boolean
+ * @default true
+ * 
  * @help 
  * Kapu_RangeDistanceのUI表現をKapu_BattleSystemに適用するためのプラグイン。
  * TwldBattleSystemに入れてもいいけど、
@@ -99,6 +105,8 @@
     const textFront = parameters["textFront"] || "Front";
     const textRear = parameters["textRear"] || "Rear";
     const textRangeDistance = parameters["textRangeDistance"] || "Range";
+    const enableBattlerSpritePositionChange = (typeof parameters["enableBattlerSpritePositionChange"] == undefined)
+            ? true : (parameters["enableBattlerSpritePositionChange"] == "true");
     //------------------------------------------------------------------------------
     // TextManager
     TextManager._rangeDistance = [];
@@ -351,40 +359,42 @@
         this._mainSprite.y = this.mainSpritePosition().y;
     };
 
-    const _Sprite_BattleHudActor_mainSpritePosition = Sprite_BattleHudActor.prototype.mainSpritePosition;
-    /**
-     * メインスプライトの位置を得る。
-     * 
-     * @returns {Point} スプライトの位置
-     */
-    Sprite_BattleHudActor.prototype.mainSpritePosition = function() {
-        let pos = _Sprite_BattleHudActor_mainSpritePosition.call(this);
-        if (this._actor && this._actor.battlePosition() !== 0) {
-            pos.y += 20;
-        } else {
-            pos.y -= 10;
-        }
-        return pos;
-    };
-
-    const _Sprite_BattleHudActor_updatePosition = Sprite_BattleHudActor.prototype.updatePosition;
-    /**
-     * 表示位置を更新する。
-     * 
-     * 毎フレーム ホーム位置＋オフセット位置に設定される。
-     */
-    Sprite_BattleHudActor.prototype.updatePosition = function() {
-        _Sprite_BattleHudActor_updatePosition.call(this);
-        if (this._actor) {
-            const targetY = this.mainSpritePosition().y;
-            const currentY = this._mainSprite.y;
-            if (currentY < targetY) {
-                this._mainSprite.y = Math.min(currentY + 3, targetY);
-            } else if (currentY > targetY) {
-                this._mainSprite.y = Math.max(currentY - 3, targetY);
+    if (enableBattlerSpritePositionChange) {
+        const _Sprite_BattleHudActor_mainSpritePosition = Sprite_BattleHudActor.prototype.mainSpritePosition;
+        /**
+         * メインスプライトの位置を得る。
+         * 
+         * @returns {Point} スプライトの位置
+         */
+        Sprite_BattleHudActor.prototype.mainSpritePosition = function() {
+            let pos = _Sprite_BattleHudActor_mainSpritePosition.call(this);
+            if (this._actor && this._actor.battlePosition() !== 0) {
+                pos.y += 20;
+            } else {
+                pos.y -= 10;
             }
-        }
-    };
+            return pos;
+        };
+
+        const _Sprite_BattleHudActor_updatePosition = Sprite_BattleHudActor.prototype.updatePosition;
+        /**
+         * 表示位置を更新する。
+         * 
+         * 毎フレーム ホーム位置＋オフセット位置に設定される。
+         */
+        Sprite_BattleHudActor.prototype.updatePosition = function() {
+            _Sprite_BattleHudActor_updatePosition.call(this);
+            if (this._actor) {
+                const targetY = this.mainSpritePosition().y;
+                const currentY = this._mainSprite.y;
+                if (currentY < targetY) {
+                    this._mainSprite.y = Math.min(currentY + 3, targetY);
+                } else if (currentY > targetY) {
+                    this._mainSprite.y = Math.max(currentY - 3, targetY);
+                }
+            }
+        };
+    }
 
     //------------------------------------------------------------------------------
     // Spriteset_Battle
