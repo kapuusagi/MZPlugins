@@ -26,6 +26,16 @@
  * @min -5.00
  * @max 0.00
  * 
+ * @param relativeDiffRateCoeff
+ * @text 相対補正値係数
+ * @desc 相対補正値を計算する際の係数。1でそのまま、0.5で半分、2.0で2倍に補正量が変わる。
+ * @type number
+ * @default 1.00
+ * @decimals 2
+ * @min 0.00
+ * @max 2.00
+ * 
+ * 
  * @param debug
  * @text デバッグモード
  * @desc trueにするとデバッグ出力をする。
@@ -64,6 +74,7 @@
     const relativeDiffRateMax = (Number(parameters["relativeDiffRateMax"]) || 1.00).clamp(0, 5);
     const relativeDiffRateMin = (Number(parameters["relativeDiffRateMin"]) || -1.00).clamp(-5, 0);
     const isDebug = (parameters["debug"] === undefined) ? false : (parameters["debug"] === "true");
+    const relativeDiffRateCoeff = (Number(parameters["relativeDiffRateCoeff"]) || 1.00).clamp(0.00, 2.00);
     /**
      * デバッグ表示用メソッド
      * 
@@ -188,8 +199,10 @@
      * (ターゲットの値x2) < 使用者の値)
      * だと-1.0になる。
      * 
-     * 例）使用者 25 ターゲット35 -> 補正値 (35 - 25) / 25 = 0.4
-     *     使用者 82 ターゲット92 -> 補正値 (92 - 82) / 82 = 0.12
+     * 例）
+     *     使用者 10 ターゲット20 -> 補正値 (20 - 10) / 10 = 1.0 (100%相当) 
+     *     使用者 25 ターゲット35 -> 補正値 (35 - 25) / 25 = 0.4 (40%相当)
+     *     使用者 82 ターゲット92 -> 補正値 (92 - 82) / 82 = 0.12 (12%相当)
      * 
      * 小さい側の値が大きくなるほど、差分によるレートの差が出にくくなるようにした。
      * あと使用者より2倍速い相手に基本的に当てられないでしょ？という考えに基づく。
@@ -202,7 +215,7 @@
     Game_Action.prototype.relativeDiffRate = function(targetVal, subjectVal) {
         const diff = subjectVal - targetVal;
         const min = Math.max(1, Math.min(targetVal, subjectVal)); // 1以上の値になるように。ゼロ除算防止
-        return (diff / min).clamp(relativeDiffRateMin, relativeDiffRateMax);
+        return (diff / min * relativeDiffRateCoeff).clamp(relativeDiffRateMin, relativeDiffRateMax);
     };
 
 
