@@ -7,6 +7,8 @@
  * @orderAfter Kapu_Utility
  * @base Kapu_BattlerGender
  * @orderAfter Kapu_BattlerGender
+ * @base Kapu_PassiveStates
+ * @orderAfter Kapu_PassiveStates
  * 
  * 
  * @help 
