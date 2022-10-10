@@ -56,7 +56,7 @@
      */
     DataManager.resetIndependentWeaponBoost = function(weapon) {
         _DataManager_resetIndependentWeaponBoost.call(this, weapon);
-        const baseWeapon = DataManager.getBaseItem(item);
+        const baseWeapon = DataManager.getBaseItem(weapon);
         if (baseWeapon) {
             weapon.weight = baseWeapon.weight;
         }
@@ -70,7 +70,7 @@
      */
     DataManager.resetIndependentArmorBoost = function(armor) {
         _DataManager_resetIndependentArmorBoost.call(this, armor);
-        const baseArmor = DataManager.getBaseItem(item);
+        const baseArmor = DataManager.getBaseItem(armor);
         if (baseArmor) {
             armor.weight = baseArmor.weight;
         }
