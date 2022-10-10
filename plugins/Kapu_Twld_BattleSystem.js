@@ -2551,10 +2551,11 @@ function Sprite_BattleHudPicture() {
      * 使用時表示アニメーションIDを得る。
      * 
      * @param {object} item DataItem/DataSkill
+     * @returns {number} アニメーションID(0はアニメーションなし)
      */
     Window_BattleLog.prototype.useAnimationId = function(item) {
         if (item.meta.useAnimationId !== undefined) {
-            return Number(item.meta.useAnimationId);
+            return Number(item.meta.useAnimationId) || 0;
         } else {
             if (DataManager.isSkill(item)) {
                 return defaultUseSkillAnimationIds[item.stypeId] || 0;
