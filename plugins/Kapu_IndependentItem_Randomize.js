@@ -9,8 +9,8 @@
  * @param isShopRandomize
  * @text ショップ購入品性能ランダム化
  * @desc ショップでの購入品に対して、性能をランダム化するかどうかを指定します。
- * @default false
  * @type boolean
+ * @default false
  * 
  * 
  * ■ setRandomize
@@ -53,9 +53,9 @@
  *        ばらつき加算結果は0以下にしない。
  * 武器/防具
  *     <varianceParam:value#>
- *        0～valueの範囲で、全ての0でないパラメータに加算させる。
+ *        -value#～valueの範囲で、全ての0でないパラメータに加算させる。
  *     <varianceParam:N=value#,...>
- *        0～valueの範囲で指定パラメータを加算する。Nはパラメータ名。
+ *        -value#～valueの範囲で指定パラメータを加算する。Nはパラメータ名。
  *        Nに指定可能なものは次の通り。
  *        "MaxHP","MaxMP","ATK","DEF","MATK","MDEF","AGI","LUK"
  *        
