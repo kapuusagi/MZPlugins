@@ -1621,8 +1621,11 @@ function Window_StatusProfile() {
      * @param {number} width 幅
      */
     Window_StatusEquip.prototype.drawWeight = function(label, value, tolerance, x, y, width) {
-        const labelWidth = Math.round(width * 0.4);
-        const valueWidth = width - labelWidth - 4;
+        const labelWidth = Math.round(width * 0.3);
+        const spacing = 8;
+        const slashWidth = this.textWidth("/");
+        const valueWidth = (width - labelWidth - slashWidth - spacing * 3) / 2;
+
         this.resetFontSettings();
         this.changeTextColor(ColorManager.systemColor());
         this.drawText(label, x, y, labelWidth);
@@ -1630,8 +1633,13 @@ function Window_StatusProfile() {
         if (value > tolerance) {
             this.changeTextColor(colorOverweight);
         }
-        const labelX = x + labelWidth + 4;
-        this.drawText(value, labelX, y, valueWidth, "right");
+        const currentX = x + labelWidth + spacing;
+        this.drawText(value, currentX, y, valueWidth, "right");
+        this.resetFontSettings();
+        const slashX = currentX + valueWidth + spacing;
+        this.drawText("/", slashX, y, slashWidth);
+        const toleranceX = slashX + slashWidth + spacing;
+        this.drawText(tolerance, toleranceX, y, valueWidth, "right");
     };
 
     /**
