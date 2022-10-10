@@ -464,7 +464,7 @@
      * @returns {boolean} 装備している場合にはtrue, それ以外はfalse.
      */
     Game_Actor.prototype.isWtypeEquipped = function(wtypeId) {
-        let isEquipped = _Game_Actor_isWtypeEquipped.call(wTypeId);
+        let isEquipped = _Game_Actor_isWtypeEquipped.call(this, wtypeId);
         if (!isEquipped && (wtypeId === bareHandsWmTypeId) && this.hasNoWeapons()) {
             // 素手武器タイプの場合、武器未装備の場合でも使用可能とする。
             isEquipped = true;
