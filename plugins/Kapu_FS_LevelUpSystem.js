@@ -133,6 +133,7 @@
             this._paramPlus[paramId] = initialParams[paramId];
         }
         this.refresh();
+        this.recoverAll();
     };
     const _Game_Actor_changeClass = Game_Actor.prototype.changeClass;
     /**
