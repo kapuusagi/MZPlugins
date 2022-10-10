@@ -780,9 +780,11 @@ function Window_EquipItemName() {
         y += lineHeight;
         this.drawBasicParam(x, y, itemWidth, TextManager.basicParam(4), actor.basicParam(4), 
                 ((tempActor) ? tempActor.basicParam(4) : undefined));
+        // AGI
         x += itemWidth + spacing;
-        this.drawBasicParam(x, y, itemWidth, TextManager.basicParam(5), actor.basicParam(5), 
-                ((tempActor) ? tempActor.basicParam(5) : undefined));
+        this.drawBasicParam(x, y, itemWidth, TextManager.basicParam(5), actor.param(6), 
+                ((tempActor) ? tempActor.param(6) : undefined));
+        // LUK
         x += itemWidth + spacing;
         this.drawBasicParam(x, y, itemWidth, TextManager.param(7), actor.param(7), 
                 ((tempActor) ? tempActor.param(7) : undefined));
