@@ -14,7 +14,6 @@
  * @base Kapu_ChoiceActor
  * @orderAfter Kapu_ChoiceActor
  * 
- * 
  * @command gainFriendlyPoint
  * @text 友好度増減
  * @desc 指定アクターの単純に友好度を増減する。
@@ -333,6 +332,30 @@
         const initialTp = Math.max(0, Math.floor(fp * friendlyPointTpRate));
         this.setTp(Math.randomInt(initialTp));
     };
+    /**
+     * levelに対応する経験値を得る。
+     * 
+     * @param {number} level レベル
+     * @returns {number} 経験値
+     * !!!overwrite!!! Game_Actor.expForLevel()
+     *     EXP計算式を変更するため、オーバーライドする。
+     */
+    Game_Actor.prototype.expForLevel = function(level) {
+        const c = this.currentClass();
+        const basis = c.expParams[0];
+        const extra = c.expParams[1];
+        const acc_a = c.expParams[2];
+        const acc_b = c.expParams[3];
+
+        const basisRate = (1 + (basis - 30) / 40) * 16;
+        const baseRate = 2.75;
+        const accARate = baseRate + (acc_a - 30) / 400.0;
+        const accBRate = 2.0 + (acc_b - 30) / 80.0;
+
+        return Math.floor(
+            Math.pow((level - 1), accARate) * basisRate + extra * Math.pow((level - 1), accBRate)
+        );
+    };    
 
     const _Game_Actor_paramPlus = Game_Actor.prototype.paramPlus;
     /**
@@ -346,37 +369,79 @@
         switch (paramId) {
             case 0: // MaxHP
                 {
-                    return value + this.vit * 3 + (this.vit >> 3) * 10;
+                    const vit = Math.max(0, this.vit - 20);
+                    return value + vit * 3 + (vit >> 3) * 10;
                 }
             case 1: // MaxMP
                 {
-                    const intmen = this.int + this.men;
+                    const int = Math.max(0, this.int - 20);
+                    const men = Math.max(0, this.men - 20);
+                    const intmen = int + men;
                     return value + (intmen >> 2) + (intmen >> 3) * 4;
                 }
             case 2: // ATK
                 {
-                    return value + this.str + (this.str >> 3) * 5;
+                    const str = Math.max(0, this.str - 20);
+                    return value + str + (str >> 3) * 5;
                 }
             case 3: // DEF
                 {
-                    return value + this.vit + (this.vit >> 3) * 3;
+                    const vit = Math.max(0, this.vit - 20);
+                    return value + vit + (vit >> 3) * 3;
                 }
             case 4: // MAT
                 {
-                    return value + this.int + (this.int >> 3) * 5;
+                    const int = Math.max(0, this.int - 20);
+                    return value + int + (int >> 3) * 5;
                 }
             case 5: // MDF
                 {
-                    return value + this.men + (this.men >> 3) * 3;
+                    const men = Math.max(0, this.men - 20);
+                    return value + men + (men >> 3) * 3;
                 }
             case 6: // AGI
                 return value;
             case 7: // LUK
                 return value; // LUKを返す。
+            default:
+                return value;
         }
-        return 0;
     };
 
+    /**
+     * 育成コストを計算する。
+     * 
+     * @param {number} currentValue 現在値
+     * @returns {number} 育成コスト
+     * !!!overwrite!!! Game_Actor.calcGrowupBasicParamCost()
+     *     育成コストを変更するため、オーバーライドする。
+     */
+    Game_Actor.prototype.calcGrowupBasicParamCost = function(currentValue) {
+        return Math.max(1, currentValue + 1);
+    };
+
+
+    /**
+     * 武器装備可能重量を得る。
+     * 
+     * @returns {number} 装備可能重量
+     * !!!overwrite!!! Game_Actor.weaponWeightTolerance()
+     *     武器装備可能重量計算式を変更するため、オーバーライドする。
+     */
+    Game_Actor.prototype.weaponWeightTolerance = function() {
+        return this.str;
+    };
+
+    /**
+     * 防具装備可能重量を得る。
+     * 
+     * @returns {number} 装備可能重量
+     * !!!overwrite!!! Game_Actor.armorWeightTolerance()
+     *     防具装備可能重量計算式を変更するため、オーバーライドする。
+     */
+    Game_Actor.prototype.armorWeightTolerance = function() {
+        return this.vit;
+    };    
     //------------------------------------------------------------------------------
     // BattleManager
     const _BattleManager_endBattle = BattleManager.endBattle;
