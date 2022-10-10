@@ -41,6 +41,11 @@
  * @type actor[]
  * @default []
  * 
+ * @arg includeEval
+ * @text 選択対象とするアクターの評価式。空欄で条件なし。aにアクターが入る。trueを返すと含む。
+ * @type string
+ * @default 
+ * 
  * @arg isCancelable
  * @text キャンセル許可
  * @desc 選択の際、キャンセル操作を許可するかどうか。
@@ -210,8 +215,9 @@ function Window_ChoiceActorList() {
             console.error(e);
         }
         const isCancelable = (typeof args.isCancelable == "undefined") ? true : args.isCancelable == "true";
+        const includeEval = args.includeEval || "";
         const displayInformation = args.displayInformation || "default";
-        interpreter.setupChoiceActors([ variableId, choiceActorType, actors, exclusionActors, isCancelable, displayInformation ]);
+        interpreter.setupChoiceActors([ variableId, choiceActorType, actors, exclusionActors, isCancelable, displayInformation, includeEval ]);
         if ($gameMessage.isChoiceActor()) {
             interpreter.setWaitMode("message");
         }
@@ -787,12 +793,13 @@ function Window_ChoiceActorList() {
      * params[3] : {Array<number>} 除外アクターID配列
      * params[4] : {boolean} キャンセル許可/禁止
      * params[5] : {string} 表示情報種類
+     * params[6] : {string} 含むかどうか判定する評価式(null可)
      * 
      * @param {Array<object>} params パラメータ
      */
     Game_Interpreter.prototype.setupChoiceActors = function(params) {
         const variableId = params[0];
-        const actors = this.makeCandidateActors(params[1], params[2], params[3]);
+        const actors = this.makeCandidateActors(params[1], params[2], params[3], params[6]);
         if (actors.length > 0) {
             const isCancelable = params[4];
             const informationType = params[5];
@@ -822,21 +829,46 @@ function Window_ChoiceActorList() {
     };
 
     /**
+     * メンバーに含むかどうかを判定する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {string} includeEval 含むかどうかの評価式
+     * @returns 
+     */
+    const _evalIncludes = function(actor, includeEval) {
+        if (includeEval) { // 評価式は空で無い？
+            try {
+                // eslint-disable-next-line no-unused-vars
+                const a = actor;
+                return eval(includeEval) ? true : false;
+            }
+            catch {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    };
+
+    /**
      * 選択候補のアクターIDリストを作る
      * 
      * @param {number} choiceActorType 選択タイプ(CHOICEACTOR_FROM_x)
      * @param {number} actors アクターリスト(CHOICEACTOR_FROM_CANDIDATES時のみ有効)
      * @param {number} exclusionActors 除外アクターリスト 
+     * @param {string} includeEval 含むかどうかの判定式(nullの場合は常に含む)
      * @returns {Array<number>} アクターリスト
      */
-    Game_Interpreter.prototype.makeCandidateActors = function(choiceActorType, actors, exclusionActors) {
+    Game_Interpreter.prototype.makeCandidateActors = function(choiceActorType, actors, exclusionActors, includeEval) {
         const canditates = [];
         switch (choiceActorType) {
             case CHOICEACTOR_FROM_CHOICABLE:
                 for (let actorId = 1; actorId < $dataActors.length; actorId++) {
                     if ($gameActors.isActorDataExists(actorId)) {
                         const actor = $gameActors.actor(actorId);
-                        if (actor.choicableActor() && _isCandidate(actorId, exclusionActors)) {
+                        if (actor.choicableActor() 
+                                && _isCandidate(actorId, exclusionActors)
+                                && _evalIncludes(actor, includeEval)) {
                             canditates.push(actorId);
                         }
                     }
@@ -847,7 +879,9 @@ function Window_ChoiceActorList() {
                     if ($gameActors.isActorDataExists(actorId)
                             && !$gameParty.allMembers().some((actor) => actor.actorId() == actorId)) {
                         const actor = $gameActors.actor(actorId);
-                        if (actor.choicableActor() && _isCandidate(actorId, exclusionActors)) {
+                        if (actor.choicableActor()
+                                && _isCandidate(actorId, exclusionActors)
+                                && _evalIncludes(actor, includeEval)) {
                             canditates.push(actorId);
                         }
                     }
@@ -856,14 +890,18 @@ function Window_ChoiceActorList() {
             case CHOICEACTOR_FROM_CANDIDATES:
                 for (let actorId of actors) {
                     if (actorId > 0) {
-                        canditates.push(actorId);
+                        const actor = $gameActors.actor(actorId);
+                        if (_evalIncludes(actor, includeEval)) {
+                            canditates.push(actorId);
+                        }
                     }
                 }
                 break;
             case CHOICEACTOR_FORM_BATTLEMEMBERS:
                 for (const actor of $gameParty.battleMembers()) {
                     const actorId = actor.actorId();
-                    if (_isCandidate(actorId, exclusionActors)) {
+                    if (_isCandidate(actorId, exclusionActors)
+                            && _evalIncludes(actor, includeEval)) {
                         canditates.push(actorId);
                     }
                 }
@@ -874,7 +912,8 @@ function Window_ChoiceActorList() {
                     for (const actor of $gameParty.allMembers()) {
                         const actorId = actor.actorId();
                         if (!battleMembers.includes(actor)
-                                && _isCandidate(actorId, exclusionActors)) {
+                                && _isCandidate(actorId, exclusionActors)
+                                && _evalIncludes(actor, includeEval)) {
                             canditates.push(actorId);
                         }
                     }
@@ -884,7 +923,8 @@ function Window_ChoiceActorList() {
             default:
                 for (const actor of $gameParty.allMembers()) {
                     const actorId = actor.actorId();
-                    if (_isCandidate(actorId, exclusionActors)) {
+                    if (_isCandidate(actorId, exclusionActors)
+                            && _evalIncludes(actor, includeEval)) {
                         canditates.push(actorId);
                     }
                 }
