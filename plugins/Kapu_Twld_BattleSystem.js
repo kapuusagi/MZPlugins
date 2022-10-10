@@ -197,7 +197,7 @@
  * 
  * @param pictureYOffset
  * @text Yオフセット
- * @desc アクターHUDに表示するBattlePicture上端からのオフセット。
+ * @desc アクターHUDに表示するBattlePicture上端からのオフセット。BattlePictureのうち、このオフセット分だけ下の位置から表示される。
  * @type number
  * @default 0
  * @parent useBattlePicture
@@ -207,6 +207,15 @@
  * @desc アクターHUDに表示するBattlePictureの表示する高さ。
  * @type number
  * @default 400
+ * @parent useBattlePicture
+ * 
+ * @param pictureDisplayYOffset
+ * @text Y表示位置調整
+ * @desc アクターHUDに表示するBattlePictureのY表示位置調整。＋で下に移動、ーで上に移動
+ * @type number
+ * @default 0
+ * @min -4096
+ * @max 4096
  * @parent useBattlePicture
  * 
  * @param pictureZoom
@@ -403,6 +412,7 @@ function Sprite_BattleHudPicture() {
             ? false : (parameters["useBattlePicture"] === "true");
     const pictureYOffset = Number(parameters["pictureYOffset"]) || 0;
     const pictureDisplayHeight = Number(parameters["pictureDisplayHeight"]) || 400;
+    const pictureDisplayYOffset = Number(parameters["pictureDisplayYOffset"]) || 0;
     const pictureZoom = Number(parameters["pictureZoom"]) || 1;
     const pictureMethod = parameters["pictureMethod"] || "battlePicture";
     const enableInputtingZoom = (parameters["enableInputtingZoom"] === undefined)
@@ -2000,7 +2010,7 @@ function Sprite_BattleHudPicture() {
      */
     Sprite_BattleHudActor.prototype.mainSpritePosition = function() {
         const x = 0;
-        let y = -this.statusAreaHeight();
+        let y = -this.statusAreaHeight() + pictureDisplayYOffset;
 
         if (useBattlePicture && this._mainSprite.bitmap) {
             const displayHeight = pictureDisplayHeight * pictureZoom;
