@@ -344,6 +344,20 @@ if (line.match(notePattern)) {
 ### 既存のグローバルデータにメンバを新規追加する場合
 
 既存のデータ$gameなんちゃらは、メンバを追加すれば勝手に保存される（はず）
+既存のデータで、セーブファイル毎に呼び出されるものは以下の通り。
+
+|グローバルシンボル|クラス|補足|
+|---|---|---|
+|$gameSystem|Game_System|システムデータ|
+|$gameScreen|Game_Screen|カラートーンや、ピクチャをどういう状態で表示させているかといった情報|
+|$gameTimer|Game_Timer|タイマー|
+|$gameSwitches|Game_Switches|スイッチデータ|
+|$gameVariables|Game_Variables|変数データ|
+|$gameSelfSwitches|Game_SelfSwitches|セルフスイッチデータ|
+|$gameActors|Game_Actors|アクターデータ。|
+|$gameParty|Game_Party|パーティーデータ。構成するメンバーID、所持金、所持アイテムデータなど|
+|$gameMap|Game_Map|現在いるマップのデータ。イベントの位置や一時消去状態など。|
+|$gamePlayer|Game_Player|プレイヤーのマップ上の位置やフォロワーの状態など。|
 
 ### 新規にグローバルデータを追加する場合。
 
