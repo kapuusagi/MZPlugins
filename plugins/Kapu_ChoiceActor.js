@@ -4,6 +4,49 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
+ * @command getChoisableActorCount
+ * @text 選択候補アクター数取得
+ * @desc 条件指定したときに、選択可能なアクター数を取得します。選択可能かどうか、事前に分岐させたい場合に使用します。
+ * 
+ * @arg choiceActorType
+ * @type select
+ * @default 1
+ * @option パーティーメンバー(デフォルト)
+ * @value 1
+ * @option パーティー戦闘参加メンバー
+ * @value 2
+ * @option パーティー控えメンバー
+ * @value 3
+ * @option 選択可能フラグがセットされた、パーティーにいないメンバー
+ * @value 7
+ * @option 選択可能フラグがセットされた、全てのメンバー
+ * @value 8
+ * @option 特定のメンバー
+ * @value 99
+ * 
+ * @arg variableId
+ * @text 候補数を格納する変数ID
+ * @desc 候補数を格納する変数ID
+ * @type variable
+ * 
+ * @arg actors
+ * @text 選択対象アクター
+ * @desc 選択対象として、特定のメンバーを選択したとき、候補となるメンバー
+ * @type actor[]
+ * @default []
+ * 
+ * @arg exclusionActors
+ * @text 選択対象から外すアクター
+ * @desc 選択対象から外すメンバーとして、特定のメンバーを選択したい場合に使用する
+ * @type actor[]
+ * @default []
+ * 
+ * @arg includeEval
+ * @text 選択対象とするアクターの評価式。空欄で条件なし。aにアクターが入る。trueを返すと含む。
+ * @type string
+ * @default 
+ * 
+ * 
  * @command choiceActor
  * @text アクター選択
  * @desc アクター選択を行います。選択時はアクターID、未選択時は指定変数に0が格納されます。選択対象アクターがいない場合も0が格納されます。
@@ -192,6 +235,35 @@ function Window_ChoiceActorList() {
     const CHOICEACTOR_FROM_CANDIDATES = 99;
 
     /**
+     * 選択可能アクター数取得
+     */
+    PluginManager.registerCommand(pluginName, "getChoisableActorCount", function(args) {
+        const interpreter = this;
+
+        const variableId = Number(args.variableId) || 0;
+        const choiceActorType = Number(args.choiceActorType) || CHOICEACTOR_FROM_PARTY;
+        let actors = [];
+        try {
+            actors = JSON.parse(args.actors).map(token => Number(token) || 0);
+        }
+        catch (e) {
+            console.error(e);
+        }
+        let exclusionActors = [];
+        try {
+            exclusionActors = JSON.parse(args.exclusionActors).map(token => Number(token) || 0);
+        }
+        catch (e) {
+            console.error(e);
+        }
+        const includeEval = args.includeEval || "";
+        if (variableId > 0) {
+            const choisableActors = interpreter.makeCandidateActors(choiceActorType, actors, exclusionActors, includeEval);
+            $gameVariables.setValue(variableId, choisableActors.length);
+        }
+    });
+
+    /**
      * アクター選択
      */
     // Note: 匿名関数だと this に Game_Interpreter が渡らないことに注意。
@@ -199,7 +271,7 @@ function Window_ChoiceActorList() {
         const interpreter = this;
 
         const variableId = Number(args.variableId) || 0;
-        const choiceActorType = Number(args.choiceActorType) || 1;
+        const choiceActorType = Number(args.choiceActorType) || CHOICEACTOR_FROM_PARTY;
         let actors = [];
         try {
             actors = JSON.parse(args.actors).map(token => Number(token) || 0);
