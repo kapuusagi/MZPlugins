@@ -227,12 +227,12 @@ function Window_ChoiceActorList() {
     const windowWidth = Number(parameters["windowWidth"]) || 0;
     const windowHeight = Number(parameters["windowHeight"]) || 0;
 
-    const CHOICEACTOR_FROM_PARTY = 1;
-    const CHOICEACTOR_FORM_BATTLEMEMBERS = 2;
-    const CHOICEACTOR_FROM_NOTBATTLEMEMBERS = 3;
-    const CHOICEACTOR_FROM_CHOICABLE_WITHOUT_PARTY = 7;
-    const CHOICEACTOR_FROM_CHOICABLE = 8;
-    const CHOICEACTOR_FROM_CANDIDATES = 99;
+    Game_Interpreter.CHOICEACTOR_FROM_PARTY = 1;
+    Game_Interpreter.CHOICEACTOR_FORM_BATTLEMEMBERS = 2;
+    Game_Interpreter.CHOICEACTOR_FROM_NOTBATTLEMEMBERS = 3;
+    Game_Interpreter.CHOICEACTOR_FROM_CHOICABLE_WITHOUT_PARTY = 7;
+    Game_Interpreter.CHOICEACTOR_FROM_CHOICABLE = 8;
+    Game_Interpreter.CHOICEACTOR_FROM_CANDIDATES = 99;
 
     /**
      * 選択可能アクター数取得
@@ -241,7 +241,7 @@ function Window_ChoiceActorList() {
         const interpreter = this;
 
         const variableId = Number(args.variableId) || 0;
-        const choiceActorType = Number(args.choiceActorType) || CHOICEACTOR_FROM_PARTY;
+        const choiceActorType = Number(args.choiceActorType) || Game_Interpreter.CHOICEACTOR_FROM_PARTY;
         let actors = [];
         try {
             actors = JSON.parse(args.actors).map(token => Number(token) || 0);
@@ -271,7 +271,7 @@ function Window_ChoiceActorList() {
         const interpreter = this;
 
         const variableId = Number(args.variableId) || 0;
-        const choiceActorType = Number(args.choiceActorType) || CHOICEACTOR_FROM_PARTY;
+        const choiceActorType = Number(args.choiceActorType) || Game_Interpreter.CHOICEACTOR_FROM_PARTY;
         let actors = [];
         try {
             actors = JSON.parse(args.actors).map(token => Number(token) || 0);
@@ -860,7 +860,7 @@ function Window_ChoiceActorList() {
      * アクター選択をセットアップする。
      * 
      * params[0] : {number} 結果を格納する変数ID
-     * params[1] : {number} 選択タイプ(CHOICEACTOR_FROM_x)
+     * params[1] : {number} 選択タイプ(Game_Interpreter.CHOICEACTOR_FROM_x)
      * params[2] : {Array<number>} 選択候補アクターID配列
      * params[3] : {Array<number>} 除外アクターID配列
      * params[4] : {boolean} キャンセル許可/禁止
@@ -925,8 +925,8 @@ function Window_ChoiceActorList() {
     /**
      * 選択候補のアクターIDリストを作る
      * 
-     * @param {number} choiceActorType 選択タイプ(CHOICEACTOR_FROM_x)
-     * @param {number} actors アクターリスト(CHOICEACTOR_FROM_CANDIDATES時のみ有効)
+     * @param {number} choiceActorType 選択タイプ(Game_Interpreter.CHOICEACTOR_FROM_x)
+     * @param {number} actors アクターリスト(Game_Interpreter.CHOICEACTOR_FROM_CANDIDATES時のみ有効)
      * @param {number} exclusionActors 除外アクターリスト 
      * @param {string} includeEval 含むかどうかの判定式(nullの場合は常に含む)
      * @returns {Array<number>} アクターリスト
@@ -934,7 +934,7 @@ function Window_ChoiceActorList() {
     Game_Interpreter.prototype.makeCandidateActors = function(choiceActorType, actors, exclusionActors, includeEval) {
         const canditates = [];
         switch (choiceActorType) {
-            case CHOICEACTOR_FROM_CHOICABLE:
+            case Game_Interpreter.CHOICEACTOR_FROM_CHOICABLE:
                 for (let actorId = 1; actorId < $dataActors.length; actorId++) {
                     if ($gameActors.isActorDataExists(actorId)) {
                         const actor = $gameActors.actor(actorId);
@@ -946,7 +946,7 @@ function Window_ChoiceActorList() {
                     }
                 }
                 break;
-            case CHOICEACTOR_FROM_CHOICABLE_WITHOUT_PARTY:
+            case Game_Interpreter.CHOICEACTOR_FROM_CHOICABLE_WITHOUT_PARTY:
                 for (let actorId = 1; actorId < $dataActors.length; actorId++) {
                     if ($gameActors.isActorDataExists(actorId)
                             && !$gameParty.allMembers().some((actor) => actor.actorId() == actorId)) {
@@ -959,7 +959,7 @@ function Window_ChoiceActorList() {
                     }
                 }
                 break;
-            case CHOICEACTOR_FROM_CANDIDATES:
+            case Game_Interpreter.CHOICEACTOR_FROM_CANDIDATES:
                 for (let actorId of actors) {
                     if (actorId > 0) {
                         const actor = $gameActors.actor(actorId);
@@ -969,7 +969,7 @@ function Window_ChoiceActorList() {
                     }
                 }
                 break;
-            case CHOICEACTOR_FORM_BATTLEMEMBERS:
+            case Game_Interpreter.CHOICEACTOR_FORM_BATTLEMEMBERS:
                 for (const actor of $gameParty.battleMembers()) {
                     const actorId = actor.actorId();
                     if (_isCandidate(actorId, exclusionActors)
@@ -978,7 +978,7 @@ function Window_ChoiceActorList() {
                     }
                 }
                 break;
-            case CHOICEACTOR_FROM_NOTBATTLEMEMBERS:
+            case Game_Interpreter.CHOICEACTOR_FROM_NOTBATTLEMEMBERS:
                 {
                     const battleMembers = $gameParty.battleMembers();
                     for (const actor of $gameParty.allMembers()) {
@@ -991,7 +991,7 @@ function Window_ChoiceActorList() {
                     }
                 }
                 break;
-            case CHOICEACTOR_FROM_PARTY:
+            case Game_Interpreter.CHOICEACTOR_FROM_PARTY:
             default:
                 for (const actor of $gameParty.allMembers()) {
                     const actorId = actor.actorId();
