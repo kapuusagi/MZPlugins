@@ -1887,7 +1887,11 @@ $gameParty
 |5|パーティーレベル条件|レベル|-|パーティーメンバーの最大レベルが指定値以上のとき、選択候補になる。|
 |6|スイッチ条件|スイッチID|-|指定スイッチがONのとき、選択候補になる。|
 
+# イベントのページ適用判定は？
 
+__Game_Event.meetsConditions(page : DataPage)__ が適用判定。
+__Game_Event.refresh()__ がコールされたとき、 __Game_Event.findProperPageIndex()__ にて一番最後のページから順にmeetsConditionsがコールされ、最初にtrueを返したページ(結果的に条件を満たす最後のページ)が表示される。
+拡張するならこれをフックする。
 
 
 
