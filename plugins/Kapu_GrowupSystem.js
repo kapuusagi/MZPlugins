@@ -27,7 +27,7 @@
  * @text 増加量
  * @desc 加算する値
  * @type number
- * @min 1
+ * @min 0
  * 
  * @arg gainVariableId
  * @text 増加量変数ID
