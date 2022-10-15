@@ -18,50 +18,85 @@
  * @text 友好度増減
  * @desc 指定アクターの単純に友好度を増減する。
  * 
- * @param actorId
+ * @arg actorId
  * @text アクター
- * @desc 対象のアクター
+ * @desc 対象のアクター。未指定時はパーティーメンバー全員の友好度を上げる。
  * @type actor
  * @default 0
  * 
- * @param value
+ * @arg value
  * @text 値
  * @desc 値
  * @type number
  * @default 0
- * @min 10000
+ * @min -10000
  * @max 10000
+ * 
+ * @arg variableId
+ * @text 値変数ID(変数で指定する場合)
+ * @desc 値変数ID(変数で指定する場合)。変数指定が優先される。
+ * @type variable
+ * @default 0
+ * 
  * 
  * @command gainFriendlyPointWithoutActor
  * @text 指定アクター以外の友好度を増減
  * @desc 指定アクターの友好度を上げ、それ以外にデータの存在するアクターの友好度を下げる。
  * 
- * @param actorId
+ * @arg actorId
  * @text アクター
  * @desc 対象のアクター
  * @type actor
  * @default 0
  * 
- * @param value
+ * @arg value
  * @text 値
  * @desc 値
  * @type number
  * @default 0
- * @min 10000
+ * @min -10000
  * @max 10000
+ * 
+ * @arg variableId
+ * @text 値変数ID(変数で指定する場合)
+ * @desc 値変数ID(変数で指定する場合)。変数指定が優先される。
+ * @type variable
+ * @default 0
+ * 
  * 
  * @command gainFriendlyPointAll
  * @text 全友好度増減
  * @desc 存在するアクターの友好度を増減する。
  * 
- * @param value
+ * @arg value
  * @text 値
  * @desc 値
  * @type number
  * @default 0
- * @min 10000
+ * @min -10000
  * @max 10000
  * 
+ * @arg variableId
+ * @text 値変数ID(変数で指定する場合)
+ * @desc 値変数ID(変数で指定する場合)。変数指定が優先される。
+ * @type variable
+ * @default 0
+ * 
+ * @command changeMainActor
+ * @text 主人公変更
+ * @desc 友好度上昇・下降の対象になるメインアクターIDを変更します。
+ * 
+ * @arg actorId
+ * @text アクターID
+ * @desc 主人公に割り当てるアクターID
+ * @type actor
+ * @default 1
+ * 
+ * @arg variableId
+ * @text 変数ID
+ * @desc 主人公に割り当てるアクターを指定する変数ID。変数指定が優先される。
+ * @type variable
+ * @default 0
  * 
  * @param friendlyPointTpRate
  * @text 友好度TP変換レート
@@ -117,11 +152,19 @@
  * @default []
  * @parent displayFriendlyPoint
  * 
+ * @param defaultMainActorId
+ * @text メインアクターID
+ * @desc 友好度のデフォルトターゲット(主人公)として扱うアクターID
+ * @type actor
+ * @default 1
+ * 
  * @help 
  * FS向けの変更
  *     大前提として、No.1番のアクターは主人公で固定。
  * 
- * ・友好度操作用コマンドを追加。
+ * ・メイン主人公としてのアクターを割り当て。
+ *   他のアクターはメイン主人公に対する友好度操作用コマンドを追加。
+ *   $gameSystem.mainActorId()で参照できる。
  * ・レベルアップ時はランダムに上昇
  * ・クラスチェンジ時はステータス半減
  * ・友好度補正
@@ -168,6 +211,9 @@
         Game_Actor.FRIENDLY_POINT_MIN, Game_Actor.FRIENDLY_POINT_DEFAULT);
     const displayFriendlyPointMax = Number(parameters["displayFriendlyPointMax"] || 0).clamp(
         Game_Actor.FRIENDLY_POINT_DEFAULT, Game_Actor.FRIENDLY_POINT_MAX);
+    const defaultMainActorId = Math.floor(Number(parameters["defaultMainActorId"]) || 0);
+
+
     /**
      * paramを解析して、アイコン番号テーブルを得る。
      * 
@@ -227,41 +273,56 @@
         }
     };
 
-    const mainActorId = 1;
-
     PluginManager.registerCommand(pluginName, "gainFriendlyPoint", args => {
         const actorId = Number(args.actorId);
-        const value = Math.floor(Number(args.value));
-        if ((actorId > 0) && (actorId != mainActorId) 
+        const variableId = Math.floor(Number(args.variableId) || 0);
+        const value = (variableId > 0) ? $gameVariables.value(variableId) : Math.floor(Number(args.value));
+        if ((actorId > 0) && (actorId !== $gameSystem.mainActorId()) 
                 && $gameActors.isActorDataExists(actorId) && (value != 0)) {
             const actor = $gameActors.actor(actorId);
-            actor.gainFriendlyPoint(mainActorId, value);
+            actor.gainFriendlyPoint($gameSystem.mainActorId(), value);
+        } else if (value !== 0) {
+            for (const actor of $gameParty.members()) {
+                if (actor.actorId() !== $gameSystem.mainActorId()) {
+                    actor.gainFriendlyPoint($gameSystem.mainActorId(), value);
+                }
+            }
         }
     });
     PluginManager.registerCommand(pluginName, "gainFriendlyPointWithoutActor", args => {
         const excludeActorId = Number(args.actorId);
-        const value = Math.floor(Number(args.value));
-        if ((actorId > 0) && (value != 0)) {
+        const variableId = Math.floor(Number(args.variableId) || 0);
+        const value = (variableId > 0) ? $gameVariables.value(variableId) : Math.floor(Number(args.value));
+        if ((actorId > 0) && (value !== 0)) {
             for (let actorId = 1; actorId < $dataActors.length; actorId++) {
-                if ((actorId != mainActorId) && (actorId != excludeActorId) && $gameActors.isActorDataExists(actorId)) {
+                if ((actorId !== $gameSystem.mainActorId()) && (actorId !== excludeActorId) && $gameActors.isActorDataExists(actorId)) {
                     const actor = $gameActors.actor(actorId);
-                    actor.gainFriendlyPoint(mainActorId, value);
+                    actor.gainFriendlyPoint($gameSystem.mainActorId(), value);
                 }
             }
         }
     });
     PluginManager.registerCommand(pluginName, "gainFriendlyPointAll", args => {
-        const value = Math.floor(Number(args.value));
+        const variableId = Math.floor(Number(args.variableId) || 0);
+        const value = (variableId > 0) ? $gameVariables.value(variableId) : Math.floor(Number(args.value));
         if (value != 0) {
             for (let actorId = 1; actorId < $dataActors.length; actorId++) {
-                if ((actorId != mainActorId) && $gameActors.isActorDataExists(actorId)) {
+                if ((actorId != $gameSystem.mainActorId()) && $gameActors.isActorDataExists(actorId)) {
                     const actor = $gameActors.actor(actorId);
                     actor.gainFriendlyPoint(1, value);
                 }
             }
         }
     });
+    PluginManager.registerCommand(pluginName, "changeMainActor", args => {
+        const variableId = Math.floor(Number(args.variableId) || 0);
+        const actorId = (variableId > 0) 
+                ? $gameVariables.value(variableId) : Math.floor(Number(args.actorId) || 0);
+        if ((actorId >= 0) && (actorId < $dataActors.length)) {
+            $gameSystme.setMainActorId(actorId);
+        }
 
+    });
 
 
     /**
@@ -274,7 +335,7 @@
      */
     const _getFriendlyPoint = function(actor) {
         if (actor.isActor()) {
-            if (actor.actorId() == mainActorId) { // メインアクターか？
+            if (actor.actorId() == $gameSystem.mainActorId()) { // メインアクターか？
                 const maxFp = $gameParty.allMembers().reduce((prev, actor) => Math.max(prev, actor.friendlyPoint(1)), 0);
                 return maxFp;
             } else {
@@ -285,7 +346,34 @@
         }
     };    
 
+    //------------------------------------------------------------------------------
+    // Game_System
+    const _Game_System_initialize = Game_System.prototype.initialize;
+    /**
+     * Game_Systemを初期化する。
+     */
+    Game_System.prototype.initialize = function() {
+        _Game_System_initialize.call(this);
+        this._mainActorId = defaultMainActorId;
+    };
 
+    /**
+     * メインアクターIDを設定する。
+     * 
+     * @param {number} id ID
+     */
+    Game_System.prototype.setMainActorId = function(id) {
+        this._mainActorId = id;
+    };
+
+    /**
+     * メインアクターIDを取得する。
+     * 
+     * @returns {number} アクターID
+     */
+    Game_System.prototype.mainActorId = function() {
+        return this._mainActorId;
+    };
     //------------------------------------------------------------------------------
     // Game_Actor
 
