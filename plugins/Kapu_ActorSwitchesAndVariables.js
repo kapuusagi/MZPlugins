@@ -135,6 +135,10 @@
  * 基本的に"スクリプト"によるアクセスを想定します。
  * アクターデータを初期化すると、該当するアクターのスイッチとフラグは消えます。
  * 
+ * エスケープキャラクタに以下のものを追加します。
+ * \AV[id#,variableName$] - id#のアクターのvariableName$で指定される変数の値に置換されます。
+ * 
+ * 
  * スイッチの設定
  *     $gameActors.actor(id).setSwitch("スイッチ名", 値);
  * スイッチの参照
@@ -404,6 +408,41 @@
         const id = $gameSystem.actorVariableId(idName);
         return this._variables[id] || 0;
     };
+
+    //------------------------------------------------------------------------------
+    // Window＿Base
+
+    const _actorVariable = function(p1, p2) {
+        const actorId = parseInt(p1);
+        let variableName = p2 || "";
+        if (variableName.startsWith("\"") && variableName.endsWith("\"")) {
+            variableName = variableName.slice(1, variableName.length - 1);
+        }
+        if (variableName.startsWith("'") && variableName.endsWith("'")) {
+            variableName = variableName.slice(1, variableName.length - 1);
+        }
+        if ((actorId > 0) && variableName) {
+            return String($gameActors.actor(actorId).variable(variableName));
+        } else {
+            return "";
+        }
+    };
+
+    const _Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
+    /**
+     * エスケープキャラクタを変換する。
+     * 
+     * @param {string} text テキスト
+     * @returns {string} 置換済みテキスト
+     */
+    Window_Base.prototype.convertEscapeCharacters = function(text) {
+        text = _Window_Base_convertEscapeCharacters.call(this, text);
+        text = text.replace(/\x1bAV\[(\d+),([^\]]+)\]/gi, (_, p1, p2) =>
+            _actorVariable(p1, p2)
+        );
+        return text;
+    };
+
 
     //------------------------------------------------------------------------------
     // TODO : メソッドフック・拡張
