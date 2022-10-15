@@ -419,21 +419,20 @@ function Window_ChoiceActorList() {
     };
 
     /**
-     * Window_ChoiceActorListを更新する。
-     */
-    Window_ChoiceActorList.prototype.update = function() {
-        Window_Selectable.prototype.update.call(this);
-        this.updateCancelButton();
-    };
-
-    /**
      * キャンセルボタンの可視状態を更新する。
      * 非タッチモードでキャンセルボタンが無い場合には更新されない。
      */
     Window_ChoiceActorList.prototype.updateCancelButton = function() {
         if (this._cancelButton) {
-            this._cancelButton.visible = this.isOpen();
+            this._cancelButton.visible = this.needsCancelButton() && this.isOpen();
         }
+    };
+
+    /**
+     * キャンセルボタンが必要かどうかを判定する。
+     */
+    Window_ChoiceActorList.prototype.needsCancelButton = function() {
+        return $gameMessage.isChoiceActorCancelable();
     };
 
     /**
@@ -451,7 +450,7 @@ function Window_ChoiceActorList() {
             const spacing = 8;
             const button = this._cancelButton;
             const right = this.x + this.width;
-            if (right < Graphics.boxWidth - button.width + spacing) {
+            if ((Graphics.boxWidth - right) >= (button.width + spacing)) { // 右側にボタンを配置するのに十分なスペースがある？
                 button.x = this.width + spacing;
             } else {
                 button.x = -button.width - spacing;
@@ -664,6 +663,7 @@ function Window_ChoiceActorList() {
      */
     Window_ChoiceActorList.prototype.update = function() {
         Window_Selectable.prototype.update.call(this);
+        this.updateCancelButton();
 
         // Note: フェイスイメージなど、loading中で描画できなかった場合、
         //       ここで再描画する。
