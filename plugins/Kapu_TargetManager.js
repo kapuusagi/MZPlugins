@@ -415,18 +415,29 @@ $dataItemScopes = null;
     /**
      * 初期化する。
      * 
+     * @param {Game_Battler} 使用者
      * @param {number} targetIndex ターゲットID
      * @param {string} name 選択項目名
      * @param {Array<Game_Battler>} mainTargets メインターゲット
      * @param {Array<Game_Battler>} members 効果対象メンバー(メインターゲットと同じであればnull可)
      * @param {boolean} isNormalyTarget 通常選択可能なターゲットかどうか。
      */
-    Game_ActionTargetGroup.prototype.initialize = function(targetIndex, name, mainTargets, members, isNormalyTarget) {
+    Game_ActionTargetGroup.prototype.initialize = function(subject, targetIndex, name, mainTargets, members, isNormalyTarget) {
+        this._subject = subject;
         this._targetIndex = targetIndex;
         this._name = name || "";
         this._mainTargets = mainTargets || [];
         this._members = members || mainTargets || [];
         this._isNormalyTarget = isNormalyTarget;
+    };
+
+    /**
+     * このアクション対象の行使者を得る。
+     * 
+     * @returns {Game_Battler} 使用者
+     */
+    Game_ActionTargetGroup.prototype.subject = function() {
+        return this._subject;
     };
 
     /**
@@ -590,13 +601,13 @@ $dataItemScopes = null;
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         for (const member of opponentMembers) {
             const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
-            selectable.push(new Game_ActionTargetGroup(member.index(), member.name(), [ member ], effectiveMembers, true));
+            selectable.push(new Game_ActionTargetGroup(subject, member.index(), member.name(), [ member ], effectiveMembers, true));
         }
 
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         for (const member of friendMembers) {
             const effectiveMembers = this.itemEffectiveMembers(subject, item, member);
-            selectable.push(new Game_ActionTargetGroup(member.index() + 1000, member.name(), [ member ], effectiveMembers, false));
+            selectable.push(new Game_ActionTargetGroup(subject, member.index() + 1000, member.name(), [ member ], effectiveMembers, false));
         }
         return selectable;
     };
@@ -612,10 +623,10 @@ $dataItemScopes = null;
         const selectable = [];
         const scopeInfo = this.scopeInfo(subject.itemScope(item));
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers, true));
+        selectable.push(new Game_ActionTargetGroup(subject, 0, scopeInfo.name, opponentMembers, opponentMembers, true));
 
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers, false));
+        selectable.push(new Game_ActionTargetGroup(subject, 1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers, false));
         return selectable;
     };
 
@@ -631,9 +642,9 @@ $dataItemScopes = null;
         const selectable = [];
 
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, opponentMembers, opponentMembers, true));
+        selectable.push(new Game_ActionTargetGroup(subject, 0, scopeInfo.name, opponentMembers, opponentMembers, true));
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers, false));
+        selectable.push(new Game_ActionTargetGroup(subject, 1000, TextManager.scopeName(TargetManager.SCOPE_ALL_FRIENDS), friendMembers, friendMembers, false));
 
         return selectable;
     };
@@ -651,16 +662,16 @@ $dataItemScopes = null;
         for (const friend of friendMembers) {
             if (this.isTargetable(subject, friend, item)) {
                 const effectiveTargets = this.itemEffectiveMembers(subject, item, friend);
-                selectable.push(new Game_ActionTargetGroup(friend.index(), friend.name(), [ friend ], effectiveTargets, true));
+                selectable.push(new Game_ActionTargetGroup(subject, friend.index(), friend.name(), [ friend ], effectiveTargets, true));
             } else {
-                selectable.push(new Game_ActionTargetGroup(friend.index(), friend.name(), [], [], true));
+                selectable.push(new Game_ActionTargetGroup(subject, friend.index(), friend.name(), [], [], true));
             }
         }
 
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         for (const opponent of opponentMembers) {
             const effectiveTargets = this.itemEffectiveMembers(subject, item, opponent);
-            selectable.push(new Game_ActionTargetGroup(opponent.index() + 1000, opponent.name(), [ opponent ], effectiveTargets, false));
+            selectable.push(new Game_ActionTargetGroup(subject, opponent.index() + 1000, opponent.name(), [ opponent ], effectiveTargets, false));
         }
         return selectable;
     };
@@ -677,9 +688,9 @@ $dataItemScopes = null;
         const selectable = [];
 
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, friendMembers, friendMembers, true));
+        selectable.push(new Game_ActionTargetGroup(subject, 0, scopeInfo.name, friendMembers, friendMembers, true));
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
-        selectable.push(new Game_ActionTargetGroup(1000, TextManager.scopeName(TargetManager.SCOPE_ALL_OPPONENTS), opponentMembers, opponentMembers, false));
+        selectable.push(new Game_ActionTargetGroup(subject, 1000, TextManager.scopeName(TargetManager.SCOPE_ALL_OPPONENTS), opponentMembers, opponentMembers, false));
 
         return selectable;
     };
@@ -693,7 +704,7 @@ $dataItemScopes = null;
      */
     // eslint-disable-next-line no-unused-vars
     TargetManager.makeSelectableActionTargetsUser = function(subject, item) {
-        return [ new Game_ActionTargetGroup(-1, subject.name(), [ subject ], [ subject ], true)];
+        return [ new Game_ActionTargetGroup(subject, -1, subject.name(), [ subject ], [ subject ], true)];
     };
 
     /**
@@ -709,7 +720,7 @@ $dataItemScopes = null;
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const allMembers = friendMembers.concat(opponentMembers);
 
-        return [ new Game_ActionTargetGroup(-1, scopeInfo.name, allMembers, allMembers, true)];
+        return [ new Game_ActionTargetGroup(subject, -1, scopeInfo.name, allMembers, allMembers, true)];
 
     };
 
@@ -918,6 +929,9 @@ $dataItemScopes = null;
     /**
      * subjectがitemをtargetに使用した時の効果範囲を得る。
      * (全体を指定する場合は対象外)
+     * 
+     * @note 対象1体を選択したとき、近くにいるバトラーも効果範囲にしたい、とか、
+     *       奥行きがあるフィールドで、直線範囲も対象にする、とかいう場合に使用される。
      * 
      * @param {Game_Battler} subject 使用者
      * @param {object} item DataItem/DataWeapon
@@ -1239,6 +1253,18 @@ $dataItemScopes = null;
     Window_ActionTargetBase.prototype.initialize = function(rect) {
         Window_Selectable.prototype.initialize.call(this, rect);
         this._targetGroups = [];
+        this._item = null;
+    };
+
+    /**
+     * 使用するアイテムまたはスキルを設定する。
+     * 
+     * @note 選択可否判定に使用される。
+     * 
+     * @param {object} item 使用するDataSkill/DataItem
+     */
+    Window_ActionTargetBase.prototype.setItem = function(item) {
+        this._item = item;
     };
 
     /**
@@ -1337,12 +1363,11 @@ $dataItemScopes = null;
     /**
      * 現在の選択が選択可能かどうかを取得する。
      * 
-     * TODO: 選択出来ない項目も表示する場合に使用する。
      * @return {boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
     Window_ActionTargetBase.prototype.isCurrentItemEnabled = function() {
         const item = this.itemAt(this.index());
-        return (item) ? (allowSelectNonEffectiveMembers || this.isEnabled(item)) : false;
+        return (item) ? this.isEnabled(item) : false;
     };
 
     /**
@@ -1352,7 +1377,22 @@ $dataItemScopes = null;
      * @returns {boolean} 選択可能な場合にはture, 選択不可な場合にはfalse
      */
     Window_ActionTargetBase.prototype.isEnabled = function(group) {
-        return (group.members().length > 0);
+        if (allowSelectNonEffectiveMembers) {
+            return true;
+        } else {
+            if (group.members().length === 0) { // 効果対象いない
+                return false;
+            }
+            if (this._item) {
+                const action = new Game_Action(group.subject());
+                action.setItemObject(this._item);
+                const hasEffectiveTargets = group.members().some(target => action.testApply(target));
+                if (!hasEffectiveTargets) { // 効果がある対象はいない？
+                    return false;
+                }
+            }
+            return true;
+        }
     };
     /**
      * タッチ操作を処理する
@@ -1471,7 +1511,13 @@ $dataItemScopes = null;
      * Note: アクター選択ウィンドウは自動的にdeactivate()はしない。
      */
     Window_MenuActionTarget.prototype.processOk = function() {
-        this.callOkHandler();
+        if (this.isCurrentItemEnabled()) {
+            this.playOkSound();
+            this.updateInputData();
+            this.callOkHandler();
+        } else {
+            this.playBuzzerSound();
+        }
     };
     //------------------------------------------------------------------------------
     // BattleManager
@@ -1666,6 +1712,7 @@ $dataItemScopes = null;
     Scene_Battle.prototype.startActionTargetSelection = function() {
         const action = BattleManager.inputtingAction();
         const groups = action.makeSelectableActionTargets();
+        this._actionTargetWindow.setItem(action.item());
         this._actionTargetWindow.setTargetGroups(groups);
         this._actionTargetWindow.show();
         this._actionTargetWindow.select(0);
@@ -1965,9 +2012,11 @@ $dataItemScopes = null;
                     actionTargets.push(selectableTarget);
                 }
             }
+            this._actionTargetWindow.setItem(item);
             this._actionTargetWindow.setTargetGroups(actionTargets);
         } else {
             const actionTargets = TargetManager.makeSelectableActionTargets(this.user(), item).filter(group => group.isNormalyTarget());
+            this._actionTargetWindow.setItem(item);
             this._actionTargetWindow.setTargetGroups(actionTargets);
         }
 
@@ -1977,6 +2026,7 @@ $dataItemScopes = null;
         this._actorWindow.show();
         this._actionTargetWindow.activate();
     };
+
     /**
      * アクター選択ウィンドウを隠す
      * !!!overwrite!!! Scene_ItemBase.hideActorWindow

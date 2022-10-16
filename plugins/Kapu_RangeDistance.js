@@ -1004,7 +1004,7 @@
                 break;
             }
             const name = textTargetRowOpponents.format(row + 1);
-            selectable.push(new Game_ActionTargetGroup(row, name, rowMembers, rowMembers, true));
+            selectable.push(new Game_ActionTargetGroup(subject, row, name, rowMembers, rowMembers, true));
         }
         const friendMembers = this.friendMembers(subject);
         for (let row = 0; row < 12; row++) {
@@ -1015,7 +1015,7 @@
 
             const targetMembers = rowMembers.filter(member => TargetManager.isTargetable(subject, member, item));
             const name = textTargetRowFriends.format(row + 1);
-            selectable.push(new Game_ActionTargetGroup(row + 1000, name, targetMembers, targetMembers, false));
+            selectable.push(new Game_ActionTargetGroup(subject, row + 1000, name, targetMembers, targetMembers, false));
         }
         return selectable;
     };
@@ -1034,14 +1034,14 @@
             const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             const rowMembers = opponentMembers.filter(member => member.battlePosition() === 0);
             if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers, true));
+                selectable.push(new Game_ActionTargetGroup(subject, 0, scopeInfo.name, rowMembers, rowMembers, true));
             }
         }
         {
             const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             const rowMembers = friendMembers.filter(member => member.battlePosition() === 0);
             if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, rowMembers, rowMembers, false));
+                selectable.push(new Game_ActionTargetGroup(subject, 1000, scopeInfo.name, rowMembers, rowMembers, false));
             }
         }
         return selectable;
@@ -1064,7 +1064,7 @@
             }
             const targetMembers = rowMembers.filter(member => TargetManager.isTargetable(subject, member, item));
             const name = textTargetRowFriends.format(row + 1);
-            selectable.push(new Game_ActionTargetGroup(row, name, targetMembers, targetMembers, true));
+            selectable.push(new Game_ActionTargetGroup(subject, row, name, targetMembers, targetMembers, true));
         }
         const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         for (let row = 0; row < 12; row++) {
@@ -1073,7 +1073,7 @@
                 break;
             }
             const name = textTargetRowOpponents.format(row + 1);
-            selectable.push(new Game_ActionTargetGroup(row + 1000, name, rowMembers, rowMembers, false));
+            selectable.push(new Game_ActionTargetGroup(subject, row + 1000, name, rowMembers, rowMembers, false));
         }
         return selectable;
     };
@@ -1093,14 +1093,14 @@
             const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             const rowMembers = friendMembers.filter(member => member.battlePosition() === 0);
             if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers, true));
+                selectable.push(new Game_ActionTargetGroup(subject, 0, scopeInfo.name, rowMembers, rowMembers, true));
             }
         }
         {
             const opponentMembers = this.opponentMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
             const rowMembers = opponentMembers.filter(member => member.battlePosition() === 0);
             if (rowMembers.length > 0) {
-                selectable.push(new Game_ActionTargetGroup(1000, scopeInfo.name, rowMembers, rowMembers, false));
+                selectable.push(new Game_ActionTargetGroup(subject, 1000, scopeInfo.name, rowMembers, rowMembers, false));
             }
         }
         return selectable;
@@ -1118,7 +1118,7 @@
 
         const friendMembers = this.friendMembers(subject).filter(member => TargetManager.isTargetable(subject, member, item));
         const rowMembers = friendMembers.filter(member => member.battlePosition() === subject.battlePosition());
-        selectable.push(new Game_ActionTargetGroup(0, scopeInfo.name, rowMembers, rowMembers, true));
+        selectable.push(new Game_ActionTargetGroup(subject, 0, scopeInfo.name, rowMembers, rowMembers, true));
         return selectable;
     };
 
