@@ -2005,6 +2005,9 @@ $dataItemScopes = null;
     Scene_ItemBase.prototype.onActionTargetOk = function() {
         if (this.canUse()) {
             this.useItem();
+            if (!this.canUse()) { // もう使用できない？
+                this.onActionTargetCancel();
+            }
         } else {
             SoundManager.playBuzzer();
         }
@@ -2038,8 +2041,10 @@ $dataItemScopes = null;
         // すげえ面倒。
         const item = this.item();
         const scopeInfo = TargetManager.scopeInfo(item.scope);
-        if (DataManager.isItem(item) && scopeInfo.forUserOnly) {
-            // メンバー全体に対して、使用可能かどうかを判定をする必要がある。
+        if ($gameParty.inBattle() // 戦闘中？
+                && DataManager.isItem(item) // アイテム？
+                && scopeInfo.forUserOnly) { // 使用者にのみ効果があるアイテム/スキルか？
+            /* 移動中は動けるメンバー全員に対して、個別に使用可能かどうかを判定をする。 */
             for (const user of $gameParty.movableMembers()) {
                 if (user.canUse(item) && this.isItemEffectsValidWithUser(user)) {
                     return true;
@@ -2048,7 +2053,8 @@ $dataItemScopes = null;
             // 全メンバー使っても効果なし。
             return false;
         } else {
-            return this.isItemEffectsValidWithUser(this.user());
+            const user = this.user();
+            return user.canUse(item) && this.isItemEffectsValidWithUser(user);
         }
     };
 
