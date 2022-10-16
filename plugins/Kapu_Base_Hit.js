@@ -92,7 +92,7 @@
          */
         Game_Action.prototype.testCritical = function(target) {
             const item = this.item();
-            if (item.critical && (item.damage.type > 0)) {
+            if (item.damage.critical && (item.damage.type > 0)) {
                 const rate = this.itemCri(target);
                 console.log("  criticalRate = " + rate);
                 return Math.random() < rate;
@@ -109,7 +109,7 @@
          */
         Game_Action.prototype.testCritical = function(target) {
             const item = this.item();
-            if (item.critical && (item.damage.type > 0)) {
+            if (item.damage.critical && (item.damage.type > 0)) {
                 return Math.random() < this.itemCri(target);
             } else {
                 return false;
