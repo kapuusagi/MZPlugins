@@ -178,8 +178,8 @@
  * 
  * @param enemyAreaOffsetX
  * @text エネミーエリア位置X
- * @desc エネミーエリアの水平位置X
- * @default 162
+ * @desc エネミーエリアの水平位置X。エディタ上で設定した位置に対して、これだけオフセットした場所に配置する。
+ * @default 0
  * @type number
  * @parent layout
  * 
@@ -407,7 +407,7 @@ function Sprite_BattleHudPicture() {
     const statusAreaPadding = Number(parameters["statusAreaPadding"]) || 16;
     const statusAreaHeight = Number(parameters["statusAreaHeight"]) || 220;
     const statusAreaOffsetX = Number(parameters["statusAreaOffsetX"]) || 192;
-    const enemyAreaOffsetX = Number(parameters["enemyAreaOffsetX"]) || 162;
+    const enemyAreaOffsetX = Number(parameters["enemyAreaOffsetX"]) || 0;
     const useBattlePicture = (parameters["useBattlePicture"] === undefined)
             ? false : (parameters["useBattlePicture"] === "true");
     const pictureYOffset = Number(parameters["pictureYOffset"]) || 0;
