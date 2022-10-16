@@ -98,6 +98,17 @@
  * @type variable
  * @default 0
  * 
+ * 
+ * 
+ * 
+ * 
+ * @param effectCode
+ * @text 友好度加減エフェクトコード
+ * @desc 友好度を加減する効果を割り当てるエフェクトコード。
+ * @type number
+ * @default 1004
+ * @min 4
+ * 
  * @param friendlyPointTpRate
  * @text 友好度TP変換レート
  * @desc 初期TP値の算出に使用する、友好度からTPへ変換するレート。友好度にこの値が乗算される。0.1だと友好度10毎に1上がる。
@@ -111,15 +122,15 @@
  * @type number
  * @default 1
  * 
- * @param friendlyPointDamageRate
- * @text 友好度ダメージ補正レート[%]
- * @desc ダメージ計算にて、友好度1あたりに補正するダメージレート(割合)。1.0にすると、友好度1上がる毎にダメージ量が1％上昇する。
- * @type number
- * @decimals 2
- * @default 0.25
- * 
  * @param displayFriendlyPoint
  * @text 友好度表示
+ * 
+ * @param displayFriendlyPointValue
+ * @text 友好度値表示する
+ * @desc trueにすると、実際の友好度数値を表示する。
+ * @type boolean
+ * @default true
+ * @parent displayFriendlyPoint
  * 
  * @param displayFriendlyPointMin
  * @text 表示友好度下限
@@ -158,6 +169,17 @@
  * @type actor
  * @default 1
  * 
+ * @param friendlyPointDamageCorrectionTable
+ * @text 友好度によるダメージ補正テーブル
+ * @type struct<CorrectEntry>[]
+ * @default []
+ * 
+ * @param friendlyPointCriticalCorrectionTable
+ * @text 友好度によるクリティカル率補正テーブル
+ * @type struct<CorrectEntry>[]
+ * @default []
+ * 
+ * 
  * @help 
  * FS向けの変更
  *     大前提として、No.1番のアクターは主人公で固定。
@@ -192,20 +214,47 @@
  * ============================================
  * ノートタグ
  * ============================================
+ * アイテム
+ *   <gainFp:type#,value#>
+ *      友好度上昇効果を持つアイテムとして定義する。
+ *      typeが種類、valueが上昇量。
+ * 
+ * アクター
+ *   <gainFriendlyPointRates:type=rate#,type=rate#,type=rate#,...>
+ *      type# に対応する上昇レートテーブルを指定する。
  * 
  * ============================================
  * 変更履歴
  * ============================================
  * Version.0.1.0 動作未確認。
  */
+/*~struct~CorrectEntry:
+ *
+ * @param friendlyPoint
+ * @text 友好度
+ * @type number
+ * @min -10000
+ * @max 10000
+ * @default 0
+ * 
+ * @param correctRate
+ * @text 補正量。
+ * @desc 補正量。友好度の時に適用する補正値[%]。100が等倍加算。
+ * @type number
+ * @default 0.00
+ * @min -100.00
+ * @max 10000.00
+ * @decimals 2
+ *
+ */
 (() => {
     'use strict';
     const pluginName = "Kapu_FS_BaseSystem";
     const parameters = PluginManager.parameters(pluginName);
 
+    Game_Action.EFFECT_GAIN_FP = Number(parameters["effectCode"]) || 0;
     const friendlyPointTpRate = Math.abs(Number(parameters["friendlyPointTpRate"] || 0.0));
     const gainFriendlyPointOnBattleWin = Math.floor(Number(parameters["gainFriendlyPointOnBattleWin"] || 0));
-    const friendlyPointDamageRate = Math.floor(Number(parameters["friendlyPointDamageRate"] || 0));
 
     const displayFriendlyPointMin = Number(parameters["displayFriendlyPointMin"] || 0).clamp(
         Game_Actor.FRIENDLY_POINT_MIN, Game_Actor.FRIENDLY_POINT_DEFAULT);
@@ -213,6 +262,8 @@
         Game_Actor.FRIENDLY_POINT_DEFAULT, Game_Actor.FRIENDLY_POINT_MAX);
     const defaultMainActorId = Math.floor(Number(parameters["defaultMainActorId"]) || 0);
 
+    const displayFriendlyPointValue = (typeof parameters["displayFriendlyPointValue"] == "undefined")
+            ? true : (parameters["displayFriendlyPointValue"] == "true");
 
     /**
      * paramを解析して、アイコン番号テーブルを得る。
@@ -273,6 +324,101 @@
         }
     };
 
+    /**
+     * テーブルに補正値エントリを追加する。
+     * 
+     * @param {Array<CorrectEntry>} table 
+     * @param {number} fp 友好度
+     * @param {number} rate 補正値
+     */
+    const _addCorrectEntry = function(table, fp, rate) {
+        const entry = {
+            friendlyPoint : fp,
+            correctRate : rate
+        };
+        for (let i = 0; i < table.length; i++) {
+            if (fp < table[i].fp) {
+                table.splice(i, 0, entry);
+                 return ;
+            }
+        }
+
+        table.push(entry);
+    };
+    /**
+     * 補正値パラメータテーブル文字列を解釈する。
+     * 
+     * @param {string} arg 補正値テーブルパラメータ文字列
+     * @returns {Array<CorrectEntry} テーブル
+     */
+    const _parseCorrentEntries = function(arg) {
+        const table = [];
+        try {
+            if (arg) {
+                for (const token of JSON.parse(arg)) {
+                    const obj = JSON.parse(token);
+                    const fp = Number(obj.friendlyPoint) || 0;
+                    const rate = (Number(obj.correctRate) || 0.00) / 100.0;
+
+                    _addCorrectEntry(table, fp, rate);
+                }
+            }
+        }
+        catch (e) {
+            console.error("_parseCorrectEntries failure:" + e);
+        }
+        return table;
+    };
+
+    /**
+     * 補正値を得る。
+     * 
+     * @param {Array<CorrectEntry>} table 補正値テーブル
+     * @param {number} fp 友好度
+     * @returns {number} 補正値
+     */
+    const _getCorrectRate = function(table, fp) {
+        if (table.length === 0) {
+            return 0.0;
+        }
+
+        let i = table.length - 1;
+        while ((i>= 0) && (fp < table[i].friendlyPoint)) {
+            i--;
+        }
+        const prevIndex = i;
+        const nextIndex = i + 1;
+
+        const prevEntry = table[prevIndex];
+        const nextEntry = table[nextIndex];
+
+        if (prevEntry) {
+            if (nextEntry) {
+                const prevFp = prevEntry.friendlyPoint
+                const range = nextEntry.friendlyPoint - prevFp;
+                const rateRange = nextEntry.correctRate - prevEntry.correctRate;
+                if (range > 0) {
+                    return prevEntry.correctRate + (fp - prevFp) / range * rateRange;
+                } else {
+                    return prevEntry.correctRate;
+                }
+            } else {
+                return prevEntry.correctRate;
+            }
+        } else {
+            if (nextEntry) {
+                return nextEntry.correctRate;
+            } else {
+                return 0;
+            }
+        }
+    };
+
+    const friendlyPointDamageCorrectionTable = _parseCorrentEntries(parameters["friendlyPointDamageCorrectionTable"]);
+    const friendlyPointCriticalCorrectionTable = _parseCorrentEntries(parameters["friendlyPointCriticalCorrectionTable"]);
+    /**
+     * 友好度上昇
+     */
     PluginManager.registerCommand(pluginName, "gainFriendlyPoint", args => {
         const actorId = Number(args.actorId);
         const variableId = Math.floor(Number(args.variableId) || 0);
@@ -344,7 +490,51 @@
         } else {
             return 0;
         }
-    };    
+    };
+
+    //------------------------------------------------------------------------------
+    // DataManager
+    /**
+     * アイテムのノートタグを処理する。
+     * 
+     * @param {object} obj データオブジェクト。(DataItem)
+     */
+     const _processItemNotetag = function(obj) {
+        if (Game_Action.EFFECT_GAIN_FP && obj.meta.gainFp) {
+            const tokens = obj.meta.gainFp.split(',');
+            if (tokens.length >= 2) {
+                const type = Math.floor(Number(tokens[0]) || 0);
+                const value = Math.floor(Number(tokens[1]) || 0);
+                obj.effects.push({
+                    code: Game_Action.EFFECT_GAIN_FP,
+                    dataid: 0,
+                    value1: type,
+                    value2: value
+                });
+            }
+        }
+    };
+    DataManager.addNotetagParserItems(_processItemNotetag);
+
+    /**
+     * アクターのノートタグを処理する。
+     * 
+     * @param {object} obj データオブジェクト(DataActor)
+     */
+    const _processActorNotetag = function(obj) {
+        obj.gainFriendlyPointRates = [];
+        if (obj.meta.gainFriendlyPointRates) {
+            for (const field of obj.meta.gainFriendlyPointRates.split(',')) {
+                const tokens = field.split('=');
+                if (tokens.length >= 2) {
+                    const type = Number(tokens[0].trim()) || 0;
+                    const rate = Number(tokens[1].trim()) || 0;
+                    obj.gainFriendlyPointRates[type] = rate;
+                }
+            }
+        }
+    };
+    DataManager.addNotetagParserActors(_processActorNotetag);
 
     //------------------------------------------------------------------------------
     // Game_System
@@ -505,7 +695,7 @@
      *     育成コストを変更するため、オーバーライドする。
      */
     Game_Actor.prototype.calcGrowupBasicParamCost = function(currentValue) {
-        return Math.max(1, currentValue + 1);
+        return 5 + Math.floor(currentValue / 8);
     };
 
 
@@ -529,7 +719,23 @@
      */
     Game_Actor.prototype.armorWeightTolerance = function() {
         return this.vit;
-    };    
+    };
+
+    /**
+     * 友好度上昇レート
+     * 
+     * @param {number} type 種類
+     * @returns {number} 上昇レート
+     */
+    Game_Actor.prototype.gainFriendlyPointRate = function(type) {
+        const dataActor = this.actor();
+        if ((type >= 0) && (type < dataActor.gainFriendlyPointRates.length)) {
+            return dataActor.gainFriendlyPointRates[type] || 0;
+        } else {
+            return 0.0;
+        }
+    };
+
     //------------------------------------------------------------------------------
     // BattleManager
     const _BattleManager_endBattle = BattleManager.endBattle;
@@ -542,8 +748,8 @@
     BattleManager.endBattle = function(result) {
         if (result == 0) { // 勝利時？
             for (const actor of $gameParty.allMembers()) {
-                if (!actor.isDead() && (actor.actorId() != 1)) {
-                    actor.gainFriendlyPoint(1, gainFriendlyPointOnBattleWin);
+                if (!actor.isDead() && (actor.actorId() != $gameSystem.mainActorId())) {
+                    actor.gainFriendlyPoint($gameSystem.mainActorId(), gainFriendlyPointOnBattleWin);
                 }
             }
         }
@@ -561,23 +767,79 @@
      * @param {boolean} critical クリティカルの場合にはtrue, それ以外はfalse
      * @returns {number} 乗算ボーナスレート
      */
-    // eslint-disable-next-line no-unused-vars
     Game_Action.prototype.multiplyDamageRate = function(target, critical) {
         let rate = _Game_Action_multiplyDamageRate.call(this, target, critical);
         const subject = this.subject();
         const fp = _getFriendlyPoint(subject);
-        if (fp < Game_Actor.FRIENDLY_POINT_DEFAULT) {
-            const minusFp = Game_Actor.FRIENDLY_POINT_DEFAULT - fp;
-            const maxMinusFp = Game_Actor.FRIENDLY_POINT_DEFAULT - Game_Actor.FRIENDLY_POINT_MIN;
-            if (maxMinusFp > 0) {
-                rate *= Math.max(0.01, (1.0 - minusFp / maxMinusFp));
-            }
-        } else if (fp > Game_Actor.FRIENDLY_POINT_DEFAULT) {
-            const plusFp = fp - Game_Actor.FRIENDLY_POINT_DEFAULT;
-            rate *= (1.0 + plusFp * friendlyPointDamageRate / 100.0);
-        }
-        return rate;
+        const correctRate = _getCorrectRate(friendlyPointDamageCorrectionTable, fp);
+        return Math.max(0, rate + correctRate);
     };
+    const _Game_Action_itemCri = Game_Action.prototype.itemCri;
+    /**
+     * このアクションのクリティカル率を得る。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @returns {number} クリティカル率(0.0～1.0）
+     */
+    Game_Action.prototype.itemCri = function(target) {
+        const subject = this.subject();
+        const fp = _getFriendlyPoint(subject);
+        const correctRate = _getCorrectRate(friendlyPointCriticalCorrectionTable, fp);
+        return Math.max(0, _Game_Action_itemCri.call(this, target) + correctRate);
+    };
+
+    const _Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
+    /**
+     * 効果を適用可能かどうかを判定する。
+     * codeに対応する判定処理が定義されていない場合、適用可能(true)が返る。
+     * 
+     * @param {Game_BattlerBase} target 対象
+     * @param {DataEffect} effect エフェクトデータ
+     * @returns {boolean} 適用可能な場合にはtrue, それ以外はfalse
+     */
+    Game_Action.prototype.testItemEffect = function(target, effect) {
+        if (Game_Action.EFFECT_GAIN_FP
+                && (effect.code === Game_Action.EFFECT_GAIN_FP)) {
+            return (target.isActor() 
+                    && (target.friendlyPoint($gameSystem.mainActorId()) < Game_Actor.FRIENDLY_POINT_MAX)
+                    && (target.gainFriendlyPointRate(effect.value1) !== 0));
+        } else {
+            return _Game_Action_testItemEffect.call(this, target, effect);
+        }
+    };
+
+    const _Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
+    /**
+     * 効果を適用する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {DataEffect} effect エフェクトデータ
+     */
+    Game_Action.prototype.applyItemEffect = function(target, effect) {
+        if (Game_Action.EFFECT_GAIN_FP
+                && (effect.code === Game_Action.EFFECT_GAIN_FP)) {
+            this.applyItemEffectGainFp(target, effect);
+        } else {
+            _Game_Action_applyItemEffect.call(this, target, effect);
+        }
+    };
+
+    /**
+     * 友好度上昇効果を適用する。
+     * 
+     * @param {Game_Battler} target ターゲット
+     * @param {DataEffect} effect エフェクトデータ
+     */
+    Game_Action.prototype.applyItemEffectGainFp = function(target, effect) {
+        if (target.isActor()) {
+            const rate = target.gainFriendlyPointRate(effect.value1);
+            const value = Math.floor(effect.value2 * rate);
+            target.gainFriendlyPoint($gameSystem.mainActorId(), value);
+
+            this.makeSuccess(target);
+        }
+    };
+
     //------------------------------------------------------------------------------
     // Window_ChoiceActorList
     const _Window_ChoiceActorList_drawActorDefaultCustom = Window_ChoiceActorList.prototype.drawActorDefaultCustom;
@@ -602,12 +864,19 @@
                 this.changeTextColor(ColorManager.systemColor());
                 this.drawText(TextManager.frindlyPointA, x, y, labelWidth);
 
-                this.changeTextColor(ColorManager.paramchangeTextColor(fp - Game_Actor.FRIENDLY_POINT_DEFAULT));
-                this.drawText(fp, x + labelWidth + 8, y, paramWidth, "right");
+                if (displayFriendlyPointValue) {
+                    this.changeTextColor(ColorManager.paramchangeTextColor(fp - Game_Actor.FRIENDLY_POINT_DEFAULT));
+                    this.drawText(fp, x + labelWidth + 8, y, paramWidth, "right");
 
-                const iconId = _getFriendlyPointIconId(fp);
-                if (iconId >= 0) {
-                    this.drawIcon(iconId, x + labelWidth + 16 + paramWidth, y + 2);
+                    const iconId = _getFriendlyPointIconId(fp);
+                    if (iconId >= 0) {
+                        this.drawIcon(iconId, x + labelWidth + 16 + paramWidth, y + 2);
+                    }
+                } else {
+                    const iconId = _getFriendlyPointIconId(fp);
+                    if (iconId >= 0) {
+                        this.drawIcon(iconId, x + labelWidth + 16, y + 2);
+                    }
                 }
             }
         }
@@ -633,12 +902,19 @@
                 this.changeTextColor(ColorManager.systemColor());
                 this.drawText(TextManager.frindlyPointA, x, y, labelWidth);
 
-                this.changeTextColor(ColorManager.normalColor());
-                this.drawText(fp, x + labelWidth + 8, y, paramWidth, "right");
+                if (displayFriendlyPointValue) {
+                    this.changeTextColor(ColorManager.normalColor());
+                    this.drawText(fp, x + labelWidth + 8, y, paramWidth, "right");
 
-                const iconId = _getFriendlyPointIconId(fp);
-                if (iconId >= 0) {
-                    this.drawIcon(iconId, x + labelWidth + 16 + paramWidth, y + 2);
+                    const iconId = _getFriendlyPointIconId(fp);
+                    if (iconId >= 0) {
+                        this.drawIcon(iconId, x + labelWidth + 16 + paramWidth, y + 2);
+                    }
+                } else {
+                    const iconId = _getFriendlyPointIconId(fp);
+                    if (iconId >= 0) {
+                        this.drawIcon(iconId, x + labelWidth + 16, y + 2);
+                    }
                 }
             }
         };
