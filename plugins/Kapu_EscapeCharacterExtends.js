@@ -15,6 +15,7 @@
  * \ARMOR[id#] - id#の防具名に置換します。
  * \ENEMY[id#] - id#のエネミー名に置換します。
  * \TROOP[id#] - id#のエネミーグループ名に置換します。
+ * \SKILL[id#] - id#のスキル名に置換します。
  * \MAPNAME - 現在のマップ名に置換します。
  * \EVAL[formula$] - formula$を評価した結果に置換します。例) $gameVariables.value(1)|
  * 
@@ -93,6 +94,15 @@
      */
     TextManager.className = function(id) {
         return TextManager.collectionName($dataClasses, id);
+    };
+    /**
+     * スキル名を得る。
+     * 
+     * @param {number} id ID
+     * @returns {string} スキル名
+     */
+    TextManager.skillName = function(id) {
+        return TextManager.collectionName($dataSkills, id);
     };
     /**
      * アイテム名を得る。
@@ -193,11 +203,14 @@
         text = text.replace(/\x1bCLASSNAME\[(\d+)\]/gi, (_, p1) =>
             TextManager.className(parseInt(p1))
         );
+        text = text.replace(/\x1bSKILL\[(\d+)\]/gi, (_, p1) =>
+            TextManager.skillName(parseInt(p1))
+        );
         text = text.replace(/\x1bENEMY\[(\d+)\]/gi, (_, p1) =>
-            TextManager.itemName(parseInt(p1))
+            TextManager.enemyName(parseInt(p1))
         );
         text = text.replace(/\x1bTROOP\[(\d+)\]/gi, (_, p1) =>
-            TextManager.itemName(parseInt(p1))
+            TextManager.troopName(parseInt(p1))
         );
         text = text.replace(/\x1bITEM\[(\d+)\]/gi, (_, p1) =>
             TextManager.itemName(parseInt(p1))
@@ -226,10 +239,13 @@
         _Window_message_initMembers.call(this);
         this._characterWait = 0;
     };
+
+    const _Window_Message_startMessage = Window_Message.prototype.startMessage;
     /**
      * メッセージ表示を開始する。
      */
     Window_Message.prototype.startMessage = function() {
+        _Window_Message_startMessage.call(this);
         this._characterWait = 0; // reset.
     };
 
@@ -240,7 +256,7 @@
      * @param {TextState} textState テキストステートオブジェクト
      */
     Window_Base.prototype.processCharacter = function(textState) {
-        const prevLen = testState.buffer.length;
+        const prevLen = textState.buffer.length;
         _Window_Message_processCharacter.call(this, textState);
         if ((textState.buffer.length > prevLen) // 表示文字追加？
                 && !this._showFast && !this._lineShowFast) { // 瞬間表示要求なし
