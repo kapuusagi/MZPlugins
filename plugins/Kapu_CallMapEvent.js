@@ -104,7 +104,7 @@ $dataTempMap = null;
     };
 
     /**
-     * 他のマップのイベント呼び出しをセットアップするう。
+     * 他のマップのイベント呼び出しをセットアップする。
      * 
      * @param {number} mapId マップID
      * @param {number} eventId イベントID 
