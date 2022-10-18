@@ -8,8 +8,20 @@
  * @help 
  * エスケープキャラクタに以下のものを追加します。
  * 
- * \ClassName [id#] - id#のクラス名に置換します。
+ * 文字列置換
+ * \CLASSNAME[id#] - id#のクラス名に置換します。
+ * \ITEM[id#] - id#のアイテム名に置換します。
+ * \WEAPON[id#] - id#の武器名に置換します。
+ * \ARMOR[id#] - id#の防具名に置換します。
  * \EVAL[formula$] - formula$を評価した結果に置換します。例) $gameVariables.value(1)|
+ * 
+ * 制御
+ * \CWAIT[frame#] - 1文字出力する毎に、frame#で指定したウェイトを入れます。
+ *                  (瞬間表示時はウェイトが入りません。)
+ *                  メッセージ切り替わりでリセットされます。
+ *                  \.や\|を毎文字挿入が必要になるような、ゆっくりしたメッセージ表示をしたい場合に使用します。
+ * \WAIT[frame#] - frame#で指定した量だけウェイトを入れます。60で1秒に相当します。
+ * 
  * 
  * ■ 使用時の注意
  * 
@@ -31,6 +43,7 @@
  */
 (() => {
     'use strict';
+        /* eslint no-control-regex : 0 */
     // const pluginName = "Kapu_EscapeCharacterExtends";
     // const parameters = PluginManager.parameters(pluginName);
 
@@ -40,12 +53,64 @@
     // });
     //------------------------------------------------------------------------------
     // TextManager
-    TextManager.className = function(id) {
-        if ((id > 0) && (id < $dataClasses.length)) {
-            return $dataClasses[id].name;
+
+    /**
+     * collection の id 要素に相当するデータの名前を得る。
+     * 該当するものがなければ、空文字列を返す。
+     * 
+     * @param {string} collection コレクション
+     * @param {number} id ID
+     * @returns {string} 名前
+     */
+    TextManager.collectionName = function(collection, id) {
+        if ((id > 0) && (collection.length)) {
+            const obj = collection[id];
+            if (obj) {
+                return obj["name"] || "";
+            } else {
+                return "";
+            }
         } else {
             return "";
         }
+    };
+    /**
+     * クラス名を得る。
+     * 
+     * @param {number} id ID
+     * @returns {string} クラス名
+     */
+    TextManager.className = function(id) {
+        return TextManager.collectionName($dataClasses, id);
+    };
+    /**
+     * アイテム名を得る。
+     * 
+     * @param {number} id ID
+     * @returns {string} アイテム名
+     */
+    TextManager.itemName = function(id) {
+        return TextManager.collectionName($dataItems, id);
+    };
+
+    /**
+     * 武器名を得る。
+     * 
+     * @param {number} id ID
+     * @returns {string} 武器名
+     */
+    TextManager.weaponName = function(id) {
+        return TextManager.collectionName($dataWeapons, id);
+    };
+
+    /**
+     * 防具名を得る。
+     * 
+     * @param {number} id ID
+     * @returns {string} 武器名
+     */
+    TextManager.armorName = function(id) {
+        return TextManager.collectionName($dataArmors, id);
     };
 
     //------------------------------------------------------------------------------
@@ -91,19 +156,85 @@
     Window_Base.prototype.convertEscapeCharacters = function(text) {
         // \Vや\Nなどの処理
         text = _Window_Base_convertEscapeCharacters.call(this, text);
-        // eslint-disable-next-line no-control-regex
-        text = text.replace(/\x1bClassName\[(\d+)\]/gi, (_, p1) =>
+        text = text.replace(/\x1bCLASSNAME\[(\d+)\]/gi, (_, p1) =>
             TextManager.className(parseInt(p1))
         );
-        // eslint-disable-next-line no-control-regex
+        text = text.replace(/\x1bITEM\[(\d+)\]/gi, (_, p1) =>
+            TextManager.itemName(parseInt(p1))
+        );
+        text = text.replace(/\x1bWEAPON\[(\d+)\]/gi, (_, p1) =>
+            TextManager.weaponName(parseInt(p1))
+        );
+        text = text.replace(/\x1bARMOR\[(\d+)\]/gi, (_, p1) =>
+            TextManager.armorName(parseInt(p1))
+        );
         text = text.replace(/\x1bEVAL\[([^\]]+)\]/gi, (_, p1) =>
             _evalString(p1)
         );
-        
+
         return text;
     };
 
+    //------------------------------------------------------------------------------
+    // Window_Message
 
+    const _Window_message_initMembers = Window_Message.prototype.initMembers;
+    /**
+     * Window_Messageのメンバを初期化する。
+     */
+    Window_Message.prototype.initMembers = function() {
+        _Window_message_initMembers.call(this);
+        this._characterWait = 0;
+    };
+    /**
+     * メッセージ表示を開始する。
+     */
+    Window_Message.prototype.startMessage = function() {
+        this._characterWait = 0; // reset.
+    };
 
+    const _Window_Message_processCharacter = Window_Base.prototype.processCharacter;
+    /**
+     * 文字を処理する。
+     * 
+     * @param {TextState} textState テキストステートオブジェクト
+     */
+    Window_Base.prototype.processCharacter = function(textState) {
+        const prevLen = testState.buffer.length;
+        _Window_Message_processCharacter.call(this, textState);
+        if ((textState.buffer.length > prevLen) // 表示文字追加？
+                && !this._showFast && !this._lineShowFast) { // 瞬間表示要求なし
+            this._waitCount = this._characterWait;
+        }
+    };
+
+    const _Window_Message_processEscapeCharacter = Window_Message.prototype.processEscapeCharacter;
+    /**
+     * エスケープキャラクタを処理する。
+     * 
+     * @param {string} code コード
+     * @param {object} textState TextStateオブジェクト
+     */
+    Window_Message.prototype.processEscapeCharacter = function(code, textState) {
+        switch (code) {
+            case "CWAIT":
+                {
+                    const waitFrames = this.obtainEscapeParam(textState);
+                    this._characterWait = waitFrames;
+                }
+                break;
+            case "WAIT":
+                {
+                    const waitFrames = this.obtainEscapeParam(textState);
+                    if (waitFrames > 0) {
+                        this.startWait(waitFrames);
+                    }
+                }
+                break;
+            default:
+                _Window_Message_processEscapeCharacter.call(this, code, textState);
+                break;
+        }
+    };
 
 })();
