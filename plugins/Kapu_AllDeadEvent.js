@@ -121,15 +121,18 @@
      * 全滅時実行イベントを更新する。
      */
     Game_Map.prototype.updateAllDeadEvent = function() {
-        if ($gameParty.isAllDead()) {
-            if ($gameSystem.allDeadEventId() > 0) { // 全滅時実行イベントが設定されている？
-                if (this._allDeadEventInterpreter == null) {
-                    const dataCommonEvent = $dataCommonEvents[$gameSystem.allDeadEventId];
-                    this._allDeadEventInterpreter = new Game_Interpreter()
-                    this._allDeadEventInterpreter.setup(dataCommonEvent.list);
+        if (!this._interpreter.isRunning()) { // 実行中のイベントは無い？
+            if ($gameParty.isAllDead()) {
+                if ($gameSystem.allDeadEventId() > 0) { // 全滅時実行イベントが設定されている？
+                    if (this._allDeadEventInterpreter == null) {
+                        $gameScreen.startFadeOut(10); //フェードアウトさせる
+                        const dataCommonEvent = $dataCommonEvents[$gameSystem.allDeadEventId()];
+                        this._allDeadEventInterpreter = new Game_Interpreter()
+                        this._allDeadEventInterpreter.setup(dataCommonEvent.list);
+                    }
+                } else {
+                    SceneManager.goto(Scene_Gameover); // ゲームオーバーにする。
                 }
-            } else {
-                SceneManager.goto(Scene_Gameover); // ゲームオーバーにする。
             }
         }
     };
@@ -180,14 +183,15 @@
      */
     Scene_Base.prototype.checkGameover = function() {
         if ($gameParty.isAllDead() && ($gameSystem.allDeadEventId() > 0)) {
-            if (SceneManager._scene && SceneManager._scene.constructor !== SceneMap) { // Scene_Mapでない？
+            if (SceneManager._scene && SceneManager._scene.constructor !== Scene_Map) { // Scene_Mapでない？
                 $gameScreen.startFadeOut(10); //フェードアウトさせる
-                SceneManager.pop(); // 前のシーンに戻す。
+                SceneManager.goto(Scene_Map); // マップに戻る。
             }
         } else {
             _Scene_Base_checkGameover.call(this);            
         }
     };
+
     //------------------------------------------------------------------------------
     // BattleManager
     /**
