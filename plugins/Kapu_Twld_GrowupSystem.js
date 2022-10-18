@@ -164,8 +164,8 @@
 
 
         // レベルを1に戻す。
-        this._gotGpLevel = this._level;
         this.changeLevel(1, false);
+        this._gotGpLevel = 1;
         this._reincarnationCount++;
 
         // 経験値全リセット
