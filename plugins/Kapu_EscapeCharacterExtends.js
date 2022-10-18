@@ -19,6 +19,10 @@
  * \EVAL[formula$] - formula$を評価した結果に置換します。例) $gameVariables.value(1)|
  * 
  * 制御
+ * \PLAYME[file$,volume#,pitch#,pan#] - 指定したMEを鳴らす。待機はしない。必要なら\WAITを使うこと。
+ * \PLAYSE[file$,volume#,pitch#,pan#] - 指定したSEを鳴らす。待機はしない。必要なら\WAITを使うこと。
+ * \FADEOUTME[time#] - MEをフェードアウトさせる。
+ * \STOPME - MEを停止
  * \CWAIT[frame#] - 1文字出力する毎に、frame#で指定したウェイトを入れます。
  *                  (瞬間表示時はウェイトが入りません。)
  *                  メッセージ切り替わりでリセットされます。
@@ -29,15 +33,19 @@
  * ■ 使用時の注意
  * 
  * ■ プラグイン開発者向け
+ * ベースのソースコードを見るとわかるが、エスケープキャラクタに使用できるのは基本的にアルファベットである。
+ * アルファベット以外を使用したい場合には、Window_BaseまたはWindow_MessageのobtainEscapeCodeを
+ * フックまたはオーバーライドして拡張する必要がある。
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
- * 
+ * なし。
  * 
  * ============================================
  * ノートタグ
  * ============================================
+ * なし。
  * 
  * ============================================
  * 変更履歴
@@ -249,6 +257,31 @@
      */
     Window_Message.prototype.processEscapeCharacter = function(code, textState) {
         switch (code) {
+            case "PLAYME":
+                {
+                    const audio = this.obtainAudioParam(textState);
+                    if (audio && audio.name) { // 有効なデータがある？
+                        AudioManager.playMe(audio);
+                    }
+                }
+                break;
+            case "FADEOUTME":
+                {
+                    const frames = this.obtainEscapeParam(textState) || 0;
+                    AudioManager.fadeOutMe(frames / 60);
+                }
+                break;
+            case "STOPME":
+                AudioManager.stopMe();
+                break;
+            case "PLAYSE":
+                {
+                    const audio = this.obtainAudioParam(textState);
+                    if (audio && audio.name) { // 有効なデータがある？
+                        AudioManager.playSe(audio);
+                    }
+                }
+                break;
             case "CWAIT":
                 {
                     const waitFrames = this.obtainEscapeParam(textState);
@@ -266,6 +299,39 @@
             default:
                 _Window_Message_processEscapeCharacter.call(this, code, textState);
                 break;
+        }
+    };
+
+    /**
+     * textStateからオーディオパラメータを入手する。
+     * 
+     * @param {TextState} textState テキストステート
+     * @returns {object} オーディオパラメータ。データがない場合にはnull.
+     */
+    Window_Message.prototype.obtainAudioParam = function(textState) {
+        const regExp = /^\[([^\]]+)\]/; // 続く'['から']'までを取り出す。
+        const match = regExp.exec(textState.text.slice(textState.index));
+        if (match) {
+            textState.index += match[0].length; // インデックスを進める
+            const params = match[1].split(',');
+
+            let name = (params.length > 0) ? params[0] : "";
+            if (name.startsWith("\"") && name.endsWith("\"")) {
+                name = name.slice(1, name.length - 1);
+            } else if (name.startsWith("'") && name.endsWith("'")) {
+                name = name.slice(1, name.length - 1);
+            }
+            const volume = (params.length > 1) ? (Number(params[1]) || 100) : 100;
+            const pitch = (params.length > 2) ? (Number(params[2]) || 100) : 100;
+            const pan = (params.length > 3) ? (Number(params(3)) || 0) : 0;
+            return {
+                name : name,
+                volume : volume,
+                pitch : pitch,
+                pan : pan
+            };
+        } else {
+            return null;
         }
     };
 
