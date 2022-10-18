@@ -13,6 +13,9 @@
  * \ITEM[id#] - id#のアイテム名に置換します。
  * \WEAPON[id#] - id#の武器名に置換します。
  * \ARMOR[id#] - id#の防具名に置換します。
+ * \ENEMY[id#] - id#のエネミー名に置換します。
+ * \TROOP[id#] - id#のエネミーグループ名に置換します。
+ * \MAPNAME - 現在のマップ名に置換します。
  * \EVAL[formula$] - formula$を評価した結果に置換します。例) $gameVariables.value(1)|
  * 
  * 制御
@@ -43,7 +46,7 @@
  */
 (() => {
     'use strict';
-        /* eslint no-control-regex : 0 */
+    /* eslint no-control-regex : 0 */
     // const pluginName = "Kapu_EscapeCharacterExtends";
     // const parameters = PluginManager.parameters(pluginName);
 
@@ -112,6 +115,25 @@
     TextManager.armorName = function(id) {
         return TextManager.collectionName($dataArmors, id);
     };
+    /**
+     * エネミー名を得る。
+     * 
+     * @param {number} id ID
+     * @returns {string} エネミー名
+     */
+    TextManager.enemyName = function(id) {
+        return TextManager.collectionName($dataEnemies, id);
+    };
+    /**
+     * 敵グループ名を得る。
+     * 
+     * @param {number} id ID
+     * @returns {string} 敵グループ名
+     */
+    TextManager.troopName = function(id) {
+        return TextManager.collectionName($dataTroops, id);
+    }
+
 
     //------------------------------------------------------------------------------
     // Window_Base
@@ -156,8 +178,18 @@
     Window_Base.prototype.convertEscapeCharacters = function(text) {
         // \Vや\Nなどの処理
         text = _Window_Base_convertEscapeCharacters.call(this, text);
+        // eslint-disable-next-line no-unused-vars
+        text = text.replace(/\x1bMAPNAME/gi, (_, p1) =>
+            $gameMap.displayName()
+        );
         text = text.replace(/\x1bCLASSNAME\[(\d+)\]/gi, (_, p1) =>
             TextManager.className(parseInt(p1))
+        );
+        text = text.replace(/\x1bENEMY\[(\d+)\]/gi, (_, p1) =>
+            TextManager.itemName(parseInt(p1))
+        );
+        text = text.replace(/\x1bTROOP\[(\d+)\]/gi, (_, p1) =>
+            TextManager.itemName(parseInt(p1))
         );
         text = text.replace(/\x1bITEM\[(\d+)\]/gi, (_, p1) =>
             TextManager.itemName(parseInt(p1))

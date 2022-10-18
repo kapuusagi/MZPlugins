@@ -86,6 +86,62 @@
  * @type struct<ChoiceItem>[]
  * @default []
  * 
+ * @command playSystemSe
+ * @text システム効果音を鳴らす
+ * 
+ * @arg type
+ * @text 種類
+ * @desc 効果音の種類
+ * @type select
+ * @default 1
+ * @option カーソル音
+ * @value 0
+ * @option 決定音
+ * @value 1
+ * @option キャンセル音
+ * @value 2
+ * @option ブザー(選択不可音)
+ * @value 3
+ * @option 装備音(装備変更時の音)
+ * @value 4
+ * @option セーブ時
+ * @value 5
+ * @option ロード時
+ * @value 6
+ * @option 戦闘開始
+ * @value 7
+ * @option 逃走
+ * @value 8
+ * @optin 敵の攻撃
+ * @value 9
+ * @option 敵のダメージ
+ * @value 10
+ * @option 敵消滅
+ * @value 11
+ * @option 敵消滅1
+ * @value 12
+ * @option 敵消滅2
+ * @value 13
+ * @option アクターダメージ
+ * @value 14
+ * @option アクター戦闘不能
+ * @value 15
+ * @option リカバリー
+ * @value 16
+ * @option ミス
+ * @value 17
+ * @option 回避
+ * @value 18
+ * @optin 魔法回避
+ * @value 19
+ * @option 反射
+ * @value 20
+ * @option ショップ(購入/売却)
+ * @value 21
+ * @option アイテム使用
+ * @value 22
+ * @option スキル使用
+ * @value 23
  * 
  * 
  * 
@@ -102,12 +158,17 @@
  * プラグインコマンド
  * ============================================
  * パーティーに変数で指定したアクターを追加
+ *     ベーシックシステムでは変数指定することができなかったため、追加した。
  * 
  * パーティーから変数で指定したアクターを外す
+ *     ベーシックシステムでは変数指定することができなかったため、追加した。
  * 
  * 選択肢を表示して結果を変数に格納する
- *     選択肢を表示して結果を変数に格納する
+ *     選択肢を表示して結果を変数に格納する。
  * 
+ * システム効果音を鳴らす
+ *     データベースで設定した効果音を鳴らす。
+ *     
  * ============================================
  * ノートタグ
  * ============================================
@@ -256,6 +317,17 @@
                 $gameVariables.setValue(variableId, defaultIndex);
             }
         }
+    });
+
+    /**
+     * システム効果音を鳴らす
+     */
+    PluginManager.registerCommand(pluginName, "playSystemSe", args => {
+        const type = Number(args.type);
+        if (type >= 0) {
+            SoundManager.playSystemSound(type);
+        }
+
     });
 
 
