@@ -2104,7 +2104,11 @@ $dataItemScopes = null;
             return false;
         } else {
             const user = this.user();
-            return user.canUse(item) && this.isItemEffectsValidWithUser(user);
+            if (user) {
+                return user.canUse(item) && this.isItemEffectsValidWithUser(user);
+            } else {
+                return false;
+            }
         }
     };
 
