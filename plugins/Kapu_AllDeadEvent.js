@@ -58,6 +58,12 @@
  * 
  * 
  * ■ 使用時の注意
+ * 全滅イベントでは、以下のいずれかを行う必要があります。
+ * ・1名以上のパーティーメンバーを復帰させる。
+ * ・パーティーメンバーを0にする。
+ * ・全滅イベントを0(設定無し)にする。
+ * 上記をやらない場合、延々と全滅イベントが呼び出され、復帰しなくなります。
+ * 
  * BattleManager.updateBattleEnd()をオーバーライドする系統のプラグインと競合します。
  * プラグインにより、全滅処理が追加されている場合、
  * このプラグインで設定したイベントが呼び出されない場合があります。
@@ -126,72 +132,6 @@
 
     //------------------------------------------------------------------------------
     // Game_Map
-    const _Game_Map_initialize = Game_Map.prototype.initialize;
-    /**
-     * Game_Mapを初期化する。
-     */
-    Game_Map.prototype.initialize = function() {
-        _Game_Map_initialize.call(this);
-        this._allDeadEventInterpreter = null;
-    };
-
-    const _Game_Map_updateInterpreter = Game_Map.prototype.updateInterpreter;
-    /**
-     * 実行中のインタプリタを更新する。
-     * 
-     * 全滅時イベント実行中は、他のインタプリタを更新しない。
-     */
-    Game_Map.prototype.updateInterpreter = function() {
-        if (this._allDeadEventInterpreter) { // 全滅時イベント実行中？
-            if (this._allDeadEventInterpreter.isRunning()) {
-                this._allDeadEventInterpreter.update();
-            } else {
-                if ($gameParty.isAllDead()) {
-                    // 動作完了しているが、isAllDead()条件を満たしたままなので、ハングアップ
-                    SceneManager.goto(Scene_Gameover); // ゲームオーバーにする。
-                } else {
-                    this._allDeadEventInterpreter = null; // 全滅時実行イベントを終了。
-                }
-            }
-        } else {
-            _Game_Map_updateInterpreter.call(this);            
-        }
-
-    };
-
-    const _Game_Map_updateEvents = Game_Map.prototype.updateEvents;
-    /**
-     * イベントを更新する。
-     * 
-     * @note 全滅時イベントが実行中、イベントのトリガ判定を行わない。
-     */
-    Game_Map.prototype.updateEvents = function() {
-        this.updateAllDeadEvent();
-        if (!this._allDeadEventInterpreter) { // 全滅時イベントは実行中でない？
-            _Game_Map_updateEvents.call(this);
-        }
-    };
-
-    /**
-     * 全滅時実行イベントを更新する。
-     */
-    Game_Map.prototype.updateAllDeadEvent = function() {
-        if (!this._interpreter.isRunning()) { // 実行中のイベントは無い？
-            if ($gameParty.isAllDead()) {
-                if ($gameSystem.allDeadEventId() > 0) { // 全滅時実行イベントが設定されている？
-                    if (this._allDeadEventInterpreter == null) {
-                        $gameScreen.startFadeOut(10); //フェードアウトさせる
-                        const dataCommonEvent = $dataCommonEvents[$gameSystem.allDeadEventId()];
-                        this._allDeadEventInterpreter = new Game_Interpreter()
-                        this._allDeadEventInterpreter.setup(dataCommonEvent.list);
-                    }
-                } else {
-                    SceneManager.goto(Scene_Gameover); // ゲームオーバーにする。
-                }
-            }
-        }
-    };
-
     /**
      * 現在実行中のイベントを強制終了する。
      */
@@ -201,6 +141,39 @@
         }
     };
 
+    const _Game_Map_setupStartingEvent = Game_Map.prototype.setupStartingEvent;
+    /**
+     * 次に実行するイベントをセットアップする。
+     * 
+     * @returns {boolean} 次に実行するイベントがある場合にはtrue, それ以外はfalse.
+     */
+    Game_Map.prototype.setupStartingEvent = function() {
+        if (this.setupAllDeadEvent()) {
+            return true;
+        } else {
+            return _Game_Map_setupStartingEvent.call(this);
+        }
+    };
+
+    /**
+     * 全滅イベントをセットアップする。
+     * 
+     * @note 次のイベントをセットアップする(setupStartingEvent())際に呼び出される。
+     * @returns {boolean} 次に実行するイベントがある場合にはtrue, それ以外はfalse.
+     */
+    Game_Map.prototype.setupAllDeadEvent = function() {
+        if ($gameParty.isAllDead() // 全滅？
+                && ($gameSystem.allDeadEventId() > 0)) { // 全滅イベントが有効？
+            const event = $dataCommonEvents[$gameSystem.allDeadEventId()];
+            if (event) {
+                $gameScreen.startFadeOut(10); //フェードアウトさせる
+                this._interpreter.setup(event.list);
+                return true;
+            }
+        }
+
+        return false;
+    };
     //------------------------------------------------------------------------------
     // Scene_Base
     const _Scene_Base_checkGameover = Scene_Base.prototype.checkGameover;
@@ -218,6 +191,8 @@
             _Scene_Base_checkGameover.call(this);            
         }
     };
+
+
 
     //------------------------------------------------------------------------------
     // BattleManager
