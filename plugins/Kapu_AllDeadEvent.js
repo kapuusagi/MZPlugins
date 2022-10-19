@@ -19,13 +19,43 @@
  * @type common_event
  * @default 0
  * 
+ * 
+ * @param reviveAtBattleLoseSwitchId
+ * @text 戦闘敗北時に復活させるかどうかを制御するスイッチ
+ * @desc 戦闘で敗北可能設定されて敗北したとき、復活させるかどうかを制御するスイッチ。設定なしだと無条件で復活させる。
+ * @type switch
+ * @default 0
+ * 
  * @help 
  * 全滅時に特定のコモンイベントを実行するようにするプラグインです。
  * 戦闘中に全滅した場合、敗北可能に設定していた場合は呼び出されません。
  * 
- * <Note>
- * イベント処理中に全滅すると、こっちのイベントが優先されるので、
- * 期待した動作をしないかも。
+ * コモンイベントを呼び出す前に、フェードアウトします。
+ * コモンイベントにて、復帰処理を行った後、適切にフェードイン処理を呼び出す必要があります。
+ * 
+ * 動作としては次のようになります。
+ * a) ランダムエンカウントでの戦闘全滅時
+ *     全滅時イベントが設定されている → フェードアウト後、マップに戻ってコモンイベント呼び出し。
+ *     全滅時イベントが設定されていない → ゲームオーバー
+ * b) イベントでの全滅時(ダメージを与えるコマンドで全滅させた場合)
+ *     全滅時イベントが設定されている → イベント処理継続後、全滅イベント呼び出し
+ *     全滅時イベントが設定されていない → イベント処理継続後、ゲームオーバー
+ * c) イベントからの戦闘で全滅時
+ *     敗北許可設定されている
+ *         → 戦闘敗北時に復活させるかどうかの制御スイッチ未設定 → 全メンバーがHP1で復活して敗北時処理を実行。
+ *         → 戦闘敗北時に復活させるかどうかの制御スイッチがON → 全メンバーがHP1で復活して敗北時処理を実行。
+ *         → 戦闘敗北時に復活させるかどうかの制御スイッチがOFF → 敗北時処理を実行。メンバーが全滅したままであれば、そのまま全滅イベントが呼び出される。
+ *     敗北許可設定されていない
+ *         → 全滅時イベントが設定されている → マップに戻ってコモンイベント呼び出し
+ *         → 全滅時イベントが設定されていない → マップに戻ってゲームオーバー
+ * 
+ * d) アイテム使用での全滅時(パーティーメンバーにダメージを与えるアイテム使用など)
+ *      aと同じ
+ * 
+ * e) 床ダメージでの全滅時
+ *     aと同じ
+ * 
+ * 
  * 
  * ■ 使用時の注意
  * BattleManager.updateBattleEnd()をオーバーライドする系統のプラグインと競合します。
@@ -50,7 +80,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.1.0.0 動作確認。
  */
 (() => {
     'use strict';
@@ -58,6 +88,7 @@
     const parameters = PluginManager.parameters(pluginName);
 
     const defaultAllDeadEventId = Math.floor(parameters["defaultAllDeadEventId"]);
+    const reviveAtBattleLoseSwitchId = Number(parameters["reviveAtBattleLoseSwitchId"]) || 0;
 
     PluginManager.registerCommand(pluginName, "changeEvent", args => {
         const eventId = Math.floor(Number(args.eventId) || 0);
@@ -104,40 +135,7 @@
         this._allDeadEventInterpreter = null;
     };
 
-    const _Game_Map_update = Game_Map.prototype.update;
-    /**
-     * Game_Mapを更新する。
-     * 
-     * @param {boolean} sceneActive シーンがアクティブかどうか
-     */
-    Game_Map.prototype.update = function(sceneActive) {
-        if (sceneActive) {
-            this.updateAllDeadEvent();
-        }
-        _Game_Map_update.call(this, sceneActive);
-    };
-
-    /**
-     * 全滅時実行イベントを更新する。
-     */
-    Game_Map.prototype.updateAllDeadEvent = function() {
-        if (!this._interpreter.isRunning()) { // 実行中のイベントは無い？
-            if ($gameParty.isAllDead()) {
-                if ($gameSystem.allDeadEventId() > 0) { // 全滅時実行イベントが設定されている？
-                    if (this._allDeadEventInterpreter == null) {
-                        $gameScreen.startFadeOut(10); //フェードアウトさせる
-                        const dataCommonEvent = $dataCommonEvents[$gameSystem.allDeadEventId()];
-                        this._allDeadEventInterpreter = new Game_Interpreter()
-                        this._allDeadEventInterpreter.setup(dataCommonEvent.list);
-                    }
-                } else {
-                    SceneManager.goto(Scene_Gameover); // ゲームオーバーにする。
-                }
-            }
-        }
-    };
     const _Game_Map_updateInterpreter = Game_Map.prototype.updateInterpreter;
-
     /**
      * 実行中のインタプリタを更新する。
      * 
@@ -168,11 +166,40 @@
      * @note 全滅時イベントが実行中、イベントのトリガ判定を行わない。
      */
     Game_Map.prototype.updateEvents = function() {
+        this.updateAllDeadEvent();
         if (!this._allDeadEventInterpreter) { // 全滅時イベントは実行中でない？
             _Game_Map_updateEvents.call(this);
         }
     };
 
+    /**
+     * 全滅時実行イベントを更新する。
+     */
+    Game_Map.prototype.updateAllDeadEvent = function() {
+        if (!this._interpreter.isRunning()) { // 実行中のイベントは無い？
+            if ($gameParty.isAllDead()) {
+                if ($gameSystem.allDeadEventId() > 0) { // 全滅時実行イベントが設定されている？
+                    if (this._allDeadEventInterpreter == null) {
+                        $gameScreen.startFadeOut(10); //フェードアウトさせる
+                        const dataCommonEvent = $dataCommonEvents[$gameSystem.allDeadEventId()];
+                        this._allDeadEventInterpreter = new Game_Interpreter()
+                        this._allDeadEventInterpreter.setup(dataCommonEvent.list);
+                    }
+                } else {
+                    SceneManager.goto(Scene_Gameover); // ゲームオーバーにする。
+                }
+            }
+        }
+    };
+
+    /**
+     * 現在実行中のイベントを強制終了する。
+     */
+    Game_Map.prototype.terminateCurrentEvent = function() {
+        if (this._interpreter.isRunning()) {
+            this._interpreter.terminate();
+        }
+    };
 
     //------------------------------------------------------------------------------
     // Scene_Base
@@ -207,11 +234,14 @@
             SceneManager.exit();
         } else if (!this._escaped && $gameParty.isAllDead()) {
             if (this._canLose) {
-                $gameParty.reviveBattleMembers();
+                if ((reviveAtBattleLoseSwitchId === 0) // 戦闘敗北時復活制御スイッチが未設定？
+                        || $gameSwitches.value(reviveAtBattleLoseSwitchId)) { // 戦闘敗北時復活制御スイッチがON？
+                    $gameParty.reviveBattleMembers();
+                }
                 SceneManager.pop();
             } else {
                 if ($gameSystem.allDeadEventId() > 0) {
-                    $gameScreen.startFadeOut(10); //フェードアウトさせる
+                    $gameMap.terminateCurrentEvent(); // イベント実行中なら強制終了。
                     SceneManager.pop(); // マップに戻る
                 } else {
                     SceneManager.goto(Scene_Gameover);
@@ -222,10 +252,4 @@
         }
         this._phase = "";
     };    
-
-
-    //------------------------------------------------------------------------------
-    // TODO : メソッドフック・拡張
-
-
 })();
