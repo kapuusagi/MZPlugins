@@ -29,6 +29,32 @@
  * @type variable
  * @default 0
  * 
+ * @command releaseEquipments
+ * @text 装備を解除する。プラグイン等で同じetypeIdが複数スロットにある場合、両方解除される。
+ * 
+ * @arg actorId
+ * @text アクターID
+ * @desc 対象のアクターID(直接指定)
+ * @type actor
+ * @default 0
+ * 
+ * @arg actorVariableId
+ * @text アクターID(変数指定)
+ * @desc 対象のアクターID(変数指定)
+ * @type variable
+ * @default 0
+ * 
+ * @arg etypeId
+ * @text 解除する装備タイプ
+ * @desc 解除する対象の装備タイプ番号。0で全て解除
+ * @type number
+ * @default 0
+ * 
+ * @arg etypeVariableId
+ * @text 解除する装備タイプ(変数指定)
+ * @desc 解除する対象の装備タイプ番号(変数指定)。
+ * @type variable
+ * @default 0
  * 
  * @command choice
  * @text 選択肢を表示して結果を変数に格納する
@@ -357,6 +383,33 @@
 
         return true;
     };
+
+    /**
+     * 装備解除
+     */
+    PluginManager.registerCommand(pluginName, "releaseEquipments", args => {
+        const actorVariableId = Number(args.actorVariableId) || 0;
+        const actorId = (actorVariableId > 0) 
+                ? $gameVariables.value(actorVariableId)
+                : (Number(args.actorId) || 0);
+        const etypeVariableId = Number(args.etypeVariableId) || 0;
+        const etypeId = (etypeVariableId > 0) 
+                ? $gameVariables.value(etypeVariableId)
+                : (Number(args.etypeId) || 0);
+
+        if ((actorId > 0) && (actorId < $dataActors.length)) {
+            const actor = $gameActors.actor(actorId);
+            const equips = actor.equips();
+            for (let slotId = 0; slotId < equips.length; slotId++) {
+                const equip = equips[slotId];
+                if (equip  // 装備している？
+                        && ((etypeId === 0) || (equip.etypeId === etypeId))) { // 全解除 or 装備タイプ一致
+                    actor.changeEquip(slotId, null);
+                }
+            }
+        }
+
+    });
 
     /**
      * 選択肢を表示して結果を変数に格納する
