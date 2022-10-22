@@ -4,11 +4,21 @@
  * @author kapuusagi
  * @url https://github.com/kapuusagi/MZPlugins/tree/master/plugins
  * 
+ * @command setNextBattleBgm
+ * @text 次の戦闘のBGMを指定する
+ * @desc 次に発生する戦闘のBGMを指定します。有利不利状態、ランダム設定状態に依らず、優先されます。
+ * 
+ * @arg bgm
+ * @text BGMデータ
+ * @desc BGMデータ
+ * @type struct<BgmEntry>
+ * @default {"name":"","volume":"90","pitch":"100","pan":"0"}
+ * 
  * @command clearBattleBgm
  * @text 戦闘BGM指定解除
  * 
  * @command addBattleBgm
- * @text 戦闘BGMを追加する
+ * @text ランダムに鳴らす戦闘BGMを追加する
  * 
  * @arg name 
  * @text 識別名
@@ -22,7 +32,7 @@
  * @default {"name":"","volume":"90","pitch":"100","pan":"0"}
  * 
  * @command removeBattleBgm
- * @text 戦闘BGMを削除する。
+ * @text ランダムに鳴らす戦闘BGMを削除する
  * 
  * @arg name 
  * @text 識別名
@@ -66,6 +76,8 @@
  * @type struct<BgmEntry>
  * @default {"name":"","volume":"90","pitch":"100","pan":"0"}
  * 
+ * 
+ * 
  * @param randomizeBattleBgm
  * @text 戦闘BGMランダマイズ状態初期値
  * @desc 戦闘BGMランダマイズ状態初期値（NewGame時の初期値）
@@ -102,15 +114,51 @@
  * @parent useBattleBgmSurprise
  * 
  * @help 
+ * 鳴らす戦闘BGMについて、以下の拡張を行います。
+ * A. 設定された候補からランダムに鳴らします。
+ * B. ランダムに鳴らすかどうかを設定できます。
+ * C. 有利(先制攻撃)、不利(急襲)の場合に、特定のBGMを鳴らすように設定できます。
+ * 
+ * 鳴らされるBGMの決定順位
+ * 1. 次の戦闘BGM設定で指定されたもの。
+ * 2. 有利戦闘BGM / 不利戦闘BGM の設定が有効で、有利戦闘/不利戦闘
+ * 3. マップに戦闘BGMが設定されている
+ * 4. ランダム選択が有効で、ランダム選択候補がある場合はその中から選択
+ * 5. インタプリタコマンドで変更された戦闘BGM
+ * 6. データベースで設定した戦闘BGM初期設定
  * 
  * ■ 使用時の注意
+ * イベント戦闘などで、特定のBGMを鳴らしたい場合には
+ * 本プラグインの、「次の戦闘のBGMを指定する」コマンドを使用してください。
+ * 
  * 
  * ■ プラグイン開発者向け
  * 
  * ============================================
  * プラグインコマンド
  * ============================================
+ * 次の戦闘のBGMを指定する
+ *   次に発生した戦闘のBGMを明示的に指定します。
+ *   なしにすると設定解除になります。
+ *   戦闘終了により、自動的にクリアされます。
  * 
+ * 戦闘BGM指定解除
+ *   次の戦闘BGM指定を解除します。
+ * 
+ * ランダムに鳴らす戦闘BGMを追加する
+ *   ランダムに鳴らす対象の戦闘BGM候補を追加します。
+ * 
+ * ランダムに鳴らす戦闘BGMを削除する
+ *   ランダムに鳴らす対象の戦闘BGM削除します。
+ * 
+ * 戦闘BGMランダム機能設定
+ *   ランダムに鳴らす機能の有効/無効を設定します。
+ * 
+ * 戦闘BGM指定（有利状況）
+ *   有利な状態で開始する戦闘で、特定のBGMを鳴らすかどうかを設定します。
+ * 
+ * 戦闘BGM指定（不利状況）
+ *   不利な状態で開始する戦闘で、特定のBGMを鳴らすかどうかを設定します。
  * 
  * ============================================
  * ノートタグ
@@ -149,7 +197,7 @@
  * 
  * @param pitch
  * @text ピッチ
- * @desc ピッチ(50～150)
+ * @desc ピッチ(50～150)。100が標準
  * @type number
  * @min 50
  * @max 150
@@ -157,7 +205,7 @@
  * 
  * @param pan
  * @text パン
- * @desc パン(-100～100)
+ * @desc パン(-100～100)。0が中央。
  * @type number
  * @min -100
  * @max 100
@@ -269,6 +317,21 @@
         }
     });
 
+    PluginManager.registerCommand(pluginName, "setNextBattleBgm", args=> {
+        try {
+            const bgm = JSON.parse(args.bgm);
+            if (bgm.name) {
+                $gameSystem.setNextBattleBgm(bgm);
+            } else {
+                $gameSystem.setNextBattleBgm(null);
+            }
+        }
+        catch (e) {
+            console.error(e);
+        }
+
+    });
+
     //------------------------------------------------------------------------------
     // Game_Map
 
@@ -341,10 +404,20 @@
         this.clearNextBattleBgm();
     };
 
+    /**
+     * 先制したときの戦闘BGMを設定する。
+     * 
+     * @param {Bgm} bgm 
+     */
     Game_System.prototype.setBattleBgmPreemptive = function(bgm) {
         this._battleBgmPreemptive = bgm;
     };
 
+    /**
+     * 強襲されたときの戦闘BGMを設定する。
+     * 
+     * @param {Bgm} bgm 
+     */
     Game_System.prototype.setBattleBgmSurprise = function(bgm) {
         this._battleBgmSurprise = bgm;
     };
@@ -372,9 +445,17 @@
      */
     Game_System.prototype.clearNextBattleBgm = function() {
         this._nextBattleBgm = null;
+        this._prioerityNextBattleBgm = null;
     };
 
-
+    /**
+     * 次の戦闘BGMを設定する。
+     * 
+     * @param {Bgm} bgm BGM (nullで解除)
+     */
+    Game_System.prototype.setNextBattleBgm = function(bgm) {
+        this._prioerityNextBattleBgm = bgm;
+    };
 
     /**
      * 戦闘BGMをセットアップする。
@@ -383,21 +464,23 @@
      *       この時点では有利状態・不利状態は分からない。
      */
     Game_System.prototype.setupNextBattleBgm = function() {
-        if (this._isRandomizeBattleBgm) {
+        if (this._prioerityNextBattleBgm) {
+            // 優先BGMが設定されているので処理しない。
+        } else {
             const bgm = $gameMap.battleBgm();
-            if (bgm) {
-                this._nextBattleBgm = bgm;
-            } else {
+            if (bgm) { // マップに戦闘BGMが設定されている？
+                this._nextBattleBgm = bgm; // マップに設定されたBGMを優先する。
+            } else if (this._isRandomizeBattleBgm) { // ランダムにならす設定が有効？
                 const randomBattleBgms = this.randomBattleBgms();
                 if (randomBattleBgms.length > 0) {
                     const index = Math.randomInt(randomBattleBgms.length);
                     this._nextBattleBgm = randomBattleBgms[index];
                 } else {
-                    this._nextBattleBgm = this._battleBgm ?? $dataSystem.battleBgm;
+                    this._nextBattleBgm = null;
                 }
+            } else {
+                this._nextBattleBgm = null;
             }
-        } else {
-            this._nextBattleBgm = null;
         }
     };
 
@@ -405,10 +488,15 @@
     /**
      * 戦闘BGMを得る。
      * 
+     * @note 呼び出されるタイミングの都合上、有利戦闘か不利戦闘かの判定は
+     *       この時点でしかわからない。
+     * 
      * @returns {object} BGMデータ。未指定時はnull
      */
     Game_System.prototype.battleBgm = function() {
-        if (BattleManager.isPreemptive() &&  this._battleBgmPreemptive) {
+        if (this._prioerityNextBattleBgm) {
+            return this._prioerityNextBattleBgm;
+        } if (BattleManager.isPreemptive() &&  this._battleBgmPreemptive) {
             // 有利戦闘で曲設定あり。
             return this._battleBgmPreemptive;
         } else if (BattleManager.isSurprise() && this._battleBgmSurprise) {
