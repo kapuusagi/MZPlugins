@@ -179,6 +179,10 @@
  * @type struct<CorrectEntry>[]
  * @default []
  * 
+ * @param friendlyPointStringTable
+ * @text 友好度を文字列置換したときのテキスト
+ * @type struct<FriendlyPointStringEntry>[]
+ * @default []
  * 
  * @help 
  * FS向けの変更
@@ -196,6 +200,10 @@
  *     友好度が高いほど初期TP増加
  *     友好度が高いほどダメージ増加
  *     友好度が低いとダメージ低下(最低時-1)
+ * ・友好度状態を取得するエスケープシーケンスを追加。
+ *     /FPSTR[id#] id#のアクターの友好度を表す文字列を返す。
+ *     /FPICON[id#] id#のアクターの友好度を表すアイコンを描画。
+ * 
  * 
  * ■ 使用時の注意
  * 
@@ -246,6 +254,22 @@
  * @max 10000.00
  * @decimals 2
  *
+ */
+/*~struct~FriendlyPointStringEntry:
+ *
+ * @param friendlyPoint
+ * @text 友好度下限値
+ * @desc この文字列表現を採用する、友好度の下限。
+ * @type number
+ * @min -10000
+ * @max 10000
+ * @default 0
+ * 
+ * @param fpString
+ * @text 友好度表現
+ * @desc 友好度を表す文字列。
+ * @type string
+ * @default 普通
  */
 (() => {
     'use strict';
@@ -301,7 +325,7 @@
             : Game_Actor.FRIENDLY_POINT_DEFAULT - displayFriendlyPointMin;
         const gaugeValue = (fp >= Game_Actor.FRIENDLY_POINT_DEFAULT)
             ? (fp - Game_Actor.FRIENDLY_POINT_DEFAULT)
-            : (fp - Game_Actor.FRIENDLY_POINT_MIN);
+            : (fp - displayFriendlyPointMin);
         const limitIconIndex = (fp >= Game_Actor.FRIENDLY_POINT_DEFAULT)
             ? (iconTable.length - 1) : 0;
         const isOverRange = (fp >= Game_Actor.FRIENDLY_POINT_DEFAULT)
@@ -328,18 +352,13 @@
      * テーブルに補正値エントリを追加する。
      * 
      * @param {Array<CorrectEntry>} table 
-     * @param {number} fp 友好度
-     * @param {number} rate 補正値
+     * @param {object} entry エントリー
      */
-    const _addCorrectEntry = function(table, fp, rate) {
-        const entry = {
-            friendlyPoint : fp,
-            correctRate : rate
-        };
+    const _addFpEntry = function(table, entry) {
         for (let i = 0; i < table.length; i++) {
-            if (fp < table[i].fp) {
+            if (entry.friendlyPoint < table[i].friendlyPoint) {
                 table.splice(i, 0, entry);
-                 return ;
+                return ;
             }
         }
 
@@ -359,8 +378,11 @@
                     const obj = JSON.parse(token);
                     const fp = Number(obj.friendlyPoint) || 0;
                     const rate = (Number(obj.correctRate) || 0.00) / 100.0;
-
-                    _addCorrectEntry(table, fp, rate);
+                    const entry = {
+                        friendlyPoint : fp,
+                        correctRate : rate
+                    };
+                    _addFpEntry(table, entry);
                 }
             }
         }
@@ -383,7 +405,7 @@
         }
 
         let i = table.length - 1;
-        while ((i>= 0) && (fp < table[i].friendlyPoint)) {
+        while ((i >= 0) && (fp < table[i].friendlyPoint)) {
             i--;
         }
         const prevIndex = i;
@@ -416,6 +438,38 @@
 
     const friendlyPointDamageCorrectionTable = _parseCorrentEntries(parameters["friendlyPointDamageCorrectionTable"]);
     const friendlyPointCriticalCorrectionTable = _parseCorrentEntries(parameters["friendlyPointCriticalCorrectionTable"]);
+
+    /**
+     * 友好度文字列テーブルを得る。
+     * 
+     * @param {string} paramStr パラメータ文字列
+     * @returns {Array<FriendlyPointStringEntry>} 友好度文字列テーブル
+     */
+    const _parseFriendlyPointStringTable = function(paramStr) {
+        const table = [];
+        try {
+            if (paramStr) {
+                const tokens = JSON.parse(paramStr);
+                for (const token of tokens) {
+                    const obj = JSON.parse(token);
+                    const fp = Number(obj.friendlyPoint);
+                    const text = obj.fpString;
+                    const entry = {
+                        friendlyPoint: fp,
+                        fpString: text
+                    };
+                    _addFpEntry(table, entry);
+                }
+            }
+        }
+        catch (e) {
+            console.error("_parseFriendlyPointStringTable failure : " + e);
+        }
+        return table;
+    };
+
+    const friendlyPointStringTable = _parseFriendlyPointStringTable(parameters["friendlyPointStringTable"]);
+
     /**
      * 友好度上昇
      */
@@ -491,6 +545,29 @@
             return 0;
         }
     };
+
+    //------------------------------------------------------------------------------
+    // TextManager
+
+    TextManager.getFriendlyPointString = function(fp) {
+        let index = friendlyPointStringTable.length - 1;
+        while (index >= 0) {
+            if (fp >= friendlyPointStringTable[index].friendlyPoint) {
+                break;
+            }
+            index--;
+        }
+        if (index < 0) {
+            index = 0;
+        }
+
+        const entry = friendlyPointStringTable[index];
+        if (entry) {
+            return entry.fpString;
+        }
+        return "-";
+    };
+
 
     //------------------------------------------------------------------------------
     // DataManager
@@ -862,7 +939,7 @@
                 const labelWidth = Math.min(48, (width - 40) * 0.3);
                 const paramWidth = Math.min(120, width - 40 - labelWidth - 8);
                 this.changeTextColor(ColorManager.systemColor());
-                this.drawText(TextManager.frindlyPointA, x, y, labelWidth);
+                this.drawText(TextManager.friendlyPointA, x, y, labelWidth);
 
                 if (displayFriendlyPointValue) {
                     this.changeTextColor(ColorManager.paramchangeTextColor(fp - Game_Actor.FRIENDLY_POINT_DEFAULT));
@@ -900,7 +977,7 @@
                 const labelWidth = Math.min(48, (width - 40) * 0.3);
                 const paramWidth = Math.min(120, width - 40 - labelWidth - 8);
                 this.changeTextColor(ColorManager.systemColor());
-                this.drawText(TextManager.frindlyPointA, x, y, labelWidth);
+                this.drawText(TextManager.friendlyPointA, x, y, labelWidth);
 
                 if (displayFriendlyPointValue) {
                     this.changeTextColor(ColorManager.normalColor());
@@ -919,6 +996,63 @@
             }
         };
     }
+
+    //------------------------------------------------------------------------------
+    // Window_Base
+    /**
+     * actorIdの友好度を表す文字列を得る。
+     * 
+     * @param {number} actorId アクターID
+     * @returns {string} 文字列
+     */
+    const _getFriendlyPointStringOfActor = function(actorId) {
+        const actor = $gameActors.actor(actorId);
+        if (actor && (actor.actorId() !== $gameSystem.mainActorId())) {
+            const fp = _getFriendlyPoint(actor);
+            return TextManager.getFriendlyPointString(fp);
+        } else {
+            return "-";
+        }
+    };
+
+
+    const _Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
+    /**
+     * エスケープキャラクタを変換する。
+     * 
+     * @param {string} text テキスト
+     * @returns {string} 置換済みテキスト
+     */
+    Window_Base.prototype.convertEscapeCharacters = function(text) {
+        text = _Window_Base_convertEscapeCharacters.call(this, text);
+        // eslint-disable-next-line no-control-regex
+        text = text.replace(/\x1bFPSTR\[(\d+)\]/gi, (_, p1) =>
+            _getFriendlyPointStringOfActor(parseInt(p1))
+        );
+        return text;
+    };
+
+    const _Window_Base_processEscapeCharacter = Window_Base.prototype.processEscapeCharacter;
+    /**
+     * エスケープキャラクタを処理する。
+     * 
+     * @param {string} code エスケープキャラクタ
+     * @param {TextState} textState テキストステートオブジェクト
+     */
+    Window_Base.prototype.processEscapeCharacter = function(code, textState) {
+        if (code === "FPICON") {
+            const id = this.obtainEscapeParam(textState);
+            const actor = $gameActors.actor(id);
+            if (actor && (actor.actorId() !== $gameSystem.mainActorId())) {
+                const fp = _getFriendlyPoint(actor);
+                const iconId = _getFriendlyPointIconId(fp);
+                this.processDrawIcon(iconId, textState);
+            }
+        } else {
+            _Window_Base_processEscapeCharacter.call(this, code, textState);
+        }
+    };
+    
     //------------------------------------------------------------------------------
     // TODO : メソッドフック・拡張
 

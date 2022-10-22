@@ -144,13 +144,13 @@
  * 
  * @param paramName
  * @text パラメータ名
- * @desc パラメータ名として扱う文字列。TextManager.frindlyPointで取得できる。
+ * @desc パラメータ名として扱う文字列。TextManager.friendlyPointで取得できる。
  * @type string
  * @default 友好度
  * 
  * @param paramNameA
  * @text パラメータ省略名
- * @desc パラメータ省略名として扱う文字列。TextManager.frindlyPointAで取得できる。
+ * @desc パラメータ省略名として扱う文字列。TextManager.friendlyPointAで取得できる。
  * @type string
  * @default FP
  * 
@@ -327,7 +327,7 @@
         },
         configurable: true
     });
-    Object.defineProperty(TextManager, "frindlyPointA", {
+    Object.defineProperty(TextManager, "friendlyPointA", {
         get: function() {
             return TextManager.getFriendlyPoint(true);
         },
