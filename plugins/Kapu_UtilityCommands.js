@@ -7,7 +7,6 @@
  * @command releaseParty
  * @text パーティー解散
  * 
- * 
  * @command addActorByVariable
  * @text パーティーに変数で指定したアクターを追加
  * 
@@ -236,6 +235,10 @@
  * @value 3
  * @default 0
  * 
+ * @command clearSelfSwitches
+ * @text セルフスイッチの全クリア
+ * 
+ * 
  * @help 
  * 標準のコマンドだけだとちょっとアレができない、というのをカバーする。
  * 
@@ -445,6 +448,14 @@
                     ? actor[pictureMethod]() : actor[pictureMethod];
             $gameScreen.showPicture(pictureId, pictureName, origin, x, y, xScale, yScale, alpha, synthesisMethod);
         }
+    });
+
+    /**
+     * 全セルフスイッチクリア
+     */
+    // eslint-disable-next-line no-unused-vars
+    PluginManager.registerCommand(pluginName, "clearSelfSwitches", args => {
+        $gameSelfSwitches.clear();
     });
 
 
