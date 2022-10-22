@@ -63,7 +63,7 @@
  * @arg variableId
  * @text 変数ID
  * @desc 指定変数の値で指定する場合。(アクター指定が優先されます。)
- * @type number
+ * @type variable
  * 
  * @arg enabled
  * @text パーティー変更可否
