@@ -20,8 +20,8 @@
  * @arg variableId
  * @text 変数ID
  * @desc アクターIDを変数で指定する場合に使用する。
+ * @type variable
  * @default 0
- * @type number
  * 
  * @arg value
  * @text 増加量
