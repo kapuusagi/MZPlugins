@@ -23,6 +23,8 @@
  * \PLAYME[file$,volume#,pitch#,pan#] - 指定したMEを鳴らす。待機はしない。必要なら\WAITを使うこと。
  * \PLAYSE[file$,volume#,pitch#,pan#] - 指定したSEを鳴らす。待機はしない。必要なら\WAITを使うこと。
  * \FADEOUTME[time#] - MEをフェードアウトさせる。
+ * \FACE[name$,index#] - name$, index# で指定される顔グラフィックを表示する
+ * \AFACE[id#] - アクター id# のアクター顔グラフィックを表示する。
  * \STOPME - MEを停止
  * \CWAIT[frame#] - 1文字出力する毎に、frame#で指定したウェイトを入れます。
  *                  (瞬間表示時はウェイトが入りません。)
@@ -51,7 +53,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.1.0.0 動作確認。
  */
 (() => {
     'use strict';
@@ -152,7 +154,42 @@
         return TextManager.collectionName($dataTroops, id);
     }
 
+    //------------------------------------------------------------------------------
+    // Window_Base
+    const _Game_Message_clear = Game_Message.prototype.clear;
+    /**
+     * ゲームメッセージをクリアする。
+     */
+    Game_Message.prototype.clear = function() {
+        _Game_Message_clear.call(this);
+        this._renderFaceImageRequired = false;
+    };
 
+    const _Game_Message_setFaceImage = Game_Message.prototype.setFaceImage;
+    /**
+     * 顔グラフィックを設定する。
+     * 
+     * @param {string} faceName 顔グラフィックファイル名
+     * @param {number} faceIndex 顔グラフィックインデックス
+     */
+    Game_Message.prototype.setFaceImage = function(faceName, faceIndex) {
+        this._renderFaceImageRequired = (faceName != this._faceName) || (faceIndex != this._faceIndex);
+        _Game_Message_setFaceImage.call(this, faceName, faceIndex);
+    };
+    /**
+     * 顔グラフィックをレンダリングする必要があるかどうかを判定する。
+     * 
+     * @returns {boolean} レンダリングする必要がある場合にはtrue, それ以外はfalse.
+     */
+    Game_Message.prototype.renderFaceImageRequired = function() {
+        return this._renderFaceImageRequired;
+    };
+    /**
+     * 顔グラフィックをレンダリング必要性をクリアする。
+     */
+    Game_Message.prototype.clearRenderFaceImageRequired = function() {
+        this._renderFaceImageRequired = false;
+    };
     //------------------------------------------------------------------------------
     // Window_Base
     const _Window_Base_processEscapeCharacter = Window_Base.prototype.processEscapeCharacter;
@@ -227,6 +264,20 @@
 
         return text;
     };
+    const _Window_Message_processCharacter = Window_Base.prototype.processCharacter;
+    /**
+     * 文字を処理する。
+     * 
+     * @param {TextState} textState テキストステートオブジェクト
+     */
+    Window_Base.prototype.processCharacter = function(textState) {
+        const prevLen = textState.buffer.length;
+        _Window_Message_processCharacter.call(this, textState);
+        if ((textState.buffer.length > prevLen) // 表示文字追加？
+                && !this._showFast && !this._lineShowFast) { // 瞬間表示要求なし
+            this._waitCount = this._characterWait;
+        }
+    };
 
     //------------------------------------------------------------------------------
     // Window_Message
@@ -249,19 +300,58 @@
         this._characterWait = 0; // reset.
     };
 
-    const _Window_Message_processCharacter = Window_Base.prototype.processCharacter;
     /**
-     * 文字を処理する。
+     * 新しい行の先頭x位置を得る。
      * 
-     * @param {TextState} textState テキストステートオブジェクト
+     * @param {object} textState テキストステート
+     * @returns {number} x位置
+     * !!!overwrite!!! Window_Message.newLineX()
+     *     \FACE, \AFACE機能を実現するためにオーバーライドする。
      */
-    Window_Base.prototype.processCharacter = function(textState) {
-        const prevLen = textState.buffer.length;
-        _Window_Message_processCharacter.call(this, textState);
-        if ((textState.buffer.length > prevLen) // 表示文字追加？
-                && !this._showFast && !this._lineShowFast) { // 瞬間表示要求なし
-            this._waitCount = this._characterWait;
+    Window_Message.prototype.newLineX = function(textState) {
+        const faceExists = this.isFaceExists(textState);
+        const faceWidth = ImageManager.faceWidth;
+        const spacing = 20;
+        const margin = faceExists ? faceWidth + spacing : 4;
+        return textState.rtl ? this.innerWidth - margin : margin;
+    };
+
+    /**
+     * メッセージにテキストが含まれるかどうかを判定する。
+     * 
+     * @param {TextState} textState テキストステート
+     * @returns {boolean} フェイス指定がある場合にはtrue, それ以外はfalse.
+     */
+    Window_Message.prototype.isFaceExists = function(textState) {
+        return ($gameMessage.faceName() !== "")
+                || textState.text.match(/\x1bFACE/)
+                || textState.text.match(/\x1bAFACE/);
+    };
+
+
+    const _Window_Message_updateLoading = Window_Message.prototype.updateLoading;
+    /**
+     * ロード状態を更新する。
+     * 
+     * @returns {boolean} 待ち状態の場合にはtrue, それ以外はfalse.
+     */
+    Window_Message.prototype.updateLoading = function() {
+        if ($gameMessage.renderFaceImageRequired()) {
+            this.loadMessageFace();
         }
+        return _Window_Message_updateLoading.call(this);
+    };
+
+    const _Window_Message_loadMessageFace = Window_Message.prototype.loadMessageFace;
+    /**
+     * メッセージの顔グラフィックをロード開始する。
+     * 
+     * @note 顔グラフィックがロード完了(_faceBitmap.isReady()がtrue)したら、
+     *       updateLoading内で描画処理される。
+     */
+    Window_Message.prototype.loadMessageFace = function() {
+        _Window_Message_loadMessageFace.call(this);
+        $gameMessage.clearRenderFaceImageRequired();
     };
 
     const _Window_Message_processEscapeCharacter = Window_Message.prototype.processEscapeCharacter;
@@ -298,6 +388,27 @@
                     }
                 }
                 break;
+            case "FACE":
+                {
+                    const faceParam = this.obtainFaceParam(textState);
+                    if (faceParam) {
+                        $gameMessage.setFaceImage(faceParam.faceName, faceParam.faceIndex);
+                    } else {
+                        $gameMessage.setFaceImage("", 0);
+                    }
+                }
+                break;
+            case "AFACE":
+                {
+                    const actorId = this.obtainEscapeParam(textState);
+                    if (actorId > 0) {
+                        const actor = $gameActors.actor(actorId);
+                        $gameMessage.setFaceImage(actor.faceName(), actor.faceIndex());
+                    } else {
+                        $gameMessage.setFaceImage("", 0);
+                    }
+                }
+                break;
             case "CWAIT":
                 {
                     const waitFrames = this.obtainEscapeParam(textState);
@@ -319,12 +430,36 @@
     };
 
     /**
+     * textStateから顔グラフィック表示パラメータを入手する。
+     * 
+     * @param {TextState} textState テキストステート
+     * @returns {object} 顔グラフィック表示パラメータ。データがない場合にはnull.
+     */
+    Window_Message.prototype.obtainFaceParam = function(textState) {
+        const regExp = /^\[([^\]]+)\]/; // 続く'['から']'までを取り出す。
+        const match = regExp.exec(textState.text.slice(textState.index));
+        if (match) {
+            textState.index += match[0].length; // インデックスを進める
+            const params = match[1].split(',');
+
+            const faceName = params[0] || "";
+            const faceIndex = Number(params[1]) || 0;
+
+            return {
+                faceName : faceName,
+                faceIndex : faceIndex
+            };
+        } else {
+            return null;
+        }
+    };
+    /**
      * textStateからオーディオパラメータを入手する。
      * 
      * @param {TextState} textState テキストステート
      * @returns {object} オーディオパラメータ。データがない場合にはnull.
      */
-    Window_Message.prototype.obtainAudioParam = function(textState) {
+     Window_Message.prototype.obtainAudioParam = function(textState) {
         const regExp = /^\[([^\]]+)\]/; // 続く'['から']'までを取り出す。
         const match = regExp.exec(textState.text.slice(textState.index));
         if (match) {
@@ -350,5 +485,4 @@
             return null;
         }
     };
-
 })();
