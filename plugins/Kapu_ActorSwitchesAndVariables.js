@@ -437,6 +437,7 @@
      */
     Window_Base.prototype.convertEscapeCharacters = function(text) {
         text = _Window_Base_convertEscapeCharacters.call(this, text);
+        //eslint-disable-next-line no-control-regex
         text = text.replace(/\x1bAV\[(\d+),([^\]]+)\]/gi, (_, p1, p2) =>
             _actorVariable(p1, p2)
         );
