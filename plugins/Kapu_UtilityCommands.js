@@ -143,7 +143,98 @@
  * @option スキル使用
  * @value 23
  * 
+ * @command showPictureWithActor
+ * @text アクターに設定されたピクチャを表示する
  * 
+ * @arg pictureId
+ * @text ピクチャID
+ * @type number
+ * @default 1
+ * @min 1
+ * @max 100
+ * 
+ * @arg actorId
+ * @text アクターID
+ * @type actor
+ * @default 0
+ * 
+ * @arg actorVariableId
+ * @text アクター(変数指定)
+ * @type variable
+ * @default 0
+ * 
+ * @arg pictureMethod
+ * @text 画像取得メソッド
+ * @desc アクターから画像ファイルパスを取得するプロパティまたはメソッド名
+ * @type string
+ * @default
+ * 
+ * @arg origin
+ * @text スプライト原点
+ * @type select
+ * @option 左上
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @default 0
+ * 
+ * @arg x
+ * @text X座標
+ * @type number
+ * @min -9999
+ * @max 9999
+ * @default 0
+ * 
+ * @arg y
+ * @text Y座標
+ * @type number
+ * @min -9999
+ * @max 9999
+ * @default 0
+ * 
+ * @arg xVariableId
+ * @text X座標(変数指定)
+ * @type variable
+ * @default 0
+ * 
+ * @arg yVariableId
+ * @text Y座標(変数指定)
+ * @type variable
+ * @default 0
+ * 
+ * @arg xScale
+ * @text x拡大率
+ * @type number
+ * @min -2000
+ * @max 2000
+ * @default 100
+ * 
+ * @arg yScale
+ * @text y拡大率
+ * @type number
+ * @min -2000
+ * @max 2000
+ * @default 100
+ * 
+ * @arg alpha
+ * @text 透過率
+ * @type number
+ * @min 0
+ * @max 255
+ * @default 255
+ * 
+ * @arg synthesisMethod
+ * @text 合成方法
+ * @type select
+ * @option 通常
+ * @value 0
+ * @option 加算
+ * @value 1
+ * @option 乗算
+ * @value 2
+ * @option スクリーン
+ * @value 3
+ * @default 0
  * 
  * @help 
  * 標準のコマンドだけだとちょっとアレができない、というのをカバーする。
@@ -328,6 +419,32 @@
             SoundManager.playSystemSound(type);
         }
 
+    });
+
+    PluginManager.registerCommand(pluginName, "showPictureWithActor", function(args) {
+        //const interpreter = this;
+
+        const pictureId = Number(args.pictureId) || 0;
+        const actorVariableId = Number(args.actorVariableId) || 0;
+        const actorId = (actorVariableId > 0)
+                ? $gameVariables.value(actorVariableId) : Number(args.actorId);
+        const pictureMethod = args.pictureMethod || "";
+        const origin = Number(args.origin);
+        const xVariableId = Number(args.xVariableId) || 0;
+        const yVariableId = Number(args.yVariableId) || 0;
+        const x = (xVariableId > 0) ? $gameVariables.value(xVariableId) : Number(args.x);
+        const y = (yVariableId > 0) ? $gameVariables.value(yVariableId) : Number(args.y);
+        const xScale = Number(args.xScale) || 0;
+        const yScale = Number(args.yScale) || 0;
+        const alpha = (Number(args.alpha) || 0).clamp(0, 255);
+        const synthesisMethod = Number(args.synthesisMethod);
+
+        if ((pictureId > 0) && (actorId > 0) && (actorId < $dataActors.length) && pictureMethod) {
+            const actor = $gameActors.actor(actorId);
+            const pictureName = (typeof actor[pictureMethod] == "function")
+                    ? actor[pictureMethod]() : actor[pictureMethod];
+            $gameScreen.showPicture(pictureId, pictureName, origin, x, y, xScale, yScale, alpha, synthesisMethod);
+        }
     });
 
 
