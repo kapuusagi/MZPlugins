@@ -116,6 +116,15 @@
  * @decimals 3
  * @default 0.025
  * 
+ * @param gainFriendlyPointRateOnBattleWin
+ * @text 戦闘勝利時友好度が上昇する確率
+ * @desc 戦闘に勝利した際、友好度が上昇する確率。ここで指定した確率で戦闘勝利時上昇友好度だけ上昇する。
+ * @type number
+ * @decimals 2
+ * @min 0.00
+ * @max 100.00
+ * @default 100.00
+ * 
  * @param gainFriendlyPointOnBattleWin
  * @text 戦闘勝利時上昇友好度
  * @desc 戦闘に勝利した際、上昇させる友好度
@@ -278,6 +287,7 @@
 
     Game_Action.EFFECT_GAIN_FP = Number(parameters["effectCode"]) || 0;
     const friendlyPointTpRate = Math.abs(Number(parameters["friendlyPointTpRate"] || 0.0));
+    const gainFriendlyPointRateOnBattleWin = (Number(parameters["gainFriendlyPointRateOnBattleWin"] || 0) || 0) / 100.0;
     const gainFriendlyPointOnBattleWin = Math.floor(Number(parameters["gainFriendlyPointOnBattleWin"] || 0));
 
     const displayFriendlyPointMin = Number(parameters["displayFriendlyPointMin"] || 0).clamp(
@@ -826,7 +836,9 @@
         if (result == 0) { // 勝利時？
             for (const actor of $gameParty.allMembers()) {
                 if (!actor.isDead() && (actor.actorId() != $gameSystem.mainActorId())) {
-                    actor.gainFriendlyPoint($gameSystem.mainActorId(), gainFriendlyPointOnBattleWin);
+                    if (Math.random() < gainFriendlyPointRateOnBattleWin) {
+                        actor.gainFriendlyPoint($gameSystem.mainActorId(), gainFriendlyPointOnBattleWin);
+                    }
                 }
             }
         }
