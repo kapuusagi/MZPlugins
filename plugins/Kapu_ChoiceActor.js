@@ -948,10 +948,10 @@ function Window_ChoiceActorList() {
                 break;
             case Game_Interpreter.CHOICEACTOR_FROM_CHOICABLE_WITHOUT_PARTY:
                 for (let actorId = 1; actorId < $dataActors.length; actorId++) {
-                    if ($gameActors.isActorDataExists(actorId)
-                            && !$gameParty.allMembers().some((actor) => actor.actorId() == actorId)) {
+                    if ($gameActors.isActorDataExists(actorId)) {
                         const actor = $gameActors.actor(actorId);
                         if (actor.choicableActor()
+                                && !$gameParty.allMembers().includes(actor)
                                 && _isCandidate(actorId, exclusionActors)
                                 && _evalIncludes(actor, includeEval)) {
                             canditates.push(actorId);
