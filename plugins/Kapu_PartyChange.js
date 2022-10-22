@@ -25,11 +25,13 @@
  * @text アクターID
  * @desc アクターIDで指定する場合
  * @type actor
+ * @default 0
  * 
  * @arg variableId
  * @text 変数ID
  * @desc 指定変数の値でアクターを指定する場合。(アクター指定が優先されます。)
  * @type variable
+ * @default 0
  * 
  * 
  * @command removePartyChangeMember
@@ -40,11 +42,13 @@
  * @text アクターID
  * @desc アクターIDで指定する場合
  * @type actor
+ * @default 0
  * 
  * @arg variableId
  * @text 変数ID
  * @desc 指定変数の値でアクターを指定する場合。(アクター指定が優先されます。)
- * @type number
+ * @type variable
+ * @default 0
  * 
  * 
  * @command setPartyChangeEnable
