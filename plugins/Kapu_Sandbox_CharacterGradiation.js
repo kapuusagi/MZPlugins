@@ -71,12 +71,19 @@
     Bitmap.prototype._drawTextBody = function(text, tx, ty, maxWidth) {
         const context = this.context;
         const size = context.measureText(text);
-        const gradiation = context.createLinearGradient(0, ty, 0, ty + size.height);
-        gradiation.addColorStop(0, "white");
+        const y0 = ty - size.actualBoundingBoxAscent;
+        const y1 = ty + size.actualBoundingBoxDescent;
+        const gradiation = context.createLinearGradient(0, y0, 0, y1);
+        //const gradiation = context.createLinearGradient(0, ty, 0, ty + size.actualBoundingBoxAscent);
+        //const gradiation = context.createLinearGradient(0, ty, 0, ty + size.actualBoundingBoxAscent + size.actualBoundingBoxDescent);
+        // const gradiation = context.createLinearGradient(0, 0, 0, 0 + size.actualBoundingBoxAscent + size.actualBoundingBoxDescent);
+        gradiation.addColorStop(0, "darkgray");
         gradiation.addColorStop(0.25, this.textColor);
-        gradiation.addColorStop(0.60, this.textColor);
-        gradiation.addColorStop(0.80, "#C8C8C8");
-        gradiation.addColorStop(0.00, "darkgray");
+        gradiation.addColorStop(0.70, this.textColor);
+        gradiation.addColorStop(0.90, "#C8C8FF");
+        gradiation.addColorStop(1.00, "darkgray");
+        // gradiation.addColorStop(0.0, "red");
+        // gradiation.addColorStop(1.0, "black");
         context.fillStyle = gradiation;
         context.fillText(text, tx, ty, maxWidth);
     };

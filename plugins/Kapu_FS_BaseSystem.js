@@ -193,6 +193,12 @@
  * @type struct<FriendlyPointStringEntry>[]
  * @default []
  * 
+ * @param applyCharacterGradiation
+ * @text 文字にグラディエーションをかける
+ * @desc 文字にグラディエーションをかけます。但し非常に重くなります。
+ * @type boolean
+ * @default false
+ * 
  * @help 
  * FS向けの変更
  *     大前提として、No.1番のアクターは主人公で固定。
@@ -298,6 +304,9 @@
 
     const displayFriendlyPointValue = (typeof parameters["displayFriendlyPointValue"] == "undefined")
             ? true : (parameters["displayFriendlyPointValue"] == "true");
+
+    const applyCharacterGradiation = (typeof parameters["applyCharacterGradiation"] == "undefined")
+            ? false : (parameters["applyCharacterGradiation"] == "true");
 
     /**
      * paramを解析して、アイコン番号テーブルを得る。
@@ -1065,6 +1074,35 @@
         }
     };
     
+    //------------------------------------------------------------------------------
+    // Bitmap
+    if (applyCharacterGradiation) {
+        /**
+         * 文字の本体部分を描画する。
+         * 
+         * @param {string} text 文字列
+         * @param {number} tx X位置
+         * @param {number} ty Y位置
+         * @param {number} maxWidth 最大幅
+         * !!!overwrite!!! Bitmap._drawTextBody
+         *     文字をグラディエーションさせるため、オーバーライドする。
+         */
+        Bitmap.prototype._drawTextBody = function(text, tx, ty, maxWidth) {
+            const context = this.context;
+            const size = context.measureText(text);
+            const y0 = ty - size.actualBoundingBoxAscent;
+            const y1 = ty + size.actualBoundingBoxDescent;
+            const gradiation = context.createLinearGradient(0, y0, 0, y1);
+            gradiation.addColorStop(0, "darkgray");
+            gradiation.addColorStop(0.25, this.textColor);
+            gradiation.addColorStop(0.70, this.textColor);
+            gradiation.addColorStop(0.90, "#C8C8FF");
+            gradiation.addColorStop(1.00, "darkgray");
+            context.fillStyle = gradiation;
+            context.fillText(text, tx, ty, maxWidth);
+        };
+    }
+
     //------------------------------------------------------------------------------
     // TODO : メソッドフック・拡張
 
