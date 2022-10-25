@@ -133,7 +133,7 @@
                     const level = ids[0];
                     for (let i = 1; i < ids.length; i++) {
                         const id = ids[i];
-                        if (DataManager.isAbilityId) {
+                        if (DataManager.isAbilityId(id)) {
                             obj.gpLearnableAbilities.push({ level:level, abilityId:id });
                         }
                     }
@@ -182,6 +182,18 @@
             }
         };
         DataManager.addNotetagParserItems(_processItemNotetag);
+
+        /**
+         * ノートタグを処理する。
+         * 
+         * @param {object} obj データオブジェクト
+         */
+        const _processArmorNotetag = function(obj) {
+            if (obj.meta.gpCost) {
+                obj.gpCost = Number(obj.meta.gpCost) || 0;
+            }
+        };
+        DataManager.addNotetagParserArmors(_processArmorNotetag);
     }
     //------------------------------------------------------------------------------
     // Game_Actor
