@@ -1894,21 +1894,26 @@ __Game_Event.meetsConditions(page : DataPage)__ が適用判定。
 __Game_Event.refresh()__ がコールされたとき、 __Game_Event.findProperPageIndex()__ にて一番最後のページから順にmeetsConditionsがコールされ、最初にtrueを返したページ(結果的に条件を満たす最後のページ)が表示される。
 拡張するならこれをフックする。
 
+# やれるかわからんけど
 
+文字列をグラディエーションにするには？
+根っこの構造は Bitmap クラスに関連付けられた、 Context のレンダリング系メソッドを呼び出している。
+レンダリングの際に、Bitmap.textColor をcontext.fillStyleに設定している。
+MDN Web Docsにあるとおり、これはCSSスタイルの文字以外に、CanvasGradient が指定可能。
+なので、以下のようなコードを書くと、グラディエーションもいけそうなんだけど。
 
+~~~javascript
+var ctx = bitmap.context;
 
+// Create gradient
+var grd = ctx.createLinearGradient(0, gradiationHeight, 0, 0); // 縦方向にグラディエーションする。
+grd.addColorStop(0, "red"); // 始点赤
+grd.addColorStop(0.5, "white"); // 中央白
+grd.addColorStop(1, "red"); // 終点赤
 
+// Fill with gradient
+ctx.fillStyle = grd;
+ctx.fillText(text, tx, ty, maxWidth);
+~~~
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+__createLinearGradient(x0, y0, x1, y1)__ は (x0,y0)の位置を始点0.0として、(x1,y1)の時に終点(1.0)の線形なグラディエーションを作成する。
