@@ -150,6 +150,12 @@
  * @type string
  * @parent windowLayout
  * 
+ * @param useSprite_Gauge
+ * @text 標準のゲージ描画を使用する
+ * @desc ステータス表示で、HP,MPゲージ描画を他のプラグインでカスタマイズしている場合はtrueにする。
+ * @type boolean
+ * @default true
+ * 
  * @help 
  * パーティー編成画面を提供するプラグイン。
  * ・変更可能メンバーリストの保持
@@ -284,6 +290,9 @@ function Scene_PartyChange() {
     const menuEnable = (typeof parameters["menuEnable"] === "undefined")
             ? true : (parameters["menuEnable"] === "true");
     const menuCommandText = parameters["menuCommandText"] || "Change party";
+
+    const useSprite_Gauge = (typeof parameters["useSprite_Gauge"] === "undefined")
+            ? true : (parameters["useSprite_Gauge"] === "true");
 
     const _parseMotionPattern = function(arg) {
         try {
@@ -1250,9 +1259,17 @@ function Scene_PartyChange() {
         y += lineHeight;
         this.drawActorLevel(actor, paramX, y, paramWidth);
         y += lineHeight;
-        this.drawActorHp(actor, paramX, y, paramWidth);
+        if (useSprite_Gauge) {
+            this.placeGauge(actor, "hp", paramX, y);
+        } else {
+            this.drawActorHp(actor, paramX, y, paramWidth);
+        }
         y += lineHeight;
-        this.drawActorMp(actor, paramX, y, paramWidth);
+        if (useSprite_Gauge) {
+            this.placeGauge(actor, "mp", paramX, y);
+        } else {
+            this.drawActorMp(actor, paramX, y, paramWidth);
+        }
         y += lineHeight;
         this.resetFontSettings();
         this.drawHorzLine(rect.x, y, rect.width);
