@@ -2459,6 +2459,7 @@ function Window_StatusProfile() {
         this._statusSkillListWindow.hide();
         this._helpWindow.hide();
         this._statusProfileWindow.hide();
+        this._abilityWindow.hide();
     };
     /**
      * スキルタイプ選択画面で、OKボタンが押された時に通知を受け取る。
