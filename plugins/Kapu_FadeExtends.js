@@ -101,6 +101,7 @@
  * @value pixelate
  * @option ディゾルブ
  * @value dissolve
+ * @default normal
  * 
  * @param defaultFadeOutPattern
  * @text 既定のフェードアウトパターン
@@ -127,6 +128,7 @@
  * @value pixelate
  * @option ディゾルブ
  * @value dissolve
+ * @default normal
  * 
  * @param defaultFadeInPattern
  * @text 既定のフェードインパターン
