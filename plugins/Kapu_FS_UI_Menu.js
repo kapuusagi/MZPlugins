@@ -242,39 +242,13 @@
         this.drawActorLevel(actor, x, y, width);
         y += lineHeight;
 
-        // HPゲージ
-        const gaugeX = x + 32;
-        const gaugeWidth = width - 32;
-        this.drawGauge("hp", actor.hp, actor.mhp, gaugeX, y + 32, gaugeWidth, 12);
-
         // HP
-        {
-            const data = {
-                label:TextManager.hpA,
-                color:ColorManager.hpColor(actor),
-                current:actor.hp,
-                max:actor.mhp
-            };
-            this.drawGaugeText(data, x, y, width);
-        }
+        this.placeGauge(actor, "hp", x, y + 32);
         y += lineHeight * 2;
-
-        // MPゲージ
-        this.drawGauge("mp", actor.mp, actor.mmp, gaugeX, y + 32, gaugeWidth, 16);
 
         // MP
-        {
-            const data = {
-                label:TextManager.mpA,
-                color:ColorManager.mpColor(actor),
-                current:actor.mp,
-                max:actor.mmp
-            };
-            this.drawGaugeText(data, x, y, width);
-        }
+        this.placeGauge(actor, "mp", x, y + 32);
         y += lineHeight * 2;
-
-        // TPはTWLDでは表示しない。
 
         // ステートアイコン
         this.drawStateIcons(actor, x, y, width);

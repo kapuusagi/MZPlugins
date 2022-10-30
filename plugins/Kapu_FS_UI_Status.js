@@ -53,11 +53,11 @@
  * @type string
  * @default 最大TP
  * 
- * @param textPassiveSkill
- * @text パッシブスキルラベル
- * @desc 「パッシブスキル」として使用するラベル。
+ * @param textAbilities
+ * @text アビリティラベル
+ * @desc 「アビリティ」として使用するラベル。
  * @type string
- * @default パッシブスキル
+ * @default アビリティ
  * 
  * @param textStatus1
  * @text ステータスウィンドウ1ラベル
@@ -320,7 +320,13 @@
 function Window_StatusSkillType() {
     this.initialize(...arguments);
 }
-
+/**
+ * Window_AbilityList
+ * 装備画面でアビリティ一覧を提供するウィンドウ。
+ */
+function Window_AbilityList() {
+    this.initialize(...arguments);
+}
 /**
  * Window_StatusProfile
  * パラメータ情報表示
@@ -340,7 +346,7 @@ function Window_StatusProfile() {
     const statusLabelWidth = Number(parameters["statusLabelWidth"]) || 80;
     const textClassName = parameters["textClassName"] || "Class";
     const textNickname = parameters["textNickname"] || "Nickname";
-    const textPassiveSkill = parameters["textPassiveSkill"] || "PassiveSkill";
+    const textAbilities = parameters["textAbilities"] || "Abilities";
     const textGuildRank = parameters["textGuildRank"] || "GuildRank";
     const textMaxTp = parameters["textMaxTp"] || "MaxTP";
     const textStatus1 = parameters["textStatus1"] || "Page.1";
@@ -488,6 +494,7 @@ function Window_StatusProfile() {
             this.addCommand(textProfile, "profile");
         }
         this.addCommand(TextManager.skill, "skill");
+        this.addCommand(textAbilities, "ability", true);
     };
 
     /**
@@ -570,13 +577,26 @@ function Window_StatusProfile() {
             this.drawActorLevel(actor, x1, y3, textWidth);
             this.drawActorGrowPoint(actor, x2, y3, textWidth);
             this.drawActorGuildRank(actor, x3, y3, textWidth);
-            this.drawActorHp(actor, x1, y4 + 8, textWidth);
-            this.drawActorMp(actor, x2, y4 + 8, textWidth);
-            this.drawActorTp(actor, x3, y4 + 8, textWidth);
+            this.placeGauge(actor, "hp", x1, y4 + 8);
+            this.placeGauge(actor, "mp", x2, y4 + 8);
+            this.drawActorMaxTp(actor, x3, y4 + 8, textWidth);
             this.drawActorExp(actor, x1, y6, textWidth);
             this.drawActorNext(actor, x2, y6, textWidth);
         }
         this.drawHorzLine(rect.x, rect.y + this.lineHeight() * 6, rect.width);
+    };
+
+    /**
+     * 最大TPを描画する。
+     * 
+     * @param {Game_Actor} actor アクター
+     * @param {number} x X位置
+     * @param {number} y Y位置
+     * @param {number} width 描画幅
+     */
+    Window_Status.prototype.drawActorMaxTp = function(actor, x, y, width) {
+        const maxTp = actor.maxTp();
+        this.drawParamValue(textMaxTp, maxTp, maxTp, x, y, width);
     };
 
     /**
@@ -980,93 +1000,6 @@ function Window_StatusProfile() {
         this.drawText(this.expNextValue(), x + statusLabelWidth, y, valueWidth, "right");
     };
     
-    /**
-     * アクターのHPを描画する。
-     * 
-     * @param {Game_Actor} actor アクター
-     * @param {number} x 描画領域左上x
-     * @param {number} y 描画領域左上y
-     * @param {number} width 幅
-     */
-    Window_Status.prototype.drawActorHp = function(actor, x, y, width) {
-        // ゲージ描画
-        const current = actor.hp;
-        const max = actor.mhp;
-        const gaugeData = {
-            rate:((max > 0) ? current / max : 0),
-            backColor:ColorManager.gaugeBackColor(),
-            color1:ColorManager.hpGaugeColor1(),
-            color2:ColorManager.hpGaugeColor2()
-        };
-        const spacing = 16;
-        const labelWidth = Math.floor(width * 0.2);
-        const gaugeX = x + labelWidth + spacing;
-        const gaugeWidth = width - labelWidth - spacing;
-        this.drawGaugeRect(gaugeData, gaugeX, y + 24, gaugeWidth, 12);
-        
-        // テキスト描画
-        const data = {
-            label:TextManager.hpA,
-            color:ColorManager.hpColor(actor),
-            current:current,
-            max:max
-        };
-        this.drawGaugeText(data, x, y, width);
-    };
-
-    /**
-     * アクターのMPを描画する。
-     * 
-     * @param {Game_Actor} actor アクター
-     * @param {number} x 描画領域左上x
-     * @param {number} y 描画領域左上y
-     * @param {number} width 幅
-     */
-    Window_Status.prototype.drawActorMp = function(actor, x, y, width) {
-        // ゲージ描画
-        const current = actor.mp;
-        const max = actor.mmp;
-        const gaugeData = {
-            rate:((max > 0) ? current / max : 0),
-            backColor:ColorManager.gaugeBackColor(),
-            color1:ColorManager.mpGaugeColor1(),
-            color2:ColorManager.mpGaugeColor2()
-        };
-        const spacing = 16;
-        const labelWidth = Math.floor(width * 0.2);
-        const gaugeX = x + labelWidth + spacing;
-        const gaugeWidth = width - labelWidth - spacing;
-        this.drawGaugeRect(gaugeData, gaugeX, y + 24, gaugeWidth, 12);
-        // テキスト描画
-        const data = {
-            label:TextManager.mpA,
-            color:ColorManager.mpColor(actor),
-            current:current,
-            max:max
-        };
-        this.drawGaugeText(data, x, y, width);
-    };
-
-    /**
-     * アクターのTPを描画する。
-     * 
-     * @param {Game_Actor} actor アクター
-     * @param {number} x 描画領域左上x
-     * @param {number} y 描画領域左上y
-     * @param {number} width 幅
-     */
-    // eslint-disable-next-line no-unused-vars
-    Window_Status.prototype.drawActorTp = function(actor, x, y, width) {
-        this.resetFontSettings();
-        this.changeTextColor(ColorManager.systemColor());
-        this.drawText(textMaxTp, x, y + 8, statusLabelWidth, "left");
-        this.changeTextColor(ColorManager.tpColor(actor));
-        this.contents.fontFace = $gameSystem.numberFontFace();
-        this.contents.fontSize = $gameSystem.mainFontSize() + 8;
-        const valueWidth = Math.max(this.textWidth("000"), (width - statusLabelWidth - 16));
-        this.drawText(actor.maxTp(), x + statusLabelWidth + 16, y, valueWidth, "left");
-    };
-
 
     /**
      * ゲージを描画する。
@@ -1879,12 +1812,6 @@ function Window_StatusProfile() {
                     this.addCommand(name, "skill", true, stypeId);
                 }
             }
-            
-            // 更にパッシブスキルを追加
-            if (this._actor.hasPassiveSkill()) {
-                const stypeId = Game_BattlerBase.PASSIVE_SKILL_TYPE || 0;
-                this.addCommand(textPassiveSkill, "passive", true, stypeId);
-            }
         }
     };
 
@@ -2013,6 +1940,127 @@ function Window_StatusProfile() {
         this.changePaintOpacity(true);
     };
 
+    //------------------------------------------------------------------------------
+    // Window_AbilityList
+
+
+    Window_AbilityList.prototype = Object.create(Window_ItemList.prototype);
+    Window_AbilityList.prototype.constructor = Window_AbilityList;
+
+    /**
+     * Window_AbilityListを初期化する。
+     * 
+     * @param {Rectangle} rect ウィンドウ矩形領域
+     */
+    Window_AbilityList.prototype.initialize = function(rect) {
+        Window_ItemList.prototype.initialize.call(this, rect);
+        this._actor = null;
+    };
+
+
+    /**
+     * ウィンドウのカラム数を得る。
+     * 
+     * @returns {number} カラム数
+     */
+    Window_AbilityList.prototype.maxCols = function() {
+        return 2;
+    };
+
+    /**
+     * カラム間隔を得る。
+     * 
+     * @returns {number} カラム間隔
+     */
+    Window_AbilityList.prototype.colSpacing = function() {
+        return 8;
+    };
+
+    /**
+     * このウィンドウで表示するアクターを設定する。
+     * 
+     * @param {Game_Actor} actor アクター
+     */
+    Window_AbilityList.prototype.setActor = function(actor) {
+        if (this._actor !== actor) {
+            this._actor = actor;
+            this.refresh();
+            this.scrollTo(0, 0);
+        }
+    };
+    /**
+     * 表示するアイテムリストを構築する。
+     * 
+     * Note: 全てのアイテム($gameParty.allItems())に対して、includes(item)を呼び出してtrueを返すものをリストにする。
+     *       派生クラスでは何のリストにしているのか、includes()のメソッドに注意すること。
+     */
+    Window_AbilityList.prototype.makeItemList = function() {
+        this._data = [];
+        if (this._actor) {
+            this._data = this._actor.abilities();
+        }
+    };
+
+    /**
+     * アイテム個数を描画する。
+     * 
+     * @param {DataItem} item アイテム
+     * @param {number} x x位置
+     * @param {number} y y位置
+     * @param {number} width 幅
+     */
+    // eslint-disable-next-line no-unused-vars
+    Window_AbilityList.prototype.drawItemNumber = function(item, x, y, width) {
+        // do not draw.
+
+    };
+    /**
+     * このスロットの装備タイプ番号を得る。
+     * 
+     * @return {number} 装備タイプ番号
+     */
+    Window_AbilityList.prototype.etypeId = function() {
+        if (this._actor && this._slotId >= 0) {
+            return this._actor.equipSlots()[this._slotId];
+        } else {
+            return 0;
+        }
+    };
+
+    /**
+     * アイテムが有効かどうかを判定する。
+     * 
+     * @returns {boolean} 有効な場合にはtrue, それ以外はfalse.
+     */
+    Window_AbilityList.prototype.isEnabled = function(item) {
+        if (this._actor && item) {
+            return this._actor.equips().includes(item);
+        } else {
+            return false;
+        }
+    };
+
+    /**
+     * 最後に選択した項目を選択する。
+     */
+    Window_AbilityList.prototype.selectLast = function() {
+        //
+    };
+
+    /**
+     * ヘルプメッセージを更新する。
+     */
+    Window_AbilityList.prototype.updateHelp = function() {
+        Window_ItemList.prototype.updateHelp.call(this);
+    };
+    /**
+     * OK音を鳴らす。
+     * 
+     * Note: ならさないためにオーバーライドする。
+     */
+    Window_AbilityList.prototype.playOkSound = function() {
+        //
+    };
     //------------------------------------------------------------------------------
     // Sprite_StatusBackgroundPicture
     /**
@@ -2164,6 +2212,7 @@ function Window_StatusProfile() {
         this.createStatusEquipWindow();
         this.createStatusSkillTypeWindow();
         this.createStatusSkillWindow();
+        this.createAbilityWindow();
         this.createStatusProfileWindow();
         this.createBackgroundImage();
     };
@@ -2222,7 +2271,7 @@ function Window_StatusProfile() {
      * @returns {Rectangle} ウィンドウ矩形領域。
      */
     Scene_Status.prototype.statusCategoryWindowRect = function() {
-        let lineCount = 4;
+        let lineCount = 5;
         if (enableProfile) {
             lineCount++;
         }
@@ -2334,6 +2383,7 @@ function Window_StatusProfile() {
         return new Rectangle(wx, wy, ww, wh);
     };
 
+
     /**
      * スキルウィンドウを作成する。 
      */
@@ -2390,8 +2440,14 @@ function Window_StatusProfile() {
                 this._statusSkillListWindow.show();
                 this._helpWindow.show();
                 break;
+            case "ability":
+                this._abilityWindow.show();
+                this._helpWindow.show();
+                break;
         }
     };
+
+
     /**
      * 詳細ウィンドウを全て隠す
      */
@@ -2457,6 +2513,39 @@ function Window_StatusProfile() {
         this._statusSkillTypeWindow.activate();
     };
 
+    /**
+     * アビリティウィンドウを作成する。
+     */
+     Scene_Status.prototype.createAbilityWindow = function() {
+        const rect = this.abilityWindowRect();
+        this._abilityWindow = new Window_AbilityList(rect);
+        this._abilityWindow.setHelpWindow(this._helpWindow);
+        this._abilityWindow.setHandler("cancel", this.onAbilityCancel.bind(this));
+        this._abilityWindow.hide();
+        this.addWindow(this._abilityWindow);
+    };
+
+    /**
+     * アビリティウィンドウの矩形領域を取得する。
+     * 
+     * @returns {Rectangle} ウィンドウ矩形領域
+     */
+    Scene_Status.prototype.abilityWindowRect = function() {
+        const rect = this.statusCategoryWindowRect();
+        const wx = rect.x + rect.width;
+        const wy = this.mainAreaTop();
+        const ww = Graphics.boxWidth - wx;
+        const wh = this.mainAreaHeight();
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    /**
+     * アビリティウィンドウでキャンセル操作されたときに通知を受け取る。
+     */
+    Scene_Status.prototype.onAbilityCancel = function() {
+        this._abilityWindow.hide();
+        this._categoryWindow.activate();
+    };
 
     /**
      * アクタープロフィールウィンドウを作成する。
@@ -2508,9 +2597,6 @@ function Window_StatusProfile() {
         return new Rectangle(wx, wy, ww, wh);
     };
 
-
-
-
     /**
      * ステータス種類ウィンドウでOK操作がされたときに通知を受け取る。
      */
@@ -2522,6 +2608,9 @@ function Window_StatusProfile() {
                 break;
             case "skill":
                 this._statusSkillTypeWindow.activate();
+                break;
+            case "ability":
+                this._abilityWindow.activate();
                 break;
             default:
                 this._categoryWindow.activate();
@@ -2557,11 +2646,13 @@ function Window_StatusProfile() {
         this._statusEquipWindow.setActor(actor);
         this._statusSkillTypeWindow.setActor(actor);
         this._statusSkillListWindow.setActor(actor);
+        this._abilityWindow.setActor(actor);
         //this._helpWindow.setActor(actor);
         this._statusProfileWindow.setActor(actor);
         this._backgroundImage.setActor(actor);
         this._statusSkillListWindow.deactivate();
         this._statusSkillTypeWindow.deactivate();
+        this._abilityWindow.deactivate();
         this._categoryWindow.activate();
     };
 

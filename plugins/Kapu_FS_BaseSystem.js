@@ -663,7 +663,21 @@
     //------------------------------------------------------------------------------
     // Game_Actor
 
+    const _Game_Actor_changeClass = Game_Actor.prototype.changeClass;
+    /**
+     * クラスを変更する。
+     * 
+     * @param {number} classId クラスID
+     * @param {boolean} keepExp 経験値を保持するか。
+     *                          保持する場合、クラス毎に経験値が保持される。つまりジョブレベルね。
+     */
+    Game_Actor.prototype.changeClass = function(classId, keepExp) {
+        if (this._gpLearnableSkills) {
+            this._gpLearnableSkills = []; // GrowupSystemで習得可能状態なスキルは全てリセットする。
+        }
 
+        _Game_Actor_changeClass.call(this, classId, keepExp);
+    };
     /**
      * レベル変更の表示をする。
      * 
