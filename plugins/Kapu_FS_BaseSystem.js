@@ -1095,8 +1095,9 @@
             const gradiation = context.createLinearGradient(0, y0, 0, y1);
             gradiation.addColorStop(0, "darkgray");
             gradiation.addColorStop(0.25, this.textColor);
-            gradiation.addColorStop(0.70, this.textColor);
-            gradiation.addColorStop(0.90, "#C8C8FF");
+            gradiation.addColorStop(0.60, "white");
+            gradiation.addColorStop(0.70, "darkgray");
+            gradiation.addColorStop(0.90, this.textColor);
             gradiation.addColorStop(1.00, "darkgray");
             context.fillStyle = gradiation;
             context.fillText(text, tx, ty, maxWidth);
