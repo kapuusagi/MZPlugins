@@ -521,10 +521,9 @@
 
     const baseY = 40;
 
-    const _Game_Battler_initMembers = Game_Battler.prototype.initMembers;
-
     //------------------------------------------------------------------------------
     // Game_Battlerの変更
+    const _Game_Battler_initMembers = Game_Battler.prototype.initMembers;
     /**
      * メンバーを初期化する。
      */
@@ -587,6 +586,8 @@
         SoundManager.playGuard();
     };
 
+    //------------------------------------------------------------------------------
+    // SoundManager
     /**
      * ガード時のSEを鳴らす。
      */
