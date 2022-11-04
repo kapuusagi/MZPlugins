@@ -298,7 +298,7 @@ function MapFilterManager() {
      */
     MapFilterManager.update = function() {
         // Note: "_"付いたメンバに外部からアクセスするのでよろしくない。
-        if (!(SceneManager._scene && SceneManager._scene.constructor === Scene_Map)) {
+        if (!(SceneManager._scene && SceneManager._scene.constructor !== Scene_Map)) {
             if (debugEnable) {
                 console.log(pluginName + ":Current scene is not Scene_Map")
             }
