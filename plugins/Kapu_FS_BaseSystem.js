@@ -218,7 +218,7 @@
  * ・友好度状態を取得するエスケープシーケンスを追加。
  *     /FPSTR[id#] id#のアクターの友好度を表す文字列を返す。
  *     /FPICON[id#] id#のアクターの友好度を表すアイコンを描画。
- * 
+ * ・習得したスキルに対応するスキルタイプは全部使用可能にする。
  * 
  * ■ 使用時の注意
  * 
@@ -249,7 +249,7 @@
  * ============================================
  * 変更履歴
  * ============================================
- * Version.0.1.0 動作未確認。
+ * Version.1.0.0 動作確認
  */
 /*~struct~CorrectEntry:
  *
@@ -845,7 +845,24 @@
             return 0.0;
         }
     };
-
+    /**
+     * このアクターが使用可能なスキルタイプを得る。
+     * 
+     * @returns {Array<number>} スキルIDリスト
+     * !!!overwrite!!! Game_Actor.skillTypes()
+     *     使用可能なスキルから、使用可能なスキルタイプを逆算するように変更する。
+     */
+    Game_Actor.prototype.skillTypes = function() {
+        const skills = this.skills();
+        const skillTypes = [];
+        for (const skill of skills) {
+            if ((skill.stypeId > 0) && !skillTypes.includes(skill.stypeId)) {
+                skillTypes.push(skill.stypeId);
+            }
+        }
+        skillTypes.sort((a, b) => a - b);
+        return skillTypes;
+    };
     //------------------------------------------------------------------------------
     // BattleManager
     const _BattleManager_endBattle = BattleManager.endBattle;
