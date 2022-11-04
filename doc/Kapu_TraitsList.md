@@ -15,10 +15,11 @@
 |107|__TRAIT_PARAM_ADD__|パラメータID|単純にパラメータを加算する特性。|
 |108|__TRAIT_MAXTP_ADD__|-|最大TP加算特性。|
 |109|__TRAIT_ELEMENT_ATTACK_RATE__|属性ID|指定した属性の威力を変更する特性。乗算合計。|
+|110|__TRAIT_GUARD_SKILL__|スキルID|防御コマンドの結果として適用するスキルを"スキルID"にする。。|
 ||||
-|1001|__TRAIT_BASIC_PARAM__|基本パラメータを加算する特性|
-|1002|__TRAIT_BASIC_PARAM_RATE__|基本パラメータ乗算レート特性|
-|1003|__TRAIT_PARAM_RATE_ALL__|パラメータ乗算レート（装備品含む全体にかかる）|
+|1001|__TRAIT_BASIC_PARAM__|基本パラメータID|基本パラメータ(STR,DEX,...)を加算する特性|
+|1002|__TRAIT_BASIC_PARAM_RATE__|基本パラメータID|基本パラメータ(STR,DEX,...)に対する乗算レート特性|
+|1003|__TRAIT_PARAM_RATE_ALL__|パラメータID|パラメータ乗算レート（装備品含む全体にかかる）|
 ||||
 
 ### XPARAM
